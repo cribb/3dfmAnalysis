@@ -8,7 +8,7 @@
 % to drive the experiment.  Variables in this section define the number 
 % of coils in the 3dfm pole geometry, the number of DAQ Analog-Out 
 % channels on the DAQ board, the identity of the DAQ board, etc...
-DAQid = '';
+DAQid = 'daqtest';
 nDACout = 8;
 nCoils = 6;
 DAQ_sampling_rate = 1000;  % [Hz]
@@ -47,8 +47,8 @@ end
 % sent to DAQ board according to the experimental details defined above.
 for k = 1 : length(times_to_activate_pulses)   
 	idx = find(t >= times_to_activate_pulses(k) & t < times_to_deactivate_pulses(k));
-	signal(idx, poles_to_excite_pos) = voltage;
-	signal(idx, poles_to_excite_neg) = -voltage / length(poles_to_excite_neg);
+	signal(idx, poles_to_excite_pos) = pulse_voltages(k);
+	signal(idx, poles_to_excite_neg) = -pulse_voltages(k) / length(poles_to_excite_neg);
 end
 
 % Plot test output, for inspection before beginning experiment.
@@ -68,7 +68,6 @@ end
 
 % Start experiment.  Call DACoperator. Call pulnix software. etc..
 Nrepeat = 1;
-board = 'daqtest';
 channels = [1:8];
 Vrange = [-10 10];
-DACoperator(signal, Nrepeat, board, channels, DAQ_sampling_rate, Vrange);
+DACoperator(signal, Nrepeat, DAQid, channels, DAQ_sampling_rate, Vrange);

@@ -1,3 +1,6 @@
+2004-12-06  Jeremy Cribb <jcribb@email.unc.edu>
+	* history_dependence_expt.m:  bugfix- wrong voltage variable referenced in method.
+
 2004-10-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* relaxation_time_expt.m: added.  script that defines the driven bead microbead rheology experiment and places signals onto 3DFM magnets (6 pole design) for a given pole geometry. 
  	* history_dependence_expt.m: added.  same as above except for history dependence experiment type.
