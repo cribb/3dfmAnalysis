@@ -82,7 +82,7 @@ end
 
 temp = load(tracking_string);
 if(isfield(temp,'tracking'))    
-    dorig = load_vrpn_tracking(tracking_string, 0,0.3,'blackman','um','uct');
+    dorig = load_vrpn_tracking(tracking_string,'um','uct','no','no');
 elseif(isfield(temp,'dj'))
     dorig = temp.dj;
 else
