@@ -1,3 +1,6 @@
+2004-12-18  Jeremy Cribb <jcribb@email.unc.edu>
+	* DACoperator.m: weird errors when comparing strings with strfind.  switched to strcmp.  works better now.
+
 2004-12-08  Jeremy Cribb <jcribb@email.unc.edu>
 	* DACoperator.m: fixed a bug in if-block.
 

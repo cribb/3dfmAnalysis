@@ -1,7 +1,7 @@
 function varargout = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange)
 % 3DFM function  
 % DSP / DAQ 
-% last modified 10/31/04 
+% last modified 12/18/04 
 %
 % data = DACoperator(inputs, duration, board, channels, srate);  
 %
@@ -57,11 +57,11 @@ end
 
 
 % find the board id that goes with the name
-if ~strfind(board,'daqtest')
+if ~strcmp(board,'daqtest')
 	hwinfo = daqhwinfo('nidaq');
 	AOid = -1;
 	for i=1:length(hwinfo.BoardNames)
-      if strcmp(char(hwinfo.BoardNames(i)), AOname)
+      if strcmp(char(hwinfo.BoardNames(i)), board)
         AOid = i;
       end
 	end
