@@ -14,9 +14,10 @@ s = size(magnets.analogs);
 Nchannels = s(1,2);
 j = 1;
 k = 1;
+cleaned.origMags = magnets.analogs;
 for (j = Nchannels:Nchannels:s(1,1))
     cleaned.sectime(k,1) = magnets.sectime(j,1);
-    cleaned.analogs(k,1:Nchannels) = magnets.analogs(j,:);
+    cleaned.cleanMags(k,1:Nchannels) = magnets.analogs(j,:);   
     k = k+1;
 end    
 
