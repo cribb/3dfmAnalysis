@@ -1,0 +1,4 @@
+2005-01-29  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m:  contains matlab code for editing video tracking data (evt).  Works with Video Spot Tracker v4.0.  Initial Version.
+	* evt_GUI.fig:  defines the matlab GUI for editing video tracking datasets.  Initial Version.
+
