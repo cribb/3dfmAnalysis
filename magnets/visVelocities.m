@@ -114,7 +114,8 @@ if (strcmpi(mode,'colors') | strcmpi(mode,'both'))
     figure
 	quiver3([0 0 0 0]',[0 0 0 0]',[0 0 0 0]',p(:,1), p(:,2), p(:,3),1,'.','r');
 	hold on
-	surf(x,y,z,'colormap','Hot');%XXX changed on 6th Jan 04 kd
+	surf(x,y,z,colr);
+    colormap hot;
     shading interp;
 	hold off
 	set(gca,'Fontsize',12);
