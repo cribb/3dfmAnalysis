@@ -22,7 +22,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 29-Jan-2005 16:37:57
+% Last Modified by GUIDE v2.5 02-Feb-2005 21:36:21
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -78,22 +78,31 @@ function varargout = evt_GUI_OutputFcn(hObject, eventdata, handles)
 function radio_selected_dataset_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Value', 1);
 	set(handles.radio_boundingbox, 'Value', 0);
-	set(handles.radio_deletetime, 'Value', 0);
+	set(handles.radio_deletetimebefore, 'Value', 0);
+	set(handles.radio_deletetimeafter, 'Value', 0);
 
     
 % --- Executes on button press in radio_boundingbox.
 function radio_boundingbox_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Value', 0);
 	set(handles.radio_boundingbox, 'Value', 1);
-	set(handles.radio_deletetime, 'Value', 0);
+	set(handles.radio_deletetimebefore, 'Value', 0);
+	set(handles.radio_deletetimeafter, 'Value', 0);
     
     
-% --- Executes on button press in radio_deletetime.
-function radio_deletetime_Callback(hObject, eventdata, handles)
+% --- Executes on button press in radio_deletetimebefore.
+function radio_deletetimebefore_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Value', 0);
 	set(handles.radio_boundingbox, 'Value', 0);
-	set(handles.radio_deletetime, 'Value', 1);
+	set(handles.radio_deletetimebefore, 'Value', 1);
+	set(handles.radio_deletetimeafter, 'Value', 0);
 
+% --- Executes on button press in radio_deletetimebefore.
+function radio_deletetimeafter_Callback(hObject, eventdata, handles)
+	set(handles.radio_selected_dataset, 'Value', 0);
+	set(handles.radio_boundingbox, 'Value', 0);
+	set(handles.radio_deletetimebefore, 'Value', 0);
+	set(handles.radio_deletetimeafter, 'Value', 1);
     
 % --- Executes on button press in radio_XYfig.
 function radio_XYfig_Callback(hObject, eventdata, handles)
@@ -250,13 +259,13 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
 
 	set(handles.radio_selected_dataset, 'Enable', 'Off');
 	set(handles.radio_boundingbox, 'Enable', 'Off');
-    set(handles.radio_deletetime, 'Enable', 'Off');
+    set(handles.radio_deletetimebefore, 'Enable', 'Off');
 	
 	if (get(handles.radio_selected_dataset, 'Value'))
         delete_selected_dataset(hObject, eventdata, handles);
 	elseif (get(handles.radio_boundingbox, 'Value'))
         delete_inside_boundingbox(hObject, eventdata, handles);
-    elseif (get(handles.radio_deletetime, 'Value'))
+    elseif (get(handles.radio_deletetimebefore, 'Value'))
         set(handles.radio_XTfig, 'Value', 1, 'Enable', 'off');
         set(handles.radio_XYfig, 'Value', 0, 'Enable', 'off');
 
@@ -264,7 +273,15 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
         
         set(handles.radio_XTfig, 'Enable', 'on');
         set(handles.radio_XYfig, 'Enable', 'on');
+    elseif (get(handles.radio_deletetimeafter, 'Value'))
+        set(handles.radio_XTfig, 'Value', 1, 'Enable', 'off');
+        set(handles.radio_XYfig, 'Value', 0, 'Enable', 'off');
 
+        delete_data_after_time(hObject, eventdata, handles);
+        
+        set(handles.radio_XTfig, 'Enable', 'on');
+        set(handles.radio_XYfig, 'Enable', 'on');
+        
 	else
         msgbox('One of the data handling methods must be selected.', ...
                'Error.');
@@ -272,7 +289,7 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
 	
 	set(handles.radio_selected_dataset, 'Enable', 'On');
 	set(handles.radio_boundingbox, 'Enable', 'On');
-    set(handles.radio_deletetime, 'Enable', 'On');
+    set(handles.radio_deletetimebefore, 'Enable', 'On');
     
     plot_data(hObject, eventdata, handles);
     drawnow;
@@ -490,7 +507,47 @@ function delete_data_before_time(hObject, eventdata, handles);
     guidata(hObject, handles);
 
     drawnow;
+   
     
+function delete_data_after_time(hObject, eventdata, handles);    
+    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+
+    if(get(handles.radio_XYfig, 'Value'))
+        active_fig = handles.XTfig;        
+    elseif(get(handles.radio_XTfig, 'Value'))
+        active_fig = handles.XTfig;
+    end
+    figure(active_fig);
+
+    table = handles.table;
+    beadID = table(:,ID);
+
+    currentbead = get(handles.slider_BeadID, 'Value');
+    idx = find(beadID == currentbead);
+    
+    t = table(idx,TIME);
+    x = table(idx,X);
+    y = table(idx,Y);
+    
+    [tm, xm] = ginput(1);
+    
+    % find the closest time point to mouse click
+    dists = abs(t - tm);    
+    
+    % identify time
+    idx = find(dists == min(dists));
+    closest_time = t(idx);
+    
+    % remove any points in the table that are now negative
+    idx = find(table(:,TIME) <= closest_time);
+    table = table(idx,:);
+    
+    handles.table = table;
+    guidata(hObject, handles);
+
+    drawnow;
+    
+
 function logentry(txt)
     logtime = clock;
     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
@@ -502,4 +559,9 @@ function logentry(txt)
      headertext = [logtimetext 'evt_gui: '];
      
      fprintf('%s%s\n', headertext, txt);
+
+
+
+% --- Executes on button press in radio_deletetimeafter.
+function radio_deletetimeafter_Callback(hObject, eventdata, handles)
 

@@ -1,3 +1,7 @@
+2005-02-02  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m:  added ability to delete datapoints after a selected time.
+	* evt_GUI.fig:  same.
+
 2005-02-01  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m:  correctly referenced filename, adjusted background image.
 
