@@ -1,4 +1,8 @@
-2005-01-26  Jeremy Crivv <jcribb@email.unc.edu>
+2005-02-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* raw2avi.m: added some image processing for handling low-light datasets.
+	* clipraw.m: added.  cuts out and saves a range of frames as a new RAW file.
+
+2005-01-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* get_mips.m: added.  runs and saves single or batches of max(min)imum intensity projection images.  This function calls mip.m and is for batch processing only.
 
 2005-12-20  Jeremy Cribb <jcribb@email.unc.edu>

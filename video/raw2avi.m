@@ -6,7 +6,7 @@ function v = raw2avi(rawfilein, stride, frame_rate)
 % This function converts RAW files from the Pulnix camera
 % (via take, GLUItake, etc...) into an AVI file.
 %  
-%  v = raw2avi(rawfilein, movieout, stride, frame_rate);  
+%  v = raw2avi(rawfilein, stride, frame_rate);  
 %   
 %  where "rawfilein" is the filename of the input RAW file (wildcards ok)
 %        "stride" takes every <stride> frame (reduces bandwidth, removes timelapse)
@@ -69,7 +69,9 @@ for f = 1 : length(file)
 		tic;  % start timer
 		
 		im = fread(fid, [648,484],'uint8');   % read in the next frame
-		image(im','parent',ax);               % puts image in invisible axes  
+        im = balance_pulnix_gains(im);
+        
+		imagesc(im','parent',ax);               % puts image in invisible axes  
 		axis off;
         drawnow;
 		mov = addframe(mov,ax);               % adds frames to the AVI file 
