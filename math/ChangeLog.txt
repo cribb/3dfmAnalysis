@@ -1,4 +1,7 @@
-2004-10.26  Jeremy Cribb <jcribb@email.unc.edu>
+2004-11-17  Jeremy Cribb <jcribb@email.unc.edu>
+	* windiff.m: updated documentation; switched inputs for consistency.
+
+2004-10-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* windiff.m: fixed a bug that incorrectly assigned grid values.  fixed documentation.
 
 2004-10-23  Jeremy Cribb <jcribb@email.unc.edu>
@@ -8,6 +11,5 @@
 	* added heavi.m, which will output Heaviside function with delay.
 
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
-
 	* Initial Version
 
