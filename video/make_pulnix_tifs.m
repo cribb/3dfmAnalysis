@@ -1,4 +1,20 @@
 function v = make_pulnix_tifs(rawfilein)
+% 3DFM function  
+% Video 
+% last modified 09/07/2004 
+%  
+% This function converts RAW files from the Pulnix camera
+% (via take, GLUItake, etc...) to a stack of TIFFs.
+%  
+%  v = make_pulnix_tifs(rawfilein);  
+%   
+%  where "rawfilein" is the filename of the input RAW file. 
+%  
+%   
+%  ??/??/?? - created.  jcribb.
+%  09/07/04 - added documentation and removed a bug that only
+%             allowed one to capture 60 frames.  jcribb.
+%  
 
 % get input file information
 file = dir(rawfilein);
@@ -26,7 +42,7 @@ set(ax, 'Units', 'Pixels');
 set(ax, 'Position',[1 1 cols rows]);
 axis square;
 
-number_of_frames = 60;
+% number_of_frames = 60;
 
 for k=1:number_of_frames
   im = fread(fid, [648,484],'uint8');   % read in the next frame
@@ -47,7 +63,6 @@ for k=1:number_of_frames
 end 
 
 
-% close(fig);    % closes the handle to invisible figure
+close(fig);    % closes the handle to invisible figure
 
 v=im';
-beep;beep;beep;beep;

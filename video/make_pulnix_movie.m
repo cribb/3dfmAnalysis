@@ -1,4 +1,23 @@
-function v = make_pulnix_movie(rawfilein, movieout,frame_rate)
+function v = make_pulnix_movie(rawfilein, movieout, frame_rate)
+% 3DFM function  
+% Video 
+% last modified 09/07/2004 
+%  
+% This function converts RAW files from the Pulnix camera
+% (via take, GLUItake, etc...) to an AVI file.
+%  
+%  v = make_pulnix_movie(rawfilein, movieout, frame_rate);  
+%   
+%  where "rawfilein" is the filename of the input RAW file. 
+%        "movieout"  is the filename for the output AVI file.
+%        "frame_rate" is the frame_rate of the output AVI.
+%   
+%  ??/??/?? - created.  jcribb.
+%  09/07/04 - added documentation and removed a bug that only
+%             allowed one to capture 60 frames.  jcribb.
+%  
+
+tic; 
 
 % get input file information
 file = dir(rawfilein);
@@ -29,7 +48,6 @@ set(ax, 'Units', 'Pixels');
 set(ax, 'Position',[1 1 cols rows]);
 axis square;
 
-number_of_frames = 2000;
 
 for k=1:number_of_frames
   im = fread(fid, [648,484],'uint8');   % read in the next frame
@@ -43,5 +61,4 @@ end
 mov=close(mov); %closes the AVI file  
 close(fig); % closes the handle to invisible figure
 
-v=im;
-beep;beep;beep;beep;
+v=toc;

@@ -1,3 +1,6 @@
+2004-09-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* Added documentation and removed bug that clipped stacks and movies to 60 frames in make_pulnix_bmps, make_pulnix_tifs, make_pulnix_avi, make_pulnix_movie
+
 2004-09-01  Jeremy Cribb <jcribb@email.unc.edu>
 	* Added make_pulnix_bmps and made cosmetic changes to make_pulnix_tifs.
 
