@@ -83,7 +83,7 @@ end
 [timefig,timetext] = init_timerfig;
 
 % now, the meat of the routine.... handle it according to parameters
-for k = start : stride :  stop
+for k = start : stride :  (stop - 1)
     tic;
     
     switch ext
@@ -104,7 +104,7 @@ for k = start : stride :  stop
     im = im(:,:,1);
     
     % Maximum or minimum intensity projection code
-    if k < start 
+    if k == start 
         imMIP = double(im);
     else
         temp(:,:,1) = imMIP;
