@@ -1,0 +1,7 @@
+2005-04-06 Kalpit Desai <kvdesai@email.unc.edu>
+	* mysignal.m, mysignal.fig:
+	- First commit
+	- useful for pulling a bead with highfrequency sinusoids
+	- at this point only two coils can be used at a time.
+	- allows arbitrary choice of amplitude, offset, phase for each channel
+	- arbitrary frequency vector can be provided
