@@ -7,7 +7,7 @@ function clipped = tclip(d,ts,te,fields,fsave)
 % It also stores the information about the original dataset and limits
 % where the clipping was performed
 %  
-%  clipped = tclip(d,ts,te,save)
+%  clipped = tclip(d,ts,te,fields,save)
 %   
 %  where clipped : dataset after clipping has been performed
 %          d      : dataset in the same format as of output of load_vrpn_tracking.m

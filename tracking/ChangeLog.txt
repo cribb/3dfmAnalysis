@@ -1,3 +1,9 @@
+2005-04-06	Kalpit Desai	<kvdesai@cs.unc.edu>
+	* load_vrpn_tracking.m: 
+	- Now compatible with laser tracker 02.13
+	- Tells user when swaping vrpn time stamps with separately logged 'even' time stamps.
+	* tclip.m: fixed function signature in the documentation.
+
 2004-10-23	Jeremy Cribb
 	* load_video_tracking.m: added filter on input file (in case it's not a struct).
 

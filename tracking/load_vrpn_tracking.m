@@ -133,7 +133,7 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
     end
     
    if(isfield(dd.tracking,'TimeStampsVRPNSecUsecEVENSecUse'));
-   % replace the vrpn time stamps with even time stamps if provided
+   % replace the vrpn time stamps with even time stamps if provided and notify user on command-promp
        teven = dd.tracking.TimeStampsVRPNSecUsecEVENSecUse(:,3)+ dd.tracking.TimeStampsVRPNSecUsecEVENSecUse(:,4)*1e-6;
        d.qpd.time = teven;
        d.laser.time = teven;
@@ -143,6 +143,21 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
        if(isfield(d,'posError'))
            d.posError.time = teven;
        end
+       disp('load_vrpn_tracking::A separate time-stamp record was found in .vrpn file')
+       disp('...so, time-stamps of qpd, laser, stageReport and posError are replaced with the new one...');
+   elseif(isfield(dd.tracking,'TimeStampsVRPNSecUsecEVENSecUsec')) %this code is the price paid for a typo in one version of converter prog.
+       % replace the vrpn time stamps with even time stamps if provided and notify user on command-promp
+       teven = dd.tracking.TimeStampsVRPNSecUsecEVENSecUsec(:,3)+ dd.tracking.TimeStampsVRPNSecUsecEVENSecUsec(:,4)*1e-6;
+       d.qpd.time = teven;
+       d.laser.time = teven;
+       if(isfield(d,'stageReport'))
+           d.stageReport.time = teven;
+       end
+       if(isfield(d,'posError'))
+           d.posError.time = teven;
+       end
+       disp('load_vrpn_tracking::A separate time-stamp record was found in .vrpn file')
+       disp('...so, time-stamps of qpd, laser, stageReport and posError are replaced with the new one...');
    end
     
    % Now all information from the original files is copied. So delete the 'dd' to clear memory
