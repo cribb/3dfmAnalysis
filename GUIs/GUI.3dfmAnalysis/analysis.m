@@ -393,7 +393,8 @@ function varargout = menu_geometry_Callback(h, eventdata, handles, varargin)
 
 % --------------------------------------------------------------------
 function velocity = button_computeVelocity_Callback(h, eventdata, handles, varargin)
-
+%functions called: subtractDrift, giveClipped, computeVelocity, avgVelForPoles
+dbstop if error
     d = get(handles.button_brTracking,'UserData');
     
 	if(get(handles.radio_plotDrift,'value'))
@@ -414,23 +415,23 @@ function velocity = button_computeVelocity_Callback(h, eventdata, handles, varar
     if(get(handles.radio_discrete,'value'))
         calc_mode = 'discrete';
         dmag = get(handles.button_brMagnets,'UserData');
+            % use only those magnet points which have corresponding tracking points
+        if(dtrack.stageCom.time_offset + dtrack.stageCom.time(1,1) > dmag.sectime(1,1))
+            tmagst = dtrack.stageCom.time_offset + dtrack.stageCom.time(1,1) - dmag.sectime(1,1);
+        else
+            tmagst = 0;
+        end
+        
+        if(dtrack.stageCom.time_offset + dtrack.stageCom.time(end,1) < dmag.sectime(end,1))
+            tmagend = dmag.sectime(end,1) - dtrack.stageCom.time_offset + dtrack.stageCom.time(1,1);
+        else
+            tmagend = dmag.sectime(end);
+        end
+        dmag = mclip(dmag,tmagst,tmagend);
     else
         calc_mode = 'continuous';
         dmag = [];
     end
-    % use only those magnet points which have corresponding tracking points
-    if(dtrack.stageCom.time_offset + dtrack.stageCom.time(1,1) > dmag.sectime(1,1))
-        tmagst = dtrack.stageCom.time_offset + dtrack.stageCom.time(1,1) - dmag.sectime(1,1);
-    else
-        tmagst = 0;
-    end
-    
-    if(dtrack.stageCom.time_offset + dtrack.stageCom.time(end,1) < dmag.sectime(end,1))
-        tmagend = dmag.sectime(end,1) - dtrack.stageCom.time_offset + dtrack.stageCom.time(1,1);
-    else
-        tmagend = dmag.sectime(end);
-    end
-    dmag = mclip(dmag,tmagst,tmagend);
     velocity = computeVelocity(dtrack,dmag,calc_mode,time_step,filter);
     
     if(get(handles.menu_mode,'value') == 2)
