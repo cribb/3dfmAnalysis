@@ -1,3 +1,5 @@
+2004-06-26	Kalpit Desai	<kvdesai@cs.unc.edu>
+	* tclip.m: Made 'all fields' as default for fields to be clipped.
 2004-06-22	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* tclip.m: Fixed a typo.
 2004-06-22	Kalpit Desai	<kvdesai@cs.unc.edu>

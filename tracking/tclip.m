@@ -37,8 +37,8 @@ function clipped = tclip(d,ts,te,fields,fsave)
   
 % Find the start and stop indices from the given time limits for
 % lowbandwidth data
-if nargin < 4     fsave = 'no';  end
-if nargin < 3 | isemtpy(varargin{3})   fields = 'a';  end % Clip all fields
+if nargin < 5     fsave = 'no';  end
+if nargin < 4 | isempty(fields)   fields = 'a';  end % Clip all fields
 isl = max(find(d.stageCom.time - d.stageCom.time(1,1) - ts <= 0.0005));
 iel = max(find(d.stageCom.time - d.stageCom.time(1,1) - te <= 0.0005));
 % Find the start and stop indices from the given time limits for
