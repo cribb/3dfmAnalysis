@@ -3,7 +3,7 @@ function varargout = analysis(varargin)
 %    FIG = ANALYSIS launch analysis GUI.
 %    ANALYSIS('callback_name', ...) invoke the named callback.
 
-% Last Modified by GUIDE v2.0 15-Oct-2003 00:34:08
+% Last Modified by GUIDE v2.5 17-Jun-2004 12:45:01
 
 if nargin == 0  % LAUNCH GUI
 
@@ -72,7 +72,6 @@ warning off
 [path, file] = uigetfile('*.mat');
 fullName = strcat(file,path);
 set(handles.edit_trackingFileName,'string',fullName);
-% set(handles.button_plotVis,'Enable','off');
 tracking_string = get(handles.edit_trackingFileName,'string');
 if isempty(tracking_string)
     disp('No tracking file selected');
@@ -81,15 +80,19 @@ if isempty(tracking_string)
 end
 
 temp = load(tracking_string);
-if(isfield(temp,'tracking'))    
-    dorig = load_vrpn_tracking(tracking_string,'u','uct','no','no');
+if(isfield(temp,'tracking'))
+    clear temp; %clear memory
+    dorig = load_vrpn_tracking(tracking_string,'u','uct');
 elseif(isfield(temp,'dj'))
     dorig = temp.dj;
 else
     disp('Unrecognized data format: valid fields - tracking | dj');
 end
-dorig.info.orig.time_offset = dorig.stageCom.time(1,1);
-% dorig.stageCom.time_offset = dorig.stageCom.time(1,1);
+
+if (~isfield(dorig.info.orig,'time_offset'))
+    dorig.info.orig.time_offset = dorig.stageCom.time(1,1);
+end
+dorig.stageCom.time_offset = dorig.stageCom.time(1,1);
 dorig.stageCom.time = dorig.stageCom.time - dorig.stageCom.time(1,1);
 set(h,'UserData',dorig);
 tim = dorig.stageCom.time - dorig.stageCom.time(1,1);
@@ -100,7 +103,6 @@ set(handles.edit_trackingEnd,'string',num2str(dorig.tend));
 set(handles.edit_driftStart,'string',num2str(0.0));
 set(handles.edit_driftEnd,'string',num2str(0.0));
 set(handles.text_driftData,'UserData',[]);
-
 warning on
 
 % --------------------------------------------------------------------
@@ -116,26 +118,35 @@ if(isempty(fullName))
 end
 set(handles.check_mags,'Enable','On');
 set(handles.check_plotMagTrack,'Enable','On');
-magnets = load(fullName);
-if(isfield(magnets,'magnets'))
-    magnets = magnets.magnets;
-    if(~isfield(magnets,'sectime'))
-        magnets.sectime = magnets.time(:,1) + magnets.time(:,2)*1e-6;
-    end
-else
-    magnets = magnets.output;
-    magnets.analogs = magnets.mags;
-    magnets.sectime = magnets.time;
+load(fullName); % file must have a structure named 'magnets'
+if(~isfield(magnets,'cleanMags'))
+    magnets = clean(magnets); %clean the data if it is not cleaned
+else 
+    magnets = magnets; % Do nothing
 end
 set(h, 'UserData', magnets);
-warning on
 
 % --------------------------------------------------------------------
 function varargout = button_plotVis_Callback(h, eventdata, handles, varargin)
 global dorig
 
 vis_velocities = 1;
-
+if (1 == get(handles.menu_geometry,'value'))
+    %its tetrapole
+    P = [-300, 0 ,300; 300, 0 ,300; 0 , -300, -300; 0,300,-300];
+elseif(2 == get(handles.menu_geometry,'value'))
+    %its hexapole
+    R = 60; %um
+    H = R*2*cos(pi/6); %um
+    P(1,1:3) = [0, R, H/2];
+    P(2,:) = [-0.866*R, R/2, -H/2];
+    P(3,:) = [-0.866*R, -R/2, H/2];
+    P(4,:) = [0, -R, -H/2];
+    P(5,:) = [0.866*R, -R/2, H/2];
+    P(6,:) = [0.866*R, R/2, -H/2];
+else
+    error('Pole geometry is not recognized, cannot plot visualization');
+end
 do_hairs = get(handles.check_hairs,'value');
 do_colors = get(handles.check_colors,'value');
 subtract_drift = get(handles.radio_plotDrift,'value');
@@ -150,16 +161,26 @@ else
 end
 
 if(get(handles.check_mags,'value'))
-	dmag = load(get(handles.edit_magetsFileName,'string'));
-	mags = dmag.magnets.analogs;
-	plot3(mags(:,1), mags(:,2), mags(:,3));
+	mags = get(handles.button_brMagnets,'Userdata');
+    svec = size(magnets.cleanMags);
+    figure;
+    hold on
+    titls = num2str(mags.sectime(1,1)); 
+    mags.sectime = mags.sectime(1,1);%subtract offset if any
+    colors = 'rgbkcmy';
+    for M = 1:svec(1,2)
+        plot(mags.sectime, mags.cleanMags(:,M), colors(M));
+    end
+    title(titls);
+    hold off
 end
 if(vis_velocities)
     if(isempty(get(handles.button_computeVelocity,'UserData')))
         button_computeVelocity_Callback(handles.button_computeVelocity,[],handles,[]);
     end
+    
     vel = get(handles.button_computeVelocity,'UserData');
-    visVelocities(vel,vis_mode);
+    visVelocities(vel,P,vis_mode);
 end
 
 
@@ -209,7 +230,7 @@ checkVal(h, handles, dorig.tstart, dorig.tend);
 tr_start = str2double(get(handles.edit_trackingStart,'string'));
 tr_end = str2double(get(handles.edit_trackingEnd,'string'));
 if (tr_start > tr_end) % not out of bounds
-    errordlg('Warning: Starting Time is greater than ending time for tracking!','Bad Input','modal')
+    errordlg('Error: Starting Time is greater than ending time for tracking!','Bad Input','modal')
 end
 
 % --------------------------------------------------------------------
@@ -224,7 +245,6 @@ elseif (dr_start == dr_end)
     set(handles.text_driftData,'UserData',[]);
 end
 
-
 % --------------------------------------------------------------------
 function varargout = edit_driftEnd_Callback(h, eventdata, handles, varargin)
 global dorig
@@ -232,15 +252,12 @@ checkVal(h, handles, dorig.tstart, dorig.tend);
 dr_start = str2double(get(handles.edit_driftStart,'string'));
 dr_end = str2double(get(handles.edit_driftEnd,'string'));
 if (dr_start > dr_end)
-	errordlg('Warning: Starting Time is greater than ending time for drift!','Bad Input','modal')
+	errordlg('Error: Starting Time is greater than ending time for drift!','Bad Input','modal')
 elseif (dr_start == dr_end)
     set(handles.text_driftData,'UserData',[]);
 else
     setDriftData(handles.text_driftData,dorig,dr_start,dr_end);
 end 
-
-
-
 
 % --------------------------------------------------------------------
 function varargout = slider_dt_Callback(h, eventdata, handles, varargin)
@@ -297,11 +314,11 @@ function varargout = radio_plotClipped_Callback(h, eventdata, handles, varargin)
 function check_plotMagTrack_Callback(h, eventdata, handles)
 
 % --------------------------------------------------------------------
-function varargout = radio_descrete_Callback(h, eventdata, handles, varargin)
+function varargout = radio_discrete_Callback(h, eventdata, handles, varargin)
 
 if(get(h,'value'))
     if(isempty(get(handles.button_brMagnets,'userdata')))
-        disp('Error: Load manget data first for descrete mode');
+        disp('Error: Load manget data first for discrete mode');
         set(h,'value',0);
         return
     end        
@@ -320,16 +337,16 @@ function varargout = radio_continuous_Callback(h, eventdata, handles, varargin)
 
 if(~get(h,'value'))
     if(isempty(get(handles.button_brMagnets,'userdata')))
-        disp('Error: Load manget data first for descrete mode');
+        disp('Error: Load manget data first for discrete mode');
         set(h,'value',1);
         return
     end        
-    set(handles.radio_descrete,'value', 1);
+    set(handles.radio_discrete,'value', 1);
     set(handles.edit_dt,'Enable','off');
     set(handles.slider_dt,'Enable','off');
     set(handles.radio_filter,'Enable','off');    
 else
-    set(handles.radio_descrete,'value', 0);
+    set(handles.radio_discrete,'value', 0);
     set(handles.edit_dt,'Enable','on');
     set(handles.slider_dt,'Enable','on');
     set(handles.radio_filter,'Enable','on');    
@@ -394,14 +411,26 @@ function velocity = button_computeVelocity_Callback(h, eventdata, handles, varar
     time_step = get(handles.slider_dt,'value');
     filter = get(handles.radio_filter,'value');
     
-    if(get(handles.radio_descrete,'value'))
-        calc_mode = 'descrete';
+    if(get(handles.radio_discrete,'value'))
+        calc_mode = 'discrete';
         dmag = get(handles.button_brMagnets,'UserData');
     else
         calc_mode = 'continuous';
         dmag = [];
     end
+    % use only those magnet points which have corresponding tracking points
+    if(dtrack.stageCom.time_offset + dtrack.stageCom.time(1,1) > dmag.sectime(1,1))
+        tmagst = dtrack.stageCom.time_offset + dtrack.stageCom.time(1,1) - dmag.sectime(1,1);
+    else
+        tmagst = 0;
+    end
     
+    if(dtrack.stageCom.time_offset + dtrack.stageCom.time(end,1) < dmag.sectime(end,1))
+        tmagend = dmag.sectime(end,1) - dtrack.stageCom.time_offset + dtrack.stageCom.time(1,1);
+    else
+        tmagend = dmag.sectime(end);
+    end
+    dmag = mclip(dmag,tmagst,tmagend);
     velocity = computeVelocity(dtrack,dmag,calc_mode,time_step,filter);
     
     if(get(handles.menu_mode,'value') == 2)
@@ -456,7 +485,7 @@ dmag = get(handles.button_brMagnets,'UserData');
 track_st = dtrack.stageCom.time_offset; 
 track_end = dtrack.stageCom.time_offset + max(dtrack.stageCom.time);
 mag_st = dmag.sectime(1,1);
-mag_end =max(dmag.sectime);
+mag_end = max(dmag.sectime);
 
 if(track_st <= mag_st)
     low_limit = track_st;
@@ -477,7 +506,7 @@ dtrack.base = dtrack.stageCom.time_offset + dtrack.stageCom.time - low_limit;
     if(findstr('x',str))
         figure(101)
         set(gca,'Xlim',limits);
-        stairs(dmag.base,dmag.analogs);
+        stairs(dmag.base,dmag.cleanMags);
         hold on;
         plot(dtrack.base,dtrack.stageCom.x,'--');
         title('Coils and X tracking');
@@ -489,7 +518,7 @@ dtrack.base = dtrack.stageCom.time_offset + dtrack.stageCom.time - low_limit;
     if(findstr('y',str))
         figure(102)
         set(gca,'Xlim',limits);
-        stairs(dmag.base,dmag.analogs);
+        stairs(dmag.base,dmag.cleanMags);
         hold on;
         plot(dtrack.base,dtrack.stageCom.y,'--');
         title('Coils and Y tracking');
@@ -501,7 +530,7 @@ dtrack.base = dtrack.stageCom.time_offset + dtrack.stageCom.time - low_limit;
     if(findstr('z',str))
         figure(103)
         set(gca,'Xlim',limits);
-        stairs(dmag.base,dmag.analogs);
+        stairs(dmag.base,dmag.cleanMags);
         hold on;
         plot(dtrack.base,dtrack.stageCom.z,'--');
         title('Coils and Z tracking');
@@ -514,14 +543,14 @@ return;
 %<<< function plot_lissajous(dtrack,ddrift,dmag,vis_mode,calc_mode,tstep,filter)
 %This function is used to compute velocity vectors from given data
 %Tracking data should be already clipped and drift should have been taken care of.
-%dmag/magnet data will only be used in case of calc_mode = 'descrete'
+%dmag/magnet data will only be used in case of calc_mode = 'discrete'
 %tstep and filter will only be used in case of calc_mode = 'continuous'
 function data = computeVelocity(dtrack,dmag,calc_mode,tstep,filter)
 block = tstep;
-mstage = dtrack.stage;
+mstage = dtrack.stageCom;
 
-%------------compute velocity vectors for descrete mode if we should
-if(strcmpi(calc_mode,'descrete'))
+%------------compute velocity vectors for discrete mode if we should
+if(strcmpi(calc_mode,'discrete'))
     %--------check if  both of the datasets are clipped precisely enough
 
     track_st = dtrack.info.orig.time_offset; %+ dtrack.info.clip.tstart; 
@@ -547,9 +576,9 @@ if(strcmpi(calc_mode,'descrete'))
         %detect next edge in magnets excitation
         %magnitude threshold = 0.01
         %temporal threshold  = 1 sec
-        while(~edge_found & cur_index < length(dmag.analogs))
+        while(~edge_found & cur_index < length(dmag.cleanMags))
             cur_index = cur_index + 1;
-            temp = abs(dmag.analogs(cur_index,:) - dmag.analogs(last_edge_imag,:));
+            temp = abs(dmag.cleanMags(cur_index,:) - dmag.cleanMags(last_edge_imag,:));
             if(max(temp)>0.01)
                 if(dmag.time(cur_index,1) - last_edge_time > 1)
                     new_edge_time = dmag.time(cur_index,1);
@@ -559,7 +588,7 @@ if(strcmpi(calc_mode,'descrete'))
             end
         end
         %Exit if we have gone thorough the whole dataset
-        if(cur_index >= length(dmag.analogs))
+        if(cur_index >= length(dmag.cleanMags))
             break;
         end
         %new edge found! compute velocity between last edge and this edge
@@ -704,11 +733,30 @@ return;
 % --------------------------------------------------------------------
 function clipped = giveClipped(handles,d)
 
-clipped.info.orig = d.info.orig;
+% if the original dataset has a field named 'info', than all that 
+% information should be inherited into the clipped dataset.
+if(isfield(d,'info')) 
+    clipped.info = d.info;
+    
+    if(isfield(d.info,'clips'))%if the data being clipped has already been clipped atleast once 
+        ind = length(d.info.clips) + 1;
+    else %the data is original and it hasnot been clipped yet.
+        ind = 1;
+    end
+end
+
 tstart = str2double(get(handles.edit_trackingStart,'string'));
 tend = str2double(get(handles.edit_trackingEnd,'string'));
-istart = max(find(d.stageCom.time <= tstart));
-iend = max(find(d.stageCom.time <= tend));
+istart = max(find(d.stageCom.time - d.stageCom.time(1,1) - tstart <= 0.05));
+iend = max(find(d.stageCom.time - d.stageCom.time(1,1) - tend <= 0.05));
+
+% Now save information about clipping of this dataset
+clipped.info.clips(ind).rel_tstart = d.stageCom.time(istart) - d.stageCom.time(1,1);
+clipped.info.clips(ind).tstart = d.stageCom.time(istart);
+clipped.info.clips(ind).tend = d.stageCom.time(iend);
+clipped.info.clips(ind).istart = istart;
+clipped.info.clips(ind).iend = iend;
+
 if(istart >= iend)
     prompt(handles,'No clipping performed: check tracking limits','r');
     clipped = d;
@@ -718,11 +766,6 @@ end
 if(isfield(d.info,'drift'));
     clipped.info.drift = d.info.drift;
 end
-
-clipped.info.clip.tstart = tstart;
-clipped.info.clip.tend = tend;
-clipped.info.clip.istart = istart;
-clipped.info.clip.iend = iend;
 
 clipped.stageCom.time = d.stageCom.time(istart:iend) - d.stageCom.time(istart);
 clipped.stageCom.x = d.stageCom.x(istart:iend);
