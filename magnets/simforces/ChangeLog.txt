@@ -1,3 +1,6 @@
+2004-12-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* poleflat.m, added.  provides matrix for poleflat geometry.
+
 2004-10-24  Jeremy Cribb <jcribb@email.unc.edu>
 	* Changelog, added.
 	* Bforce.m, added.  returns force vectors applied to a bead in a given geometry. 
