@@ -36,7 +36,7 @@ end
 
 % subtract off the time-offset
 d.stageCom.time = d.stageCom.time - d.stageCom.time(1,1);
-d.laser.time = d.laser.time - d.laser.time(1,1);
+% d.laser.time = d.laser.time - d.laser.time(1,1);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot Z-stage (for drift) and Laser Fluctuations

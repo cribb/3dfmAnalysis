@@ -63,7 +63,7 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
 
     % meta-information (just constant here, but should be upgradable for
     % meta-data found in future .vrpn tracking files
-	d.info.orig.beadSize = 0.957;	
+	d.info.orig.beadSize = 'NOT AVAILABLE';	
 	d.info.orig.xyzunits = xyzunits;
 
    % handle the switch for including user_input 
@@ -72,13 +72,13 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
                                          'want to be associated with this data set \n',...
                                          'Press Enter only when you are done\n'],'s');
    end
-
    
 	d.stageCom.time = dd.tracking.stageCommandSecUsecZeroXYZ(:,1) + ...        % get time data
                    dd.tracking.stageCommandSecUsecZeroXYZ(:,2) * 1e-6;      % add usec column
 	d.stageCom.x    = dd.tracking.stageCommandSecUsecZeroXYZ(:,4);        % get stage x data
 	d.stageCom.y    = dd.tracking.stageCommandSecUsecZeroXYZ(:,5);        % get stage y data
 	d.stageCom.z    = dd.tracking.stageCommandSecUsecZeroXYZ(:,6);        % get stage z data
+    d.info.orig.uct_offset = d.stageCom.time(1,1);
 
     d.qpd.time   = dd.tracking.QPDsSecUsecVals(:,1) + ...
                    dd.tracking.QPDsSecUsecVals(:,2) * 1e-6;

@@ -31,10 +31,10 @@ function joined = tjoin(d1,d2,fields)
 %  05/11/04 - Commented  
 %           - added 'fields' argument
 
-if (varargin < 3 | isempty(fields))
+if (nargin < 3 | isempty(fields))
     fields = 's';
 end
-if (varargin < 2 | isempty(d2))
+if (nargin < 2 | isempty(d2))
     joined = d1;
     warning('tjoin::Only one dataset is provided in input');
     return;

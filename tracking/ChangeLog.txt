@@ -1,3 +1,10 @@
+2004-06-17	Kalpit Desai	<kvdesai@cs.unc.edu>
+	* load_vrpn_tracking.m:
+	- Added default storing of uct_offset (universal coordinated time of first sample) within info.orig
+	- Changed default bead size value to 'NOT AVAILABLE', instead of 0.957
+	* plot_vrpn_tracking.m: commented out the time-offset removal from 'laser' field 
+	* tclip.m : Replaced 'varargin' with 'nargin' as it should be.
+ 
 2004-06-14	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* load_vrpn_tracking: 
 	- Added feature to select displacement units (meters|microns) of position error, stage reports and bead positions. Previously, this was only possible for stage commands
