@@ -1,21 +1,21 @@
-function v = sucrose_viscosity(sucrose_molar_conc, temperature_C)
+function v = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units)
 % 3DFM function  
 % Rheology 
-% last modified 10/22/04 
+% last modified 11/04/04 
 %  
 % This function returns the viscosity of a sucrose solution when given 
 % an input molar concentration of sucrose in mol/L and the solution's 
-% temperature in degrees Celsius.  This model for sucrose viscosity can 
+% temperature in degrees Celsius (or Kelvin).  This model for sucrose viscosity can 
 % be found in the book: "Rheological properties of sucrose solutions and 
 % suspensions"; M.Mathlouthi and J.Génotelle pp. 126-154 in SUCROSE 
 % Properties and Applications, M. Mathlouthi and P. Reiser eds., Blackie 
 % Academic & Professional 1995.
 %  
-% viscosity_Pasec = sucrose_viscosity(sucrose_molar_conc, temperature_C);
+% viscosity_Pasec = sucrose_viscosity(sucrose_molar_conc, temperature);
 %   
 %  where "sucrose_molar_conc" is in mol/L
-%        "temperature_C" is in degrees Celsius
-%  
+%        "temperature" is in units of 'temp_units'
+%        "temp_units" is a 'K' for Kelvin, or a 'C' for Celsius 
 %  Notes:  
 %   
 %  - This model gives ~1% error on the experimental values.  
@@ -24,10 +24,15 @@ function v = sucrose_viscosity(sucrose_molar_conc, temperature_C)
 %    
 %  10/13/04 - created; jcribb  
 %  10/22/04 - changed the exceeded solubility condition to a warning instead of an error; jcribb
-% 
+%  11/04/04 - added a switch for entering temperature in units of Kelvin or Celsius.
+%
 
+    if (temp_units == 'K')
+        temperature = temperature - 273.15;
+    end
+    
     % Check the temperature input value for sanity.
-    if temperature_C < 0 | temperature_C > 100
+    if temperature < 0 | temperature > 100
         error('This model is valid for temperature values between 0 and 100 degrees Celsius.');
     end
 
@@ -35,7 +40,7 @@ function v = sucrose_viscosity(sucrose_molar_conc, temperature_C)
     % sucrose solution from the sucrose concentration in percent
     % (determined recursively from the solution density function below) and
     % the temperature of the solution in degrees Celsius.
-    [sucrose_conc_percent, rho] = solution_density(sucrose_molar_conc, temperature_C);
+    [sucrose_conc_percent, rho] = solution_density(sucrose_molar_conc, temperature);
     
     % Check the solution concentration input for sanity.  If the input
     % concentration is greater than the solubility of sucrose at the
@@ -44,13 +49,13 @@ function v = sucrose_viscosity(sucrose_molar_conc, temperature_C)
     % the concentration of sucrose in percent.  Putting it here reduces the
     % number of computations as the convergence routine in
     % 'solution_density' needs only be ran once.
-    sol = sucrose_solubility(sucrose_conc_percent, temperature_C);
+    sol = sucrose_solubility(sucrose_conc_percent, temperature);
     if sucrose_conc_percent > sol
         warning('The input sucrose concentration exceeds sucrose solubility at the input temperature.');
     end;
     
     A = sucrose_conc_percent / (1900 - 18 * sucrose_conc_percent);
-	B = (30 - temperature_C) / (91 + temperature_C);
+	B = (30 - temperature) / (91 + temperature);
 	C = A^1.25;
 	D = -0.114 + (1.1*B);
 	
