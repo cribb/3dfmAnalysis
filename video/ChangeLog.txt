@@ -1,3 +1,6 @@
+2005-02-11  Ben Wilde <wilde@cs.unc.edu>
+	* beadOrbitAngles.m: Added this file, which computes the angle that a bead orbits around a rod.
+
 2005-02-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* mip.m: fixed time bug for when file started in middle.
 
