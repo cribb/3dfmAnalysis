@@ -1,3 +1,6 @@
+2004-12-07  Jeremy Cribb <jcribb@email.unc.edu>
+	* balance_pulnix_gains.m: added.  sometimes the image looks banded even after the line-swapping problem is confirmed fixed.  The gains between the two channels on the Pulnix may be off.  You can actually fix this in the camera (where I'm headed after I finish with the data I've already taken).
+
 2004-12-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* mip.m: fixed off-by-one error in frame id.
 
