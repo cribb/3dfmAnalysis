@@ -1,6 +1,6 @@
 function plot_vrpn_tracking(d, plots)
 % 3DFM function
-% Last Modified on 7/28/03
+% Last Modified on 05/19/04 kvdesai
 %
 % This function is a collection of common plots for the 3DFM.
 %
@@ -20,16 +20,17 @@ function plot_vrpn_tracking(d, plots)
 % 'v' for viscosity
 % 'e' to append the QPD error signals onto 'x' 'y' 'z'
 %
-%
+% Changes:
+% 05/19/04 : replaced '.stage.' with '.stageCom.'
 
 if (nargin < 2)
     plots = 'l3pnxyze';
 end
 
 if (d.info.orig.xyzunits == 'm')
-    d.stage.x = d.stage.x * 1e-6;
-    d.stage.y = d.stage.y * 1e-6;
-    d.stage.z = d.stage.z * 1e-6;
+    d.stageCom.x = d.stageCom.x * 1e-6;
+    d.stageCom.y = d.stageCom.y * 1e-6;
+    d.stageCom.z = d.stageCom.z * 1e-6;
     d.info.orig.xyzunits = 'um';
 end
 
@@ -40,7 +41,7 @@ if(findstr('l',plots))
     figure(1);
     subplot(2,1,1), plot(d.laser.time,d.laser.intensity)
     title('Laser Fluctuations');
-    subplot(2,1,2), plot(d.stage.time,d.stage.z)
+    subplot(2,1,2), plot(d.stageCom.time,d.stageCom.z)
     title('Z Position');
 end
 
@@ -49,7 +50,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if(findstr('3',plots))
-    figure(2); plot3(d.stage.x, d.stage.y, d.stage.z);
+    figure(2); plot3(d.stageCom.x, d.stageCom.y, d.stageCom.z);
     xl=xlabel('X Position (microns)');
         set(xl,'Rotation', -15); %Rotates the text 15 degrees
         set(xl,'Units','Normalized'); %Sets the axes ranges to lie between 0 and 1
@@ -100,20 +101,20 @@ if(findstr('x',plots))
     	figure(5);
 
 		subplot(2,1,1);
-		plot(d.stage.time, d.stage.x);
+		plot(d.stageCom.time, d.stageCom.x);
 		title('X stage translation through time');
 		xlabel('time (sec)');
 		ylabel('x position (um)');
 
 % 		subplot(2,1,2);
-% 		plot(d.stage.time, d.error.x);
+% 		plot(d.stageCom.time, d.error.x);
 % 		title('X Error Signal, uncalibrated for bead');
 % 		xlabel('time (sec)');
 % 		ylabel('Error (Volts)');
 	else
 		figure(5);
 		
-        plot(d.stage.time, d.stage.x);
+        plot(d.stageCom.time, d.stageCom.x);
 		title('X stage translation through time');
 		ylabel('X position');
 		xlabel('time (sec)');
@@ -130,20 +131,20 @@ if(findstr('y',plots))
     	figure(6);
 
 		subplot(2,1,1);
-		plot(d.stage.time, d.stage.y);
+		plot(d.stageCom.time, d.stageCom.y);
 		title('Y stage translation through time');
 		xlabel('time (sec)');
 		ylabel('y position (um)');
 
 % 		subplot(2,1,2);
-% 		plot(d.stage.time, d.error.y);
+% 		plot(d.stageCom.time, d.error.y);
 % 		title('Y Error Signal, uncalibrated for bead');
 % 		xlabel('time (sec)');
 % 		ylabel('Error (Volts)');
 	else
 		figure(6);
 		
-        plot(d.stage.time, d.stage.y);
+        plot(d.stageCom.time, d.stageCom.y);
 		title('Y stage translation through time');
 		ylabel('y position');
 		xlabel('time (sec)');
@@ -161,20 +162,20 @@ if(findstr('z',plots))
     	figure(7);
 
 		subplot(2,1,1);
-		plot(d.stage.time, d.stage.z);
+		plot(d.stageCom.time, d.stageCom.z);
 		title('Z stage translation through time');
 		xlabel('time (sec)');
 		ylabel('z position (um)');
 
 % 		subplot(2,1,2);
-% 		plot(d.stage.time, d.error.z);
+% 		plot(d.stageCom.time, d.error.z);
 % 		title('Z Error Signal, uncalibrated for bead');
 % 		xlabel('time (sec)');
 % 		ylabel('Error (Volts)');
 	else
 		figure(7);
 		
-        plot(d.stage.time, d.stage.z);
+        plot(d.stageCom.time, d.stageCom.z);
 		title('Z stage translation through time');
 		ylabel('z position');
 		xlabel('time (sec)');

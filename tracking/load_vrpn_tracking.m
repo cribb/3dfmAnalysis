@@ -1,6 +1,6 @@
 function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, user_input);
 % 3DFM function
-% last modified 05/11/04 - kvdesai
+% last modified 05/19/04 - kvdesai
 %
 % This function reads in a 3DFM dataset previously saved as a 
 % 2d matrix in a matlab workspace file (*.mat) file 
@@ -10,7 +10,7 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, user_input);
 %
 % where "file" can be a string containing name of the the .mat file 
 %              OR it can be the variable created by double-clicking the .mat file
-%		"xyz_units" is either 'um' or 'm'
+%		"xyz_units" is either 'u' or 'm'
 %       "tzero" is either 'zero' or 'uct'
 %       "beadpos" is either 'yes' or 'no'-tells whether to compute bead-position
 %       "user_input" is either 'yes' or 'no'-tells if to prompt user to
@@ -26,7 +26,7 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, user_input);
 % - The choice of window for the power spectral density (PSD) can be 
 %   either 'blackman' or 'rectangle' (rectangle for rheology data). 
 %   (default = blackman)
-% - The xyzunits can be either 'um' for microns for 'm' for meters.
+% - The xyzunits can be either 'u' for microns for 'm' for meters.
 %   (default = microns)
 % - The tzero parameter can be either 'zero' for using the first element
 %   in the array as tzero, or 'uct' for universal coordinated time, defaulting
@@ -51,35 +51,37 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, user_input);
 %          - added user_input parameter
 %          - removed DSP handling code  
 % 05/11/04 - renamed d.stage field to d.stageCom, removed ambiguity
-%
+% 05/19/04 - Do not try saving file name when data is supplied in form of
+%           matlab variable and not in form of file name
+% 
 
 	% handle the argument list
 	if (nargin < 5 | isempty(user_input));  user_input='no';         end;
 	if (nargin < 4 | isempty(beadpos));     beadpos='yes';        	 end;
 	if (nargin < 3 | isempty(tzero));       tzero = 'uct';           end;
-	if (nargin < 2 | isempty(xyzunits));    xyzunits  = 'um';	     end;
+	if (nargin < 2 | isempty(xyzunits));    xyzunits  = 'u';	     end;
 
 	% load tracking data after it has been converted to a .mat file OR
     % if it is present as a workspace variable
-	if(ischar(file))
-        dd= load(file);
+    if(ischar(file))
+        dd= load(file);        
+        % get filename by subtracting filepath
+        id = max(find(file(:)=='\'));
+        if(isempty(id))
+            name = file;
+        else
+            name = file(id+1:end);
+        end
+        d.info.orig.name = name;
     else
         dd.tracking = file;
+        d.info.orig.name = 'NOT AVAILABLE';
     end
 
     % meta-information (just constant here, but should be upgradable for
     % meta-data found in future .vrpn tracking files
-	d.info.orig.beadSize = 0.957;
-	d.info.orig.name = name;
+	d.info.orig.beadSize = 0.957;	
 	d.info.orig.xyzunits = xyzunits;
-
-    % get filename by subtracting filepath
-    id = max(find(file(:)=='\'));
-    if(isempty(id))
-        name = file;
-    else
-        name = file(id+1:end);
-    end
 
    % handle the switch for including user_input 
    if findstr(user_input,'y')
@@ -188,11 +190,11 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, user_input);
    end   
                                                                  
 	% handle the units before doing any mathematical analysis on data
-	if findstr(xyzunits,'m')
-		d.stageCom.x = d.stageCom.x * 1e-6;  % convert stage data from
-		d.stageCom.y = d.stageCom.y * 1e-6;  % default microns to meters
-		d.stageCom.z = d.stageCom.z * 1e-6;
-		d.info.orig.xyzunits = 'm';
+	if findstr(xyzunits,'u')
+		d.stageCom.x = d.stageCom.x * 1e6;  % convert stage data from
+		d.stageCom.y = d.stageCom.y * 1e6;  % default microns to meters
+		d.stageCom.z = d.stageCom.z * 1e6;
+		d.info.orig.xyzunits = 'u';
     end
 			
     % compute the position of the bead at QPD bandwidth, provided

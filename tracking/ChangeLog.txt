@@ -1,3 +1,12 @@
+2004-05-19	Kalpit Desai	<kvdesai@cs.unc.edu>
+
+	* load_vrpn_tracking.m:
+	- Do not try saving the file name when data is supplied in form of a matlab variable.
+	- changed XYZunits options to 'u' and 'm', this used to be 'um' and 'm', creating ambiguity.
+	
+	* plot_vrpn_tracking.m:
+	- replaced '.stage.' with '.stageCom.', to accord with changes in load_vrpn_tracking.m				
+
 2004-05-18  Kalpit Desai <kvdesai@cs.unc.edu>
 
 	* load_vrpn_tracking.m : Fixed the comment about default 'time' argument - should have been 'uct'
@@ -5,4 +14,4 @@
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 
 	* Initial Version
-
+a
