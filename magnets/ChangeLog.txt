@@ -1,3 +1,6 @@
+2004-10-24  Jeremy Cribb <jcribb@email.unc.edu>
+	* simforces.  added this folder to contain force simulation code.
+
 2004-07-13  Kalpit Desai <kvdesai@cs.unc.edu>
 	* visVelocities.m : Replaced the code for placing a colorbar with the new found matlab function 'colorbar'. Also changed the rendering in 'hairs' mode back to with white background sphere.
 2004-06-11  Kalpit Desai <kvdesai@cs.unc.edu>
