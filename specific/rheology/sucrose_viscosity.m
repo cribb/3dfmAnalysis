@@ -1,7 +1,7 @@
 function v = sucrose_viscosity(sucrose_molar_conc, temperature_C)
 % 3DFM function  
 % Rheology 
-% last modified 10/13/04 
+% last modified 10/22/04 
 %  
 % This function returns the viscosity of a sucrose solution when given 
 % an input molar concentration of sucrose in mol/L and the solution's 
@@ -23,7 +23,7 @@ function v = sucrose_viscosity(sucrose_molar_conc, temperature_C)
 %    at: http://www.univ-reims.fr/Externes/AVH/MementoSugar/001.htm
 %    
 %  10/13/04 - created; jcribb  
-%   
+%  10/22/04 - changed the exceeded solubility condition to a warning instead of an error; jcribb
 % 
 
     % Check the temperature input value for sanity.
@@ -46,7 +46,7 @@ function v = sucrose_viscosity(sucrose_molar_conc, temperature_C)
     % 'solution_density' needs only be ran once.
     sol = sucrose_solubility(sucrose_conc_percent, temperature_C);
     if sucrose_conc_percent > sol
-        error('The input sucrose concentration exceeds sucrose solubility at the input temperature.');
+        warning('The input sucrose concentration exceeds sucrose solubility at the input temperature.');
     end;
     
     A = sucrose_conc_percent / (1900 - 18 * sucrose_conc_percent);
