@@ -1,3 +1,6 @@
+2004-10-31  Jeremy Cribb <jcribb@email.unc.edu>
+	* DACoperator.m: fixed some syntax errors, enhanced documentation, and added a 'daqtest' DAq board type so that you can simulate DAQ AO runs on a non-DAQ enabled PC.
+
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 
 	* Initial Version
