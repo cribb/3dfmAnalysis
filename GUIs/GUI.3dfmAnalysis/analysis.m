@@ -82,17 +82,17 @@ end
 
 temp = load(tracking_string);
 if(isfield(temp,'tracking'))    
-    dorig = load_vrpn_tracking(tracking_string,'um','uct','no','no');
+    dorig = load_vrpn_tracking(tracking_string,'u','uct','no','no');
 elseif(isfield(temp,'dj'))
     dorig = temp.dj;
 else
     disp('Unrecognized data format: valid fields - tracking | dj');
 end
-dorig.info.orig.time_offset = dorig.stage.time(1,1);
-% dorig.stage.time_offset = dorig.stage.time(1,1);
-dorig.stage.time = dorig.stage.time - dorig.stage.time(1,1);
+dorig.info.orig.time_offset = dorig.stageCom.time(1,1);
+% dorig.stageCom.time_offset = dorig.stageCom.time(1,1);
+dorig.stageCom.time = dorig.stageCom.time - dorig.stageCom.time(1,1);
 set(h,'UserData',dorig);
-tim = dorig.stage.time - dorig.stage.time(1,1);
+tim = dorig.stageCom.time - dorig.stageCom.time(1,1);
 dorig.tstart = min(tim);
 dorig.tend = max(tim);
 set(handles.edit_trackingStart,'string',num2str(dorig.tstart));
@@ -129,56 +129,6 @@ else
 end
 set(h, 'UserData', magnets);
 warning on
-
-% % --------------------------------------------------------------------
-% function varargout = button_selectData_Callback(h, eventdata, handles, varargin)
-% tr_start = str2double(get(handles.edit_trackingStart,'string'));
-% tr_end = str2double(get(handles.edit_trackingEnd,'string'));
-% d = get(handles.button_brTracking,'UserData');
-% % d = d.dorig;
-% if(get(handles.check_drift,'value'))
-% 	dr_start = str2double(get(handles.edit_driftStart,'string'));
-% 	dr_end = str2double(get(handles.edit_driftEnd,'string'));
-% end
-% 	
-% if (tr_start > tr_end) % not out of bounds
-%     errordlg('Starting Time is greater than ending time for tracking! Wake up!','Bad Input','modal')
-% elseif (get(handles.check_drift,'value') & (dr_start > dr_end))
-% 	errordlg('Starting Time is greater than ending time for drift! Wake up!','Bad Input','modal')
-% else
-% 	
-% 
-% 	tra_istart = min(find(d.stage.time >= tr_start));
-% 	tra_iend = max(find(d.stage.time <= tr_end));
-% 	dclip.stage.time = d.stage.time(tra_istart:tra_iend);
-% 	dclip.stage.x = d.stage.x(tra_istart:tra_iend);
-% 	dclip.stage.y = d.stage.y(tra_istart:tra_iend);
-% 	dclip.stage.z = d.stage.z(tra_istart:tra_iend);
-%     dclip.stage.time_offset = d.stage.time_offset;
-%     dclip.const = d.const;
-% 	set(handles.text_TrackingData,'UserData',dclip);
-% 	
-% 	if(get(handles.check_drift,'value'))
-% 		dr_istart = min(find(d.stage.time >= dr_start));
-% 		dr_iend = max(find(d.stage.time <= dr_end));
-% 		ddrift.stage.time = d.stage.time(dr_istart:dr_iend);
-% 		ddrift.stage.x = d.stage.x(dr_istart:dr_iend);
-% 		ddrift.stage.y = d.stage.y(dr_istart:dr_iend);
-% 		ddrift.stage.z = d.stage.z(dr_istart:dr_iend);
-% 		
-% 		temp_t = ddrift.stage.time;
-% 		x = ddrift.stage.x;
-% 		y = ddrift.stage.y;
-% 		z = ddrift.stage.z;	
-% 
-% 		ddrift.back_vx = polyfit(temp_t, x, 1);
-% 		ddrift.back_vy = polyfit(temp_t, y, 1);
-% 		ddrift.back_vz = polyfit(temp_t, z, 1);
-% 		set(handles.check_drift,'UserData',ddrift);
-% 	end
-%    	set(handles.button_plotVis,'Enable','On');
-% end
-% 
 
 % --------------------------------------------------------------------
 function varargout = button_plotVis_Callback(h, eventdata, handles, varargin)
@@ -503,8 +453,8 @@ function plot_MagnetsOnTracking(dtrack,str,handles)
 dmag = get(handles.button_brMagnets,'UserData');
 
 % dmag.base = dmag.sectime - dmag.sectime(1,1);
-track_st = dtrack.stage.time_offset; 
-track_end = dtrack.stage.time_offset + max(dtrack.stage.time);
+track_st = dtrack.stageCom.time_offset; 
+track_end = dtrack.stageCom.time_offset + max(dtrack.stageCom.time);
 mag_st = dmag.sectime(1,1);
 mag_end =max(dmag.sectime);
 
@@ -522,14 +472,14 @@ end
 
 limits = [0, up_limit - low_limit];
 dmag.base = dmag.sectime - low_limit;
-dtrack.base = dtrack.stage.time_offset + dtrack.stage.time - low_limit;
+dtrack.base = dtrack.stageCom.time_offset + dtrack.stageCom.time - low_limit;
  
     if(findstr('x',str))
         figure(101)
         set(gca,'Xlim',limits);
         stairs(dmag.base,dmag.analogs);
         hold on;
-        plot(dtrack.base,dtrack.stage.x,'--');
+        plot(dtrack.base,dtrack.stageCom.x,'--');
         title('Coils and X tracking');
         legend('C1','C2','C3','C4','X tracking',0);
         grid on;
@@ -541,7 +491,7 @@ dtrack.base = dtrack.stage.time_offset + dtrack.stage.time - low_limit;
         set(gca,'Xlim',limits);
         stairs(dmag.base,dmag.analogs);
         hold on;
-        plot(dtrack.base,dtrack.stage.y,'--');
+        plot(dtrack.base,dtrack.stageCom.y,'--');
         title('Coils and Y tracking');
         legend('C1','C2','C3','C4','Y tracking',0);
         grid on;
@@ -553,7 +503,7 @@ dtrack.base = dtrack.stage.time_offset + dtrack.stage.time - low_limit;
         set(gca,'Xlim',limits);
         stairs(dmag.base,dmag.analogs);
         hold on;
-        plot(dtrack.base,dtrack.stage.z,'--');
+        plot(dtrack.base,dtrack.stageCom.z,'--');
         title('Coils and Z tracking');
         legend('C1','C2','C3','C4','Z tracking',0); 
         grid on;
@@ -575,7 +525,7 @@ if(strcmpi(calc_mode,'descrete'))
     %--------check if  both of the datasets are clipped precisely enough
 
     track_st = dtrack.info.orig.time_offset; %+ dtrack.info.clip.tstart; 
-    track_end = track_st + max(dtrack.stage.time);
+    track_end = track_st + max(dtrack.stageCom.time);
     mag_st = dmag.sectime(1,1);
     mag_end = max(dmag.sectime);
        
@@ -701,8 +651,8 @@ return;
 % --------------------------------------------------------------------
 function setDriftData(h,d,dr_start,dr_end)
 
-dr_istart = min(find(d.stage.time >= dr_start));
-dr_iend = max(find(d.stage.time <= dr_end));
+dr_istart = min(find(d.stageCom.time >= dr_start));
+dr_iend = max(find(d.stageCom.time <= dr_end));
 
 ddrift.info.orig = d.info.orig;
 ddrift.info.drift.dr_tstart = dr_start;
@@ -710,11 +660,11 @@ ddrift.info.drift.dr_tend = dr_end;
 ddrift.info.drift.dr_istart = dr_istart;
 ddrift.info.drift.dr_iend = dr_iend;
 
-temp_t = d.stage.time(dr_istart:dr_iend);
+temp_t = d.stageCom.time(dr_istart:dr_iend);
 temp_t = temp_t - temp_t(1,1);
-x = d.stage.x(dr_istart:dr_iend);
-y = d.stage.y(dr_istart:dr_iend);
-z = d.stage.z(dr_istart:dr_iend);	
+x = d.stageCom.x(dr_istart:dr_iend);
+y = d.stageCom.y(dr_istart:dr_iend);
+z = d.stageCom.z(dr_istart:dr_iend);	
 
 ddrift.back_vx = polyfit(temp_t, x, 1);
 ddrift.back_vx(1,2) = 0; %store just the slope and not intercept
@@ -739,15 +689,15 @@ nodrift.info.drift = ddrift.info.drift;
 if(isfield(d.info,'clip'));
     nodrift.info.clip = d.info.clip;
 end
-d.stage.time = d.stage.time - d.stage.time(1,1);
-px = polyval(ddrift.back_vx,d.stage.time);
-py = polyval(ddrift.back_vy,d.stage.time);
-pz = polyval(ddrift.back_vz,d.stage.time);
+d.stageCom.time = d.stageCom.time - d.stageCom.time(1,1);
+px = polyval(ddrift.back_vx,d.stageCom.time);
+py = polyval(ddrift.back_vy,d.stageCom.time);
+pz = polyval(ddrift.back_vz,d.stageCom.time);
 
-nodrift.stage.time = d.stage.time;
-nodrift.stage.x = d.stage.x - px;
-nodrift.stage.y = d.stage.y - py;
-nodrift.stage.z = d.stage.z - pz;
+nodrift.stageCom.time = d.stageCom.time;
+nodrift.stageCom.x = d.stageCom.x - px;
+nodrift.stageCom.y = d.stageCom.y - py;
+nodrift.stageCom.z = d.stageCom.z - pz;
 
 return;
 
@@ -757,8 +707,8 @@ function clipped = giveClipped(handles,d)
 clipped.info.orig = d.info.orig;
 tstart = str2double(get(handles.edit_trackingStart,'string'));
 tend = str2double(get(handles.edit_trackingEnd,'string'));
-istart = max(find(d.stage.time <= tstart));
-iend = max(find(d.stage.time <= tend));
+istart = max(find(d.stageCom.time <= tstart));
+iend = max(find(d.stageCom.time <= tend));
 if(istart >= iend)
     prompt(handles,'No clipping performed: check tracking limits','r');
     clipped = d;
@@ -774,10 +724,10 @@ clipped.info.clip.tend = tend;
 clipped.info.clip.istart = istart;
 clipped.info.clip.iend = iend;
 
-clipped.stage.time = d.stage.time(istart:iend) - d.stage.time(istart);
-clipped.stage.x = d.stage.x(istart:iend);
-clipped.stage.y = d.stage.y(istart:iend);
-clipped.stage.z = d.stage.z(istart:iend);
+clipped.stageCom.time = d.stageCom.time(istart:iend) - d.stageCom.time(istart);
+clipped.stageCom.x = d.stageCom.x(istart:iend);
+clipped.stageCom.y = d.stageCom.y(istart:iend);
+clipped.stageCom.z = d.stageCom.z(istart:iend);
 
 return;
 
