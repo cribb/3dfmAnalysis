@@ -1,0 +1,2 @@
+2004-06-11  Kalpit Desai <kvdesai@cs.unc.edu>
+	* This folder is downloaded from GNU opensource. For more information about licencing read gpl.txt . Any file inside this folder is not supposed to be modified. It included in CVS so that anyone does checkout, gets all the required files for visualization.
