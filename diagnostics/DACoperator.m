@@ -90,6 +90,7 @@ if (AOid < 0) | strcmp(board,'daqtest');
     title('DAQtest Output');
     xlabel('time (s)');
     ylabel('Voltage (V)');
+    pretty_plot;
     
     fprintf('\n Board ID: %s', board);
     fprintf('\n Sampling Rate: %i', srate);
