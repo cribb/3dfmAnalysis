@@ -1,0 +1,5 @@
+2004-10-23  Jeremy Cribb <jcribb@email.unc.edu>
+	* VE_fluid_model_app.m:  demo for describing the response of a viscoelastic fluid.  Allows you to change the parameters of the model via the GUI and immediately see the results.
+	* VE_fluid_model_app.fig:  GUI file for demo.  
+	* viscoelastic_liquid_model.bmp: image of VE liquid model overlaid onto GUI.
+
