@@ -55,7 +55,7 @@ for i=1:size(s,2)
    % [p(:,i) f] = pwelch(s(:,i), blackman(nw), nw/2, nw, rate);  %original gbcode
    [p(:,i) f] = pwelch(s(:,i), win, nw/2, nw, rate);          %jac-hack
    if(findstr(calculateId,'y'))
-       Id(1,i) = sqrt(Dp(1,i)*f(1));
+       Id(1,i) = sqrt(p(1,i)*f(1));
        for j = 2:length(p(:,i))
            Id(j,i) = sqrt(Id(j-1,i)^2 + p(j,i)*(f(j)-f(j-1)));%discrete integration
        end

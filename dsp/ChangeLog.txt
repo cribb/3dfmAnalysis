@@ -1,3 +1,5 @@
+2005-01-10  Kalpit Desai <kvdesai@cs.unc.edu>
+	* mypsd.m : fixed a typo in calculation of cumulative displacement
 2004-06-11  Kalpit Desai <kvdesai@cs.unc.edu>
 	* mypsd.m : renamed 'window' variable to 'win' and 'windowtype' to 'window_type'.	
 
