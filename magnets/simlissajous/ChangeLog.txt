@@ -1,0 +1,2 @@
+2004-06-11  Kalpit Desai <kvdesai@cs.unc.edu>
+	* Initial Version. Added files: simlissajous.m, Bforce.m, clean.m, fmatrix.m, tetra.m, coils2pole.m and folder 'sphere'
