@@ -1,2 +1,4 @@
+2004-07-13  Kalpit Desai <kvdesai@cs.unc.edu>
+	* simlissajous.m: Fixed the pole location calculation for 6 pole geometry in stage coordinate system.
 2004-06-11  Kalpit Desai <kvdesai@cs.unc.edu>
 	* Initial Version. Added files: simlissajous.m, Bforce.m, clean.m, fmatrix.m, tetra.m, coils2pole.m and folder 'sphere'
