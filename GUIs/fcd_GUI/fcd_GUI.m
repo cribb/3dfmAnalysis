@@ -166,6 +166,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     guidata(hObject, handles);
 
     plot_data(hObject, eventdata, handles);
+    drawnow;
     
     
 % --- Executes on button press in pushbutton_savefile.
@@ -184,8 +185,7 @@ function pushbutton_savefile_Callback(hObject, eventdata, handles)
     save(outfile, 'tracking');
     
     set(handles.edit_infile, 'String', '');
-    set(handles.edit_outfile, 'String', '');
-    
+    set(handles.edit_outfile, 'String', '');    
 
        
 % --- Executes during object creation, after setting all properties.
@@ -234,6 +234,7 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
 	set(handles.radio_boundingbox, 'Enable', 'On');
 
     plot_data(hObject, eventdata, handles);
+    drawnow;
     
     
 % --- Executes during object creation, after setting all properties.
@@ -265,7 +266,8 @@ function slider_BeadID_Callback(hObject, eventdata, handles)
 	set(handles.edit_BeadID, 'String', num2str(currentBead));
     
     plot_data(hObject, eventdata, handles);
-
+    drawnow;
+    
 
 % --- Executes during object creation, after setting all properties.
 function edit_BeadID_CreateFcn(hObject, eventdata, handles)
@@ -316,6 +318,7 @@ function pushbutton_Select_Closest_dataset_Callback(hObject, eventdata, handles)
     set(handles.edit_BeadID, 'String', num2str(bead_to_select));
     
     plot_data(hObject, eventdata, handles);
+    drawnow;
     
 
 function v = attach_time(table)
@@ -359,6 +362,8 @@ function plot_data(hObject, eventdata, handles)
     set(handles.fig, 'Units', 'Normalized');
     set(handles.fig, 'Position', [0.1 0.075 0.8 0.4]);
     
+    drawnow;
+    
     
 function delete_closest_dataset(hObject, eventdata, handles)
     
@@ -394,6 +399,9 @@ function delete_closest_dataset(hObject, eventdata, handles)
     set(handles.slider_BeadID, 'Max', bead_max-1);
     set(handles.slider_BeadID, 'SliderStep', [1/(bead_max-1) 1/(bead_max-1)]);
     
+    plot_data(hObject, eventdata, handles);
+    drawnow;
+    
     
 function delete_inside_boundingbox(hObject, eventdata, handles)
 
@@ -412,4 +420,5 @@ function delete_inside_boundingbox(hObject, eventdata, handles)
     handles.table = table(k,:);
     guidata(hObject, handles);
 
-    
+    plot_data(hObject, eventdata, handles);
+	drawnow;
