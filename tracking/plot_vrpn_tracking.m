@@ -1,6 +1,6 @@
 function plot_vrpn_tracking(d, plots)
 % 3DFM function
-% Last Modified on 05/19/04 kvdesai
+% Last Modified on 05/20/04 kvdesai
 %
 % This function is a collection of common plots for the 3DFM.
 %
@@ -33,6 +33,10 @@ if (d.info.orig.xyzunits == 'm')
     d.stageCom.z = d.stageCom.z * 1e-6;
     d.info.orig.xyzunits = 'um';
 end
+
+% subtract off the time-offset
+d.stageCom.time = d.stageCom.time - d.stageCom.time(1,1);
+d.laser.time = d.laser.time - d.laser.time(1,1);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot Z-stage (for drift) and Laser Fluctuations
