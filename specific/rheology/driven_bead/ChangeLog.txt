@@ -1,3 +1,9 @@
+2005-02-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* relaxation_time_expt.m:  added DAC control.
+	* history_dependence_expt.m:  added reference to 'daqtest' for simulating signals.
+ 	* yield_stress_pulses_expt.m:  same.
+ 	* yield_stress_ramp_expt.m:  same.
+
 2004-12-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* history_dependence_expt.m:  bugfix- wrong voltage variable referenced in method.
 

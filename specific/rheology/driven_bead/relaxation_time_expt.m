@@ -1,14 +1,16 @@
 % Driven rheology
 % 
 % This matlab script will construct and save a .mat file that contains the
-% input signals used to drive the magnets during a history dependence
+% input signals used to drive the magnets during a relaxation time
 % experiment.
 
 % HARDWARE.  setup constants that describe the physical hardware used 
 % to drive the experiment.  Variables in this section define the number 
 % of coils in the 3dfm pole geometry, the number of DAQ Analog-Out 
 % channels on the DAQ board, the identity of the DAQ board, etc...
-DAQid = '';
+
+DAQid = 'daqtest';
+% DAQid = 'PCI-6713';
 nDACout = 8;
 nCoils = 6;
 DAQ_sampling_rate = 1000;  % [Hz]
@@ -67,3 +69,8 @@ end
 
 
 % Start experiment.  Call DACoperator. Call pulnix software. etc..
+Nrepeat = 1;
+channels = [0:nDACout-1]';
+Vrange = [-10 10];
+DACoperator(signal, Nrepeat, DAQid, channels, DAQ_sampling_rate, Vrange);
+

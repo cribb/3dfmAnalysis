@@ -8,7 +8,9 @@
 % to drive the experiment.  Variables in this section define the number 
 % of coils in the 3dfm pole geometry, the number of DAQ Analog-Out 
 % channels on the DAQ board, the identity of the DAQ board, etc...
-DAQid = '';
+
+DAQid = 'daqtest';
+% DAQid = 'PCI-6713';
 nDACout = 8;
 nCoils = 6;
 DAQ_sampling_rate = 1000;  % [Hz]
@@ -20,9 +22,9 @@ DAQ_sampling_rate = 1000;  % [Hz]
 pole_geometry = 'pole4-flat';
 start_time = 0;
 pulse_voltages = [0.5 1 1.5 2 2.5 3 0.5];
-times_to_activate_pulses = [10 50 70 90 110 130 170];
-times_to_deactivate_pulses = [20 60 80 100 120 140 180];
-end_time = 210;
+times_to_activate_pulses = [5 15 25 35 45 55 65];
+times_to_deactivate_pulses = [10 20 30 40 50 60 70];
+end_time = 75;
 
 % INITIAL MATH:  precondition the output matrix to all zeros and define the
 % time vector that will give normal mortals an idea of what's going on.
@@ -67,3 +69,7 @@ end
 
 
 % Start experiment.  Call DACoperator. Call pulnix software. etc..
+Nrepeat = 1;
+channels = [0:nDACout-1]';
+Vrange = [-10 10];
+DACoperator(signal, Nrepeat, DAQid, channels, DAQ_sampling_rate, Vrange);
