@@ -43,7 +43,7 @@ for f = 1 : length(file)
     movieout = [movieout(1:end-3) 'avi'];
 	
 	% setup the output file
-	mov = avifile(movieout,'quality',60,'fps',frame_rate,'keyframe',2.0,'compression','MPG4');
+	mov = avifile(movieout,'quality',60,'fps',frame_rate,'keyframe',2.0,'compression','none');
         % avifile('example.avi','quality',60,'fps',5,'keyframe',2.0,'compression','DIVX')
 
 	% initialize figure and set initial properties

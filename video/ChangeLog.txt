@@ -1,4 +1,8 @@
-2004-12-01  Jeremy Cribb <jcribb@email.unc.edu
+2004-12-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* mip.m: fixed error in time calculation.
+	* raw2avi.m: removed MPEG4 compression until I can make it actually work.
+
+2004-12-01  Jeremy Cribb <jcribb@email.unc.edu>
 	* Added mip.m.  Calculates and displays/returns minimum or maximum intensity projection for avi, raw, or stacks of images.
 
 2004-11-29  Jeremy Cribb <jcribb@email.unc.edu>

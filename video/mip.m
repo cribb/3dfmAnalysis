@@ -126,7 +126,7 @@ for k = start : stride :  stop
         totaltime = totaltime + itertime;
 	end    
 	meantime = totaltime / (k / stride);
-	timeleft = (number_of_frames-k)/stride * meantime;
+	timeleft = (stop-k)/stride * meantime;
 	outs = [num2str(timeleft, '%5.0f') ' sec.'];
 	set(timetext, 'String', outs);
     drawnow;
