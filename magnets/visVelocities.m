@@ -38,7 +38,7 @@ j = 0;
 % triangles. Does this breaking for the times as specified in second
 % arguement
 FV = sphere_tri('ico',4,radias,0);
-svec2 = size(FV.faces);
+svec2 = size(FV.vertices);
 % 'color' stores the total sum of the length of velocity vectors that fall
 % in to particular bin, while 'colr' saves the average velocity.
 color.num(1:svec2(1,1),1) = 0;
@@ -76,67 +76,41 @@ for i = 1:length(data.velx)
         fverts = sort(fverts);
         iclean = 0;
         % make a list of idices of all vertices involved in making the faces listed
-        % in face1. Exclude the ind(1) from the list though.
+        % in face1. include the ind(1) in the list also.
         for vind = 1:length(fverts)
-            if (fverts(vind) ~= ind(1));
-                if(iclean <1);
+               if(iclean <1);
                     iclean = iclean + 1;
                     cleanvert(iclean) = fverts(vind);
                 else(fverts(vind) ~= cleanvert(iclean) | iclean < 1);
                     iclean = iclean + 1;
                     cleanvert(iclean) = fverts(vind);
                 end
-            end
         end
-        iclean = 1;
+        
         % dot product of all listed vertices in cleanvert with the current
         % velocity vector
-        dotp(iclean) =  (vertices(cleanvert(iclean),1).*unit3d(1) + vertices(cleanvert(iclean),2).*unit3d(2) + vertices(cleanvert(iclean),3).*unit3d(3));
-        for iclean = 2:length(cleanvert)
+        for iclean = 1:length(cleanvert)
             dotp(iclean) =  (vertices(cleanvert(iclean),1).*unit3d(1) + vertices(cleanvert(iclean),2).*unit3d(2) + vertices(cleanvert(iclean),3).*unit3d(3));
         end
         [sdotp idotp]=  sort(dotp);
-        % check if the current velocity vector falls directly on some
-        % vertex. If so, then distribute the intesity evenly among all
-        % faces containing that vertex. If not, then search only in the cleanvertices 
-        % for the closest two vertices to the current velocity vector. Those two vertices and ind(1) 
-        % must make a face, if they don't consider that as an algorithmic
-        % error and increment ibad count;
-        if (range(dotp) < 0.01*dotp(1))  % the vector is at the center of hexagon /pentagon
-            %distribute the intensity amonng all faces containing that
-            %vertex equally. 
-            for itemp = 1:length(fi)
-                color.contri(fi(itemp),1) = color.contri(fi(itemp),1) + color_contri/length(fi);
-                color.num(fi(itemp),1) = color.num(fi(itemp),1) + 1; 
-            end
-            clear itemp;
-        else % the vector is not right-on the vertex, so find another two closest vertices
-            ind(2) = cleanvert(idotp(end));
-            ind(3) = cleanvert(idotp(end-1));            
-%                     vertices(index,:) = [0 0 0];
-%                     [m,index] = max(vertices(:,1).*unit3d(1) + vertices(:,2).*unit3d(2) + vertices(:,3)*unit3d(3));
-%                     v(2,1:3) = vertices(index);
-%                     ind(2) = index;
-%                     vertices(index,:) = [0 0 0];
-%                     [m,index] = max(vertices(:,1).*unit3d(1) + vertices(:,2).*unit3d(2) + vertices(:,3)*unit3d(3));
-%                     v(3,1:3) = vertices(index);
-%                     ind(3) = index;
-%                     vertices(index,:) = [0 0 0];
-% %             
-% %                     [fi fj] = find(face == ind(1));
-% %                     face1 = face(fi,:);
-% %                         
-            [fk fl] = find(face1 == ind(2));
-            face2 = face1(fk,:);
-            [fm fn]= find(face2 == ind(3));
-            
-            iface = fi(fk(fm)); 
-            if isempty(iface)
-                ibad = ibad + 1
-            end
-            
-            color.contri(iface,1) = color.contri(iface,1) + color_contri;
-            color.num(iface,1) = color.num(iface,1) + 1;           
+        % There could be at most three vertices to which a vector can be at
+        % equal distance. So we are interested in only three vertices from
+        % the cleanvert which are closest to velocity vector.
+        if (abs(sdotp(end) - sdotp(end-1) > 0.05*abs(sdotp(end))))  % if true, then there is no tie here. 
+            color.contri(cleanvert(idotp(end)),1) = color.contri(cleanvert(idotp(end)),1) + color_contri;
+            color.num(cleanvert(idotp(end)),1) = color.num(cleanvert(idotp(end)),1) + 1;
+        elseif (abs(sdotp(end) - sdotp(end-2) > 0.05*abs(sdotp(end)))) % tie between only two vertices
+            color.contri(cleanvert(idotp(end)),1) = color.contri(cleanvert(idotp(end)),1) + color_contri/2;
+            color.num(cleanvert(idotp(end)),1) = color.num(cleanvert(idotp(end)),1) + 1;
+            color.contri(cleanvert(idotp(end-1)),1) = color.contri(cleanvert(idotp(end-1)),1) + color_contri/2;
+            color.num(cleanvert(idotp(end-1)),1) = color.num(cleanvert(idotp(end-1)),1) + 1;            
+        else % tie between all three vertices
+            color.contri(cleanvert(idotp(end)),1) = color.contri(cleanvert(idotp(end)),1) + color_contri/3;
+            color.num(cleanvert(idotp(end)),1) = color.num(cleanvert(idotp(end)),1) + 1;
+            color.contri(cleanvert(idotp(end-1)),1) = color.contri(cleanvert(idotp(end-1)),1) + color_contri/3;
+            color.num(cleanvert(idotp(end-1)),1) = color.num(cleanvert(idotp(end-1)),1) + 1;
+            color.contri(cleanvert(idotp(end-2)),1) = color.contri(cleanvert(idotp(end-2)),1) + color_contri/3;
+            color.num(cleanvert(idotp(end-2)),1) = color.num(cleanvert(idotp(end-2)),1) + 1;
         end
     end
 end
@@ -174,41 +148,41 @@ if (strcmpi(mode,'colors') | strcmpi(mode,'both'))
         end
     end
 % totalunder = length(find(colr <= 0))    
-
-%     %get rid of the patch between long180 and long0
-% %---------------------------------------------------
-%     s = size(colr);
-%     nlong = s(1,2);
-%     for k = 1:s(1,1)
-%         total_colr = color.contri(k,1) + color.contri(k,nlong);
-%         total_num = (color.num(k,1) + color.num(k,nlong)); 
-%         if(total_num)
-%             colr(k,nlong) = total_colr/total_num; 
-%         else
-%             colr(k,nlong) = 0;
-%         end
-%         colr(k,1) = colr(k,nlong);
-%     end
-%---------------------------------------------------
     figure
+    subplot('position',[0.1 0.1 0.7 0.85]);
     hold on
     size(poles);
     Npoles = ans(1,1);
-    orig = zeros(Npoles,1);
-    quiver3(orig,orig,orig,poles(:,1), poles(:,2), poles(:,3),4,'.','c');
-
-%     shading interp;
-	Hp = patch('faces',FV.faces,'vertices',FV.vertices,'facevertexcdata',colr,...
+%     orig = zeros(Npoles,1);
+%     quiver3(orig,orig,orig,poles(:,1), poles(:,2), poles(:,3),4,'.','r');
+    for ipol = 1:Npoles
+        line([0,poles(ipol,1)*3], [0,poles(ipol,2)*3], [0,poles(ipol,3)*3], 'LineWidth', 4, 'color', 'b')
+    end
+    FV.colr = colr;
+	Hp = patch('faces',FV.faces,'vertices',FV.vertices,'FaceVertexCdata',FV.colr,...
     'facecolor','flat');
     colormap hot;
-%     shading interp;
-	
-  	hold off
+    shading interp;
+    hold off
 	set(gca,'Fontsize',12);
 	xlabel('X axes');
 	ylabel('Y axes');
 	zlabel('Z axes');
 	axis equal;
+    
+    % now show the colormap bar at the right hand side
+    subplot('position',[0.85 0.1 0.09 0.85] );
+    maxc = max(FV.colr);
+    minc = min(FV.colr);
+    rangec = maxc - minc;
+    y = minc:rangec/20:maxc;
+    x = 0:1/length(y):1-1/length(y);
+    for i = 1:length(y)
+        c(i,1:length(x)) = y(i);
+    end
+    pcolor(x,y,c);
+    colormap hot
+     shading interp
 end
 
 if (strcmpi(mode,'hairs') | strcmpi(mode,'both'))
