@@ -1,3 +1,8 @@
+2004-06-14	Kalpit Desai	<kvdesai@cs.unc.edu>
+	* load_vrpn_tracking: 
+	- Added feature to select displacement units (meters|microns) of position error, stage reports and bead positions. Previously, this was only possible for stage commands
+	- Fixed the bug of getting weird first entry in position error log, messing up the whole data set when offset is being subtracted out. This was happening because we don't have jacobian available for first position error, so using default jacobian. Fixed it by discarting the first sample.
+
 2004-06-11	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* load_vrpn_tracking.m: Added an arguement to select if we want to remove the offset from computed bead positions. Also re-commented the whole header to make consitent with updates.
 	* tclip.m: just renamed the flag 'save' to 'fsave' to avoid using reserved keywords.

@@ -173,20 +173,48 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
    end   
                                                                  
 	% handle the units before doing any mathematical analysis on data
-	if findstr(xyzunits,'u')
-		d.stageCom.x = d.stageCom.x * 1e6;  % convert stage data from
-		d.stageCom.y = d.stageCom.y * 1e6;  % default microns to meters
+    % stage command data in original log file is in meteres
+    % stage sensor data in original log file is in microns
+    % error positions in original log file is in mircrons
+    
+	if findstr(xyzunits,'u') % displacement unit is microns
+		d.stageCom.x = d.stageCom.x * 1e6;  
+		d.stageCom.y = d.stageCom.y * 1e6;  
 		d.stageCom.z = d.stageCom.z * 1e6;
 		d.info.orig.xyzunits = 'u';
     end
+    
+    if findstr(xyzunits,'m') % displacement unit is meters
+        if(isfield(d,'stageReport'))
+            d.stageReport.x = d.stageReport.x*1e-6;
+            d.stageReport.y = d.stageReport.y*1e-6;
+            d.stageReport.z = d.stageReport.z*1e-6;
+        end
+        if(isfield(d,'avgError'))
+            d.avgError.x = d.avgError.x*1e-6;
+            d.avgError.y = d.avgError.y*1e-6;
+            d.avgError.z = d.avgError.z*1e-6;
+        end        
+        if(isfield(d,'posError'))
+            d.posError.x = d.posError.x*1e-6;
+            d.posError.y = d.posError.y*1e-6;
+            d.posError.z = d.posError.z*1e-6;
+        end        
+    end       
 			
     % compute the position of the bead at QPD bandwidth, provided
     % that the 'beadpos' switch is active.
+    % A BUG BEING QUARANTINED: 06/14/04 FIX THIS IN PARTICLE TRACKER
+    % When the position errors are calculated for first sample, the
+    % jacobian is not available, so the default jacobian is used. So the
+    % first sample position error is quite different from rest of them.
+    % here, we are discarding the first sample to make the offset
+    % subtraction work.
     if findstr(beadpos,'y')
-		d.beadpos.time = d.stageReport.time;
-		d.beadpos.x = d.stageReport.x + d.posError.x;
-		d.beadpos.y = d.stageReport.y + d.posError.y;
-		d.beadpos.z = d.stageReport.z + d.posError.z;
+		d.beadpos.time = d.stageReport.time(2:end);
+		d.beadpos.x = d.stageReport.x(2:end) + d.posError.x(2:end);
+		d.beadpos.y = d.stageReport.y(2:end) + d.posError.y(2:end);
+		d.beadpos.z = d.stageReport.z(2:end) + d.posError.z(2:end);
         if findstr(beadOffset,'y') %if we don't want offset in bead positions.
             d.beadpos.x = d.beadpos.x - d.beadpos.x(1,1);
             d.beadpos.y = d.beadpos.y - d.beadpos.y(1,1);
