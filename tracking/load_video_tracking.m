@@ -1,12 +1,12 @@
 function d = load_video_tracking(file, frame_rate, upsampleHz, psd_res, window, xyzunits, calib_um, absolute_pos);
 % 3DFM function
-% last modified 08/09/2003
+% last modified 09/22/2004
 %
 % This function reads in a Video Tracking dataset, saved in the 
 % matlab workspace file (*.mat) format and converts it to the 
 % familiar 3dfm data structure.
 % 
-% d = load_video_tracking(file, frame_rate, upsampleHz, psd_res, window, xyzunits, calib_um);
+% d = load_video_tracking(file, frame_rate, upsampleHz, psd_res, window, xyzunits, calib_um, absolute_pos);
 %
 % where "filename" is the .mat filename
 %       "frame_rate" is the physical frame rate of the captured video sequence
@@ -30,14 +30,10 @@ function d = load_video_tracking(file, frame_rate, upsampleHz, psd_res, window, 
 % - The xyzunits can be either 'um' for microns for 'm' for meters.
 %   (default = pixels)
 %
-%   BUG: All of the num_sensors (i.e. different beads) must have the same
-%   length, or else there is a 'Subscripted assignment dimension mismatch'.
-%   
 % 08/04/03 - created from load_vrpn_tracking
 % 08/09/03 - added the upsampling feature
+% 09/22/04 - updated documentation
 %
-%
-
 
 % handle the argument list
 if nargin < 8;   absolute_pos = 'relative'; end;
@@ -75,22 +71,6 @@ if nargin < 2;   frame_rate = 30;            end;
     d.video.x = zeros(num_rows,num_sensors);
     d.video.y = zeros(num_rows,num_sensors);
     
-%Old version with a bug in it    
-% 	if(strcmp(absolute_pos,'relative'))
-%         for k = 1 : num_sensors
-%             my_sensor      = find(data(:,3) == k-1);
-% 			d.video.x(:,k) = data(my_sensor,4) - data(my_sensor(1),4);    
-% 			d.video.y(:,k) = data(my_sensor,5) - data(my_sensor(1),5);    
-%         end    
-%    	elseif(strcmp(absolute_pos,'absolute'))
-%         for k = 1 : num_sensors
-%             my_sensor      = find(data(:,3) == k-1);
-% 			d.video.x(:,k) = data(my_sensor,4);    
-% 			d.video.y(:,k) = data(my_sensor,5);  
-%         end
-% 	end  
-
-
 	if(strcmp(absolute_pos,'relative'))
         for k = 1 : num_sensors       
             my_sensor      = find(data(:,3) == k-1);

@@ -1,3 +1,6 @@
+2004-08-22	Jeremy Cribb	<jcribb@email.unc.edu>
+	* load_video_tracking.m: Repaired documentation (did not explain relative/absolution position choice in parameter list)
+
 2004-06-26	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* tclip.m: Made 'all fields' as default for fields to be clipped.
 2004-06-22	Kalpit Desai	<kvdesai@cs.unc.edu>
