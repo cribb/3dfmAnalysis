@@ -1,7 +1,7 @@
-function clipped = tclip(d,ts,te,save)
+function clipped = tclip(d,ts,te,fsave)
 % 3DFM function  
 % GUI Analysis 
-% last modified 05/19/04 
+% last modified 05/20/04 
 %  
 % This function clips the data according to given time limits in seconds
 % It also stores the information about the original dataset and limits
@@ -13,7 +13,7 @@ function clipped = tclip(d,ts,te,save)
 %          d      : dataset in the same format as of output of load_vrpn_tracking.m
 %          ts     : Starting time for the clip in seconds ( fractions allowed e.g 4.347)
 %          te     : Ending time for the clip in seconds (fractions allowed)
-%          save   : [optional] 'yes' | 'no' -Flag specifying if the clipped data needs to be saved' 
+%          fsave   : [optional] 'yes' | 'no' -Flag specifying if the clipped data needs to be saved 
 %                   automatically [defaulted to 'no']
 %          
 %  Notes:  
@@ -31,7 +31,7 @@ function clipped = tclip(d,ts,te,save)
 % Find the start and stop indices from the given time limits for
 % lowbandwidth data
 if nargin < 4
-    save = 'no';
+    fsave = 'no';
 end
 isl = max(find(d.stageCom.time - d.stageCom.time(1,1) - ts <= 0.05));
 iel = max(find(d.stageCom.time - d.stageCom.time(1,1) - te <= 0.05));
@@ -98,7 +98,7 @@ if(isfield(d,'jacobian'))%Do not clip jacobian time values
 end
 dc = clipped;
 disp('Clipping was peformed successfully.')
-if(findstr(save,'y'))
+if(findstr(fsave,'y'))
     disp('Now saving to a .mat file...');
     save(['clip_',d.info.orig.name],'dc');
     disp(['Clipped data saved as ','clip_',d.info.orig.name]);

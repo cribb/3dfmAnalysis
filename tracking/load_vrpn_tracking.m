@@ -1,62 +1,45 @@
-function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, user_input);
+function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user_input);
 % 3DFM function
-% last modified 05/19/04 - kvdesai
+% last modified 06/11/04 - kvdesai
 %
 % This function reads in a 3DFM dataset previously saved as a 
 % 2d matrix in a matlab workspace file (*.mat) file 
 % and converts it to the familiar 3dfm data structure.
 % 
-% d = load_vrpn_tracking(filename, xyz_units, tzero, beadpos, user_input);
+% USAGE:
+% d = load_vrpn_tracking(filename, xyz_units, tzero, beadpos, beadOffset, user_input);
 %
-% where "file" can be a string containing name of the the .mat file 
-%              OR it can be the variable created by double-clicking the .mat file
-%		"xyz_units" is either 'u' or 'm'
-%       "tzero" is either 'zero' or 'uct'
-%       "beadpos" is either 'yes' or 'no'-tells whether to compute bead-position
-%       "user_input" is either 'yes' or 'no'-tells if to prompt user to
-%       type in extra information associated with the dataset.
-%
-% Notes:
-%
-% - This function is designed to work under default conditions with
-%   only one input argument, the filename.
-% - The stage position defaults to resampling the dataset to a 1000Hz
-%   uniform time-step (linear interpolation). To avoid resampling 
-%   the stage, use a stage_res value of 0 Hz.
-% - The choice of window for the power spectral density (PSD) can be 
-%   either 'blackman' or 'rectangle' (rectangle for rheology data). 
-%   (default = blackman)
-% - The xyzunits can be either 'u' for microns for 'm' for meters.
-%   (default = microns)
-% - The tzero parameter can be either 'zero' for using the first element
-%   in the array as tzero, or 'uct' for universal coordinated time, defaulting
-%   to 'uct'
-% - The user_input parameter controls a prompt where custom information
-%   about a dataset can be included by the user.  NOTE:  USING THIS ARGUMENT
-%   TURNS LOAD_VRPN_TRACKING INTO A FUNCTION THAT REQUIRES USER
-%   INTERACTION.
+% PARAMETER DESCRIPTION: curly brackets indicate default values.
 % 
-% 10/30/02 - added PSD res option; jcribb.
-% 11/12/02 - added window_type option; jcribb.
-% 12/03/02 - added units, meters or microns, option; jcribb
-% 04/02/03 - changed name to load_vrpn_tracking to reflect changes in 
-%            particle tracker's output (i.e. logfile format change); jcribb
-% 06/20/03 - added tzero option; jcribb
-% 12/19/03 - Added jacobian storage; kvdesai
-%          - calculation of position error from jacobian
-%          - storage of even time stamps
-%          - option to specify empty argument
-%          - switched default value of tzero from 'zero' to 'uct'
-% 05/06/04 - merged changes between two different versions; jcribb
-%          - added user_input parameter
-%          - removed DSP handling code  
-% 05/11/04 - renamed d.stage field to d.stageCom, removed ambiguity
-% 05/19/04 - Do not try saving file name when data is supplied in form of
-%           matlab variable and not in form of file name
+% "file" : required arguement
+%     it can be a string containing name of the the .mat file 
+%     OR it can be the variable created by double-clicking the .mat file
+% "xyz_units" : [{'u'} | 'm']
+%     specifies units of the displacement. 
+%     'u' for microns and 'm' for meters
+% "tzero" : [{'uct'} | 'zero']
+%     specifies format of time staps
+%     'uct' for universal coordinated time stamps
+%     'zero' for using first element in the array as time reference
+% "beadpos" : [{'yes'} | 'no']
+%     a flag specifying whether we want bead positions to be computed and
+%     included in the data set or not.
+% "beadOffset" : [{'yes'} | 'no']
+%     a flag specifying if we want to remove the offset from bead positions.
+%     not used when "beadpos" == 'no'. 
+%     'yes' means remove any offset from bead positions
+%     'no' means do not remove any offset.
+% "user_input" : ['yes' | {'no'}]
+%     controls a prompt where custom information about a dataset can be typed in 
+%     by the user. SPECIFYING 'YES' TURNS LOAD_VRPN_TRACKING INTO A FUNCTION 
+%     THAT REQUIRES USER INTERACTION.
 % 
+% NOTES: none.
+
 
 	% handle the argument list
-	if (nargin < 5 | isempty(user_input));  user_input='no';         end;
+	if (nargin < 6 | isempty(user_input));  user_input='no';         end;
+    if (nargin < 5 | isempty(beadOffset));  beadOffset = 'yes';       end;
 	if (nargin < 4 | isempty(beadpos));     beadpos='yes';        	 end;
 	if (nargin < 3 | isempty(tzero));       tzero = 'uct';           end;
 	if (nargin < 2 | isempty(xyzunits));    xyzunits  = 'u';	     end;
@@ -204,4 +187,9 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, user_input);
 		d.beadpos.x = d.stageReport.x + d.posError.x;
 		d.beadpos.y = d.stageReport.y + d.posError.y;
 		d.beadpos.z = d.stageReport.z + d.posError.z;
+        if findstr(beadOffset,'y') %if we don't want offset in bead positions.
+            d.beadpos.x = d.beadpos.x - d.beadpos.x(1,1);
+            d.beadpos.y = d.beadpos.y - d.beadpos.y(1,1);
+            d.beadpos.z = d.beadpos.z - d.beadpos.z(1,1);
+        end
     end

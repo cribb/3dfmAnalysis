@@ -1,3 +1,7 @@
+2004-06-11	Kalpit Desai	<kvdesai@cs.unc.edu>
+	* load_vrpn_tracking.m: Added an arguement to select if we want to remove the offset from computed bead positions. Also re-commented the whole header to make consitent with updates.
+	* tclip.m: just renamed the flag 'save' to 'fsave' to avoid using reserved keywords.
+
 2004-05-20	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* plot_vrpn_tracking.m: Subtract off the time-offset before plotting graphs.
 
