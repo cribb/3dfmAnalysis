@@ -1,4 +1,7 @@
 2004-05-19	Kalpit Desai	<kvdesai@cs.unc.edu>
+	* tclip.m: added feature to let user specify if the resultant file needs to be automatically saved.
+	
+2004-05-19	Kalpit Desai	<kvdesai@cs.unc.edu>
 
 	* load_vrpn_tracking.m:
 	- Do not try saving the file name when data is supplied in form of a matlab variable.
