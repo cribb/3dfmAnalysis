@@ -1,3 +1,8 @@
+2005-01-10  Kalpit Desai <kvdesai@email.unc.edu>
+	* visVelocities.m: 
+	- Now has pole-locations plotted in the 'hairs' mode also.
+	- Also cleaned up the background grid and tick-marks that weren't helping in visualization.
+
 2004-12-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* video_forces.m:  statistics are now reported on multiple beads.
 	* fcd_forcecal2d.m:  added.  prototype method for analyzing and calibrating forces in 2D.

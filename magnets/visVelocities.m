@@ -165,6 +165,7 @@ if (strcmpi(mode,'colors') | strcmpi(mode,'both'))
     shading interp;
     hold off
 	set(gca,'Fontsize',12);
+        set(gca,'Xtick',[],'Ytick',[],'Ztick',[]);
 	xlabel('X axes');
 	ylabel('Y axes');
 	zlabel('Z axes');
@@ -185,7 +186,7 @@ if (strcmpi(mode,'colors') | strcmpi(mode,'both'))
 %     colormap hot
 %      shading interp
 end
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%         HAIRS MODE      %%%%%%
 if (strcmpi(mode,'hairs') | strcmpi(mode,'both'))
 	figure
     %background sphere
@@ -202,11 +203,14 @@ if (strcmpi(mode,'hairs') | strcmpi(mode,'both'))
     %Put poles
     size(poles);
     Npoles = ans(1,1);
-    orig = zeros(Npoles,1);
-    quiver3(orig,orig,orig,poles(:,1), poles(:,2), poles(:,3),max_colr*2,'.','c');
+%     orig = zeros(Npoles,1);
+%     quiver3(orig,orig,orig,poles(:,1), poles(:,2), poles(:,3),4,'.','r');
+    for ipol = 1:Npoles
+        line([0,poles(ipol,1)*3], [0,poles(ipol,2)*3], [0,poles(ipol,3)*3], 'LineWidth', 4, 'color', 'b')
+    end
 %     colormap hot
 	set(gca,'Fontsize',12);
-    
+    set(gca,'Xtick',[],'Ytick',[],'Ztick',[]);
 	xlabel('X axes');
 	ylabel('Y axes');
 	zlabel('Z axes');
