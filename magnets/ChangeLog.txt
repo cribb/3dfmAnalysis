@@ -1,3 +1,6 @@
+2004-06-10  Kalpit Desai <kvdesai@cs.unc.edu>
+	* visVelocities.m : Changed the visualization for 'colors' mode. Making bins by tessellating the sphere by equilateral triangles, instead by forming latitues and longitudes. This tessellation makes area of all bins approximately equal, so provides uniformal sampling over surface of sphere. Tessellation is done by a tool - 'sphere_tri.m' - downloaded from internet from GNU-opensource. Requires the 'sphere_tri.m' file and all the files being called by this function (eg. 'sphere_project.m', 'mesh_refine_tri4.m' etc) in the matlab path.
+
 2004-06-08  Kalpit Desai <kvdesai@cs.unc.edu>
 	* visVelocities.m : modified to work for hexapole geometry also.
 
