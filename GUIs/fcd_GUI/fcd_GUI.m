@@ -152,7 +152,10 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
 	slider_max = max(beadID);
 	slider_min = 0;
-	slider_step = 1/range(beadID);
+    if slider_min == slider_max
+        slider_max = slider_min + 1;
+    end
+	slider_step = 1/(slider_max - slider_min);
     	
 	set(handles.slider_BeadID, 'Min', slider_min);
 	set(handles.slider_BeadID, 'Max', slider_max);

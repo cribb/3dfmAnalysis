@@ -1,3 +1,8 @@
+2004-10-23  Jeremy Cribb <jcribb@email.unc.edu>
+
+	* fcd_GUI.m:  fixed it so datasets with one tracked bead will work.
+
+
 2004-10-22  Jeremy Cribb <jcribb@email.unc.edu>
 
 	* fcd_GUI.m:  contains matlab code for editing Force Calibration Data (FCD).  Initial Version
