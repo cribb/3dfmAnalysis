@@ -1,3 +1,6 @@
+2004-12-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* DACoperator.m: fixed a bug in if-block.
+
 2004-10-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* DACoperator.m: fixed some syntax errors, enhanced documentation, and added a 'daqtest' DAq board type so that you can simulate DAQ AO runs on a non-DAQ enabled PC.
 

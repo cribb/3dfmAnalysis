@@ -57,7 +57,7 @@ end
 
 
 % find the board id that goes with the name
-if board ~= 'daqtest'
+if ~strfind(board,'daqtest')
 	hwinfo = daqhwinfo('nidaq');
 	AOid = -1;
 	for i=1:length(hwinfo.BoardNames)
