@@ -40,7 +40,7 @@ for k=1:number_of_frames
 
   f = getframe(gcf);
   [X, MAP] = frame2im(f);
-  imwrite(X, [myfile num2str(k,'%.4d') '.tif'], 'TIF');
+  imwrite(X, [myfile num2str(k,'%.4d') '.bmp'], 'BMPn');
 
   status = fseek(fid, frame_size*k, 'bof');  % advance to next frame
   pause(0.01);
