@@ -1,4 +1,6 @@
 2004-06-17	Kalpit Desai	<kvdesai@cs.unc.edu>
+	* tjoin.m: Fixed a bug that was throwing out the meta-data information when two datasets being joined are themselves result of two/more datasets previously joined.
+2004-06-17	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* load_vrpn_tracking.m:
 	- Added default storing of uct_offset (universal coordinated time of first sample) within info.orig
 	- Changed default bead size value to 'NOT AVAILABLE', instead of 0.957
@@ -36,4 +38,3 @@
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 
 	* Initial Version
-a

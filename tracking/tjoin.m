@@ -47,11 +47,12 @@ joined.info = d1.info;
 if(isfield(d1.info,'joints')) %if d1 is already a joint dataset 
     len = length(d1.info.joints);
     joined.info.joints = d1.info.joints;
-    i = len+1;
+    i = len;
 else
     i = 1;
+    joined.info.joints(i,1) = d1.info;
 end
-joined.info.joints(i,1) = d1.info;
+
 i = i+1;
 % all information from data1 joints is now inherited. 
 % now inherid all information about data2 joints
