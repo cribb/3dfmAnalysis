@@ -1,6 +1,6 @@
 function d = load_video_tracking(file, frame_rate, upsampleHz, psd_res, window, xyzunits, calib_um, absolute_pos);
 % 3DFM function
-% last modified 09/22/2004
+% last modified 10/23/2004
 %
 % This function reads in a Video Tracking dataset, saved in the 
 % matlab workspace file (*.mat) format and converts it to the 
@@ -11,9 +11,9 @@ function d = load_video_tracking(file, frame_rate, upsampleHz, psd_res, window, 
 % where "filename" is the .mat filename
 %       "frame_rate" is the physical frame rate of the captured video sequence
 %       "upsampleHz" is the desired upsampling (linear interp) rate of the video
-%		"psd_res" is the desired resolution between datapts in the PSD
-%		"window_type" is either 'blackman' or 'rectangle'
-%		"xyz_units" is either 'nm' 'um' 'm' or 'pixels'
+%       "psd_res" is the desired resolution between datapts in the PSD
+%	      "window_type" is either 'blackman' or 'rectangle'
+%	      "xyz_units" is either 'nm' 'um' 'm' or 'pixels'
 %       "calib_um" is the calibration coefficient to convert pixels to microns
 %       "absolute_pos" is either 'relative' or 'absolute'
 %
@@ -33,7 +33,9 @@ function d = load_video_tracking(file, frame_rate, upsampleHz, psd_res, window, 
 % 08/04/03 - created from load_vrpn_tracking
 % 08/09/03 - added the upsampling feature
 % 09/22/04 - updated documentation
+% 10/23/04 - added filter on input file (in case it's not a struct)
 %
+
 
 % handle the argument list
 if nargin < 8;   absolute_pos = 'relative'; end;
@@ -50,6 +52,8 @@ if nargin < 2;   frame_rate = 30;            end;
         data = dd.tracking.videoTrackingSecUsecZeroXYZ;
     elseif isfield(dd.tracking, 'spot2DSecUsecIndexXYZ')
         data = dd.tracking.spot2DSecUsecIndexXYZ;
+    elseif length(dd.tracking) > 1
+        data = dd.tracking;
     else
         error('I do not know how to handle this video VRPN file (weird fieldnames).');
     end
