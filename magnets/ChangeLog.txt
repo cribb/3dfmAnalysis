@@ -1,3 +1,7 @@
+2004-12-06  Jeremy Cribb <jcribb@email.unc.edu>
+	* video_forces.m:  statistics are now reported on multiple beads.
+	* fcd_forcecal2d.m:  added.  prototype method for analyzing and calibrating forces in 2D.
+
 2004-10-24  Jeremy Cribb <jcribb@email.unc.edu>
 	* simforces.  added this folder to contain force simulation code.
 

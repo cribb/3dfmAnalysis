@@ -13,12 +13,14 @@ function v = video_forces(file, frame_rate, bead_radius, visc)
     xlabel('time (sec)');
     ylabel('Force (pN)');
     pretty_plot;
-    
-    fprintf('\nAverage force:  %5.2f pN\n', (mean(force)*1e12));
-    fprintf('RMS     force:  %5.2f pN\n', (rms(force)*1e12));
-    fprintf('Maximum force:  %5.2f pN\n', (max(abs(force))*1e12));
-    fprintf('Minimum force:  %5.2f pN\n\n', (min(abs(force))*1e12));
+
+    for k=1:size(force,2)
+        fprintf('\nTracked Particle #%d\n', k);
+        fprintf('------------------------\n');
+        fprintf('Average force:  %5.5f pN\n', (mean(force(:,k))*1e12));
+        fprintf('RMS     force:  %5.5f pN\n', (rms(force(:,k))*1e12));
+        fprintf('Maximum force:  %5.5f pN\n', (max(abs(force(:,k)))*1e12));
+        fprintf('Minimum force:  %5.5f pN\n\n', (min(abs(force(:,k)))*1e12));
+    end
     
     v = force;
-    
-    
