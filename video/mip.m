@@ -104,7 +104,7 @@ for k = start : stride :  stop
     im = im(:,:,1);
     
     % Maximum or minimum intensity projection code
-    if k < (start + 1) 
+    if k < start 
         imMIP = double(im);
     else
         temp(:,:,1) = imMIP;
