@@ -1,3 +1,6 @@
+2004-12-06  Jeremy Cribb <jcribb@email.unc.edu>
+	* randwalk.m: vectorized random walk so that it runs faster in matlab.
+
 2004-11-17  Jeremy Cribb <jcribb@email.unc.edu>
 	* windiff.m: updated documentation; switched inputs for consistency.
 
