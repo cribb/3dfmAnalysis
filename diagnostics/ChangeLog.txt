@@ -1,3 +1,6 @@
+2005--1-10  Kalpit Desai <kvdesai@cs.unc.edu>
+	* added file stagenoisechar.m - a stand alone utility to characterize the noise on stage sensor outputs.
+
 2004-12-18  Jeremy Cribb <jcribb@email.unc.edu>
 	* DACoperator.m: weird errors when comparing strings with strfind.  switched to strcmp.  works better now.
 
