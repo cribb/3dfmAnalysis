@@ -1,3 +1,6 @@
+2004-10-24  Jeremy Cribb <jcribb@email.unc.edu>
+	* removed Bforce.m, fmatrix.m, and tetra.m.  These files are used to simulate the forces via a monopole approximation.  Moved them to a new folder in 'magnets' called 'simforces'
+
 2004-07-21  Kalpit Desai <kvdesai@cs.unc.edu>
 	* clean.m: Changed the output structure of cleaned file, so that field names are not ambiguous with the non-cleaned input fields.
 2004-07-16  Kalpit Desai <kvdesai@cs.unc.edu>
