@@ -1,3 +1,8 @@
+2004-11-29  Jeremy Cribb <jcribb@email.unc.edu>
+	* Added playback_data.m.  Creates .avi video of dataset.  Useful for making animations that describe a bead path (beating cilia, for example).
+	* Added raw2avi, which replaces make_pulnix_movie.  
+	* Removed make_pulnix_movie.
+
 2004-09-22  Jeremy Cribb <jcribb@email.unc.edu>
 	* Added raw2img, which is a single replacement for make_pulnix_<format> functions.  Removed make_pulnix_<format> functions
 
