@@ -97,13 +97,17 @@ function varargout = btnLoadFile_Callback(h, eventdata, handles, varargin)
     coord = setupImage(h, eventdata, handles, varargin);
 	
     calib_um = str2num(get(handles.txtCalibration,'String'));
-    calib_um = calib_um * 1e-6;
+    %calib_um = calib_um * 1e-6;
     
     dist = pole_distances(coord) * calib_um;
     cent = pole_center(coord)    * calib_um;
-    regr = pole_regularity(dist)
-
-    cent*1e6
+    regularity = pole_regularity(dist);
+    
+    assignin('base','coords',coord);
+    assignin('base','dists',dist);
+    assignin('base','cents',cent);
+    
+%    cent*1e6
     
     
 % ---------------------------------

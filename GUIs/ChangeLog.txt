@@ -1,6 +1,12 @@
+2004-09-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* Modified poletipsmeasurer to output relevant variables to matlab workspace.  
+
+	* Made cosmetic changes to TrackerGUI.fig
+
+
 2004-06-07  Ben Wilde <wilde@cs.unc.edu>
 
-	*Added ForceCalculator to the GUI folder
+	* Added ForceCalculator to the GUI folder
 
 
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
