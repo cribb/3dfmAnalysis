@@ -1,3 +1,6 @@
+2005-12-20  Jeremy Cribb <jcribb@email.unc.edu>
+	* raw2img.m: set the output of the function to the last image processed.  Useful for immediately looking at an image after conversion.
+
 2004-12-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* mip.m: fixed a bug I introduced by fixing off-by-one error.
 
