@@ -114,4 +114,4 @@ end
 
 close(fig);    % closes the handle to invisible figure
 
-v = 0;
+v = X;
