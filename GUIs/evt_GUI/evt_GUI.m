@@ -224,7 +224,7 @@ function pushbutton_savefile_Callback(hObject, eventdata, handles)
         return;
     end
     
-    tracking = handles.table;
+    tracking.spot3DSecUsecIndexFramenumXYZRPY = handles.table;
     save(outfile, 'tracking');
     logentry(['New tracking file, ' outfile ', saved...']);
     
