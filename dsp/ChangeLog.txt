@@ -1,3 +1,6 @@
+2005-01-19  Kalpit Desai <kvdesai@cs.unc.edu>
+	* added processpeak.m : Takes two vectors [p,f] that are output of psd calculatios, and converts the power at particular frquency (fsearch) in to units of amplitude of sinewave at that particular frequency. A handy utility for interpreting psd data.
+
 2005-01-10  Kalpit Desai <kvdesai@cs.unc.edu>
 	* mypsd.m : fixed a typo in calculation of cumulative displacement
 2004-06-11  Kalpit Desai <kvdesai@cs.unc.edu>
