@@ -1,5 +1,10 @@
+2004-10-14  Jeremy Cribb <jcribb@email.unc.edu>
+	* Added sucrose_viscosity.m, which models a sucrose solution's viscosity given inputs of concentration in mol/L and temperature in degrees Celsius.  References for this model are given in the code.
+
+
 2004-09-01  Jeremy Cribb <jcribb@email.unc.edu>
 	* Added VE_fluid_model.m, which models a simple Viscoelastic fluid model (combined Maxwell and Kelvin-Voight).
+
 
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 
