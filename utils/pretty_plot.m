@@ -1,7 +1,7 @@
 function pretty_plot(fig)
 % 3DFM function
 % Utilities
-% last modified 08/02/03
+% last modified 01/03/05
 %
 % This function changes the font sizes and weights for any given figure
 % (or the current figure if no input parameter is used) so that when pasted 
@@ -11,11 +11,10 @@ function pretty_plot(fig)
 %
 % where "fig" is the matlab figure number (can use gcf here if desired)
 %
-% Notes:
-%
-% 
 % 
 % 08/02/03 - created; jcribb
+% 01/03/05 - fixed case-sensitive typo; jcribb
+%
 
 if nargin == 0
     fig = gcf;
@@ -23,7 +22,7 @@ end
 
 axes = gca(fig);
 titl = get(axes, 'Title');
-legd = Legend;
+legd = legend;
 xlab = get(axes, 'Xlabel');
 ylab = get(axes, 'Ylabel');
 

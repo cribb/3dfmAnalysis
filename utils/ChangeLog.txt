@@ -1,3 +1,6 @@
+2005-01-03  Jeremy Cribb <jcribb@email.unc.edu>
+        * pretty_plot.m: fixed case-sensitive typo; jcribb
+
 2004-06-18  Kalpit Desai <kvdesai@cs.unc.edu>
 	* Added a file unixUtc.m: Takes time in YYYY-MM-DD-hh-mm-ss.sssss format and converts it to the unix time
 (toal number of seconds elapsed since 1970/01/01 midnight). The output is adjusted assuming that the input time is the local time
