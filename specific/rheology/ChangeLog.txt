@@ -1,3 +1,6 @@
+2005-03-31  Jeremy Cribb <jcribb@email.unc.edu>
+	* cone_and_plate:  added this folder for cone_and_plate specific rheology code.
+
 2004-11-04  Jeremy Cribb <jcribb@email.unc.edu>
 	* sucrose_viscosity.m:  added the ability to input temperature in Celsius and Kelvin.
 
