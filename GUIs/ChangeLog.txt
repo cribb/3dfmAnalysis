@@ -1,3 +1,6 @@
+2005-04-06  Kalpit Desai <kvdesai@email.unc.edu>
+	* Added FreqSweepGUI. Useful for pulling a bead with high frequency sinusoids on magnets.
+ 
 2005-01-29  Jeremy Cribb <jcribb@email.unc.edu>
 	* Added evt_GUI.  Matlab GUI for editing video tracking files.
 

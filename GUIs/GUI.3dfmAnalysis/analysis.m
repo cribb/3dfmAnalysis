@@ -448,7 +448,7 @@ dbstop if error
     end
     
     set(h,'Userdata',velocity);
-    
+    disp('Velocity Computation has finished...');
     return;
 
 %**********************************************************************    
@@ -503,7 +503,7 @@ end
 limits = [0, up_limit - low_limit];
 dmag.base = dmag.sectime - low_limit;
 dtrack.base = dtrack.stageCom.time_offset + dtrack.stageCom.time - low_limit;
- 
+smag = size(dmag.cleanMags); 
     if(findstr('x',str))
         figure(101)
         set(gca,'Xlim',limits);
@@ -511,7 +511,13 @@ dtrack.base = dtrack.stageCom.time_offset + dtrack.stageCom.time - low_limit;
         hold on;
         plot(dtrack.base,dtrack.stageCom.x,'--');
         title('Coils and X tracking');
-        legend('C1','C2','C3','C4','X tracking',0);
+        if(smag(1,2) == 4)
+            legend('C1','C2','C3','C4','X tracking',0);
+        elseif (smag(1,2) == 6)
+            legend('C1','C2','C3','C4','C5','C6','X tracking',0);
+        else
+           disp('plot_MagnetsOnTracking: Un-recognized number of poles');     
+        end
         grid on;
         hold off
     end
@@ -523,7 +529,13 @@ dtrack.base = dtrack.stageCom.time_offset + dtrack.stageCom.time - low_limit;
         hold on;
         plot(dtrack.base,dtrack.stageCom.y,'--');
         title('Coils and Y tracking');
-        legend('C1','C2','C3','C4','Y tracking',0);
+        if(smag(1,2) == 4)
+            legend('C1','C2','C3','C4','Y tracking',0);
+        elseif (smag(1,2) == 6)
+            legend('C1','C2','C3','C4','C5','C6','Y tracking',0);
+        else
+           disp('plot_MagnetsOnTracking: Un-recognized number of poles');     
+        end
         grid on;
         hold off
     end
@@ -535,7 +547,13 @@ dtrack.base = dtrack.stageCom.time_offset + dtrack.stageCom.time - low_limit;
         hold on;
         plot(dtrack.base,dtrack.stageCom.z,'--');
         title('Coils and Z tracking');
-        legend('C1','C2','C3','C4','Z tracking',0); 
+        if(smag(1,2) == 4)
+            legend('C1','C2','C3','C4','Y tracking',0);
+        elseif (smag(1,2) == 6)
+            legend('C1','C2','C3','C4','C5','C6','Y tracking',0);
+        else
+           disp('plot_MagnetsOnTracking: Un-recognized number of poles');     
+        end
         grid on;
         hold off
     end
