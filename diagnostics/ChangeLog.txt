@@ -1,4 +1,7 @@
-2005--1-10  Kalpit Desai <kvdesai@cs.unc.edu>
+2005-02-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* DACoperator.m: fixed voltage-clipping functionality.  If you attempt to put a voltage outside of the prescribed range, DACoperator clips it.
+
+2005-1-10  Kalpit Desai <kvdesai@cs.unc.edu>
 	* added file stagenoisechar.m - a stand alone utility to characterize the noise on stage sensor outputs.
 
 2004-12-18  Jeremy Cribb <jcribb@email.unc.edu>

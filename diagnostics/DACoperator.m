@@ -69,9 +69,15 @@ else
     AOid = -1;
 end
 
+% condition inputs to DAC board
+% clip the data so that its within specified bounds of the board
+inputs = max(inputs,Vrange(1,1)); 
+inputs = min(inputs,Vrange(1,2));
+
+
 % output information to "virtual daq board" to convey what *would* have
 % gone to DAQout had a real board been specified in the function call.
-if AOid < 0 | board == 'daqtest';  
+if (AOid < 0) | strcmp(board,'daqtest');  
     warning(['DACoperator: output board not found or board == daqtest.  '  ...
              'Plotting DACout instead of sending to DAq board.']);  
     daqreset;
@@ -105,10 +111,7 @@ set(Ochan, 'OutputRange', Vrange);
 set(AO, 'SampleRate', srate);
 set(AO, 'RepeatOutput', Nrepeat);
 
-%clip the data so that its within specified bounds of the board
-posData = min(posData,Vrange(1,1)); 
-posData = max(posData,Vrange(1,2));
 
-putdata(AO, posData); % enqueue the data
+putdata(AO, inputs); % enqueue the data
 start(AO); % send the data
 
