@@ -1,3 +1,6 @@
+2005-01-26  Jeremy Crivv <jcribb@email.unc.edu>
+	* get_mips.m: added.  runs and saves single or batches of max(min)imum intensity projection images.  This function calls mip.m and is for batch processing only.
+
 2005-12-20  Jeremy Cribb <jcribb@email.unc.edu>
 	* raw2img.m: set the output of the function to the last image processed.  Useful for immediately looking at an image after conversion.
 
