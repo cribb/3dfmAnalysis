@@ -33,8 +33,8 @@ function clipped = tclip(d,ts,te,fsave)
 if nargin < 4
     fsave = 'no';
 end
-isl = max(find(d.stageCom.time - d.stageCom.time(1,1) - ts <= 0.05));
-iel = max(find(d.stageCom.time - d.stageCom.time(1,1) - te <= 0.05));
+isl = max(find(d.stageCom.time - d.stageCom.time(1,1) - ts <= 0.0005));
+iel = max(find(d.stageCom.time - d.stageCom.time(1,1) - te <= 0.0005));
 % Find the start and stop indices from the given time limits for
 % highbandwidth data
 ish = max(find(d.qpd.time - d.qpd.time(1,1) - ts <= 0.00005));

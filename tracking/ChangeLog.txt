@@ -1,3 +1,6 @@
+2004-06-18	Kalpit Desai	<kvdesai@cs.unc.edu>
+	* tclip.m: Reduced the tolerance level for finding correct clipping points for low bandwidth data to 0.0005 seconds from 0.05 seconds. Provides more precise clipping.
+		
 2004-06-17	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* tjoin.m: Fixed a bug that was throwing out the meta-data information when two datasets being joined are themselves result of two/more datasets previously joined.
 2004-06-17	Kalpit Desai	<kvdesai@cs.unc.edu>
