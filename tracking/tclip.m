@@ -37,8 +37,8 @@ function clipped = tclip(d,ts,te,fields,fsave)
   
 % Find the start and stop indices from the given time limits for
 % lowbandwidth data
-if nargin < 4 | isempty(fsave)    fsave = 'no';  end
-if nargin < 3 | isempty(fields)   fields = 'a';  end % Clip all fields
+if nargin < 4     fsave = 'no';  end
+if nargin < 3 | isemtpy(varargin{3})   fields = 'a';  end % Clip all fields
 isl = max(find(d.stageCom.time - d.stageCom.time(1,1) - ts <= 0.0005));
 iel = max(find(d.stageCom.time - d.stageCom.time(1,1) - te <= 0.0005));
 % Find the start and stop indices from the given time limits for
@@ -96,30 +96,29 @@ if(findstr(fields,'r'))
         clipped.stageReport.x = d.stageReport.x(ish:ieh);
         clipped.stageReport.y = d.stageReport.y(ish:ieh);
         clipped.stageReport.z = d.stageReport.z(ish:ieh);
+    else
+        warning('StageReport field was requested to be clipped, but it was not found in the original data set.');
     end
-else
-    warning('StageReport field was requested to be clipped, but it was not found in the original data set.');
 end
 if(findstr(fields,'e'))
     if(isfield(d,'posError'))
         clipped.posError.time = d.posError.time(ish:ieh);
         clipped.posError.x = d.posError.x(ish:ieh);
         clipped.posError.y = d.posError.y(ish:ieh);
-        clipped.posError.z = d.posError.z(ish:ieh);
+        clipped.posError.z = d.posError.z(ish:ieh);    
+    else
+        warning('posError field was requested to be clipped, but it was not found in the original data set.');
     end
-else
-    warning('posError field was requested to be clipped, but it was not found in the original data set.');
 end
-
 if(findstr(fields,'b'))
     if(isfield(d,'beadpos'))
         clipped.beadpos.time = d.beadpos.time(ish:ieh);
         clipped.beadpos.x = d.beadpos.x(ish:ieh);
         clipped.beadpos.y = d.beadpos.y(ish:ieh);
         clipped.beadpos.z = d.beadpos.z(ish:ieh);
+    else
+        warning('beadpos field was requested to be clipped, but it was not found in the original data set.');
     end
-else
-    warning('beadpos field was requested to be clipped, but it was not found in the original data set.');
 end
 dc = clipped;
 disp('Clipping was peformed successfully.')

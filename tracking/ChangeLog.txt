@@ -1,4 +1,6 @@
 2004-06-22	Kalpit Desai	<kvdesai@cs.unc.edu>
+	* tclip.m: Fixed a typo.
+2004-06-22	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* tclip.m: Added feature to select only those fileds which are wanted in the clipped dataset. All other fields will be removed. Saves hard-drive space.
 2004-06-18	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* tclip.m: Reduced the tolerance level for finding correct clipping points for low bandwidth data to 0.0005 seconds from 0.05 seconds. Provides more precise clipping.
