@@ -14,7 +14,7 @@ function utc = unixUtc(yyyy,mm,dd,hour,minute,second,fDSL)
 % Providing 'yes' indicates that local time is 4 hours behind standard UTC (in England)
 % Providing 'no' indicates that local time is 5 hours behind standard UTC (in England)
 %  EXAMPLE: 
-%  Let us convert the time 2004-June-15, 12:28:02.000345 pm
+%  Let us convert the time 2004-June-15, 12:28:02.40859 pm
 %  uct = unixUtc(2004,6,15,12,28,2.40859)
 %  ans 
 %  uct = 1087316882.4086
