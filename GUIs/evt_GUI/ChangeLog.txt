@@ -1,3 +1,6 @@
+2005-02-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m:  correctly referenced filename, adjusted background image.
+
 2005-01-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m:  fixed a file formatting problem.
 

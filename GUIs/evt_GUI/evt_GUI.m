@@ -141,7 +141,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         return;
     end
     set(handles.edit_infile, 'TooltipString', filename);
-    logentry(['Dataset, ' fname ', successfully loaded...']);
+    logentry(['Dataset, ' filename ', successfully loaded...']);
     
     % try loading the MIP file
     try 
@@ -165,7 +165,8 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
                 im = raw2img(rawfile, 'BMP', 1, 1);
                 logentry('Successfully extracted first frame image...');
             catch
-                logentry('evt_gui: Could not extract image; RAW file not found.  Giving up...');
+                logentry('Could not extract image; RAW file not found.  Giving up...');
+                im = 0;
             end
         end        
     end
@@ -347,11 +348,7 @@ function plot_data(hObject, eventdata, handles)
 	k = find(beadID == currentBead);
 	nk = find(beadID ~= currentBead);
     
-    try
-        im = handles.im;
-    catch
-        im = 0;
-    end
+    im = handles.im;
     
     figure(handles.XYfig);   
     imagesc(handles.im);
