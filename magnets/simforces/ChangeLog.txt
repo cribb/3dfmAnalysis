@@ -1,0 +1,8 @@
+2004-10-24  Jeremy Cribb <jcribb@email.unc.edu>
+	* Changelog, added.
+	* Bforce.m, added.  returns force vectors applied to a bead in a given geometry. 
+        * gmatrix.m, added.  generates matrix of 'geometric factor' used by Bforce.
+	* tetra.m, added.  matrix for tetrahedral monopole geometry.
+	* hexa.m, added.  matrix for hexapole geometry.
+        * trigplane.m, added.  matrix for 'trigonal planar' geometry.
+
