@@ -1,3 +1,5 @@
+2004-10-24  Kalpit Desai <kvdesai@email.unc.edu>
+	* simlissajous.m: Now has pole locations in real-space (i.e. lab-coordinate frame) instead of aligned with X,Y,Z axis.
 2004-10-24  Jeremy Cribb <jcribb@email.unc.edu>
 	* removed Bforce.m, fmatrix.m, and tetra.m.  These files are used to simulate the forces via a monopole approximation.  Moved them to a new folder in 'magnets' called 'simforces'
 
