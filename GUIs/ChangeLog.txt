@@ -1,3 +1,10 @@
+2004-10-22  Jeremy Cribb <jcribb@email.unc.edu>
+	* Added fcd_GUI folder.
+
+	* fcd_GUI.m:  contains matlab code for editing Force Calibration Data (FCD).  Initial Version
+	* fcd_GUI.fig:  defines the matlab GUI for editing Force Calibration Data.  Initial Version
+
+
 2004-09-01  Jeremy Cribb <jcribb@email.unc.edu>
 	* Modified poletipsmeasurer to output relevant variables to matlab workspace.  
 
