@@ -171,24 +171,25 @@ if (strcmpi(mode,'colors') | strcmpi(mode,'both'))
 	axis equal;
     
     % now show the colormap bar at the right hand side
-    subplot('position',[0.85 0.1 0.09 0.85] );
-    maxc = max(FV.colr);
-    minc = min(FV.colr);
-    rangec = maxc - minc;
-    y = minc:rangec/20:maxc;
-    x = 0:1/length(y):1-1/length(y);
-    for i = 1:length(y)
-        c(i,1:length(x)) = y(i);
-    end
-    pcolor(x,y,c);
-    colormap hot
-     shading interp
+    colorbar('vert');
+%     subplot('position',[0.85 0.1 0.09 0.85] );
+%     maxc = max(FV.colr);
+%     minc = min(FV.colr);
+%     rangec = maxc - minc;
+%     py = minc:rangec/20:maxc;
+%     px = 0:1/length(py):1-1/length(py);
+%     for i = 1:length(py)
+%         c(i,1:length(px)) = py(i);
+%     end
+%     pcolor(px,py,c);
+%     colormap hot
+%      shading interp
 end
 
 if (strcmpi(mode,'hairs') | strcmpi(mode,'both'))
 	figure
     %background sphere
-%     surf(x,y,z); colormap white;
+    surf(x,y,z); colormap white;
     hold on
     %velocity vector hairs
     
@@ -203,7 +204,7 @@ if (strcmpi(mode,'hairs') | strcmpi(mode,'both'))
     Npoles = ans(1,1);
     orig = zeros(Npoles,1);
     quiver3(orig,orig,orig,poles(:,1), poles(:,2), poles(:,3),max_colr*2,'.','c');
-    colormap hot
+%     colormap hot
 	set(gca,'Fontsize',12);
     
 	xlabel('X axes');

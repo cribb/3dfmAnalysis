@@ -1,3 +1,5 @@
+2004-07-13  Kalpit Desai <kvdesai@cs.unc.edu>
+	* visVelocities.m : Replaced the code for placing a colorbar with the new found matlab function 'colorbar'. Also changed the rendering in 'hairs' mode back to with white background sphere.
 2004-06-11  Kalpit Desai <kvdesai@cs.unc.edu>
 	* visVelocities.m : Changed the visualization for 'colors' mode. Instead of using faces as bins, now using vertices as bins. This is more efficient and also facilitates interpolation. Also included code that automaically plots color scale bar on right.
 
