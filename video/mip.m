@@ -120,12 +120,12 @@ for k = start : stride :  (stop - 1)
  
 	% handle timer
 	itertime = toc;
-	if k == 1
+	if k == start
         totaltime = itertime;
 	else
         totaltime = totaltime + itertime;
 	end    
-	meantime = totaltime / (k / stride);
+	meantime = totaltime / ((k-start+1) / stride);
 	timeleft = (stop-k)/stride * meantime;
 	outs = [num2str(timeleft, '%5.0f') ' sec.'];
 	set(timetext, 'String', outs);

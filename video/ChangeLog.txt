@@ -1,3 +1,6 @@
+2005-02-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* mip.m: fixed time bug for when file started in middle.
+
 2005-02-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* raw2avi.m: added some image processing for handling low-light datasets.
 	* clipraw.m: added.  cuts out and saves a range of frames as a new RAW file.
