@@ -1,3 +1,5 @@
+2004-07-16  Kalpit Desai <kvdesai@cs.unc.edu>
+	* neutnorm.m: Changed the method of normalization. Now, normalize the excitation in such a way the 'normalized' excitation will give highest magnitude of force in the same direction as the 'un-normalized' or input excitation.
 2004-07-13  Kalpit Desai <kvdesai@cs.unc.edu>
 	* added neutnorm.m: Does the neutralization and normalization of magnet excitation vectors.
 2004-07-13  Kalpit Desai <kvdesai@cs.unc.edu>
