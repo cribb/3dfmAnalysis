@@ -1,7 +1,7 @@
 function x = randwalk(len,p)
 % 3DFM function  
 % Math 
-% last modified 12/06/04 
+% last modified 01/20/05 
 %  
 % This function produces a discrete-time, discrete-space random walk in 1D.
 %  
@@ -16,12 +16,14 @@ function x = randwalk(len,p)
 %   
 %  05/06/04 - created; jcribb.  
 %  12/06/04 - vectorized random walk so that matlab computes it faster.
+%  01/20/05 - added magnitude to the randomizer
+%
 
 % randwalk(len,p)
 % len = length of data vector,  p = bias (0 - 1) (e.g. p = q = 0.5)
 
 % randomize state of random number generator
-rand('state',sum(100*clock));
+rand('state',sum(10000*clock));
 
 r = rand(len,1);
 

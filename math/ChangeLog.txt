@@ -1,3 +1,7 @@
+2005-01-20  Jeremy Cribb <jcribb@email.unc.edu>
+	* randwalk.m: added magnitude to the randomizer.  Some returned clock values were returning identical seed values to the random number generator.  bad.
+	* windiff.m: added the new grid to the return values.
+
 2004-12-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* randwalk.m: vectorized random walk so that it runs faster in matlab.
 

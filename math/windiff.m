@@ -1,13 +1,13 @@
-function [dydx, newx] = windiff(y, x, window_size)
+function [dydx, newx, newy] = windiff(y, x, window_size)
 % 3DFM function  
 % Math 
-% last modified 10/26/04 
+% last modified 01/20/05 
 %  
 % This function computes a 'windowed' numerical derivative dy/dx
 % of window-length window_size.  It returns the derivative as dydx, and
 % also returns the grid, newx, on which the derivative was calculated.
 %  
-%  [dydx, newx] = windiff(y, x, window_size)
+%  [dydx, newx, newy] = windiff(y, x, window_size)
 %   
 %  where "x" is a datastream's independent variable
 %        "y" is a datastream's dependent variable
@@ -18,6 +18,7 @@ function [dydx, newx] = windiff(y, x, window_size)
 %  10/23/04 - added the independent variable, x, so that its grid is computed properly; jcribb
 %  10/26/04 - fixed a bug in calculation; jcribb.
 %  11/17/04 - updated documentation, switched outputs to be more consistent.
+%  01/20/05 - added the output of the new grid
 %
 
 
@@ -31,4 +32,4 @@ function [dydx, newx] = windiff(y, x, window_size)
     
     dydx = dy./dx;
     newx = mean([C D], 2);
-
+    newy = mean([A B], 2);
