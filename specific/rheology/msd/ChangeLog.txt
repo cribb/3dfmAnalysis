@@ -1,0 +1,4 @@
+2004-08-31  David Hill <dbhill@email.unc.edu>
+
+	* Initial Version of Mean Squared Displacement Code
+
