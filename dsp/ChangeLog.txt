@@ -1,3 +1,6 @@
+2004-06-11  Kalpit Desai <kvdesai@cs.unc.edu>
+	* mypsd.m : renamed 'window' variable to 'win' and 'windowtype' to 'window_type'.	
+
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 
 	* Initial Version

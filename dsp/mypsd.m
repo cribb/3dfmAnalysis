@@ -32,8 +32,8 @@ end
 if(nargin < 5 | isempty(style))
 	style = '-';
 end
-if(nargin < 4 | isempty(windowtype))
-   	windowtype = 'blackman';
+if(nargin < 4 | isempty(window_type))
+   	window_type = 'blackman';
 end
 if(nargin < 3 | isempty(res))
   res = 1;
@@ -41,19 +41,19 @@ end
 
 
 nw = fix(rate/(2*res))*2;
-
+win = zeros(nw,1);
 switch window_type
 	case 'blackman'
-		window = blackman(nw);
+		win = blackman(nw);
 	case 'rectangle'
-		window = ones(nw,1);
+		win = ones(nw,1);
 end
 	
 
 for i=1:size(s,2)
    % [Pxx,f]=pwelch(X, WINDOW,NOVERLAP,NFFT)
    % [p(:,i) f] = pwelch(s(:,i), blackman(nw), nw/2, nw, rate);  %original gbcode
-   [p(:,i) f] = pwelch(s(:,i), window, nw/2, nw, rate);          %jac-hack
+   [p(:,i) f] = pwelch(s(:,i), win, nw/2, nw, rate);          %jac-hack
    if(findstr(calculateId,'y'))
        Id(1,i) = sqrt(Dp(1,i)*f(1));
        for j = 2:length(p(:,i))
