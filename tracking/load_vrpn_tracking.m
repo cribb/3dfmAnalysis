@@ -12,8 +12,9 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, user_input);
 %              OR it can be the variable created by double-clicking the .mat file
 %		"xyz_units" is either 'um' or 'm'
 %       "tzero" is either 'zero' or 'uct'
-%       "beadpos" is either 'yes' or 'no'
-%       "user_input" is either 'yes' or 'no'
+%       "beadpos" is either 'yes' or 'no'-tells whether to compute bead-position
+%       "user_input" is either 'yes' or 'no'-tells if to prompt user to
+%       type in extra information associated with the dataset.
 %
 % Notes:
 %
@@ -29,7 +30,7 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, user_input);
 %   (default = microns)
 % - The tzero parameter can be either 'zero' for using the first element
 %   in the array as tzero, or 'uct' for universal coordinated time, defaulting
-%   to 'zero'
+%   to 'uct'
 % - The user_input parameter controls a prompt where custom information
 %   about a dataset can be included by the user.  NOTE:  USING THIS ARGUMENT
 %   TURNS LOAD_VRPN_TRACKING INTO A FUNCTION THAT REQUIRES USER

@@ -1,3 +1,7 @@
+2004-05-18  Kalpit Desai <kvdesai@cs.unc.edu>
+
+	* load_vrpn_tracking.m : Fixed the comment about default 'time' argument - should have been 'uct'
+
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 
 	* Initial Version
