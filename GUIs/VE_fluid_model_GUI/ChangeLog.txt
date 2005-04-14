@@ -1,3 +1,7 @@
+2005-04-14  Jeremy Cribb <jcribb@email.unc.edu>
+	* VE_fluid_model_app.m:  add a control for changing the magnitude of the input force.  Also made some cosmetic changes to code, including an improvement on the step sizes on the sliders used to change values for the spring and two dampers.
+	* VE_fluid_model_app.fig:  added controls to figure file.
+
 2004-10-23  Jeremy Cribb <jcribb@email.unc.edu>
 	* VE_fluid_model_app.m:  demo for describing the response of a viscoelastic fluid.  Allows you to change the parameters of the model via the GUI and immediately see the results.
 	* VE_fluid_model_app.fig:  GUI file for demo.  

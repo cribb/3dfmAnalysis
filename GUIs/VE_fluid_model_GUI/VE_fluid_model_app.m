@@ -22,7 +22,7 @@ function varargout = VE_fluid_model_app(varargin)
 
 % Edit the above text to modify the response to help VE_fluid_model_app
 
-% Last Modified by GUIDE v2.5 01-Sep-2004 12:40:46
+% Last Modified by GUIDE v2.5 14-Apr-2005 00:53:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -82,40 +82,6 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 im = imread('viscoelastic_liquid_model.bmp');
 image(im);
 axis off;
-
-
-% --- Executes during object creation, after setting all properties.
-function slider_D2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to slider_D2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: slider controls usually have a light gray background, change
-%       'usewhitebg' to 0 to use default.  See ISPC and COMPUTER.
-usewhitebg = 1;
-if usewhitebg
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-
-% --- Executes on slider movement.
-function slider_D2_Callback(hObject, eventdata, handles)
-% hObject    handle to slider_D2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
-		K = get(handles.slider_K, 'Value');
-		D1 = get(handles.slider_D1, 'Value');
-        D2 = get(handles.slider_D2,'Value');
-        
-        set(handles.edit_D2,'String', D2);
-        
-        model_me(K, D1, D2);
         
 
 % --- Executes during object creation, after setting all properties.
@@ -133,6 +99,16 @@ else
     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
+    slider_max = 1000;
+	slider_min = 0;
+    if slider_min == slider_max
+        slider_max = slider_min + 1;
+    end
+	slider_step = 1/(slider_max - slider_min);
+    	
+	set(hObject, 'Min', slider_min);
+	set(hObject, 'Max', slider_max);
+	set(hObject, 'SliderStep', [slider_step slider_step]);
 
 % --- Executes on slider movement.
 function slider_D1_Callback(hObject, eventdata, handles)
@@ -142,15 +118,54 @@ function slider_D1_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+    
+	D1 = get(handles.slider_D1, 'Value');
+    set(handles.edit_D1,'String', D1);
 
-		K = get(handles.slider_K, 'Value');
-		D1 = get(handles.slider_D1, 'Value');
-        D2 = get(handles.slider_D2,'Value');
+    model_me(hObject, eventdata, handles);
 
-        set(handles.edit_D1,'String', D1);
-        set(handles.text_relaxtime, 'String', num2str(D1/K));
+        
+% --- Executes during object creation, after setting all properties.
+function slider_D2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider_D2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
-        model_me(K, D1, D2);
+% Hint: slider controls usually have a light gray background, change
+%       'usewhitebg' to 0 to use default.  See ISPC and COMPUTER.
+usewhitebg = 1;
+if usewhitebg
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+    slider_max = 1000;
+	slider_min = 0;
+    if slider_min == slider_max
+        slider_max = slider_min + 1;
+    end
+	slider_step = 1/(slider_max - slider_min);
+    	
+	set(hObject, 'Min', slider_min);
+	set(hObject, 'Max', slider_max);
+	set(hObject, 'SliderStep', [slider_step slider_step]);
+
+
+% --- Executes on slider movement.
+function slider_D2_Callback(hObject, eventdata, handles)
+% hObject    handle to slider_D2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+    
+    D2 = get(handles.slider_D2,'Value');
+    set(handles.edit_D2,'String', D2);
+        
+    model_me(hObject, eventdata, handles);
         
         
 % --- Executes during object creation, after setting all properties.
@@ -168,6 +183,16 @@ else
     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
+    slider_max = 1000;
+	slider_min = 0;
+    if slider_min == slider_max
+        slider_max = slider_min + 1;
+    end
+	slider_step = 1/(slider_max - slider_min);
+    	
+	set(hObject, 'Min', slider_min);
+	set(hObject, 'Max', slider_max);
+	set(hObject, 'SliderStep', [slider_step slider_step]);
 
 % --- Executes on slider movement.
 function slider_K_Callback(hObject, eventdata, handles)
@@ -177,15 +202,52 @@ function slider_K_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+    
+	K = get(handles.slider_K, 'Value');
+    set(handles.edit_K,'String', K);
 
-		K = get(handles.slider_K, 'Value');
-		D1 = get(handles.slider_D1, 'Value');
-        D2 = get(handles.slider_D2,'Value');
+    model_me(hObject, eventdata, handles);
 
-        set(handles.edit_K,'String', K);
-        set(handles.text_relaxtime, 'String', num2str(D1/K));
+    
+% --- Executes during object creation, after setting all properties.
+function slider_force_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider_force (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background, change
+%       'usewhitebg' to 0 to use default.  See ISPC and COMPUTER.
+usewhitebg = 1;
+if usewhitebg
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+    slider_max = 1000;
+	slider_min = 0;
+    if slider_min == slider_max
+        slider_max = slider_min + 1;
+    end
+	slider_step = 1/(slider_max - slider_min);
+    	
+	set(hObject, 'Min', slider_min);
+	set(hObject, 'Max', slider_max);
+	set(hObject, 'SliderStep', [slider_step slider_step]);
+
+% --- Executes on slider movement.
+function slider_force_Callback(hObject, eventdata, handles)
+% hObject    handle to slider_force (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+        F = get(handles.slider_force, 'Value');        
+        set(handles.edit_force,'String', F);
         
-        model_me(K, D1, D2);
+        model_me(hObject, eventdata, handles);
         
         
 % --- Executes during object creation, after setting all properties.
@@ -202,8 +264,6 @@ else
     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
-
-
 function edit_K_Callback(hObject, eventdata, handles)
 % hObject    handle to edit_K (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -212,9 +272,10 @@ function edit_K_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit_K as text
 %        str2double(get(hObject,'String')) returns contents of edit_K as a double
 
-    K = str2num(get(handles.edit_K, 'String'));
+	K = str2num(get(handles.edit_K, 'String'));
     set(handles.slider_K,'Value', K);
-
+    
+    model_me(hObject, eventdata, handles);    
 
 % --- Executes during object creation, after setting all properties.
 function edit_D1_CreateFcn(hObject, eventdata, handles)
@@ -242,6 +303,7 @@ function edit_D1_Callback(hObject, eventdata, handles)
     D1 = str2num(get(handles.edit_D1, 'String'));
     set(handles.slider_D1,'Value', D1);
     
+    model_me(hObject, eventdata, handles);    
 
 % --- Executes during object creation, after setting all properties.
 function edit_D2_CreateFcn(hObject, eventdata, handles)
@@ -265,18 +327,57 @@ function edit_D2_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit_D2 as text
 %        str2double(get(hObject,'String')) returns contents of edit_D2 as a double
-
+    
     D2 = str2num(get(handles.edit_D2, 'String'));
     set(handles.slider_D2,'Value', D2);
-
     
-function model_me(K, D1, D2)
+    model_me(hObject, eventdata, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_force_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_force (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(hObject,'BackgroundColor','white');
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function edit_force_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_force (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_force as text
+%        str2double(get(hObject,'String')) returns contents of edit_force as a double
+
+    F = str2num(get(handles.edit_force, 'String'));
+    set(handles.slider_force,'Value', F);
+
+    model_me(hObject, eventdata, handles);    
+    
+           
+function model_me(hObject, eventdata, handles)
+
+    K = get(handles.slider_K, 'Value');
+    D1 = get(handles.slider_D1, 'Value');
+    D2 = get(handles.slider_D2,'Value');
+    F = get(handles.slider_force, 'Value');        
+
+    set(handles.text_relaxtime, 'String', num2str(D1/K));
 
 	[t, ct, pulse] = VE_fluid_model(K, D1, D2);
 	
 	figure(2);
-	plot(t, ct);
-	title('Simple VE fluid model (X_2/F)');
+	plot(t, ct*F);
+	title('Simple VE fluid model (X2/F)');
 	xlabel('time (sec)');
 	ylabel('displacement (m)');
-	pretty_plot;
+	pretty_plot;        
