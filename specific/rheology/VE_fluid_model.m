@@ -4,6 +4,8 @@ function [t, ct, pulse] = VE_fluid_model(K, D1, D2);
 % D1 = 1;
 % D2 = eps;
 
+warning off MATLAB:divideByZero
+
 t = 0:0.005:50;
 
 t1 = 10;

@@ -1,3 +1,6 @@
+2005-04-14  Jeremy Cribb <jcribb@email.unc.edu>
+	* VE_fluid_model:  removed warning for dividing by zero.  
+
 2005-03-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* cone_and_plate:  added this folder for cone_and_plate specific rheology code.
 
