@@ -58,6 +58,7 @@ handles.output = hObject;
 guidata(hObject, handles);
 % assign initial value to frquency vector
 clc;
+disp('Welcome to Frequency Sweep Generator 1.0');
 edit_freqVec_Callback(handles.edit_freqVec,[], handles);
 % UIWAIT makes mysignal wait for user response (see UIRESUME)
 % uiwait(handles.mysignal);
@@ -92,47 +93,72 @@ if AOid < 0
   error('Analog output board not found')
 end
 %On Hercules, Hardware channel# = coil# -1
-ch1 = str2double(get(handles.edit_coilA,'string'))-1;
-ch2 = str2double(get(handles.edit_coilB,'string'))-1;
-AOchannels = [ch1 ,ch2];
-srate = 40000; % sampling rate for magents D2A
+chA = str2double(get(handles.edit_coilA,'string'))-1;
+chB = str2double(get(handles.edit_coilB,'string'))-1;
+AOchannels = [chA ,chB];
+srate = 50000; % sampling rate for magnets D2A
 
-amp1 = 0.5*get(handles.slider_pkTOpk1,'value');
-amp2 = 0.5*get(handles.slider_pkTOpk2,'value');
-offset1 = get(handles.slider_offset1,'value');
-offset2 = get(handles.slider_offset2,'value');
-phase1 = str2double(get(handles.edit_phase1,'string'))*pi/180;%in radians
-phase2 = str2double(get(handles.edit_phase2,'string'))*pi/180;
+ampA = 0.5*get(handles.slider_pkTOpk1,'value');
+ampB = 0.5*get(handles.slider_pkTOpk2,'value');
+offsetA = get(handles.slider_offset1,'value');
+offsetB = get(handles.slider_offset2,'value');
+phaseA = str2double(get(handles.edit_phase1,'string'))*pi/180;%in radians
+phaseB = str2double(get(handles.edit_phase2,'string'))*pi/180;
 Nrepeat = str2double(get(handles.edit_repeat,'string'));
 tspan = str2double(get(handles.edit_period,'string'));
 fcont = str2double(get(handles.edit_controlFreq,'string'));
 % flag_cont = a flag to indicate how to incoroporate the control frequency excitation
 %   i.e. do we superimpose the control-frequency ('superimpose') or do
-%   we intervene it between test frequencies ('intervene') or do we
+%   we interleave it between test frequencies ('interleave') or do we
 %   omit the control frequency alltogether ('nocontrol')
 switch get(handles.menu_controlStrat,'value')
     case 1
         flag_cont = 'nocontrol';
     case 2
-        flag_cont = 'intervene';
+        flag_cont = 'interleave';
     case 3
         flag_cont = 'superimpose';
     otherwise
 end
 
-    raw1 = [];
-    raw2 = [];
+    rawA = [];
+    rawB = [];
+    %For purpose of avoiding step inputs to magnet amplifier, all excitation should 
+    %smoothly start from zero and stop at zero. Now, since the two coils used here 
+    %must have offset of opposite polarities, it is not possible to start/stop both 
+    %coils simultaneosly and still maintain the condition above. 
+    %so set first 3/4 cycle of +ve coil to zero and first 1/4 cycle of -ve coil to zero
+    %Also set last 1/4 cycle of +ve coil to zero and last 3/4 cycle of -ve coil to zero
+    %Then apply tspan/2 zeros in between each consequtive frequencies (test & control)
+    
     t = 0:1/srate:tspan;
+    gapsA = -offsetA*ones(1,srate*tspan/2);
+    gapsB = -offsetB*ones(1,srate*tspan/2);
+    Num_C4th = round(srate/(4*fcont));%Number of points in the 1/4th cycle of control frquency wave
     for i = 1:length(fvec)
-        if(strcmpi(flag_cont,'intervene'))        
-            raw1 = [raw1, sin(2*pi*fvec(i)*t), sin(2*pi*fcont*t)]; %intervene fcont instead of superimposing it
-            raw2 = [raw2, sin(2*pi*fvec(i)*t), sin(2*pi*fcont*t)];            
-        elseif(strcmpi(flag_cont,'superimpose'))
-            raw1 = [raw1, sin(2*pi*fvec(i)*t) + sin(2*pi*fcont*t)];
-            raw2 = [raw2, sin(2*pi*fvec(i)*t) + sin(2*pi*fcont*t)];
-        elseif(strcmpi(flag_cont,'nocontrol'))
-            raw1 = [raw1, sin(2*pi*fvec(i)*t)];
-            raw2 = [raw2, sin(2*pi*fvec(i)*t)];
+        Num_T4th = round(srate/(4*fvec(i)));%Number of points in the 1/4th cycle of test frquency wave
+        if offsetA > 0 %this means coilA has positive offset
+            tsineA = [-offsetA*ones(1, 3*Num_T4th-1), sin(2*pi*fvec(i)*t(3*Num_T4th:end-Num_T4th)),  -offsetA*ones(1, Num_T4th)];
+            csineA = [-offsetA*ones(1, 3*Num_C4th-1), sin(2*pi*fcont*t(3*Num_C4th:end-Num_C4th)),  -offsetA*ones(1, Num_C4th)];
+            tsineB = [-offsetB*ones(1, Num_T4th-1), sin(2*pi*fvec(i)*t(Num_T4th:end-3*Num_T4th)),  -offsetB*ones(1, 3*Num_T4th)];
+            csineB = [-offsetB*ones(1, Num_C4th-1), sin(2*pi*fcont*t(Num_C4th:end-3*Num_C4th)),  -offsetB*ones(1, 3*Num_C4th)];
+        else % this means coilB has positive offset
+            tsineB = [-offsetB*ones(1, 3*Num_T4th-1), sin(2*pi*fvec(i)*t(3*Num_T4th:end-Num_T4th)),  -offsetB*ones(1, Num_T4th)];
+            csineB = [-offsetB*ones(1, 3*Num_C4th-1), sin(2*pi*fcont*t(3*Num_C4th:end-Num_C4th)),  -offsetB*ones(1, Num_C4th)];
+            tsineA = [-offsetA*ones(1, Num_T4th-1), sin(2*pi*fvec(i)*t(Num_T4th:end-3*Num_T4th)),  -offsetA*ones(1, 3*Num_T4th)];
+            csineA = [-offsetA*ones(1, Num_C4th-1), sin(2*pi*fcont*t(Num_C4th:end-3*Num_C4th)),  -offsetA*ones(1, 3*Num_C4th)];
+        end
+        
+        if(strcmpi(flag_cont,'interleave'))  %control frquency betwn each test freq      
+            rawA = [rawA, tsineA, gapsA, csineA, gapsA]; 
+            rawB = [rawB, tsineB, gapsB, csineB, gapsB];            
+        elseif(strcmpi(flag_cont,'superimpose')) %control freq simultaneous with test freq
+            %In this mode, it is impossible to start both sinewaves at zero, so zero-starting not implemented here.
+            rawA = [rawA, sin(2*pi*fvec(i)*t) + sin(2*pi*fcont*t), gapsA];
+            rawB = [rawB, sin(2*pi*fvec(i)*t) + sin(2*pi*fcont*t), gapsB];
+        elseif(strcmpi(flag_cont,'nocontrol')) %no control applied
+            rawA = [rawA, tsineA, gapsA];
+            rawB = [rawB, tsineB, gapsB];
         else
         end
     end
@@ -141,13 +167,13 @@ end
 %     for i = 1:length(fvec)
 %         amalg = amalg + sin(2*pi*fvec(i)*t);
 %     end
-%     raw1 = [0.4*amalg,raw1,0.1*amalg];
-%     raw2 = [0.4*amalg,raw2,0.1*amalg];
-    coil1 = amp1*raw1 + offset1;
-    coil2 = amp2*raw2 + offset2;
+%     rawA = [0.4*amalg,rawA,0.1*amalg];
+%     rawB = [0.4*amalg,rawB,0.1*amalg];
+    coilA = ampA*rawA + offsetA;
+    coilB = ampB*rawB + offsetB;
 
-% plot(t,coil1,'b',t,coil2,'r');
-outData = [[coil1';0.0], [coil2';0.0]];
+% plot(t,coilA,'b',t,coilB,'r');
+outData = [[coilA';0.0], [coilB';0.0]];
 % setup the output
 AO = analogoutput('nidaq', AOid);
 Ochan = addchannel(AO, AOchannels); % 
@@ -156,7 +182,7 @@ set(Ochan, 'OutputRange', [-10 10]); % doesn't matter for pci-6733. unipolar ran
 set(AO, 'TriggerType', 'Manual'); % use hardware manual trigger 
 % set(AO, 'TriggerType', 'HwDigital'); % use hardware digital trigger 
 set(AO, 'SampleRate', srate); %default sample rate 
-set(AO,'RepeatOutput',Nrepeat); %go on for 10 minutes
+set(AO,'RepeatOutput',Nrepeat); 
 putdata(AO, outData); % send the data
 start(AO); % ready but not triggered
 %-----------   THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
@@ -170,9 +196,9 @@ data.info.chan = AOchannels;
 data.info.pole_geometry = 'ThreePolesInPlane';
 data.info.control_freq = fcont;
 data.info.srateHz = srate;
-data.info.amplitudeV = [amp1 amp2];
-data.info.offsetV = [offset1 offset2];
-data.info.phaseRad = [phase1 phase2];
+data.info.amplitudeV = [ampA ampB];
+data.info.offsetV = [offsetA offsetB];
+data.info.phaseRad = [phaseA phaseB];
 data.info.control_stratety = flag_cont;
 data.info.freqHz = fvec;
 data.info.tspan = tspan;
@@ -212,16 +238,6 @@ clear AO
 delete AO
 daqreset;
 close(handles.mysignal);
-% % ---Whether do frequency sweep or not
-% function check_freqSweep_Callback(hObject, eventdata, handles)
-% if(get(hObject,'value'))
-%     set(handles.edit_period,'Enable','Off');
-%     set(handles.slider_period,'Enable','Off');
-% else
-%     set(handles.edit_period,'Enable','On');
-%     set(handles.slider_period,'Enable','On');
-% end
-
 
 function edit_repeat_Callback(hObject, eventdata, handles)
 
@@ -229,7 +245,7 @@ function edit_repeat_Callback(hObject, eventdata, handles)
 function button_defaultFreq_Callback(hObject, eventdata, handles)
 global fvec;
 default_fvec = [4000 3400 3000 2600 2050 1680 1100 800 700 500 300 110 80 70 45 25 8 5]; 
-default_fcont = 150;%it is usually desirable that harmonics of fcont are not in fvec
+default_fcont = 125;%it is usually desirable that first 3 harmonics of fcont are not in fvec
 fvec = default_fvec;
 set(handles.edit_freqVec,'string',num2str(default_fvec));
 set(handles.edit_controlFreq,'string',num2str(default_fcont));
@@ -251,7 +267,10 @@ str = get(hObject,'string');
 fvec = parsemyarray(str);
 set(handles.edit_freqVec,'string',num2str(fvec));
 return;
-
+%--------------------------------------------------------------------------
+%This function parses the comma separated list of frequencies and extracts
+%out the frequencies from that. It is flexible enough that aslong as user
+%puts one comma AND/OR one space between consequtive frequencies, it works.
 function numerVec = parsemyarray(str)
 if(isempty(str))
     error('Error: Frequency vector can not be left empty');
@@ -278,12 +297,12 @@ end
 if(waiting_for_char)%this means last element is numeric character
     numerVec(itrue) = str2num(str(first_dig_index:end));
 end
-
+%------------------------------------------------------------------
 function edit_period_Callback(hObject, eventdata, handles)
 check_editval(hObject, handles.slider_period);
 
 updateAO;
-% --- Channel 1 settings
+% --- Channel 1 settings%------------------------------------------
 % --- Peak To Peak amplitude in volts
 function slider_pkTOpk1_Callback(hObject, eventdata, handles)
 user_input = get(hObject,'value');
@@ -367,8 +386,12 @@ if (value > max | value < min) % out of bounds
 end
 set(h_slider,'Value', value);
 
-function updateAO(varargin)
-
+function updateAO(varargin)%does nothing at this point
+return
+%##########################################################################
+%#########  EVERYTHING BELOW IS THE CREATE FUNCTION. DONT PUT   ###########
+%#########          ACTUAL CODE BEYOND THIS POINT.              ###########
+%##########################################################################
 % --- Executes during object creation, after setting all properties.
 function edit_phase1_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit_phase1 (see GCBO)
@@ -471,7 +494,6 @@ if usewhitebg
 else
     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
-
 
 % --- Executes during object creation, after setting all properties.
 function edit_coilA_CreateFcn(hObject, eventdata, handles)

@@ -1,3 +1,14 @@
+2005-04-20 Kalpit Desai <kvdesai@email.unc.edu>
+	* mysignal.m:
+	- Adjusted the excitation values such that there is no 'step' occuring at start or end of any frequency.
+	- Renamed all varibles named as *1, *2 eg. coil1,coil2, amp1, amp2 etc to *A and *B to avoid confusion
+	- Added a gap containing zero values between sinusoids for each successive test frequency.
+	- Fixed default values of the pk2pk range. Now pk2pk = 2*offset by default
+
+	* mysignal.fig:
+	- Added a note on the GUI describing the conditions for excitations that will cause sinusoidal motion of the bead.
+	- Minor coloring and typo-fixings.
+
 2005-04-06 Kalpit Desai <kvdesai@email.unc.edu>
 	* mysignal.m, mysignal.fig:
 	- First commit
