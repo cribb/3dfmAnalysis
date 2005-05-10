@@ -1,3 +1,9 @@
+2005-05-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_newt_fluid_1D.m.  added.  simulates Newtowian fluid random walk in 1D.
+	* sim_newt_fluid_2D.m.  added.  simulates Newtowian fluid random walk in 2D.
+	* sim_newt_fluid_3D.m.  added.  simulates Newtowian fluid random walk in 3D.
+	* sim_newt_ps.m.  added.  computes theoretical power spectrum for Newtonian fluid.
+
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 
 	* Initial Version
