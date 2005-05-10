@@ -1,3 +1,8 @@
+2005-05-09	Jeremy Cribb
+	* load_video_tracking.m: MAJOR CHANGES to output format.  Prior to this version, load_video_tracking outputted a matrix that required all beads to exist for all times; zeros were used as placeholders.  This was changed to reflect Video Spot Tracker's output more truthfully.  Also added support for '.evt.mat' data format.
+	* get_bead.m: added.  Extracts a specific bead's data from new load_video_tracking.
+
+
 2005-04-06	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* load_vrpn_tracking.m: 
 	- Now compatible with laser tracker 02.13

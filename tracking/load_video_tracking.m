@@ -1,178 +1,217 @@
-function d = load_video_tracking(file, frame_rate, upsampleHz, psd_res, window, xyzunits, calib_um, absolute_pos);
+function varargout = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
 % 3DFM function
-% last modified 10/23/2004
+% last modified 05/09/2005
 %
 % This function reads in a Video Tracking dataset, saved in the 
-% matlab workspace file (*.mat) format and converts it to the 
-% familiar 3dfm data structure.
+% matlab workspace file (*.mat) format and prepares it for most 
+% data analysis functions.
 % 
-% d = load_video_tracking(file, frame_rate, upsampleHz, psd_res, window, xyzunits, calib_um, absolute_pos);
+% d        = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
+% [d,ch]   = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
+% [d,ch,u] = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
 %
-% where "filename" is the .mat filename
-%       "frame_rate" is the physical frame rate of the captured video sequence
-%       "upsampleHz" is the desired upsampling (linear interp) rate of the video
-%       "psd_res" is the desired resolution between datapts in the PSD
-%	      "window_type" is either 'blackman' or 'rectangle'
-%	      "xyz_units" is either 'nm' 'um' 'm' or 'pixels'
+% where "d" is the outputted data table
+%       "ch" are the column headings for the data table, d
+%       "u" are the units for columns of the data table, d
+%       "filename" is the .mat filename
+%       "frame_rate" (default 120fps) is the frame rate of the captured video sequence
+%	    "xyz_units" is either 'nm' 'um' 'm' or 'pixels'
 %       "calib_um" is the calibration coefficient to convert pixels to microns
 %       "absolute_pos" is either 'relative' or 'absolute'
 %
 % Notes:
 %
 % - This function is designed to work under default conditions with
-%   only one input argument, the filename.
-% - The video framerate defaults to 30Hz (fps)
-% - The default upsampling frequency is 30fps.
-% - If no upsampling is desired, use an upsampleHz of [] (NULL).
-% - The choice of window for the power spectral density (PSD) can be 
-%   either 'blackman' or 'rectangle' (rectangle for rheology data). 
-%   (default = blackman)
-% - The xyzunits can be either 'um' for microns for 'm' for meters.
-%   (default = pixels)
+%   only the filename as an input argument.
 %
 % 08/04/03 - created from load_vrpn_tracking
 % 08/09/03 - added the upsampling feature
 % 09/22/04 - updated documentation
 % 10/23/04 - added filter on input file (in case it's not a struct)
+% 01/24/05 - added the timestamps ability
+% 05/09/05 - MAJOR CHANGES to output format.  Prior to this version,
+%            load_video_tracking outputted a matrix that required all beads to exist
+%            for all times.  This was changed to reflect Video Spot Tracker's output
+%            more truthfully.  Use 'get_bead' to extract a specific bead's
+%            data.  Also added support for '.evt.mat' data format.
 %
 
-
 % handle the argument list
-if nargin < 8;   absolute_pos = 'relative'; end;
-if nargin < 7;   calib_um = 1;              end;
-if nargin < 6;   xyzunits  = 'pixels';	    end;
-if nargin < 5;   window = 'blackman';  		end;
-% psd nargin handled below
-if nargin < 3;   upsampleHz = [];           end;
-if nargin < 2;   frame_rate = 30;            end;
+if (nargin < 6 | isempty(tstamps));        tstamps  = 'no';	          end;
+if (nargin < 5 | isempty(absolute_pos));   absolute_pos = 'relative'; end;
+if (nargin < 4 | isempty(calib_um));       calib_um = 1;              end;
+if (nargin < 3 | isempty(xyzunits));       xyzunits  = 'pixels';	  end;
+if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
 
 	% Load the tracking data after it has been converted to a .mat file
-	dd=load(file);
-    if isfield(dd.tracking, 'videoTrackingSecUsecZeroXYZ')
+    dd=load(file);
+    if strfind(file, '.evt.') & isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
+        data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
+
+        % set up variables for easy tracking of table's column headings
+        TIME = 1; ID = 2; FRAME = 3; X = 4; Y = 5; Z = 6; 
+        ROLL = 7; PITCH = 8; YAW = 9; RADIAL = 10;
+        
+        ch{TIME} = 'time';
+        ch{ID} = 'id';
+        ch{FRAME} = 'frame';
+        ch{X} = 'x';
+        ch{Y} = 'y';
+        ch{Z} = 'z';
+        ch{ROLL} = 'roll';
+        ch{PITCH} = 'pitch';
+        ch{YAW} = 'yaw';
+        ch{RADIAL} = 'radial vector';      
+        
+        % if there are timestamps, and evt_gui was used, then they are already attached
+        tstamps = 'done';
+        
+    elseif isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
+        data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
+
+        % Let's axe the VRPN "time-stamps"... they don't mean anything here
+        data(:,2) = zeros(size(data, 1),1);  %fill the second column with zeros
+        data = data(:,2:end); %delete the first column
+
+        % set up variables for easy tracking of table's column headings
+        TIME = 1; ID = 2; FRAME = 3; X = 4; Y = 5; Z = 6; 
+        ROLL = 7; PITCH = 8; YAW = 9; RADIAL = 10;
+        
+        ch{1} = 'time';
+        ch{2} = 'id';
+        ch{3} = 'frame';
+        ch{4} = 'x';
+        ch{5} = 'y';
+        ch{6} = 'z';
+        ch{7} = 'roll';
+        ch{8} = 'pitch';
+        ch{9} = 'yaw';
+        ch{10} = 'radial vector';      
+
+    elseif isfield(dd.tracking, 'videoTrackingSecUsecZeroXYZ')        
         data = dd.tracking.videoTrackingSecUsecZeroXYZ;
+
+        % Let's axe the VRPN "time-stamps"... they don't mean anything here
+        data(:,2) = zeros(size(data, 1),1);  
+        data = data(:,2:end);
+
+        % set up variables for easy tracking of table's column headings
+        TIME = 1; ID = 2; X = 3; Y = 4; Z = 5; 
+        
+        ch{1} = 'time';
+        ch{2} = 'id';
+        ch{3} = 'x';
+        ch{4} = 'y';
+        ch{5} = 'z';  
+        
+        % no timestamps in this vrpn file format
+        tstamps = 'no';
+
     elseif isfield(dd.tracking, 'spot2DSecUsecIndexXYZ')
         data = dd.tracking.spot2DSecUsecIndexXYZ;
+
+        % Let's axe the VRPN "time-stamps"... they don't mean anything here
+        data(:,2) = zeros(size(data, 1),1);  
+        data = data(:,2:end);
+
+        % set up variables for easy tracking of table's column headings
+        TIME = 1; ID = 2; X = 3; Y = 4; Z = 5; 
+        
+        ch{1} = 'time';
+        ch{2} = 'id';
+        ch{3} = 'x';
+        ch{4} = 'y';
+        ch{5} = 'z';       
+        
+        % no timestamps in this vrpn file format
+        tstamps = 'no';
+
     elseif length(dd.tracking) > 1
         data = dd.tracking;
+        ch = NaN;
     else
         error('I do not know how to handle this video VRPN file (weird fieldnames).');
     end
+        
+    units{TIME} = 'sec';
     
-	d.const.beadSize = 0.957;
-	d.const.name = file;
-
-    num_sensors = max(data(:,3)) + 1;
-    
-    num_rows = 0;
-    for k = 1 : num_sensors
-        my_sensor = find(data(:,3) == k-1);
-        if(length(my_sensor)>num_rows)
-            num_rows = length(my_sensor);
-        end
-    end
-    
-
-    d.video.x = zeros(num_rows,num_sensors);
-    d.video.y = zeros(num_rows,num_sensors);
-    
-	if(strcmp(absolute_pos,'relative'))
-        for k = 1 : num_sensors       
-            my_sensor      = find(data(:,3) == k-1);
-                  
-            xsensor = data(my_sensor,4);
-            ysensor = data(my_sensor,5);
-            
-            for j = 1:length(my_sensor)
- 			d.video.x(j,k) = xsensor(j) - xsensor(1);    
-			d.video.y(j,k) = ysensor(j) - ysensor(1);
-        end
-    end
-   	elseif(strcmp(absolute_pos,'absolute'))
-        for k = 1 : num_sensors       
-       
-            my_sensor      = find(data(:,3) == k-1);
-
-            xsensor = data(my_sensor,4);
-            ysensor = data(my_sensor,5);
-            
-            for j = 1:length(my_sensor)
- 			d.video.x(j,k) = xsensor(j);    
-			d.video.y(j,k) = ysensor(j);
-        end
-        end
-	end
-    
-    % handle the units before doing anything else
+    % handle the physical units
+    units{X} = xyzunits;  units{Y} = xyzunits;  units{Z} = xyzunits;
 	if strcmp(xyzunits,'m')
-		d.video.x = d.video.x * calib_um * 1e-6;  % convert video coords from 
-		d.video.y = d.video.y * calib_um * 1e-6;  % default pixels to meters
-		d.const.xyzunits = 'meters';
+		data(:,X:Z) = data(:,X:Z) * calib_um * 1e-6;  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'um')
-        d.video.x = d.video.x * calib_um;
-        d.video.y = d.video.y * calib_um;  % default pixels to microns
-        d.const.xyzunits = 'microns';
+		data(:,X:Z) = data(:,X:Z) * calib_um;  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'nm')
-        d.video.x = d.video.x * calib_um * 1e3; % convert video coords from
-        d.video.y = d.video.y * calib_um * 1e3; % default pixels to nm
+		data(:,X:Z) = data(:,X:Z) * calib_um * 1e3;  % convert video coords from pixels to nm
     else 
-        d.const.xyzunits = 'pixels';
+        units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
 	end
 
-    for k = 1 : num_sensors
-        my_sensor      = find(data(:,3) == k-1);
-        d.video.r(:,k) = magnitude(d.video.x(:,k),d.video.y(:,k));
-    end        
+    trackerID = data(:,ID);
+    x = data(:,X);
+    y = data(:,Y);
     
-    % Assuming we have a constant frame rate:
-    d.video.time = [0 : 1/frame_rate : (length(d.video.x)-1)/frame_rate]';
+    % now do all of the bead specific things
+    for k = 0 : max(trackerID)    
+                    
+        % select rows in table that correspond only to the k-th bead
+        this_tracker  = find(trackerID == k);
+        
+        % handle the case for which a trackerID was used, but no points
+        % were retained in the dataset.
+        if(length(this_tracker) == 0); 
+            continue;
+        end;
 
-    
-    % handle the PSD res Problem
-    if (nargin < 4) | (length(psd_res) == 0);
-        psd_res = 1/d.video.time(end);
+        % select x&y coords for only the kth bead
+        this_x = x(this_tracker);
+        this_y = y(this_tracker);
+
+        if(strcmp(absolute_pos,'relative'))
+            
+            % subtract off the initial x and y (1st point becomes the zero)
+            this_x = this_x - this_x(1);
+            this_y = this_y - this_y(1);
+            
+            % enter the new locations into the data table
+            data(this_tracker,X) = this_x;
+            data(this_tracker,Y) = this_y;            
+
+            % ASIDE: add vector magnitude column (because this is only relevant 
+            % in relative measurements, it's placed here.)
+            data(this_tracker,RADIAL) = magnitude(this_x,this_y);           
+        
+        end
+        
+            % Handle time.... if we don't have timestamps then we have to assume
+            % that we have a constant frame rate.
+            if strcmp(tstamps,'yes')
+                tfile = file(1:end-9);
+                try
+                    times = load([tfile '.tstamp.txt'], 'ASCII');
+                    times = times - times(1);
+                    active_frames = data(this_tracker, FRAME);
+                    data(this_tracker,TIME) = times(active_frames+1);
+                catch
+                    data(this_tracker,TIME) = data(this_tracker,FRAME) * 1/frame_rate;                
+                end            
+            elseif strcmp(tstamps, 'no')
+                data(this_tracker,TIME) = data(this_tracker,FRAME) * 1/frame_rate;
+            else
+                % do nothing
+            end    
     end
-
     
-    % handle the upsampling if so desired
-    if length(upsampleHz) > 0
-		t = d.video.time;
-		video_T = 1/upsampleHz;
-		d.video.ts = interp1(t, d.video.time, min(t):video_T:max(t))';
-		d.video.xs = interp1(t, d.video.x, min(t):video_T:max(t));
-		d.video.ys = interp1(t, d.video.y, min(t):video_T:max(t));
-		d.video.rs = interp1(t, d.video.r, min(t):video_T:max(t));
-    
-        ts = d.video.ts;
-        xs = d.video.xs(:,k);
-		ys = d.video.ys(:,k);
-		rs = d.video.rs(:,k);
-        
-        [psd f] = mypsd([xs, ys, rs], frame_rate, psd_res, window);
-		d.psd.fs = f;
-		d.psd.xs(:,k) = psd(:, 1);
-		d.psd.ys(:,k) = psd(:, 2);
-        d.psd.rs(:,k) = psd(:, 3);
-    end   
-
-	% Construct the Power Spectral Densities for x and y tracked positions
-	for k = 1 : num_sensors
-
-        % Put some easier variable names here for all the function calls
-        t = d.video.time;
-        x = d.video.x(:,k);
-		y = d.video.y(:,k);
-		r = d.video.r(:,k);
-
-        
-        % Want a PSD resolution of psd_res Hz between freqs with
-		% a windowing of window_type
-
-        
-		[psd f] = mypsd([x, y, r], frame_rate, psd_res, window);
-		d.psd.f = f;
-		d.psd.x(:,k) = psd(:, 1);
-		d.psd.y(:,k) = psd(:, 2);
-        d.psd.r(:,k) = psd(:, 3);
-
-	end
-    
+switch nargout
+    case 1
+        varargout{1} = data;
+    case 2
+        varargout{1} = data;
+        varargout{2} = ch;
+    case 3
+        varargout{1} = data;
+        varargout{2} = ch;
+        varargout{3} = units;
+    otherwise
+        error('incorrect number of output arguments');
+end
