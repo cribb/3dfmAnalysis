@@ -14,4 +14,4 @@ function v = rows(X);
 
     [r c p] = size(X);
 
-    v = c;
+    v = r;

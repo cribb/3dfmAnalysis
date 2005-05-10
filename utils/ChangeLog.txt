@@ -1,4 +1,7 @@
 2005-05-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* rows.m:  stupid typo.
+
+2005-05-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* rows.m:  added.  returns the number or rows in a matrix.
 
 2005-01-03  Jeremy Cribb <jcribb@email.unc.edu>
