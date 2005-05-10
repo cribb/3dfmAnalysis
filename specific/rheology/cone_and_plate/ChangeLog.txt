@@ -1,0 +1,10 @@
+2005-05-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* Added cap_creep.m, cap_sweep.m, cap_viscometry.m, cap_yield.m.  These files take the exported XLS files from the Bohlin Gemini Rheometer and converts them to matlab structures/workspaces.
+	* Added cap_plot.m.  Plots standard rheology plots from data.  Uses above as input filters.
+
+2005-03-31  Jeremy Cribb <jcribb@email.unc.edu>
+
+	* Initial Version
+
+
+
