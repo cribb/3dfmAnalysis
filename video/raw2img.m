@@ -20,24 +20,25 @@ function v = raw2img(varargin)
 %          (default = the number of frames in the rawfile)
 %   
 %  09/22/04 - created; jcribb.
-%  
+%  05/14/05 - fixed an off by one error.  Now single frame RAWs are
+%             converted without error.
 %
 
 switch nargin
     case 1
         rawfilein = varargin{1};
         image_type = 'tif';
-        start_frame = 1;
+        start_frame = 0;
         end_frame = inf;        % will handle this later
     case 2
         rawfilein = varargin{1};
         image_type = varargin{2};
-        start_frame = 1;
+        start_frame = 0;
         end_frame = inf;        % will handle this later
     case 3
         rawfilein = varargin{1};
         image_type = varargin{2};        
-        start_frame = 1;
+        start_frame = 0;
         end_frame = varargin{3};
     case 4
         rawfilein = varargin{1};
@@ -60,15 +61,15 @@ number_of_frames = (file.bytes) / frame_size;
 
 % finish handling argument-list
 if (nargin <= 2)
-    start_frame = 1;
+    start_frame = 0;
     end_frame = number_of_frames;
 end
 
 % check validity of parameters
-if (start_frame < 1) | (start_frame > number_of_frames)
-    error('The start_frame parameter is less than one, or exceeds the number of frames in the RAW stack.');    
-elseif (end_frame < 1) | (end_frame > number_of_frames)
-    error('The end_frame parameter is less than one, or exceeds the number of frames in the RAW stack.');
+if (start_frame < 0) | (start_frame > number_of_frames)
+    error('The start_frame parameter is less than zero, or exceeds the number of frames in the RAW stack.');    
+elseif (end_frame < 0) | (end_frame > number_of_frames)
+    error('The end_frame parameter is less than zero, or exceeds the number of frames in the RAW stack.');
 end
 
 % setup the input file
@@ -90,7 +91,7 @@ axis square;
 set(ax, 'Visible', 'off');
 
 
-for k=start_frame:end_frame
+for k=start_frame:end_frame-1
     
   status = fseek(fid, frame_size*k, 'bof');  % advance to next frame
     

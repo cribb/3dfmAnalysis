@@ -1,3 +1,6 @@
+2005-05-15  Jeremy Cribb <jcribb@email.unc.edu>
+	* raw2img.m: fixed a bug that offset the frame number by one.
+
 2005-05-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* swaplines.m: added.  Swaps lines in image(s) if Pulnix misbehaves.
 
