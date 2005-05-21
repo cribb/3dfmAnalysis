@@ -1,3 +1,6 @@
+2005-05-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* phase.m: added new documentation and used quadrant-aware atan function.
+
 2005-01-20  Jeremy Cribb <jcribb@email.unc.edu>
 	* randwalk.m: added magnitude to the randomizer.  Some returned clock values were returning identical seed values to the random number generator.  bad.
 	* windiff.m: added the new grid to the return values.
