@@ -1,7 +1,12 @@
-2005-05-09	Jeremy Cribb
+2005-05-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* filter_out_repeats_in_vrpn.m: added.
+
+2005-05-17  Sorrell Massenburg <massenburgs@unc.edu>
+	* erase_negatives_in_vrpn.m: added.
+
+2005-05-09	Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: MAJOR CHANGES to output format.  Prior to this version, load_video_tracking outputted a matrix that required all beads to exist for all times; zeros were used as placeholders.  This was changed to reflect Video Spot Tracker's output more truthfully.  Also added support for '.evt.mat' data format.
 	* get_bead.m: added.  Extracts a specific bead's data from new load_video_tracking.
-
 
 2005-04-06	Kalpit Desai	<kvdesai@cs.unc.edu>
 	* load_vrpn_tracking.m: 
@@ -9,7 +14,7 @@
 	- Tells user when swaping vrpn time stamps with separately logged 'even' time stamps.
 	* tclip.m: fixed function signature in the documentation.
 
-2004-10-23	Jeremy Cribb
+2004-10-23	Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: added filter on input file (in case it's not a struct).
 
 2004-08-22	Jeremy Cribb	<jcribb@email.unc.edu>
