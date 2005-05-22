@@ -1,3 +1,6 @@
+2005-05-22  Jeremy Cribb <jcribb@email.unc.edu>
+	* hexaplane.m: added.  pole matrix for 6-poles-coplanar geometry.
+
 2004-12-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* trigplane.m: prettified code.
 
