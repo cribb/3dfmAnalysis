@@ -1,23 +1,21 @@
-function varargout = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
+function v = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps, table);
 % 3DFM function
-% last modified 05/09/2005
+% last modified 05/22/2005
 %
 % This function reads in a Video Tracking dataset, saved in the 
 % matlab workspace file (*.mat) format and prepares it for most 
 % data analysis functions.
 % 
-% d        = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
-% [d,ch]   = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
-% [d,ch,u] = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
+% d = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
 %
 % where "d" is the outputted data table
-%       "ch" are the column headings for the data table, d
-%       "u" are the units for columns of the data table, d
-%       "filename" is the .mat filename
+%       "file" is the .mat filename
 %       "frame_rate" (default 120fps) is the frame rate of the captured video sequence
-%	    "xyz_units" is either 'nm' 'um' 'm' or 'pixels'
+%	    "xyzunits" is either 'nm' 'um' 'm' or 'pixels'
 %       "calib_um" is the calibration coefficient to convert pixels to microns
 %       "absolute_pos" is either 'relative' or 'absolute'
+%       "tstamps" is 'yes' when a timestamps file exists
+%       "table" is 'struct' or 'table', denoting the style of the output data
 %
 % Notes:
 %
@@ -34,9 +32,12 @@ function varargout = load_video_tracking(file, frame_rate, xyzunits, calib_um, a
 %            for all times.  This was changed to reflect Video Spot Tracker's output
 %            more truthfully.  Use 'get_bead' to extract a specific bead's
 %            data.  Also added support for '.evt.mat' data format.
+% 05/22/05 - added table parameter that will change output from matrix to structure of vectors 
+%            for easier coding.
 %
 
 % handle the argument list
+if (nargin < 7 | isempty(table));          table = 'struct';          end;
 if (nargin < 6 | isempty(tstamps));        tstamps  = 'no';	          end;
 if (nargin < 5 | isempty(absolute_pos));   absolute_pos = 'relative'; end;
 if (nargin < 4 | isempty(calib_um));       calib_um = 1;              end;
@@ -52,17 +53,6 @@ if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
         TIME = 1; ID = 2; FRAME = 3; X = 4; Y = 5; Z = 6; 
         ROLL = 7; PITCH = 8; YAW = 9; RADIAL = 10;
         
-        ch{TIME} = 'time';
-        ch{ID} = 'id';
-        ch{FRAME} = 'frame';
-        ch{X} = 'x';
-        ch{Y} = 'y';
-        ch{Z} = 'z';
-        ch{ROLL} = 'roll';
-        ch{PITCH} = 'pitch';
-        ch{YAW} = 'yaw';
-        ch{RADIAL} = 'radial vector';      
-        
         % if there are timestamps, and evt_gui was used, then they are already attached
         tstamps = 'done';
         
@@ -77,17 +67,6 @@ if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
         TIME = 1; ID = 2; FRAME = 3; X = 4; Y = 5; Z = 6; 
         ROLL = 7; PITCH = 8; YAW = 9; RADIAL = 10;
         
-        ch{1} = 'time';
-        ch{2} = 'id';
-        ch{3} = 'frame';
-        ch{4} = 'x';
-        ch{5} = 'y';
-        ch{6} = 'z';
-        ch{7} = 'roll';
-        ch{8} = 'pitch';
-        ch{9} = 'yaw';
-        ch{10} = 'radial vector';      
-
     elseif isfield(dd.tracking, 'videoTrackingSecUsecZeroXYZ')        
         data = dd.tracking.videoTrackingSecUsecZeroXYZ;
 
@@ -97,13 +76,7 @@ if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
 
         % set up variables for easy tracking of table's column headings
         TIME = 1; ID = 2; X = 3; Y = 4; Z = 5; 
-        
-        ch{1} = 'time';
-        ch{2} = 'id';
-        ch{3} = 'x';
-        ch{4} = 'y';
-        ch{5} = 'z';  
-        
+                
         % no timestamps in this vrpn file format
         tstamps = 'no';
 
@@ -117,34 +90,31 @@ if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
         % set up variables for easy tracking of table's column headings
         TIME = 1; ID = 2; X = 3; Y = 4; Z = 5; 
         
-        ch{1} = 'time';
-        ch{2} = 'id';
-        ch{3} = 'x';
-        ch{4} = 'y';
-        ch{5} = 'z';       
-        
         % no timestamps in this vrpn file format
         tstamps = 'no';
 
     elseif length(dd.tracking) > 1
         data = dd.tracking;
         ch = NaN;
+        error(['CONGRATULATIONS! You have stumbled upon an OLD video-tracking VRPN format. ' ...
+              '\nYou will have to edit load_video_tracking and include a filter for this format.']);
     else
         error('I do not know how to handle this video VRPN file (weird fieldnames).');
     end
         
-    units{TIME} = 'sec';
-    
     % handle the physical units
     units{X} = xyzunits;  units{Y} = xyzunits;  units{Z} = xyzunits;
 	if strcmp(xyzunits,'m')
 		data(:,X:Z) = data(:,X:Z) * calib_um * 1e-6;  % convert video coords from pixels to meters
+        units.x = 'm'; units.y = 'm'; units.z = 'm';
     elseif strcmp(xyzunits,'um')
 		data(:,X:Z) = data(:,X:Z) * calib_um;  % convert video coords from pixels to meters
+        units.x = 'um'; units.y = 'um'; units.z = 'um';
     elseif strcmp(xyzunits,'nm')
 		data(:,X:Z) = data(:,X:Z) * calib_um * 1e3;  % convert video coords from pixels to nm
+        units.x = 'nm'; units.y = 'nm'; units.z = 'nm';
     else 
-        units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
+        units.x = 'pixels';  units.y = 'pixels';  units.z = 'pixels';
 	end
 
     trackerID = data(:,ID);
@@ -201,17 +171,21 @@ if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
                 % do nothing
             end    
     end
+
+    switch table
+        case 'table'
+            v = data;
+        otherwise
+            v.id= data(:,ID);    
+            v.t = data(:,TIME);
+            v.frame = data(:,FRAME);
+            v.x = data(:,X);
+            v.y = data(:,Y);
+            v.z = data(:,Z);		
+            if exist('ROLL');    v.roll = data(:,ROLL);    end;
+            if exist('PITCH');   v.pitch= data(:,PITCH);   end;
+            if exist('YAW');     v.yaw  = data(:,YAW);     end;                    
+    end
     
-switch nargout
-    case 1
-        varargout{1} = data;
-    case 2
-        varargout{1} = data;
-        varargout{2} = ch;
-    case 3
-        varargout{1} = data;
-        varargout{2} = ch;
-        varargout{3} = units;
-    otherwise
-        error('incorrect number of output arguments');
-end
+    
+    

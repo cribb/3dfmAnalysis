@@ -1,3 +1,7 @@
+2005-05-22  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: added table parameter that allows one to switch between structure and matrix/table output.
+	* get_bead.m: now handles either output type.
+
 2005-05-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* filter_out_repeats_in_vrpn.m: added.
 
