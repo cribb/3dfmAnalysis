@@ -144,12 +144,13 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     % load the datafile
     logentry('Loading dataset... ');
     try
-        d = load_video_tracking2(filename, [], [], [], 'absolute', 'yes');
+        d = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table');
     catch
         msgbox('File Not Found!', 'Error.');
         return;
     end
     set(handles.edit_infile, 'TooltipString', filename);
+    set(handles.edit_infile, 'String', '');
     logentry(['Dataset, ' filename ', successfully loaded...']);
     
     % try loading the MIP file

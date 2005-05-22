@@ -1,3 +1,6 @@
+2005-05-22  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: updated load_video_tracking call.
+
 2005-02-02  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m:  added ability to delete datapoints after a selected time.
 	* evt_GUI.fig:  same.
