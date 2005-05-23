@@ -12,7 +12,9 @@ function v = erase_negatives_in_vrpn(filemask)
 %  (wildcards ok)
 %  
 %  05/18/05 - created; sorell massenburg.
-%               modeled on filter_out_repeats_in_vrpn function by jcribb
+%               modeled on filter_out_repeats_in_vrpn
+
+%  05/23/05 - modified; sorell massenburg
 
 files = dir(filemask);
 
