@@ -1,3 +1,7 @@
+2005-06-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* relaxation_time.m: added.  This function uses non-linear least squares fitting procedures to compute any number of time constants for creep-relaxation data.  A Kelvin-Voight model was used for equation construction.
+	* relaxtime_fun.m: added.  contains the fitting function for relaxation_time.m.
+
 2005-04-14  Jeremy Cribb <jcribb@email.unc.edu>
 	* VE_fluid_model:  removed warning for dividing by zero.  
 
