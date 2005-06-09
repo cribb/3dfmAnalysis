@@ -30,8 +30,10 @@ tau = x0(foo+1:end);
 % go to town.  this is our fitting function
 [rows cols] = size(J);
 for k = 1 : cols
-    if ~exist('Jt')
-        Jt = J(k)*exp(-t/tau(k));
+    if ~exist('Jt') & (cols == 1)
+        Jt = exp(-t/tau(k));       
+    elseif ~exist('Jt')
+        Jt = J(k)*exp(-t/tau(k));        
     elseif (k > 1) & (k < cols)
         Jt = Jt + J(k)*exp(-t/tau(k));
     else

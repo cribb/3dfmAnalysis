@@ -1,4 +1,8 @@
 2005-06-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* relaxation_time.m: fixed a bug where, when asked for only one time constant, nothing would happen.
+	* relaxtime_fun.m: same.
+
+2005-06-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* relaxation_time.m: added.  This function uses non-linear least squares fitting procedures to compute any number of time constants for creep-relaxation data.  A Kelvin-Voight model was used for equation construction.
 	* relaxtime_fun.m: added.  contains the fitting function for relaxation_time.m.
 

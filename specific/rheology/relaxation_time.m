@@ -1,4 +1,4 @@
-function [tau,J] = relaxation_time(t, xt, n)
+function [J,tau,R_square] = relaxation_time(t, xt, n)
 % 3DFM function  
 % Rheology 
 % last modified 06/09/2005 
@@ -25,10 +25,10 @@ function [tau,J] = relaxation_time(t, xt, n)
 %  
 
 % set parameters for the options structure sent to lsqcurvefit.
-options = optimset('MaxFunEvals', 4000*2*n, ...
+options = optimset('MaxFunEvals', 20000*2*n, ...
                    'Diagnostics', 'off', ...
-                   'TolFun', 1e-8, ...
-                   'MaxIter', 1000, ...
+                   'TolFun', 1e-13, ...
+                   'MaxIter', 2000, ...
                    'ShowStatusWindow', 'off');
 
 % normalize recovery to start at 1 and end at 0
@@ -41,13 +41,17 @@ xt = xt / max(xt);
 rand('state',sum(100000*clock));
 
 % initial guess... let's use random numbers with no negatives.
-J   = rand(1,n-1);    % the last J is constrained
+if n > 1
+    J   = ones(1,n-1)/n;    % the last J is constrained
+else
+    J = 1;
+end
 tau = rand(1,n);
 
 x0 = [J tau];  % x0 is a row vector with one less coefficient than 
                % time constants. (J is constrained such that sum(J) == 1)
 
-[fit, resnorm, residuals] = lsqcurvefit('relaxtime_fun', x0, t, xt, [], [], options);
+[fit, resnorm, residuals] = lsqcurvefit('relaxtime_fun', x0, t, xt, 0, 1, options);
 
 
 % HOW GOOD WAS THE FIT????
@@ -69,7 +73,9 @@ R_square = 1 - sse/sst;
 foo = floor(length(x0)/2);
 tau = fit(foo+1:end);
 J = fit(1:foo);
-J(length(tau)) = 1 - sum(J);
+if length(tau) > 1
+    J(length(tau)) = 1 - sum(J);
+end
 
 % rest of this stuff is for plotting fit vs data
 for k = 1 : length(J)
@@ -80,10 +86,14 @@ for k = 1 : length(J)
     end
 end
 
-figure(1);
-subplot(2,2,1);
-plot(t, xt, '.', t, fit_xt, 'ro');
-subplot(2,2,2);
-loglog(t, xt, '.', t, fit_xt, 'ro');
-subplot(2,2,3);
-plot(t, residuals, '.');
+figure;
+plot(t, xt, '.', t, fit_xt, 'r');
+xlabel('time [s]');
+ylabel('normalized recovery');
+legend('data', 'fit');
+
+figure;
+loglog(t, xt, '.', t, fit_xt, 'r');
+xlabel('time [s]');
+ylabel('normalized recovery');
+legend('data', 'fit');
