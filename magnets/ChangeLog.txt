@@ -1,3 +1,7 @@
+2005-07-09  Kalpit Desai <kvdesai@email.unc.edu>
+	* visVelocities.m: 
+	- Commented out the code that was removing the datapoints with absolutely zero velocities. For simulation purposes, we would like to see this data points through.
+
 2005-01-10  Kalpit Desai <kvdesai@email.unc.edu>
 	* visVelocities.m: 
 	- Now has pole-locations plotted in the 'hairs' mode also.

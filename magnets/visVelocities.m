@@ -16,6 +16,7 @@ function varargout = visVelocities(data,poles,mode,threshold)
 % Last Modified : 10 January 04 by kd- changed the colormap type to "HOT"
 % 06/10/04: changed the visualization for 'colors' mode: using sphere_tri to tesselate the sphere with triangles
 
+dbstop if error
 if nargin < 4
     threshold = 0; %no threshold applied
 end
@@ -50,10 +51,10 @@ for i = 1:length(data.velx)
     dir3d = [data.velx(i,1), data.vely(i,1), data.velz(i,1)];
     mag = sqrt(dir3d*dir3d');
     max_mag = max(max_mag,mag);
-    if(~mag) % if this is a zero velocity vector than discard it, because it creates empty spaces in sphere
-        j = j-1;
-        continue;
-    end
+%     if(~mag) % if this is a zero velocity vector than discard it, because it creates empty spaces in sphere
+%         j = j-1;
+%         continue;
+%     end
     unit3d = dir3d/mag; %unit vector along the direction of this velocity
     
     data.origx(j,1) = unit3d(1,1)*radias; % used only for purpose of plotting hairs
@@ -217,4 +218,5 @@ if (strcmpi(mode,'hairs') | strcmpi(mode,'both'))
 	axis equal;
     set(gca,'Color','k');
 end
+dbclear if error
 % keyboard
