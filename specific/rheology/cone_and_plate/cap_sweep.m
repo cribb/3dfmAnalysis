@@ -19,9 +19,6 @@ function v = cap_sweep(file)
 
 [data, headertext] = xlsread(file);
 
-TRUE  = 1;
-FALSE = 0;
-
 % column headers are determined by the Bohlin/Malvern rheology Software
 % package.  For frequency and amplitude sweeps, these headers are:  time, 
 % temperature, frequency, phase angle, complex modulus, elastic modulus, 

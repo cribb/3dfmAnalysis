@@ -59,7 +59,7 @@ if nargin < 2
         
         v = plot_me(d, plottype);
 		figure(v);
-		title(file);
+		title(file,'Interpreter', 'none');
         pretty_plot;
 	end
 
@@ -75,6 +75,8 @@ function v = plot_me(d, plottype);
 	switch plottype
         case 'creep'
             v = creep_plots(d);
+        case 'creep:all'
+            v = creep_all(d);
         case 'viscometry'
             v = viscometry_plots(d);
         case 'viscometry:yield'
@@ -96,7 +98,7 @@ function h = creep_plots(d);
     
     h = figure;
     plot(d.creep.time, d.creep.compliance, d.recovery.time + max(d.creep.time), d.recovery.compliance);
-    title('Creep Recovery');
+    title('Creep Recovery','Interpreter', 'none');
     xlabel('time [s]');
     ylabel('Compliance [1/Pa]');
     
@@ -109,7 +111,7 @@ function h = viscometry_plots(d);
     hold on;
         loglog(d.shear_rate(2), d.viscosity(2), '>');
     hold off;
-    title('Viscometry');
+    title('Viscometry','Interpreter', 'none');
     xlabel('Shear Rate [1/s]');
     ylabel('Viscosity [Pa s]');
 
@@ -122,7 +124,7 @@ function h = yield_plots(d);
     hold on;
         plot(d.shear_stress(2), d.shear_rate(2), '>');
     hold off;    
-    title('Viscometry');
+    title('Viscometry','Interpreter', 'none');
     xlabel('Shear Stress [Pa]');
     ylabel('Strain Rate [s^{-1}]');    
     pretty_plot;
@@ -132,7 +134,7 @@ function h = sweep_freq(d);
 
     h = figure;
     [ax,h1,h2] = plotyy(d.frequency, d.elastic_modulus, d.frequency, d.viscous_modulus, 'loglog');
-    title('Frequency Sweep','FontSize',12,'FontWeight','bold');
+    title('Frequency Sweep','FontSize',12,'FontWeight','bold','Interpreter', 'none');
     xlabel('Frequency [Hz]','FontSize',12,'FontWeight','bold');
     gpax = ax(1);
     gppax = ax(2);
@@ -155,7 +157,7 @@ function h = sweep_freq_angle(d);
     h = figure;
 
     [ax,h1,h2] = plotyy(d.frequency, [d.elastic_modulus./d.complex_modulus, d.viscous_modulus./d.complex_modulus], d.frequency, d.phaseangle, 'semilogx');
-    title('Frequency Sweep','FontSize',12,'FontWeight','bold');
+    title('Frequency Sweep','FontSize',12,'FontWeight','bold','Interpreter', 'none');
     xlabel('Frequency [Hz]','FontSize',12,'FontWeight','bold');
     set(get(ax(1),'YLabel'),'String','normalized modulus [Pa]','FontSize',12,'FontWeight','bold');
     set(get(ax(2),'YLabel'),'String','tan(\delta) [^o]','FontSize',12,'FontWeight','bold');
@@ -172,7 +174,7 @@ function h = sweep_amp(d);
     hold on;
         loglog(d.shear_stress(2), d.complex_modulus(2), '>');
     hold off;
-    title('Amplitude Sweep');
+    title('Amplitude Sweep','Interpreter', 'none');
     xlabel('Shear Stress [Pa]');
     ylabel('Complex Modulus [Pa]');
     
@@ -201,9 +203,39 @@ function h = sweep_amp_all(d);
 	end
 
     hold off;
-	title('Amplitude Sweep');    
+	title('Amplitude Sweep','Interpreter', 'none');    
     xlabel('Shear Stress [Pa]');
     ylabel('|G*| [Pa]');    
     pretty_plot;
 
+%-------------------------------------------------
+function h = creep_all(d);
+    files = dir('*.xls');
+    clr = 'brgkmcy';
+    h = figure;
+    hold on;
     
+    clridx = 0;
+	for k = 1 : length(files)
+        
+        file = files(k).name;
+        file = lower(file);
+        
+        if strfind(file, 'creep')
+            d = cap_creep(file);
+            semilogy(d.creep.time, d.creep.compliance, clr(mod(clridx,7)+1), ...
+                 d.recovery.time+max(d.creep.time), d.recovery.compliance, clr(mod(clridx,7)+1));
+            hold on;
+        end
+        clridx = clridx + 1;
+        
+	end
+
+    hold off;
+	title('Creep:All','Interpreter', 'none');    
+    xlabel('time [sec]');
+    ylabel('Compliance [1/Pa]');    
+    pretty_plot;
+
+    
+        

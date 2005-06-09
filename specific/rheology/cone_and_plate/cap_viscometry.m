@@ -18,9 +18,6 @@ function v = cap_viscometry(file)
 %
 [data, headertext] = xlsread(file);
 
-TRUE  = 1;
-FALSE = 0;
-
 % column headers are determined by the Bohlin/Malvern rheology Software
 % package.  For viscometry expts, these headers are:  time, temperature, 
 % shear stress, shear rate, instantaneous viscosity, strain, normal force, 

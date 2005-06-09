@@ -18,9 +18,6 @@ function v = cap_creep(file)
 %
 [data, headertext] = xlsread(file);
 
-TRUE = 1;
-FALSE = 0;
-
 % column headers are determined by the Bohlin/Malvern rheology Software
 % package.  For creep experimeents these headers are:  temperature, 
 % creep time, creep angle, creep compliance, recovery time, recovery angle, 
@@ -41,7 +38,7 @@ UNITS = 4;
 
 % take care of the creep data first.
 creepnans = isnan(data(:,CREEPTIME));
-creep = find(creepnans == FALSE);
+creep = find(creepnans == false);
 
 v.creep.temperature = data(creep,TEMPERATURE);
 v.creep.time = data(creep,CREEPTIME);
@@ -52,7 +49,7 @@ v.creep.normalforceN1 = data(creep,NORMALFORCEN1);
 
 % now for the recovery data...
 recoverynans = isnan(data(:, RECOVERYTIME));
-recovery = find(recoverynans == FALSE);
+recovery = find(recoverynans == false);
 
 v.recovery.temperature = data(recovery,TEMPERATURE);
 v.recovery.time = data(recovery,RECOVERYTIME);
