@@ -1,5 +1,9 @@
 2005-07-10  David Hill <dbhill@email.unc.edu>
 
+	* Changed msd2pt to be a funtion
+
+2005-07-10  David Hill <dbhill@email.unc.edu>
+
 	* Added batch_msd2pt to more quickly get thru 2pt rheology calculations
 
 2004-08-31  David Hill <dbhill@email.unc.edu>
