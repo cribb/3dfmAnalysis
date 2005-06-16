@@ -1,3 +1,6 @@
+2005-05-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* mip.m: adjusted output so that if an output variable is defined, the MIP is outputted as a 2D matrix, otherwise it just displays an image of the MIP.
+
 2005-05-15  Jeremy Cribb <jcribb@email.unc.edu>
 	* raw2img.m: fixed a bug that offset the frame number by one.
 

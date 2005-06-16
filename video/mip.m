@@ -83,7 +83,7 @@ end
 [timefig,timetext] = init_timerfig;
 
 % now, the meat of the routine.... handle it according to parameters
-for k = start : stride :  (stop - 1)
+for k = start : stride :  stop
     tic;
     
     switch ext
@@ -140,9 +140,12 @@ if findstr('raw', ext)
     imMIP = imMIP';
 end
 
-figure;
-imagesc(imMIP);
-colormap(gray(256));
-
-v = imMIP;
+switch nargout
+    case 0
+		figure;
+		imagesc(imMIP);
+		colormap(gray(256));
+    case 1
+		v = imMIP;
+end
 
