@@ -1,3 +1,6 @@
+2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* windiff.m: the dependent variable can now have more than one column (e.g. x & y coordinates) 
+
 2005-05-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* phase.m: added new documentation and used quadrant-aware atan function.
 

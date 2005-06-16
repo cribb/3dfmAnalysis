@@ -30,6 +30,11 @@ function [dydx, newx, newy] = windiff(y, x, window_size)
     dy = (B-A);
     dx = (D-C);
     
-    dydx = dy./dx;
+    [rows cols] = size(y);
+    
+    dydx = dy./repmat(dx, 1, cols);
     newx = mean([C D], 2);
-    newy = mean([A B], 2);
+
+    newy(:,:,1) = A;
+    newy(:,:,2) = B;
+    newy = mean(newy, 3);
