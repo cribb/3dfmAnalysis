@@ -1,4 +1,7 @@
 2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* forcecal2d.m: cleaned up code.  fixed bug in offset of 1D force-distance plot.
+
+2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* forcecal2d.m: added documentation.
 	
 2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
