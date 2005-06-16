@@ -1,3 +1,6 @@
+2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: improved the way intensity projection images are included in editing video tracking files.
+	
 2005-05-22  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: updated load_video_tracking call.
 

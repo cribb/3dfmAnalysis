@@ -46,9 +46,8 @@ function varargout = evt_GUI(varargin)
     % set up global constants for data columns
     global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
     
-    TIME = 1; ID = 2; FRAME = 3; X = 4; Y = 5; Z = 6;
-    ROLL = 7; PITCH = 8; YAW = 9; RADIAL = 10;
-    
+    video_tracking_constants;
+
 
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -132,7 +131,7 @@ function edit_infile_Callback(hObject, eventdata, handles)
 function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
 
-    filename = get(handles.edit_infile, 'String');
+    filename = get(handles.edit_infile, 'String')
     
     if(length(filename) == 0)
 		[fname, pname] = uigetfile('*.mat');
@@ -140,6 +139,9 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 		set(handles.edit_infile,'String', filename);
         set(handles.edit_outfile, 'String', '');
     end   
+
+    filenameroot = strrep(filename, '.raw.vrpn.mat', '')
+    filenameroot = strrep(filenameroot, '.raw.vrpn.evt.mat', '')
 
     % load the datafile
     logentry('Loading dataset... ');
@@ -155,7 +157,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     % try loading the MIP file
     try 
-        MIPfile = [filename(1:end-12) 'MIP.bmp'];
+        MIPfile = [filenameroot, '.MIP.bmp'];
         im = imread(MIPfile, 'BMP');
         logentry('Successfully loaded MIP image...');
     catch
@@ -163,7 +165,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 
         % or, try loading the first frame        
         try
-            fimfile = [filename(1:end-12) '0001.bmp'];
+            fimfile = [filenameroot, '0001.bmp'];
             im = imread(fimfile, 'BMP');
             logentry('Successfully loaded first frame image...');            
         catch
@@ -171,7 +173,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
             
             % last chance.... try extracting first frame
             try
-                rawfile = [filename(1:end-3) 'RAW'];
+                rawfile = [filenameroot '.RAW'];
                 im = raw2img(rawfile, 'BMP', 1, 1);
                 logentry('Successfully extracted first frame image...');
             catch
