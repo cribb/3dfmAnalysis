@@ -1,4 +1,4 @@
-function v = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps, table);
+function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absolute_pos, tstamps, table);
 % 3DFM function
 % last modified 05/22/2005
 %
@@ -6,10 +6,10 @@ function v = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_
 % matlab workspace file (*.mat) format and prepares it for most 
 % data analysis functions.
 % 
-% d = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
+% d = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
 %
 % where "d" is the outputted data table
-%       "file" is the .mat filename
+%       "filemask" is the .mat filename(s) (i.e. wildcards ok)
 %       "frame_rate" (default 120fps) is the frame rate of the captured video sequence
 %	    "xyzunits" is either 'nm' 'um' 'm' or 'pixels'
 %       "calib_um" is the calibration coefficient to convert pixels to microns
@@ -34,6 +34,8 @@ function v = load_video_tracking(file, frame_rate, xyzunits, calib_um, absolute_
 %            data.  Also added support for '.evt.mat' data format.
 % 05/22/05 - added table parameter that will change output from matrix to structure of vectors 
 %            for easier coding.
+% 06/16/05 - now you can use filemasks to aggregate several video tracks into a single 
+%            data table table.
 %
 
 % handle the argument list
@@ -44,6 +46,12 @@ if (nargin < 4 | isempty(calib_um));       calib_um = 1;              end;
 if (nargin < 3 | isempty(xyzunits));       xyzunits  = 'pixels';	  end;
 if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
 
+filelist = dir(filemask);
+
+for fid = 1:length(filelist)
+    
+    file = filelist(fid).name;
+    
 	% Load the tracking data after it has been converted to a .mat file
     dd=load(file);
     if strfind(file, '.evt.') & isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
@@ -106,16 +114,13 @@ if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
     units{X} = xyzunits;  units{Y} = xyzunits;  units{Z} = xyzunits;
 	if strcmp(xyzunits,'m')
 		data(:,X:Z) = data(:,X:Z) * calib_um * 1e-6;  % convert video coords from pixels to meters
-        units.x = 'm'; units.y = 'm'; units.z = 'm';
     elseif strcmp(xyzunits,'um')
 		data(:,X:Z) = data(:,X:Z) * calib_um;  % convert video coords from pixels to meters
-        units.x = 'um'; units.y = 'um'; units.z = 'um';
     elseif strcmp(xyzunits,'nm')
 		data(:,X:Z) = data(:,X:Z) * calib_um * 1e3;  % convert video coords from pixels to nm
-        units.x = 'nm'; units.y = 'nm'; units.z = 'nm';
     else 
-        units.x = 'pixels';  units.y = 'pixels';  units.z = 'pixels';
-	end
+        units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
+    end
 
     trackerID = data(:,ID);
     x = data(:,X);
@@ -172,20 +177,34 @@ if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
             end    
     end
 
-    switch table
-        case 'table'
-            v = data;
-        otherwise
-            v.id= data(:,ID);    
-            v.t = data(:,TIME);
-            v.frame = data(:,FRAME);
-            v.x = data(:,X);
-            v.y = data(:,Y);
-            v.z = data(:,Z);		
-            if exist('ROLL');    v.roll = data(:,ROLL);    end;
-            if exist('PITCH');   v.pitch= data(:,PITCH);   end;
-            if exist('YAW');     v.yaw  = data(:,YAW);     end;                    
-    end
+
     
-    
-    
+    % we don't want to repeat any beadIDs as we concatenate the
+    % datasets from each filename in the stack.  To avoid this, we add
+    % the max(beadID) to the newdata's beadID and then we concatenate.
+    if exist('glommed_d')
+        beadmax = max(data(:,ID));
+        data(:,ID) = data(:,ID) + beadmax;            
+        glommed_d = [glommed_d ; data];   
+    else
+        glommed_d = data;
+    end    
+end
+
+data = glommed_d;
+
+% now, settle our outputs, and move on....
+switch table
+    case 'table'
+        v = data;
+    otherwise
+        v.id= data(:,ID);    
+        v.t = data(:,TIME);
+        v.frame = data(:,FRAME);
+        v.x = data(:,X);
+        v.y = data(:,Y);
+        v.z = data(:,Z);		
+        if exist('ROLL');    v.roll = data(:,ROLL);    end;
+        if exist('PITCH');   v.pitch= data(:,PITCH);   end;
+        if exist('YAW');     v.yaw  = data(:,YAW);     end;                    
+end

@@ -1,3 +1,6 @@
+2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: now you can use filemasks to aggregate several video tracks into a single data table.
+
 2005-05-22  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: added table parameter that allows one to switch between structure and matrix/table output.
 	* get_bead.m: now handles either output type.
