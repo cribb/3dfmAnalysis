@@ -1,4 +1,7 @@
 2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* video_tracking_constants.m: hid a lot of the constants for the video tracking & analysis code into this script.
+
+2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: now you can use filemasks to aggregate several video tracks into a single data table.
 
 2005-05-22  Jeremy Cribb <jcribb@email.unc.edu>
