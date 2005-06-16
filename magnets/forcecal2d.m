@@ -1,6 +1,27 @@
 function [x_out,y_out,F] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um)
+% 3DFM function  
+% Math 
+% last modified 06/16/05 
+%  
 % run a sample velocity profile using data from EVT_GUI
+%  
+%  [x, y, F] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um);  
+%   
+%  where "x & y" are coordinates in units of pixels
+%        "F" is the output 2D force grid linearly interpolated by beads in "files"
+%        "files" is a string containing the file name(s) for analysis (wildcards ok)
+%		 "viscosity" is the calibration fluid viscosity in [Pa s]
+%        "bead_radius" is the radius of the probe particles in [m]
+%        "poleloc" is the pole location, i.e. [pole_x, pole_y] in [pixels]
+%        "calib_um" is the microns per pixel calibration factor.
+%  
+%  01/??/05 - created.  
+%  06/16/05 - added documentation.
+%   
 
+    
+    video_tracking_constants;
+    
     % turn off the divide by zero warning because there's a divide by zero
     % in the determination of the derivative
 	warning off MATLAB:divideByZero;
@@ -11,26 +32,9 @@ function [x_out,y_out,F] = forcecal2d(files, viscosity, bead_radius, poleloc, ca
     window_size = 12;
     
     % for every file, get its filename and reduce the dataset to a single table.
-    for k = 1:length(fp)
-        newd = load_video_tracking(fp(k).name,[],'pixels',calib_um,'absolute','yes','table');
-        
-        % we don't want to repeat any beadIDs as we concatenate the
-        % datasets from each filename in the stack.  To avoid this, we add
-        % the max(beadID) to the newdata's beadID and then we concatenate.
-        if exist('d')
-            beadmax = max(newd(:,3));
-            newd(:,3) = newd(:,3) + beadmax;            
-            d = [d ; newd];   
-        else
-            d = newd;
-        end
-    end
-    
-    % prefit the output data table with two additional columns of zeros, to
-    % fill in later.
-	d = [d zeros(length(d), 2)];
+    d = load_video_tracking(files,[],'pixels',calib_um,'absolute','yes','table');
 	
-	beadID = d(:,2);
+	beadID = d(:,ID);
 	
     % for each beadID, compute it's velocity and concatenate it to the
     % current data table as new columns [olddata vel_magnitude vel_angle].
@@ -39,9 +43,7 @@ function [x_out,y_out,F] = forcecal2d(files, viscosity, bead_radius, poleloc, ca
         temp = d(idx,:);
         
         if(length(idx)>window_size) % avoid any gaps in beadID numbers
-%             vel = compute_velocity(temp(:,1), temp(:,4), temp(:,5), window_size);
-		
-            [dxydt, newt, newxy] = windiff(temp(:,4:5),temp(:,1),window_size);
+            [dxydt, newt, newxy] = windiff(temp(:,X:Y),temp(:,TIME),window_size);
 		
             vel = dxydt;
             
@@ -50,6 +52,7 @@ function [x_out,y_out,F] = forcecal2d(files, viscosity, bead_radius, poleloc, ca
             
             force = 6*pi*viscosity*bead_radius*velmag*calib_um*1e-6;
 
+            % setup the output variables
             if ~exist('finalxy');  
                 finalxy = newxy;
             else
@@ -87,7 +90,7 @@ function [x_out,y_out,F] = forcecal2d(files, viscosity, bead_radius, poleloc, ca
         hold on;
 			plot(x,y,'.');
         hold off;
-        axis([0 649 0 484]);
+        axis([0 648 0 484]);
 		xlabel('x [pixels]'); ylabel('y [pixels]'); set(gca, 'YDir', 'reverse');
         
         newr = magnitude((x-poleloc(1)),(y-poleloc(2)));
@@ -96,14 +99,12 @@ function [x_out,y_out,F] = forcecal2d(files, viscosity, bead_radius, poleloc, ca
         grid on;
 		xlabel('r'); ylabel('force (pN)');
 
-%         subplot(2,2,3);
         figure;
 		plot3(finalxy(:,1), finalxy(:,2), finalF, '.');
         colormap(hot);
 		zlabel('force (pN)');
         
         figure; 
-%         subplot(2,2,4);
 		imagesc(x_out,y_out,zi);
 		colormap(hot);
 		colorbar; 
@@ -111,19 +112,3 @@ function [x_out,y_out,F] = forcecal2d(files, viscosity, bead_radius, poleloc, ca
     % provide force as output table
 	F = zi;
 
-%==============================================
-% function v = compute_velocity(t, x, y, window_size)
-% 
-%     coords = [x y];
-%     
-%     [dxy, newt, newxy] = windiff(coords,t,window_size);
-% 
-%     vel = dxy./repmat(dt,1,2);
-%     
-%     velmag = sqrt(vel(:,1).^2 + vel(:,2).^2);
-%     velang = atan2(vel(:,2), vel(:,1)); 
-%     
-%     v(:,1) = velmag;
-%     v(:,2) = velang;
-
-    

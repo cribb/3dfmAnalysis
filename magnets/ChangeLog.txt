@@ -1,4 +1,7 @@
 2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* forcecal2d.m: added documentation.
+	
+2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* fcd_forcecal2d.m: removed and renamed to forcecal2d.m
 	* forcecal2d.m: added. added the MIP background, and separated the plots into different figures so that they might have different colormaps.
 
