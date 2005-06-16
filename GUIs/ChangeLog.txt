@@ -1,3 +1,6 @@
+2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* removed fcd_GUI.  This was replaced a long time ago with evt_gui and never got removed from CVS.
+
 2005-04-06  Kalpit Desai <kvdesai@email.unc.edu>
 	* Added FreqSweepGUI. Useful for pulling a bead with high frequency sinusoids on magnets.
  
