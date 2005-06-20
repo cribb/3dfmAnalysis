@@ -1,29 +1,35 @@
-function [x_out,y_out,F] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um)
+function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity)
 % 3DFM function  
 % Math 
 % last modified 06/16/05 
 %  
-% run a sample velocity profile using data from EVT_GUI
+% Run a 2D force calibration using data from EVT_GUI.
 %  
-%  [x, y, F] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um);  
+%  [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um);  
 %   
-%  where "x & y" are coordinates in units of pixels
+%  where "Ftable" is the average force computed for each pixel.
+%        "stderr" is the standard error (std(X)/sqrt(N)) for Ftable.
+%        "step" is the stepsize for each pixel.  Each pixel is assumed square.
 %        "F" is the output 2D force grid linearly interpolated by beads in "files"
 %        "files" is a string containing the file name(s) for analysis (wildcards ok)
-%		 "viscosity" is the calibration fluid viscosity in [Pa s]
+%        "viscosity" is the calibration fluid viscosity in [Pa s]
 %        "bead_radius" is the radius of the probe particles in [m]
 %        "poleloc" is the pole location, i.e. [pole_x, pole_y] in [pixels]
 %        "calib_um" is the microns per pixel calibration factor.
+%        "granularity" is the binning for 2D force determination
 %  
 %  01/??/05 - created.  
 %  06/16/05 - added documentation. cleaned up code. fixed bug in
 %  force-distance 1D plot.
+%  06/20/05 - commented out linear-interp code for 2D plot and added
+%  2D binning force calibration.  This can take a LONG time to compute if
+%  the granularity is set too low (<3)
 %   
     
     video_tracking_constants;
     
     % derivative window size
-    window_size = 12;
+    window_size = 1;
     
     % for every file, get its filename and reduce the dataset to a single table.
     d = load_video_tracking(files,[],'pixels',calib_um,'absolute','yes','table');
@@ -63,49 +69,92 @@ function [x_out,y_out,F] = forcecal2d(files, viscosity, bead_radius, poleloc, ca
             
         end
 	end
-	
-    % set up for plotting
+    
+    % output variables
+    x = finalxy(:,1);
+    y = finalxy(:,2);
+    F = finalF;
+    
+    % set up for generic plotting
     warning off MATLAB:griddata:DuplicateDataPoints; 
 
-    x = finalxy(:,1);
-	y = finalxy(:,2);
-	z = finalF*1e12;
-    
-    x_out = 1:648; 
-    y_out = 1:484; 
+    x_grid = 1:648; 
+    y_grid = 1:484; 
     
     myMIP = mip('*.MIP.bmp');
     
-	[xi,yi] = meshgrid(x_out, y_out);
-	zi = griddata(x, y, z, xi, yi);
+% 	[xi,yi] = meshgrid(x_grid, y_grid);
+% 	zi = griddata(x, y, finalF*1e12, xi, yi);
         
     % now, for the plots...
 	figure;
     subplot(1,2,1);
-    imagesc(myMIP); 
+    imagesc(x_grid * calib_um, y_grid * calib_um, myMIP); 
     colormap(copper(256));
     hold on;
-		plot(x,y,'.');
+		plot(x * calib_um,y * calib_um,'.');
     hold off;
-    axis([0 648 0 484]);
-	xlabel('x [pixels]'); ylabel('y [pixels]'); set(gca, 'YDir', 'reverse');
+    axis([0 648*calib_um 0 484*calib_um]);
+	xlabel('x [\mum]'); ylabel('y [\mum]'); set(gca, 'YDir', 'reverse');
     
     newr = magnitude((x-poleloc(1)),(y-poleloc(2)));
     subplot(1,2,2);
-    plot(newr, z, '.');
+    plot(newr, F*1e12, '.');
     grid on;
 	xlabel('r'); ylabel('force (pN)');
-
-    figure;
-	plot3(finalxy(:,1), finalxy(:,2), finalF, '.');
-    colormap(hot);
-	zlabel('force (pN)');
+    set(gcf, 'Position', [65 675 1354 420]);
+    drawnow;
     
-    figure; 
-	imagesc(x_out,y_out,zi);
+% 	figure;
+% 	plot3(finalxy(:,1), finalxy(:,2), finalF, '.');
+% 	colormap(hot);
+% 	zlabel('force (pN)');
+% 	
+% 	figure; 
+% 	imagesc(x_grid,y_grid,zi);
+% 	colormap(hot);
+% 	colorbar;         
+
+
+    % now set up the binning process
+    warning off MATLAB:divideByZero; % if there is no data in a bin, it's a divide by zero. we don't care about that.
+    
+	width = 648;
+	height = 484;
+	
+% 	granularity = 4;
+	
+	col_bins = [1 : granularity : width];
+	row_bins = [1 : granularity : height];
+	
+	for k = 1 : length(col_bins)-1
+		for m = 1 : length(row_bins)-1
+            idx = find( x >= col_bins(k) & x < col_bins(k+1) ...
+                      & y >= row_bins(m) & y < row_bins(m+1));
+            im_mean(m,k) = mean(F(idx));
+            im_stderr(m,k) = std(F(idx))/sqrt(length(idx));        
+        end
+	end
+
+    % plot the binning outputs 
+	figure; 
+	subplot(1,2,1);
+	imagesc((col_bins - poleloc(1))* calib_um, (row_bins - poleloc(2)) * calib_um, im_mean * 1e12);
+    title('Mean Calibrated Force (pN)');
+	xlabel('\mum'); ylabel('\mum');
 	colormap(hot);
 	colorbar; 
-        
-    % provide force as output table
-	F = zi;
-
+	
+	subplot(1,2,2);
+	imagesc((col_bins - poleloc(1))* calib_um, (row_bins - poleloc(2)) * calib_um, im_stderr./im_mean);
+    title('Standard Error / Mean');
+	xlabel('\mum'); ylabel('\mum');
+	colormap(hot);
+	colorbar;     
+    set(gcf, 'Position', [65 153 1353 420]);
+    
+    % output variables
+    Ftable   = im_mean * 1e12;
+    errtable = im_stderr * 1e12;
+    step     = calib_um * granularity;
+    
