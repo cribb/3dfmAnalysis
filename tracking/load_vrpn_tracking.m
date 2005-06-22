@@ -1,6 +1,6 @@
 function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user_input);
 % 3DFM function
-% last modified 06/11/04 - kvdesai
+% last modified 06/20/05 - kvdesai
 %
 % This function reads in a 3DFM dataset previously saved as a 
 % 2d matrix in a matlab workspace file (*.mat) file 
@@ -132,7 +132,7 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
         end
     end
     
-   if(isfield(dd.tracking,'TimeStampsVRPNSecUsecEVENSecUse'));
+   if(isfield(dd.tracking,'TimeStampsVRPNSecUsecEVENSecUse'));%this code is the price paid for a typo in one version of converter prog.
    % replace the vrpn time stamps with even time stamps if provided and notify user on command-promp
        teven = dd.tracking.TimeStampsVRPNSecUsecEVENSecUse(:,3)+ dd.tracking.TimeStampsVRPNSecUsecEVENSecUse(:,4)*1e-6;
        d.qpd.time = teven;
@@ -145,7 +145,7 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
        end
        disp('load_vrpn_tracking::A separate time-stamp record was found in .vrpn file')
        disp('...so, time-stamps of qpd, laser, stageReport and posError are replaced with the new one...');
-   elseif(isfield(dd.tracking,'TimeStampsVRPNSecUsecEVENSecUsec')) %this code is the price paid for a typo in one version of converter prog.
+   elseif(isfield(dd.tracking,'TimeStampsVRPNSecUsecEVENSecUsec')) 
        % replace the vrpn time stamps with even time stamps if provided and notify user on command-promp
        teven = dd.tracking.TimeStampsVRPNSecUsecEVENSecUsec(:,3)+ dd.tracking.TimeStampsVRPNSecUsecEVENSecUsec(:,4)*1e-6;
        d.qpd.time = teven;
@@ -219,17 +219,11 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
 			
     % compute the position of the bead at QPD bandwidth, provided
     % that the 'beadpos' switch is active.
-    % A BUG BEING QUARANTINED: 06/14/04 FIX THIS IN PARTICLE TRACKER
-    % When the position errors are calculated for first sample, the
-    % jacobian is not available, so the default jacobian is used. So the
-    % first sample position error is quite different from rest of them.
-    % here, we are discarding the first sample to make the offset
-    % subtraction work.
     if findstr(beadpos,'y')
-		d.beadpos.time = d.stageReport.time(2:end);
-		d.beadpos.x = d.stageReport.x(2:end) + d.posError.x(2:end);
-		d.beadpos.y = d.stageReport.y(2:end) + d.posError.y(2:end);
-		d.beadpos.z = d.stageReport.z(2:end) + d.posError.z(2:end);
+		d.beadpos.time = d.stageReport.time(1:end);
+		d.beadpos.x = -d.stageReport.x(1:end) + d.posError.x(1:end);
+		d.beadpos.y = -d.stageReport.y(1:end) + d.posError.y(1:end);
+		d.beadpos.z = -d.stageReport.z(1:end) + d.posError.z(1:end);
         if findstr(beadOffset,'y') %if we don't want offset in bead positions.
             d.beadpos.x = d.beadpos.x - d.beadpos.x(1,1);
             d.beadpos.y = d.beadpos.y - d.beadpos.y(1,1);
