@@ -1,4 +1,6 @@
-2004-01-11  Kalpit Desai <kvdesai@email.unc.edu>
+2005-06-22  Kalpit Desai <kvdesai@email.unc.edu>
+	* clean.m: Now passes along the original time-stamp field.
+2005-01-11  Kalpit Desai <kvdesai@email.unc.edu>
 	* simlissajous.m: Previous commit was accidentally from wrong directory, This commit has correct coordinate frame.
 2005-01-10  Kalpit Desai <kvdesai@email.unc.edu>
 	* simlissajous.m: Now has pole locations in real-space (i.e. lab-coordinate frame) instead of aligned with X,Y,Z axis.

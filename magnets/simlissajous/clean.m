@@ -3,6 +3,7 @@ function cleaned = clean(magnets)
 if(~isfield(magnets,'sectime'))
     magnets.sectime = magnets.time(:,1) + magnets.time(:,2)*1e-6;
 end
+cleaned.origTime = magnets.sectime;
 cleaned.sectime(1,1) = magnets.sectime(1,1);
 if(isfield(magnets,'joints'))
     cleaned.joints = magnets.joints;
