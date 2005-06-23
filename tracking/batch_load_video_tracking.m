@@ -72,7 +72,10 @@ for z = 1:num_files,
     n_beads = max(d(:,2))+1;
     
     % create a data array to fill in with t and position infromation
-    data = zeros(max(d(:,3)+1),2*n_beads+1);
+    data = zeros(max(d(:,3)+1)-min(d(:,3)+1)+1,2*n_beads+1);
+    
+    size(data)
+    pause
    
     % place position and time info into data matrix
     for j = 0:max(d(:,2)),

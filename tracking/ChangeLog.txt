@@ -1,3 +1,7 @@
+2005-06-23 David Hill <dbhill@email.unc.edu>
+	* batch_load_video_tracking.m: fixed bug so that tracking files to not
+	* have to start at t = 0
+
 2005-06-22  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* load_vrpn_tracking.m: Fixed the calculation of BeadPosition.
 
