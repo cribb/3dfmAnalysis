@@ -1,4 +1,4 @@
-function d = batch_load_video_tracking2(text, conversion, fr, rel)
+function d = batch_load_video_tracking(text, lens, multiplier, fr, rel);
 % 3DFM function  
 % Rheology 
 % created 12-7-2004 
@@ -6,13 +6,13 @@ function d = batch_load_video_tracking2(text, conversion, fr, rel)
 % batch_load_video_tracking
 % by DB Hill
 % 
-% d = batch_load_video_tracking(text, conversion, frame rate, rel);
+% d = batch_load_video_tracking(text, lens, multiplier, fr, rel)
 %
 %   text == suffix of filenames to load from pix's to UM's;
 %
-%   conversion == 1 or 1.5, depending on how the microscope is set:
-%       note: this is now set to run with the pulnix, 60x and only the
-%       pulnix 60x
+%   lens = 40 or 60x on artimus or hercules
+%
+%   multiplier = 1 or 1.5, depending on the optivar
 %
 %   rel == a string that sets the postion coordnates to be either relative
 %       (starting from zero) or absolut
@@ -38,12 +38,16 @@ fu = dir(text);
 num_files = size(fu);
 
 % calculate the conversion factor for pixels -- microns
-if conversion == 1.5,
+if lens == 60,
+    if multiplier == 1.5,
     con = 0.104;
-elseif conversion == 4,
-    con = 0.039;
-elseif conversion == 6,
-    con = 0.026;
+    else con = 0.152;
+    end
+elseif lens == 40,
+    if multiplier == 1.5,
+        con = 0.151;
+    else con = 0.224;
+    end
 else con = 0.154;
 end
 
