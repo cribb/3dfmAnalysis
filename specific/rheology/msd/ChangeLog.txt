@@ -1,3 +1,9 @@
+2005-06-23 David Hill <dbhill@email.unc.edu>
+
+	* Change batch_load_video_tracking to be able to handle the 40x and 60x
+		lenses
+
+
 2005-07-10  David Hill <dbhill@email.unc.edu>
 
 	* Changed msd2pt to be a funtion
