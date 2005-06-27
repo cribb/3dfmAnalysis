@@ -13,6 +13,7 @@
 %  This function is intended to be ran as part of a batch file
 %  that will calculate the the msd's of all beads in a given postion 
 %  vs. time data set (usually written in batch_load_video_tracking) 
+function d = msd_2d(filename);
 %  This program is set up to handle 2-D tracks only 
 %
 %  - created 3-2004
@@ -85,3 +86,5 @@ MSD_out = MSD';
 
 filename_save = strcat(filename,'msd_out.txt');
 save(filename_save, 'MSD_out', '-ASCII');
+
+d = 1;

@@ -36,7 +36,7 @@ for z = 1:num_files,
     
     filename = fu(z).name;
 
-    msd_2d(filename);
+    d = msd_2d(filename);
 
 end
 

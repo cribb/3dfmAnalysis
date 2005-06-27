@@ -1,3 +1,7 @@
+2005-06-27 David Hill <dbhill@email.unc.edu>
+	* batch_msd_2d.m: changed to function from script.
+	* msd_2d.m: changed to function from script.
+
 2005-06-23 David Hill <dbhill@email.unc.edu>
 
 	* Change batch_load_video_tracking to be able to handle the 40x and 60x
