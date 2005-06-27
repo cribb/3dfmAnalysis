@@ -1,3 +1,7 @@
+2005-06-27  Jeremy Cribb <jcribb@email.unc.edu>
+	* vrpn_psd.m:  fixed several syntactial errors so that vrpn_psd actually works now.
+	* mypsd.m: fixed typo in documentation.
+
 2005-01-19  Kalpit Desai <kvdesai@cs.unc.edu>
 	* added processpeak.m : Takes two vectors [p,f] that are output of psd calculatios, and converts the power at particular frquency (fsearch) in to units of amplitude of sinewave at that particular frequency. A handy utility for interpreting psd data.
 

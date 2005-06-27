@@ -15,7 +15,7 @@ function varargout = mypsd(s, rate, res, window_type, style, calculateId)
 %        "window_type" is 'blackman' or 'rectangle', defaulting to 'blackman'
 %        "style" is matlab graph-style string
 %        "calculateId" is 'yes' or 'no': a switch for calculating
-%        integrated displacement upto the frequency, dufaulted to 'no'
+%        integrated displacement upto the frequency, defaulted to 'no'
 %  
 %  Notes:  
 %  - Resolution cannot exceed 1/endtime  

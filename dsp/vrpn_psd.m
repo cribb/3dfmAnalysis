@@ -9,11 +9,11 @@ function v = vrpn_psd(d, psdres, window)
 %  [d] = function_name(d, psdres, window);  
 %   
 %  where "d" is the 3dfm data structure (acquired from load_vrpn_tracking)
-%		 "psd_res" is the desired resolution between datapts in the PSD
+%		 "psdres" is the desired resolution between datapts in the PSD
 %		 "window_type" is either 'blackman' or 'rectangle'
 %  
 %  Notes:  
-%  - default psd_res is the "best" resolution available to the routine
+%  - default psdres is the "best" resolution available to the routine
 %    based on the data given (1/end_time).
 %  - default window is 'rectangle'.
 %
@@ -31,7 +31,7 @@ T = t(2) - t(1);
 fs = 1/T;
 
 % default window is a rectangle
-if(nargin < 3 | isempty(windowtype))
+if(nargin < 3 | isempty(window))
    	window = 'rectangle';
 end
 
@@ -42,8 +42,8 @@ if(nargin < 2 | isempty(psdres))
    	psdres = 1 / (t(end)-T);
 end
 
-if(nargin < 1 | isempty(res))
-  error('You must supply at least a 3dfm tracking structure.");
+if(nargin < 1 | isempty(psdres))
+  error('You must supply at least a 3dfm tracking structure.');
 end
 
 r = magnitude(xyz);
