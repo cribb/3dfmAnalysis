@@ -1,3 +1,6 @@
+2005-06-27  Jeremy Cribb  <jcribb@email.unc.edu>
+	*  get_beadmax: added.  returns the maximum bead/tracker ID in a tracked-video dataset.
+
 2005-06-23 David Hill <dbhill@email.unc.edu>
 	* batch_load_video_tracking.m: fixed bug so that tracking files to not
 	* have to start at t = 0
