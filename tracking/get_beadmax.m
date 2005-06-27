@@ -19,6 +19,6 @@ video_tracking_constants;
 if isfield(data, 'id')
     v = max(data.id);
 else
-    v = max(data, ID);
+    v = max(data(:, ID));
 end
 

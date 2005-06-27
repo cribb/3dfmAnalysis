@@ -1,4 +1,7 @@
 2005-06-27  Jeremy Cribb  <jcribb@email.unc.edu>
+	*  get_beadmax: fixed stupid bug.  I really should have tested this first... oy
+
+2005-06-27  Jeremy Cribb  <jcribb@email.unc.edu>
 	*  get_beadmax: added.  returns the maximum bead/tracker ID in a tracked-video dataset.
 
 2005-06-23 David Hill <dbhill@email.unc.edu>
