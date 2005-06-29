@@ -1,3 +1,10 @@
+2005-06-29  Jeremy Cribb <jcribb@email.unc.edu>
+	* evaluateKK.m: fixed bug where variable for tolerance (eta) was inadvertantly placed inside an if-statement.
+	* kkr.m: reworked for use with current version of evaluateKK.m.
+	* visc_ps: reinserted figure.  added karo line to standard plot as a 'guide for the eye'
+	* get_video_viscs.m: reworked to take advantage of current version of load_video_tracking.  Now multiple files are handled by load_video_tracking, each tracker is handled at exactly its own time points (no substituted zeros to fill in matrix), and a mean power spectrum across all beads computed.  Used linear interpolation to put all power spectra on the same grid.
+	* get_vrpn_viscs.m: reworked for use with current version of load_vrpn_tracking.
+
 2005-06-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* relaxation_time.m: fixed a bug where, when asked for only one time constant, nothing would happen.
 	* relaxtime_fun.m: same.

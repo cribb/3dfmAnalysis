@@ -48,13 +48,16 @@ fit = polyval(p, f);
 B = p(end);
 n = (k * T) / (6*pi^3*10^B*a);
 
-% figure; 
-% plot(f, [ps fit], f, -14.1027 - 2*f,'--r');
-% axis([0 1 -17 -13]);
-% xlabel('log_{10}(frequency [Hz])');
-% ylabel('log_{10}(Power [m^2/Hz])');
-% legend('sample ps', 'sample fit', 'water fit');
-% pretty_plot;
+water = -14.1027 - 2*f;
+karo = -15.5583 - 2*f;
+
+figure; 
+plot(f, [ps fit], f, water, '--k', f, karo, '--r');
+% axis([min(f) max(f) -17 -13]);
+xlabel('log_{10}(frequency [Hz])');
+ylabel('log_{10}(Power [m^2/Hz])');
+legend('sample ps', 'sample fit', 'water fit', 'karo fit (1.6)');
+pretty_plot;
 
 
 v.visc = n;

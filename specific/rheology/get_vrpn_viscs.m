@@ -1,4 +1,4 @@
-function v = get_vrpn_viscs(file, bead_radius, frame_rate, calib_um, cutoff);
+function v = get_vrpn_viscs(file, bead_radius, cutoff);
 % 3DFM function  
 % Rheology 
 % last modified 05/07/04 
@@ -23,11 +23,10 @@ function v = get_vrpn_viscs(file, bead_radius, frame_rate, calib_um, cutoff);
 %
 
 
-	v = load_video_tracking(file,frame_rate,[],0.3,'rectangle','m',calib_um);
+	d = load_vrpn_tracking(file, 'm', 'zero', 'yes', 'no');
+	d = vrpn_psd(d, [], 'rectangle');
     
-    coord = [neutralize(v.video.x) neutralize(v.video.y)];
-    
-    data = visc_ps(v.psd.f, [v.psd.x v.psd.y v.psd.r], bead_radius, cutoff);
+    data = visc_ps(d.psd.f, [d.psd.x d.psd.y d.psd.z d.psd.r], bead_radius, cutoff);
 
     % break
     

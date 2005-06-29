@@ -9,7 +9,7 @@ function v = get_video_viscs(name, bead_radius_m, frame_rate, cutoff);
 %   
 %  where "name"          name of the file or files (wildcards may be used)
 %        "bead_radius_m" radius of the bead in meters
-%		     "frame_rate"    number of frames/second from the recording camera.
+%		 "frame_rate"    number of frames/second from the recording camera.
 %        "cutoff"        cutoff frequency for use in the linear fit (good guess is ~Nyquist/2).
 %
 %
@@ -19,24 +19,43 @@ function v = get_video_viscs(name, bead_radius_m, frame_rate, cutoff);
 %  03/11/04 - reworked to include multiple files
 %   
 %  
+    video_tracking_constants;
+
     files = dir(name);
-    
+    count = 1;
     for k = 1:length(files)
         
         file = files(k).name;
         
-        d = load_video_tracking(file, frame_rate, [], 0.1, 'rectangle', 'm', 0.104);
+        d = load_video_tracking(file, frame_rate, 'm', 0.152, 'relative', 'yes', 'table');
 
-        for m = 1:cols(d.video.r)
+        for m = 0:get_beadmax(d)
             
-            r = d.video.r(:,m);
+            b = get_bead(d, m);
+
+            min_time_step = min(diff(b(:,TIME)));
             
-            temp = visc_ps(d.psd.f, d.psd.r(:,m), bead_radius_m, cutoff);
-            data(m,k) = temp.visc;
+            interp_b = interp1(b(:,TIME), b, min_time_step:min_time_step:max(b(:,TIME)));
+
+            r = magnitude(interp_b(:,X:Y));
+            [psd f] = mypsd(r, 1/min_time_step, 1/floor(max(b(:,TIME))), 'rectangle');
+            
+            temp = visc_ps(f, psd, bead_radius_m, cutoff);
+            visc(m+1,k) = temp.visc;
+            slope(m+1,k) = temp.slope;
+            
+            new_grid = [0.02 : 1/200 : 60]';
+            interp_psd = interp1(f, psd, new_grid);
+            interp_f = interp1(f, f, new_grid);
+            psdALL(:,count) = interp_psd(:);
+            fALL = interp_f(:);
+            count = count + 1;
         end
         
     end
     
     
-    v = data;    
-    
+    v.visc = visc;    
+    v.slope = slope;
+    v.psd = psdALL;
+    v.f = fALL;

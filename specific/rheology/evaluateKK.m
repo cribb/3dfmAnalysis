@@ -22,6 +22,8 @@ function ap = evaluateKK(omega_table, app_table, algorithm)
 %   
 %  
 
+eta = 1e-5;
+
 if nargin < 3
     algorithm = 's';
 end
@@ -31,7 +33,6 @@ if strcmp(algorithm,'f')
 	% fast algorithm
     
     ap    = (2/pi) * dct(dst(app_table));
-	eta = 1e-5;
     
 else
     
