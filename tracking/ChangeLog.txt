@@ -1,3 +1,7 @@
+2005-06-29  Jeremy Cribb  <jcribb@email.unc.edu>
+	* load_video_tracking.m: now uses video_tracking_constants for column labeling.  Fixed a 'off-by-one' bug where some beads were not counted.
+	* batch_load_video_tracking.m: now uses video_tracking_constants for column labeling.
+
 2005-06-27  Jeremy Cribb  <jcribb@email.unc.edu>
 	*  get_beadmax: fixed stupid bug.  I really should have tested this first... oy
 

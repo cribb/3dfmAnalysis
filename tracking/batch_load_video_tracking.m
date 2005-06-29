@@ -30,6 +30,8 @@ function d = batch_load_video_tracking(text, lens, multiplier, fr, rel);
 %
 % ***********************************************************************
 
+video_tracking_constants;
+
 % create and array with the filenames of a given suffix. For this program,
 % they must include *.mat
 fu = dir(text);
@@ -62,36 +64,34 @@ end
 for z = 1:num_files,
     
     % debugging outputs
-    z
     filename = fu(z).name
 
     % call load video tracking to load the data
     d = load_video_tracking(filename, fr,'um',con,rel,'yes','table');
 
     % count the number of beads in a given tracking file
-    n_beads = max(d(:,2))+1;
+    n_beads = max(d(:,ID))+1;
     
     % create a data array to fill in with t and position infromation
-    data = zeros(max(d(:,3)+1)-min(d(:,3)+1)+1,2*n_beads+1);
+    data = zeros(max(d(:,FRAME)+1)-min(d(:,FRAME)+1)+1,2*n_beads+1);
     
     size(data)
-    pause
    
     % place position and time info into data matrix
-    for j = 0:max(d(:,2)),
+    for j = 0:max(d(:,ID)),
         
         g = get_bead(d,j);    
         
         if j == 0,
             
-            data(:,1) = g(:,1);
-            data(:,2) = g(:,4);
-            data(:,n_beads+2) = g(:,5);
+            data(:,1) = g(:,TIME);
+            data(:,2) = g(:,X);
+            data(:,n_beads+2) = g(:,Y);
             
         else
             
-            data(:,j+2) = g(:,4);
-            data(:,j+2+n_beads) = g(:,5);
+            data(:,j+2) = g(:,X);
+            data(:,j+2+n_beads) = g(:,Y);
             
         end
         

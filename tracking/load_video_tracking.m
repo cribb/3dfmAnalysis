@@ -56,10 +56,9 @@ for fid = 1:length(filelist)
     dd=load(file);
     if strfind(file, '.evt.') & isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
-
+    
         % set up variables for easy tracking of table's column headings
-        TIME = 1; ID = 2; FRAME = 3; X = 4; Y = 5; Z = 6; 
-        ROLL = 7; PITCH = 8; YAW = 9; RADIAL = 10;
+        video_tracking_constants;
         
         % if there are timestamps, and evt_gui was used, then they are already attached
         tstamps = 'done';
@@ -183,8 +182,8 @@ for fid = 1:length(filelist)
     % datasets from each filename in the stack.  To avoid this, we add
     % the max(beadID) to the newdata's beadID and then we concatenate.
     if exist('glommed_d')
-        beadmax = max(data(:,ID));
-        data(:,ID) = data(:,ID) + beadmax;            
+        beadmax = max(glommed_d(:,ID));
+        data(:,ID) = data(:,ID) + beadmax + 1;            
         glommed_d = [glommed_d ; data];   
     else
         glommed_d = data;
