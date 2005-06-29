@@ -1,4 +1,7 @@
 2005-06-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: vectorized innermost for-loop so that msd runs more quickly.
+
+2005-06-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* msd.m: added.  Reimplemented algorithm for computing mean-square displacement as found in Mason's 2000 Rheol Acta paper.  Mostly done for better understanding of the algorithm, but placed here as it works cleanly with the new version of load_video_tracking.
 	* ve.m: added.  Uses output of msd.m to compute, output, and plot the viscoelastic moduli (as determined by mean-square displacement computation).
 

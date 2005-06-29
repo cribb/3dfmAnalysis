@@ -41,23 +41,29 @@ for beadID = 0 : get_beadmax(v);
     % for every window size (or tau)
     for w = 1:length(window)
         
-        % for every frame
-        for fnum = 1 : (framemax - window(w) - 1)
-            switch dim
-                case 1
-                    r2(fnum) = ( b(fnum+window(w), X) - b(fnum, X))^2;
-                case 2
-                    r2(fnum) = ( b(fnum+window(w), X) - b(fnum, X))^2 + ...
-                               ( b(fnum+window(w), Y) - b(fnum, Y))^2 ;
-                case 3
-                    r2(fnum) = ( b(fnum+window(w), X) - b(fnum, X))^2 + ...
-                               ( b(fnum+window(w), Y) - b(fnum, Y))^2 + ...
-                               ( b(fnum+window(w), Z) - b(fnum, Z))^2 ;                               
-                otherwise
-                    error('dimension must be 1D, 2D, or 3D.');
-            end
-        end
+        %  for all frames
+        A1 = b(1:end-window(w),X);
+        A2 = b(1:end-window(w),Y);
+        A3 = b(1:end-window(w),Z);
+
+        B1 = b(window(w)+1:end,X);
+        B2 = b(window(w)+1:end,Y);
+        B3 = b(window(w)+1:end,Z);
         
+        switch dim
+            case 1
+                r2 = ( B1 - A1 ).^2;
+            case 2
+                r2 = ( B1 - A1 ).^2 + ...
+                     ( B2 - A2 ).^2 ;
+            case 3
+                r2 = ( B1 - A1 ).^2 + ...
+                     ( B2 - A2 ).^2 + ...
+                     ( B3 - A3 ).^2 ;
+            otherwise
+                error('dimension must be 1D, 2D, or 3D.');
+        end        
+ 
         msd(w, beadID+1) = mean(r2);
         tau(w, beadID+1) = window(w) * mean(diff(b(:,TIME)));
     end   
