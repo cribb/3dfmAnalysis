@@ -1,4 +1,7 @@
 2005-06-29  Jeremy Cribb  <jcribb@email.unc.edu>
+	* load_video_tracking.m: makes older version imported vrpn files look like newer version imported vrpn files.
+
+2005-06-29  Jeremy Cribb  <jcribb@email.unc.edu>
 	* load_video_tracking.m: now uses video_tracking_constants for column labeling.  Fixed a 'off-by-one' bug where some beads were not counted.
 	* batch_load_video_tracking.m: now uses video_tracking_constants for column labeling.
 

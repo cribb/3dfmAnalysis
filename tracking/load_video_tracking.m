@@ -35,8 +35,11 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absol
 % 05/22/05 - added table parameter that will change output from matrix to structure of vectors 
 %            for easier coding.
 % 06/16/05 - now you can use filemasks to aggregate several video tracks into a single 
-%            data table table.
+%            data table.
 %
+
+% load video tracking constants
+video_tracking_constants;
 
 % handle the argument list
 if (nargin < 7 | isempty(table));          table = 'struct';          end;
@@ -47,6 +50,9 @@ if (nargin < 3 | isempty(xyzunits));       xyzunits  = 'pixels';	  end;
 if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
 
 filelist = dir(filemask);
+if length(filelist) < 1
+    error(['No files found matching ' filemask '.']);
+end
 
 for fid = 1:length(filelist)
     
@@ -57,9 +63,6 @@ for fid = 1:length(filelist)
     if strfind(file, '.evt.') & isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
     
-        % set up variables for easy tracking of table's column headings
-        video_tracking_constants;
-        
         % if there are timestamps, and evt_gui was used, then they are already attached
         tstamps = 'done';
         
@@ -70,20 +73,28 @@ for fid = 1:length(filelist)
         data(:,2) = zeros(size(data, 1),1);  %fill the second column with zeros
         data = data(:,2:end); %delete the first column
 
-        % set up variables for easy tracking of table's column headings
-        TIME = 1; ID = 2; FRAME = 3; X = 4; Y = 5; Z = 6; 
-        ROLL = 7; PITCH = 8; YAW = 9; RADIAL = 10;
-        
     elseif isfield(dd.tracking, 'videoTrackingSecUsecZeroXYZ')        
         data = dd.tracking.videoTrackingSecUsecZeroXYZ;
 
         % Let's axe the VRPN "time-stamps"... they don't mean anything here
         data(:,2) = zeros(size(data, 1),1);  
         data = data(:,2:end);
-
+        
+        video_tracking_constants; 
+        
         % set up variables for easy tracking of table's column headings
-        TIME = 1; ID = 2; X = 3; Y = 4; Z = 5; 
-                
+        myTIME = 1; myID = 2; myX = 3; myY = 4; myZ = 5; 
+
+        data(:,TIME) = data(:,myTIME);
+        data(:,ID)   = data(:,myID);
+        data(:,FRAME)= 1:rows(data);
+        data(:,X)    = data(:,myX);
+        data(:,Y)    = data(:,myY);
+        data(:,Z)    = data(:,myZ);
+        data(:,ROLL) = zeros(rows(data),1);
+        data(:,PITCH) = zeros(rows(data),1);
+        data(:,YAW) = zeros(rows(data),1);
+         
         % no timestamps in this vrpn file format
         tstamps = 'no';
 
@@ -94,8 +105,20 @@ for fid = 1:length(filelist)
         data(:,2) = zeros(size(data, 1),1);  
         data = data(:,2:end);
 
+        video_tracking_constants; 
+        
         % set up variables for easy tracking of table's column headings
-        TIME = 1; ID = 2; X = 3; Y = 4; Z = 5; 
+        myTIME = 1; myID = 2; myX = 3; myY = 4; myZ = 5; 
+
+        data(:,TIME) = data(:,myTIME);
+        data(:,ID)   = data(:,myID);
+        data(:,FRAME)= [1:rows(data)]';
+        data(:,X)    = data(:,myX);
+        data(:,Y)    = data(:,myY);
+        data(:,Z)    = data(:,myZ);
+        data(:,ROLL) = zeros(rows(data),1);
+        data(:,PITCH) = zeros(rows(data),1);
+        data(:,YAW) = zeros(rows(data),1);
         
         % no timestamps in this vrpn file format
         tstamps = 'no';
@@ -141,8 +164,7 @@ for fid = 1:length(filelist)
         this_x = x(this_tracker);
         this_y = y(this_tracker);
 
-        if(strcmp(absolute_pos,'relative'))
-            
+        if(strcmp(absolute_pos,'relative'))            
             % subtract off the initial x and y (1st point becomes the zero)
             this_x = this_x - this_x(1);
             this_y = this_y - this_y(1);
@@ -150,30 +172,30 @@ for fid = 1:length(filelist)
             % enter the new locations into the data table
             data(this_tracker,X) = this_x;
             data(this_tracker,Y) = this_y;            
-
-            % ASIDE: add vector magnitude column (because this is only relevant 
-            % in relative measurements, it's placed here.)
-            data(this_tracker,RADIAL) = magnitude(this_x,this_y);           
-        
         end
         
-            % Handle time.... if we don't have timestamps then we have to assume
-            % that we have a constant frame rate.
-            if strcmp(tstamps,'yes')
-                tfile = file(1:end-9);
-                try
-                    times = load([tfile '.tstamp.txt'], 'ASCII');
-                    times = times - times(1);
-                    active_frames = data(this_tracker, FRAME);
-                    data(this_tracker,TIME) = times(active_frames+1);
-                catch
-                    data(this_tracker,TIME) = data(this_tracker,FRAME) * 1/frame_rate;                
-                end            
-            elseif strcmp(tstamps, 'no')
+        % Handle time.... if we don't have timestamps then we have to assume
+        % that we have a constant frame rate.
+        if strcmp(tstamps,'yes')
+            tfile = file(1:end-9);
+            try
+                times = load([tfile '.tstamp.txt'], 'ASCII');
+                times = times - times(1);
+                active_frames = data(this_tracker, FRAME);
+                data(this_tracker,TIME) = times(active_frames+1);
+            catch
+                tstamps = 'no';                
+            end
+        end
+        
+        if strcmp(tstamps, 'no')
+            if sum(this_tracker,FRAME) > 0
                 data(this_tracker,TIME) = data(this_tracker,FRAME) * 1/frame_rate;
             else
-                % do nothing
-            end    
+                frames = [0 : rows(this_tracker)-1]';
+                data(this_tracker,TIME) = frames * 1/frame_rate;
+            end                
+        end    
     end
 
 
