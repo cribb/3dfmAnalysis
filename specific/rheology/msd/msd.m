@@ -23,7 +23,7 @@ function d = msd(files, window, dim)
 
 if (nargin < 3) | isempty(dim)    dim = 2;   end
 if (nargin < 2) | isempty(window) window = [1 2 5 10 20 50 100 200 500 1000 1001];  end
-if (nargin < 1) | isempty(files)  files = '*.evt.mat'; end
+if (nargin < 1) | isempty(files)  files = '*.mat'; end
 
 % load in the constants that identify the output's column headers for the current
 % version of the vrpn-to-matlab program.

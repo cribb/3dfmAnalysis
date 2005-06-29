@@ -1,4 +1,7 @@
 2005-06-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: corrected documentation to read default filemask is '*.evt.mat'.
+
+2005-06-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* msd.m: vectorized innermost for-loop so that msd runs more quickly.
 
 2005-06-30  Jeremy Cribb <jcribb@email.unc.edu>
@@ -13,11 +16,11 @@
 
 	* Change batch_load_video_tracking to be able to handle the 40x and 60x lenses
 
-2005-07-10  David Hill <dbhill@email.unc.edu>
+2005-06-10  David Hill <dbhill@email.unc.edu>
 
 	* Changed msd2pt to be a funtion
 
-2005-07-10  David Hill <dbhill@email.unc.edu>
+2005-06-10  David Hill <dbhill@email.unc.edu>
 
 	* Added batch_msd2pt to more quickly get thru 2pt rheology calculations
 
