@@ -1,0 +1,12 @@
+2005-07-12  Kalpit Desai	<kvdesai@cs.unc.edu>
+
+	* Initial version for ChangeLog in Agnostic directory
+	* atanalysis.m, atanalysis.fig: 
+	- A GUI for analysing agnostic tracking data. Initial version.
+	* load_agnostic_tracking.m:
+	- A script that parses the tracking data from AgnosticTracking point of view. Compatible to laser tracker versions 03.02 to 04.00 and may be later.
+	* modifiedBP.m:
+	- A script to compute 'modified' bead positions. 'modified' because the positionErrors during the blips (the period when noise was injected) is computed by using the post-blip jacobian and not the pre-blip jacobian
+	* quadTOpos.m:
+	- A script that converts QPD signals into positionErrors using the supplied jacobian. Calculation compatible to laser tracker version 03.02 to 04.00 and may be later.
+
