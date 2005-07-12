@@ -1,3 +1,7 @@
+2005-07-12 Kalpit Desai <kvdesai@email.unc.edu>
+	* threePoleFreqSweep.m, threePoleFreqSweep.fig:
+	- A GUI tool for sinusoidal force applications using three-pole geometry
+	- First version: 1.0
 2005-04-20 Kalpit Desai <kvdesai@email.unc.edu>
 	* mysignal.m:
 	- Adjusted the excitation values such that there is no 'step' occuring at start or end of any frequency.
