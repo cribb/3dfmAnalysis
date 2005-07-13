@@ -80,7 +80,7 @@ function button_start_Callback(hObject, eventdata, handles)
 % hObject    handle to button_start (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global AO fvec
+global AO fvec version_str
 % hObject    handle to button_start (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -142,7 +142,6 @@ switch get(handles.menu_controlStrat,'value')
     otherwise
 end
 rawA = [];    rawB = []; rawC = [];
-
 t = 0:1/srate:tspan;
 % HARDCODED VALUES: gap time = 1 second, control frequency time = 1 second.
 GAP_TIME = 1;
@@ -151,12 +150,14 @@ tgap = 0:1/srate:GAP_TIME;
 tcont = 0:1/srate:FCONT_TIME;
 gaps = zeros(1,length(tgap));
 for i = 1:length(fvec)
-    tsineA = sin(2*pi*fvec(i)*t + phaseA);
-    csineA = sin(2*pi*fcont(i)*tcont + phaseA);
-    tsineB = sin(2*pi*fvec(i)*t + phaseB);
-    csineB = sin(2*pi*fcont(i)*tcont + phaseB);
-    tsineC = sin(2*pi*fvec(i)*t + phaseC);
-    csineC = sin(2*pi*fcont(i)*tcont + phaseC);
+    % For three pole case, the force frequency is twice the excitation
+    % frequency. So divide the supplied frquencies by two.
+    tsineA = sin(2*pi*fvec(i)*0.5*t + phaseA);
+    csineA = sin(2*pi*fcont*0.5*tcont + phaseA);
+    tsineB = sin(2*pi*fvec(i)*0.5*t + phaseB);
+    csineB = sin(2*pi*fcont*0.5*tcont + phaseB);
+    tsineC = sin(2*pi*fvec(i)*0.5*t + phaseC);
+    csineC = sin(2*pi*fcont*0.5*tcont + phaseC);
     
     if(strcmpi(flag_cont,'interleave'))  %control frquency betwn each test freq      
         rawA = [rawA, tsineA, gaps, csineA, gaps]; 

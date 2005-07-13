@@ -219,23 +219,26 @@ function button_stop_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global AO
-if(strcmpi(get(AO,'Running'),'On'))
-    stop(AO);
+if (exist('AO') & ~isempty(AO))
+    if(strcmpi(get(AO,'Running'),'On'))
+        stop(AO);
+    end
+    putsample(AO,[0 0 0]);
 end
-putsample(AO,[0 0]);
-
 % --- Executes on button press in button_close.
 function button_close_Callback(hObject, eventdata, handles)
 % hObject    handle to button_close (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global AO
-if(strcmpi(get(AO,'Running'),'On'))
-    stop(AO);
+if (exist('AO') & ~isempty(AO))
+    if(strcmpi(get(AO,'Running'),'On'))
+        stop(AO);
+    end
+    putsample(AO,[0 0 0]);
+    clear AO
+    delete AO
 end
-putsample(AO,[0 0]);
-clear AO
-delete AO
 daqreset;
 close(handles.mysignal);
 
@@ -249,13 +252,6 @@ default_fcont = 125;%it is usually desirable that first 3 harmonics of fcont are
 fvec = default_fvec;
 set(handles.edit_freqVec,'string',num2str(default_fvec));
 set(handles.edit_controlFreq,'string',num2str(default_fcont));
-
-function slider_period_Callback(hObject, eventdata, handles)
-user_input = get(hObject,'value');
-val = round(user_input);
-set(hObject,'value');
-set(handles.edit_period,'string',num2str(val));
-updateAO;
 
 function edit_controlFreq_Callback(hObject, eventdata, handles)
 user_input = num2str(get(hObject,'string'));
@@ -299,7 +295,6 @@ if(waiting_for_char)%this means last element is numeric character
 end
 %------------------------------------------------------------------
 function edit_period_Callback(hObject, eventdata, handles)
-check_editval(hObject, handles.slider_period);
 
 updateAO;
 % --- Channel 1 settings%------------------------------------------
@@ -539,20 +534,6 @@ else
     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
-% --- Executes during object creation, after setting all properties.
-function slider_period_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to slider_period (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: slider controls usually have a light gray background, change
-%       'usewhitebg' to 0 to use default.  See ISPC and COMPUTER.
-usewhitebg = 1;
-if usewhitebg
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
 % --- Executes during object creation, after setting all properties.
 function edit_pkTOpk1_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit_pkTOpk1 (see GCBO)
