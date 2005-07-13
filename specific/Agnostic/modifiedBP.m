@@ -39,7 +39,7 @@ end
 for c = 1:size(jac,1)
     istart = jac(c).iblip(1,1); iend = jac(c).iblip(1,2);
     modpei(istart:iend,:) = quadTOpos(d.qpd(istart:iend,:),jac(c), jacType);
-    if(isequal(boolactive,'yes'))
+    if(isequal(boolactive,'yes') & exist('jaca'))
         % now find if there is any active jacobian updated near to this blip
         tnow = d.t(iend);
         for ca = 1:size(jaca,1);    

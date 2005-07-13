@@ -1,3 +1,5 @@
+2005-07-13  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* modifiedBP.m: Fixed the bug where it was looking for Active Jacobian for calculation Active-Position-Errors during blips.
 2005-07-12  Kalpit Desai	<kvdesai@cs.unc.edu>
 
 	* Initial version for ChangeLog in Agnostic directory
