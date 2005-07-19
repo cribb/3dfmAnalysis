@@ -1,0 +1,5 @@
+2005-07-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* Added the 'timeutils' folder, a library of date-handling functions.
+
+2005-07-19  Jeremy Cribb <jcribb@email.unc.edu>  	
+	* Initial Version
