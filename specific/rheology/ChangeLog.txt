@@ -1,3 +1,6 @@
+2005-07-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* percent_recovery.m: added.  computes the percent recovery of vector.
+
 2005-06-29  Jeremy Cribb <jcribb@email.unc.edu>
 	* evaluateKK.m: fixed bug where variable for tolerance (eta) was inadvertantly placed inside an if-statement.
 	* kkr.m: reworked for use with current version of evaluateKK.m.
