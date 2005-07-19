@@ -37,7 +37,7 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absol
 % 06/16/05 - now you can use filemasks to aggregate several video tracks into a single 
 %            data table.
 % 07/19/05 - timestamps are now in unixutc format (Number of seconds 
-%            since 00:00:00 2005/01/01) and now two-column timestamps are handled.
+%            since 00:00:00 1970/01/01) and now two-column timestamps are handled.
 
 % load video tracking constants
 video_tracking_constants;
