@@ -1,6 +1,6 @@
 function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absolute_pos, tstamps, table);
 % 3DFM function
-% last modified 05/22/2005
+% last modified 07/19/2005 ; jcribb
 %
 % This function reads in a Video Tracking dataset, saved in the 
 % matlab workspace file (*.mat) format and prepares it for most 
@@ -36,7 +36,8 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absol
 %            for easier coding.
 % 06/16/05 - now you can use filemasks to aggregate several video tracks into a single 
 %            data table.
-%
+% 07/19/05 - timestamps are now in unixutc format (Number of seconds 
+%            since 00:00:00 2005/01/01) and now two-column timestamps are handled.
 
 % load video tracking constants
 video_tracking_constants;
@@ -180,7 +181,9 @@ for fid = 1:length(filelist)
             tfile = file(1:end-9);
             try
                 times = load([tfile '.tstamp.txt'], 'ASCII');
-                times = times - times(1);
+                if size(times, 2) == 2
+                    times = times(:,1) + times(:,2) / 1e6;
+                end
                 active_frames = data(this_tracker, FRAME);
                 data(this_tracker,TIME) = times(active_frames+1);
             catch
@@ -197,7 +200,6 @@ for fid = 1:length(filelist)
             end                
         end    
     end
-
 
     
     % we don't want to repeat any beadIDs as we concatenate the

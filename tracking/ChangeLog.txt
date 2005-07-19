@@ -1,3 +1,6 @@
+2005-07-19  Jeremy Cribb  <jcribb@email.unc.edu>
+	*	load_video_tracking: timestamps are now in unixutc format (number of secondssince 00:00:00 2005/01/01) and now two-column timestamps are handled.
+
 2005-06-29  Jeremy Cribb  <jcribb@email.unc.edu>
 	* load_video_tracking.m: makes older version imported vrpn files look like newer version imported vrpn files.
 
