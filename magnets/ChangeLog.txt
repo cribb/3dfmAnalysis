@@ -1,3 +1,7 @@
+2005-07-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* forcecal2d.m: Corrected documentation.
+	* extract_magnet_log.m: added.  Extracts magnet data for time periods relevant to recorded timestamps of input (video or laser).
+	
 2005-06-20  Jeremy Cribb <jcribb@email.unc.edu>
 	* forcecal2d.m: used binning in 2D force plot instead of interpolated surface.  It runs slower, but makes more sense.  Changed the origin to coincide with the defined center of the pole tip.  Plots now have axes in microns instead of pixels. Changed the outputs to Force table, error table, and step size.  Updated documentation.
 

@@ -1,11 +1,11 @@
 function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity)
 % 3DFM function  
 % Math 
-% last modified 06/16/05 
+% last modified 07/19/05 (jcribb)
 %  
 % Run a 2D force calibration using data from EVT_GUI.
 %  
-%  [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um);  
+%  [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity);  
 %   
 %  where "Ftable" is the average force computed for each pixel.
 %        "stderr" is the standard error (std(X)/sqrt(N)) for Ftable.
@@ -18,12 +18,12 @@ function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, po
 %        "calib_um" is the microns per pixel calibration factor.
 %        "granularity" is the binning for 2D force determination
 %  
-%  01/??/05 - created.  
+%  01/??/05 - created; jcribb.  
 %  06/16/05 - added documentation. cleaned up code. fixed bug in
 %  force-distance 1D plot.
 %  06/20/05 - commented out linear-interp code for 2D plot and added
 %  2D binning force calibration.  This can take a LONG time to compute if
-%  the granularity is set too low (<3)
+%  the granularity is set too low (<4)
 %   
     
     video_tracking_constants;
