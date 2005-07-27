@@ -1,3 +1,6 @@
+2005-07-27  Jeremy Cribb <jcribb@email.unc.edu>
+	* uncertainty in slope.m: added.  returns the uncertainty in the slope of a linear fit.
+
 2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* windiff.m: the dependent variable can now have more than one column (e.g. x & y coordinates) 
 
