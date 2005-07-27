@@ -1,7 +1,7 @@
 function pretty_plot(fig)
 % 3DFM function
 % Utilities
-% last modified 01/03/05
+% last modified 07/25/05
 %
 % This function changes the font sizes and weights for any given figure
 % (or the current figure if no input parameter is used) so that when pasted 
@@ -14,21 +14,26 @@ function pretty_plot(fig)
 % 
 % 08/02/03 - created; jcribb
 % 01/03/05 - fixed case-sensitive typo; jcribb
+% 07/25/05 - added support for multiple axes in figure (e.g. yy-overlays)
 %
 
 if nargin == 0
     fig = gcf;
 end
 
-axes = gca(fig);
-titl = get(axes, 'Title');
-legd = legend;
-xlab = get(axes, 'Xlabel');
-ylab = get(axes, 'Ylabel');
+axes = get(fig, 'Children');
 
-set(titl, 'FontSize', 14, 'FontWeight', 'Bold');
-set(legd, 'FontSize', 12, 'FontWeight', 'Bold');
-set(xlab, 'FontSize', 12, 'FontWeight', 'Bold');
-set(ylab, 'FontSize', 12, 'FontWeight', 'Bold');
-set(axes, 'FontSize', 12, 'FontWeight', 'Bold');
-
+for k = 1 : length(axes)
+    
+	titl = get(axes(k), 'Title');
+	legd = legend;
+	xlab = get(axes(k), 'Xlabel');
+	ylab = get(axes(k), 'Ylabel');
+	
+	set(titl, 'FontSize', 14, 'FontWeight', 'Bold');
+	set(legd, 'FontSize', 12, 'FontWeight', 'Bold');
+	set(xlab, 'FontSize', 12, 'FontWeight', 'Bold');
+	set(ylab, 'FontSize', 12, 'FontWeight', 'Bold');
+	set(axes(k), 'FontSize', 12, 'FontWeight', 'Bold');
+	
+end
