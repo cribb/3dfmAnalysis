@@ -34,6 +34,7 @@ options = optimset('MaxFunEvals', 20000*2*n, ...
 % normalize recovery to start at 1 and end at 0
 xt = xt - min(xt);
 xt = xt / max(xt);
+t = t - min(t);
 
 % design the fitting routine
 
@@ -59,7 +60,7 @@ x0 = [J tau];  % x0 is a row vector with one less coefficient than
 % residuals = data - fit ...difference between the response value and the
 % predicted response value
 
-% rms of the residuals
+% standard deviation of measurements == rms of the residuals
 rms_residuals = rms(residuals);
 
 % compute R-square
@@ -87,12 +88,13 @@ for k = 1 : length(J)
 end
 
 figure;
+subplot(1,2,1);
 plot(t, xt, '.', t, fit_xt, 'r');
 xlabel('time [s]');
 ylabel('normalized recovery');
 legend('data', 'fit');
 
-figure;
+subplot(1,2,2);
 loglog(t, xt, '.', t, fit_xt, 'r');
 xlabel('time [s]');
 ylabel('normalized recovery');

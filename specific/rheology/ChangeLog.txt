@@ -1,3 +1,10 @@
+2005-07-27  Jeremy Cribb <jcribb@email.unc.edu>
+	* relaxation_time.m: updated documentation. improved fitting by normalizing time.
+	* laser_relaxtime.m: added.  takes a laser tracking file and a magnet log file along with other necessary parameters, applies fitting routine, generates plots, and outputs a table describing the relaxation times present.
+	* laser_membranestep.m: added.  takes a laser tracking file and a magnet log file along with other necessary parameters, applies fitting routine, generates plots, and outputs a table describing the viscoelastic model parameters found in the data.
+	* membrane_step_response.m: added.  returns parameter values for fit to membrane model (Sackmann '98).
+	* membrane_step_response_fun.m: added.  file describing the modeling function(s) used for fitting procedure in membrane_step_response.m.
+
 2005-07-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* percent_recovery.m: added.  computes the percent recovery of vector.
 
