@@ -131,17 +131,21 @@ function edit_infile_Callback(hObject, eventdata, handles)
 function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
 
-    filename = get(handles.edit_infile, 'String')
+    filename = get(handles.edit_infile, 'String');
     
     if(length(filename) == 0)
 		[fname, pname] = uigetfile('*.mat');
 		filename = strcat(pname, fname);
+        logentry(['Setting Path to: ' pname]);
+        cd(pname);
 		set(handles.edit_infile,'String', filename);
         set(handles.edit_outfile, 'String', '');
     end   
 
-    filenameroot = strrep(filename, '.raw.vrpn.mat', '')
-    filenameroot = strrep(filenameroot, '.raw.vrpn.evt.mat', '')
+    filenameroot = strrep(filename,     '.raw', '');
+    filenameroot = strrep(filenameroot, '.vrpn', '');
+    filenameroot = strrep(filenameroot, '.mat', '');
+    filenameroot = strrep(filenameroot, '.evt', '')
 
     % load the datafile
     logentry('Loading dataset... ');
@@ -394,6 +398,8 @@ function plot_data(hObject, eventdata, handles)
     set(handles.XTfig, 'BackingStore', 'off');    
     drawnow;
     
+    refresh(handles.XYfig);
+    refresh(handles.XTfig);
     
 function delete_selected_dataset(hObject, eventdata, handles)
     global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
