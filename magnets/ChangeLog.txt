@@ -1,3 +1,7 @@
+2005-07-27  Jeremy Cribb <jcribb@email.unc.edu>
+	* laser_forcecal.m: added.  Performs force calibration routine and returns a table describing forces measured with respect to voltage applied to coils.  requires user to identify 'dominant coil' used in experimental process.
+	* extract_magnet_log: added textual output describing timing between magnet and tracking log files.
+
 2005-07-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* forcecal2d.m: Corrected documentation.
 	* extract_magnet_log.m: added.  Extracts magnet data for time periods relevant to recorded timestamps of input (video or laser).
