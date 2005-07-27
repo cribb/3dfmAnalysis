@@ -30,10 +30,15 @@ magtime = mag.magnets.time(:,1) + mag.magnets.time(:,2) / 1e6;
 
 % We make the assumption that the magnets log file envelops the
 % experimental time scale.  We check for that here...
-if ( min(magtime) > min(expt_time_stamps) ) | ...
-   ( max(magtime) < max(expt_time_stamps)
+    fprintf('MAGNET start time: %12.5f\n', min(magtime));
+    fprintf('EXPT   start time: %12.5f\n', min(expt_time_stamps));
+    fprintf('MAGNET stop  time: %12.5f\n', max(magtime));
+    fprintf('EXPT   stop  time: %12.5f\n', max(expt_time_stamps));
 
-    error('Magnet data does not exist for all times recorded in experiment.');
+if ( min(magtime) > min(expt_time_stamps) ) | ...
+   ( max(magtime) < max(expt_time_stamps) )
+
+    error('Magnet data does not exist for all times recorded in experiment.\n');
 end
 
 
