@@ -1,3 +1,6 @@
+2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: added code that plots time using the first time point as zero.  This was done to offset the change made in glui_take, where the recorded timestamps are now in UCT.
+
 2005-07-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: improved filename/filetype handling.  improved but did not completely fix the plotting update problem (where a deleted point is not removed from a plot until focus is removed from that tracker).
 

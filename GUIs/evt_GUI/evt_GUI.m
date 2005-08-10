@@ -388,7 +388,7 @@ function plot_data(hObject, eventdata, handles)
     drawnow;
     
     figure(handles.XTfig);
-    plot(t(k), [x(k) y(k)], '.');
+    plot(t(k) - min(t(k)), [x(k) y(k)], '.');
     xlabel('time (s)');
     ylabel('displacement (pixels)');
     legend('x', 'y');    
