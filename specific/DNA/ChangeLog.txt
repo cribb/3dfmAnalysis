@@ -1,3 +1,6 @@
+2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* Added wlc.m, wlc_model_response_fun.m.  These files are used for fitting displacement vs. force data to a worm-like chain (WLC).
+
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 
 	* Initial Version
