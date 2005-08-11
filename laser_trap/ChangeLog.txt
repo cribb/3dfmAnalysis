@@ -1,3 +1,7 @@
+2005-08-11  Jeremy Cribb <jcribb@email.unc.edu>
+	* laser_trap_analysis.m: Removed.
+	* lsser_trap_calibration.m: Added.
+
 2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* Added LorentzianFit.m, LorentzianFit_fun.m, and laser_trap_calibration.m.  These files are used to calibrate the laser trap on Apollo by computing the trap's spring constants.
 	* Initial Version
