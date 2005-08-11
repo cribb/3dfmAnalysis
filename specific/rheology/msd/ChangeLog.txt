@@ -1,3 +1,6 @@
+2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* ve.m: fixed a warning regarding the use of the variable 'gamma' which is also a function in matlab.
+
 2005-06-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* msd.m: corrected documentation to read default filemask is '*.evt.mat'.
 

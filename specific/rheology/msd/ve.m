@@ -27,14 +27,14 @@ B = tau(2:end,:);
 C = msd(1:end-1,:);
 D = msd(2:end,:);
 alpha = log10(D./C)./log10(B./A);
-gamma = gamma(1 + alpha);
+MYgamma = gamma(1 + alpha);
 % gamma = 0.457*(1+alpha).^2-1.36*(1+alpha)+1.9;
 
 % because of the first-difference equation used to compute alpha, we have
 % to delete the last row of f, tau, and msd values computed.
 msd = msd(1:end-1,:);
 tau = tau(1:end-1,:);
-gstar = (2*k*T) ./ (3 * pi * bead_radius .* msd .* gamma);
+gstar = (2*k*T) ./ (3 * pi * bead_radius .* msd .* MYgamma);
 
 f = 1 ./ tau;
 w = f/(2*pi);
@@ -92,7 +92,7 @@ v.f = f;
 v.tau = tau;
 v.msd = msd;
 v.alpha = alpha;
-v.gamma = gamma;
+v.gamma = MYgamma;
 v.gstar = gstar;
 v.gp = gp;
 v.gpp=gpp;
