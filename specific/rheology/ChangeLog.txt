@@ -1,3 +1,6 @@
+2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* percent_recovery.m: updated documentation and fixed an error in the computation.
+
 2005-07-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* relaxation_time.m: updated documentation. improved fitting by normalizing time.
 	* laser_relaxtime.m: added.  takes a laser tracking file and a magnet log file along with other necessary parameters, applies fitting routine, generates plots, and outputs a table describing the relaxation times present.
