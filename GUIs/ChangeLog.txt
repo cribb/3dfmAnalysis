@@ -1,3 +1,6 @@
+2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* added laser_forcecal_GUI.
+
 2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* removed fcd_GUI.  This was replaced a long time ago with evt_gui and never got removed from CVS.
 
