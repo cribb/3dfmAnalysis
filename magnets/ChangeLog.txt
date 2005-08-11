@@ -1,3 +1,6 @@
+2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* laser_forcecal.m: added drift subtraction.  added documentation.
+
 2005-07-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* laser_forcecal.m: added.  Performs force calibration routine and returns a table describing forces measured with respect to voltage applied to coils.  requires user to identify 'dominant coil' used in experimental process.
 	* extract_magnet_log: added textual output describing timing between magnet and tracking log files.
