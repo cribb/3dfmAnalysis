@@ -1,3 +1,6 @@
+2005-08-11  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: removed a duplicate function name to get rid of annoying warning messages.
+
 2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: added code that plots time using the first time point as zero.  This was done to offset the change made in glui_take, where the recorded timestamps are now in UCT.
 

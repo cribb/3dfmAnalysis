@@ -568,9 +568,3 @@ function logentry(txt)
      headertext = [logtimetext 'evt_gui: '];
      
      fprintf('%s%s\n', headertext, txt);
-
-
-
-% --- Executes on button press in radio_deletetimeafter.
-function radio_deletetimeafter_Callback(hObject, eventdata, handles)
-
