@@ -7,7 +7,7 @@ function F = WLC_model_response_fun(x0, r)
 	T = 293;
 	k = 1.3807e-23;
 	
-    F = log( (k*T/P) * (.25*(1-(r+offset)/L).^-2 - .25 + (r+offset)/L) );
+    F = (k*T/P) * (.25*(1-(r+offset)/L).^-2 - .25 + (r+offset)/L);
 
 
     

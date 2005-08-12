@@ -1,3 +1,6 @@
+2005-08-12  Jeremy Cribb <jcribb@email.unc.edu>
+	* wlc.m, wlc_model_response_fun.m: Removed log-space versions of fitting equations.
+
 2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* Added wlc.m, wlc_model_response_fun.m.  These files are used for fitting displacement vs. force data to a worm-like chain (WLC).
 
