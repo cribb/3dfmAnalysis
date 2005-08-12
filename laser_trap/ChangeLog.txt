@@ -1,4 +1,8 @@
 2005-08-11  Jeremy Cribb <jcribb@email.unc.edu>
+	* LorentzianFit.m: removed calibration code.
+	* laser_trap_calibration.m: removed code specific for fitting to Lorentzian.
+
+2005-08-11  Jeremy Cribb <jcribb@email.unc.edu>
 	* laser_trap_analysis.m: Removed.
 	* lsser_trap_calibration.m: Added.
 
