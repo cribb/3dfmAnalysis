@@ -1,6 +1,5 @@
 function v = load_lasertrap_tracking(filename, spring_constants);
 
-
 d = load_vrpn_tracking(filename,'m','zero','yes');  %load in data set
 
 %Set spring constants
@@ -30,9 +29,10 @@ v.position.y = d.beadpos.y;
 v.position.z = d.beadpos.z;
 v.time       = d.beadpos.time;
 
-% % [px,fx] = mypsd(d.posError.x, 10000, 1, 'rectangle');
-% % [py,fy] = mypsd(d.posError.y, 10000, 1, 'rectangle');
-% % [pz,fz] = mypsd(d.posError.z, 10000, 1, 'rectangle');
+[v.psd.x,v.psd.f] = mypsd(d.posError.x, 10000, 1, 'rectangle');
+[v.psd.y,v.psd.f] = mypsd(d.posError.y, 10000, 1, 'rectangle');
+[v.psd.z,v.psd.f] = mypsd(d.posError.z, 10000, 1, 'rectangle');
+
 % % 
 % % figure(1);subplot(2,1,1),plot(d.beadpos.time,j.position.x)
 % % title('X Position (microns) vs. Time (seconds)')

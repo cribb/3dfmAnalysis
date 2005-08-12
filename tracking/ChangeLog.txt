@@ -1,4 +1,7 @@
 2005-08-10  Jeremy Cribb  <jcribb@email.unc.edu>
+	* load_lasertrap_tracking.m: added back power spectrum computation.
+
+2005-08-10  Jeremy Cribb  <jcribb@email.unc.edu>
 	* load_lasertrap_tracking.m: added.  handles special needs for laser trap tracking vrpn files.
 
 2005-07-19  Jeremy Cribb  <jcribb@email.unc.edu>
