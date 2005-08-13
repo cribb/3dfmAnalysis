@@ -81,7 +81,11 @@ function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, po
     x_grid = 1:648; 
     y_grid = 1:484; 
     
-    myMIP = mip('*.MIP.bmp');
+    try 
+        myMIP = mip('*.MIP.bmp');
+    catch
+        myMIP = 0;
+    end
     
 % 	[xi,yi] = meshgrid(x_grid, y_grid);
 % 	zi = griddata(x, y, finalF*1e12, xi, yi);
