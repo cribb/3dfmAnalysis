@@ -1,3 +1,6 @@
+2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* select_data_in_box.m: added.  using the coordinates of two captured mouse clicks, this function returns all of the points in the bounding box.
+
 2005-07-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* pretty_plot.m: added support for multiple axes in figure (e.g. yy-overlays).
 	* figurelist.m: returns a sorted vector containing the handles of all existing matlab figures.
