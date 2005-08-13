@@ -10,5 +10,6 @@ function v = percent_recovery(x)
 %  07/16/05 - created (jcribb) 
 % 
 
-    v = (max(x) - min(x)) / max(x) * 100;
+    v = (max(x) - x(end)) / (max(x) - x(1)) * 100;
+    
     

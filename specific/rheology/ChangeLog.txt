@@ -1,3 +1,6 @@
+2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* percent_recovery.m: fixed yet another error in the computation.
+
 2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* percent_recovery.m: updated documentation and fixed an error in the computation.
 
