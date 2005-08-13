@@ -1,0 +1,4 @@
+2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* lasertrap_cal_GUI.fig: Added.  Figure file for lasertrap force calibration by laser tracking.
+	* lasertrap_cal_GUI.m: Added. Implementation for above figure file.
+
