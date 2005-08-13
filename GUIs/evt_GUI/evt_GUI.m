@@ -22,7 +22,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 02-Feb-2005 21:36:21
+% Last Modified by GUIDE v2.5 12-Aug-2005 11:47:22
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -202,12 +202,16 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 
     % assign data variables
     table = d;
+    time_offset = min(table(:,TIME));
+    table(:,TIME) = table(:,TIME) - time_offset; 
+    
     % table = attach_time(table);
     beadID = table(:,ID);
     x = table(:,X);
     y = table(:,Y);
     XYfig = figure;
     XTfig = figure;
+    RTfig = figure; 
     currentBead = 0;
     
 	slider_max = max(beadID);
@@ -215,6 +219,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     if slider_min == slider_max
         slider_max = slider_min + 1;
     end
+    
 	slider_step = 1/(slider_max - slider_min);
     	
 	set(handles.slider_BeadID, 'Min', slider_min);
@@ -223,12 +228,16 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 
     handles.XYfig = XYfig;
     handles.XTfig = XTfig;
+    handles.RTfig = RTfig;
     handles.table = table;
+    handles.time_offset = time_offset;
+    
     guidata(hObject, handles);
 
     plot_data(hObject, eventdata, handles);
     drawnow;
     
+    set(RTfig, 'Visible', 'off');
     
 % --- Executes on button press in pushbutton_savefile.
 function pushbutton_savefile_Callback(hObject, eventdata, handles)
@@ -241,6 +250,10 @@ function pushbutton_savefile_Callback(hObject, eventdata, handles)
         return;
     end
     
+    table = handles.table;
+    time_offset = handles.time_offset;
+    
+    table(:,TIME) = table(:,TIME) + time_offset;
     tracking.spot3DSecUsecIndexFramenumXYZRPY = handles.table;
     save(outfile, 'tracking');
     logentry(['New tracking file, ' outfile ', saved...']);
@@ -382,21 +395,34 @@ function plot_data(hObject, eventdata, handles)
     hold off;
     axis([0 648 0 484]);
     set(handles.XYfig, 'Units', 'Normalized');
-    set(handles.XYfig, 'Position', [0.1 0.075 0.4 0.4]);
+    set(handles.XYfig, 'Position', [0.1 0.05 0.4 0.4]);
     set(handles.XYfig, 'DoubleBuffer', 'on');
     set(handles.XYfig, 'BackingStore', 'off');
     drawnow;
     
     figure(handles.XTfig);
-    plot(t(k) - min(t(k)), [x(k) y(k)], '.');
+    plot(t(k), [x(k) y(k)], '.');
     xlabel('time (s)');
     ylabel('displacement (pixels)');
     legend('x', 'y');    
     set(handles.XTfig, 'Units', 'Normalized');
-    set(handles.XTfig, 'Position', [0.51 0.075 0.4 0.4]);
+    set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
     set(handles.XTfig, 'DoubleBuffer', 'on');
     set(handles.XTfig, 'BackingStore', 'off');    
     drawnow;
+    
+    if get(handles.checkbox_plotradius, 'Value')
+        figure(handles.RTfig);
+        plot(t(k), magnitude(x(k), y(k)), '.');
+        xlabel('time (s)');
+        ylabel('radial displacement (pixels)');
+        set(handles.RTfig, 'Units', 'Normalized');
+        set(handles.RTfig, 'Position', [0.51 0.525 0.4 0.4]);
+        set(handles.RTfig, 'DoubleBuffer', 'on');
+        set(handles.RTfig, 'BackingStore', 'off');    
+        drawnow;
+    end
+    
     
     refresh(handles.XYfig);
     refresh(handles.XTfig);
@@ -450,6 +476,7 @@ function delete_inside_boundingbox(hObject, eventdata, handles)
     figure(active_fig);
     
     table = handles.table;
+    
     beadID = table(:,ID);
     t = table(:,TIME);
     x = table(:,X);
@@ -557,6 +584,22 @@ function delete_data_after_time(hObject, eventdata, handles);
     drawnow;
     
 
+% --- Executes on button press in checkbox_plotradius.
+function checkbox_plotradius_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_plotradius (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_plotradius
+
+    if get(hObject, 'Value')
+        set(handles.RTfig, 'Visible', 'on');
+%         plot_data(hObject, eventdata, handles);
+    else
+        set(handles.RTfig, 'Visible', 'off');
+    end
+
+    
 function logentry(txt)
     logtime = clock;
     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...

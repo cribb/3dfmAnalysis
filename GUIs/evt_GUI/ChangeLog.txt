@@ -1,3 +1,7 @@
+2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: added a 'plot radial displacement' checkbox.
+	* evt_gui.fig: same.
+
 2005-08-11  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: removed a duplicate function name to get rid of annoying warning messages.
 
