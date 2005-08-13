@@ -1,4 +1,8 @@
 2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* laser_forcecal_GUI.fig: added. 'subtract drift' checkbox.
+	* laser_forcecal_GUI.m: same.
+
+2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* laser_forcecal_GUI.fig: Added.  Figure file for magnetic force calibration by laser tracking.
 	* laser_forcecal_GUI.m: Added. Implementation for above figure file.
 

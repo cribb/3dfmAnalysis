@@ -22,7 +22,7 @@ function varargout = laser_forcecal_GUI(varargin)
 
 % Edit the above text to modify the response to help laser_forcecal_GUI
 
-% Last Modified by GUIDE v2.5 10-Aug-2005 23:07:15
+% Last Modified by GUIDE v2.5 12-Aug-2005 15:37:03
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -190,3 +190,22 @@ function logentry(txt)
      headertext = [logtimetext 'laser_forcecal_GUI: '];
      
      fprintf('%s%s\n', headertext, txt);
+
+
+% --- Executes on button press in checkbox_subtract_drift.
+function checkbox_subtract_drift_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_subtract_drift (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_subtract_drift
+
+
+% --- Executes on button press in pushbutton_close.
+function pushbutton_close_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_close (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+    close(laser_forcecal_GUI);
+
