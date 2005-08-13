@@ -1,4 +1,7 @@
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* added video_forcecal_GUI.
+
+2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* added bioforceGUI.
 
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
