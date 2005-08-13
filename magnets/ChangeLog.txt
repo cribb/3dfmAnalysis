@@ -1,4 +1,7 @@
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* laser_forcecal.m: re-added drift subtraction.  updated documentation.
+
+2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* forcecal2d.m: added exception handling to MIP loader, incase the Minimum Intensity Projection images do not exist.
 
 2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>

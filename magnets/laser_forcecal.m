@@ -1,4 +1,4 @@
-function v = laser_forcecal(tracking_log_file, magnet_log_file, dominant_pole, bead_radius, viscosity)
+function v = laser_forcecal(tracking_log_file, magnet_log_file, dominant_pole, bead_radius, viscosity, subtract_drift)
 % 3DFM function  
 % Magnetics
 % last modified 08/10/05 
@@ -12,9 +12,11 @@ function v = laser_forcecal(tracking_log_file, magnet_log_file, dominant_pole, b
 %		 "dominant_pole" is the identity of the dominant pole in the 3dfm
 %        "bead_radius" is the radius of hte tracked bead in [m]
 %        "viscosity" is the viscosity of the calibrator fluid in [Pa s]
-%  
+%        "subtract_drift" is 'y' or 'n', defaulting to 'n'
+%
 
 % handle argument list
+if (nargin < 6) | isempty(subtract_drift); subtract_drift = 'n';  end;
 if (nargin < 5) | isempty(viscosity);      viscosity = 1.6;       end;
 if (nargin < 4) | isempty(bead_radius);    bead_radius = 0.5e-6;  end;
 if (nargin < 3) | isempty(dominant_pole);  dominant_pole = 4;     end;
@@ -70,7 +72,7 @@ drift = [0 0 0];
 for k = 1 : ( length(magtime) - 1 );
 
     % for how long do we need to ignore points due to disynchrony?
-    buffer = 0; % seconds
+    buffer = 0.05; % seconds
     
     idx = find(beadtime >= (magtime(k) + buffer) & beadtime < (magtime(k+1) - buffer));
     
@@ -95,10 +97,12 @@ for k = 1 : ( length(magtime) - 1 );
                 uncertainty_in_slope(beadtime(idx), y(idx), fity), ...
                 uncertainty_in_slope(beadtime(idx), z(idx), fitz) ] ;
         
-        if dcoil_voltage == 0
-%             drift = vel;
-        else    
-%             vel = vel - drift;
+        if dcoil_voltage == 0 & strcmp(subtract_drift, 'y')
+            drift = vel;
+        elseif strcmp(subtract_drift, 'y')    
+            vel = vel - drift;
+        else 
+            % do nothing to the velocity.
         end
                     
         bead_velocity = fitr(1);
