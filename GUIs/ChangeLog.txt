@@ -1,3 +1,7 @@
+2005-08-14  Jeremy Cribb <jcribb@email.unc.edu>
+	* added elt_GUI.
+  * added mainGUI.
+	
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* added video_forcecal_GUI.
 

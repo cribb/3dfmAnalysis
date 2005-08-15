@@ -22,7 +22,7 @@ function varargout = bioforceGUI(varargin)
 
 % Edit the above text to modify the response to help bioforceGUI
 
-% Last Modified by GUIDE v2.5 10-Aug-2005 21:47:19
+% Last Modified by GUIDE v2.5 14-Aug-2005 10:16:44
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -164,6 +164,9 @@ function pushbutton_slope_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+    fig = get(handles.edit_ActiveFigure, 'String');
+    fig = str2num(fig);
+    
     x = handles.x;
     y = handles.y;
 
@@ -177,6 +180,10 @@ function pushbutton_slope_Callback(hObject, eventdata, handles)
 	fprintf('Statistics\n');
 	fprintf('x-range: %d \ny-range: %d \n', range(x), range(y));
 	fprintf('slope = %g, icept = %g', slope, icept);
+    
+    figure(fig);
+    hold on;
+    plot(x, fity, 'r');
 
 
 % --- Executes on button press in pushbutton_DNA.
@@ -193,3 +200,20 @@ function pushbutton_DNA_Callback(hObject, eventdata, handles)
     set(handles.text_persistence_length, 'String', num2str(L.Lp * 1e9));
     set(handles.text_contour_length, 'String', num2str(L.Lc * 1e6));
     set(handles.text_offset, 'String', num2str(L.offset * 1e6));    
+
+
+% --- Executes on button press in pushbutton_range.
+function pushbutton_range_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_range (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    fig = get(handles.edit_ActiveFigure, 'String');
+    fig = str2num(fig);
+
+    y = handles.y;
+    
+    set(handles.text_range, 'String', range(y));
+    
+    figure(fig);
+    drawlines(gca, [], [], [], [min(y) max(y)], 'r')
+    
