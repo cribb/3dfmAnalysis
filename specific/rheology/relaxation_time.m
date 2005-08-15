@@ -88,14 +88,14 @@ for k = 1 : length(J)
 end
 
 figure;
-subplot(1,2,1);
+% subplot(1,2,1);
 plot(t, xt, '.', t, fit_xt, 'r');
 xlabel('time [s]');
 ylabel('normalized recovery');
 legend('data', 'fit');
 
-subplot(1,2,2);
-loglog(t, xt, '.', t, fit_xt, 'r');
-xlabel('time [s]');
-ylabel('normalized recovery');
-legend('data', 'fit');
+% subplot(1,2,2);
+% loglog(t, xt, '.', t, fit_xt, 'r');
+% xlabel('time [s]');
+% ylabel('normalized recovery');
+% legend('data', 'fit');

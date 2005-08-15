@@ -1,4 +1,7 @@
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* relaxation_time.m: commented out a debugging plot.
+
+2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* percent_recovery.m: fixed yet another error in the computation.
 
 2005-08-10  Jeremy Cribb <jcribb@email.unc.edu>
