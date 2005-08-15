@@ -22,7 +22,7 @@ function varargout = bioforceGUI(varargin)
 
 % Edit the above text to modify the response to help bioforceGUI
 
-% Last Modified by GUIDE v2.5 14-Aug-2005 10:16:44
+% Last Modified by GUIDE v2.5 15-Aug-2005 09:25:45
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -175,9 +175,16 @@ function pushbutton_slope_Callback(hObject, eventdata, handles)
 	
 	slope = fit(1);
 	icept = fit(2);
-
+    R2 = corrcoef(x, y);
+    R2 = R2(1,2);
+    
     set(handles.text_slope, 'String', num2str(slope));
-	fprintf('Statistics\n');
+    set(handles.text_slope_R2, 'String', num2str(R2));
+    set(handles.text_lblR2_1, 'Visible', 'on');
+    set(handles.text_lblR2_2, 'Visible', 'on');
+    
+    
+    fprintf('Statistics\n');
 	fprintf('x-range: %d \ny-range: %d \n', range(x), range(y));
 	fprintf('slope = %g, icept = %g', slope, icept);
     

@@ -1,3 +1,7 @@
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* bioforceGUI.fig: Added r-square value for linear slope estimate.
+	* bioforceGUI.m: same.
+
+2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* bioforceGUI.fig: Added.  GUI for common analysis tools like measuring slopes, relaxation times, ranges, etc...
 	* bioforceGUI.m: Added. same.
