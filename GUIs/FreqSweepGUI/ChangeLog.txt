@@ -1,8 +1,11 @@
+2005-08-24 Kalpit Desai <kvdesai@email.unc.edu>
+	* threePoleFreqSweep.m: Removed junk code for non-existent slider for 'period' setting. 
+
 2005-07-13 Kalpit Desai <kvdesai@email.unc.edu>
 	* mysignal.m: 
 	- removed the interfering junk code of the non-existent slider for 'period' setting.
 	- Errorless quitting and closing.
-	* threePoleFreq.Sweep.m:
+	* threePoleFreqSweep.m:
 	- The applied frequencies are now half than the values in the requested frequency vector. This is necessary because for three pole case, the force frequency is always double the excitation frequency.
 	- Fix a bug in control-frequency generation.
 2005-07-12 Kalpit Desai <kvdesai@email.unc.edu>

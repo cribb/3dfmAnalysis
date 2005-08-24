@@ -253,12 +253,12 @@ fvec = default_fvec;
 set(handles.edit_freqVec,'string',num2str(default_fvec));
 set(handles.edit_controlFreq,'string',num2str(default_fcont));
 
-function slider_period_Callback(hObject, eventdata, handles)
-user_input = get(hObject,'value');
-val = round(user_input);
-set(hObject,'value');
-set(handles.edit_period,'string',num2str(val));
-updateAO;
+% function slider_period_Callback(hObject, eventdata, handles)
+% user_input = get(hObject,'value');
+% val = round(user_input);
+% set(hObject,'value');
+% set(handles.edit_period,'string',num2str(val));
+% updateAO;
 
 function edit_controlFreq_Callback(hObject, eventdata, handles)
 user_input = num2str(get(hObject,'string'));
@@ -303,7 +303,7 @@ if(waiting_for_char)%this means last element is numeric character
 end
 %------------------------------------------------------------------
 function edit_period_Callback(hObject, eventdata, handles)
-check_editval(hObject, handles.slider_period);
+% check_editval(hObject, handles.slider_period);
 updateAO;
 
 % --- Coil A settings%------------------------------------------
@@ -550,19 +550,19 @@ else
 end
 
 % --- Executes during object creation, after setting all properties.
-function slider_period_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to slider_period (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: slider controls usually have a light gray background, change
-%       'usewhitebg' to 0 to use default.  See ISPC and COMPUTER.
-usewhitebg = 1;
-if usewhitebg
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
+% function slider_period_CreateFcn(hObject, eventdata, handles)
+% % hObject    handle to slider_period (see GCBO)
+% % eventdata  reserved - to be defined in a future version of MATLAB
+% % handles    empty - handles not created until after all CreateFcns called
+% 
+% % Hint: slider controls usually have a light gray background, change
+% %       'usewhitebg' to 0 to use default.  See ISPC and COMPUTER.
+% usewhitebg = 1;
+% if usewhitebg
+%     set(hObject,'BackgroundColor',[.9 .9 .9]);
+% else
+%     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+% end
 % --- Executes during object creation, after setting all properties.
 function edit_pk2pkA_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit_pk2pkA (see GCBO)
