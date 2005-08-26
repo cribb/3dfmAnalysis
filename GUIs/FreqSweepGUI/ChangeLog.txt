@@ -1,4 +1,6 @@
 2005-08-26 Kalpit Desai <kvdesai@email.unc.edu>
+	* threePoleFreqSweep.m: Fixed coupel of bugs in stopping and quitting of the program.
+2005-08-26 Kalpit Desai <kvdesai@email.unc.edu>
 	* threePoleFreqSweep.m: version 1.1
 	- Now puts (sum of squares of coil excitations)/100 on hardware channel 6 of magnet DAC. This channel is read into the tracking ADC for offline synchronization.
 

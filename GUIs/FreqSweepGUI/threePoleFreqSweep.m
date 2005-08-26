@@ -224,7 +224,7 @@ if (exist('AO') & ~isempty(AO))
     if(strcmpi(get(AO,'Running'),'On'))
         stop(AO);
     end
-    putsample(AO,[0 0 0]);
+    putsample(AO,length(get(AO,'Channel')));
 end
 % --- Executes on button press in button_close.
 function button_close_Callback(hObject, eventdata, handles)
@@ -236,7 +236,7 @@ if (exist('AO') & ~isempty(AO))
     if(strcmpi(get(AO,'Running'),'On'))
         stop(AO);
     end
-    putsample(AO,[0 0 0]);
+    putsample(AO,length(get(AO,'Channel')));
     clear AO
     delete AO
 end
