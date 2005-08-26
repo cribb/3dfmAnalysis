@@ -55,7 +55,7 @@ function threePoleFreqSweep_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for threePoleFreqSweep
 handles.output = hObject;
 global version_str;
-version_str = '1.0';
+version_str = '1.1';
 % Update handles structure
 guidata(hObject, handles);
 clc;
@@ -102,14 +102,15 @@ end
 chA = str2double(get(handles.edit_coilA,'string'))-1;
 chB = str2double(get(handles.edit_coilB,'string'))-1;
 chC = str2double(get(handles.edit_coilC,'string'))-1;
+chFlag = 7 - 1; %Channel 7 output is being read into tracking ADC, so put the sum of squares on this channel.
 
-AOchannels = [chA, chB, chC];
+AOchannels = [chA, chB, chC, chFlag];
 desired_sampleRate = 50000; % desired sampling rate for magnets D2A
 
 % setup the output board
 AO = analogoutput('nidaq', AOid);
-Ochan = addchannel(AO, AOchannels); % 
-set(Ochan, 'OutputRange', [-10 10]); % doesn't matter for pci-6733. unipolar range is not available
+Ochan = addchannel(AO, AOchannels);  
+set(Ochan, 'OutputRange', [-10 10]);  
 
 set(AO, 'TriggerType', 'Manual'); % use hardware manual trigger 
 % set(AO, 'TriggerType', 'HwDigital'); % use hardware digital trigger 
@@ -178,9 +179,8 @@ end
 coilA = ampA*rawA;
 coilB = ampB*rawB;
 coilC = ampC*rawC;
-
-% plot(t,coilA,'b',t,coilB,'r');
-outData = [[coilA';0.0], [coilB';0.0], [coilC';0.0]];
+dFlag = 0.01*(coilA.^2 + coilB.^2 + coilC.^2);
+outData = [[coilA';0.0], [coilB';0.0], [coilC';0.0], [dFlag';0.0]];
 % Now fill the output buffer but do not start sending the data yet
 
 set(AO,'RepeatOutput',Nrepeat); 
@@ -243,11 +243,10 @@ end
 daqreset;
 close(handles.threePoleFreqSweep);
 
-
 % --- Executes on button press in button_defaultFreq.
 function button_defaultFreq_Callback(hObject, eventdata, handles)
 global fvec;
-default_fvec = [4000 3400 3000 2600 2050 1680 1100 800 700 500 300 110 80 70 45 25 8 5]; 
+default_fvec = [4000 3400 3000 2600 2050 1680 1100 800 700 500 300 110 80 70 45 25 17 8 5 2]; 
 default_fcont = 125;%it is usually desirable that first 3 harmonics of fcont are not in fvec
 fvec = default_fvec;
 set(handles.edit_freqVec,'string',num2str(default_fvec));
