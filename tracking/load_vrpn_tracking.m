@@ -1,10 +1,10 @@
 function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user_input);
 % 3DFM function
-% last modified 06/20/05 - kvdesai
+% last modified 07/30/05 - kvdesai
 %
-% This function reads in a 3DFM dataset previously saved as a 
-% 2d matrix in a matlab workspace file (*.mat) file 
-% and converts it to the familiar 3dfm data structure.
+% This function reads in a 3DFM dataset previously logged by Laser Tracker
+% program and then converted to matlab compatible format by vrpnLogToMatlab
+% program.
 % 
 % USAGE:
 % d = load_vrpn_tracking(filename, xyz_units, tzero, beadpos, beadOffset, user_input);
@@ -13,7 +13,7 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
 % 
 % "file" : required arguement
 %     it can be a string containing name of the the .mat file 
-%     OR it can be the variable created by double-clicking the .mat file
+%     OR it can be the 'tracking' structure created by double-clicking the .mat file
 % "xyz_units" : [{'u'} | 'm']
 %     specifies units of the displacement. 
 %     'u' for microns and 'm' for meters
@@ -36,34 +36,50 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
 % 
 % NOTES: none.
 
-
 	% handle the argument list
 	if (nargin < 6 | isempty(user_input));  user_input='no';         end;
     if (nargin < 5 | isempty(beadOffset));  beadOffset = 'yes';       end;
 	if (nargin < 4 | isempty(beadpos));     beadpos='yes';        	 end;
 	if (nargin < 3 | isempty(tzero));       tzero = 'uct';           end;
 	if (nargin < 2 | isempty(xyzunits));    xyzunits  = 'u';	     end;
-
+    version_string = '01.01';
+    LTver = 'NotAvailable';
+    V2Mver = 'NotAvailable';
+    d.info.orig.matOutputFileName = 'NotAvailable';
+    d.info.orig.LoadVrpnTrackingVersion = version_string;
+    
 	% load tracking data after it has been converted to a .mat file OR
     % if it is present as a workspace variable
     if(ischar(file))
-        dd= load(file);        
-        % get filename by subtracting filepath
-        id = max(find(file(:)=='\'));
-        if(isempty(id))
-            name = file;
+        dd= load(file);
+        if isfield(dd.tracking,'info')
+            d.info.orig = dd.tracking.info;
         else
-            name = file(id+1:end);
+            % get filename by subtracting filepath
+            id = max(find(file(:)=='\'));
+            if(isempty(id))
+                name = file;
+            else
+                name = file(id+1:end);
+            end
+            d.info.orig.matOutputFileName = name;            
         end
-        d.info.orig.name = name;
     else
         dd.tracking = file;
-        d.info.orig.name = 'NOT AVAILABLE';
+        if isfield(dd.tracking,'info')
+            d.info.orig = dd.tracking.info;
+        end
     end
-
+    if (isfield(d.info.orig,'LaserTrackverVersion'));
+        LTver = dd.tracking.info.LaserTrackerVersion;
+    end
+    if (isfield(d.info.orig,'vrpnLogToMatlabVersion'));
+        V2Mver = dd.tracking.info.vrpnLogToMatlabVersion;
+    end
+ 
     % meta-information (just constant here, but should be upgradable for
     % meta-data found in future .vrpn tracking files
-	d.info.orig.beadSize = 'NOT AVAILABLE';	
+
 	d.info.orig.xyzunits = xyzunits;
 
    % handle the switch for including user_input 
@@ -188,18 +204,15 @@ function d = load_vrpn_tracking(file, xyzunits, tzero, beadpos, beadOffset, user
    end   
                                                                  
 	% handle the units before doing any mathematical analysis on data
-    % stage command data in original log file is in meteres
+    % stage command data in original log file is in microns
     % stage sensor data in original log file is in microns
     % error positions in original log file is in mircrons
     
-	if findstr(xyzunits,'u') % displacement unit is microns
-		d.stageCom.x = d.stageCom.x * 1e6;  
-		d.stageCom.y = d.stageCom.y * 1e6;  
-		d.stageCom.z = d.stageCom.z * 1e6;
-		d.info.orig.xyzunits = 'u';
-    end
-    
     if findstr(xyzunits,'m') % displacement unit is meters
+            d.stageCom.x = d.stageCom.x * 1e-6;  
+            d.stageCom.y = d.stageCom.y * 1e-6;  
+            d.stageCom.z = d.stageCom.z * 1e-6;
+            d.info.orig.xyzunits = 'u';
         if(isfield(d,'stageReport'))
             d.stageReport.x = d.stageReport.x*1e-6;
             d.stageReport.y = d.stageReport.y*1e-6;

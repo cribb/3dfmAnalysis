@@ -1,3 +1,8 @@
+2005-08-31  Kalpit Desai  <kvdesai@email.unc.edu>
+	* load_vrpn_tracking.m: 
+	- implemented the parsing of 'info' field and version numbers.
+	- fixed the units of stage commands.
+		
 2005-08-10  Jeremy Cribb  <jcribb@email.unc.edu>
 	* load_lasertrap_tracking.m: added back power spectrum computation.
 
