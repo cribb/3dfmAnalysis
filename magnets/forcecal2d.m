@@ -1,11 +1,12 @@
-function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity)
+function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity, window_size)
 % 3DFM function  
-% Math 
-% last modified 07/19/05 (jcribb)
+% Magnetics
+% last modified 08/16/05 (jcribb)
 %  
 % Run a 2D force calibration using data from EVT_GUI.
 %  
-%  [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity);  
+%  [Ftable, errtable, step] =  forcecal2d(files, viscosity, bead_radius, ...
+%                                         poleloc, calib_um, granularity, window_size); 
 %   
 %  where "Ftable" is the average force computed for each pixel.
 %        "stderr" is the standard error (std(X)/sqrt(N)) for Ftable.
@@ -17,7 +18,8 @@ function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, po
 %        "poleloc" is the pole location, i.e. [pole_x, pole_y] in [pixels]
 %        "calib_um" is the microns per pixel calibration factor.
 %        "granularity" is the binning for 2D force determination
-%  
+%        "window_size" is an integer describing the derivative's time-step, tau
+%
 %  01/??/05 - created; jcribb.  
 %  06/16/05 - added documentation. cleaned up code. fixed bug in
 %  force-distance 1D plot.
@@ -25,11 +27,11 @@ function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, po
 %  2D binning force calibration.  This can take a LONG time to compute if
 %  the granularity is set too low (<4)
 %   
+    if nargin < 7 | window_size
+        window_size = 1;
+    end
     
     video_tracking_constants;
-    
-    % derivative window size
-    window_size = 1;
     
     % for every file, get its filename and reduce the dataset to a single table.
     d = load_video_tracking(files,[],'pixels',calib_um,'absolute','yes','table');

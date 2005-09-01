@@ -1,3 +1,6 @@
+2005-09-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* forcecal2d.m: changed window_size to be an input parameter.  This changes the "tau" value for derivative determination.
+
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* laser_forcecal.m: re-added drift subtraction.  updated documentation.
 
