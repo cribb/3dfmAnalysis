@@ -22,7 +22,7 @@ function varargout = video_forcecal_GUI(varargin)
 
 % Edit the above text to modify the response to help video_forcecal_GUI
 
-% Last Modified by GUIDE v2.5 13-Aug-2005 11:57:32
+% Last Modified by GUIDE v2.5 16-Aug-2005 09:38:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -174,6 +174,7 @@ function pushbutton_compute_Callback(hObject, eventdata, handles)
     viscosity = str2num(get(handles.edit_viscosity, 'String'));
     granularity = str2num(get(handles.edit_granularity, 'String'));
     calib_um = str2num(get(handles.edit_microns_per_pixel, 'String'));
+    window_size = str2num(get(handles.edit_window_size, 'String'));
     x = str2num(get(handles.edit_poleloc_x, 'String'));
     y = str2num(get(handles.edit_poleloc_y, 'String'));   
     poleloc = [x y];
@@ -183,12 +184,12 @@ function pushbutton_compute_Callback(hObject, eventdata, handles)
                                           bead_radius * 1e-6, ...
                                           poleloc, ...
                                           calib_um, ...
-                                          granularity);
-                                      
+                                          granularity, ...
+                                          window_size);
 
     assignin('base', 'force_table', Ftable);
-    
-    close(video_forcecal_GUI);
+
+%     close(video_forcecal_GUI);
 
     
 % --- Executes on button press in checkbox_subtract_drift.
@@ -296,28 +297,23 @@ function edit_microns_per_pixel_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of edit_microns_per_pixel as a double
 
 
-% --- Executes during object creation, after setting all properties.
 function edit_granularity_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_granularity (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-
+	if ispc
+        set(hObject,'BackgroundColor','white');
+	else
+        set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+	end
 
 function edit_granularity_Callback(hObject, eventdata, handles)
-% hObject    handle to edit_granularity (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit_granularity as text
-%        str2double(get(hObject,'String')) returns contents of edit_granularity as a double
 
 
+function edit_window_size_CreateFcn(hObject, eventdata, handles)
+	if ispc
+        set(hObject,'BackgroundColor','white');
+	else
+        set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+	end
+
+
+
+function edit_window_size_Callback(hObject, eventdata, handles)

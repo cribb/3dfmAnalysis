@@ -1,3 +1,7 @@
+2005-09-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* video_forcecal_GUI.m: added window_size functionality to the derivative.
+	* video_forcecal_GUI.fig: same.
+
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* video_forcecal_GUI.fig: Added.  Figure file for magnetic force calibration by video tracking.
 	* video_forcecal_GUI.m: Added. Implementation for above figure file.
