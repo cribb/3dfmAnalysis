@@ -1,7 +1,9 @@
 function res = modifiedBP(d,boolactive)
 % d is the output of load_agnostic_tracking
 % Calcuates beadposition vs. time
-% Uses the post-jacobian to calculated the positionError during blip
+% Uses the post-jacobian to calculated the positionError during the blips
+% Lenght of the bead position vector is guaranteed to be same as length of
+% input position-error field.
 if (nargin < 2 | isempty(boolactive))   boolactive = 'no'; end
 jacType = 'UNDEFINED';
 

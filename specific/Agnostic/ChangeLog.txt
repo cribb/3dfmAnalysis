@@ -1,3 +1,9 @@
+2005-09-02  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* atcore.m: Added the core script that does actual analsis of the agnostic tracking data set. This script can be called from matlab prompt. It is also called from atanalysis GUI.
+	* Load agnostic tracking: Now compatible with the recent versions of Laser Tracker where Jacobian is in absolute space and not in derivative space. Also parses the noise-messages for each Jacobian.
+	* atanalysis.fig, atanalysis.m: GUI version of the analysis program. Call upon appropriate scripts and displays results.
+	* modifiedBP.m: Slight change in comments. Still not compatible with the recent version of Laser Tracker.
+
 2005-07-13  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* modifiedBP.m: Fixed the bug where it was looking for Active Jacobian for calculation Active-Position-Errors during blips.
 2005-07-12  Kalpit Desai	<kvdesai@cs.unc.edu>
