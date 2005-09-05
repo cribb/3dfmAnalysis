@@ -1,4 +1,4 @@
-function v = imscalebar(im, physlen, calib, units, location, color)
+function imscalebar(im, physlen, calib, units, location, color)
 % 3DFM function  
 % Video
 % last modified 09/04/05 (jcribb)
@@ -17,7 +17,7 @@ function v = imscalebar(im, physlen, calib, units, location, color)
 % 
    
 % handle the argument list
-if nargin < 6 | isempty(color);     color = 'b';                  end
+if nargin < 6 | isempty(color);     color = 'k';                  end
 if nargin < 5 | isempty(location);  location = 'br';              end
 if nargin < 4 | isempty(units);     units = 'axis length units';  end
 if nargin < 3 | isempty(calib);     calib = 1;                    end
@@ -72,6 +72,5 @@ hold on;
          'Color', color);
 hold off;
 
-axis square;
 axis off;
 

@@ -1,4 +1,7 @@
 2005-09-04  Jeremy Cribb <jcribb@email.unc.edu>
+  * imscalebar.m: removed output variable.
+
+2005-09-04  Jeremy Cribb <jcribb@email.unc.edu>
   * imscalebar.m: added.  puts a scalebar of desired length and color onto an image at a desired location (bottom-right, bottom-left, top-left, top-right).  It gets a little weird when the Y-Direction of the plot is reversed, but I'll deal with that later.  It also squares up the axis so that the pixels are square; this lets the scalebar work at angles.
 
 2005-05-16  Jeremy Cribb <jcribb@email.unc.edu>
