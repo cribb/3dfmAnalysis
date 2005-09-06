@@ -96,6 +96,22 @@ cd (curdir);
 d = load_agnostic_tracking(filename,1,0);
 figure(1);
 plot(d.t,d.ssense - repmat(d.ssense(1,:),size(d.ssense,1),1));
+if (isfield(d,'ji2nd'))
+    for (c = 1:length(d.ji2nd))        
+        drawlines(gca,d.ji2nd(c).tblip);
+    end
+end
+if (isfield(d,'jilin'))
+    for (c = 1:length(d.jilin))        
+        drawlines(gca,d.jilin(c).tblip);
+    end
+end
+if (isfield(d,'jacold'))
+    for (c = 1:length(d.jacold))        
+        drawlines(gca,d.jacold(c).tblip);
+    end
+end
+
 set(handles.edit_FitStart,'string',num2str(d.t(1)));
 set(handles.edit_FitEnd,'string',num2str(d.t(end)));
 set(handles.edit_TestStart,'string',num2str(d.t(1)));

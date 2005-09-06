@@ -1,3 +1,5 @@
+2005-09-06  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* atanalysis.m: Now draws markers for the timings when perturbations were injected.
 2005-09-02  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* atcore.m: Added the core script that does actual analsis of the agnostic tracking data set. This script can be called from matlab prompt. It is also called from atanalysis GUI.
 	* Load agnostic tracking: Now compatible with the recent versions of Laser Tracker where Jacobian is in absolute space and not in derivative space. Also parses the noise-messages for each Jacobian.
