@@ -24,7 +24,8 @@ function res = atcore(d, settings, flags);
 %             .ratio - ratio of the two rms values
     
 dbstop if error
-mt = d.t - d.t(1);
+% mt = d.t - d.t(1);
+mt = d.t;
 ms = d.ssense - repmat(d.ssense(1,:),size(d.ssense,1),1);
 mq = d.qpd;
 
@@ -65,6 +66,13 @@ else
 end
 clear mt ms mq %free up memory as we go
 %%------------------------------------------------------------------
+if flags.usereciprocals
+%     qfit = [ qfit, 1./qfit ];   
+%     qtest = [ qtest, 1./qtest];
+    
+    qfit = 1 ./ qfit;
+    qtest = 1 ./ qtest;       
+end
 % use a high-pass filter or simply subtract off a trend.
 if flags.HPstage
     [b,a] = butter(2, settings.HPhz*2/srate, 'high');
@@ -121,10 +129,6 @@ end
 % qfit = newq; clear newq;
 
 % see if including reciprocals helps
-if flags.usereciprocals
-%     qfit = [ qfit, 1./qfit ];
-    qfit = 1 ./ qfit;
-end
 
 % this allows (T-B)/sum, (R-L)/sum, sum to be used instead of raw qfit values
 if flags.usesumdiff
@@ -164,7 +168,7 @@ for i = 1:3
     figure(19+i);
     mypsd([stest(:,i),pred(:,i),residual(:,i)], srate, 10);
     title(['stage psd', xyz(i)]);
-    legend('True','Pred','Resid');
+    legend('Measrd','Pred','Resid');
 end
 
 for i = 1:3
@@ -177,10 +181,12 @@ end
 res.residrms = sqrt(mean(residual.^2));
 res.stagerms = sqrt(mean(stest.^2));
 res.ratio = res.residrms ./res.stagerms;
+res.fudge = 0.0035;
+res.ratio_fudged = (res.residrms - res.fudge) ./ (res.stagerms - res.fudge);
 figure(12)
 for (i = 1:3)
     subplot(3,1,i)
-    plot(ttest,stest(:,i), 'b', ttest, pred(:,i),'r'); legend('test', 'Pred');
+    plot(ttest,stest(:,i), 'b', ttest, pred(:,i),'r'); legend('Measrd', 'Pred');
 end
 
 % try to estimate the effect of skew in the data acquisition system

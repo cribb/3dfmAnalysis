@@ -1,4 +1,8 @@
 2005-09-06  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* atcore.m: Fixed a bug in 'reciprocal' mode fitting. Also deleted the time-offset removal in this file. It should be taken care of by load_agnostic_tracking file.
+	* atanalysis.fig: Removed the 'select all' button.
+
+2005-09-06  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* atanalysis.m: Now draws markers for the timings when perturbations were injected.
 2005-09-02  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* atcore.m: Added the core script that does actual analsis of the agnostic tracking data set. This script can be called from matlab prompt. It is also called from atanalysis GUI.
