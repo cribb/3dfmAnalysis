@@ -1,3 +1,5 @@
+2005-09-08  Kalpit Desai <kvdesai@cs.unc.edu>
+	* mypsd.m: Added couple of more options for window types and handled when the supplied window type is unacceptable.
 2005-06-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* vrpn_psd.m:  fixed several syntactial errors so that vrpn_psd actually works now.
 	* mypsd.m: fixed typo in documentation.

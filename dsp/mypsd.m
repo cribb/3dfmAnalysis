@@ -1,7 +1,7 @@
 function varargout = mypsd(s, rate, res, window_type, style, calculateId)
 % 3DFM function  
 % DSP 
-% last modified 05/07/04 - kvdesai
+% last modified 09/08/05 - kvdesai
 %  
 % This function computes the power spectral density for input, s  
 %  
@@ -12,7 +12,8 @@ function varargout = mypsd(s, rate, res, window_type, style, calculateId)
 %  where "signal" is a matrix (columns denote different datasets)
 %        "rate" is the sampling rate in units of [Hz] 
 %		 "res"  is the desired PSD resolution in [Hz]
-%        "window_type" is 'blackman' or 'rectangle', defaulting to 'blackman'
+%        "window_type" couldbe any of
+%               'blackman' 'rectangle' 'hamming' 'hann', defaulting to 'blackman'
 %        "style" is matlab graph-style string
 %        "calculateId" is 'yes' or 'no': a switch for calculating
 %        integrated displacement upto the frequency, defaulted to 'no'
@@ -47,6 +48,14 @@ switch window_type
 		win = blackman(nw);
 	case 'rectangle'
 		win = ones(nw,1);
+    case 'hamming'
+        win = hamming(nw);
+    case 'hann'
+        win = hann(nw);
+    otherwise
+        disp('ERROR: mypsd:: Unrecoginzed window type');
+        varargout = cell(nargout);
+        return;       
 end
 	
 
