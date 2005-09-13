@@ -1,3 +1,7 @@
+2005-09-13  Kalpit Desai <kvdesai@cs.unc.edu>
+	* mypsd.m: 
+	- Made to exit gracefully and report some plain english errors when input parameters are inconsistent. 
+	- Fixed some comments.
 2005-09-08  Kalpit Desai <kvdesai@cs.unc.edu>
 	* mypsd.m: Added couple of more options for window types and handled when the supplied window type is unacceptable.
 2005-06-27  Jeremy Cribb <jcribb@email.unc.edu>
