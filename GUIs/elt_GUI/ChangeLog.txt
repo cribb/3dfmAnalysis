@@ -1,3 +1,6 @@
+2005-09-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* elt_gui.fig: hopefully fixed the "GUI doesn't work on lower video resolution" problem.
+
 2005-08-14  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m:  contains matlab code for editing laser tracking data (elt).  Initial Version.  Plotting functions work, but editing functions do not.  Thus, they are currently disabled.
 	* evt_GUI.fig:  defines the matlab GUI for editing laser tracking datasets.  Initial Version.
