@@ -22,7 +22,7 @@ function varargout = video_forcecal_GUI(varargin)
 
 % Edit the above text to modify the response to help video_forcecal_GUI
 
-% Last Modified by GUIDE v2.5 16-Aug-2005 09:38:38
+% Last Modified by GUIDE v2.5 13-Sep-2005 11:00:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,7 +59,7 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 % UIWAIT makes video_forcecal_GUI wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+% uiwait(handles.video_forcecal_GUI);
 
 
 % --- Outputs from this function are returned to the command line.
