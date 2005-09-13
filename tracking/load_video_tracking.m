@@ -248,6 +248,6 @@ function logentry(txt)
                    num2str(logtime(4),        '%02i') ':' ...
                    num2str(logtime(5),        '%02i') ':' ...
                    num2str(round(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext 'evt_gui: '];
+     headertext = [logtimetext 'load_video_tracking: '];
      
      fprintf('%s%s\n', headertext, txt);
