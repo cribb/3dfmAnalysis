@@ -178,16 +178,23 @@ for fid = 1:length(filelist)
         % Handle time.... if we don't have timestamps then we have to assume
         % that we have a constant frame rate.
         if strcmp(tstamps,'yes')
-            tfile = file(1:end-9);
+            tfile = strrep(file,  '.raw',  '');
+            tfile = strrep(tfile, '.vrpn', '');
+            tfile = strrep(tfile, '.mat',  '');
+            tfile = strrep(tfile, '.evt',  '');
+            
             try
-                times = load([tfile '.tstamp.txt'], 'ASCII');
+                times = load([tfile '.raw.tstamp.txt'], 'ASCII');
                 if size(times, 2) == 2
                     times = times(:,1) + times(:,2) / 1e6;
                 end
                 active_frames = data(this_tracker, FRAME);
                 data(this_tracker,TIME) = times(active_frames+1);
+                
+                logentry('Successfully loaded time stamps.');
             catch
                 tstamps = 'no';                
+                logentry('Attempt to load time stamps failed.  File not found.');
             end
         end
         
@@ -231,3 +238,16 @@ switch table
         if exist('PITCH');   v.pitch= data(:,PITCH);   end;
         if exist('YAW');     v.yaw  = data(:,YAW);     end;                    
 end
+
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'evt_gui: '];
+     
+     fprintf('%s%s\n', headertext, txt);
