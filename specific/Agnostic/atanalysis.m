@@ -93,7 +93,8 @@ disp(['*************************************************************']);
 disp(['Now parsing ',filename]);
 cd (curdir);
 d = [];
-d = load_agnostic_tracking(filename,1,0);
+atflags.verbose = 0; atflags.concise = 1; atflags.remtoff = 1;
+d = load_agnostic_tracking(filename,atflags);
 
 plot_base_figure(d);
 
@@ -171,6 +172,7 @@ function plot_base_figure(d)
 global BASEFIG_NAME
 BASEFIG_NAME = 'SELECT DATA';
 figure(1);
+set (gcf,'name',BASEFIG_NAME,'NumberTitle','Off');
 plot(d.t,d.ssense - repmat(d.ssense(1,:),size(d.ssense,1),1));
 if (isfield(d,'ji2nd'))
     for (c = 1:length(d.ji2nd))        
@@ -187,7 +189,17 @@ if (isfield(d,'jacold'))
         drawlines(gca,d.jacold(c).tblip);
     end
 end
-set (gcf,'name',BASEFIG_NAME,'NumberTitle','Off');
+if (isfield(d,'ja2nd'))
+    for (c = 1:length(d.ja2nd))        
+        drawlines(gca,d.ja2nd(c).tupdate,'b');
+    end
+end
+if (isfield(d,'jalin'))
+    for (c = 1:length(d.jalin))        
+        drawlines(gca,d.jalin(c).tupdate,'b');
+    end
+end
+
 title('vertical lines indicate perturbation sessions');
 xlabel('Time [seconds]');
 ylabel('Stage Sensed Position [microns]');

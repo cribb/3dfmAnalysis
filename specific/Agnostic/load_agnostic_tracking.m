@@ -1,4 +1,4 @@
-function dat = load_agnostic_tracking(fileName, remtoff, verbose)
+function dat = load_agnostic_tracking(fileName, flags)
 % Parse the laser-tracking log file for the purpose of analyzing agnostic tracking
 % compatible with LaserTracker version 03.02 to 04.00
 % "Always Present" fields in the output structure dat:
@@ -32,21 +32,24 @@ function dat = load_agnostic_tracking(fileName, remtoff, verbose)
 % LAST MODIFIED:    1 September 2005, by kvdesai
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dbstop if error
-VERSION = '1.2';
-disp(['load_agnostic_tracking :: version ', VERSION]);
-if (nargin < 3 | isempty(verbose));  verbose=1;         end;%print messages loudly by default
-if (nargin < 2 | isempty(remtoff));  remtoff=1;         end;%subtract out the offset in timestamps by default
-
+VERSION = '1.3';
+if (nargin < 2 | ~isfield(flags,'verbose'));  flags.verbose=1;         end;%print messages loudly by default
+if (nargin < 2 | ~isfield(flags,'remtoff'));  flags.remtoff=1;         end;%subtract out the offset in timestamps by default
+if (nargin < 2 | ~isfield(flags,'concise')); flags.concise = 0;        end;%return full dataset by default
+if(flags.verbose)
+    disp(['load_agnostic_tracking :: version ', VERSION]);
+end
+pack
 dat = [];
 
 load(fileName);
 d = tracking; clear tracking;
 
 if(isfield(d,'info'))
-   dat.info = d.info;
-   if(isfield(d.info,'perturbationProperties'))
-       noiseinfo = d.info.perturbationProperties;
-   end
+    dat.info = d.info;
+    if(isfield(d.info,'perturbationProperties'))
+        noiseinfo = d.info.perturbationProperties;
+    end
 end
 % dat.info.name = fileName;
 dat.info.loadATmVersion = VERSION;
@@ -58,7 +61,7 @@ names = fieldnames(d);
 %     disp(names);
 % end
 LTver = str2double(dat.info.LaserTrackerVersion(1,1:5)); %convert first five characters into a number
-if (verbose)
+if (flags.verbose)
     disp(['Found Version of the laser tracker: ', num2str(LTver)]);
 end
 
@@ -86,7 +89,7 @@ if((~isequal(d.posErrorSecUsecXYZ(:,2), d.QPDsSecUsecVals(:,2), d.stageSenseSecU
     disp('You haven''t taught me to process this type of file...Look into it!');
     keyboard
 else    
-    if(remtoff)
+    if(flags.remtoff)
         % determine which is Toffset, the JacData's first sample or, QPDs
         % first sample
         if(isfield(d,'JacDataSecUsecQPDsStagesensors'))
@@ -104,17 +107,19 @@ else
         dat.t = d.QPDsSecUsecVals(:,1) + d.QPDsSecUsecVals(:,2)*1E-6;
     end
 end
-
-dat.peidle = d.posErrorSecUsecXYZ(:,3:5);
-% keep freeing memory as we go
+pack
+if (~flags.concise)
+    dat.peidle = d.posErrorSecUsecXYZ(:,3:5);
+    % keep freeing memory as we go
     d.posErrorSecUsecXYZ = [];
+end
 dat.ssense = d.stageSenseSecUsecXYZsense(:,3:5);
-    d.stageSenseSecUsecXYZsense = [];
+d.stageSenseSecUsecXYZsense = [];
 dat.qpd = d.QPDsSecUsecVals(:,3:6);
-    d.QPDsSecUsecVals = [];
-    
-if(isfield(d,'posErrorActiveSecUsecXYZ')) %if we have ActivePositionErrors computed 
-    if(remtoff)        
+d.QPDsSecUsecVals = [];
+
+if(isfield(d,'posErrorActiveSecUsecXYZ') & (~flags.concise)) %if we have ActivePositionErrors computed 
+    if(flags.remtoff)        
         dat.peactive.t = removeToffset([d.posErrorActiveSecUsecXYZ(:,1),d.posErrorActiveSecUsecXYZ(:,2)], dat.info.Toffset);
     else
         dat.peactive.t = d.posErrorActiveSecUsecXYZ(:,1) + d.posErrorActiveSecUsecXYZ(:,2)*1E-6;
@@ -124,7 +129,7 @@ if(isfield(d,'posErrorActiveSecUsecXYZ')) %if we have ActivePositionErrors compu
 end
 
 if(isfield(d,'JacDataSecUsecQPDsStagesensors')) %if we have ActivePositionErrors computed 
-    if(remtoff)        
+    if(flags.remtoff)        
         dat.JacData.t = removeToffset([d.JacDataSecUsecQPDsStagesensors(:,1),d.JacDataSecUsecQPDsStagesensors(:,2)], dat.info.Toffset);
     else
         dat.JacData.t = d.JacDataSecUsecQPDsStagesensors(:,1) + d.JacDataSecUsecQPDsStagesensors(:,2)*1E-6;
@@ -135,7 +140,7 @@ if(isfield(d,'JacDataSecUsecQPDsStagesensors')) %if we have ActivePositionErrors
 end
 
 if(isfield(d,'gainsSecUsecPxyzIxyzDxyz'))
-    if(remtoff)        
+    if(flags.remtoff)        
         dat.gains.t = removeToffset([d.gainsSecUsecPxyzIxyzDxyz(:,1),d.gainsSecUsecPxyzIxyzDxyz(:,2)], dat.info.Toffset);
     else
         dat.gains.t = d.gainsSecUsecPxyzIxyzDxyz(:,1) + d.gainsSecUsecPxyzIxyzDxyz(:,2)*1E-6;
@@ -144,7 +149,7 @@ if(isfield(d,'gainsSecUsecPxyzIxyzDxyz'))
     d.gainsSecUsecPxyzIxyzDxyz = [];
 end
 
-if(remtoff)        
+if(flags.remtoff)        
     dat.stageCom.t = removeToffset([d.stageCommandSecUsecZeroXYZ(:,1),d.stageCommandSecUsecZeroXYZ(:,2)], dat.info.Toffset);
 else    
     dat.stageCom.t = d.stageCommandSecUsecZeroXYZ(:,1) + d.stageCommandSecUsecZeroXYZ(:,2)*1e-6;
@@ -155,7 +160,7 @@ d.stageCommandSecUsecZeroXYZ = [];
 %SCARY HARDCODING, MAY BREAK LATER: TRUE FOR LASER TRACKER VERSIONS 04.00
 %ONWARDS. 
 SINTERVAL = 100E-6;
-    
+
 % Now parse whatever jacobian info we have.
 %
 % idle jacobian timestamp is the exact time when noise-injection was started
@@ -193,7 +198,7 @@ if(LTver <= 04.05)
         temp = d.JacLinearIdleSecUsecGoalsNsampleDQtoDS;
         cj = 0;%index of the non-old jacobian 
         for c = 1:1:size(temp,1)
-            if(remtoff)
+            if(flags.remtoff)
                 tstart = removeToffset(temp(c,1:2), dat.info.Toffset);
             else
                 tstart = temp(c,1) + temp(c,2)*1e-6;
@@ -212,15 +217,17 @@ if(LTver <= 04.05)
                     keyboard;
                 end
                 cj = cj+1;
-                iend = istart+count-1;            
-                dat.jilin(cj,1).qpd = dat.qpd(istart:iend,:);
-                dat.jilin(cj,1).ssense = dat.ssense(istart:iend,:);
+                iend = istart+count-1;
+                if (~flags.concise)
+                    dat.jilin(cj,1).qpd = dat.qpd(istart:iend,:);
+                    dat.jilin(cj,1).ssense = dat.ssense(istart:iend,:);
+                end
                 dat.jilin(cj,1).iblip(1,1) = istart; 
                 dat.jilin(cj,1).iblip(1,2) = iend;                
                 dat.jilin(cj,1).qgoals = temp(c,3:6);                
                 dat.jilin(cj,1).tblip = [dat.t(istart), dat.t(iend)];
                 dat.jilin(cj,1).pertprop = getperturbationinfo( ... 
-                    dat.jilin(cj,1).tblip, noiseinfo, remtoff, dat.info.Toffset);
+                    dat.jilin(cj,1).tblip, noiseinfo, flags.remtoff, dat.info.Toffset);
                 for rows = 1:1:4
                     dat.jilin(cj,1).jac(rows,1:3) = temp(c,[7 + (rows-1)*3 + 1 : 7 + (rows-1)*3 + 3]);
                 end
@@ -242,12 +249,14 @@ if(LTver <= 04.05)
                 
                 dat.jacold.iblip(1,1) = istart; 
                 dat.jacold.iblip(1,2) = iend;            
-                dat.jacold.qgoals = temp(c,3:6);    
-                dat.jacold.qpd = dat.JacData.qpd(istart:iend,:);
-                dat.jacold.ssense = dat.JacData.ssense(istart:iend,:);
+                dat.jacold.qgoals = temp(c,3:6); 
+                if (~flags.concise)
+                    dat.jacold.qpd = dat.JacData.qpd(istart:iend,:);
+                    dat.jacold.ssense = dat.JacData.ssense(istart:iend,:);
+                end                
                 dat.jacold.tblip = [dat.JacData.t(istart), dat.JacData.t(iend)];
                 dat.jacold.pertprop = getperturbationinfo( ... 
-                    dat.jacold.tblip, noiseinfo, remtoff, dat.info.Toffset);                
+                    dat.jacold.tblip, noiseinfo, flags.remtoff, dat.info.Toffset);                
                 for rows = 1:1:4
                     dat.jacold.jac(rows,1:3) = temp(c,[7 + (rows-1)*3 + 1 : 7 + (rows-1)*3 + 3]);
                 end
@@ -259,7 +268,7 @@ if(LTver <= 04.05)
         temp = d.Jac2ndOrderIdleSecUsecGoalsNsampleDQtoDS;    
         cj = 0;%index of the non-old jacobian 
         for c = 1:size(temp,1)
-            if(remtoff)
+            if(flags.remtoff)
                 tstart = removeToffset(temp(c,1:2), dat.info.Toffset);
             else
                 tstart = temp(c,1) + temp(c,2)*1e-6;
@@ -276,15 +285,17 @@ if(LTver <= 04.05)
                     keyboard;
                 end
                 cj = cj+1;
-                iend = istart+count-1;            
-                dat.ji2nd(cj,1).qpd = dat.qpd(istart:iend,:);
-                dat.ji2nd(cj,1).ssense = dat.ssense(istart:iend,:);
+                iend = istart+count-1;  
+                if (~flags.concise)
+                    dat.ji2nd(cj,1).qpd = dat.qpd(istart:iend,:);
+                    dat.ji2nd(cj,1).ssense = dat.ssense(istart:iend,:);
+                end
                 dat.ji2nd(cj,1).iblip(1,1) = istart; 
                 dat.ji2nd(cj,1).iblip(1,2) = iend;            
                 dat.ji2nd(cj,1).qgoals = temp(c,3:6);
                 dat.ji2nd(cj,1).tblip = [dat.t(istart), dat.t(iend)];
                 dat.ji2nd(cj,1).pertprop = getperturbationinfo( ... 
-                    dat.ji2nd(cj,1).tblip, noiseinfo, remtoff, dat.info.Toffset);
+                    dat.ji2nd(cj,1).tblip, noiseinfo, flags.remtoff, dat.info.Toffset);
                 for rows = 1:1:20
                     dat.ji2nd(cj,1).jac(rows,1:3) = temp(c,[7 + (rows-1)*3 + 1 : 7 + (rows-1)*3 + 3]);
                 end
@@ -306,11 +317,13 @@ if(LTver <= 04.05)
                 dat.jacold.iblip(1,1) = istart; 
                 dat.jacold.iblip(1,2) = iend;            
                 dat.jacold.qgoals = temp(c,3:6);    
-                dat.jacold.qpd = dat.JacData.qpd(istart:iend,:);
-                dat.jacold.ssense = dat.JacData.ssense(istart:iend,:);
+                if (~flags.concise)
+                    dat.jacold.qpd = dat.JacData.qpd(istart:iend,:);
+                    dat.jacold.ssense = dat.JacData.ssense(istart:iend,:);
+                end
                 dat.jacold.tblip = [dat.JacData.t(istart), dat.JacData.t(iend)];
                 dat.jacold.pertprop = getperturbationinfo( ... 
-                    dat.jacold.tblip, noiseinfo, remtoff, dat.info.Toffset);   
+                    dat.jacold.tblip, noiseinfo, flags.remtoff, dat.info.Toffset);   
                 for rows = 1:1:20
                     dat.jacold.jac(rows,1:3) = temp(c,[7 + (rows-1)*3 + 1 : 7 + (rows-1)*3 + 3]);
                 end
@@ -322,7 +335,7 @@ if(LTver <= 04.05)
     if(isfield(d,'JacLinearActiveSecUsecGoalsDQtoDS'))
         temp = d.JacLinearActiveSecUsecGoalsDQtoDS;
         for c = 1:1:size(temp,1)        
-            if(remtoff)
+            if(flags.remtoff)
                 dat.jalin(c,1).tupdate = removeToffset(temp(c,1:2), dat.info.Toffset);
             else
                 dat.jalin(c,1).tupdate = temp(c,1) + temp(c,2)*1e-6;
@@ -336,7 +349,7 @@ if(LTver <= 04.05)
     if(isfield(d, 'Jac2ndOrderActiveSecUsecGoalsDQtoDS'))
         temp = d.Jac2ndOrderActiveSecUsecGoalsDQtoDS;    
         for c = 1:1:size(temp,1)
-            if(remtoff)
+            if(flags.remtoff)
                 dat.ja2nd(c,1).tupdate = removeToffset(temp(c,1:2), dat.info.Toffset);
             else
                 dat.ja2nd(c,1).tupdate = temp(c,1) + temp(c,2)*1e-6;
@@ -354,7 +367,7 @@ if (LTver > 04.05)
         temp = d.JacLinearIdleSecUsecNsampleQPDtoXYZ;
         cj = 0;%index of the non-old jacobian 
         for c = 1:1:size(temp,1)
-            if(remtoff)
+            if(flags.remtoff)
                 tstart = removeToffset(temp(c,1:2), dat.info.Toffset);
             else
                 tstart = temp(c,1) + temp(c,2)*1e-6;
@@ -371,14 +384,16 @@ if (LTver > 04.05)
                     keyboard;
                 end
                 cj = cj+1;
-                iend = istart+count-1;            
-                dat.jilin(cj,1).qpd = dat.qpd(istart:iend,:);
-                dat.jilin(cj,1).ssense = dat.ssense(istart:iend,:);
+                iend = istart+count-1;     
+                if(~flags.concise)
+                    dat.jilin(cj,1).qpd = dat.qpd(istart:iend,:);
+                    dat.jilin(cj,1).ssense = dat.ssense(istart:iend,:);
+                end
                 dat.jilin(cj,1).iblip(1,1) = istart; 
                 dat.jilin(cj,1).iblip(1,2) = iend;    
                 dat.jilin(cj,1).tblip = [dat.t(istart), dat.t(iend)];
                 dat.jilin(cj,1).pertprop = getperturbationinfo( ... 
-                    dat.jilin(cj,1).tblip, noiseinfo, remtoff, dat.info.Toffset); 
+                    dat.jilin(cj,1).tblip, noiseinfo, flags.remtoff, dat.info.Toffset); 
                 for rows = 1:1:4
                     dat.jilin(cj,1).jac(rows,1:3) = temp(c,[3 + (rows-1)*3 + 1 : 3 + (rows-1)*3 + 3]);
                 end                
@@ -395,12 +410,14 @@ if (LTver > 04.05)
                 iend = istart+count-1;
                 
                 dat.jacold.iblip(1,1) = istart; 
-                dat.jacold.iblip(1,2) = iend;            
-                dat.jacold.qpd = dat.JacData.qpd(istart:iend,:);
-                dat.jacold.ssense = dat.JacData.ssense(istart:iend,:);
-                dat.jacold.tblip = [dat.JacData.t(istart), dat.JacData.t(iend)];
+                dat.jacold.iblip(1,2) = iend; 
+                if(~flags.concise)
+                    dat.jacold.qpd = dat.JacData.qpd(istart:iend,:);
+                    dat.jacold.ssense = dat.JacData.ssense(istart:iend,:);
+                end
+                dat.jacold.qpd = dat.JacData.qpd(istart:iend,:);                
                 dat.jacold.pertprop = getperturbationinfo( ... 
-                    dat.jacold.tblip, noiseinfo, remtoff, dat.info.Toffset);  
+                    dat.jacold.tblip, noiseinfo, flags.remtoff, dat.info.Toffset);  
                 for rows = 1:1:4
                     dat.jacold.jac(rows,1:3) = temp(c,[3 + (rows-1)*3 + 1 : 3 + (rows-1)*3 + 3]);
                 end
@@ -411,7 +428,7 @@ if (LTver > 04.05)
         temp = d.Jac2ndOrderIdleSecUsecNsampleQPDtoXYZ;    
         cj = 0;%index of the non-old jacobian 
         for c = 1:size(temp,1)
-            if(remtoff)
+            if(flags.remtoff)
                 tstart = removeToffset(temp(c,1:2), dat.info.Toffset);
             else
                 tstart = temp(c,1) + temp(c,2)*1e-6;
@@ -422,20 +439,22 @@ if (LTver > 04.05)
             if(tstart >= dat.t(1))  
                 % this is not a legacy jacobian, neither it is the first in the
                 % tracking session
-               istart = max(find(dat.t <= tstart));
+                istart = max(find(dat.t <= tstart));
                 if isempty(istart)
                     disp(['Error: can not find jacobian data for 2ndOrderIdle Jacobian, index',num2str(c)]);
                     keyboard;
                 end
                 cj = cj+1;
-                iend = istart+count-1;            
-                dat.ji2nd(cj,1).qpd = dat.qpd(istart:iend,:);
-                dat.jiS2nd(cj,1).ssense = dat.ssense(istart:iend,:);
+                iend = istart+count-1; 
+                if(~flags.concise)
+                    dat.ji2nd(cj,1).qpd = dat.qpd(istart:iend,:);
+                    dat.ji2nd(cj,1).ssense = dat.ssense(istart:iend,:);
+                end
                 dat.ji2nd(cj,1).iblip(1,1) = istart; 
                 dat.ji2nd(cj,1).iblip(1,2) = iend;
                 dat.ji2nd(cj,1).tblip = [dat.t(istart), dat.t(iend)];
                 dat.ji2nd(cj,1).pertprop = getperturbationinfo( ... 
-                    dat.ji2nd(cj,1).tblip, noiseinfo, remtoff, dat.info.Toffset);
+                    dat.ji2nd(cj,1).tblip, noiseinfo, flags.remtoff, dat.info.Toffset);
                 for rows = 1:1:15
                     dat.ji2nd(cj,1).jac(rows,1:3) = temp(c,[3 + (rows-1)*3 + 1 : 3 + (rows-1)*3 + 3]);
                 end                
@@ -451,12 +470,14 @@ if (LTver > 04.05)
                 end
                 iend = istart+count-1;            
                 dat.jacold.iblip(1,1) = istart; 
-                dat.jacold.iblip(1,2) = iend;            
-                dat.jacold.qpd = dat.JacData.qpd(istart:iend,:);
-                dat.jacold.ssense = dat.JacData.ssense(istart:iend,:);
+                dat.jacold.iblip(1,2) = iend;    
+                if(~flags.concise)
+                    dat.jacold.qpd = dat.JacData.qpd(istart:iend,:);
+                    dat.jacold.ssense = dat.JacData.ssense(istart:iend,:);
+                end
                 dat.jacold.tblip = [dat.JacData.t(istart), dat.JacData.t(iend)];
                 dat.jacold.pertprop = getperturbationinfo( ... 
-                    dat.jacold.tblip, noiseinfo, remtoff, dat.info.Toffset);  
+                    dat.jacold.tblip, noiseinfo, flags.remtoff, dat.info.Toffset);  
                 for rows = 1:1:15
                     dat.jacold.jac(rows,1:3) = temp(c,[3 + (rows-1)*3 + 1 : 3 + (rows-1)*3 + 3]);
                 end
@@ -469,7 +490,7 @@ if (LTver > 04.05)
     if(isfield(d,'JacLinearActiveSecUsecQPDtoXYZ'))
         temp = d.JacLinearActiveSecUsecQPDtoXYZ;
         for c = 1:1:size(temp,1) 
-            if(remtoff)
+            if(flags.remtoff)
                 dat.jalin(c,1).tupdate = removeToffset(temp(c,1:2), dat.info.Toffset);
             else
                 dat.jalin(c,1).tupdate = temp(c,1) + temp(c,2)*1e-6;
@@ -482,7 +503,7 @@ if (LTver > 04.05)
     if(isfield(d, 'Jac2ndOrderActiveSecUsecQPDtoXYZ'))
         temp = d.Jac2ndOrderActiveSecUsecQPDtoXYZ;    
         for c = 1:1:size(temp,1)
-            if(remtoff)
+            if(flags.remtoff)
                 dat.ja2nd(c,1).tupdate = removeToffset(temp(c,1:2), dat.info.Toffset);
             else
                 dat.ja2nd(c,1).tupdate = temp(c,1) + temp(c,2)*1e-6;

@@ -1,4 +1,7 @@
 2005-09-13  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* load_agnostic_tracking.m: Added option for concise loading, that saves memory and loads only bare essential data.
+	* atanalysis.m: made compatible with the change above. Also, now draws lines for jacobian update instants.
+2005-09-13  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* atcore.m: version 1.2. Some minor changes.
 	* atanalysis.m: working version.
 	* atanalysis.fig: same.
