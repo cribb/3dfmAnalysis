@@ -22,7 +22,7 @@ function varargout = atanalysis(varargin)
 
 % Edit the above text to modify the response to help atanalysis
 
-% Last Modified by GUIDE v2.5 30-Aug-2005 11:36:16
+% Last Modified by GUIDE v2.5 11-Sep-2005 16:46:59
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -92,8 +92,84 @@ filename = strcat(pname, fname);
 disp(['*************************************************************']);
 disp(['Now parsing ',filename]);
 cd (curdir);
-
+d = [];
 d = load_agnostic_tracking(filename,1,0);
+
+plot_base_figure(d);
+
+set(handles.edit_FitStart,'string',num2str(d.t(1)));
+set(handles.edit_FitEnd,'string',num2str(d.t(end)));
+set(handles.edit_TestStart,'string',num2str(d.t(1)));
+set(handles.edit_TestEnd,'string',num2str(d.t(end)));
+set(handles.edit_QuietStart,'string',num2str(d.t(1)));
+set(handles.edit_QuietEnd,'string',num2str(d.t(end)));
+
+% --- Executes on button press in buttpn_Export.
+function buttpn_Export_Callback(hObject, eventdata, handles)
+% hObject    handle to buttpn_Export (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global d
+[settings flags] = read_settings_and_flags(handles);
+dex.info = d.info;
+
+ifit = [max(find(d.t <= settings.fitrange(1,1))), max(find(d.t <= settings.fitrange(1,2)))];
+itest = [max(find(d.t <= settings.testrange(1,1))), max(find(d.t <= settings.testrange(1,2)))];
+iquiet = [max(find(d.t <= settings.quietrange(1,1))), max(find(d.t <= settings.quietrange(1,2)))];
+
+% can do better, but for now lets export all the data between earliest
+% start and latest end points.
+istart = min(ifit(1,1), itest(1,1), iquiet(1,1));
+iend = max(ifit(1,2), itest(1,2), iquiet(1,2));
+dex.t = d.t(istart:iend);
+dex.ssense = d.ssense(istart:iend,1:3);
+dex.qpd = d.qpd(istart:iend,1:4);
+
+% icstart = min([max(find(d.stageCom.t <= settings.fitrange(1,1))), max(find(d.stageCom.t <= settings.testrange(1,1)))]);
+% icend = max([max(find(d.stageCom.t <= settings.fitrange(1,2))), max(find(d.stageCom.t <= settings.testrange(1,2)))]);
+% dex.stageCom.t = d.stageCom.t(icstart:icend);
+% dex.stageCom.xyz = d.stageCom.xyz(icstart:icend,1:3);
+assignin('base','d',dex);
+assignin('base','settings',settings);
+assignin('base','flags',flags);
+disp('Variables ''d'', ''settings'' and ''flags'' were exported to base workspace');
+% --- Executes on button press in button_Compute.
+function button_Compute_Callback(hObject, eventdata, handles)
+% hObject    handle to button_Compute (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global d
+[settings, flags] = read_settings_and_flags(handles);
+disp(['|-----------Fit  [', num2str(settings.fitrange(1,1)), ' to ',num2str(settings.fitrange(1,2)), ...
+        ']  ==> Test  [', num2str(settings.testrange(1,1)), ' to ', num2str(settings.testrange(1,2)), ']  ----------|']);
+disp('Flags:');disp(flags); 
+disp('Settings:');disp(settings);
+[res, Jac] = atcore(d, settings, flags);
+disp('Results:');disp(res);
+%------------------------------------------------------------
+function [settings, flags] = read_settings_and_flags(handles);
+flags.fixskew = get(handles.check_Skew,'value');
+settings.order = get(handles.slider_JacOrder,'value');
+flags.usereciprocals = get(handles.check_Reciprocals,'value');
+flags.usesumdiff = get(handles.check_SumDiff,'Value');
+flags.LPstage = get(handles.check_LPfilterStage,'value');
+flags.LPqpd = get(handles.check_LPfilterQPD,'value');
+flags.LPresid = get(handles.check_LPfilterResid,'value');
+settings.LPhz = get(handles.slider_LPfilter,'value');
+settings.fitrange = [str2double(get(handles.edit_FitStart, 'string')), ...
+        str2double(get(handles.edit_FitEnd, 'string'))];
+settings.testrange = [str2double(get(handles.edit_TestStart,'string')), ...
+        str2double(get(handles.edit_TestEnd,'string'))];
+settings.quietrange = [str2double(get(handles.edit_QuietStart,'string')), ...
+        str2double(get(handles.edit_QuietEnd,'string'))];
+flags.HPstage = get(handles.check_HPfilterStage,'value');
+flags.HPqpd = get(handles.check_HPfilterQPD,'value');
+settings.HPhz = get(handles.slider_HPfilter,'value');
+settings.RecForm = get(handles.menu_recmethod,'value');
+%------------------------------------------------------------
+function plot_base_figure(d)
+global BASEFIG_NAME
+BASEFIG_NAME = 'SELECT DATA';
 figure(1);
 plot(d.t,d.ssense - repmat(d.ssense(1,:),size(d.ssense,1),1));
 if (isfield(d,'ji2nd'))
@@ -111,95 +187,51 @@ if (isfield(d,'jacold'))
         drawlines(gca,d.jacold(c).tblip);
     end
 end
-
-set(handles.edit_FitStart,'string',num2str(d.t(1)));
-set(handles.edit_FitEnd,'string',num2str(d.t(end)));
-set(handles.edit_TestStart,'string',num2str(d.t(1)));
-set(handles.edit_TestEnd,'string',num2str(d.t(end)));
-% --- Executes on button press in buttpn_clearMemory.
-function buttpn_clearMemory_Callback(hObject, eventdata, handles)
-global d
-% hObject    handle to buttpn_clearMemory (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-set(handles.edit_FitStart,'string',num2str(d.t(1)));
-set(handles.edit_FitEnd,'string',num2str(d.t(end)));
-set(handles.edit_TestStart,'string',num2str(d.t(1)));
-set(handles.edit_TestEnd,'string',num2str(d.t(end)));
-% --- Executes on button press in buttpn_Export.
-function buttpn_Export_Callback(hObject, eventdata, handles)
-% hObject    handle to buttpn_Export (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-global d
-[settings flags] = read_settings_and_flags(handles);
-dex.info = d.info;
-
-istart = min([max(find(d.t <= settings.fitrange(1,1))), max(find(d.t <= settings.testrange(1,1)))]);
-iend = max([max(find(d.t <= settings.fitrange(1,2))), max(find(d.t <= settings.testrange(1,2)))]);
-dex.t = d.t(istart:iend);
-dex.ssense = d.ssense(istart:iend,1:3);
-dex.qpd = d.qpd(istart:iend,1:4);
-
-icstart = min([max(find(d.stageCom.t <= settings.fitrange(1,1))), max(find(d.stageCom.t <= settings.testrange(1,1)))]);
-icend = max([max(find(d.stageCom.t <= settings.fitrange(1,2))), max(find(d.stageCom.t <= settings.testrange(1,2)))]);
-dex.stageCom.t = d.stageCom.t(icstart:icend);
-dex.stageCom.xyz = d.stageCom.xyz(icstart:icend,1:3);
-assignin('base','d',dex);
-assignin('base','settings',settings);
-assignin('base','flags',flags);
-disp('Variables ''d'', ''settings'' and ''flags'' were exported to base workspace');
-% --- Executes on button press in button_Compute.
-function button_Compute_Callback(hObject, eventdata, handles)
-% hObject    handle to button_Compute (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-global d
-[settings, flags] = read_settings_and_flags(handles);
-res = atcore(d, settings, flags);
-disp(['|-----------Fit  [', num2str(settings.fitrange(1,1)), ' to ',num2str(settings.fitrange(1,2)), ...
-        ']  ==> Test  [', num2str(settings.testrange(1,1)), ' to ', num2str(settings.testrange(1,2)), ']  ----------|']);
-disp(flags); disp(settings);
-disp('Results:');
-disp(res);
-%------------------------------------------------------------
-function [settings, flags] = read_settings_and_flags(handles);
-flags.fixskew = get(handles.check_Skew,'value');
-settings.order = get(handles.slider_JacOrder,'value');
-flags.usereciprocals = get(handles.check_Reciprocals,'value');
-flags.usesumdiff = get(handles.check_SumDiff,'Value');
-flags.LPstage = get(handles.check_LPfilterStage,'value');
-flags.LPqpd = get(handles.check_LPfilterQPD,'value');
-flags.LPresid = get(handles.check_LPfilterResid,'value');
-settings.LPhz = get(handles.slider_LPfilter,'value');
-settings.fitrange = [str2double(get(handles.edit_FitStart, 'string')), ...
-        str2double(get(handles.edit_FitEnd, 'string'))];
-settings.testrange = [str2double(get(handles.edit_TestStart,'string')), ...
-        str2double(get(handles.edit_TestEnd,'string'))];
-flags.HPstage = get(handles.check_HPfilterStage,'value');
-flags.HPqpd = get(handles.check_HPfilterQPD,'value');
-settings.HPhz = get(handles.slider_HPfilter,'value');
+set (gcf,'name',BASEFIG_NAME,'NumberTitle','Off');
+title('vertical lines indicate perturbation sessions');
+xlabel('Time [seconds]');
+ylabel('Stage Sensed Position [microns]');
+zoom on;
+return
 % --- Executes on button press in button_SelectFit.
 function button_SelectFit_Callback(hObject, eventdata, handles)
-% hObject    handle to button_SelectFit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-figure(1);
-[x,y] = ginput(2);
-x = sort(x);
-set(handles.edit_FitStart,'string',num2str(x(1,1)));
-set(handles.edit_FitEnd,'string',num2str(x(2,1)));
-% drawlines(handles.axes_times,[
+global d BASEFIG_NAME
+if (0 == figflag(BASEFIG_NAME))
+    plot_base_figure(d);
+end
+% disp('Place the cross-hair and click to select STARTING point of fitting data');
+[x,y] = ginput(1);
+set(handles.edit_FitStart,'string',num2str(x));
+% disp('Place the cross-hair and click to select ENDING point of fitting data');
+[x,y] = ginput(1);
+set(handles.edit_FitEnd,'string',num2str(x));
+
 % --- Executes on button press in button_SelectTest.
 function button_SelectTest_Callback(hObject, eventdata, handles)
-% hObject    handle to button_SelectTest (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-figure(1);
-[x,y] = ginput(2);
-x = sort(x);
-set(handles.edit_TestStart,'string',num2str(x(1,1)));
-set(handles.edit_TestEnd,'string',num2str(x(2,1)));
+global d BASEFIG_NAME
+if (0 == figflag(BASEFIG_NAME))
+    plot_base_figure(d);
+end
+% disp('Place the cross-hair and click to select STARTING point of testbed data');
+[x,y] = ginput(1);
+set(handles.edit_TestStart,'string',num2str(x));
+% disp('Place the cross-hair and click to select ENDING point of testbed data');
+[x,y] = ginput(1);
+set(handles.edit_TestEnd,'string',num2str(x));
+
+
+% --- Executes on button press in button_SelectQuiet.
+function button_SelectQuiet_Callback(hObject, eventdata, handles)
+global d BASEFIG_NAME
+if (0 == figflag(BASEFIG_NAME))
+    plot_base_figure(d);
+end
+[x,y] = ginput(1);
+set(handles.edit_QuietStart,'string',num2str(x));
+
+[x,y] = ginput(1);
+set(handles.edit_QuietEnd,'string',num2str(x));
+
 
 % --- Executes on slider movement.
 function slider_JacOrder_Callback(hObject, eventdata, handles)
@@ -493,5 +525,79 @@ else
     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
+
+% --- Executes during object creation, after setting all properties.
+function menu_recmethod_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to menu_recmethod (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(hObject,'BackgroundColor','white');
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+% --- Executes on selection change in menu_recmethod.
+function menu_recmethod_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_recmethod (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns menu_recmethod contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from menu_recmethod
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_QuietStart_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_QuietStart (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(hObject,'BackgroundColor','white');
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function edit_QuietStart_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_QuietStart (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_QuietStart as text
+%        str2double(get(hObject,'String')) returns contents of edit_QuietStart as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_QuietEnd_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_QuietEnd (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(hObject,'BackgroundColor','white');
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function edit_QuietEnd_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_QuietEnd (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_QuietEnd as text
+%        str2double(get(hObject,'String')) returns contents of edit_QuietEnd as a double
 
 

@@ -1,3 +1,8 @@
+2005-09-13  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* atcore.m: version 1.2. Some minor changes.
+	* atanalysis.m: working version.
+	* atanalysis.fig: same.
+
 2005-09-06  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* atcore.m: Fixed a bug in 'reciprocal' mode fitting. Also deleted the time-offset removal in this file. It should be taken care of by load_agnostic_tracking file.
 	* atanalysis.fig: Removed the 'select all' button.
