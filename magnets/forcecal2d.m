@@ -1,4 +1,4 @@
-function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity, window_size)
+function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity, window_size)
 % 3DFM function  
 % Magnetics
 % last modified 08/16/05 (jcribb)
@@ -9,7 +9,9 @@ function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, po
 %                                         poleloc, calib_um, granularity, window_size); 
 %   
 %  where "Ftable" is the average force computed for each pixel.
-%        "stderr" is the standard error (std(X)/sqrt(N)) for Ftable.
+%        "xpos" are the xpositions in the Ftable
+%        "ypos" are the ypositions in the Ftable
+%        "errtable" is the standard error (std(X)/sqrt(N)) for Ftable.
 %        "step" is the stepsize for each pixel.  Each pixel is assumed square.
 %        "F" is the output 2D force grid linearly interpolated by beads in "files"
 %        "files" is a string containing the file name(s) for analysis (wildcards ok)
@@ -27,6 +29,7 @@ function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, po
 %  2D binning force calibration.  This can take a LONG time to compute if
 %  the granularity is set too low (<4)
 %   
+
     if nargin < 7 | window_size
         window_size = 1;
     end
@@ -142,10 +145,13 @@ function [Ftable, errtable, step] = forcecal2d(files, viscosity, bead_radius, po
         end
 	end
 
+    xpos = (col_bins(1:end-1) - poleloc(1))* calib_um;
+    ypos = (row_bins(1:end-1) - poleloc(2)) * calib_um;
+    
     % plot the binning outputs 
 	figure; 
 	subplot(1,2,1);
-	imagesc((col_bins - poleloc(1))* calib_um, (row_bins - poleloc(2)) * calib_um, im_mean * 1e12);
+	imagesc(xpos, ypos, im_mean * 1e12);
     title('Mean Calibrated Force (pN)');
 	xlabel('\mum'); ylabel('\mum');
 	colormap(hot);

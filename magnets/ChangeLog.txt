@@ -1,3 +1,6 @@
+2005-09-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* forcecal2d.m: added x and y positions to output.
+
 2005-09-01  Jeremy Cribb <jcribb@email.unc.edu>
 	* forcecal2d.m: changed window_size to be an input parameter.  This changes the "tau" value for derivative determination.
 
