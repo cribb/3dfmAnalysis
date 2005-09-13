@@ -1,3 +1,6 @@
+2005-09-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* cap_plot.m: corrected documentation.
+
 2005-06-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* cap_creep.m,cap_sweep.m,cap_viscometry,cap_yield.m: removed unnecessary commented code.  cleaned up a bit.
 	* cap_plot: added creep:all cone-and-plate plotting type.

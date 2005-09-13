@@ -20,7 +20,7 @@ function cap_plot(d, plottype)
 %  NOTES: If both input arguments are not defined, then the result is default
 %  behavior, i.e. construct default plots for any XLS file in the current
 %  directory.  The convention for the filenames requires the strings
-%  'creep', 'viscometry', 'amp', or 'frequency' as a means to direct which
+%  'creep', 'viscometry', 'amp', or 'freq' as a means to direct which
 %  plots and which conversions (.XLS -> .MAT) to make.
 %   
 %  03/31/05 - created; jcribb.
