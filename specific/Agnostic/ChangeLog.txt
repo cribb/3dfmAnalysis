@@ -1,3 +1,7 @@
+2005-09-16  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* atanalysis.m: Now exports the results and all the data. Several other minor changes.
+	* atcore.m: version 1.3. Compatible with the changes above. Also added option for zeropadding before filtering. Next versions will have altogether different apparoch for removing feedback contamination.
+	* atanalysis.fig: minor changes.
 2005-09-13  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* load_agnostic_tracking.m: Added option for concise loading, that saves memory and loads only bare essential data.
 	* atanalysis.m: made compatible with the change above. Also, now draws lines for jacobian update instants.

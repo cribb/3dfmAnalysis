@@ -22,7 +22,7 @@ function varargout = atanalysis(varargin)
 
 % Edit the above text to modify the response to help atanalysis
 
-% Last Modified by GUIDE v2.5 11-Sep-2005 16:46:59
+% Last Modified by GUIDE v2.5 14-Sep-2005 10:14:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -87,7 +87,7 @@ if (fname(1) == 0 | pname(1) == 0);
     set(hObject,'string','Click here to browse for tracking file');
     return;
 end
-set(hObject,'string',[pname(1:25), '.....\', fname]);
+set(hObject,'string',[pname(1:20), '.....\', fname]);
 filename = strcat(pname, fname);
 disp(['*************************************************************']);
 disp(['Now parsing ',filename]);
@@ -105,9 +105,9 @@ set(handles.edit_TestEnd,'string',num2str(d.t(end)));
 set(handles.edit_QuietStart,'string',num2str(d.t(1)));
 set(handles.edit_QuietEnd,'string',num2str(d.t(end)));
 
-% --- Executes on button press in buttpn_Export.
-function buttpn_Export_Callback(hObject, eventdata, handles)
-% hObject    handle to buttpn_Export (see GCBO)
+% --- Executes on button press in button_Export.
+function button_Export_Callback(hObject, eventdata, handles)
+% hObject    handle to button_Export (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global d
@@ -145,8 +145,13 @@ disp(['|-----------Fit  [', num2str(settings.fitrange(1,1)), ' to ',num2str(sett
         ']  ==> Test  [', num2str(settings.testrange(1,1)), ' to ', num2str(settings.testrange(1,2)), ']  ----------|']);
 disp('Flags:');disp(flags); 
 disp('Settings:');disp(settings);
-[res, Jac] = atcore(d, settings, flags);
+[res, Jac, dout] = atcore(d, settings, flags);
 disp('Results:');disp(res);
+% export the results to base workspace
+assignin('base','res',res);
+assignin('base','jac',Jac);
+assignin('base','d',dout);
+
 %------------------------------------------------------------
 function [settings, flags] = read_settings_and_flags(handles);
 flags.fixskew = get(handles.check_Skew,'value');

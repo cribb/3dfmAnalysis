@@ -1,4 +1,4 @@
-function [res, Jac] = atcore(d, settings, flags);
+function varargout = atcore(d, settings, flags);
 % Usage: res = atcore(d, settings, flags)
 % inputs: 'd' , a structure containing atleast all of the fields below
 %            .t
@@ -22,7 +22,7 @@ function [res, Jac] = atcore(d, settings, flags);
 %             .residrms - rms value of residuals for 3 axis
 %             .stagerms - rms value of stagesensed positions
 %             .ratio - ratio of the two rms values
-version_str = '1.2 - 13th Sep 05';
+version_str = '1.3 - 15th Sep 05';
 % disp(['atcore version: ', version_str]);
 dbstop if error
 
@@ -110,16 +110,16 @@ end
 if flags.HPstage
     [b,a] = butter(2, settings.HPhz*2/srate, 'high');
     for i = 1:3
-        sfit(:,i) = filtfilt(b,a,sfit(:,i));
-        stest(:,i) = filtfilt(b,a,stest(:,i));% ????SHOULD WE REALLY FILTER THE TESTBED DATA HERE????
-        squiet(:,i) = filtfilt(b,a,squiet(:,i));
+        sfit(:,i) = myfilt(b,a,sfit(:,i));
+        stest(:,i) = myfilt(b,a,stest(:,i));% ????SHOULD WE REALLY FILTER THE TESTBED DATA HERE????
+        squiet(:,i) = myfilt(b,a,squiet(:,i));
     end
 else    % subtract the linear trend from the stage reports
     for i = 1:3
         ps = polyfit(tfit, sfit(:,i), 1);
         sfit(:,i) = sfit(:,i) - polyval(ps, tfit);
         ps = polyfit(ttest, stest(:,i), 1);
-        stest(:,i) = stest(:,i) - polyval(ps, ttest);% ????SHOULD WE REALLY FILTER THE TESTBED DATA HERE????
+        stest(:,i) = stest(:,i) - polyval(ps, ttest);
         ps = polyfit(tquiet, squiet(:,i), 1);
         squiet(:,i) = squiet(:,i) - polyval(ps, tquiet);
     end
@@ -128,16 +128,16 @@ end
 if flags.HPqpd
     [b,a] = butter(2, settings.HPhz*2/srate, 'high');
     for i = 1:size(qfit,2)
-        qfit(:,i) = filtfilt(b,a,qfit(:,i));
-        qtest(:,i) = filtfilt(b,a,qtest(:,i));% ????SHOULD WE REALLY FILTER THE TESTBED DATA HERE????
-        qquiet(:,i) = filtfilt(b,a,qquiet(:,i));
+        qfit(:,i) = myfilt(b,a,qfit(:,i));
+        qtest(:,i) = myfilt(b,a,qtest(:,i));
+        qquiet(:,i) = myfilt(b,a,qquiet(:,i));
     end    
 else    
     for i = 1:size(qfit,2)
         pq = polyfit(tfit, qfit(:,i), 1);
         qfit(:,i) = qfit(:,i) - polyval(pq, tfit);
         pq = polyfit(ttest, qtest(:,i), 1);
-        qtest(:,i) = qtest(:,i) - polyval(pq, ttest); %????SHOULD WE REALLY FILTER THE TESTBED DATA HERE????
+        qtest(:,i) = qtest(:,i) - polyval(pq, ttest);
         pq = polyfit(tquiet, qquiet(:,i), 1);
         qquiet(:,i) = qquiet(:,i) - polyval(pq, tquiet);
     end    
@@ -148,13 +148,13 @@ end
 if flags.LPstage
     [b,a] = butter(4, settings.LPhz*2/srate);
     for i = 1:3
-        sfit(:,i) = filtfilt(b,a,sfit(:,i));
+        sfit(:,i) = myfilt(b,a,sfit(:,i));
     end
 end
 if flags.LPqpd
     [b,a] = butter(4, settings.LPhz*2/srate);
     for i = 1:size(qfit,2)
-        qfit(:,i) = filtfilt(b,a,qfit(:,i));
+        qfit(:,i) = myfilt(b,a,qfit(:,i));
     end
 end
 
@@ -208,6 +208,36 @@ res.rmsFITresid = sqrt(mean(fitresid.^2));
 res.rmsFITstage = sqrt(mean(sfit.^2));
 res.blipratio = res.rmsFITresid ./res.rmsQUIETresid;
 
+switch (nargout)
+    case 1
+        varargout{1} = res;
+    case 2
+        varargout{1} = res;
+        varargout{2} = Jac;
+    case 3
+        dout.test.s = stest;
+        dout.test.q = qtest;
+        dout.test.preds = testpred;
+        dout.test.t = ttest;
+        
+        dout.fit.s = sfit;
+        dout.fit.q = qfit;
+        dout.fit.preds = fitpred;
+        dout.fit.t = tfit;        
+        
+        dout.quiet.s = squiet;
+        dout.quiet.q = qquiet;
+        dout.quiet.preds = quietpred;
+        dout.quiet.t = tquiet;
+        
+        varargout{1} = res;
+        varargout{2} = Jac;
+        varargout{3} =  dout;   
+    otherwise
+        disp('atcore Error: unrecognized number of output arguments');
+end
+%%%%%%%%% EVERYTHING BELOW IS ONLY PLOTTING ETC, NO ANALYSIS %%%%%%%%% 
+
 % res.fudge = 0.0035;
 % res.ratio_fudged = (res.residrms - res.fudge) ./ (res.stagerms - res.fudge);
 
@@ -227,17 +257,27 @@ res.blipratio = res.rmsFITresid ./res.rmsQUIETresid;
 if flags.LPresid
     [b,a] = butter(4, LPHz*2/srate);
     for i = 1:3
-        testresid(:,i) = filtfilt(b,a,testresid(:,i));
-        fitresid(:,i) = filtfilt(b,a,fitresid(:,i));
+        testresid(:,i) = myfilt(b,a,testresid(:,i));
+        fitresid(:,i) = myfilt(b,a,fitresid(:,i));
+        quietresid(:,i) = myfilt(b,a,quietresid(:,i));
     end    
 end    
 xyz = 'XYZ';
 psdres = max([1, ceil(1/range(ttest))]); 
 for i = 1:3
     figure(19+i);
-    set(gcf,'name',['PSD:',xyz(i)],'NumberTitle','Off');
-    mypsd([stest(:,i),testpred(:,i),testresid(:,i)], srate, psdres);
+    set(gcf,'name',['PSD test:',xyz(i)],'NumberTitle','Off');
+    mypsd([stest(:,i),testpred(:,i),testresid(:,i)], srate, psdres,[],'.-');
     title(['stage psd: Test data ', xyz(i)]);
+    legend('Measrd','Pred','Resid',3);    
+    zoom on
+end
+psdres = max([1, ceil(1/range(tquiet))]);
+for i = 1:3
+    figure(19+3+i);
+    set(gcf,'name',['PSD quiet:',xyz(i)],'NumberTitle','Off');
+    mypsd([squiet(:,i),quietpred(:,i),quietresid(:,i)], srate, psdres,[],'.-');
+    title(['stage psd: Quiet data ', xyz(i)]);
     legend('Measrd','Pred','Resid',3);    
     zoom on
 end
@@ -266,6 +306,17 @@ for i = 1:3
 end
 zoom on
 legend('Measrd','Pred','resid',0);
+
+figure(32);
+set (gcf,'name','Quiet','NumberTitle','Off');
+for i = 1:3
+    subplot(3,1,i);
+    plot(tquiet,squiet(:,i),'b', tquiet, quietpred(:,i), 'g', tquiet,quietresid(:,i),'r')
+    title(['Stage: Quiet data', xyz(i)])    
+end
+zoom on
+legend('Measrd','Pred','resid',0);
+
 % figure(12)
 % for (i = 1:3)
 %     subplot(3,1,i)
@@ -285,4 +336,14 @@ for o = 1:order
         nQ(i) = size(A,2) + 1;
         A = [ A, repmat(q(:,i),1,size(Ac,2)).*Ac ];
     end
+end
+%----------------------- a central place for playing around with filtering
+function filout = myfilt(b,a,filin)
+if (1)
+    filout = filtfilt(b,a,filin);
+else
+    len = floor(size(filin,1)/2);
+    padin = [zeros(len,1); filin ; zeros(len,1)];
+    padout = filtfilt(b,a,padin);
+    filout = padout(len+1:len+size(filin,1),1);
 end
