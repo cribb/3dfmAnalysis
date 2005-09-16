@@ -1,7 +1,10 @@
-2005-08-13  Jeremy Cribb  <jcribb@email.unc.edu>
+2005-09-16  Jeremy Cribb  <jcribb@email.unc.edu>
+	* load_vrpn_tracking.m:  new cvs updates of load_vrpn_tracking has inserted lines between code.  Removed these extra lines, because the actually break the code.
+
+2005-09-13  Jeremy Cribb  <jcribb@email.unc.edu>
 	* load_video_tracking.m:  fixed stupid logentry typo.
 
-2005-08-13  Jeremy Cribb  <jcribb@email.unc.edu>
+2005-09-13  Jeremy Cribb  <jcribb@email.unc.edu>
 	* load_video_tracking.m:  fixed a bug where perfectly good timestamp files were not loaded due to getting the filename wrong.  Added logentries so that a message is printed to stdout when timestamps are/are not loaded.
 
 2005-08-31  Kalpit Desai  <kvdesai@email.unc.edu>
