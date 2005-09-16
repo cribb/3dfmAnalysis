@@ -1,3 +1,6 @@
+2005-09-16  Jeremy Cribb <jcribb@email.unc.edu>
+  * mip.m: changed comments.
+
 2005-09-04  Jeremy Cribb <jcribb@email.unc.edu>
   * imscalebar.m: removed output variable.
 

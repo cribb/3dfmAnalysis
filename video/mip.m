@@ -20,6 +20,8 @@ function v = mip(files, start, stop, stride, mode);
 %   
 %  
 
+% test change
+
 % handle argument list
 
 % get directory for a file or a list of files (using wildcards)
