@@ -1,3 +1,6 @@
+2005-09-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* zerodaq.m:  added.  with no arguments, it zeros daq boards.  With an argument it sets the board output to a DC value.
+
 2005-02-18  Jeremy Cribb <jcribb@email.unc.edu>
 	* DACoperator.m: made output plots more readable.
 
