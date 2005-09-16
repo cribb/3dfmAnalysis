@@ -1,3 +1,6 @@
+2005-09-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* shear_wave_MCL_oscillator.m: added.  this script will oscillate the mad city labs stage in x or y while moving up or down in z.  This is used for the shear wave propagation experiments for mucus, etc...
+
 2005-02-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* relaxation_time_expt.m:  added DAC control.
 	* history_dependence_expt.m:  added reference to 'daqtest' for simulating signals.
