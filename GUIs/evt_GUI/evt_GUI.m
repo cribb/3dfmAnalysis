@@ -145,7 +145,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     filenameroot = strrep(filename,     '.raw', '');
     filenameroot = strrep(filenameroot, '.vrpn', '');
     filenameroot = strrep(filenameroot, '.mat', '');
-    filenameroot = strrep(filenameroot, '.evt', '')
+    filenameroot = strrep(filenameroot, '.evt', '');
 
     % load the datafile
     logentry('Loading dataset... ');

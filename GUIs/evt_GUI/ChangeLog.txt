@@ -1,3 +1,7 @@
+2005-09-22  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: suppressed debug output mistakenly left in code.
+	* evt_gui.fig: minor changes in GUI appearance.
+
 2005-09-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.fig: hopefully fixed the "GUI doesn't work on lower video resolution" problem.
 
