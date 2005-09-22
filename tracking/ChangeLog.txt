@@ -1,3 +1,6 @@
+2005-09-22  Jeremy Cribb  <jcribb@email.unc.edu>
+	* load_video_tracking.m: fixed filter on older spot_tracker .vrpn.mat files.  Fixed logentry that liked to repeat itself.
+
 2005-09-16  Jeremy Cribb  <jcribb@email.unc.edu>
 	* load_vrpn_tracking.m:  new cvs updates of load_vrpn_tracking has inserted lines between code.  Removed these extra lines, because the actually break the code.
 

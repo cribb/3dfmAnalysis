@@ -100,26 +100,26 @@ for fid = 1:length(filelist)
         tstamps = 'no';
 
     elseif isfield(dd.tracking, 'spot2DSecUsecIndexXYZ')
-        data = dd.tracking.spot2DSecUsecIndexXYZ;
+        mydata = dd.tracking.spot2DSecUsecIndexXYZ;
 
         % Let's axe the VRPN "time-stamps"... they don't mean anything here
-        data(:,2) = zeros(size(data, 1),1);  
-        data = data(:,2:end);
+        mydata(:,2) = zeros(size(mydata, 1),1);  
+        mydata = mydata(:,2:end);
 
         video_tracking_constants; 
         
         % set up variables for easy tracking of table's column headings
         myTIME = 1; myID = 2; myX = 3; myY = 4; myZ = 5; 
 
-        data(:,TIME) = data(:,myTIME);
-        data(:,ID)   = data(:,myID);
-        data(:,FRAME)= [1:rows(data)]';
-        data(:,X)    = data(:,myX);
-        data(:,Y)    = data(:,myY);
-        data(:,Z)    = data(:,myZ);
-        data(:,ROLL) = zeros(rows(data),1);
-        data(:,PITCH) = zeros(rows(data),1);
-        data(:,YAW) = zeros(rows(data),1);
+        data(:,TIME) = mydata(:,myTIME);
+        data(:,ID)   = mydata(:,myID);
+        data(:,FRAME)= zeros(rows(mydata),1);
+        data(:,X)    = mydata(:,myX);
+        data(:,Y)    = mydata(:,myY);
+        data(:,Z)    = mydata(:,myZ);
+        data(:,ROLL) = zeros(rows(mydata),1);
+        data(:,PITCH) = zeros(rows(mydata),1);
+        data(:,YAW) = zeros(rows(mydata),1);
         
         % no timestamps in this vrpn file format
         tstamps = 'no';
@@ -149,11 +149,28 @@ for fid = 1:length(filelist)
     x = data(:,X);
     y = data(:,Y);
     
+    % try loading the time stamps if that is requested.
+    if strcmp(tstamps,'yes')
+        tfile = strrep(file,  '.raw',  '');
+        tfile = strrep(tfile, '.vrpn', '');
+        tfile = strrep(tfile, '.mat',  '');
+        tfile = strrep(tfile, '.evt',  '');
+        
+        try
+            times = load([tfile '.raw.tstamp.txt'], 'ASCII');            
+            logentry('Successfully loaded time stamps.');
+        catch
+            tstamps = 'no';                
+            logentry('Attempt to load timestamps failed (file not found). Using frame rate to construct timestamps');
+        end
+    end
+
     % now do all of the bead specific things
     for k = 0 : max(trackerID)    
                     
         % select rows in table that correspond only to the k-th bead
-        this_tracker  = find(trackerID == k);
+        idx = find(trackerID == k);
+        this_tracker  = data(idx,:);
         
         % handle the case for which a trackerID was used, but no points
         % were retained in the dataset.
@@ -162,8 +179,8 @@ for fid = 1:length(filelist)
         end;
 
         % select x&y coords for only the kth bead
-        this_x = x(this_tracker);
-        this_y = y(this_tracker);
+        this_x = x(idx);
+        this_y = y(idx);
 
         if(strcmp(absolute_pos,'relative'))            
             % subtract off the initial x and y (1st point becomes the zero)
@@ -171,39 +188,26 @@ for fid = 1:length(filelist)
             this_y = this_y - this_y(1);
             
             % enter the new locations into the data table
-            data(this_tracker,X) = this_x;
-            data(this_tracker,Y) = this_y;            
+            data(idx,X) = this_x;
+            data(idx,Y) = this_y;            
         end
         
         % Handle time.... if we don't have timestamps then we have to assume
         % that we have a constant frame rate.
         if strcmp(tstamps,'yes')
-            tfile = strrep(file,  '.raw',  '');
-            tfile = strrep(tfile, '.vrpn', '');
-            tfile = strrep(tfile, '.mat',  '');
-            tfile = strrep(tfile, '.evt',  '');
-            
-            try
-                times = load([tfile '.raw.tstamp.txt'], 'ASCII');
-                if size(times, 2) == 2
-                    times = times(:,1) + times(:,2) / 1e6;
-                end
-                active_frames = data(this_tracker, FRAME);
-                data(this_tracker,TIME) = times(active_frames+1);
-                
-                logentry('Successfully loaded time stamps.');
-            catch
-                tstamps = 'no';                
-                logentry('Attempt to load time stamps failed.  File not found.');
+            if size(times, 2) == 2
+                times = times(:,1) + times(:,2) / 1e6;
             end
+            active_frames = data(idx, FRAME);
+            data(idx,TIME) = times(active_frames+1);
         end
         
         if strcmp(tstamps, 'no')
-            if sum(this_tracker,FRAME) > 0
-                data(this_tracker,TIME) = data(this_tracker,FRAME) * 1/frame_rate;
+            if sum(this_tracker(:,FRAME)) > 0
+                data(idx,TIME) = data(idx,FRAME) * 1/frame_rate;
             else
                 frames = [0 : rows(this_tracker)-1]';
-                data(this_tracker,TIME) = frames * 1/frame_rate;
+                data(idx,TIME) = frames * 1/frame_rate;
             end                
         end    
     end
