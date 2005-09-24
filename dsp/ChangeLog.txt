@@ -1,3 +1,6 @@
+2005-09-24  Kalpit Desai <kvdesai@cs.unc.edu>
+	* processpeak.m: Made interactive. 
+
 2005-09-13  Kalpit Desai <kvdesai@cs.unc.edu>
 	* mypsd.m: 
 	- Made to exit gracefully and report some plain english errors when input parameters are inconsistent. 
