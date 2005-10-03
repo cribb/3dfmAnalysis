@@ -1,22 +1,19 @@
-function data =  noisechar(A, f, Nrepeat)
-% A stand-alone function used to test the noise on MCL stage sensor outputs
-% Last modified by: kvdesai
+function data =  teststreaks(amp_um, f, Nrepeat)
+% A stand-alone function used to test streaks on camera by moving MCL stage
+% in circles.
+% Last modified 3 October 05 by: kvdesai
 % Usage:
-%   data =  noisechar(seconds, drive, range)
+%   data =  teststreaks(radius_um, Hz, Nrepeat)
 %   Where,
-%   seconds = desired duration of the data acquisition
-%   drive = a Nx2 vector specifying the  voltage that is to be put
-%            on [x y] channels of the stage
-%   range = a number specifying bipolar range of the analog input board (ADC). 
-%           e.g. providing 5 = range, sets the range to be -5 to +5 volts.
-%           Reducing the range increases the resolution of ADC board.
-%           However, 'drive' signals should be within this range.  
-
+%   radius_um = desired radius of circle in microns
+%   Hz = Frequency of the circular motion
+%   Nrepeat = How many time do you want to do circles?
 AOname = 'PCI-6733';   %id = 1
 AIname = 'PCI-6052E';  %id = 2
 sampleRate = 10000; 
-seconds = 2;
+seconds = 1;
 t = (0:1/sampleRate:seconds);
+A = amp_um*0.1;
 x = A*sin(2*pi*f*t)+5; y = A*cos(2*pi*f*t) + 5;
 drive = [x',y'];
 disp(['Sample rate to be used (Hz): ',num2str(sampleRate)]);
@@ -47,7 +44,7 @@ set(AO, 'RepeatOutput', Nrepeat);
 AI = analoginput('nidaq', AIid);
 set(AI, 'InputType', 'Differential');
 
-% VARIES FROM HERCULES TO BETTY
+
 Ichan = addchannel(AI, 4:6); %3 stage channels: X = 4, Y = 5, Z=6(just in case) all in MCL marked coordinates
 
 set(AI, 'SampleRate', sampleRate);
@@ -96,10 +93,11 @@ if(strncmpi(asksave,'y',1))
     save(fullname,'data');
     disp(['The noise data is saved as ', fullname]);
 else
-    disp('Data was discarded...');
+    disp('Data was discarded...Waiting for drive to complete');
 %     data = [];
 end
 % putsample(AO,[0 0 0 0]);%Return stage to the origin
+waittilstop(AO,seconds*Nrepeat);
 stop(AO);
 stop(AI);
 delete(AI);
