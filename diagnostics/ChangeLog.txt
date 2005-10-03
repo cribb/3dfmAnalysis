@@ -1,3 +1,5 @@
+2005-10-03	Kalpit Desai <kvdesai@email.unc.edu>
+	* teststreaks.m: Added utility for testing streaks on camera by moving MCL stage.
 2005-09-24	Kalpit Desai <kvdesai@email.unc.edu>
 	* ADCnoisechar.m: A utility to chracterize noise in the data acquisition path.
 2005-09-16  Jeremy Cribb <jcribb@email.unc.edu>
