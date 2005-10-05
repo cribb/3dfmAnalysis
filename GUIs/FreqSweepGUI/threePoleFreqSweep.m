@@ -22,7 +22,7 @@ function varargout = threePoleFreqSweep(varargin)
 
 % Edit the above text to modify the response to help threePoleFreqSweep
 
-% Last Modified by GUIDE v2.5 04-Oct-2005 17:43:03
+% Last Modified by GUIDE v2.5 05-Oct-2005 13:49:44
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,13 +54,14 @@ function threePoleFreqSweep_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for threePoleFreqSweep
 handles.output = hObject;
-global version_str;
-version_str = '2.0';
+global AO version_str;
+version_str = '2.1';
 % Update handles structure
 guidata(hObject, handles);
 clc;
 disp(['Welcome to Three Pole Frequency Sweep Generator ', version_str]);
 button_defaults_Callback(handles.button_defaults, [], handles)
+setupDACboard;
 % UIWAIT makes threePoleFreqSweep wait for user response (see UIRESUME)
 % uiwait(handles.threePoleFreqSweep);
 
@@ -99,14 +100,13 @@ fmax = str2double(get(handles.edit_freqMax,'string'));
 fstep = str2double(get(handles.edit_freqStep,'string'));
 param.fvec = fmin:fstep:fmax;
 param.docontrol = get(handles.check_control,'value');
-% --- Executes on button press in button_start ---------------------------
-function button_start_Callback(hObject, eventdata, handles)
-% hObject    handle to button_start (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-global AO version_str
-p = read_settings(handles);
-AOname = 'PCI-6713';   %id = 1
+%------------------------------------------------------------------------
+function promptuser(str,handles)
+set(handles.text_message,'string',str);
+disp(str);
+function setupDACboard(varargin)
+global AO
+AOname = 'PCI-6713';
 % find the board ids that go with the names
 hwinfo = daqhwinfo('nidaq');
 AOid = -1;
@@ -119,22 +119,33 @@ end
 if AOid < 0
   error('Analog output board not found')
 end
+AO = analogoutput('nidaq', AOid);
+
+% --- Executes on button press in button_start ---------------------------
+function button_start_Callback(hObject, eventdata, handles)
+% hObject    handle to button_start (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global AO version_str
+p = read_settings(handles);
+if(~exist('AO'))
+    setupDACboard;
+end
 
 AOchannels = [p.chA, p.chB, p.chC, p.chFlag];
 desired_sampleRate = max([1000,max(p.fvec)*10]); 
    % we don't wanna sample too higher rate and eat memory
 % setup the output board
-AO = analogoutput('nidaq', AOid);
+
 Ochan = addchannel(AO, AOchannels);  
 set(Ochan, 'OutputRange', [-10 10]);  
 
 set(AO, 'TriggerType', 'Manual'); % use hardware manual trigger 
 % set(AO, 'TriggerType', 'HwDigital'); % use hardware digital trigger 
 p.srate = setverify(AO, 'SampleRate', desired_sampleRate); %default sample rate 
-
+promptuser('Now synthesizing the drive signal',handles);
 outData = synthesizer(p);
 % Now fill the output buffer but do not start sending the data yet
-
 set(AO,'RepeatOutput',p.Nrepeat); 
 putdata(AO, outData); % send the data
 start(AO); % ready but not triggered
@@ -144,8 +155,10 @@ tim = clock; % THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
 %----------    THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
 data.info.Name = datestr(tim,30);
 data.info.version = version_str;
-disp(['Magnet Operation STARTED::',data.info.Name]);
-disp(['This will take about ',num2str(size(outData,1)*(p.Nrepeat+1)/p.srate),' Seconds...']);
+% disp(['Magnet Operation STARTED::',data.info.Name]);
+promptuser('Started frquency sweep...',handles);
+set(handles.text_estimate,'string',num2str(ceil(size(outData,1)*(p.Nrepeat+1)/p.srate)));
+% disp(['This will take about ',num2str(size(outData,1)*(p.Nrepeat+1)/p.srate),' Seconds...']);
 data.info.exactSec = tim(6);
 if(get(handles.check_logData,'value'))
     data.outData = outData;
@@ -154,7 +167,7 @@ end
 waittilstop(AO,2*length(outData)/p.srate);%   THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
 tend = clock;%          THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
 %-----------            THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
-disp(['Magnet Operation COMPLETED::',data.info.Name]);
+promptuser('Completed last frequency sweep...',handles);
 
 data.info.pole_geometry = 'ThreePolesInPlane';
 data.info.param = p;
@@ -231,7 +244,9 @@ if (exist('AO') & ~isempty(AO))
     if(strcmpi(get(AO,'Running'),'On'))
         stop(AO);
     end
-    putsample(AO,zeros(1,length(get(AO,'Channel'))));
+    if(length(get(AO,'channel')))
+        putsample(AO,zeros(1,length(get(AO,'Channel'))));
+    end
     clear AO
     delete AO
 end
@@ -288,10 +303,11 @@ end
 %------------------------------------------------------------------
 function edit_controlFreq_Callback(hObject, eventdata, handles)
 set(hObject,'string',num2str(floor(str2double(get(hObject,'string')))));
+update_estimated_time(handles);
 %------------------------------------------------------------------
 function edit_nCycles_Callback(hObject, eventdata, handles)
 set(hObject,'string',num2str(floor(str2double(get(hObject,'string')))));
-
+update_estimated_time(handles);
 % --- Coil A settings%------------------------------------------
 % --- Peak To Peak amplitude in volts
 function slider_pk2pkA_Callback(hObject, eventdata, handles)
@@ -373,6 +389,7 @@ if(abs(str2double(get(hObject,'string'))) < finest)
     errordlg(['Can''t do that fine resolution man...',num2str(finest),' is the best I can do']);
     set(hObject,'string',num2str(finest));
 end
+update_estimated_time(handles);
 %-------------------------------------------------------------------
 function edit_freqMax_Callback(hObject, eventdata, handles)
 maxf = 5000;
@@ -380,6 +397,7 @@ if(str2double(get(hObject,'string')) > maxf)
     errordlg(['Can''t do that high frequency man...',num2str(maxf),' is the best I can do']);
     set(hObject,'string',num2str(maxf));
 end
+update_estimated_time(handles);
 %-------------------------------------------------------------------
 function edit_freqMin_Callback(hObject, eventdata, handles)
 minf = 0.01;
@@ -387,10 +405,11 @@ if(str2double(get(hObject,'string')) < minf)
     errordlg(['Can''t do that low frequency man...',num2str(minf),' is the best I can do']);
     set(hObject,'string',num2str(minf));
 end
+update_estimated_time(handles);
 %-------------------------------------------------------------------
 function edit_dwell_Callback(hObject, eventdata, handles)
 set(hObject,'string',num2str(floor(str2double(get(hObject,'string')))));
-
+update_estimated_time(handles);
 %-------------------------------------------------------------------
 function check_editval(h,h_slider)
 % Checks whether the value entered in "edit" object (h)is compatible to the
@@ -417,7 +436,17 @@ set(handles.slider_pk2pkC,'value',val);
 set(handles.edit_pk2pkA,'string',num2str(val));
 set(handles.edit_pk2pkB,'string',num2str(val));
 set(handles.edit_pk2pkC,'string',num2str(val));
-
+%-------------------------------------------------------------------
+function update_estimated_time(handles)
+p = read_settings(handles);
+span = sum(1./p.fvec)*(p.nCycles + p.dwell);
+if (p.docontrol == 1)
+    %span would be double since control frequency would be interleaved with
+    %dwell
+    span = 2*span;
+end
+set(handles.text_estimate,'string',num2str(ceil(span)));
+%-------------------------------------------------------------------
 function updateAO(varargin)%does nothing at this point
 return
 
@@ -671,7 +700,7 @@ function check_control_Callback(hObject, eventdata, handles)
 % hObject    handle to check_control (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+update_estimated_time(handles);
 % Hint: get(hObject,'Value') returns toggle state of check_control
 
 

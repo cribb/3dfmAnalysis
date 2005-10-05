@@ -1,4 +1,10 @@
 2005-10-04 Kalpit Desai <kvdesai@email.unc.edu>
+	* threePoleFreqSweep.m: Version 2.1
+	- Now reestimates how long will the sweep take, whenever any related parameter is changed by user, and displays the new estimate.
+	- Added a message box on the gui to tell user what is going on.
+	* threePoleFreqSweep.fig: related changes.
+
+2005-10-04 Kalpit Desai <kvdesai@email.unc.edu>
 	* threePoleFreqSweep.m: Version 2.0 [major changes]
 	- Now ON-time and dwell-time are to be specified it terms of number of cyles instead of number of seconds.
 	- Test frequencies are to be specified by three parameters: min, step and max.
