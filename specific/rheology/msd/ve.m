@@ -19,6 +19,7 @@ T = 298;
 
 msd = d.msd;
 tau = d.tau;
+N = d.n; % corresponds to the number of trackers (beads)
 
 % [dydx, newx, newy] = windiff(y, x, window_size)
 % [alpha, logtau, logmsd] = windiff(log10(msd), log10(tau), 1);
@@ -56,15 +57,15 @@ loggp  = log10(gp);
 loggpp = log10(gpp);
 mean_loggp = mean(loggp,2);
 mean_loggpp= mean(loggpp,2);
-ste_loggp  = std(logtau,0,2) ./ sqrt(cols(gp));
-ste_loggpp = std(logmsd,0,2) ./ sqrt(cols(gpp));
+ste_loggp  = std(logtau,0,2) ./ sqrt(N);
+ste_loggpp = std(logmsd,0,2) ./ sqrt(N);
 
 lognp = log10(np);
 lognpp= log10(npp);
 mean_lognp = mean(lognp,2);
 mean_lognpp= mean(lognpp,2);
-ste_lognp = std(lognp,0,2) ./ sqrt(cols(np));
-ste_lognpp= std(lognp,0,2) ./ sqrt(cols(npp));
+ste_lognp = std(lognp,0,2) ./ sqrt(N);
+ste_lognpp= std(lognpp,0,2) ./ sqrt(N);
 
 	figure;
     hold on;
@@ -88,15 +89,38 @@ ste_lognpp= std(lognp,0,2) ./ sqrt(cols(npp));
 	grid on;
 	pretty_plot;
 
-v.f = f;
-v.tau = tau;
-v.msd = msd;
-v.alpha = alpha;
-v.gamma = MYgamma;
-v.gstar = gstar;
-v.gp = gp;
-v.gpp=gpp;
-v.np = np;
-v.npp = npp;
+v.raw.f = f;
+v.raw.tau = tau;
+v.raw.msd = msd;
+v.raw.alpha = alpha;
+v.raw.gamma = MYgamma;
+v.raw.gstar = gstar;
+v.raw.gp = gp;
+v.raw.gpp=gpp;
+v.raw.np = np;
+v.raw.npp = npp;
 
+v.mean.f = mean(f, 2);
+v.mean.tau = mean(tau, 2);
+v.mean.msd = mean(msd, 2);
+v.mean.alpha = mean(alpha, 2);
+v.mean.gamma = mean(MYgamma, 2);
+v.mean.gstar = mean(gstar, 2);
+v.mean.gp = mean(gp, 2);
+v.mean.gpp = mean(gpp, 2);
+v.mean.np = mean(np, 2);
+v.mean.npp = mean(npp, 2);
+
+v.error.f = std(f, 0, 2) ./ sqrt(N);
+v.error.tau = std(tau,0,2) ./ sqrt(N);
+v.error.msd = std(msd,0,2) ./ sqrt(N);
+v.error.alpha = std(alpha,0,2) ./ sqrt(N);
+v.error.gamma = std(MYgamma,0,2) ./ sqrt(N);
+v.error.gstar = std(gstar,0,2) ./ sqrt(N);
+v.error.gp = std(gp,0,2) ./ sqrt(N);
+v.error.gpp = std(gpp,0,2) ./ sqrt(N);
+v.error.np = std(np,0,2) ./ sqrt(N);
+v.error.npp = std(npp,0,2) ./ sqrt(N);
+
+v.n = d.n;
 
