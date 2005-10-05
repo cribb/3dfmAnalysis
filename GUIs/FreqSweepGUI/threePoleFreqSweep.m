@@ -22,7 +22,7 @@ function varargout = threePoleFreqSweep(varargin)
 
 % Edit the above text to modify the response to help threePoleFreqSweep
 
-% Last Modified by GUIDE v2.5 12-Jul-2005 12:43:24  kvdesai
+% Last Modified by GUIDE v2.5 04-Oct-2005 17:43:03
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,15 +55,14 @@ function threePoleFreqSweep_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for threePoleFreqSweep
 handles.output = hObject;
 global version_str;
-version_str = '1.1';
+version_str = '2.0';
 % Update handles structure
 guidata(hObject, handles);
 clc;
 disp(['Welcome to Three Pole Frequency Sweep Generator ', version_str]);
-edit_freqVec_Callback(handles.edit_freqVec,[], handles);
+button_defaults_Callback(handles.button_defaults, [], handles)
 % UIWAIT makes threePoleFreqSweep wait for user response (see UIRESUME)
 % uiwait(handles.threePoleFreqSweep);
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = threePoleFreqSweep_OutputFcn(hObject, eventdata, handles)
@@ -75,15 +74,38 @@ function varargout = threePoleFreqSweep_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-% --- Executes on button press in button_start.
+function param = read_settings(handles);
+
+%On Hercules, Hardware channel# = coil# -1
+param.chA = str2double(get(handles.edit_coilA,'string'))-1;
+param.chB = str2double(get(handles.edit_coilB,'string'))-1;
+param.chC = str2double(get(handles.edit_coilC,'string'))-1;
+param.chFlag = 7 - 1; %Channel 7 output is being read into tracking ADC, so put the sum of squares on this
+param.ampA = 0.5*get(handles.slider_pk2pkA,'value');
+param.ampB = 0.5*get(handles.slider_pk2pkB,'value');
+param.ampC = 0.5*get(handles.slider_pk2pkC,'value');
+
+param.dwell = str2double(get(handles.edit_dwell,'string'));
+param.nCycles = str2double(get(handles.edit_nCycles,'string'));
+param.fcont = str2double(get(handles.edit_controlFreq,'string'));
+param.Nrepeat = 0; % 0 times repeat the frquency sweep. Add edit-box on UI in future if needed.
+%For sinusoidal pulling (in 2D) three coil excitations should be separated
+%by phase of 120 degree. HARD CODED.
+param.phaseA = 0;%in radians
+param.phaseB = 2*pi/3;
+param.phaseC = 4*pi/3;
+fmin = str2double(get(handles.edit_freqMin,'string'));
+fmax = str2double(get(handles.edit_freqMax,'string'));
+fstep = str2double(get(handles.edit_freqStep,'string'));
+param.fvec = fmin:fstep:fmax;
+param.docontrol = get(handles.check_control,'value');
+% --- Executes on button press in button_start ---------------------------
 function button_start_Callback(hObject, eventdata, handles)
 % hObject    handle to button_start (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global AO fvec version_str
-% hObject    handle to button_start (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+global AO version_str
+p = read_settings(handles);
 AOname = 'PCI-6713';   %id = 1
 % find the board ids that go with the names
 hwinfo = daqhwinfo('nidaq');
@@ -98,15 +120,9 @@ if AOid < 0
   error('Analog output board not found')
 end
 
-%On Hercules, Hardware channel# = coil# -1
-chA = str2double(get(handles.edit_coilA,'string'))-1;
-chB = str2double(get(handles.edit_coilB,'string'))-1;
-chC = str2double(get(handles.edit_coilC,'string'))-1;
-chFlag = 7 - 1; %Channel 7 output is being read into tracking ADC, so put the sum of squares on this channel.
-
-AOchannels = [chA, chB, chC, chFlag];
-desired_sampleRate = 50000; % desired sampling rate for magnets D2A
-
+AOchannels = [p.chA, p.chB, p.chC, p.chFlag];
+desired_sampleRate = max([1000,max(p.fvec)*10]); 
+   % we don't wanna sample too higher rate and eat memory
 % setup the output board
 AO = analogoutput('nidaq', AOid);
 Ochan = addchannel(AO, AOchannels);  
@@ -114,76 +130,12 @@ set(Ochan, 'OutputRange', [-10 10]);
 
 set(AO, 'TriggerType', 'Manual'); % use hardware manual trigger 
 % set(AO, 'TriggerType', 'HwDigital'); % use hardware digital trigger 
-srate = setverify(AO, 'SampleRate', desired_sampleRate); %default sample rate 
+p.srate = setverify(AO, 'SampleRate', desired_sampleRate); %default sample rate 
 
-ampA = 0.5*get(handles.slider_pk2pkA,'value');
-ampB = 0.5*get(handles.slider_pk2pkB,'value');
-ampC = 0.5*get(handles.slider_pk2pkC,'value');
-
-%For sinusoidal pulling (in 2D) three coil excitations should be separated
-%by phase of 120 degree.
-phaseA = 0;%in radians
-phaseB = 2*pi/3;
-phaseC = 4*pi/3;
-
-Nrepeat = str2double(get(handles.edit_repeat,'string'));
-tspan = str2double(get(handles.edit_period,'string'));
-fcont = str2double(get(handles.edit_controlFreq,'string'));
-% flag_cont = a flag to indicate how to incoroporate the control frequency excitation
-%   i.e. do we superimpose the control-frequency ('superimpose') or do
-%   we interleave it between test frequencies ('interleave') or do we
-%   omit the control frequency alltogether ('nocontrol')
-switch get(handles.menu_controlStrat,'value')
-    case 1
-        flag_cont = 'nocontrol';
-    case 2
-        flag_cont = 'interleave';
-    case 3
-        flag_cont = 'superimpose';
-    otherwise
-end
-rawA = [];    rawB = []; rawC = [];
-t = 0:1/srate:tspan;
-% HARDCODED VALUES: gap time = 1 second, control frequency time = 1 second.
-GAP_TIME = 1;
-FCONT_TIME = 1;
-tgap = 0:1/srate:GAP_TIME;
-tcont = 0:1/srate:FCONT_TIME;
-gaps = zeros(1,length(tgap));
-for i = 1:length(fvec)
-    % For three pole case, the force frequency is twice the excitation
-    % frequency. So divide the supplied frquencies by two.
-    tsineA = sin(2*pi*fvec(i)*0.5*t + phaseA);
-    csineA = sin(2*pi*fcont*0.5*tcont + phaseA);
-    tsineB = sin(2*pi*fvec(i)*0.5*t + phaseB);
-    csineB = sin(2*pi*fcont*0.5*tcont + phaseB);
-    tsineC = sin(2*pi*fvec(i)*0.5*t + phaseC);
-    csineC = sin(2*pi*fcont*0.5*tcont + phaseC);
-    
-    if(strcmpi(flag_cont,'interleave'))  %control frquency betwn each test freq      
-        rawA = [rawA, tsineA, gaps, csineA, gaps]; 
-        rawB = [rawB, tsineB, gaps, csineB, gaps];
-        rawC = [rawC, tsineC, gaps, csineC, gaps];            
-    elseif(strcmpi(flag_cont,'superimpose')) %control freq simultaneous with test freq
-        rawA = [rawA, tsineA + csineA, gaps];
-        rawB = [rawB, tsineB + csineB, gaps];
-        rawC = [rawC, tsineC + csineC, gaps];
-    elseif(strcmpi(flag_cont,'nocontrol')) %no control applied
-        rawA = [rawA, tsineA, gaps];
-        rawB = [rawB, tsineB, gaps];
-        rawC = [rawC, tsineC, gaps];        
-    else
-        errordlg('UnRecognized Control Strategy. Programming Error!');
-    end
-end
-coilA = ampA*rawA;
-coilB = ampB*rawB;
-coilC = ampC*rawC;
-dFlag = 0.01*(coilA.^2 + coilB.^2 + coilC.^2);
-outData = [[coilA';0.0], [coilB';0.0], [coilC';0.0], [dFlag';0.0]];
+outData = synthesizer(p);
 % Now fill the output buffer but do not start sending the data yet
 
-set(AO,'RepeatOutput',Nrepeat); 
+set(AO,'RepeatOutput',p.Nrepeat); 
 putdata(AO, outData); % send the data
 start(AO); % ready but not triggered
 %-----------   THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
@@ -193,27 +145,70 @@ tim = clock; % THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
 data.info.Name = datestr(tim,30);
 data.info.version = version_str;
 disp(['Magnet Operation STARTED::',data.info.Name]);
+disp(['This will take about ',num2str(size(outData,1)*(p.Nrepeat+1)/p.srate),' Seconds...']);
 data.info.exactSec = tim(6);
-data.info.chan = AOchannels;
-data.info.pole_geometry = 'ThreePolesInPlane';
-data.info.srateHz = srate;
-data.info.amplitudeV = [ampA ampB ampC];
-data.info.phaseRad = [phaseA phaseB phaseC];
-data.info.freqHz = fvec;
-data.info.control_freq = fcont;
-data.info.control_stratety = flag_cont;
-data.info.tspan = tspan;
-data.info.Nrepeat = Nrepeat;
-data.outData = outData;
+if(get(handles.check_logData,'value'))
+    data.outData = outData;
+end
 %-----------            THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
-waittilstop(AO,600);%   THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
+waittilstop(AO,2*length(outData)/p.srate);%   THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
 tend = clock;%          THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
 %-----------            THIS TWO STATEMENTS SHOULD BE AS CLOSE AS POSSIBLE
 disp(['Magnet Operation COMPLETED::',data.info.Name]);
+
+data.info.pole_geometry = 'ThreePolesInPlane';
+data.info.param = p;
 data.info.tend = datestr(tend,30);
 data.info.endSec = tend(6);
 save([data.info.Name,'_freqSweep.mat'],'data');
-
+% --------------------- Synthesize the drive signal -------
+function d = synthesizer(p)
+rawA = [];    rawB = []; rawC = [];
+for c = 1:length(p.fvec)
+    % how long should we do this frequency to apply Ncycles
+    tt = 0:1/p.srate:(p.nCycles/p.fvec(c));        
+    tgap = zeros(1,ceil(p.srate*p.dwell/p.fvec(c)));        
+    tsinebase = sin(2*pi*p.fvec(c)*tt); %zero phase sine
+    % Now shift the sinebase up/down to apply appropriate phase.
+    % doing this way ensures that all sinewaves on all 3 coils
+    % start and stop at exactly zero. Desired for Amplifier.
+    % Pad zeros if needed, to make all vectors equal length.
+    N_percycle = ceil(p.srate/p.fvec(c));
+    preA = ceil(N_percycle*p.phaseA/(2*pi)); postA = N_percycle - preA;
+    preB = ceil(N_percycle*p.phaseB/(2*pi)); postB = N_percycle - preB;
+    preC = ceil(N_percycle*p.phaseC/(2*pi)); postC = N_percycle - preC;
+    tsineA = [zeros(1,preA),tsinebase,zeros(1,postA)];
+    tsineB = [zeros(1,preB),tsinebase,zeros(1,postB)];
+    tsineC = [zeros(1,preC),tsinebase,zeros(1,postC)];
+    % Made vectors for this particular frequency, now append it to the 
+    % main excitation vector. Also interleave the control frequency cycles 
+    % if we are told to do so
+    if(p.docontrol == 0)  
+        rawA = [rawA, tsineA, tgap];
+        rawB = [rawB, tsineB, tgap];
+        rawC = [rawC, tsineC, tgap];        
+    else        %control frquency betwn each test freq          
+        ct = 0:1/p.srate:(p.nCycles/p.fcont);
+        cgap = zeros(1,ceil(p.srate*p.dwell/p.fcont));
+        csinebase = sin(2*pi*p.fcont*ct); 
+        cN_percycle = p.srate/p.fcont;
+        cpreA = ceil(cN_percycle*p.phaseA/(2*pi)); cpostA = cN_percycle - cpreA;
+        cpreB = ceil(cN_percycle*p.phaseB/(2*pi)); cpostB = cN_percycle - cpreB;
+        cpreC = ceil(cN_percycle*p.phaseC/(2*pi)); cpostC = cN_percycle - cpreC;
+        csineA = [zeros(1,cpreA),csinebase,zeros(1,cpostA)];
+        csineB = [zeros(1,cpreB),csinebase,zeros(1,cpostB)];
+        csineC = [zeros(1,cpreC),csinebase,zeros(1,cpostC)];
+        
+        rawA = [rawA, tsineA, tgap, csineA, cgap]; 
+        rawB = [rawB, tsineB, tgap, csineB, cgap];
+        rawC = [rawC, tsineC, tgap, csineC, cgap];        
+    end
+end
+coilA = p.ampA*rawA;
+coilB = p.ampB*rawB;
+coilC = p.ampC*rawC;
+dFlag = 0.01*(coilA.^2 + coilB.^2 + coilC.^2);
+d = [[coilA';0.0], [coilB';0.0], [coilC';0.0], [dFlag';0.0]];
 % --- Executes on button press in button_stop.
 function button_stop_Callback(hObject, eventdata, handles)
 % hObject    handle to button_stop (see GCBO)
@@ -224,7 +219,7 @@ if (exist('AO') & ~isempty(AO))
     if(strcmpi(get(AO,'Running'),'On'))
         stop(AO);
     end
-    putsample(AO,length(get(AO,'Channel')));
+    putsample(AO,zeros(1,length(get(AO,'Channel'))));
 end
 % --- Executes on button press in button_close.
 function button_close_Callback(hObject, eventdata, handles)
@@ -236,41 +231,31 @@ if (exist('AO') & ~isempty(AO))
     if(strcmpi(get(AO,'Running'),'On'))
         stop(AO);
     end
-    putsample(AO,length(get(AO,'Channel')));
+    putsample(AO,zeros(1,length(get(AO,'Channel'))));
     clear AO
     delete AO
 end
 daqreset;
 close(handles.threePoleFreqSweep);
 
-% --- Executes on button press in button_defaultFreq.
-function button_defaultFreq_Callback(hObject, eventdata, handles)
-global fvec;
-default_fvec = [4000 3400 3000 2600 2050 1680 1100 800 700 500 300 110 80 70 45 25 17 8 5 2]; 
-default_fcont = 125;%it is usually desirable that first 3 harmonics of fcont are not in fvec
-fvec = default_fvec;
-set(handles.edit_freqVec,'string',num2str(default_fvec));
-set(handles.edit_controlFreq,'string',num2str(default_fcont));
+% --- Executes on button press in button_defaults.
+function button_defaults_Callback(hObject, eventdata, handles)
 
-% function slider_period_Callback(hObject, eventdata, handles)
-% user_input = get(hObject,'value');
-% val = round(user_input);
-% set(hObject,'value');
-% set(handles.edit_period,'string',num2str(val));
-% updateAO;
+default.fmin = 1;
+default.fmax = 100;
+default.fstep = 5;
+default.fcont = 125;%it is usually desirable that first 3 harmonics of fcont are not in fvec
+default.nCycles = 10;
+default.dwell = 10;
 
-function edit_controlFreq_Callback(hObject, eventdata, handles)
-user_input = num2str(get(hObject,'string'));
+set(handles.edit_freqMin,'string',num2str(default.fmin));
+set(handles.edit_freqMax,'string',num2str(default.fmax));
+set(handles.edit_freqStep,'string',num2str(default.fstep));
+set(handles.edit_controlFreq,'string',num2str(default.fcont));
+set(handles.edit_nCycles,'string',num2str(default.nCycles));
+set(handles.edit_dwell,'string',num2str(default.dwell));
 
-function menu_controlStrat_Callback(hObject, eventdata, handles)
-
-function edit_freqVec_Callback(hObject, eventdata, handles)
-global fvec
-str = get(hObject,'string');
-fvec = parsemyarray(str);
-set(handles.edit_freqVec,'string',num2str(fvec));
-return;
-%--------------------------------------------------------------------------
+%-----------------OBSOLETE BUT COOL---CAN USE SOMEWHERE ELSE-----------------------
 %This function parses the comma separated list of frequencies and extracts
 %out the numbers from that. It is flexible enough that as long as user
 %puts one comma AND/OR one space between consequtive frequencies, it works.
@@ -301,9 +286,11 @@ if(waiting_for_char)%this means last element is numeric character
     numerVec(itrue) = str2num(str(first_dig_index:end));
 end
 %------------------------------------------------------------------
-function edit_period_Callback(hObject, eventdata, handles)
-% check_editval(hObject, handles.slider_period);
-updateAO;
+function edit_controlFreq_Callback(hObject, eventdata, handles)
+set(hObject,'string',num2str(floor(str2double(get(hObject,'string')))));
+%------------------------------------------------------------------
+function edit_nCycles_Callback(hObject, eventdata, handles)
+set(hObject,'string',num2str(floor(str2double(get(hObject,'string')))));
 
 % --- Coil A settings%------------------------------------------
 % --- Peak To Peak amplitude in volts
@@ -379,6 +366,30 @@ elseif val == str2num(get(handles.edit_coilB,'string'))
     errordlg('Error: CoilC channel can not be same as CoilB channel');
     set(hObject, 'string','3'); %set to default value
 end
+%-------------------------------------------------------------------
+function edit_freqStep_Callback(hObject, eventdata, handles)
+finest = 0.1;
+if(abs(str2double(get(hObject,'string'))) < finest)
+    errordlg(['Can''t do that fine resolution man...',num2str(finest),' is the best I can do']);
+    set(hObject,'string',num2str(finest));
+end
+%-------------------------------------------------------------------
+function edit_freqMax_Callback(hObject, eventdata, handles)
+maxf = 5000;
+if(str2double(get(hObject,'string')) > maxf)
+    errordlg(['Can''t do that high frequency man...',num2str(maxf),' is the best I can do']);
+    set(hObject,'string',num2str(maxf));
+end
+%-------------------------------------------------------------------
+function edit_freqMin_Callback(hObject, eventdata, handles)
+minf = 0.01;
+if(str2double(get(hObject,'string')) < minf)
+    errordlg(['Can''t do that low frequency man...',num2str(minf),' is the best I can do']);
+    set(hObject,'string',num2str(minf));
+end
+%-------------------------------------------------------------------
+function edit_dwell_Callback(hObject, eventdata, handles)
+set(hObject,'string',num2str(floor(str2double(get(hObject,'string')))));
 
 %-------------------------------------------------------------------
 function check_editval(h,h_slider)
@@ -535,8 +546,8 @@ end
 
 
 % --- Executes during object creation, after setting all properties.
-function edit_period_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_period (see GCBO)
+function edit_nCycles_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_nCycles (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -577,8 +588,8 @@ else
 end
 
 % --- Executes during object creation, after setting all properties.
-function edit_freqVec_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_freqVec (see GCBO)
+function edit_freqMin_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_freqMin (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -590,19 +601,6 @@ else
     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
-% --- Executes during object creation, after setting all properties.
-function menu_controlStrat_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to menu_controlStrat (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
 % --- Executes during object creation, after setting all properties.
 function edit_controlFreq_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit_controlFreq (see GCBO)
@@ -618,8 +616,8 @@ else
 end
 
 % --- Executes during object creation, after setting all properties.
-function edit_repeat_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_repeat (see GCBO)
+function edit_dwell_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_dwell (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -631,7 +629,49 @@ else
     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
+% --- Executes during object creation, after setting all properties.
+function edit_freqStep_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_freqStep (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(hObject,'BackgroundColor','white');
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+% --- Executes during object creation, after setting all properties.
+function edit_freqMax_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_freqMax (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(hObject,'BackgroundColor','white');
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+% --- Executes on button press in check_logData.
+function check_logData_Callback(hObject, eventdata, handles)
+% hObject    handle to check_logData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_logData
 
 
+% --- Executes on button press in check_control.
+function check_control_Callback(hObject, eventdata, handles)
+% hObject    handle to check_control (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_control
 
 

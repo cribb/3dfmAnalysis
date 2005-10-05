@@ -1,3 +1,12 @@
+2005-10-04 Kalpit Desai <kvdesai@email.unc.edu>
+	* threePoleFreqSweep.m: Version 2.0 [major changes]
+	- Now ON-time and dwell-time are to be specified it terms of number of cyles instead of number of seconds.
+	- Test frequencies are to be specified by three parameters: min, step and max.
+	- Tells how long the frequency sweep would take.
+	- Tested working for the boundary cases that I could think of
+	- cleaned up and modularized code
+	* threePoleFreqSweep.fig: Architectural chagnes that go with the new version of code.
+
 2005-08-26 Kalpit Desai <kvdesai@email.unc.edu>
 	* threePoleFreqSweep.m: Fixed coupel of bugs in stopping and quitting of the program.
 2005-08-26 Kalpit Desai <kvdesai@email.unc.edu>
