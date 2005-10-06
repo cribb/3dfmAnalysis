@@ -86,15 +86,18 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
     x_grid = 1:648; 
     y_grid = 1:484; 
     
+    sfile = strrep(files, '.raw', '');
+    sfile = strrep(sfile, '.vrpn', '');
+    sfile = strrep(sfile, '.mat', '');
+    sfile = strrep(sfile, '.evt', '');
+    mipfile = [sfile, '.MIP.bmp'];
+    
     try 
-        myMIP = mip('*.MIP.bmp');
+        myMIP = mip(mipfile);
     catch
         myMIP = 0;
     end
     
-% 	[xi,yi] = meshgrid(x_grid, y_grid);
-% 	zi = griddata(x, y, finalF*1e12, xi, yi);
-        
     % now, for the plots...
 	figure;
     subplot(1,2,1);
@@ -114,17 +117,6 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
     set(gcf, 'Position', [65 675 1354 420]);
     drawnow;
     
-% 	figure;
-% 	plot3(finalxy(:,1), finalxy(:,2), finalF, '.');
-% 	colormap(hot);
-% 	zlabel('force (pN)');
-% 	
-% 	figure; 
-% 	imagesc(x_grid,y_grid,zi);
-% 	colormap(hot);
-% 	colorbar;         
-
-
     % now set up the binning process
     warning off MATLAB:divideByZero; % if there is no data in a bin, it's a divide by zero. we don't care about that.
     
@@ -145,9 +137,11 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
         end
 	end
 
-    xpos = (col_bins(1:end-1) - poleloc(1))* calib_um;
+    xpos = (col_bins(1:end-1) - poleloc(1)) * calib_um;
+    xpos = xpos(:);
     ypos = (row_bins(1:end-1) - poleloc(2)) * calib_um;
-    
+    ypos = ypos(:);
+        
     % plot the binning outputs 
 	figure; 
 	subplot(1,2,1);
@@ -165,6 +159,31 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
 	colorbar;     
     set(gcf, 'Position', [65 153 1353 420]);
     
+    % to do the surface, we have to remap some matrices
+    sx = repmat(xpos, 1, length(ypos))'; 
+    sx = reshape(sx, length(xpos)*length(ypos), 1);
+    sy = repmat(ypos, 1, length(xpos)); 
+    sy = reshape(sy, length(xpos)*length(ypos), 1);    
+    sF = reshape(im_mean, length(xpos)*length(ypos), 1);
+
+    idx = isfinite(sF);
+    sx = sx(idx);
+    sy = sy(idx);
+    sF = sF(idx);
+    
+	[xi,yi] = meshgrid(xpos, ypos);
+	zi = griddata(sx, sy, sF * 1e12, xi, yi);
+    
+    figure;
+	surf(xi, yi, zi);
+	colormap(hot);
+	zlabel('force (pN)');
+	
+	figure; 
+	imagesc(xpos, ypos, zi);
+	colormap(hot);
+	colorbar;         
+
     % output variables
     Ftable   = im_mean * 1e12;
     errtable = im_stderr * 1e12;
