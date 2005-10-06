@@ -128,20 +128,20 @@ function button_start_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global AO version_str
 p = read_settings(handles);
+AOchannels = [p.chA, p.chB, p.chC, p.chFlag];
 if(~exist('AO'))
     setupDACboard;
 end
 
-AOchannels = [p.chA, p.chB, p.chC, p.chFlag];
-desired_sampleRate = max([1000,max(p.fvec)*10]); 
+if ~isempty(get(AO,'channel'))
+    delete(AO.Channel(:));
+end
+Ochan = addchannel(AO, AOchannels);
+set(Ochan, 'OutputRange', [-10 10]);
+desired_sampleRate = max([1000,max(p.fvec)*10]);
    % we don't wanna sample too higher rate and eat memory
-% setup the output board
-
-Ochan = addchannel(AO, AOchannels);  
-set(Ochan, 'OutputRange', [-10 10]);  
-
 set(AO, 'TriggerType', 'Manual'); % use hardware manual trigger 
-% set(AO, 'TriggerType', 'HwDigital'); % use hardware digital trigger 
+
 p.srate = setverify(AO, 'SampleRate', desired_sampleRate); %default sample rate 
 promptuser('Now synthesizing the drive signal',handles);
 outData = synthesizer(p);
@@ -157,8 +157,6 @@ data.info.Name = datestr(tim,30);
 data.info.version = version_str;
 % disp(['Magnet Operation STARTED::',data.info.Name]);
 promptuser('Started frquency sweep...',handles);
-set(handles.text_estimate,'string',num2str(ceil(size(outData,1)*(p.Nrepeat+1)/p.srate)));
-% disp(['This will take about ',num2str(size(outData,1)*(p.Nrepeat+1)/p.srate),' Seconds...']);
 data.info.exactSec = tim(6);
 if(get(handles.check_logData,'value'))
     data.outData = outData;
@@ -439,7 +437,9 @@ set(handles.edit_pk2pkC,'string',num2str(val));
 %-------------------------------------------------------------------
 function update_estimated_time(handles)
 p = read_settings(handles);
-span = sum(1./p.fvec)*(p.nCycles + p.dwell);
+span = sum(1./p.fvec)*(p.nCycles+1 + p.dwell);
+%                               1 added since the 1 cycle is added for
+%                               phase adjustment
 if (p.docontrol == 1)
     %span would be double since control frequency would be interleaved with
     %dwell
