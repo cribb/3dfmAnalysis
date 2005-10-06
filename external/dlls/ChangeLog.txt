@@ -1,0 +1,5 @@
+2005-10-06	Kalpit Desai	<kvdesai@cs.unc.edu>
+	* First ChangeLog for this directory.
+	* uigetfiles.dll, uigefiles.m: A tool from mathworks exchange, that allowes to select multifple files using cntrl/shift keys.
+	- Note: the same facility is available in R14 with inbuild 'uigetfile' (no 's'), but this is the solution till we migrate to R14. 
+	
