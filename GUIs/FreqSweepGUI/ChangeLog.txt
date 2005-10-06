@@ -1,10 +1,12 @@
-2005-10-04 Kalpit Desai <kvdesai@email.unc.edu>
+2005-10-06 Kalpit Desai <kvdesai@email.unc.edu>
+	* ChangeLog.txt: fixed the date of last two commits.
+2005-10-05 Kalpit Desai <kvdesai@email.unc.edu>
 	* threePoleFreqSweep.m:
 	- Fixed a small bug in estimatation of time.
 	- Now connects to DAC board when starting, and doesn't disconnect until program is closed.
 	* threePoleFreqSweep.fig: minor text changes.
 
-2005-10-04 Kalpit Desai <kvdesai@email.unc.edu>
+2005-10-05 Kalpit Desai <kvdesai@email.unc.edu>
 	* threePoleFreqSweep.m: Version 2.1
 	- Now reestimates how long will the sweep take, whenever any related parameter is changed by user, and displays the new estimate.
 	- Added a message box on the gui to tell user what is going on.
