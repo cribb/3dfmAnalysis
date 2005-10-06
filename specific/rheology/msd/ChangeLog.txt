@@ -1,3 +1,6 @@
+2005-10-06  Jeremy Cribb <jcribb@email.unc.edu>
+	* ve.m: updated documentation.  added number of beads tracked to output.
+
 2005-10-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* ve.m: rearranged output data structure such that each bead's data is stored in 'raw', the mean values in 'mean', and the standard error values in 'error'.
 
@@ -33,6 +36,7 @@
 2004-08-31  David Hill <dbhill@email.unc.edu>
 
 	* Initial Version of Mean Squared Displacement Code
+
 
 
 

@@ -1,14 +1,18 @@
 function v = ve(d, bead_radius);
 % 3DFM function  
 % Rheology 
-% last modified 06/29/05 (jcribb)
+% last modified 10/06/05 (jcribb)
 %  
 % ve computes the viscoelastic moduli from mean-square displacement data.
-%  
+% The output structure of ve contains four members: raw (contains data for 
+% each individual trakcer/bead), mean (contains means across trackers/beads), and 
+% error (contains standard error (stdev/sqrt(N) about the mean value, and N (the
+% number of trackers/beads in the dataset.
+%
 %  [v] = ve(d, bead_radius);  
 %   
 %  where "d" is the output structure of msd.
-%        "bead_radius" is in [m] 
+%        "bead_radius" is in [m].
 %  
 %  Notes:  
 %  - This algorithm came from Mason 2000 Rheol Acta paper.
@@ -122,5 +126,5 @@ v.error.gpp = std(gpp,0,2) ./ sqrt(N);
 v.error.np = std(np,0,2) ./ sqrt(N);
 v.error.npp = std(npp,0,2) ./ sqrt(N);
 
-v.n = d.n;
+v.n = N;
 
