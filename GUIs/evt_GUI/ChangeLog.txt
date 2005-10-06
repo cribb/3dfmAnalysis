@@ -1,3 +1,7 @@
+2005-10-06  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m:  added drift subration methods: 'linear' for removing the linear drift associated with each bead individually and 'center-of-mass' for removing drift along the center of mass vector. added controls for superimposing magnet log data on top of displacments (not yet fully implemented).  Added controls for displaying displacement data in 'microns' instead of 'pixels.'
+	* evt_gui.fig: same.
+
 2005-09-22  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: suppressed debug output mistakenly left in code.
 	* evt_gui.fig: minor changes in GUI appearance.

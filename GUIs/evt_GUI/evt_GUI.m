@@ -22,7 +22,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 12-Aug-2005 11:47:22
+% Last Modified by GUIDE v2.5 27-Sep-2005 13:19:23
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -72,7 +72,12 @@ function varargout = evt_GUI_OutputFcn(hObject, eventdata, handles)
 	% Get default command line output from handles structure
 	varargout{1} = handles.output;
 
+    
+% --- Executes on button press in pushbutton_close.
+function pushbutton_close_Callback(hObject, eventdata, handles)
+	close(evt_gui);
 
+    
 % --- Executes on button press in radio_selected_dataset.
 function radio_selected_dataset_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Value', 1);
@@ -96,12 +101,14 @@ function radio_deletetimebefore_Callback(hObject, eventdata, handles)
 	set(handles.radio_deletetimebefore, 'Value', 1);
 	set(handles.radio_deletetimeafter, 'Value', 0);
 
+    
 % --- Executes on button press in radio_deletetimebefore.
 function radio_deletetimeafter_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Value', 0);
 	set(handles.radio_boundingbox, 'Value', 0);
 	set(handles.radio_deletetimebefore, 'Value', 0);
 	set(handles.radio_deletetimeafter, 'Value', 1);
+    
     
 % --- Executes on button press in radio_XYfig.
 function radio_XYfig_Callback(hObject, eventdata, handles)
@@ -131,10 +138,20 @@ function edit_infile_Callback(hObject, eventdata, handles)
 function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
 
+    % reset the Active Bead to 0
+    set(handles.edit_BeadID, 'String', '0');
+    set(handles.slider_BeadID, 'Value', 0);
+    
     filename = get(handles.edit_infile, 'String');
     
     if(length(filename) == 0)
 		[fname, pname] = uigetfile('*.mat');
+        
+        if sum(length(fname), length(pname)) <= 1
+            logentry('No tracking file selected. No tracking file loaded.');
+            return;
+        end        
+        
 		filename = strcat(pname, fname);
         logentry(['Setting Path to: ' pname]);
         cd(pname);
@@ -202,10 +219,8 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 
     % assign data variables
     table = d;
-    time_offset = min(table(:,TIME));
-    table(:,TIME) = table(:,TIME) - time_offset; 
-    
-    % table = attach_time(table);
+    mintime = min(table(:,TIME));
+    maxtime = max(table(:,TIME));
     beadID = table(:,ID);
     x = table(:,X);
     y = table(:,Y);
@@ -230,7 +245,8 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     handles.XTfig = XTfig;
     handles.RTfig = RTfig;
     handles.table = table;
-    handles.time_offset = time_offset;
+    handles.mintime = mintime;
+    handles.maxtime = maxtime;
     
     guidata(hObject, handles);
 
@@ -251,9 +267,8 @@ function pushbutton_savefile_Callback(hObject, eventdata, handles)
     end
     
     table = handles.table;
-    time_offset = handles.time_offset;
     
-    table(:,TIME) = table(:,TIME) + time_offset;
+    table(:,TIME) = table(:,TIME);
     tracking.spot3DSecUsecIndexFramenumXYZRPY = handles.table;
     save(outfile, 'tracking');
     logentry(['New tracking file, ' outfile ', saved...']);
@@ -372,15 +387,214 @@ function pushbutton_Select_Closest_dataset_Callback(hObject, eventdata, handles)
     drawnow;
     
 
+% --- Executes on button press in checkbox_plotradius.
+function checkbox_plotradius_Callback(hObject, eventdata, handles)
+    if get(hObject, 'Value')
+        set(handles.RTfig, 'Visible', 'on');
+%         plot_data(hObject, eventdata, handles);
+    else
+        set(handles.RTfig, 'Visible', 'off');
+    end
+
+    
+% --- Executes on button press in pushbutton_select_drift_region.
+function pushbutton_select_drift_region_Callback(hObject, eventdata, handles)
+    if(get(handles.radio_XYfig, 'Value'))
+        active_fig = handles.XTfig;
+    elseif(get(handles.radio_XTfig, 'Value'))
+        active_fig = handles.XTfig;
+    end
+    figure(active_fig);
+
+    [xm, ym] = ginput(2);
+   
+    xlo = min(xm) + handles.mintime;
+    xhi = max(xm) + handles.mintime;
+
+    handles.drift_tzero = xlo;
+	handles.drift_tend = xhi;
+	guidata(hObject, handles);
+
+    
+% --- Executes on button press in radio_com.
+function radio_com_Callback(hObject, eventdata, handles)
+	set(handles.radio_com, 'Value', 1);
+	set(handles.radio_linear, 'Value', 0);
+
+
+% --- Executes on button press in radio_linear.
+function radio_linear_Callback(hObject, eventdata, handles)
+	set(handles.radio_com, 'Value', 0);
+	set(handles.radio_linear, 'Value', 1);
+
+
+% --- Executes on button press in pushbutton_export_bead.
+function pushbutton_export_bead_Callback(hObject, eventdata, handles)
+    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+
+    currentBead = get(handles.slider_BeadID, 'Value');
+    beadID = handles.table(:,ID);
+
+    k = find(beadID == currentBead);
+
+    bead.t      = handles.table(k,TIME);
+    bead.x      = handles.table(k,X);
+    bead.y      = handles.table(k,Y);
+
+    assignin('base', 'bead', bead);
+    
+    
+% --- Executes on button press in radio_pixels.
+function radio_pixels_Callback(hObject, eventdata, handles)
+	set(handles.radio_pixels, 'Value', 1);
+	set(handles.radio_microns, 'Value', 0);
+    plot_data(hObject, eventdata, handles);
+
+
+% --- Executes on button press in radio_microns.
+function radio_microns_Callback(hObject, eventdata, handles)
+	set(handles.radio_pixels, 'Value', 0);
+	set(handles.radio_microns, 'Value', 1);
+    plot_data(hObject, eventdata, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_calib_um_CreateFcn(hObject, eventdata, handles)
+	if ispc
+        set(hObject,'BackgroundColor','white');
+	else
+        set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+	end
+
+
+function edit_calib_um_Callback(hObject, eventdata, handles)
+
+% --- Executes on button press in checkbox_coil_01.
+function checkbox_coil_01_Callback(hObject, eventdata, handles)
+
+% --- Executes on button press in checkbox_coil_03.
+function checkbox_coil_03_Callback(hObject, eventdata, handles)
+
+% --- Executes on button press in checkbox_coil_04.
+function checkbox_coil_04_Callback(hObject, eventdata, handles)
+
+% --- Executes on button press in checkbox_coil_05.
+function checkbox_coil_05_Callback(hObject, eventdata, handles)
+
+% --- Executes on button press in checkbox_coil_02.
+function checkbox_coil_02_Callback(hObject, eventdata, handles)
+
+% --- Executes on button press in checkbox_coil_06.
+function checkbox_coil_06_Callback(hObject, eventdata, handles)
+
+
+% --- Executes on button press in pushbutton_remove_drift.
+function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
+
+    if ~isfield(handles, 'drift_t0')
+        start_time = [];
+    else
+        start_time = handles.drift_t0;
+    end
+    
+    if ~isfield(handles, 'drift_tend')
+        end_time = [];
+    else
+        end_time = handles.drift_tend;
+    end
+    
+    if get(handles.radio_linear, 'Value')
+        logentry('Removing Drift via linear method.');
+        [v,q] = remove_drift(handles.table, start_time, end_time, 'linear');
+    elseif get(handles.radio_com, 'Value')
+        logentry('Removing Drift via center-of-mass method.');
+        [v,q] = remove_drift(handles.table, start_time, end_time, 'center-of-mass');
+    end
+    
+    handles.table = v;
+	guidata(hObject, handles);
+
+    plot_data(hObject, eventdata, handles);
+    
+    
+% --- Executes on button press in checkbox_relative.
+function checkbox_relative_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
+    drawnow;
+
+% --- Executes on button press in pushbutton_select_magfile.
+function pushbutton_select_magfile_Callback(hObject, eventdata, handles)
+
+	warning off MATLAB:deblank:NonStringInput
+
+    try
+        [fname, pname] = uigetfile('*.mat');
+    catch
+        logentry('No magnet file found. No magnet file loaded.');
+        return;
+    end
+    
+    if sum(length(fname), length(pname)) <= 1
+        logentry('No magnet file selected. No magnet file loaded.');
+        return;
+    end        
+    
+	filename = strcat(pname, fname);
+    logentry(['Setting Path to ' pname]);
+    cd(pname);
+
+    handles.mags = load_magnet_log(filename);
+	guidata(hObject, handles);
+    
+    logentry(['Loaded magnet file, ' fname]);
+
+    
+% --- Executes on button press in checkbox_attach_magnets.
+function checkbox_attach_magnets_Callback(hObject, eventdata, handles)
+    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+
+	if get(hObject, 'Value');
+        if ~isfield(handles, 'mags');
+            pushbutton_select_magfile_Callback(hObject, eventdata, handles)
+        end
+	
+        % easier time variables
+		beadtime = handles.table(:,TIME);
+		magtime  = handles.mags.time;
+		
+		% determine the minimum time recorded by either of these 
+		% files and use that as t_zero
+		handles.mintime = min([beadtime ; magtime]);
+		handles.maxtime = max([beadtime ; magtime]);
+		guidata(hObject, handles);
+        
+    end
+
+% =========================================================================
+% Everything below this point are functions related to computation and data
+% handling/display, and not the gui (thought the handles structure is used).
+% =========================================================================
+
 function plot_data(hObject, eventdata, handles)
     global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
 
+    if get(handles.radio_pixels, 'Value');
+        calib_um = 1;
+        ylabel_string = 'displacement [pixels]';
+    elseif get(handles.radio_microns, 'Value');
+        calib_um = str2num(get(handles.edit_calib_um, 'String')); 
+        ylabel_string = 'displacement [\mum]';
+    end
+    
     beadID = handles.table(:,ID);
-    x      = handles.table(:,X);
-    y      = handles.table(:,Y);
+    x      = handles.table(:,X) * calib_um;
+    y      = handles.table(:,Y) * calib_um;
     t      = handles.table(:,TIME);
     
     currentBead = get(handles.slider_BeadID, 'Value');
+    
+    mintime = handles.mintime;
+    maxtime = handles.maxtime;
     
 	k = find(beadID == currentBead);
 	nk = find(beadID ~= currentBead);
@@ -388,12 +602,12 @@ function plot_data(hObject, eventdata, handles)
     im = handles.im;
     
     figure(handles.XYfig);   
-    imagesc(handles.im);
+    imagesc(1:648 * calib_um, 1:484 * calib_um, handles.im);
     colormap(gray);
     hold on;
     plot(x(nk), y(nk), '.', x(k), y(k), 'r.'); 
     hold off;
-    axis([0 648 0 484]);
+    axis([0 648 0 484] .* calib_um);
     set(handles.XYfig, 'Units', 'Normalized');
     set(handles.XYfig, 'Position', [0.1 0.05 0.4 0.4]);
     set(handles.XYfig, 'DoubleBuffer', 'on');
@@ -401,9 +615,9 @@ function plot_data(hObject, eventdata, handles)
     drawnow;
     
     figure(handles.XTfig);
-    plot(t(k), [x(k) y(k)], '.');
+    plot(t(k) - mintime, [x(k) y(k)], '.');
     xlabel('time (s)');
-    ylabel('displacement (pixels)');
+    ylabel(ylabel_string);
     legend('x', 'y');    
     set(handles.XTfig, 'Units', 'Normalized');
     set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
@@ -413,9 +627,15 @@ function plot_data(hObject, eventdata, handles)
     
     if get(handles.checkbox_plotradius, 'Value')
         figure(handles.RTfig);
-        plot(t(k), magnitude(x(k), y(k)), '.');
+        if get(handles.checkbox_relative, 'Value')
+            xinit = x(k); xinit = xinit(1);
+            yinit = y(k); yinit = yinit(1);
+            plot(t(k) - mintime, magnitude(x(k) - xinit, y(k) - yinit), '.');
+        else
+            plot(t(k) - mintime, magnitude(x(k), y(k)), '.');
+        end
         xlabel('time (s)');
-        ylabel('radial displacement (pixels)');
+        ylabel(['radial ' ylabel_string]);
         set(handles.RTfig, 'Units', 'Normalized');
         set(handles.RTfig, 'Position', [0.51 0.525 0.4 0.4]);
         set(handles.RTfig, 'DoubleBuffer', 'on');
@@ -426,6 +646,7 @@ function plot_data(hObject, eventdata, handles)
     
     refresh(handles.XYfig);
     refresh(handles.XTfig);
+
     
 function delete_selected_dataset(hObject, eventdata, handles)
     global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
@@ -478,7 +699,7 @@ function delete_inside_boundingbox(hObject, eventdata, handles)
     table = handles.table;
     
     beadID = table(:,ID);
-    t = table(:,TIME);
+    t = table(:,TIME) - handles.mintime;
     x = table(:,X);
     y = table(:,Y);
     currentbead = get(handles.slider_BeadID, 'Value');
@@ -500,7 +721,6 @@ function delete_inside_boundingbox(hObject, eventdata, handles)
     guidata(hObject, handles);
 
     plot_data(hObject, eventdata, handles);
-	drawnow;
 
     
 function delete_data_before_time(hObject, eventdata, handles);    
@@ -516,12 +736,9 @@ function delete_data_before_time(hObject, eventdata, handles);
     table = handles.table;
     beadID = table(:,ID);
 
-    currentbead = get(handles.slider_BeadID, 'Value');
-    idx = find(beadID == currentbead);
-    
-    t = table(idx,TIME);
-    x = table(idx,X);
-    y = table(idx,Y);
+    t = table(:,TIME) - handles.mintime;
+    x = table(:,X);
+    y = table(:,Y);
     
     [tm, xm] = ginput(1);
     
@@ -530,7 +747,7 @@ function delete_data_before_time(hObject, eventdata, handles);
     
     % identify time
     idx = find(dists == min(dists));
-    closest_time = t(idx);
+    closest_time = mean(t(idx));
     
     % subtract this time from all points
     table(:,TIME) = table(:,TIME) - closest_time;
@@ -542,7 +759,7 @@ function delete_data_before_time(hObject, eventdata, handles);
     handles.table = table;
     guidata(hObject, handles);
 
-    drawnow;
+    plot_data(hObject, eventdata, handles);
    
     
 function delete_data_after_time(hObject, eventdata, handles);    
@@ -558,48 +775,30 @@ function delete_data_after_time(hObject, eventdata, handles);
     table = handles.table;
     beadID = table(:,ID);
 
-    currentbead = get(handles.slider_BeadID, 'Value');
-    idx = find(beadID == currentbead);
-    
-    t = table(idx,TIME);
-    x = table(idx,X);
-    y = table(idx,Y);
+    t = table(:,TIME) - handles.mintime;
+    x = table(:,X);
+    y = table(:,Y);
     
     [tm, xm] = ginput(1);
     
     % find the closest time point to mouse click
     dists = abs(t - tm);    
     
-    % identify time
+    % identify index value that corresponds to this time
     idx = find(dists == min(dists));
     closest_time = t(idx);
-    
-    % remove any points in the table that are now negative
-    idx = find(table(:,TIME) <= closest_time);
+
+    % remove any points in the table that are greater than the time value
+    % selected by the mouse-click.
+    idx = find(t <= closest_time(1));
     table = table(idx,:);
     
     handles.table = table;
     guidata(hObject, handles);
 
-    drawnow;
+    plot_data(hObject, eventdata, handles);
     
 
-% --- Executes on button press in checkbox_plotradius.
-function checkbox_plotradius_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_plotradius (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox_plotradius
-
-    if get(hObject, 'Value')
-        set(handles.RTfig, 'Visible', 'on');
-%         plot_data(hObject, eventdata, handles);
-    else
-        set(handles.RTfig, 'Visible', 'off');
-    end
-
-    
 function logentry(txt)
     logtime = clock;
     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
@@ -611,3 +810,4 @@ function logentry(txt)
      headertext = [logtimetext 'evt_gui: '];
      
      fprintf('%s%s\n', headertext, txt);
+
