@@ -199,8 +199,8 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 		set(handles.edit_infile,'String', filename);
         set(handles.edit_outfile, 'String', '');
     end   
-
-    filenameroot = strrep(filename, '.vrpn', '');
+    filenameroot = strrep(filename, '.raw', '');
+    filenameroot = strrep(filenameroot, '.vrpn', '');
     filenameroot = strrep(filenameroot, '.mat', '');
     filenameroot = strrep(filenameroot, '.elt', '');
 
