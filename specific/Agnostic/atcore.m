@@ -22,7 +22,7 @@ function varargout = atcore(d, settings, flags);
 %             .residrms - rms value of residuals for 3 axis
 %             .stagerms - rms value of stagesensed positions
 %             .ratio - ratio of the two rms values
-version_str = '1.3 - 15th Sep 05';
+version_str = '1.4 - 16th Sep 05';
 % disp(['atcore version: ', version_str]);
 dbstop if error
 
@@ -106,7 +106,6 @@ if flags.usereciprocals
 end
 % use a high-pass filter or simply subtract off a trend.
 % have to do this after handling reciprocals otherwise get 1/0 issue
-% settings.HPhz = 30; %cheap hack
 if flags.HPstage
     [b,a] = butter(2, settings.HPhz*2/srate, 'high');
     for i = 1:3
@@ -114,7 +113,8 @@ if flags.HPstage
         stest(:,i) = myfilt(b,a,stest(:,i));% ????SHOULD WE REALLY FILTER THE TESTBED DATA HERE????
         squiet(:,i) = myfilt(b,a,squiet(:,i));
     end
-else    % subtract the linear trend from the stage reports
+end    
+if flags.detrend% subtract the linear trend from the stage reports
     for i = 1:3
         ps = polyfit(tfit, sfit(:,i), 1);
         sfit(:,i) = sfit(:,i) - polyval(ps, tfit);
@@ -132,7 +132,8 @@ if flags.HPqpd
         qtest(:,i) = myfilt(b,a,qtest(:,i));
         qquiet(:,i) = myfilt(b,a,qquiet(:,i));
     end    
-else    
+end   
+if flags.detrend
     for i = 1:size(qfit,2)
         pq = polyfit(tfit, qfit(:,i), 1);
         qfit(:,i) = qfit(:,i) - polyval(pq, tfit);
@@ -188,7 +189,7 @@ plot(tfit,qfit);
 title('QPD filtered fitting data');
 
 % build the equations for the indicated order
-Afit = buildpoly(qfit,settings.order);
+Afit = buildpoly(qfit,settings.order);    
 Jac = Afit \ sfit;
 fitpred = Afit * Jac;
 fitresid = sfit - fitpred;

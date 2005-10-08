@@ -1,3 +1,6 @@
+2005-10-08  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* atanalysis.m: Added explicit flag for detrending data. No UI control though.
+	* atcore.m: Handles the new flag properly.
 2005-09-16  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* atanalysis.m: Now exports the results and all the data. Several other minor changes.
 	* atcore.m: version 1.3. Compatible with the changes above. Also added option for zeropadding before filtering. Next versions will have altogether different apparoch for removing feedback contamination.

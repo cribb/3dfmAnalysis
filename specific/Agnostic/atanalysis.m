@@ -143,6 +143,7 @@ global d
 [settings, flags] = read_settings_and_flags(handles);
 disp(['|-----------Fit  [', num2str(settings.fitrange(1,1)), ' to ',num2str(settings.fitrange(1,2)), ...
         ']  ==> Test  [', num2str(settings.testrange(1,1)), ' to ', num2str(settings.testrange(1,2)), ']  ----------|']);
+flags.detrend = 0;
 disp('Flags:');disp(flags); 
 disp('Settings:');disp(settings);
 [res, Jac, dout] = atcore(d, settings, flags);
