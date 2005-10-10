@@ -630,9 +630,11 @@ function plot_data(hObject, eventdata, handles)
         if get(handles.checkbox_relative, 'Value')
             xinit = x(k); xinit = xinit(1);
             yinit = y(k); yinit = yinit(1);
-            plot(t(k) - mintime, magnitude(x(k) - xinit, y(k) - yinit), '.');
+            r = magnitude(x(k) - xinit, y(k) - yinit);
+            plot(t(k) - mintime, r - r(1), '.');
         else
-            plot(t(k) - mintime, magnitude(x(k), y(k)), '.');
+            r = magnitude(x(k), y(k));
+            plot(t(k) - mintime, r - r(1), '.');
         end
         xlabel('time (s)');
         ylabel(['radial ' ylabel_string]);
