@@ -19,7 +19,7 @@ function get_mips(rawfiles)
 rawfiles = dir(rawfiles);
 
 for k = 1 : length(rawfiles)
-    imMIP = mip(rawfiles(k).name, 1, [], 8);
+    imMIP = mip(rawfiles(k).name, 1, [], 8, 'min');
     
     new_filename = [rawfiles(k).name(1:end-3) 'MIP.bmp'];
     

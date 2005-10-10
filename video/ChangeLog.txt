@@ -1,4 +1,7 @@
 2005-10-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* get_mips.m: now uses a default 'min'imum intensity projection.
+
+2005-10-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* mip.m: added documentation about the "stride" parameter.
 
 2005-09-16  Jeremy Cribb <jcribb@email.unc.edu>
