@@ -1,3 +1,6 @@
+2005-10-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* remove_drift.m: removed stupid typo.
+
 2005-10-10  Jeremy Cribb  <jcribb@email.unc.edu>
 	* remove_drift.m: fixed bug where remove_drift would break if a tracker had no data (empty dataset).
 

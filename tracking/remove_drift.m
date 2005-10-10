@@ -90,7 +90,8 @@ function [v,q] = linear(data, drift_start_time, drift_end_time);
 
         bead = get_bead(data, k);
         
-        if length(bead) > 1)
+        if ( length(bead) > 1 )
+            
             t = bead(:,TIME);
             t0 = t(1);
             t = t - t0;
@@ -119,7 +120,8 @@ function [v,q] = linear(data, drift_start_time, drift_end_time);
                 newdata = [newdata ; tmp];
             end
         else
-            logentry(['There is not enough data in bead ' k ' to do drift subtraction (empty tracker?).']);
+            logentry(['Not enough data in bead ' num2str(k) ' to do drift subtraction (empty tracker?).']);
+        end
     end    
 
     v = newdata;
