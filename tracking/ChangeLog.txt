@@ -1,3 +1,6 @@
+2005-10-10  Jeremy Cribb  <jcribb@email.unc.edu>
+  * remove_drift.m: added.  removes drift from video datasets using either center-of-mass or linear approximation methods.
+
 2005-09-22  Jeremy Cribb  <jcribb@email.unc.edu>
 	* load_video_tracking.m: fixed filter on older spot_tracker .vrpn.mat files.  Fixed logentry that liked to repeat itself.
 
