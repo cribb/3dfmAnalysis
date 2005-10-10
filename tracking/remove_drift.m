@@ -90,33 +90,36 @@ function [v,q] = linear(data, drift_start_time, drift_end_time);
 
         bead = get_bead(data, k);
         
-        t = bead(:,TIME);
-        t0 = t(1);
-        t = t - t0;
-        
-        idx = find(t >= (drift_start_time - t0) & t <= (drift_end_time - t0));
-        
-        fitx = polyfit(t(idx), bead(idx,X), 1);
-        beadx = bead(:,X) - polyval(fitx, t) + fitx(2);
-
-        fity = polyfit(t(idx), bead(idx,Y), 1);
-        beady = bead(:,Y) - polyval(fity, t) + fity(2);
-        
-        fitz = polyfit(t(idx), bead(idx,Z), 1);
-        beadz = bead(:,Z) - polyval(fitz, t) + fitz(2);
-
-        % implement fits for ROLL PITCH AND YAW later.
-        
-        tmp = bead;
-        tmp(:,X) = beadx;
-        tmp(:,Y) = beady;
-        tmp(:,Z) = beadz;
-        
-        if ~exist('newdata')
-            newdata = tmp;
+        if length(bead) > 1)
+            t = bead(:,TIME);
+            t0 = t(1);
+            t = t - t0;
+            
+            idx = find(t >= (drift_start_time - t0) & t <= (drift_end_time - t0));
+            
+            fitx = polyfit(t(idx), bead(idx,X), 1);
+            beadx = bead(:,X) - polyval(fitx, t) + fitx(2);
+	
+            fity = polyfit(t(idx), bead(idx,Y), 1);
+            beady = bead(:,Y) - polyval(fity, t) + fity(2);
+            
+            fitz = polyfit(t(idx), bead(idx,Z), 1);
+            beadz = bead(:,Z) - polyval(fitz, t) + fitz(2);
+	
+            % implement fits for ROLL PITCH AND YAW later.
+            
+            tmp = bead;
+            tmp(:,X) = beadx;
+            tmp(:,Y) = beady;
+            tmp(:,Z) = beadz;
+            
+            if ~exist('newdata')
+                newdata = tmp;
+            else
+                newdata = [newdata ; tmp];
+            end
         else
-            newdata = [newdata ; tmp];
-        end
+            logentry(['There is not enough data in bead ' k ' to do drift subtraction (empty tracker?).']);
     end    
 
     v = newdata;

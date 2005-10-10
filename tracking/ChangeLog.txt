@@ -1,4 +1,7 @@
 2005-10-10  Jeremy Cribb  <jcribb@email.unc.edu>
+	* remove_drift.m: fixed bug where remove_drift would break if a tracker had no data (empty dataset).
+
+2005-10-10  Jeremy Cribb  <jcribb@email.unc.edu>
   * remove_drift.m: added.  removes drift from video datasets using either center-of-mass or linear approximation methods.
 
 2005-09-22  Jeremy Cribb  <jcribb@email.unc.edu>
