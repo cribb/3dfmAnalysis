@@ -1,3 +1,10 @@
+2005-10-12  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m: Added. Version 1.0
+	- clone of load_vrpn_tracking, but cleaner, more efficient and easy to use. Didn't want to break the dependent code, so created anew with more appropriate name.
+	- Compatible to log files created by laser tracker 04.00 and later only.
+	- Loads only those fields which are requested, thus conservs memory.
+	- Function input signature is changed, but output format is same as load_vrpn_tracking.
+
 2005-10-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m: removed stupid typo.
 
