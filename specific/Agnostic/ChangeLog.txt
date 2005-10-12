@@ -1,3 +1,10 @@
+2005-10-12  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* atcore.m: version 1.5
+	- Plugged in the newly invented Jacobian estimation method for pure sinusoidal perturbations. 
+	- Added option to hp filter residuals.
+	* atanalysis.m: interface for the changes above
+	* atanalysis.fig: same. 
+	
 2005-10-08  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* atanalysis.m: Added explicit flag for detrending data. No UI control though.
 	* atcore.m: Handles the new flag properly.

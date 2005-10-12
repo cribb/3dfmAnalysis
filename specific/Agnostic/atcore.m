@@ -9,8 +9,8 @@ function varargout = atcore(d, settings, flags);
 %            .testrange - the range in seconds for the test data
 %            .fitrange - the range in seconds for the data to fit Jacobian on
 %            .order - the order of jacobian to be fit
-%            .LPHz - the cutoff frequency of lowpass filter, if used
-%            .HPHz - the cutoff frequency of Highpass filter, if used
+%            .LPhz - the cutoff frequency of lowpass filter, if used
+%            .HPhz - the cutoff frequency of Highpass filter, if used
 %         'flags' , a structure containing following binary flags
 %            .fixskew - do we want to compensate for skew
 %            .HPstage - do we want to apply HP filter to stage sensed data
@@ -22,7 +22,7 @@ function varargout = atcore(d, settings, flags);
 %             .residrms - rms value of residuals for 3 axis
 %             .stagerms - rms value of stagesensed positions
 %             .ratio - ratio of the two rms values
-version_str = '1.4 - 16th Sep 05';
+version_str = '1.5 - 12th Oct 05';
 % disp(['atcore version: ', version_str]);
 dbstop if error
 
@@ -188,20 +188,76 @@ figure(11);set(gcf, 'Name','qpd','NumberTitle','Off');
 plot(tfit,qfit);
 title('QPD filtered fitting data');
 
-% build the equations for the indicated order
-Afit = buildpoly(qfit,settings.order);    
-Jac = Afit \ sfit;
-fitpred = Afit * Jac;
-fitresid = sfit - fitpred;
-% Now apply this Jacobian to the test data to see how well can we predict
-% stage position
-Atest = buildpoly(qtest,settings.order);
-testpred = Atest * Jac;
-testresid = stest - testpred;
+if flags.puresine %pure sine perturbations
+    sfit = sfit - repmat(sfit(1,:),size(sfit,1),1);
+    stest = stest - repmat(stest(1,:),size(stest,1),1);
+    squiet = squiet - repmat(squiet(1,:),size(squiet,1),1);
+    fxyz = [67,61,53]; %perturbation frequencies
+    for (c = 1:3)
+        tpraw= sin(2*pi*fxyz(c)*tfit); % unscaled, unaligned template
+        [xc,xl] = xcorr(tpraw,sfit(:,c));
+        phi = xl(find(xc == max(xc)))*2*pi*fxyz(c)/srate; %phase alignment necessary
+        tphi = sin(2*pi*fxyz(c)*tfit + phi); % phase aligned template
+        [xc,xl] = xcorr(tphi,sfit(:,c));
+        [ac,al] = xcorr(tphi,tphi);
+        amp = xc(find(xl == 0))/ ac(find(al==0)); %scaling necessary
+        template(:,c) = amp.*tphi; %scaled and aligned template
+        figure(150);
+        set(gcf,'name','Template','NumberTitle','Off');
+        subplot(3,1,c);
+        plot(tfit,sfit(:,c),'r',tfit,template(:,c),'b');
+        if c == 1
+            title('Pure Sine template fit to stage sensed positions');
+        end
+    end
+    Afit = buildpoly(qfit,settings.order); %only linear order should be used
+    Jac = Afit \ template;
+    fitpred = Afit * Jac;
+    fitresid = sfit - fitpred;
+    % Now apply this Jacobian to the test data to see how well can we predict
+    % stage position
+    Atest = buildpoly(qtest,settings.order);
+    testpred = Atest * Jac;
+    testresid = stest - testpred;
+    
+    Aquiet = buildpoly(qquiet,settings.order);
+    quietpred = Aquiet * Jac;
+    quietresid = squiet - quietpred;
+    
+else %old approach where we use filtering to get rid of the effects of feedback
+    % build the equations for the indicated order
+    Afit = buildpoly(qfit,settings.order); 
+    Jac = Afit \ sfit;
+    fitpred = Afit * Jac;
+    fitresid = sfit - fitpred;
+    % Now apply this Jacobian to the test data to see how well can we predict
+    % stage position
+    Atest = buildpoly(qtest,settings.order);
+    testpred = Atest * Jac;
+    testresid = stest - testpred;
+    
+    Aquiet = buildpoly(qquiet,settings.order);
+    quietpred = Aquiet * Jac;
+    quietresid = squiet - quietpred;
+end
 
-Aquiet = buildpoly(qquiet,settings.order);
-quietpred = Aquiet * Jac;
-quietresid = squiet - quietpred;
+if flags.LPresid
+    [b,a] = butter(4, settings.LPhz*2/srate);
+    for i = 1:3
+        testresid(:,i) = myfilt(b,a,testresid(:,i));
+        fitresid(:,i) = myfilt(b,a,fitresid(:,i));
+        quietresid(:,i) = myfilt(b,a,quietresid(:,i));
+    end    
+end
+if flags.HPresid
+% a try: hp filter the residuals
+    [b,a] = butter(4, settings.HPhz*2/srate,'high');
+    for c = 1:3
+        testresid(:,c) = filtfilt(b,a,testresid(:,c));
+        fitresid(:,c) = filtfilt(b,a,fitresid(:,c));
+        quietresid(:,c) = filtfilt(b,a,quietresid(:,c));
+    end
+end
 
 res.rmsQUIETresid = sqrt(mean(quietresid.^2));
 res.rmsQUIETstage = sqrt(mean(squiet.^2));
@@ -239,15 +295,6 @@ switch (nargout)
 end
 %%%%%%%%% EVERYTHING BELOW IS ONLY PLOTTING ETC, NO ANALYSIS %%%%%%%%% 
 
-% res.fudge = 0.0035;
-% res.ratio_fudged = (res.residrms - res.fudge) ./ (res.stagerms - res.fudge);
-
-% % try to estimate the effect of skew in the data acquisition system
-% velocity = sqrt(sum(diff(stest).^2, 2))*srate;
-% skewtime = 100e-6; % 100 microseconds is a full cycle, skew is actually (c-1)/c times that, where c is the # of channels
-% skew = skewtime * velocity;
-% res.max_skew = max(skew);
-% res.mean_skew = mean(skew);
 
 %[uA,dA,vA] = svd(Afit,0);
 %figure(11)
@@ -255,14 +302,7 @@ end
 %svds = svds / sum(svds);
 %semilogy(svds);
 %title('Singular Values');
-if flags.LPresid
-    [b,a] = butter(4, LPHz*2/srate);
-    for i = 1:3
-        testresid(:,i) = myfilt(b,a,testresid(:,i));
-        fitresid(:,i) = myfilt(b,a,fitresid(:,i));
-        quietresid(:,i) = myfilt(b,a,quietresid(:,i));
-    end    
-end    
+
 xyz = 'XYZ';
 psdres = max([1, ceil(1/range(ttest))]); 
 for i = 1:3
@@ -282,12 +322,14 @@ for i = 1:3
     legend('Measrd','Pred','Resid',3);    
     zoom on
 end
-% for i = 1:3
-% figure(19+3+i);
-%     mypsd([sfit(:,i),fitpred(:,i),fitresid(:,i)], srate, 1);
-%     title(['stage psd: Fitting data ', xyz(i)]);
-%     legend('Measrd','Pred','Resid');
-% end
+psdres = max([1, ceil(1/range(tfit))]);
+for i = 1:3
+    figure(19+6+i);
+    set(gcf,'name',['PSD Fit:',xyz(i)],'NumberTitle','Off');
+    mypsd([sfit(:,i),fitpred(:,i),fitresid(:,i)], srate, psdres,[],'.-');
+    title(['stage psd: Fitting data ', xyz(i)]);
+    legend('Measrd','Pred','Resid');
+end
 figure(30);
 set (gcf,'name','Fitting','NumberTitle','Off');
 for i = 1:3

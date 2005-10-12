@@ -22,7 +22,7 @@ function varargout = atanalysis(varargin)
 
 % Edit the above text to modify the response to help atanalysis
 
-% Last Modified by GUIDE v2.5 14-Sep-2005 10:14:20
+% Last Modified by GUIDE v2.5 11-Oct-2005 13:22:22
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -120,8 +120,8 @@ iquiet = [max(find(d.t <= settings.quietrange(1,1))), max(find(d.t <= settings.q
 
 % can do better, but for now lets export all the data between earliest
 % start and latest end points.
-istart = min(ifit(1,1), itest(1,1), iquiet(1,1));
-iend = max(ifit(1,2), itest(1,2), iquiet(1,2));
+istart = min([ifit(1,1), itest(1,1), iquiet(1,1)]);
+iend = max([ifit(1,2), itest(1,2), iquiet(1,2)]);
 dex.t = d.t(istart:iend);
 dex.ssense = d.ssense(istart:iend,1:3);
 dex.qpd = d.qpd(istart:iend,1:4);
@@ -143,15 +143,15 @@ global d
 [settings, flags] = read_settings_and_flags(handles);
 disp(['|-----------Fit  [', num2str(settings.fitrange(1,1)), ' to ',num2str(settings.fitrange(1,2)), ...
         ']  ==> Test  [', num2str(settings.testrange(1,1)), ' to ', num2str(settings.testrange(1,2)), ']  ----------|']);
-flags.detrend = 0;
-disp('Flags:');disp(flags); 
+
+disp('Flags:');disp(flags);
 disp('Settings:');disp(settings);
 [res, Jac, dout] = atcore(d, settings, flags);
 disp('Results:');disp(res);
 % export the results to base workspace
 assignin('base','res',res);
 assignin('base','jac',Jac);
-assignin('base','d',dout);
+assignin('base','dproc',dout);
 
 %------------------------------------------------------------
 function [settings, flags] = read_settings_and_flags(handles);
@@ -173,36 +173,41 @@ flags.HPstage = get(handles.check_HPfilterStage,'value');
 flags.HPqpd = get(handles.check_HPfilterQPD,'value');
 settings.HPhz = get(handles.slider_HPfilter,'value');
 settings.RecForm = get(handles.menu_recmethod,'value');
+flags.puresine = get(handles.check_pureSine,'value');
+flags.HPresid = get(handles.check_HPfilterResid,'value');
+% Below are hard coded flags, if found useful, will add to gui later
+flags.detrend = 0;
 %------------------------------------------------------------
 function plot_base_figure(d)
 global BASEFIG_NAME
 BASEFIG_NAME = 'SELECT DATA';
 figure(1);
-set (gcf,'name',BASEFIG_NAME,'NumberTitle','Off');
+hf = gcf; ha = gca;
+set (hf,'name',BASEFIG_NAME,'NumberTitle','Off');
 plot(d.t,d.ssense - repmat(d.ssense(1,:),size(d.ssense,1),1));
 if (isfield(d,'ji2nd'))
     for (c = 1:length(d.ji2nd))        
-        drawlines(gca,d.ji2nd(c).tblip);
+        drawlines(ha,d.ji2nd(c).tblip);
     end
 end
 if (isfield(d,'jilin'))
     for (c = 1:length(d.jilin))        
-        drawlines(gca,d.jilin(c).tblip);
+        drawlines(ha,d.jilin(c).tblip);
     end
 end
 if (isfield(d,'jacold'))
     for (c = 1:length(d.jacold))        
-        drawlines(gca,d.jacold(c).tblip);
+        drawlines(ha,d.jacold(c).tblip);
     end
 end
 if (isfield(d,'ja2nd'))
     for (c = 1:length(d.ja2nd))        
-        drawlines(gca,d.ja2nd(c).tupdate,'b');
+        drawlines(ha,d.ja2nd(c).tupdate,'b');
     end
 end
 if (isfield(d,'jalin'))
     for (c = 1:length(d.jalin))        
-        drawlines(gca,d.jalin(c).tupdate,'b');
+        drawlines(ha,d.jalin(c).tupdate,'b');
     end
 end
 
@@ -617,5 +622,23 @@ function edit_QuietEnd_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit_QuietEnd as text
 %        str2double(get(hObject,'String')) returns contents of edit_QuietEnd as a double
+
+
+% --- Executes on button press in check_HPfilterResid.
+function check_HPfilterResid_Callback(hObject, eventdata, handles)
+% hObject    handle to check_HPfilterResid (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_HPfilterResid
+
+
+% --- Executes on button press in check_pureSine.
+function check_pureSine_Callback(hObject, eventdata, handles)
+% hObject    handle to check_pureSine (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_pureSine
 
 
