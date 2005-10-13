@@ -1,3 +1,6 @@
+2005-10-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt.gui.m:  fixed bug where when removing data before a specified time point resulting in offsetting said data into negative time... very bad.
+
 2005-10-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m:  fixed bug in plotting the radial vector.
 

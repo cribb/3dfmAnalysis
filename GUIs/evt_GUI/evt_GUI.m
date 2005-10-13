@@ -751,14 +751,13 @@ function delete_data_before_time(hObject, eventdata, handles);
     idx = find(dists == min(dists));
     closest_time = mean(t(idx));
     
-    % subtract this time from all points
-    table(:,TIME) = table(:,TIME) - closest_time;
-    
-    % remove any points in the table that are now negative
-    idx = find(table(:,TIME) > 0);
+    % remove any points in the table that have times eariler than our
+    % prescribed beginning time point
+    idx = find(table(:,TIME) > (closest_time + handles.mintime));
     table = table(idx,:);
     
     handles.table = table;
+    handles.mintime = min(table(:,TIME));
     guidata(hObject, handles);
 
     plot_data(hObject, eventdata, handles);
