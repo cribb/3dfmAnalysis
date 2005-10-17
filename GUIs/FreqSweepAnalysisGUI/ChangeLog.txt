@@ -1,0 +1,4 @@
+2005-10-17 Kalpit Desai <kvdesai@email.unc.edu>
+	* ChangeLog.txt: First entry.
+	* FreqSweepAnalysis.fig: A GUI for analyzing frequency sweep data. Only passive data for now.
+	* FreqSweepAnalysis.m: A matlab file that goes with it.
