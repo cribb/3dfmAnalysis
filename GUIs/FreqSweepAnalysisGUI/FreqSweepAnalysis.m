@@ -22,7 +22,7 @@ function varargout = FreqSweepAnalysis(varargin)
 
 % Edit the above text to modify the response to help FreqSweepAnalysis
 
-% Last Modified by GUIDE v2.5 17-Oct-2005 12:49:44
+% Last Modified by GUIDE v2.5 17-Oct-2005 22:38:05
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -52,7 +52,6 @@ end
 
 % --- Executes just before FreqSweepAnalysis is made visible.
 function FreqSweepAnalysis_OpeningFcn(hObject, eventdata, handles, varargin)
-global lastpath
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -67,7 +66,7 @@ handles.dmnpt = {'data','metadata','name','path','tag'};
 % 'dmnpt' such that it is the alphabetically ordered first letters of each
 % field. This helps in knowing what the order is.
 % Update handles structure
-lastpath = pwd; %initial default path for browsing files
+set(handles.button_add,'UserData',pwd); %initial default path for browsing files
 % Some figure numbers allocated to specific types of plots
 handles.basefig = 1;
 handles.psdfig = 10; % 10 = r, 11 = x, 12 = y, 13 = z;
@@ -93,69 +92,75 @@ varargout{1} = handles.output;
 %%% $$$$$$$$$$$$$$$$$$$       CALLBACKS     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % --- Executes on button press in button_add.
 function button_add_Callback(hObject, eventdata, handles)
-global g lastpath% using global (as oppose to 'UserData') prevents creating multiple copies
+global g % using global (as oppose to 'UserData') prevents creating multiple copies
 
-[f, p] = uigetfiles('*.mat','Select one or more files',lastpath);
-lastpath = p;
+[f, p] = uigetfiles('*.mat','Select one or more files',get(hObject,'UserData'));
+set(hObject,'UserData',p);
 prompt_user('Wait...Loading selected files',handles);
 flags.keepuct = 0; flags.keepoffset = 0; flags.askforinput = 0;flags.inmicrons = 1;
-newid = 0;
+nloaded = 0;
 for(c = 1:length(f))
+    pack
     if exist('g') & ~isempty(g) & any(strcmp(g.(handles.dmnpt{3}),f{c}) == 1)
         prompt_user(['The file ',f{c},' is already in the database.']);                
     else
         prompt_user(['...currently loading ','[',num2str(c),'of',num2str(length(f)),'] :',f{c}],handles);
-        newid = newid+1;        
+        
+        %put newly added on the top of the list
+        if (exist('g') & ~isempty(g))
+            for cf = 1:length(handles.dmnpt) %shift all fields down by one
+                g.(handles.dmnpt{cf}) = [ {0}, g.(handles.dmnpt{cf})];
+            end
+        end
         %Make the cell arrays in the form of 1xN, and keep that form as the
         %standard. Nx1 standardization would work as well, but it seems my matlab
         %is creating arrays in the form of 1xN by default.
-        new.(handles.dmnpt{3}){1,newid} = f{c};
-        new.(handles.dmnpt{4}){1,newid} = p;
-        new.(handles.dmnpt{5}){1,newid} = 'NoTag';
-        new.(handles.dmnpt{2}){1,newid} = '';
-        % load only bead positions and laser intensity values
-        new.(handles.dmnpt{1}){1,newid} = load_laser_tracking(fullfile(p,f{c}),'bl',flags);
-                % fullfile usage protects code against platform variations
+        try
+            % load only bead positions and laser intensity values
+            g.(handles.dmnpt{1}){1,1} = load_laser_tracking(fullfile(p,f{c}),'b',flags);
+            % fullfile usage protects code against platform variations
+            g.(handles.dmnpt{3}){1,1} = f{c};
+            g.(handles.dmnpt{4}){1,1} = p;
+            g.(handles.dmnpt{5}){1,1} = 'NoTag';
+            g.(handles.dmnpt{2}){1,1} = 'NoMetaData';            
+            prompt_user([f{c}, ' added to the database.'],handles);
+            nloaded = nloaded + 1;
+        catch
+            prompt_user(lasterr);
+            prompt_user([f{c}, ' could not be added to the database.'],handles);
+            % shift back every field up by one
+            if(exist('g') & ~isempty(g))
+                for cf = 1:length(handles.dmnpt)                    
+                    g.(handles.dmnpt{cf}) = g.(handles.dmnpt{cf})(2:end); 
+                end                 
+            end
+            updatetaglist(handles);
+            break;
+        end
+        updatetaglist(handles);
     end
-end
-if exist('new')
-    if(~exist('g') | isempty(g))
-        g = new;
-    else
-        %put newly added on the top of the list
-        for cf = 1:length(handles.dmnpt) %copy all fields
-            g.(handles.dmnpt{cf}) = [new.(handles.dmnpt{cf}), g.(handles.dmnpt{cf})];
-        end        
-    end
-    prompt_user([num2str(length((new.(handles.dmnpt{1})))),' files are added to the database.'],handles);
 end
 % set(hObject,'UserData', g); %use global instead
-updatetaglist(handles);
 updatemenu(handles);
+prompt_user(['Finished Loading. Loaded ',num2str(nloaded),' files']);
 
 % --- Executes on button press in button_remove
 function button_remove_Callback(hObject, eventdata, handles)
 global g
-
 [sel,ok] = listdlg('ListString',get(handles.menu_files,'String'),...
                     'OKstring','Remove',...
                     'Name','Select file(s) to be removed');
 for c=1:length(sel)
     for cf = 1:length(handles.dmnpt) %delete all fields for that file id
-        g.(handles.dmnpt{cf}){1,c} = [];
+        g.(handles.dmnpt{cf}){1,sel(c)} = {};
     end
 end
-% Now remove the cells which have been emptied out
-cgood = 0; newg = [];
-for c=1:length(g.(handles.dmnpt{1}))
-    if ~isempty(g.(handles.dmnpt{1}){1,c})
-        cgood = cgood+1;
-        for cf = 1:length(handles.dmnpt) %copy all fields for that file id
-            newg.(handles.dmnpt{cf}){1,cgood} = g.(handles.dmnpt{cf}){1,c};
-        end
-    end
+% keyboard
+% Now remove the empty cells from each field
+for cf = 1:length(handles.dmnpt) 
+    ifilled = ~cellfun('isempty',g.(handles.dmnpt{cf}));
+    g.(handles.dmnpt{cf}) = g.(handles.dmnpt{cf})(ifilled); 
 end
-g = newg;
 updatetaglist(handles);
 updatemenu(handles);
 prompt_user([num2str(length(sel)),' files were removed from the database.'],handles);
@@ -169,22 +174,7 @@ function list_tags_Callback(hObject, eventdata, handles)
 function menu_files_Callback(hObject, eventdata, handles)
 % Hints: contents = get(hObject,'String') returns menu_files contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_files
-global g
-id = get(handles.menu_files,'Value');
-bp = g.(handles.dmnpt{1}){1,id}.beadpos;
-% laser = g.(handles.dmnpt{1}){1,id}.laser;
-dt = diff(bp.time);
-flag = min(min([bp.x,bp.y,bp.z])) +  dt*0.2*range([bp.x, bp.y, bp.z])/range(dt);
-figure(handles.basefig); clf; hf = gcf;
-set (hf,'name','EditData','NumberTitle','Off');
-plot(bp.time, [bp.x,bp.y,bp.z]); 
-hold on;
-plot(bp.time(1:end-1), dt,'.k');
-hold off;
-legend('X','Y','Z','Interval');
-ylabel('Microns (no units for black line)');
-xlabel('Seconds');
-title('Bring the zone with even interval in focus, then clip');
+
 % --- Executes on button press in button_tag.
 function button_tag_Callback(hObject, eventdata, handles)
 global g
@@ -204,20 +194,31 @@ end
 updatetaglist(handles);
 updatemenu(handles);
 % Note: Multiple tags of same string are acceptable
+%--------------makes the name string for edit figure ----------
+function str = getfocusfigname(handles);
+global g
+id = get(handles.menu_files,'Value');
+str = [num2str(id),':',g.(handles.dmnpt{5}){1,id}];
 
 % --- Executes on button press in button_clip.
 function button_clip_Callback(hObject, eventdata, handles)
 global g
-figure(handles.basefig); ha = gca;
-[t(1),y] = ginput(1);
-drawlines(ha, t(1));
-[t(2),y] = ginput(1);
-drawlines(ha, t(2));
+if ~exist('g') | isempty(g)
+    prompt_user('No file exists in the database');
+    return;
+end
 id = get(handles.menu_files,'Value');
-t = sort(t);
-
-% Clip the beadposition field
 bp = g.(handles.dmnpt{1}){1,id}.beadpos;
+% check if the current file is plotted on the base figure
+if (0 == figflag(getfocusfigname(handles)))
+   button_plotThis(handles.button_plotThis,[],handles);
+end
+hf = gcf; ha = gca;
+
+[t,y] = ginput(2);
+drawlines(ha, t);
+t = sort(t);
+% Clip the beadposition field
 ist = max(find(bp.time <= t(1)));
 iend = max(find(bp.time <= t(2)));
 g.(handles.dmnpt{1}){1,id}.beadpos = [];
@@ -227,16 +228,47 @@ g.(handles.dmnpt{1}){1,id}.beadpos.y = bp.y(ist:iend);
 g.(handles.dmnpt{1}){1,id}.beadpos.z = bp.z(ist:iend);
 
 % Clip the laser intensity field
-laser = g.(handles.dmnpt{1}){1,id}.laser;
-ist = max(find(laser.time <= t(1)));
-iend = max(find(laser.time <= t(2)));
-g.(handles.dmnpt{1}){1,id}.laser = [];
-g.(handles.dmnpt{1}){1,id}.laser.time = laser.time(ist:iend);
-g.(handles.dmnpt{1}){1,id}.laser.intensity = laser.intensity(ist:iend);
+if (isfield(g.(handles.dmnpt{1}){1,id},'laser'))
+    laser = g.(handles.dmnpt{1}){1,id}.laser;
+    ist = max(find(laser.time <= t(1)));
+    iend = max(find(laser.time <= t(2)));
+    g.(handles.dmnpt{1}){1,id}.laser = [];
+    g.(handles.dmnpt{1}){1,id}.laser.time = laser.time(ist:iend);
+    g.(handles.dmnpt{1}){1,id}.laser.intensity = laser.intensity(ist:iend);
+end
+
+% --- Executes on button press in button_plotThis.
+function button_plotThis_Callback(hObject, eventdata, handles)
+global g
+if ~exist('g') | isempty(g)
+    prompt_user('No file exists in the database');
+    return;
+end
+id = get(handles.menu_files,'Value');
+bp = g.(handles.dmnpt{1}){1,id}.beadpos;
+
+figure(handles.basefig); clf; ha = gca; hf = gcf;
+set(hf,'name',getfocusfigname(handles),'NumberTitle','Off');
+plot(bp.time, [bp.x,bp.y,bp.z]); 
+hold on;
+lims = get(ha,'Ylim');
+[scale, imax] = max(abs(lims)); scale = scale*scale/lims(imax(1));
+% laser = g.(handles.dmnpt{1}){1,id}.laser;
+dt = diff(bp.time);
+flag = zeros(size(bp.time));
+% flag all time stamps that were not within +/-0.01us allowance from 100us
+flag(find(abs(dt - 1e-4) > 1e-8)) = 0.5*scale;
+axes(ha);
+plot(bp.time, flag,'k');
+hold off;
+legend('X','Y','Z','Interval');
+ylabel('Microns (no units for black line)');
+xlabel('Seconds');
 
 % --- Executes on button press in button_plot.
 function button_plot_Callback(hObject, eventdata, handles)
 global g
+dbstop if error
 alltags = get(handles.list_tags,'String');
 ids = get(handles.list_tags,'Value');
 dims = get(handles.list_plotRxyz,'value');
@@ -258,7 +290,7 @@ if get(handles.check_psd,'Value')
         if (range(diff(bp.time)) > 1e-6)            
             fnames = get(handles.menu_files,'String');            
             prompt_user(['UnEven TimeStamps: ',fnames{ids(c)}]);
-            srate = srate*2;
+            srate = srate*0.1;
             prompt_user(['I will resample this file at ',num2str(srate),' Hz']);            
             t = [bp.time(1):1/srate:bp.time(end)]';
             x = interp1(bp.time,bp.x,t);
@@ -267,41 +299,48 @@ if get(handles.check_psd,'Value')
             bp = [];            
             [bp.time bp.x bp.y bp.z] = deal(t, x, y, z);
         end
-        psdres = 1/floor(range(bp.time)*10);
+        bp.x = bp.x - mean(bp.x);
+        bp.y = bp.y - mean(bp.y);
+        bp.z = bp.z - mean(bp.z);
+        psdres = 10/range(bp.time);
         for cd = 1:length(dims)
             switch strdim{dims(cd)}
                 case strdim{1}
                     bp.r = sqrt(bp.x.^2 + bp.y.^2 + bp.z.^2);
                     [p f] = mypsd(bp.r,srate,psdres);
-                    figure(handles.psdfigs + 1 -1);           
+                    figure(handles.psdfig + 1 -1);           
                     loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
                     if (c == length(ids))% if this is last file
                         legend(gca,alltags{ids});
+                        set(gca,'Xscale','Log','Yscale','Log');
                         hold off;
                     end
                 case strdim{2}
                     [p f] = mypsd(bp.x,srate,psdres);
-                    figure(handles.psdfigs + 2 -1);           
+                    figure(handles.psdfig + 2 -1);           
                     loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
                     if (c == length(ids))% if this is last file
                         legend(gca,alltags{ids});
+                        set(gca,'Xscale','Log','Yscale','Log');
                         hold off;
                     end
                 case strdim{3}
                     [p f] = mypsd(bp.y,srate,psdres);
-                    figure(handles.psdfigs + 3 -1);           
+                    figure(handles.psdfig + 3 -1);           
                     loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
                     if (c == length(ids))% if this is last file
                         legend(gca,alltags{ids});
+                        set(gca,'Xscale','Log','Yscale','Log');
                         hold off;
                     end
                 case strdim{4}
                     [p f] = mypsd(bp.z,srate,psdres);
-                    figure(handles.psdfigs + 4 -1);           
+                    figure(handles.psdfig + 4 -1);           
                     loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
                     if (c == length(ids))% if this is last file
                         legend(gca,alltags{ids});
                         hold off;
+                        set(gca,'Xscale','Log','Yscale','Log');
                     end
                 otherwise
                     prompt_user('Unrecognized type (not among r,x,y,z) for psd calculation');
@@ -309,18 +348,14 @@ if get(handles.check_psd,'Value')
         end
     end    
 end
-
+% keyboard
+dbclear if error
 % --- Executes on button press in check_psd.
 function check_psd_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in button_test.
 function button_test_Callback(hObject, eventdata, handles)
-dbstop if error
-contents = get(handles.list_tags,'String');% returns list_tags contents as cell array
-selected = contents{get(handles.list_tags,'Value')};% returns selected item from list_tags
-disp(selected)
-whos selected
-dbclear if error
+global g
 keyboard
 %%%$$$$$$$$$$$$$$$$  NON-CALLBACK ROUTINES     $$$$$$$$$$$$$$$$$$$$$$$$
 %-----------------------------------------------------------------------
@@ -337,6 +372,10 @@ if exist('g') & ~isempty(g);
     end
 end
 set(handles.menu_files,'String',menustr);
+val = get(handles.menu_files,'value');
+if val > length(get(handles.menu_files,'String'))
+    set(handles.menu_files,'value',length(handles.menu_files));
+end
 %-----------------------------------------------------------------------
 function updatetaglist(handles)
 global g
@@ -345,8 +384,13 @@ if exist('g') & ~isempty(g);
 else
     set(handles.list_tags,'String','');
 end
+val = get(handles.list_tags,'value');
+if any(val > length(get(handles.list_tags,'String')))
+    set(handles.list_tags,'value',length(handles.list_tags));
+end
+
 %%%********************************************************************
-%%%********** ALL BELOW IS POSSIBLY JUNK     **************************
+%%%**********      ALL BELOW IS POSSIBLY JUNK     *********************
 %%%********************************************************************
 % --- Executes during object creation, after setting all properties.
 function menu_files_CreateFcn(hObject, eventdata, handles)
@@ -400,9 +444,6 @@ function list_plotRxyz_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from list_plotRxyz
 
 %%%####################################################################
-
-
-
 
 
 

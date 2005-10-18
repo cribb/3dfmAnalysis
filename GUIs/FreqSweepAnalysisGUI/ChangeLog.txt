@@ -1,3 +1,7 @@
+2005-10-18 Kalpit Desai <kvdesai@email.unc.edu>
+	* FreqSweepAnalysis.m: Now in finely working condition for passive data.
+	* FreqSweepAnalysis.fig: Couple of other buttons and fixes.
+	
 2005-10-17 Kalpit Desai <kvdesai@email.unc.edu>
 	* ChangeLog.txt: First entry.
 	* FreqSweepAnalysis.fig: A GUI for analyzing frequency sweep data. Only passive data for now.
