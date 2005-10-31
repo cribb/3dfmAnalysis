@@ -1,3 +1,6 @@
+2005-10-31  Jeremy Cribb <jcribb@email.unc.edu>
+	* windiff.m: minor changes to make code more readable.
+
 2005-10-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* distances.m: added.  simply computes the distance between two points in three dimensions (rectangular coordinate system).
 

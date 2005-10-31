@@ -21,7 +21,8 @@ function [dydx, newx, newy] = windiff(y, x, window_size)
 %  01/20/05 - added the output of the new grid
 %
 
-
+    x = x(:);
+    
 	A = y(1:end-window_size,:);
 	B = y(window_size+1:end,:);
   	C = x(1:end-window_size,:);
@@ -32,7 +33,8 @@ function [dydx, newx, newy] = windiff(y, x, window_size)
     
     [rows cols] = size(y);
     
-    dydx = dy./repmat(dx, 1, cols);
+    dx = repmat(dx, 1, cols);
+    dydx = dy./dx;
     newx = mean([C D], 2);
 
     newy(:,:,1) = A;
