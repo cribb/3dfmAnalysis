@@ -30,7 +30,7 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
 %  the granularity is set too low (<4)
 %   
 
-    if nargin < 7 | window_size
+    if nargin < 7 | isempty(window_size)
         window_size = 1;
     end
     
@@ -39,11 +39,8 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
     % for every file, get its filename and reduce the dataset to a single table.
     d = load_video_tracking(files,[],'pixels',calib_um,'absolute','yes','table');
 	
-	max_beadID = max(d(:,ID));
-	
-    % for each beadID, compute it's velocity and concatenate it to the
-    % current data table as new columns [olddata vel_magnitude vel_angle].
-	for k = 0 : max_beadID
+    % for each beadID, compute its velocity:magnitude and force:magnitude.
+	for k = 0 : get_beadmax(d)
 
         temp = get_bead(d, k);
 
@@ -51,28 +48,26 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
                                      % whose number of points is less than the 
                                      % window size of the derivative.
 
-            [dxydt, newt, newxy] = windiff(temp(:,X:Y),temp(:,TIME),window_size);
-		
-            vel = dxydt;
-            
+            [dxydt, newt, newxy] = windiff(temp(:,X:Y),temp(:,TIME),window_size);		
+            vel = dxydt;            
             velmag = magnitude(vel);
-
             force = 6*pi*viscosity*bead_radius*velmag*calib_um*1e-6;
-
-            % setup the output variables
-            if ~exist('finalxy');  
-                finalxy = newxy;
-            else
-                finalxy = [finalxy ; newxy];
-            end
             
-            if ~exist('finalF');
-                finalF = force;
-            else
-                finalF = [finalF ; force];
-            end
+		end
             
+        % setup the output variables
+        if ~exist('finalxy');  
+            finalxy = newxy;
+        else
+            finalxy = [finalxy ; newxy];
         end
+        
+        if ~exist('finalF');
+            finalF = force;
+        else
+            finalF = [finalF ; force];
+        end
+                
 	end
     
     % output variables
@@ -100,7 +95,7 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
     
     % now, for the plots...
 	figure;
-    subplot(1,2,1);
+    subplot(1,3,1);
     imagesc(x_grid * calib_um, y_grid * calib_um, myMIP); 
     colormap(copper(256));
     hold on;
@@ -110,11 +105,18 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
 	xlabel('x [\mum]'); ylabel('y [\mum]'); set(gca, 'YDir', 'reverse');
     
     newr = magnitude((x-poleloc(1)),(y-poleloc(2)));
-    subplot(1,2,2);
+    subplot(1,3,2);
     plot(newr, F*1e12, '.');
     grid on;
 	xlabel('r'); ylabel('force (pN)');
     set(gcf, 'Position', [65 675 1354 420]);
+    drawnow;
+
+    subplot(1,3,3);
+    loglog(newr, F*1e12, '.');
+    grid on;
+	xlabel('r'); ylabel('force (pN)');
+%     set(gcf, 'Position', [65 675 1354 420]);
     drawnow;
     
     % now set up the binning process

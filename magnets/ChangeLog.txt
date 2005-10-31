@@ -1,3 +1,6 @@
+2005-10-31  Jeremy Crivv <jcribb@email.unc.edu>
+	* forcecal2d.m: better derivative handling, added plot.
+
 2005-10-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* forcecal2d.m: added x and y positions to output.  Changed output plots for better representation of data.  changed handling of filenames to be more dependable.
 
