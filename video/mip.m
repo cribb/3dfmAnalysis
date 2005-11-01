@@ -1,7 +1,7 @@
 function v = mip(files, start, stop, stride, mode);
 % 3DFM function  
 % Image Analysis 
-% last modified 10/10/05 (jcribb) 
+% last modified 11/01/05
 %  
 % This function returns the maximum or minimum intensity 
 % projection image for a movie (avi or raw), or a stack of images in
@@ -14,9 +14,8 @@ function v = mip(files, start, stop, stride, mode);
 %        "start" is starting frame number, defaults to first frame.
 %        "stop"  is ending frame number, defaults to last frame.
 %        "stride" is the number of frames to jump between "start" and "stop"
-%        "mode"  is 'max' or 'min', defaulting to 'min' 
+%        "mode"  is 'mean', 'max', or 'min', defaulting to 'min' 
 %  
-%   
 
 % handle argument list
 
@@ -113,6 +112,8 @@ for k = start : stride :  stop
                 imMIP = min(temp,[],3);
             case 'max'
                 imMIP = max(temp,[],3);
+            case 'mean'
+                imMIP = sum(temp,3);
         end
     end
  
@@ -132,6 +133,11 @@ for k = start : stride :  stop
 end
 
 close(timefig);
+
+if strfind(mode, 'mean');
+    imMIP = imMIP / ( (stop-start)/stride );
+end
+
 
 if findstr('raw', ext)
     fclose(fid);

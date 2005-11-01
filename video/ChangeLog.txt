@@ -1,20 +1,5 @@
-2005-10-27  Jeremy Cribb <jcribb@email.unc.edu>
-	* get_mips.m: added stride parameter for convenience.
-
-2005-10-10  Jeremy Cribb <jcribb@email.unc.edu>
-	* get_mips.m: now uses a default 'min'imum intensity projection.
-
-2005-10-10  Jeremy Cribb <jcribb@email.unc.edu>
-	* mip.m: added documentation about the "stride" parameter.
-
-2005-09-16  Jeremy Cribb <jcribb@email.unc.edu>
-  * mip.m: changed comments.
-
-2005-09-04  Jeremy Cribb <jcribb@email.unc.edu>
-  * imscalebar.m: removed output variable.
-
-2005-09-04  Jeremy Cribb <jcribb@email.unc.edu>
-  * imscalebar.m: added.  puts a scalebar of desired length and color onto an image at a desired location (bottom-right, bottom-left, top-left, top-right).  It gets a little weird when the Y-Direction of the plot is reversed, but I'll deal with that later.  It also squares up the axis so that the pixels are square; this lets the scalebar work at angles.
+2005-11-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* mip.m: added mean projection image as a mode.
 
 2005-05-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* mip.m: adjusted output so that if an output variable is defined, the MIP is outputted as a 2D matrix, otherwise it just displays an image of the MIP.
