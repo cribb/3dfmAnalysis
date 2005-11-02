@@ -12,12 +12,12 @@
 % DAQid = 'daqtest';
 DAQid = 'PCI-6733';
 nDACout = 3;
-DAQ_sampling_rate = 1000;  % [Hz]
-amplitude_oscillation = 10;  % microns
+DAQ_sampling_rate = 10000;  % [Hz]
+amplitude_oscillation = 5;  % microns
 microns_per_volt = 10;
-test_frequency = 1;
+test_frequency = 5;
 start_time = 0;
-end_time = 10;
+end_time = 5;
 xyoffset = 5;
 Nrepeat = 0;
 channels = [0:nDACout-1]';
@@ -26,7 +26,7 @@ Vrange = [-10 10];
 % initialize stage to known position
 x = 5;
 y = 5;
-z = 10;
+z = 5;
 zerodaq([x y z 0 0 0 0 0]);
 
 % input('Adjust stage to the starting z-plane and press <ENTER>.');
@@ -34,21 +34,9 @@ zerodaq([x y z 0 0 0 0 0]);
 % INITIAL MATH:  precondition the output matrix to all zeros and define the
 % time vector that will give normal mortals an idea of what's going on.
 t = [start_time : 1/DAQ_sampling_rate : end_time - 1/DAQ_sampling_rate]';
-x = amplitude_oscillation / microns_per_volt * cos(2 * pi * test_frequency * t) + xyoffset;
+x = amplitude_oscillation / microns_per_volt * sin(2 * pi * test_frequency * t) + xyoffset;
 y = zeros(size(x)) + xyoffset;
-
-% SET UP z-STEPS 
-z_steps_um = [100:-10:0];
-step_times = [0:5:end_time];
-z_steps_volts = z_steps_um / microns_per_volt;
-
-% SETUP z-steps OUTPUT MATRIX:  This section defines the output matrix that will be
-% sent to DAQ board according to the experimental details defined above.
-z = zeros(size(t));
-for k = 1 : length(z_steps_um)-1
-	idx = find(t >= step_times(k) & t < step_times(k+1));
-	z(idx) = z_steps_volts(k);
-end
+z = zeros(size(x)) + xyoffset;
 
 % initialize signal
 signal = [x y z];
@@ -56,5 +44,8 @@ signal = [x y z];
 % Start experiment.  Call DACoperator. Call pulnix software. etc..
 DACoperator(signal, Nrepeat, DAQid, channels, DAQ_sampling_rate, Vrange);
 
-pause(end_time);
-zerodaq([5 5 10 0 0 0 0 0]);
+% pause(end_time+0.5);
+
+zerodaq([5 5 5 0 0 0 0 0]);
+
+% daqreset;

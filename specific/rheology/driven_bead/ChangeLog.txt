@@ -1,3 +1,5 @@
+2005-11-02  Kalpit Desai <kvdesai@email.unc.edu>
+	* shear_wave_MCL_oscillator.m: Fixed the bug where stage would go to and come back before each session of data-acquisition.
 2005-09-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* shear_wave_MCL_oscillator.m: added.  this script will oscillate the mad city labs stage in x or y while moving up or down in z.  This is used for the shear wave propagation experiments for mucus, etc...
 
