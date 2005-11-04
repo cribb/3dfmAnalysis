@@ -22,7 +22,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 27-Sep-2005 13:19:23
+% Last Modified by GUIDE v2.5 04-Nov-2005 10:58:44
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -441,7 +441,27 @@ function pushbutton_export_bead_Callback(hObject, eventdata, handles)
     bead.x      = handles.table(k,X);
     bead.y      = handles.table(k,Y);
 
-    assignin('base', 'bead', bead);
+    assignin('base', ['bead' num2str(currentBead)], bead);
+    
+    
+% --- Executes on button press in pushbutton_export_all_beads.
+function pushbutton_export_all_beads_Callback(hObject, eventdata, handles)
+    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    
+    currentBead = get(handles.slider_BeadID, 'Value');
+    beadID = handles.table(:,ID);
+
+    for k = 0:max(beadID)
+    
+        idx = find(beadID == currentBead);
+
+        bead(k+1).t      = handles.table(idx,TIME);
+        bead(k+1).x      = handles.table(idx,X);
+        bead(k+1).y      = handles.table(idx,Y);
+        
+    end
+    
+    assignin('base', 'beads', bead);
     
     
 % --- Executes on button press in radio_pixels.
@@ -811,4 +831,5 @@ function logentry(txt)
      headertext = [logtimetext 'evt_gui: '];
      
      fprintf('%s%s\n', headertext, txt);
+
 

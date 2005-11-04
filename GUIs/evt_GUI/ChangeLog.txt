@@ -1,3 +1,7 @@
+2005-11-04  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m:  added export all beads button. added numberical suffix to variable name for individually exported beads.
+	* evt_gui.fig: same.
+	
 2005-10-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt.gui.m:  fixed bug where when removing data before a specified time point resulting in offsetting said data into negative time... very bad.
 
