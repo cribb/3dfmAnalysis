@@ -22,7 +22,7 @@ function varargout = FreqSweepAnalysis(varargin)
 
 % Edit the above text to modify the response to help FreqSweepAnalysis
 
-% Last Modified by GUIDE v2.5 17-Oct-2005 22:38:05
+% Last Modified by GUIDE v2.5 15-Nov-2005 13:46:52
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -70,6 +70,12 @@ set(handles.button_add,'UserData',pwd); %initial default path for browsing files
 % Some figure numbers allocated to specific types of plots
 handles.basefig = 1;
 handles.psdfig = 10; % 10 = r, 11 = x, 12 = y, 13 = z;
+handles.dvsffig = 20;
+handles.threeDfig = 30;
+handles.psdfigS = 40; % 10 = r, 11 = x, 12 = y, 13 = z;
+handles.dvsffigS = 50;
+handles.threeDfigS = 60;
+
 %  ....add to this list as more types of plots are supported
 % Some other constants
 handles.srate = 10000;
@@ -93,7 +99,19 @@ varargout{1} = handles.output;
 % --- Executes on button press in button_add.
 function button_add_Callback(hObject, eventdata, handles)
 global g % using global (as oppose to 'UserData') prevents creating multiple copies
-
+switch get(handles.menu_quants,'value')
+    case 1 %bead only
+        squant = 'b';        
+    case 2 %bead and 
+        squant = 'lb';        
+    case 3
+        squant = 'bs';
+    case 4
+        squant = 'bls';
+    otherwise
+        prompt_user('Error: Unrecognized input for desired quantities');
+end
+        
 [f, p] = uigetfiles('*.mat','Select one or more files',get(hObject,'UserData'));
 set(hObject,'UserData',p);
 prompt_user('Wait...Loading selected files',handles);
@@ -117,7 +135,7 @@ for(c = 1:length(f))
         %is creating arrays in the form of 1xN by default.
         try
             % load only bead positions and laser intensity values
-            g.(handles.dmnpt{1}){1,1} = load_laser_tracking(fullfile(p,f{c}),'b',flags);
+            g.(handles.dmnpt{1}){1,1} = load_laser_tracking(fullfile(p,f{c}),squant,flags);
             % fullfile usage protects code against platform variations
             g.(handles.dmnpt{3}){1,1} = f{c};
             g.(handles.dmnpt{4}){1,1} = p;
@@ -275,84 +293,294 @@ dims = get(handles.list_plotRxyz,'value');
 strdim = get(handles.list_plotRxyz,'String');    
 colrs = 'bgrkym';
 
-%%=========== COMPUTE AND PLOT PSD ===============
-if get(handles.check_psd,'Value')
-    % set up all figures
-    for c = 1:dims
-        figure(handles.psdfig + c - 1); clf;
-        title(['PSD: ',strdim{dims(c)}]);
-        ylabel('Micron^2/Hz');
-        hold on;
-    end        
-    for c = 1:length(ids)        
-        bp = g.(handles.dmnpt{1}){1,ids(c)}.beadpos;
-        srate = handles.srate; %reset sample rate if changed by previous file
-        if (range(diff(bp.time)) > 1e-6)            
-            fnames = get(handles.menu_files,'String');            
-            prompt_user(['UnEven TimeStamps: ',fnames{ids(c)}]);
-            srate = srate*0.1;
-            prompt_user(['I will resample this file at ',num2str(srate),' Hz']);            
-            t = [bp.time(1):1/srate:bp.time(end)]';
-            x = interp1(bp.time,bp.x,t);
-            y = interp1(bp.time,bp.y,t);
-            z = interp1(bp.time,bp.z,t);
-            bp = [];            
-            [bp.time bp.x bp.y bp.z] = deal(t, x, y, z);
-        end
-        bp.x = bp.x - mean(bp.x);
-        bp.y = bp.y - mean(bp.y);
-        bp.z = bp.z - mean(bp.z);
-        psdres = 10/range(bp.time);
-        for cd = 1:length(dims)
-            switch strdim{dims(cd)}
-                case strdim{1}
-                    bp.r = sqrt(bp.x.^2 + bp.y.^2 + bp.z.^2);
-                    [p f] = mypsd(bp.r,srate,psdres);
-                    figure(handles.psdfig + 1 -1);           
-                    loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                    if (c == length(ids))% if this is last file
-                        legend(gca,alltags{ids});
-                        set(gca,'Xscale','Log','Yscale','Log');
-                        hold off;
-                    end
-                case strdim{2}
-                    [p f] = mypsd(bp.x,srate,psdres);
-                    figure(handles.psdfig + 2 -1);           
-                    loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                    if (c == length(ids))% if this is last file
-                        legend(gca,alltags{ids});
-                        set(gca,'Xscale','Log','Yscale','Log');
-                        hold off;
-                    end
-                case strdim{3}
-                    [p f] = mypsd(bp.y,srate,psdres);
-                    figure(handles.psdfig + 3 -1);           
-                    loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                    if (c == length(ids))% if this is last file
-                        legend(gca,alltags{ids});
-                        set(gca,'Xscale','Log','Yscale','Log');
-                        hold off;
-                    end
-                case strdim{4}
-                    [p f] = mypsd(bp.z,srate,psdres);
-                    figure(handles.psdfig + 4 -1);           
-                    loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                    if (c == length(ids))% if this is last file
-                        legend(gca,alltags{ids});
-                        hold off;
-                        set(gca,'Xscale','Log','Yscale','Log');
-                    end
-                otherwise
-                    prompt_user('Unrecognized type (not among r,x,y,z) for psd calculation');
+%%=========== COMPUTE AND PLOT PSD + CUMULATIVE DISTANCE ===============
+if get(handles.check_bead,'value')
+    if get(handles.check_psd,'Value')
+        % set up all figures
+        for c = 1:length(dims)
+            figure(handles.psdfig + c - 1); clf;
+            title(['Bead PSD: ',strdim{dims(c)}]);
+            ylabel('Micron^2/Hz');
+            hold on;
+            if get(handles.check_cumdisp,'value')
+                figure(handles.dvsffig + c - 1); clf;
+                title(['Bead Cumulative Displacement: ',strdim{dims(c)}]);
+                ylabel('Micron');
+                hold on;
             end
+            
+        end        
+        for c = 1:length(ids)        
+            bp = g.(handles.dmnpt{1}){1,ids(c)}.beadpos;
+            srate = handles.srate; %reset sample rate if changed by previous file
+            if (range(diff(bp.time)) > 1e-6)            
+                fnames = get(handles.menu_files,'String');            
+                prompt_user(['UnEven TimeStamps: ',fnames{ids(c)}]);
+                srate = srate*0.1;
+                prompt_user(['I will resample this file at ',num2str(srate),' Hz']);            
+                t = [bp.time(1):1/srate:bp.time(end)]';
+                x = interp1(bp.time,bp.x,t);
+                y = interp1(bp.time,bp.y,t);
+                z = interp1(bp.time,bp.z,t);
+                bp = [];            
+                [bp.time bp.x bp.y bp.z] = deal(t, x, y, z);
+            end
+            bp.x = bp.x - mean(bp.x);
+            bp.y = bp.y - mean(bp.y);
+            bp.z = bp.z - mean(bp.z);
+            psdres = 10/range(bp.time);
+            for cd = 1:length(dims)
+                switch strdim{dims(cd)}
+                    case strdim{1}
+                        bp.r = sqrt(bp.x.^2 + bp.y.^2 + bp.z.^2);
+                        if get(handles.check_cumdisp,'Value')
+                            [p f Id] = mypsd(bp.r,srate,psdres,[],[],'yes');
+                            figure(handles.dvsffig + 1 -1);           
+                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                            if (c == length(ids))% if this is last file
+                                legend(gca,alltags{ids});
+                                set(gca,'Xscale','Log','Yscale','Linear');
+                                hold off;
+                            end
+                        else
+                            [p f] = mypsd(bp.r,srate,psdres);
+                        end
+                        figure(handles.psdfig + 1 -1);           
+                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                        if (c == length(ids))% if this is last file
+                            legend(gca,alltags{ids});
+                            set(gca,'Xscale','Log','Yscale','Log');
+                            hold off;
+                        end
+                    case strdim{2}
+                        if get(handles.check_cumdisp,'Value')
+                            [p f Id] = mypsd(bp.x,srate,psdres,[],[],'yes');
+                            figure(handles.dvsffig + 2 -1);           
+                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                            if (c == length(ids))% if this is last file
+                                legend(gca,alltags{ids});
+                                set(gca,'Xscale','Log','Yscale','Linear');
+                                hold off;
+                            end
+                        else
+                            [p f] = mypsd(bp.x,srate,psdres);
+                        end
+                        figure(handles.psdfig + 2 -1);           
+                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                        if (c == length(ids))% if this is last file
+                            legend(gca,alltags{ids});
+                            set(gca,'Xscale','Log','Yscale','Log');
+                            hold off;
+                        end
+                    case strdim{3}
+                        if get(handles.check_cumdisp,'Value')
+                            [p f Id] = mypsd(bp.y,srate,psdres,[],[],'yes');
+                            figure(handles.dvsffig + 3 -1);           
+                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                            if (c == length(ids))% if this is last file
+                                legend(gca,alltags{ids});
+                                set(gca,'Xscale','Log','Yscale','Linear');
+                                hold off;
+                            end
+                        else
+                            [p f] = mypsd(bp.y,srate,psdres);
+                        end
+                        figure(handles.psdfig + 3 -1);           
+                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                        if (c == length(ids))% if this is last file
+                            legend(gca,alltags{ids});
+                            set(gca,'Xscale','Log','Yscale','Log');
+                            hold off;
+                        end
+                    case strdim{4}
+                        if get(handles.check_cumdisp,'Value')
+                            [p f Id] = mypsd(bp.z,srate,psdres,[],[],'yes');
+                            figure(handles.dvsffig + 4 -1);           
+                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                            if (c == length(ids))% if this is last file
+                                legend(gca,alltags{ids});
+                                set(gca,'Xscale','Log','Yscale','Linear');
+                                hold off;
+                            end
+                        else
+                            [p f] = mypsd(bp.z,srate,psdres);
+                        end
+                        figure(handles.psdfig + 4 -1);           
+                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                        if (c == length(ids))% if this is last file
+                            legend(gca,alltags{ids});
+                            hold off;
+                            set(gca,'Xscale','Log','Yscale','Log');
+                        end
+                    otherwise
+                        prompt_user('Unrecognized type (not among r,x,y,z) for psd calculation');
+                end
+            end
+        end    
+    end
+    %% ==================   PLOT 3D TRACE   =====================
+    if get(handles.check_3d,'Value')
+        figure(handles.threeDfig);    
+        for c = 1:length(ids)        
+            bp = g.(handles.dmnpt{1}){1,ids(c)}.beadpos;
+            bp.x = bp.x - bp.x(1,1);
+            bp.y = bp.y - bp.y(1,1);
+            bp.z = bp.z - bp.z(1,1);        
+            plot3(bp.x,bp.y,sp.z,colrs(mod(c-1,length(colrs))+1));
         end
-    end    
+    end
+end
+%%=========== stage: COMPUTE AND PLOT PSD + CUMULATIVE DISTANCE ===============
+if get(handles.check_stage,'value')
+    if get(handles.check_psd,'Value')
+        % set up all figures
+        for c = 1:length(dims)
+            figure(handles.psdfigS + c - 1); clf;
+            title(['Stage PSD: ',strdim{dims(c)}]);
+            ylabel('Micron^2/Hz');
+            hold on;
+            if get(handles.check_cumdisp,'value')
+                figure(handles.dvsffigS + c - 1); clf;
+                title(['Stage Cumulative Displacement: ',strdim{dims(c)}]);
+                ylabel('Micron');
+                hold on;
+            end
+            
+        end        
+        for c = 1:length(ids)        
+            sp = g.(handles.dmnpt{1}){1,ids(c)}.stageReport;
+            srate = handles.srate; %reset sample rate if changed by previous file
+            if (range(diff(sp.time)) > 1e-6)            
+                fnames = get(handles.menu_files,'String');            
+                prompt_user(['UnEven TimeStamps: ',fnames{ids(c)}]);
+                srate = srate*0.1;
+                prompt_user(['I will resample this file at ',num2str(srate),' Hz']);            
+                t = [sp.time(1):1/srate:sp.time(end)]';
+                x = interp1(sp.time,sp.x,t);
+                y = interp1(sp.time,sp.y,t);
+                z = interp1(sp.time,sp.z,t);
+                sp = [];            
+                [sp.time sp.x sp.y sp.z] = deal(t, x, y, z);
+            end
+            sp.x = sp.x - mean(sp.x);
+            sp.y = sp.y - mean(sp.y);
+            sp.z = sp.z - mean(sp.z);
+            psdres = 10/range(sp.time);
+            for cd = 1:length(dims)
+                switch strdim{dims(cd)}
+                    case strdim{1}
+                        sp.r = sqrt(sp.x.^2 + sp.y.^2 + sp.z.^2);
+                        if get(handles.check_cumdisp,'Value')
+                            [p f Id] = mypsd(sp.r,srate,psdres,[],[],'yes');
+                            figure(handles.dvsffig + 1 -1);           
+                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                            if (c == length(ids))% if this is last file
+                                legend(gca,alltags{ids});
+                                set(gca,'Xscale','Log','Yscale','Linear');
+                                hold off;
+                            end
+                        else
+                            [p f] = mypsd(sp.r,srate,psdres);
+                        end
+                        figure(handles.psdfigS + 1 -1);           
+                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                        if (c == length(ids))% if this is last file
+                            legend(gca,alltags{ids});
+                            set(gca,'Xscale','Log','Yscale','Log');
+                            hold off;
+                        end
+                    case strdim{2}
+                        if get(handles.check_cumdisp,'Value')
+                            [p f Id] = mypsd(sp.x,srate,psdres,[],[],'yes');
+                            figure(handles.dvsffig + 2 -1);           
+                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                            if (c == length(ids))% if this is last file
+                                legend(gca,alltags{ids});
+                                set(gca,'Xscale','Log','Yscale','Linear');
+                                hold off;
+                            end
+                        else
+                            [p f] = mypsd(sp.x,srate,psdres);
+                        end
+                        figure(handles.psdfigS + 2 -1);           
+                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                        if (c == length(ids))% if this is last file
+                            legend(gca,alltags{ids});
+                            set(gca,'Xscale','Log','Yscale','Log');
+                            hold off;
+                        end
+                    case strdim{3}
+                        if get(handles.check_cumdisp,'Value')
+                            [p f Id] = mypsd(sp.y,srate,psdres,[],[],'yes');
+                            figure(handles.dvsffig + 3 -1);           
+                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                            if (c == length(ids))% if this is last file
+                                legend(gca,alltags{ids});
+                                set(gca,'Xscale','Log','Yscale','Linear');
+                                hold off;
+                            end
+                        else
+                            [p f] = mypsd(sp.y,srate,psdres);
+                        end
+                        figure(handles.psdfigS + 3 -1);           
+                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                        if (c == length(ids))% if this is last file
+                            legend(gca,alltags{ids});
+                            set(gca,'Xscale','Log','Yscale','Log');
+                            hold off;
+                        end
+                    case strdim{4}
+                        if get(handles.check_cumdisp,'Value')
+                            [p f Id] = mypsd(sp.z,srate,psdres,[],[],'yes');
+                            figure(handles.dvsffig + 4 -1);           
+                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                            if (c == length(ids))% if this is last file
+                                legend(gca,alltags{ids});
+                                set(gca,'Xscale','Log','Yscale','Linear');
+                                hold off;
+                            end
+                        else
+                            [p f] = mypsd(sp.z,srate,psdres);
+                        end
+                        figure(handles.psdfigS + 4 -1);           
+                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
+                        if (c == length(ids))% if this is last file
+                            legend(gca,alltags{ids});
+                            hold off;
+                            set(gca,'Xscale','Log','Yscale','Log');
+                        end
+                    otherwise
+                        prompt_user('Unrecognized type (not among r,x,y,z) for psd calculation');
+                end
+            end
+        end    
+    end
+    %% ==================   PLOT 3D TRACE   =====================
+    if get(handles.check_3d,'Value')
+        figure(handles.threeDfigS);    
+        for c = 1:length(ids)        
+            sp = g.(handles.dmnpt{1}){1,ids(c)}.stageReport;
+            sp.x = sp.x - sp.x(1,1);
+            sp.y = sp.y - sp.y(1,1);
+            sp.z = sp.z - sp.z(1,1);        
+            plot3(sp.x,sp.y,sp.z,colrs(mod(c-1,length(colrs))+1));
+        end
+    end
 end
 % keyboard
 dbclear if error
 % --- Executes on button press in check_psd.
 function check_psd_Callback(hObject, eventdata, handles)
-
+if ~get(hObject,'Value')
+    set(handles.check_cumdisp,'Value',0);
+end
+% --- Executes on button press in check_cumdisp.
+function check_cumdisp_Callback(hObject, eventdata, handles)
+if get(hObject,'Value')
+    set(handles.check_psd,'Value',1);
+end
+% --- Executes on button press in check_3d.
+function check_3d_Callback(hObject, eventdata, handles)
 % --- Executes on button press in button_test.
 function button_test_Callback(hObject, eventdata, handles)
 global g
@@ -445,5 +673,47 @@ function list_plotRxyz_Callback(hObject, eventdata, handles)
 
 %%%####################################################################
 
+
+% --- Executes on button press in check_bead.
+function check_bead_Callback(hObject, eventdata, handles)
+% hObject    handle to check_bead (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_bead
+
+
+% --- Executes on button press in check_stage.
+function check_stage_Callback(hObject, eventdata, handles)
+% hObject    handle to check_stage (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_stage
+
+
+% --- Executes during object creation, after setting all properties.
+function menu_quants_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to menu_quants (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(hObject,'BackgroundColor','white');
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+% --- Executes on selection change in menu_quants.
+function menu_quants_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_quants (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns menu_quants contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from menu_quants
 
 

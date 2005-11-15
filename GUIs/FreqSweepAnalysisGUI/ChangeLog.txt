@@ -1,3 +1,7 @@
+2005-11-15 Kalpit Desai <kvdesai@email.unc.edu>
+	* FreqSweepAnalysis.m: Several new features e.g. calculating and ploting cumulative displacement upto certain frequency, plotting for stage etc. 
+	* FreqSweepAnalysis.fig: Couple of relevant checkboxes
+
 2005-10-18 Kalpit Desai <kvdesai@email.unc.edu>
 	* FreqSweepAnalysis.m: Now in finely working condition for passive data.
 	* FreqSweepAnalysis.fig: Couple of other buttons and fixes.
