@@ -1,3 +1,9 @@
+2005-1-15   Jeremy Cribb <jcribb@email.unc.edu>
+	* raw_mean_subtract.m added. perfroms mean subtraction from a .raw file and saves a new .raw file
+
+2005-11-15  Jeremy Cribb <jcribb@email.unc.edu>
+	* enhance_contrast.m: added. increases gain for pulnix .raw files and saves a new .raw file.  maximum pixel value is set to 1 (255).
+
 2005-11-01  Jeremy Cribb <jcribb@email.unc.edu>
 	* mip.m: added mean projection image as a mode.
 
