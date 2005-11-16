@@ -36,7 +36,7 @@ switch ext
 		cols = 648;
 		color_depth = 1; % bytes
 		frame_size = rows * cols * color_depth;        
-        number_of_frames = (file.bytes) / frame_size;
+        number_of_frames = (file.bytes) / frame_size - 1;
         
         % go ahead and open the input file
 		fid = fopen(file.name);
