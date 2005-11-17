@@ -333,8 +333,9 @@ if get(handles.check_bead,'value')
                 switch strdim{dims(cd)}
                     case strdim{1}
                         bp.r = sqrt(bp.x.^2 + bp.y.^2 + bp.z.^2);
+                        bp.r = bp.r - mean(bp.r);
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.r,srate,psdres,[],[],'yes');
+                            [p f Id] = mypsd(bp.r,srate,psdres,'rectangle',[],'yes');
                             figure(handles.dvsffig + 1 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -354,7 +355,7 @@ if get(handles.check_bead,'value')
                         end
                     case strdim{2}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.x,srate,psdres,[],[],'yes');
+                            [p f Id] = mypsd(bp.x,srate,psdres,'rectangle',[],'yes');
                             figure(handles.dvsffig + 2 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -374,7 +375,7 @@ if get(handles.check_bead,'value')
                         end
                     case strdim{3}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.y,srate,psdres,[],[],'yes');
+                            [p f Id] = mypsd(bp.y,srate,psdres,'rectangle',[],'yes');
                             figure(handles.dvsffig + 3 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -394,7 +395,7 @@ if get(handles.check_bead,'value')
                         end
                     case strdim{4}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.z,srate,psdres,[],[],'yes');
+                            [p f Id] = mypsd(bp.z,srate,psdres,'rectangle',[],'yes');
                             figure(handles.dvsffig + 4 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -470,9 +471,10 @@ if get(handles.check_stage,'value')
                 switch strdim{dims(cd)}
                     case strdim{1}
                         sp.r = sqrt(sp.x.^2 + sp.y.^2 + sp.z.^2);
+                        sp.r = sp.r - mean(sp.r);
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.r,srate,psdres,[],[],'yes');
-                            figure(handles.dvsffig + 1 -1);           
+                            [p f Id] = mypsd(sp.r,srate,psdres,'rectangle',[],'yes');
+                            figure(handles.dvsffigS + 1 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
                                 legend(gca,alltags{ids});
@@ -491,8 +493,8 @@ if get(handles.check_stage,'value')
                         end
                     case strdim{2}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.x,srate,psdres,[],[],'yes');
-                            figure(handles.dvsffig + 2 -1);           
+                            [p f Id] = mypsd(sp.x,srate,psdres,'rectangle',[],'yes');
+                            figure(handles.dvsffigS + 2 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
                                 legend(gca,alltags{ids});
@@ -511,8 +513,8 @@ if get(handles.check_stage,'value')
                         end
                     case strdim{3}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.y,srate,psdres,[],[],'yes');
-                            figure(handles.dvsffig + 3 -1);           
+                            [p f Id] = mypsd(sp.y,srate,psdres,'rectangle',[],'yes');
+                            figure(handles.dvsffigS + 3 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
                                 legend(gca,alltags{ids});
@@ -531,8 +533,8 @@ if get(handles.check_stage,'value')
                         end
                     case strdim{4}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.z,srate,psdres,[],[],'yes');
-                            figure(handles.dvsffig + 4 -1);           
+                            [p f Id] = mypsd(sp.z,srate,psdres,'rectangle',[],'yes');
+                            figure(handles.dvsffigS + 4 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
                                 legend(gca,alltags{ids});
