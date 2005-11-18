@@ -32,7 +32,7 @@ options = optimset('MaxFunEvals', 20000*2*n, ...
                    'ShowStatusWindow', 'off');
 
 % normalize recovery to start at 1 and end at 0
-xt = xt - min(xt);
+xt = xt - mean(xt(end-5:end));
 xt = xt / max(xt);
 t = t - min(t);
 

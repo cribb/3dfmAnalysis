@@ -1,3 +1,6 @@
+2005-11-17  Jeremy Cribb <jcribb@email.unc.edu>
+	* relaxation_time.m: used a better approximation for the minimum value (so that the "minimum" is centered around zero).
+
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* relaxation_time.m: commented out a debugging plot.
 
