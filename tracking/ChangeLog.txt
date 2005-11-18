@@ -1,3 +1,7 @@
+2005-11-17  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: added 'table' parameter to the documentation
+	* remove_drift: now reports the drift velocity removed from each coordinate for each bead.
+
 2005-10-12  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m: Added. Version 1.0
 	- clone of load_vrpn_tracking, but cleaner, more efficient and easy to use. Didn't want to break the dependent code, so created anew with more appropriate name.

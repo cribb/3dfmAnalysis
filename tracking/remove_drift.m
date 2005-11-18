@@ -106,7 +106,8 @@ function [v,q] = linear(data, drift_start_time, drift_end_time);
             
             fitz = polyfit(t(idx), bead(idx,Z), 1);
             beadz = bead(:,Z) - polyval(fitz, t) + fitz(2);
-	
+
+            logentry(['Bead ' num2str(k) ': Removed linear drift velocity of x=' num2str(fitx(1)) ', y=' num2str(fity(1)) ', z=' num2str(fitz(1)) '.']);
             % implement fits for ROLL PITCH AND YAW later.
             
             tmp = bead;

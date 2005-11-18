@@ -6,7 +6,7 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absol
 % matlab workspace file (*.mat) format and prepares it for most 
 % data analysis functions.
 % 
-% d = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absolute_pos, tstamps);
+% d = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absolute_pos, tstamps, table);
 %
 % where "d" is the outputted data table
 %       "filemask" is the .mat filename(s) (i.e. wildcards ok)
