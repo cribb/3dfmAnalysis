@@ -1,3 +1,7 @@
+2005-11-20  Jeremy Cribb <jcribb@email.unc.edu>
+	* bioforceGUI.fig: Added fields that report total distance translated/recovered.
+	* bioforceGUI.m: same.
+
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* bioforceGUI.fig: Added r-square value for linear slope estimate.
 	* bioforceGUI.m: same.

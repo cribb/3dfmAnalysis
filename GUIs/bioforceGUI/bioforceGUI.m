@@ -22,7 +22,7 @@ function varargout = bioforceGUI(varargin)
 
 % Edit the above text to modify the response to help bioforceGUI
 
-% Last Modified by GUIDE v2.5 15-Aug-2005 09:25:45
+% Last Modified by GUIDE v2.5 20-Nov-2005 13:53:52
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -152,10 +152,11 @@ function pushbutton_percent_recovery_Callback(hObject, eventdata, handles)
     x = handles.x;
     y = handles.y;
     
-    pr = percent_recovery(y);
+    [pr, xmax, xrec] = percent_recovery(y);
+
+    set(handles.text_maximum_displacement, 'String', num2str(xmax));
+    set(handles.text_recovered_displacement, 'String', num2str(xrec));
     set(handles.text_percent_recovery, 'String', num2str(pr));
-    
-    
 
 
 % --- Executes on button press in pushbutton_slope.
