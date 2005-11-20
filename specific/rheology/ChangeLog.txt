@@ -1,3 +1,6 @@
+2005-11-20  Jeremy Cribb <jcribb@email.unc.edu>
+	* percent_recovery.m: added output variables that report the maximum distance traveled, the distance recovered, as well as the percent recovery.
+	
 2005-11-17  Jeremy Cribb <jcribb@email.unc.edu>
 	* relaxation_time.m: used a better approximation for the minimum value (so that the "minimum" is centered around zero).
 
