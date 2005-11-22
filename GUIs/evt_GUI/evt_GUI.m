@@ -438,7 +438,7 @@ function pushbutton_export_bead_Callback(hObject, eventdata, handles)
     k = find(beadID == currentBead);
 
     bead.t      = handles.table(k,TIME);
-    bead.t      = bead.t - bead.t(1);
+    bead.t      = bead.t - min(handles.table(:,TIME));
     bead.x      = handles.table(k,X);
     bead.y      = handles.table(k,Y);
 
@@ -455,7 +455,7 @@ function pushbutton_export_all_beads_Callback(hObject, eventdata, handles)
     
         idx = find(beadID == k);
 
-        bead(k+1).t      = handles.table(idx,TIME);
+        bead(k+1).t      = handles.table(idx,TIME) - min(handles.table(:,TIME));
         bead(k+1).x      = handles.table(idx,X);
         bead(k+1).y      = handles.table(idx,Y);
         

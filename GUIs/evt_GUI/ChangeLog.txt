@@ -1,4 +1,7 @@
 2005-11-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: minor adjustment to time offset for beads exported to workspace.
+
+2005-11-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.fig: cosmetic changes.  added "Close Figures" button.
 	* evt_gui.m: same.  fixed bug where exporting all beads to workspace only exported the first bead N times.
 
