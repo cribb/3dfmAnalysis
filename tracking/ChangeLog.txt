@@ -1,3 +1,6 @@
+2005-11-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* remove_drift.m: Fixed "not enough points" warning that occurred when a tracker did not exist during the drift-estimation time period.
+
 2005-11-17  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: added 'table' parameter to the documentation
 	* remove_drift: now reports the drift velocity removed from each coordinate for each bead.
@@ -31,240 +34,122 @@
 	* load_video_tracking.m:  fixed a bug where perfectly good timestamp files were not loaded due to getting the filename wrong.  Added logentries so that a message is printed to stdout when timestamps are/are not loaded.
 
 2005-08-31  Kalpit Desai  <kvdesai@email.unc.edu>
-
 	* load_vrpn_tracking.m: 
-
 	- implemented the parsing of 'info' field and version numbers.
-
 	- fixed the units of stage commands.
 
-		
-
 2005-08-10  Jeremy Cribb  <jcribb@email.unc.edu>
-
 	* load_lasertrap_tracking.m: added back power spectrum computation.
 
-
-
 2005-08-10  Jeremy Cribb  <jcribb@email.unc.edu>
-
 	* load_lasertrap_tracking.m: added.  handles special needs for laser trap tracking vrpn files.
 
-
-
 2005-07-19  Jeremy Cribb  <jcribb@email.unc.edu>
-
 	* Changelog: fixed typo regarding date in last entry.
-
 	* load_video_tracking: fixed similar typo in documentation.
 
-
-
 2005-07-19  Jeremy Cribb  <jcribb@email.unc.edu>
-
 	*	load_video_tracking: timestamps are now in unixutc format (number of secondssince 00:00:00 1970/01/01) and now two-column timestamps are handled.
 
-
-
 2005-06-29  Jeremy Cribb  <jcribb@email.unc.edu>
-
 	* load_video_tracking.m: makes older version imported vrpn files look like newer version imported vrpn files.
 
-
-
 2005-06-29  Jeremy Cribb  <jcribb@email.unc.edu>
-
 	* load_video_tracking.m: now uses video_tracking_constants for column labeling.  Fixed a 'off-by-one' bug where some beads were not counted.
-
 	* batch_load_video_tracking.m: now uses video_tracking_constants for column labeling.
 
-
-
 2005-06-27  Jeremy Cribb  <jcribb@email.unc.edu>
-
 	*  get_beadmax: fixed stupid bug.  I really should have tested this first... oy
 
-
-
 2005-06-27  Jeremy Cribb  <jcribb@email.unc.edu>
-
 	*  get_beadmax: added.  returns the maximum bead/tracker ID in a tracked-video dataset.
 
-
-
 2005-06-23 David Hill <dbhill@email.unc.edu>
-
 	* batch_load_video_tracking.m: fixed bug so that tracking files to not
-
 	* have to start at t = 0
 
-
-
 2005-06-22  Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* load_vrpn_tracking.m: Fixed the calculation of BeadPosition.
 
-
-
 2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
-
 	* video_tracking_constants.m: hid a lot of the constants for the video tracking & analysis code into this script.
 
-
-
 2005-06-16  Jeremy Cribb <jcribb@email.unc.edu>
-
 	* load_video_tracking.m: now you can use filemasks to aggregate several video tracks into a single data table.
 
-
-
 2005-05-22  Jeremy Cribb <jcribb@email.unc.edu>
-
 	* load_video_tracking.m: added table parameter that allows one to switch between structure and matrix/table output.
-
 	* get_bead.m: now handles either output type.
 
-
-
 2005-05-21  Jeremy Cribb <jcribb@email.unc.edu>
-
 	* filter_out_repeats_in_vrpn.m: added.
 
-
-
 2005-05-17  Sorrell Massenburg <massenburgs@unc.edu>
-
 	* erase_negatives_in_vrpn.m: added.
 
-
-
 2005-05-09	Jeremy Cribb <jcribb@email.unc.edu>
-
 	* load_video_tracking.m: MAJOR CHANGES to output format.  Prior to this version, load_video_tracking outputted a matrix that required all beads to exist for all times; zeros were used as placeholders.  This was changed to reflect Video Spot Tracker's output more truthfully.  Also added support for '.evt.mat' data format.
-
 	* get_bead.m: added.  Extracts a specific bead's data from new load_video_tracking.
 
-
-
 2005-04-06	Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* load_vrpn_tracking.m: 
-
 	- Now compatible with laser tracker 02.13
-
 	- Tells user when swaping vrpn time stamps with separately logged 'even' time stamps.
-
 	* tclip.m: fixed function signature in the documentation.
 
-
-
 2004-10-23	Jeremy Cribb <jcribb@email.unc.edu>
-
 	* load_video_tracking.m: added filter on input file (in case it's not a struct).
 
-
-
 2004-08-22	Jeremy Cribb	<jcribb@email.unc.edu>
-
 	* load_video_tracking.m: Repaired documentation (did not explain relative/absolute position choice in parameter list)
 
-
-
 2004-06-26	Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* tclip.m: Made 'all fields' as default for fields to be clipped.
 
 2004-06-22	Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* tclip.m: Fixed a typo.
 
 2004-06-22	Kalpit Desai	<kvdesai@cs.unc.edu>
-
-	* tclip.m: Added feature to select only those fileds which are wanted in the clipped dataset. All other fields will be removed. Saves hard-drive space.
+	* tclip.m: Added feature to select only those files which are wanted in the clipped dataset. All other fields will be removed. Saves hard-drive space.
 
 2004-06-18	Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* tclip.m: Reduced the tolerance level for finding correct clipping points for low bandwidth data to 0.0005 seconds from 0.05 seconds. Provides more precise clipping.
 
-		
-
 2004-06-17	Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* tjoin.m: Fixed a bug that was throwing out the meta-data information when two datasets being joined are themselves result of two/more datasets previously joined.
 
 2004-06-17	Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* load_vrpn_tracking.m:
-
 	- Added default storing of uct_offset (universal coordinated time of first sample) within info.orig
-
 	- Changed default bead size value to 'NOT AVAILABLE', instead of 0.957
-
 	* plot_vrpn_tracking.m: commented out the time-offset removal from 'laser' field 
-
 	* tclip.m : Replaced 'varargin' with 'nargin' as it should be.
 
- 
-
 2004-06-14	Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* load_vrpn_tracking: 
-
 	- Added feature to select displacement units (meters|microns) of position error, stage reports and bead positions. Previously, this was only possible for stage commands
-
 	- Fixed the bug of getting weird first entry in position error log, messing up the whole data set when offset is being subtracted out. This was happening because we don't have jacobian available for first position error, so using default jacobian. Fixed it by discarting the first sample.
 
-
-
 2004-06-11	Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* load_vrpn_tracking.m: Added an arguement to select if we want to remove the offset from computed bead positions. Also re-commented the whole header to make consitent with updates.
-
 	* tclip.m: just renamed the flag 'save' to 'fsave' to avoid using reserved keywords.
 
-
-
 2004-05-20	Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* plot_vrpn_tracking.m: Subtract off the time-offset before plotting graphs.
 
-
-
 2004-05-19	Kalpit Desai	<kvdesai@cs.unc.edu>
-
 	* tclip.m: added feature to let user specify if the resultant file needs to be automatically saved.
 
-	
-
 2004-05-19	Kalpit Desai	<kvdesai@cs.unc.edu>
-
-
-
 	* load_vrpn_tracking.m:
-
 	- Do not try saving the file name when data is supplied in form of a matlab variable.
-
 	- changed XYZunits options to 'u' and 'm', this used to be 'um' and 'm', creating ambiguity.
-
 	
-
 	* plot_vrpn_tracking.m:
-
 	- replaced '.stage.' with '.stageCom.', to accord with changes in load_vrpn_tracking.m				
 
-
-
 2004-05-18  Kalpit Desai <kvdesai@cs.unc.edu>
-
-
-
 	* load_vrpn_tracking.m : Fixed the comment about default 'time' argument - should have been 'uct'
 
-
-
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
-
-
-
 	* Initial Version
-

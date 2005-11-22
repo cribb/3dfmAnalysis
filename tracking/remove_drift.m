@@ -89,14 +89,14 @@ function [v,q] = linear(data, drift_start_time, drift_end_time);
     for k = 0 : get_beadmax(data);
 
         bead = get_bead(data, k);
-        
-        if ( length(bead) > 1 )
+
+        t = bead(:,TIME);
+        t0 = t(1);
+        t = t - t0;
             
-            t = bead(:,TIME);
-            t0 = t(1);
-            t = t - t0;
-            
-            idx = find(t >= (drift_start_time - t0) & t <= (drift_end_time - t0));
+        idx = find(t >= (drift_start_time - t0) & t <= (drift_end_time - t0));
+                
+        if ( length(idx) > 2 )            
             
             fitx = polyfit(t(idx), bead(idx,X), 1);
             beadx = bead(:,X) - polyval(fitx, t) + fitx(2);
