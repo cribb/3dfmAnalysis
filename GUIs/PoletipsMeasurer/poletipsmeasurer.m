@@ -99,7 +99,7 @@ function varargout = btnLoadFile_Callback(h, eventdata, handles, varargin)
     calib_um = str2num(get(handles.txtCalibration,'String'));
     %calib_um = calib_um * 1e-6;
     
-    dist = pole_distances(coord) * calib_um;
+    dist = distances(coord) * calib_um;
     cent = pole_center(coord)    * calib_um;
     regularity = pole_regularity(dist);
     

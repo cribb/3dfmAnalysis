@@ -1,3 +1,6 @@
+2005-11-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* poletipsmeasurer.m: updated function call to 'distances' to use updated parameter list.
+
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 
 	* Initial Version
