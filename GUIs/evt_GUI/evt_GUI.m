@@ -22,7 +22,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 04-Nov-2005 10:58:44
+% Last Modified by GUIDE v2.5 21-Nov-2005 20:19:21
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -438,6 +438,7 @@ function pushbutton_export_bead_Callback(hObject, eventdata, handles)
     k = find(beadID == currentBead);
 
     bead.t      = handles.table(k,TIME);
+    bead.t      = bead.t - bead.t(1);
     bead.x      = handles.table(k,X);
     bead.y      = handles.table(k,Y);
 
@@ -448,12 +449,11 @@ function pushbutton_export_bead_Callback(hObject, eventdata, handles)
 function pushbutton_export_all_beads_Callback(hObject, eventdata, handles)
     global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
     
-    currentBead = get(handles.slider_BeadID, 'Value');
     beadID = handles.table(:,ID);
 
     for k = 0:max(beadID)
     
-        idx = find(beadID == currentBead);
+        idx = find(beadID == k);
 
         bead(k+1).t      = handles.table(idx,TIME);
         bead(k+1).x      = handles.table(idx,X);
@@ -590,6 +590,12 @@ function checkbox_attach_magnets_Callback(hObject, eventdata, handles)
         
     end
 
+    
+% --- Executes on button press in pushbutton_close_figures.
+function pushbutton_close_figures_Callback(hObject, eventdata, handles)
+    close all;
+
+    
 % =========================================================================
 % Everything below this point are functions related to computation and data
 % handling/display, and not the gui (thought the handles structure is used).
@@ -831,5 +837,4 @@ function logentry(txt)
      headertext = [logtimetext 'evt_gui: '];
      
      fprintf('%s%s\n', headertext, txt);
-
 

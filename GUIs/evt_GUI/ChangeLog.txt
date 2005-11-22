@@ -1,5 +1,9 @@
+2005-11-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.fig: cosmetic changes.  added "Close Figures" button.
+	* evt_gui.m: same.  fixed bug where exporting all beads to workspace only exported the first bead N times.
+
 2005-11-04  Jeremy Cribb <jcribb@email.unc.edu>
-	* evt_gui.m:  added export all beads button. added numberical suffix to variable name for individually exported beads.
+	* evt_gui.m:  added export all beads button. added numerical suffix to variable name for individually exported beads.
 	* evt_gui.fig: same.
 	
 2005-10-13  Jeremy Cribb <jcribb@email.unc.edu>
