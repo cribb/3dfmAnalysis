@@ -22,7 +22,7 @@ function varargout = FreqSweepAnalysis(varargin)
 
 % Edit the above text to modify the response to help FreqSweepAnalysis
 
-% Last Modified by GUIDE v2.5 15-Nov-2005 13:46:52
+% Last Modified by GUIDE v2.5 30-Nov-2005 13:15:31
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -75,10 +75,12 @@ handles.threeDfig = 30;
 handles.psdfigS = 40; % 10 = r, 11 = x, 12 = y, 13 = z;
 handles.dvsffigS = 50;
 handles.threeDfigS = 60;
-
+handles.T1msfig = 70;
+handles.T10msfig = 80;
 %  ....add to this list as more types of plots are supported
 % Some other constants
 handles.srate = 10000;
+handles.psdwin = 'blackman';
 guidata(hObject, handles);
 
 % UIWAIT makes FreqSweepAnalysis wait for user response (see UIRESUME)
@@ -111,8 +113,11 @@ switch get(handles.menu_quants,'value')
     otherwise
         prompt_user('Error: Unrecognized input for desired quantities');
 end
-        
-[f, p] = uigetfiles('*.mat','Select one or more files',get(hObject,'UserData'));
+try        
+    [f, p] = uigetfiles('*.mat','Select one or more files',get(hObject,'UserData'));
+catch
+    [f, p] = uigetfiles('*.mat','Select one or more files','D:\');
+end
 set(hObject,'UserData',p);
 prompt_user('Wait...Loading selected files',handles);
 flags.keepuct = 0; flags.keepoffset = 0; flags.askforinput = 0;flags.inmicrons = 1;
@@ -229,7 +234,7 @@ id = get(handles.menu_files,'Value');
 bp = g.(handles.dmnpt{1}){1,id}.beadpos;
 % check if the current file is plotted on the base figure
 if (0 == figflag(getfocusfigname(handles)))
-   button_plotThis(handles.button_plotThis,[],handles);
+   button_preview(handles.button_preview,[],handles);
 end
 hf = gcf; ha = gca;
 
@@ -255,8 +260,8 @@ if (isfield(g.(handles.dmnpt{1}){1,id},'laser'))
     g.(handles.dmnpt{1}){1,id}.laser.intensity = laser.intensity(ist:iend);
 end
 
-% --- Executes on button press in button_plotThis.
-function button_plotThis_Callback(hObject, eventdata, handles)
+% --- Executes on button press in button_preview.
+function button_preview_Callback(hObject, eventdata, handles)
 global g
 if ~exist('g') | isempty(g)
     prompt_user('No file exists in the database');
@@ -264,7 +269,6 @@ if ~exist('g') | isempty(g)
 end
 id = get(handles.menu_files,'Value');
 bp = g.(handles.dmnpt{1}){1,id}.beadpos;
-
 figure(handles.basefig); clf; ha = gca; hf = gcf;
 set(hf,'name',getfocusfigname(handles),'NumberTitle','Off');
 plot(bp.time, [bp.x,bp.y,bp.z]); 
@@ -335,7 +339,7 @@ if get(handles.check_bead,'value')
                         bp.r = sqrt(bp.x.^2 + bp.y.^2 + bp.z.^2);
                         bp.r = bp.r - mean(bp.r);
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.r,srate,psdres,'rectangle',[],'yes');
+                            [p f Id] = mypsd(bp.r,srate,psdres,handles.psdwin,[],'yes');
                             figure(handles.dvsffig + 1 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -355,7 +359,7 @@ if get(handles.check_bead,'value')
                         end
                     case strdim{2}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.x,srate,psdres,'rectangle',[],'yes');
+                            [p f Id] = mypsd(bp.x,srate,psdres,handles.psdwin,[],'yes');
                             figure(handles.dvsffig + 2 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -375,7 +379,7 @@ if get(handles.check_bead,'value')
                         end
                     case strdim{3}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.y,srate,psdres,'rectangle',[],'yes');
+                            [p f Id] = mypsd(bp.y,srate,psdres,handles.psdwin,[],'yes');
                             figure(handles.dvsffig + 3 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -395,7 +399,7 @@ if get(handles.check_bead,'value')
                         end
                     case strdim{4}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.z,srate,psdres,'rectangle',[],'yes');
+                            [p f Id] = mypsd(bp.z,srate,psdres,handles.psdwin,[],'yes');
                             figure(handles.dvsffig + 4 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -426,9 +430,42 @@ if get(handles.check_bead,'value')
             bp = g.(handles.dmnpt{1}){1,ids(c)}.beadpos;
             bp.x = bp.x - bp.x(1,1);
             bp.y = bp.y - bp.y(1,1);
-            bp.z = bp.z - bp.z(1,1);        
-            plot3(bp.x,bp.y,sp.z,colrs(mod(c-1,length(colrs))+1));
+            bp.z = bp.z - bp.z(1,1);
+            bp = interpXYZpos(bp,1/100);
+            plot3(bp.x,bp.y,bp.z,colrs(mod(c-1,length(colrs))+1));
+            xlabel('X');
+            ylabel('Y');
+            zlabel('Z');
+            title(g.(handles.dmnpt{5}){1,ids(c)});
+            pretty_plot;
         end
+    end
+    %% ==================   PLOT TIME-DOMAIN XYZ TRACES   =====================
+    if get(handles.check_T1ms,'value')
+        figure(handles.T1msfig);    
+        for c = 1:1 %plot this for the first tag only        
+            bp = g.(handles.dmnpt{1}){1,ids(c)}.beadpos;
+            bp = interpXYZpos(bp,1/1000);
+            plot(bp.time,[bp.x,bp.y,bp.z]);
+            xlabel('Seconds');
+            ylabel('Microns');
+            title(g.(handles.dmnpt{5}){1,ids(c)});
+            legend('X','Y','Z');
+            pretty_plot;
+        end        
+    end
+    if get(handles.check_T10ms,'value')
+        figure(handles.T10msfig);    
+        for c = 1:1 %plot this for the first tag only     
+            bp = g.(handles.dmnpt{1}){1,ids(c)}.beadpos;
+            bp = interpXYZpos(bp,1/100);
+            plot(bp.time,[bp.x,bp.y,bp.z]);
+            xlabel('Seconds');
+            ylabel('Microns');
+            title(g.(handles.dmnpt{5}){1,ids(c)});
+            legend('X','Y','Z');
+            pretty_plot;
+        end        
     end
 end
 %%=========== stage: COMPUTE AND PLOT PSD + CUMULATIVE DISTANCE ===============
@@ -473,7 +510,7 @@ if get(handles.check_stage,'value')
                         sp.r = sqrt(sp.x.^2 + sp.y.^2 + sp.z.^2);
                         sp.r = sp.r - mean(sp.r);
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.r,srate,psdres,'rectangle',[],'yes');
+                            [p f Id] = mypsd(sp.r,srate,psdres,handles.psdwin,[],'yes');
                             figure(handles.dvsffigS + 1 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -493,7 +530,7 @@ if get(handles.check_stage,'value')
                         end
                     case strdim{2}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.x,srate,psdres,'rectangle',[],'yes');
+                            [p f Id] = mypsd(sp.x,srate,psdres,handles.psdwin,[],'yes');
                             figure(handles.dvsffigS + 2 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -513,7 +550,7 @@ if get(handles.check_stage,'value')
                         end
                     case strdim{3}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.y,srate,psdres,'rectangle',[],'yes');
+                            [p f Id] = mypsd(sp.y,srate,psdres,handles.psdwin,[],'yes');
                             figure(handles.dvsffigS + 3 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -533,7 +570,7 @@ if get(handles.check_stage,'value')
                         end
                     case strdim{4}
                         if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.z,srate,psdres,'rectangle',[],'yes');
+                            [p f Id] = mypsd(sp.z,srate,psdres,handles.psdwin,[],'yes');
                             figure(handles.dvsffigS + 4 -1);           
                             semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
                             if (c == length(ids))% if this is last file
@@ -571,6 +608,13 @@ if get(handles.check_stage,'value')
 end
 % keyboard
 dbclear if error
+
+function posout = interpXYZpos(posin,rate)
+posout.time = [posin.time(1):rate:posin.time(end)]';
+posout.x = interp1(posin.time,posin.x,posout.time);
+posout.y = interp1(posin.time,posin.y,posout.time);
+posout.z = interp1(posin.time,posin.z,posout.time);
+
 % --- Executes on button press in check_psd.
 function check_psd_Callback(hObject, eventdata, handles)
 if ~get(hObject,'Value')
@@ -717,5 +761,23 @@ function menu_quants_Callback(hObject, eventdata, handles)
 
 % Hints: contents = get(hObject,'String') returns menu_quants contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_quants
+
+
+% --- Executes on button press in check_T1ms.
+function check_T1ms_Callback(hObject, eventdata, handles)
+% hObject    handle to check_T1ms (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_T1ms
+
+
+% --- Executes on button press in check_T10ms.
+function check_T10ms_Callback(hObject, eventdata, handles)
+% hObject    handle to check_T10ms (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_T10ms
 
 
