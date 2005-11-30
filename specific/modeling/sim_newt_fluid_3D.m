@@ -40,12 +40,14 @@ function v = sim_newt_fluid_3D(viscosity, bead_radius, sampling_rate, duration, 
     mags = A * randn(sampling_rate * duration, 1);
     
     % construct the angles of the random walk vector;
+	rand('state',sum(10000*clock));
     theta = 2*pi * rand(sampling_rate * duration,1);
+	rand('state',sum(10000*clock));
     phi = 2*pi * rand(sampling_rate * duration,1);
 
     % construct the random walk
     x = cumsum(mags .* cos(phi) .* cos(theta));
-    y = cumsum(mags .* sin(phi) .* sin(theta));
+    y = cumsum(mags .* cos(phi) .* sin(theta));
     z = cumsum(mags .* sin(phi));
     
     v = [x y z];

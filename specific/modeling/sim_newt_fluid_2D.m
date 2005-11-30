@@ -1,4 +1,4 @@
-function v = sim_newt_fluid_3D(viscosity, bead_radius, sampling_rate, duration, temp)
+function v = sim_newt_fluid_2D(viscosity, bead_radius, sampling_rate, duration, temp)
 % 3DFM function  
 % Rheology 
 % last modified 11/17/04 
@@ -40,6 +40,7 @@ function v = sim_newt_fluid_3D(viscosity, bead_radius, sampling_rate, duration, 
     mags = A * randn(sampling_rate * duration, 1);
     
     % construct the angles of the random walk vector;
+	rand('state',sum(10000*clock));
     angles = 2*pi * rand(sampling_rate * duration,1);
     
     % construct the random walk
