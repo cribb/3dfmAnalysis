@@ -1,4 +1,7 @@
-2005-11-16   Jeremy Cribb <jcribb@email.unc.edu>
+2005-12-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* get_mips.m: added start and stop frames to parameter list.
+
+2005-11-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* mip.m: fixed an off-by-one bug that would break code whenever capturing intensity projections with a stride of 1.
 
 2005-11-15   Jeremy Cribb <jcribb@email.unc.edu>
