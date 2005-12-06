@@ -1,4 +1,4 @@
-function v = sim_newt_fluid_1D(viscosity, bead_radius, sampling_rate, duration, temp)
+function x = sim_newt_fluid_1D(viscosity, bead_radius, sampling_rate, duration, temp)
 % 3DFM function  
 % Rheology 
 % last modified 11/17/04 
@@ -35,7 +35,8 @@ function v = sim_newt_fluid_1D(viscosity, bead_radius, sampling_rate, duration, 
     gamma = 6 * pi * viscosity * bead_radius;        
     D = k * temp / gamma;
     A = sqrt(2*D*time_step);
+    v = A * randn(sampling_rate * duration, 1) + A;
 
-    v =  cumsum(A * randn(sampling_rate * duration, 1));
+    x =  cumsum(v);
     
 

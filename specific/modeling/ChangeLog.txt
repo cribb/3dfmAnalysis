@@ -1,3 +1,8 @@
+2005-12-06  Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_newt_fluid_1D.m: minor changes to algorithm.
+	* sim_newt_fluid_2D.m: same.
+	* sim_newt_fluid_3D.m: same.
+
 2005-11-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* sim_newt_fluid_2D.m.  added reseeding of generated random numbers.
 	* sim_newt_fluid_3D.m.  added reseeding of generated random numbers.  fixed equation that converted from spherical to cartesian coords.
@@ -12,6 +17,7 @@
 	* sim_newt_ps.m.  added.  computes theoretical power spectrum for Newtonian fluid.
 
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
-
 	* Initial Version
+
+
 

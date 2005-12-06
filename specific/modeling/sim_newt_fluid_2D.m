@@ -37,11 +37,11 @@ function v = sim_newt_fluid_2D(viscosity, bead_radius, sampling_rate, duration, 
     A = sqrt(4*D*time_step);
 
     % construct the magnitude of the random walk vector
-    mags = A * randn(sampling_rate * duration, 1);
+    mags = A * randn(sampling_rate * duration, 1) + A;
     
     % construct the angles of the random walk vector;
 	rand('state',sum(10000*clock));
-    angles = 2*pi * rand(sampling_rate * duration,1);
+    angles = 2*pi * rand(sampling_rate * duration,1) - pi;
     
     % construct the random walk
     x = cumsum(mags .* cos(angles));
