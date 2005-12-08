@@ -1,3 +1,6 @@
+2005-12-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* visc_ps.m: corrected the 'water' and 'karo' reference lines on the output plot.
+
 2005-11-20  Jeremy Cribb <jcribb@email.unc.edu>
 	* percent_recovery.m: added output variables that report the maximum distance traveled, the distance recovered, as well as the percent recovery.
 	

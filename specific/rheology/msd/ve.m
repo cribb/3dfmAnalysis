@@ -39,7 +39,7 @@ MYgamma = gamma(1 + alpha);
 % to delete the last row of f, tau, and msd values computed.
 msd = msd(1:end-1,:);
 tau = tau(1:end-1,:);
-gstar = (2*k*T) ./ (3 * pi * bead_radius .* msd .* MYgamma);
+gstar = (2/3) * (k*T) ./ (pi * bead_radius .* msd .* MYgamma);
 
 f = 1 ./ tau;
 w = f/(2*pi);

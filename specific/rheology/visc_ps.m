@@ -12,15 +12,7 @@ function v = visc_ps(f, ps, a, cutoff)
 %         psd = power spectra of bead-position in [m^2/Hz]
 %         bead_radius = bead radius in [m]
 %         cutoff = cutoff frequency for linear-fit in [Hz]
-%
-% Notes:  
 %   
-%   
-%  02/20/02 - created; jcribb
-%  07/28/03 - added documentation; jcribb
-%  05/07/04 - updated documentation; jcribb
-%   
-%  
 
 % constants
 k = 1.38e-23;
@@ -45,11 +37,16 @@ ps= log10(ps);
 p = polyfit(f, ps, 1);
 fit = polyval(p, f);
 
-B = p(end);
+B = p(2);
 n = (k * T) / (6*pi^3*10^B*a);
 
-water = -14.1027 - 2*f;
-karo = -15.5583 - 2*f;
+n_water = 0.001;  % Pa sec
+n_karo  = 1.6; % Pa sec
+
+Bwater = log10( (k*T) / (6*pi^3*a*n_water) );
+Bkaro  = log10( (k*T) / (6*pi^3*a*n_karo)  );
+water = Bwater - 2*f;
+karo = Bkaro - 2*f;
 
 figure; 
 plot(f, [ps fit], f, water, '--k', f, karo, '--r');
