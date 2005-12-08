@@ -1,3 +1,7 @@
+2005-12-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* rod_msd.m: added. computes the mean square displacement vs. a time-window for a diffusing rod.
+	* rod_ve.m: added. computes complex modulus and viscosity for a diffusing rod, using output from rod_msd.m.
+
 2005-10-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* ve.m: updated documentation.  added number of beads tracked to output.
 
