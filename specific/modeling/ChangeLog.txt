@@ -1,3 +1,6 @@
+2005-12-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_newt_fluid_1D.m: removed a bias I unintentionally left in the code.
+
 2005-12-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* sim_newt_fluid_1D.m: minor changes to algorithm.
 	* sim_newt_fluid_2D.m: same.

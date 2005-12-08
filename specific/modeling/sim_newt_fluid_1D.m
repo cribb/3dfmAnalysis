@@ -35,8 +35,7 @@ function x = sim_newt_fluid_1D(viscosity, bead_radius, sampling_rate, duration, 
     gamma = 6 * pi * viscosity * bead_radius;        
     D = k * temp / gamma;
     A = sqrt(2*D*time_step);
-    v = A * randn(sampling_rate * duration, 1) + A;
+    v = A * randn(sampling_rate * duration, 1);
 
     x =  cumsum(v);
     
-
