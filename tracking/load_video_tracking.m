@@ -158,7 +158,6 @@ for fid = 1:length(filelist)
         
         try
             times = load([tfile '.raw.tstamp.txt'], 'ASCII');            
-            logentry('Successfully loaded time stamps.');
         catch
             tstamps = 'no';                
             logentry('Attempt to load timestamps failed (file not found). Using frame rate to construct timestamps');
@@ -210,6 +209,9 @@ for fid = 1:length(filelist)
                 data(idx,TIME) = frames * 1/frame_rate;
             end                
         end    
+
+        logentry('Successfully loaded and attached time stamps.');
+
     end
 
     

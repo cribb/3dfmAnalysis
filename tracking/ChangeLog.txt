@@ -1,4 +1,7 @@
 2005-11-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m:  moved an informational message to a better place.
+
+2005-11-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m: Fixed "not enough points" warning that occurred when a tracker did not exist during the drift-estimation time period.
 
 2005-11-17  Jeremy Cribb <jcribb@email.unc.edu>
