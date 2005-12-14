@@ -1,3 +1,8 @@
+2005-12-14  Jeremy Cribb <jcribb@email.unc.edu>
+	* raw2img.m: added stride parameter.
+	* raw_balance_gain.m: for a raw video, this balances the gain values for both channels in each pulnix raw image and saves a new raw file.
+	* raw_swaplines.m: for a raw video, this corrects the swapped lines problem for each frame.  This follows the same algorithm in gluitake.
+
 2005-12-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* get_mips.m: added start and stop frames to parameter list.
 

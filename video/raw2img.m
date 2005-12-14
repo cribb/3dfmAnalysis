@@ -10,6 +10,7 @@ function v = raw2img(varargin)
 %  v = raw2img(rawfilein, image_format)
 %  v = raw2img(rawfilein, image_format, end_frame)
 %  v = raw2img(rawfilein, image_format, start_frame, end_frame);  
+%  v = raw2img(rawfilein, image_format, start_frame, end_frame, stride);  
 %   
 %  where "rawfilein" is the filename of the input RAW file. 
 %        "image_type" is any image type supported by matlab's imwrite (default=tif)
@@ -18,6 +19,8 @@ function v = raw2img(varargin)
 %          (default = 1)
 %        "end_frame" is the final frame to convert for output stack
 %          (default = the number of frames in the rawfile)
+%        "stride" is the distance between desired frames
+%          (default = 1)
 %   
 %  09/22/04 - created; jcribb.
 %  05/14/05 - fixed an off by one error.  Now single frame RAWs are
@@ -30,21 +33,31 @@ switch nargin
         image_type = 'tif';
         start_frame = 0;
         end_frame = inf;        % will handle this later
+        stride = 1;
     case 2
         rawfilein = varargin{1};
         image_type = varargin{2};
         start_frame = 0;
         end_frame = inf;        % will handle this later
+        stride = 1;
     case 3
         rawfilein = varargin{1};
         image_type = varargin{2};        
         start_frame = 0;
         end_frame = varargin{3};
+        stride = 1;
     case 4
         rawfilein = varargin{1};
         image_type = varargin{2};        
         start_frame = varargin{3};
-        end_frame = varargin{4};       
+        end_frame = varargin{4};  
+        stride = 1;
+    case 5
+        rawfilein = varargin{1};
+        image_type = varargin{2};        
+        start_frame = varargin{3};
+        end_frame = varargin{4};  
+        stride = varargin{5};
     otherwise
         error('Invalid use of argument-list.');
 end
@@ -91,7 +104,7 @@ axis square;
 set(ax, 'Visible', 'off');
 
 
-for k=start_frame:end_frame-1
+for k = start_frame : stride : (end_frame-1)
     
   status = fseek(fid, frame_size*k, 'bof');  % advance to next frame
     
