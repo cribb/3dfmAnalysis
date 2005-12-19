@@ -11,7 +11,7 @@ function d = load_laser_tracking(file, fields, flags);
 % USAGE:
 % d = load_laser_tracking(file, fields, flags);
 %
-% PARAMETER DESCRIPTION: curly brackets indicate default values.
+% INPUT PARAMETER DESCRIPTION: curly brackets indicate default values.
 % 
 % "file" : required arguement
 %     it can be a string containing name of the the .mat file 
@@ -41,6 +41,19 @@ function d = load_laser_tracking(file, fields, flags);
 %     by the user. SPECIFYING 1 TURNS LOAD_LASER_TRACKING INTO A FUNCTION 
 %     THAT REQUIRES USER INTERACTION, SO BATCH FILES WOULD HALT.
 % 
+% OUTPUT PARAMETER DESCRIPTION:
+% The output is a structure containing the fields that were requested.
+% The field names are exactly same as those given by load_vrpn_tracking.
+% Name of the fields in the output structure:
+%     .beadpos
+%     .stageCom
+%     .stageReport
+%     .posError
+%     .qpd
+%     .laser
+%     .gains
+%     .Jacobian
+%     
 % NOTES: The elder brother of this function 'load_vrpn_tracking' may get
 % obsolete at some point. It is encouraged to use this function instead.
 

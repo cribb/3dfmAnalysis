@@ -1,3 +1,6 @@
+2005-12-19  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m: Added comments about output parameters
+
 2005-11-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m:  moved an informational message to a better place.
 
