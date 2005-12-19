@@ -1,0 +1,19 @@
+2005-12-19 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: The new and more appropriate name for the old file FreqSweepAnalysis.m. 
+	- Competely renovated, now targetted for interactive analysis of a much broader range of experiments. 
+	- Frequency Sweep analysis is still disabled.
+	* lt_analysis_gui.fig: same.
+2005-11-30 Kalpit Desai <kvdesai@email.unc.edu>
+	* FreqSweepAnalysis.m, freqSweepAnalysis.fig: Several new features e.g. plotting 3d trace, XYZ time series etc.
+2005-11-15 Kalpit Desai <kvdesai@email.unc.edu>
+	* FreqSweepAnalysis.m: Several new features e.g. calculating and ploting cumulative displacement upto certain frequency, plotting for stage etc. 
+	* FreqSweepAnalysis.fig: Couple of relevant checkboxes
+
+2005-10-18 Kalpit Desai <kvdesai@email.unc.edu>
+	* FreqSweepAnalysis.m: Now in finely working condition for passive data.
+	* FreqSweepAnalysis.fig: Couple of other buttons and fixes.
+	
+2005-10-17 Kalpit Desai <kvdesai@email.unc.edu>
+	* ChangeLog.txt: First entry.
+	* FreqSweepAnalysis.fig: A GUI for analyzing frequency sweep data. Only passive data for now.
+	* FreqSweepAnalysis.m: A matlab file that goes with it.

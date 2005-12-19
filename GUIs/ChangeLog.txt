@@ -1,3 +1,6 @@
+2005-12-19	Kalpit Desai <kvdesai@email.unc.edu>
+	* Emptied the directory FreqSweepAnalysisGUI
+	* Added the files in another better named directory: lt_analysis_GUI
 2005-08-14  Jeremy Cribb <jcribb@email.unc.edu>
 	* added elt_GUI.
   * added mainGUI.
