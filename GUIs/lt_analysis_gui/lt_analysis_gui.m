@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_gui
 
-% Last Modified by GUIDE v2.5 16-Dec-2005 12:54:56
+% Last Modified by GUIDE v2.5 20-Dec-2005 12:52:43
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -211,10 +211,18 @@ prompt_user([num2str(length(selec)),' files were removed from the database.'],ha
 
 % --- Executes on selection change in menu_files.
 function menu_files_Callback(hObject, eventdata, handles)
+global g
 % Hints: contents = get(hObject,'String') returns menu_files contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_files
 updatesignalmenu(handles);% this will also refresh the main figure
-
+v = get(hObject,'Value');
+% check that the current file has ch 8 loaded
+if isfield(g.(handles.dmnptue{1}){1,v}, handles.signames.intr{4})
+    set(handles.check_overlaymag,'Enable','On');
+else
+    set(handles.check_overlaymag,'Enable','Off');
+    set(handles.chekc_overlaymag,'Value',0);
+end
 % --- Executes on button press in button_tag.
 function button_tag_Callback(hObject, eventdata, handles)
 global g
@@ -401,7 +409,6 @@ set(hObject,'UserData',sigid);%remember the last selection
 checkdimsvalidity(handles);
 updatemainfig(handles,'quant');
 
-
 % --- Executes on selection change in list_dims.
 function list_dims_Callback(hObject, eventdata, handles)
 val = get(hObject,'Value');
@@ -419,8 +426,17 @@ function button_many_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in check_fresponse.
 function check_fresponse_Callback(hObject, eventdata, handles)
-% --- Executes on button press in button_test.
 
+% --- Executes on selection in check_3d.
+function check_3d_Callback(hObject, eventdata, handles)
+if (get(hObject,'Value'))
+    plot3dfigure(handles);
+else
+    if (ishandle(handles.threeDfig))
+        close(handles.threeDfig);
+    end
+end
+% --- Executes on button press in button_test.
 function button_test_Callback(hObject, eventdata, handles)
 global g
 keyboard
@@ -451,7 +467,7 @@ switch sigid
         selec(:,2) = sigval.x(istart:iend);
         selec(:,3) = sigval.y(istart:iend);
         selec(:,4) = sigval.z(istart:iend);
-        selec(:,1) = sqrt(selec(:,1).^2 + selec(:,2).^2 + selec(:,3).^2);      
+        selec(:,1) = sqrt(selec(:,2).^2 + selec(:,3).^2 + selec(:,4).^2);      
     case 3
         selec(:,1) = sigval.q1(istart:iend);
         selec(:,2) = sigval.q2(istart:iend);
@@ -462,57 +478,57 @@ switch sigid
 end
 
 % Now perform computations and make the result strings
-str.trend = []; str.rms = []; str.p2p = []; tab = '    ';
+str.trend = []; str.detrms = []; str.p2p = []; str.detp2p = []; tab = '    ';
 sf = '%+05.3f';
 if sigid == 1 | sigid ==2 %if the signal is a position measurement
     dims = get(handles.list_dims,'Value'); %selected dimensions
-    strdims = get(handles.list_dims,'String');% all strings
+    strdims = get(handles.list_dims,'String');% all strings    
     for c = 1:length(dims)
         [p s] = polyfit(tsel,selec(:,dims(c)),1);                
         detrend = selec(:,dims(c)) - polyval(p,tsel);
         str.trend = [str.trend,' (',strdims{dims(c)},') ', num2str(p(1),sf),tab];
-        str.rms = [str.rms,' (', strdims{dims(c)}, ') ',num2str(rms(detrend),sf),tab];
-        str.p2p = [str.p2p,' (', strdims{dims(c)}, ') ',num2str(range(detrend),sf),tab];                                
+        str.detrms = [str.detrms,' (', strdims{dims(c)}, ') ',num2str(rms(detrend),sf),tab];
+        str.detp2p = [str.detp2p,' (', strdims{dims(c)}, ') ',num2str(range(detrend),sf),tab];
+        str.p2p = [str.p2p,' (',strdims{dims(c)}, ') ',num2str(range(selec(:,dims(c))),sf),tab];
     end
 else % Not a position measurement, so no extra labels for dimensions
     for c = 1:size(selec,2)
         [p s] = polyfit(tsel,selec(:,c),1);                
         detrend = selec(:,c) - polyval(p,tsel);
         str.trend = [str.trend, num2str(p(1),sf),tab];
-        str.rms = [str.rms, num2str(rms(detrend),sf),tab];
-        str.p2p = [str.p2p, num2str(range(detrend),sf),tab];    
+        str.detrms = [str.detrms, num2str(rms(detrend),sf),tab];
+        str.detp2p = [str.detp2p, num2str(range(detrend),sf),tab];    
+        str.p2p = [str.p2p,num2str(range(selec(:,c)),sf),tab];
     end
 end
 % Now print all this information on the separate figure
 if (~ishandle(handles.boxresfig))
     initresultfig(handles.boxresfig);
 end
+
 figure(handles.boxresfig);
 htext = get(handles.boxresfig,'UserData');
 set(htext.trend,'String',['Avg Trend [dY/dX]: ',str.trend]);
-set(htext.rms,'String',  ['Detrended RMS    : ',str.rms]);
-set(htext.p2p,'String',  ['Detrended Range  : ',str.p2p]);
+set(htext.p2p,'String',  ['Peak-to-Peak     : ',str.p2p]);
+set(htext.detrms,'String',  ['Detrended RMS  : ',str.detrms]);
+set(htext.detp2p,'String',  ['Detrended Range: ',str.detp2p]);
 % disp('results updated');
 %-----------------------------------------------------------------------
 function initresultfig(h)
-figure(h);	
-% set(h,'DoubleBuffer', 'off', ...
-%     'Position', [100 100 500 150], ...
-%     'Resize', 'Off', ...
-%     'MenuBar', 'none', ...
-%     'NumberTitle', 'off', ...
-%     'Name', 'BoxResults', ...
-%     'Colormap', gray(256));
-set(h,'DoubleBuffer', 'off');
-% set(h,'Position', [100 100 500 150]);%throws out of screen
-set(h,'Resize', 'On');
-set(h,'MenuBar', 'none');
-set(h,'NumberTitle', 'off');
-set(h,'Name', 'BoxResults');
+sp = get(0,'ScreenSize');
+figure(h);
+fp = get(h,'Position');
+set(h,'DoubleBuffer', 'off', ...
+    'Position', [fp(1:2) sp(3)*0.3 sp(4)*0.2], ...
+    'Resize', 'On', ...
+    'MenuBar', 'none', ...
+    'NumberTitle', 'off', ...
+    'Name', 'BoxResults');
 
 htext.trend = text(0.1,0.9,' ','FontSize',12);
-htext.rms = text(0.1,0.7,' ', 'FontSize', 12);         
-htext.p2p = text(0.1,0.5,' ','FontSize', 12); 
+htext.p2p = text(0.1,0.7,' ','FontSize', 12); 
+htext.detrms = text(0.1,0.5,' ', 'FontSize', 12);         
+htext.detp2p = text(0.1,0.3,' ', 'FontSize',12);
 htext.units = text(0.1,0.1,'Units should be derived from units of X and Y axis','Fontsize',10);
 axis off;
 set(h, 'UserData', htext);
@@ -539,6 +555,10 @@ sigstr = get(handles.menu_signal,'String');
 figid = get(handles.button_drawbox,'UserData');
 str = [num2str(figid),':',sigstr{sigid}];
 %-----------------------------------------------------------------------
+% --- Executes on button press in check_overlaymag.
+function check_overlaymag_Callback(hObject, eventdata, handles)
+overlaymag(handles);
+
 %-----------------------------------------------------------------------
 % make the matrices of signal values to be displayed
 function [sigout, tout, annots] = fillsig(sigin,res,signame,handles)
@@ -687,7 +707,58 @@ axis(hma,'tight');
 if findobj(hma,'Tag','Box')
     updatebox(handles,hma,0);
 end
+if isequal(lower(get(handles.check_overlaymag,'Enable')),'on') & (get(handles.check_overlaymag,'Value') == 1)
+    overlaymag(handles,figid);
+end
+if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'Value') == 1)
+    plot3dfigure(handles,sigvals);
+end
 dbclear if error
+%-----------------------------------------------------------------------
+function overlaymag(varargin)
+global g
+handles = varargin{1};
+fileid = get(handles.menu_files,'value');
+if nargin < 2    
+    sigid = get(handles.menu_signal,'UserData');
+    figid = handles.mainfigids(sigid);
+else
+    figid = vararing{2};
+end
+mags = g.(handles.dmnptue{1}){fileid}.(handles.signames.intr{4});
+oldmag = findobj(figid,'Type','Line','Tag','Mag');
+delete(oldmag);
+figure(figid); hold on;
+plot(mags.time,mags.intensity,'m','Tag','Mag');%magenta color
+hold off;
+
+%-----------------------------------------------------------------------
+function plot3dfigure(varargin)
+handles = varargin{1};
+get(handles.menu_signal,'String');
+dispname = ans{get(handles.menu_signal,'val')};
+if nargin < 2    
+    sigid = get(handles.menu_signal,'UserData');
+    % sigid = find(strcmp(handles.signames.disp, dispname) == 1);
+    signame = handles.signames.intr{1,sigid};
+    
+    fileid = get(handles.menu_files,'value');
+    sigvals = g.(handles.dmnptue{1}){1,fileid}.(signame);
+else
+    sigvals = varargin{2};
+end
+sigvals.x = sigvals.x - sigvals.x(1,1);
+sigvals.y = sigvals.y - sigvals.y(1,1);
+sigvals.z = sigvals.z - sigvals.z(1,1);
+p.t = sigvals.time(1):0.01:sigvals.time(end);
+p.x = interp1(sigvals.time,sigvals.x,p.t,'nearest');
+p.y = interp1(sigvals.time,sigvals.y,p.t,'nearest');
+p.z = interp1(sigvals.time,sigvals.z,p.t,'nearest');
+figure(handles.threeDfig); plot3(p.x,p.y,p.z,'k');
+xlabel('X');    ylabel('Y');    zlabel('Z');
+set(handles.threeDfig,'Name',['3d ',dispname],'NumberTitle','Off');
+
+
 %-----------------------------------------------------------------------
 % This routine updates two menus: menu_files and menu_signal
 function updatemenu(handles)
@@ -1259,3 +1330,6 @@ end
 %%%####################################################################
 %%%#############    GUIDE WILL ADD NEW CALLBACKS BELOW      ###########
 %%%####################################################################
+
+
+

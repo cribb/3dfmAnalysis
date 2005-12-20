@@ -1,3 +1,11 @@
+2005-12-20 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: 
+	- Added  3d plotting ability
+	- Added ability to overlay channel 8 (wire from magnet DAC) onto position traces.
+	- Added calculation and display of raw peak to peak measurement inside box.
+	- Improved default positioning of 'results' window
+	- Fixed a typo in the calcualtion of radial displacement.
+	* lt_anlaysis_gui.fig: same
 2005-12-19 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: The new and more appropriate name for the old file FreqSweepAnalysis.m. 
 	- Competely renovated, now targetted for interactive analysis of a much broader range of experiments. 
