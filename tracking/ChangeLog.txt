@@ -1,3 +1,6 @@
+2005-12-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* remove_drift.m: finished implementing the center of mass drift subtraction method.
+
 2005-12-19  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m: Added comments about output parameters
 

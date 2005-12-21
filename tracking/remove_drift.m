@@ -1,7 +1,11 @@
 function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
-% data must come from load_video_tracking
+%
+% [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
+% 
 % v = data minus drift
 % q = drift vector
+% type = 'linear' or 'center-of-mass'
+%
 
     % handle "global" variables that contain column positions for video
     global TIME ID FRAME X Y Z ROLL PITCH YAW;     
@@ -51,34 +55,130 @@ function [v,q] = center_of_mass(data, drift_start_time, drift_end_time);
 % center-of-mass, so a polyfit of the center-of-mass should be used.
 
     global TIME ID FRAME X Y Z ROLL PITCH YAW;   
-    idx = find( data(:,TIME) >= drift_start_time & data(:,TIME) <= drift_end_time);
+
+    order = 1;
+    
+    % clip data to desired time points
+    t_idx = find( data(:,TIME) >= drift_start_time & data(:,TIME) <= drift_end_time);
+    data = data(t_idx,:);
+    
+	% set up text-box for 'remaining time' display
+	[timefig,timetext] = init_timerfig;
 
     % compute center of mass at each frame by looking at existing
 	% tracker locations.  
-    meetee = data(idx, TIME);
-    for k = 1 : length(idx)
-        blah = find(data(idx,TIME) == meetee(k));
-        com(k,:) = [mean(data(blah, X)) mean(data(blah, Y)) mean(data(blah,Z))];        
+    minframe = min(data(:, FRAME));
+    maxframe = max(data(:, FRAME));
+    frame_vector = [minframe : maxframe];
+    
+    t = data(:,TIME);
+    t0 = t(1);
+    t = t - t0;
+    
+    for k = 1 : length(frame_vector)
+        
+        tic;
+        
+        thisframe_idx = find(data(:, FRAME) == frame_vector(k));
+        
+        if length(thisframe_idx) > 1
+            com(k,:) = [mean(data(thisframe_idx, X)) mean(data(thisframe_idx, Y)) mean(data(thisframe_idx,Z))];  
+        end
+
+        timevec(k,1) = t(thisframe_idx(1));
+        
+        % handle timer
+		itertime = toc;
+		if k == 1
+            totaltime = itertime;
+		else
+            totaltime = totaltime + itertime;
+		end    
+		meantime = totaltime / k;
+		timeleft = (maxframe-k) * meantime;
+		outs = [num2str(timeleft, '%5.0f') ' sec.'];
+		set(timetext, 'String', outs);
+        drawnow;
+
     end
 
     % construct polyfits for the drift vectors to low-pass filter any
     % sudden shifts in the center-of-mass and to avoid problems for
-    % trackers who may not exist for the entire duration of the dataset.
-    xfit = polyfit(data(idxt,TIME), com(:,1), 2);
-    yfit = polyfit(data(idxt,TIME), com(:,2), 2);
-    zfit = polyfit(data(idxt,TIME), com(:,3), 2);    
-    
-    xdrift = polyval(xfit, data(idxt,TIME));
-    ydrift = polyval(yfit, data(idxt,TIME));
-    zdrift = polyval(zfit, data(idxt,TIME));
-    
+    % trackers who may not exist for the entire duration of the dataset.            
+    x_drift_fit = polyfit(timevec, com(:,1), order);
+    y_drift_fit = polyfit(timevec, com(:,2), order);
+    z_drift_fit = polyfit(timevec, com(:,3), order);    
+
+    logentry(['center-of-mass: x-slope: ' num2str(x_drift_fit(1)) '  x-intercept: ' num2str(x_drift_fit(2))]);
+        
+        % test plot
+        figure(66);
+        subplot(2,2,1);
+        plot(timevec, com(:,1), '.', timevec, polyval(x_drift_fit, timevec), 'r');
+        title('center of mass X vector');
+        xlabel('time [s]');
+        ylabel('pixels');
+        legend('data', 'fit');
+        
+        figure(66);
+        subplot(2,2,2);
+        plot(timevec, com(:,2), '.', timevec, polyval(y_drift_fit, timevec), 'r');
+        title('center of mass Y vector');
+        xlabel('time [s]');
+        ylabel('pixels');
+        legend('data', 'fit');
+
+        figure(66);
+        subplot(2,2,4);
+        axis([0 648 0 484]);
+        plot(data(:,X), data(:,Y), 'bo', com(:,1), com(:,2), 'g.');
+        xlabel('x position'); 
+        ylabel('y position');
+        
     for k = 0 : get_beadmax(data)
-        idx = find(data(:,ID) == k);
-        data(idx,X:Z) = data(idx,X:Z) - [xfit(idx) yfit(idx) zfit(idx)];
+        thisbead_idx = find(data(:,ID) == k);
+
+        x_drift_val = polyval(x_drift_fit, t(thisbead_idx));
+        y_drift_val = polyval(y_drift_fit, t(thisbead_idx));
+        z_drift_val = polyval(z_drift_fit, t(thisbead_idx));
+        
+        x_data_fit = polyfit(t(thisbead_idx), data(thisbead_idx, X), order);
+        y_data_fit = polyfit(t(thisbead_idx), data(thisbead_idx, Y), order);
+        z_data_fit = polyfit(t(thisbead_idx), data(thisbead_idx, Z), order);    
+        
+        logentry(['tracker ' num2str(k) ': x-slope: ' num2str(x_data_fit(1)) '  x-intercept: ' num2str(x_data_fit(2))]);
+        x_data_val = polyval(x_data_fit, t(thisbead_idx));
+        y_data_val = polyval(y_data_fit, t(thisbead_idx));
+        z_data_val = polyval(z_data_fit, t(thisbead_idx));
+      
+		% test plots
+        figure(66);
+        subplot(2,2,3);
+        plot(t(thisbead_idx),data(thisbead_idx, X), '.' , t(thisbead_idx),x_data_val, 'r');
+
+        data(thisbead_idx,X) = data(thisbead_idx,X) - x_drift_val + x_drift_fit(end);
+        data(thisbead_idx,Y) = data(thisbead_idx,Y) - y_drift_val + y_drift_fit(end);
+        data(thisbead_idx,Z) = data(thisbead_idx,Z) - z_drift_val + z_drift_fit(end);
+        
+
+        % test plots 
+        figure(66);
+        subplot(2,2,4);
+        hold on; 
+        plot(data(thisbead_idx,X), data(thisbead_idx,Y), '.r');
+        hold off;
+        axis([0 648 0 484]);
+        legend('original', 'com', 'corrected');
+        pretty_plot;
+        
+        drawnow;
+%         pause;
     end
 
+    close(timefig);
+    
     v = data;
-    q = com;
+    q = com;    
     
     return;
 
