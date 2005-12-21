@@ -1,3 +1,10 @@
+2005-12-21  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m: version 1.01
+	- Added option to request output fields in the form of a [time, vals] matrix rather than the traditional structure.
+	- By default, the output form is the traditional structure so existing dependent code shouldn't break.
+	- Wrote a routine that centralizes the parsing algorithm for different fields. Used for most of the fields.
+	- Fixed several comments.
+
 2005-12-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m: finished implementing the center of mass drift subtraction method.
 

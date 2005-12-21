@@ -1,5 +1,6 @@
 function d = load_laser_tracking(file, fields, flags);
 % 3DFM function
+% Last modified: 12/21/05 -kvdesai
 % Created: 10/12/05 - kvdesai
 % 
 % This function is supposed to replace the load_vrpn_tracking function. It performs 
@@ -31,10 +32,15 @@ function d = load_laser_tracking(file, fields, flags);
 %     If "fields is not provided or left empty, it is defaulted to 'a'.
 % 
 % "flags": a structure containing binary (yes/no type) flags.
+%   flags.matoutput   = {0} | 1 : If 1, then output fields themselves would
+%        matrices of the form [t vals], i.e., first column would be time stamp and rest would be the
+%        signal values. Signal values would be [x,y,z] vectors for positon(bead/stage) and
+%        voltages for QPD/laser signals.
+%        If 0, then output fields themselves would be structures, as done traditionally.
 %   flags.inmicrons   = {1} | 0 : Units of displacement [{microns} | meters]
 %   flags.keepuct     = {1} | 0 : Keep all timestamps in UCT format or subtract
 %                                out the offset such that time starts from zero
-%   flags.keepoffset  = 1 | {0} : Keep the offset in position data or subtract
+%   flags.keepoffset  = 1 | {0} : Only for BeadPosition. Keep the offset in position data or subtract
 %                                it out? Removed by default.
 %   flags.askforinput = 1 | {0} : While loading, ask user to type in metadata?
 %     controls a prompt where custom information about a dataset can be typed in 
@@ -56,7 +62,18 @@ function d = load_laser_tracking(file, fields, flags);
 %     
 % NOTES: The elder brother of this function 'load_vrpn_tracking' may get
 % obsolete at some point. It is encouraged to use this function instead.
+global dd  % make the original dataset global to avert multiple copies
+global ceglqs % the cell array containing names of the fields in original .mat file
 
+%  the cell array containing names of some of the fields in original .mat file
+cegjlqs = {'stageCommandSecUsecZeroXYZ', ... 
+          'posErrorSecUsecXYZ', ...
+          'gainsSecUsecPxyzIxyzDxyz', ... 
+          'JacDataSecUsecQPDsStagesensors', ...
+          'laserIntensitySecUsecVal', ...
+          'QPDsSecUsecVals', ...
+          'stageSenseSecUsecXYZsense'};
+THIS_IS_POS = 1;          
 % handle the argument list
 if (nargin < 3 | isempty(flags))
     flags.inmicrons = 1;         
@@ -69,18 +86,18 @@ else
     if (~isfield(flags,'keepuct')); flags.keepuct = 1; end;
     if (~isfield(flags,'askforinput')); flags.askforinput = 0; end;
     if (~isfield(flags,'keepoffset')); flags.keepoffset = 0; end;
+    if (~isfield(flags,'matoutput')); flags.matoutput = 0; end;
 end
 
 if (nargin < 2 | isempty(fields));  fields = 'a';       end;
 
-%if requested to provide all the fields then make the field vector contain
-%all the characters
+%if requested to provide all the fields then make the field vector contain all the characters
 if strfind(fields,'a')
     fields = 'bcegjlqs';
 end
 
 % Take care of all version records
-version_string = '01.00';
+version_string = '01.01';
 LTver = 'NotAvailable';
 V2Mver = 'NotAvailable';
 d.info.orig.matOutputFileName = 'NotAvailable';
@@ -114,15 +131,12 @@ end
 if (isfield(d.info.orig,'vrpnLogToMatlabVersion'));
     V2Mver = dd.tracking.info.vrpnLogToMatlabVersion;
 end
+
 % handle the displacement-unit request
 if (flags.inmicrons) 
-    d.info.orig.xyzunits = 'u';
-    % Upto Laser Tracker version 04.14, the position data in tracking log 
-    % is in units of microns.
-    distscale = 1;
+    d.info.orig.xyzunits = 'u';    
 else
     d.info.orig.xyzunits = 'm';
-    distscale = 1E-6;
 end
 
 % handle the switch for including user_input 
@@ -131,88 +145,53 @@ if flags.askforinput
             'want to be associated with this data set \n',...
             'Press Enter only when you are done\n'],'s');
 end
+
 % handle the time-offset
-if(isfield(dd.tracking,'JacDataSecUsecQPDsStagesensors'))
-    if(removeToffset(dd.tracking.JacDataSecUsecQPDsStagesensors(1,1:2), dd.tracking.QPDsSecUsecVals(1,1:2)) < 0)
-        d.info.orig.uct_offset = dd.tracking.JacDataSecUsecQPDsStagesensors(1,1:2);
+% determine who started logging earliest: JacData or QPD?
+if(isfield(dd.tracking,cegjlqs{4}))
+    if(removeToffset(dd.tracking.(cegjlqs{4})(1,1:2), dd.tracking.(cegjlqs{6})(1,1:2)) < 0)
+        d.info.orig.uct_offset = dd.tracking.(cegjlqs{4})(1,1:2);
     else
-        d.info.orig.uct_offset = dd.tracking.QPDsSecUsecVals(1,1:2);
+        d.info.orig.uct_offset = dd.tracking.(cegjlqs{4})(1,1:2);
     end
 else
-    d.info.orig.uct_offset = dd.tracking.QPDsSecUsecVals(1,1:2);
+    d.info.orig.uct_offset = dd.tracking.(cegjlqs{6})(1,1:2);
 end
 
-if(strfind(fields,'c'))
-    if(flags.keepuct)
-        d.stageCom.time = removeToffset(dd.tracking.stageCommandSecUsecZeroXYZ(:,1:2),[0 0]);
-    else
-        d.stageCom.time = removeToffset(dd.tracking.stageCommandSecUsecZeroXYZ(:,1:2),d.info.orig.uct_offset);
-    end
-    % The third column is the 'sensor id' for vrpn tracker object. We dont
-    % need is so ignore.
-    d.stageCom.x    = dd.tracking.stageCommandSecUsecZeroXYZ(:,4)*distscale;        % get stage x commands data
-    d.stageCom.y    = dd.tracking.stageCommandSecUsecZeroXYZ(:,5)*distscale;        % get stage y commands data
-    d.stageCom.z    = dd.tracking.stageCommandSecUsecZeroXYZ(:,6)*distscale;        % get stage z commands data
-    dd.tracking.stageCommandSecUsecZeroXYZ = []; %free up memory as we go
-end
-if(strfind(fields,'s'))
-    if(flags.keepuct)
-        d.stageReport.time = removeToffset(dd.tracking.stageSenseSecUsecXYZsense(:,1:2),[0 0]);
-    else
-        d.stageReport.time = removeToffset(dd.tracking.stageSenseSecUsecXYZsense(:,1:2),d.info.orig.uct_offset);
-    end    
-    d.stageReport.x    = dd.tracking.stageSenseSecUsecXYZsense(:,3)*distscale;        % get stage x sensed positions
-    d.stageReport.y    = dd.tracking.stageSenseSecUsecXYZsense(:,4)*distscale;        % get stage y sensed positions
-    d.stageReport.z    = dd.tracking.stageSenseSecUsecXYZsense(:,5)*distscale;        % get stage z sensed positions
-    dd.tracking.stageSenseSecUsecXYZsense = []; %free up memory as we go    
+if(flags.keepuct)
+    Toffset = [0 0];
+else
+    Toffset = [d.info.orig.uct_offset];
 end
 
-if(strfind(fields,'q'))
-    if(flags.keepuct)
-        d.qpd.time = removeToffset(dd.tracking.QPDsSecUsecVals(:,1:2),[0 0]);
-    else
-        d.qpd.time = removeToffset(dd.tracking.QPDsSecUsecVals(:,1:2),d.info.orig.uct_offset);
-    end
-    d.qpd.q1     = dd.tracking.QPDsSecUsecVals(:,3);            % get data from individual 
-    d.qpd.q2     = dd.tracking.QPDsSecUsecVals(:,4);            % quadrants and store them in 
-    d.qpd.q3     = dd.tracking.QPDsSecUsecVals(:,5);			% d.qpd_0 : d.qpd_3
-    d.qpd.q4     = dd.tracking.QPDsSecUsecVals(:,6);
-    dd.tracking.QPDsSecUsecVals = []; %free up memory as we go    
+% Now start filling in the signals
+
+if(strfind(fields,'c')) % handle stage command logs
+    strs = {'','x','y','z'}; %ignore the first column since it is index of tracker in vrpn
+    d.stageCom = extractfield(cegjlqs{1},flags,strs,Toffset,THIS_IS_POS);
 end
 
-if(strfind(fields,'l'))
-    if(flags.keepuct)
-        d.laser.time = removeToffset(dd.tracking.laserIntensitySecUsecVal(:,1:2),[0 0]);
-    else
-        d.laser.time = removeToffset(dd.tracking.laserIntensitySecUsecVal(:,1:2),d.info.orig.uct_offset);
-    end 
-    d.laser.intensity = dd.tracking.laserIntensitySecUsecVal(:,3);
-    dd.tracking.laserIntensitySecUsecVal = []; %free up memory as we go    
+if(strfind(fields,'s')) % handle stage sensed positions
+    d.stagezReport = extractfield(cegjlqs{7},flags,{'x','y','z'},Toffset,THIS_IS_POS);
 end
 
-if(strfind(fields,'e'))
-    if(flags.keepuct)
-        d.posError.time = removeToffset(dd.tracking.posErrorSecUsecXYZ(:,1:2),[0 0]);
-    else
-        d.posError.time = removeToffset(dd.tracking.posErrorSecUsecXYZ(:,1:2),d.info.orig.uct_offset);
-    end    
-    d.posError.x    = dd.tracking.posErrorSecUsecXYZ(:,3)*distscale;        % get x PostionError
-    d.posError.y    = dd.tracking.posErrorSecUsecXYZ(:,4)*distscale;        % get y PostionError
-    d.posError.z    = dd.tracking.posErrorSecUsecXYZ(:,5)*distscale;        % get z PostionError
-    dd.tracking.posErrorSecUsecXYZ = []; %free up memory as we go    
+if(strfind(fields,'q')) % handle qpd signals
+    d.qpd = extractfield(cegjlqs{6},flags,{'q1','q2','q3','q4'},Toffset,~THIS_IS_POS);
 end
 
-if(strfind(fields,'g'))
-    if(flags.keepuct)        
-        d.gains.time = removeToffset(dd.tracking.gainsSecUsecPxyzIxyzDxyz(:,1:2),[0 0]);
-    else
-        d.gains.time = removeToffset(dd.tracking.gainsSecUsecPxyzIxyzDxyz(:,1:2), d.info.orig.uct_offset);
-    end
-    d.gains.PID = dd.tracking.gainsSecUsecPxyzIxyzDxyz(:,3:11); 
-    dd.tracking.gainsSecUsecPxyzIxyzDxyz = []; %free up memory as we go
+if(strfind(fields,'l')) % handle laser intensity
+    d.laser = extractfield(cegjlqs{5},flags,{'intensity'},Toffset,~THIS_IS_POS);
 end
 
-if(strfind(fields,'j'))
+if(strfind(fields,'e')) % handle position errors
+    d.posError = extractfield(cegjlqs{2},flags,{'x','y','z'},Toffset,THIS_IS_POS);
+end
+
+if(strfind(fields,'g')) % handle PID controller gains
+    d.gains = extractfield(cegjlqs{3},flags,{'Px','Py','Pz','Ix','Iy','Iz','Dx','Dy','Dz'},Toffset,~THIS_IS_POS);
+end
+
+if(strfind(fields,'j'))  % handle Jacobian and JacobianData
     names = fieldnames(dd.tracking);
     for c = 1:length(names)
 %         'JacDataSecUsecQPDsStagesensors'
@@ -231,45 +210,42 @@ if(strfind(fields,'j'))
         end
     end
 end
-% compute the position of the bead at QPD bandwidth if bead position is
-% requested
+
+% compute the position of the bead at QPD bandwidth if bead position is requested
 if(strfind(fields,'b'))
     if ~isfield(d,'stageReport') %is the stagesensed position parsed?
-        ss.x = dd.tracking.stageSenseSecUsecXYZsense(:,3)*distscale;
-        ss.y = dd.tracking.stageSenseSecUsecXYZsense(:,4)*distscale;
-        ss.z = dd.tracking.stageSenseSecUsecXYZsense(:,5)*distscale;
-        if(flags.keepuct)        
-            ss.time = removeToffset(dd.tracking.stageSenseSecUsecXYZsense(:,1:2),[0 0]);
-        else
-            ss.time = removeToffset(dd.tracking.stageSenseSecUsecXYZsense(:,1:2), d.info.orig.uct_offset);
-        end       
+        ss = extractfield(cegjlqs{7},flags,{'x','y','z'},Toffset,THIS_IS_POS);
     else
         ss = d.stageReport;
     end
     if ~isfield(d,'posError') %is the position error parsed?
-        pe.x    = dd.tracking.posErrorSecUsecXYZ(:,3)*distscale;        % get x PostionError
-        pe.y    = dd.tracking.posErrorSecUsecXYZ(:,4)*distscale;        % get y PostionError
-        pe.z    = dd.tracking.posErrorSecUsecXYZ(:,5)*distscale;        % get z PostionError       
-        if(flags.keepuct)        
-            pe.time = removeToffset(dd.tracking.posErrorSecUsecXYZ(:,1:2),[0 0]);
-        else
-            pe.time = removeToffset(dd.tracking.posErrorSecUsecXYZ(:,1:2), d.info.orig.uct_offset);
-        end       
+        pe = extractfield(cegjlqs{2},flags,{'x','y','z'},Toffset,THIS_IS_POS)
     else
         pe = d.posError;
     end
-    d.beadpos.time = ss.time;
-    % In the specimen coordinate frame, feedback moves the stage in the
-    % opposite direction to the bead.
-    d.beadpos.x = -ss.x(1:end) + pe.x(1:end);
-    d.beadpos.y = -ss.y(1:end) + pe.y(1:end);
-    d.beadpos.z = -ss.z(1:end) + pe.z(1:end);
     
-    if ~flags.keepoffset %if we don't want offset in bead positions.
-        d.beadpos.x = d.beadpos.x - d.beadpos.x(1,1);
-        d.beadpos.y = d.beadpos.y - d.beadpos.y(1,1);
-        d.beadpos.z = d.beadpos.z - d.beadpos.z(1,1);
+    if flags.matoutput
+        d.beadpos(:,1) = ss(:,1);
+        % In the specimen coordinate frame, feedback moves the stage in the
+        % opposite direction to the bead.    
+        d.beadpos(:,2:4) = -ss(:,2:4) + pe(:,2:4);
+        if ~flags.keepoffset
+            d.beadpos(:,2:4) = d.beadpos(:,2:4) - repmat(d.beadpos(1,2:4),size(d.beadpos,1),1);
+        end
+    else
+        d.beadpos.time = ss.time;
+        % In the specimen coordinate frame, feedback moves the stage in the
+        % opposite direction to the bead.
+        d.beadpos.x = -ss.x(1:end) + pe.x(1:end);
+        d.beadpos.y = -ss.y(1:end) + pe.y(1:end);
+        d.beadpos.z = -ss.z(1:end) + pe.z(1:end);        
+        if ~flags.keepoffset %if we don't want offset in bead positions.
+            d.beadpos.x = d.beadpos.x - d.beadpos.x(1,1);
+            d.beadpos.y = d.beadpos.y - d.beadpos.y(1,1);
+            d.beadpos.z = d.beadpos.z - d.beadpos.z(1,1);
+        end
     end
+    clear ss pe %clear memory as we go
 end
 
 %-------------------------------------------------------------------------
@@ -281,3 +257,52 @@ inegs = find(tout_usec < 0); %indices where the difference went negative
 tout_usec(inegs,1) = tout_usec(inegs,1) + 1E6;
 tout_sec(inegs,1) = tout_sec(inegs,1) - 1;
 tout = tout_sec + tout_usec*1e-6;
+
+%-------------------------------------------------------------------------
+% a common algorithm to extract the requested field. 
+% fin = input [N x M] matrix (e.g. dd.QPDsSecUsecVals)
+% flags = flags indicating how to extract the data
+% strs = names of fields in the output when output type is requested to be 
+%        a structure
+% fout = output matrix Or structure
+function fout = extractfield(fin_name,flags,strs,toffset,ispos)
+global dd %declaring global conserves lot of memory for huge datasets
+t = removeToffset(dd.tracking.(fin_name)(:,1:2),toffset);
+
+if length(strs) ~= (size(dd.tracking.(fin_name),2) - 2)
+    disp('load_laser_tracking::Warning: No of columns & No of field names do not match');
+    disp(['for signal: ',fin_name,'...data fields OR columns will be truncated']);    
+end
+
+if ispos % if this is a position measurement, handle the units
+    if flags.inmicrons
+    % At least upto Laser Tracker version 04.14, the position data in tracking log 
+    % is in units of microns. If it changes later,  change the scale here.
+        scale = 1;
+    else
+        scale = 1E-6;
+    end
+else
+    scale = 1;
+end
+
+M = min(length(strs),size(dd.tracking.(fin_name),2)-2);
+if flags.matoutput
+    fout(:,1) = t;
+    k = 1; % 1 column occupied by time
+else
+    fout.time = t;
+end
+
+for c = 1:M
+    if isempty(strs{c})
+        continue; %ignore the column if corresponding name is empty
+    end    
+    if flags.matoutput
+        k = k+1;
+        fout(:,k) = dd.tracking.(fin_name)(:,c+2).*scale;        
+    else
+        fout.(strs{c}) = dd.tracking.(fin_name)(:,c+2).*scale;        
+    end
+end
+dd.tracking.(fin_name) = []; % free up memory as we go  
