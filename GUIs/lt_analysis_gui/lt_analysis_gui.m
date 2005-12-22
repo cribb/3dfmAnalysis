@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_gui
 
-% Last Modified by GUIDE v2.5 20-Dec-2005 12:52:43
+% Last Modified by GUIDE v2.5 21-Dec-2005 21:21:08
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -62,14 +62,15 @@ global g
 % Choose default command line output for lt_analysis_gui
 handles.output = hObject;
 % a signature storing the names of the fields in global structure
-handles.dmnptue = {'data','magnets','name','path','tag','usermetadata','experType'};
+% This way is much flexible if we need to add/remove/rename fields later
+handles.dmnptud = {'data','magnets','name','path','tag','usermetadata','drift'};
 % NOTE: if change any of the strings above, also change the field name
-% to reflect the initials.
-% Update handles structure
+% to reflect the initials arranged in the same order as the fields are.
+
 handles.default_path = pwd;
 set(handles.button_add,'UserData',handles.default_path); 
 
-% Names of signals in the structure output by load_laser_tracking
+% Names of signals in the structure given by load_laser_tracking
 handles.signames.intr = {'beadpos' ,'stageReport','qpd','laser'};
 % Names of signals to be displayed on GUI control menu_signal
 handles.signames.disp = {'Bead Pos','Stage Pos'  ,'QPD','Channel 8'};
@@ -90,8 +91,8 @@ handles.psdwin = 'blackman';
 handles.emptyflag_str = 'Database is empty';
 
 % initialize the global structure
-for c = 1:length(handles.dmnptue)
-    g.(handles.dmnptue{c}) = {};
+for c = 1:length(handles.dmnptud)
+    g.(handles.dmnptud{c}) = {};
 end
 
 guidata(hObject, handles);
@@ -129,59 +130,69 @@ switch get(handles.menu_exper,'value')
     otherwise
         prompt_user('Error: Unrecognized experiment type');
 end
-if (get(hObject,'UserData') ~= 0)      
-    [f, p] = uigetfiles('*.mat','Browse and select one or more files',get(hObject,'UserData'));
-else
-    [f, p] = uigetfiles('*.mat','Browse and select one or more files',handles.default_path);
-end
-set(hObject,'UserData',p);
+% A cheap hacky fix to the bug where GUI sometimes forgets the last path
+if (get(hObject,'UserData') == 0),  set(hObject,'UserData',handles.default_path); end    
+
+[f, p] = uigetfiles('*.mat','Browse and select one or more files',get(hObject,'UserData'));
+
+set(hObject,'UserData',p); %memorize the last browsing path
 prompt_user('Wait...Loading selected files',handles);
 flags.keepuct = 0; flags.keepoffset = 0; flags.askforinput = 0;flags.inmicrons = 1;
+flags.matoutput = 1; %request output fields in the [time vals] matrix form.
 nloaded = 0;
 for(c = 1:length(f))
     pack
-    if exist('g') & ~isempty(g.(handles.dmnptue{1})) & any(strcmp(g.(handles.dmnptue{3}),f{c}) == 1)
+    if exist('g') & ~isempty(g.(handles.dmnptud{1})) & any(strcmp(g.(handles.dmnptud{3}),f{c}) == 1)
         prompt_user(['The file ',f{c},' is already in the database.']);                
     else
         prompt_user(['...currently loading ','[',num2str(c),'of',num2str(length(f)),'] :',f{c}],handles);
         
         %put newly added dataset on the top of the list
         %shift all existing datasets down by one
-        if (exist('g') & ~isempty(g.(handles.dmnptue{1})))
-            for cf = 1:length(handles.dmnptue) 
-                g.(handles.dmnptue{cf}) = [ {0}, g.(handles.dmnptue{cf})];
+        if (exist('g') & ~isempty(g.(handles.dmnptud{1})))
+            for cf = 1:length(handles.dmnptud) 
+                g.(handles.dmnptud{cf}) = [ {0}, g.(handles.dmnptud{cf})];
             end
         end
         %Make the cell arrays in the form of 1xN, and keep that form as the
         %standard. Nx1 standardization would work as well, but it seems my matlab
         %is creating arrays in the form of 1xN by default.
         try
-            % load only bead positions and laser intensity values
-            g.(handles.dmnptue{1}){1,1} = load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
+            % load only those fields which are pertinent to the selected experiment type
+            g.(handles.dmnptud{1}){1,1} = load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
             % fullfile usage is handy and protects code against platform variations
-            g.(handles.dmnptue{2}){1,1} = {}; %start out with empty magnet data
-            g.(handles.dmnptue{3}){1,1} = f{c}; %file name
-            g.(handles.dmnptue{4}){1,1} = p; %file path
-            g.(handles.dmnptue{5}){1,1} = 'NoTag'; %tag
-            g.(handles.dmnptue{6}){1,1} = 'NoMetaData'; %user specified metadata 
-                expTypes = get(handles.menu_exper,'String'); % experiment types
-            g.(handles.dmnptue{7}){1,1} = expTypes{get(handles.menu_exper,'value')}; 
-            
+            g.(handles.dmnptud{2}){1,1} = {}; %start out with empty magnet data
+            g.(handles.dmnptud{3}){1,1} = f{c}; %file name
+            g.(handles.dmnptud{4}){1,1} = p; %file path
+            % Now add the default tag
+            NoTagInd = get(handles.button_tag,'UserData');
+            if(isempty(NoTagInd) | NoTagInd < 1), NoTagInd = 1; end
+            g.(handles.dmnptud{5}){1,1} = ['NoTag',num2str(NoTagInd)]; %tag
+            set(handles.button_tag,'UserData',NoTagInd+1);
+            g.(handles.dmnptud{6}){1,1} = 'NoMetaData'; %user specified metadata                
+            for k = 1:length(handles.signames.intr)
+                if isfield(g.(handles.dmnptud{1}){1},handles.signames.intr{k})
+                    % calculate # of columns in the current signal
+                    M = size(g.(handles.dmnptud{1}){1}.(handles.signames.intr{k}),2);                    
+                    % enter zero as the place-holder in the drift fields to start with.
+                    % do not allocate space for drift for the first column which is time
+                    g.(handles.dmnptud{7}){1,1}.(handles.signames.intr{k}) = zeros(2,M-1);
+                        % First Row = Slope, Second Row = Offset
+                end
+            end            
             prompt_user([f{c}, ' added to the database.'],handles);
             nloaded = nloaded + 1; %total files loaded
         catch
             prompt_user(lasterr);
             prompt_user([f{c}, ' could not be added to the database.'],handles);
             % shift back every field up by one
-            if(exist('g') & ~isempty(g.(handles.dmnptue{1})))
-                for cf = 1:length(handles.dmnptue)                    
-                    g.(handles.dmnptue{cf}) = g.(handles.dmnptue{cf})(2:end); 
+            if(exist('g') & ~isempty(g.(handles.dmnptud{1})))
+                for cf = 1:length(handles.dmnptud)                    
+                    g.(handles.dmnptud{cf}) = g.(handles.dmnptud{cf})(2:end); 
                 end                 
             end
-%             updatetaglist(handles);
             break;
         end
-%         updatetaglist(handles);
     end
 end
 % set(hObject,'UserData', g); %use global instead
@@ -195,15 +206,15 @@ global g
                     'OKstring','Remove',...
                     'Name','Select file(s) to be removed');
 for c=1:length(selec)
-    for cf = 1:length(handles.dmnptue) %delete all fields for that file id
-        g.(handles.dmnptue{cf}){1,selec(c)} = {};
+    for cf = 1:length(handles.dmnptud) %delete all fields for that file id
+        g.(handles.dmnptud{cf}){1,selec(c)} = {};
     end
 end
 % keyboard
 % Now remove the empty cells from each field
-for cf = 1:length(handles.dmnptue) 
-    ifilled = ~cellfun('isempty',g.(handles.dmnptue{cf}));
-    g.(handles.dmnptue{cf}) = g.(handles.dmnptue{cf})(ifilled); 
+for cf = 1:length(handles.dmnptud) 
+    ifilled = ~cellfun('isempty',g.(handles.dmnptud{cf}));
+    g.(handles.dmnptud{cf}) = g.(handles.dmnptud{cf})(ifilled); 
 end
 % updatetaglist(handles);
 updatemenu(handles);
@@ -215,39 +226,35 @@ global g
 % Hints: contents = get(hObject,'String') returns menu_files contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_files
 updatesignalmenu(handles);% this will also refresh the main figure
-v = get(hObject,'Value');
-% check that the current file has ch 8 loaded
-if isfield(g.(handles.dmnptue{1}){1,v}, handles.signames.intr{4})
-    set(handles.check_overlaymag,'Enable','On');
-else
-    set(handles.check_overlaymag,'Enable','Off');
-    set(handles.chekc_overlaymag,'Value',0);
-end
+
 % --- Executes on button press in button_tag.
 function button_tag_Callback(hObject, eventdata, handles)
 global g
-% Note: Multiple tags of same string are acceptable for now.
-% I need to fix this later. Also initiate the tags with "NoTag1", "NoTag2"
-% etc, instead of just "NoTag".
-id = get(handles.menu_files,'Value');
+% Note: Multiple tags of same string are not acceptable.
+fileid = get(handles.menu_files,'Value');
 contents = get(handles.menu_files,'string');
 prompt = {'Short tag (e.g. to be used as a legend entry in a plot) for this file',...
         'Metadata to be associated with this file'};
-dlg_title = ['Edit metadata:',contents{id}];
+dlg_title = ['Edit metadata:',contents{fileid}];
 num_lines= [1;2];
-% plot_selected(id);
-userinput = inputdlg(prompt,dlg_title,num_lines,...
-    {g.(handles.dmnptue{5}){1,id}, g.(handles.dmnptue{6}){1,id}});
-if (~isempty(userinput))
-    g.(handles.dmnptue{5}){1,id} = userinput{1};
-    g.(handles.dmnptue{6}){1,id} = userinput{2};
+while 1    
+    userinput = inputdlg(prompt,dlg_title,num_lines,...
+        {g.(handles.dmnptud{5}){1,fileid}, g.(handles.dmnptud{6}){1,fileid}});  
+    sameid = find(strcmp(g.(handles.dmnptud{5}),userinput{1}) == 1);
+    if sameid == fileid | isempty(sameid) % if there is no another tag of same string
+        break;        
+    else
+        errordlg('A tag with the same string already exists. Please change the tag.','Error');
+    end
 end
-updatefilemenu(handles);
+g.(handles.dmnptud{5}){1,fileid} = userinput{1};
+g.(handles.dmnptud{6}){1,fileid} = userinput{2};
+updatefilemenu(handles); % do not replot the main figure, just change menu entries.
 
-% --- Executes on button press in button_clip.
-function button_clip_Callback(hObject, eventdata, handles)%XXX
+% --- Executes on button press in button_cut.
+function button_cut_Callback(hObject, eventdata, handles)%XXX
 global g
-if ~exist('g') | isempty(g.(handles.dmnptue{1}))
+if ~exist('g') | isempty(g.(handles.dmnptud{1}))
     errordlg('Database is empty, first add files to it','Error');
     return;
 end
@@ -255,41 +262,78 @@ end
 if (0 == figflag(getmainfigname(handles)))
    updatemainfig(handles,'new'); 
 end
-hf = gcf; ha = gca;
+% hmf = get(handles.radio_drawbox,'UserData')
+% hma = findobj(hmf,'Type','Axes','Tag','');
+% set the buttonDownFcn to DoNothing.
+manageboxradiogroup(handles,3,1);
 
-[t(1),y] = ginput(1);
-drawlines(ha,t(1));
-[t(2),y] = ginput(1);
-drawlines(ha,t(2));
+% [t(1),y] = ginput(1);
+% drawlines(hma,t(1));
+% [t(2),y] = ginput(1);
+% drawlines(hma,t(2));
+[t,y] = ginput(2);
 
 t = sort(t);
-% Clip all the fields existing in the current file
+% Cut all the fields existing in the current file
 id = get(handles.menu_files,'Value');
 for c = 1:length(handles.signames.intr)
     cursig = handles.signames.intr{c};
-    if (isfield(g.(handles.dmnptue{1}){1,id}, cursig))
-        sigold = g.(handles.dmnptue{1}){1,id}.(cursig);
-        g.(handles.dmnptue{1}){1,id}.(cursig) = [];
-        istart = max(find(sigold.time <= t(1)));
-        iend = max(find(sigold.time <= t(2)));
-        
-        g.(handles.dmnptue{1}){1,id}.(cursig).time = sigold.time(istart:iend);
-        switch c
-            case {1,2}                
-                g.(handles.dmnptue{1}){1,id}.(cursig).x = sigold.x(istart:iend)
-                g.(handles.dmnptue{1}){1,id}.(cursig).y = sigold.y(istart:iend)
-                g.(handles.dmnptue{1}){1,id}.(cursig).z = sigold.z(istart:iend)  
-            case 3
-                g.(handles.dmnptue{1}){1,id}.(cursig).q1 = sigold.q1(istart:iend)
-                g.(handles.dmnptue{1}){1,id}.(cursig).q2 = sigold.q2(istart:iend)
-                g.(handles.dmnptue{1}){1,id}.(cursig).q3 = sigold.q3(istart:iend)
-                g.(handles.dmnptue{1}){1,id}.(cursig).q4 = sigold.q4(istart:iend)
-            case 4
-                g.(handles.dmnptue{1}){1,id}.(cursig).intensity = sigold.intensity(istart:iend)                
-        end
+    if (isfield(g.(handles.dmnptud{1}){1,id}, cursig))
+        sigold = g.(handles.dmnptud{1}){1,id}.(cursig);
+        g.(handles.dmnptud{1}){1,id}.(cursig) = [];
+%         find indices outside the selected box
+        linds = find(sigold(:,1) < t(1)); %indices before box
+        uinds = find(sigold(:,1) > t(2)); %indices after box
+        %adjust the data after box such that there is no step visible after
+        %cutting the box
+        steps = sigold(uinds(1),:) - sigold(linds(end),:);
+        sigold(uinds,:) = sigold(uinds,:) - repmat(steps,length(uinds),1);
+        g.(handles.dmnptud{1}){1,id}.(cursig) = sigold([linds(:) uinds(:)],:);
+        clear sigold;
     end
 end
-updatemainfig(handles,'clip');
+updatemainfig(handles,'cut');
+%-------------------------------------------------------------------------
+% --- Executes on button press in button_selectdrift.
+% This function lets user select a box that is to be considered as
+% 'drift calculation section'. Then the routine calcualtes drift
+% over the selected section for the currently selected signal and
+% updates the drift parameters in the global master database.
+function button_selectdrift_Callback(hObject, eventdata, handles)
+global g
+if ~exist('g') | isempty(g.(handles.dmnptud{1}))
+    errordlg('Database is empty, first add files to it','Error');
+    return;
+end
+% check if the main figure is plotted and in focus
+if (0 == figflag(getmainfigname(handles)))
+   updatemainfig(handles,'new'); 
+end
+% set the buttonDownFcn to DoNothing.
+manageboxradiogroup(handles,3,1);
+% hmf = get(handles.radio_drawbox,'UserData')
+% hma = findobj(hmf,'Type','Axes','Tag','');
+[t,y] = ginput(2);
+
+t = sort(t);
+% calculate drift for currently selected signal
+sigid = get(handles.menu_signal,'UserData');
+signame = handles.signames.intr{sigid};
+fileid = get(handles.menu_files,'Value');
+sig = g.(handles.dmnptud{1}){fileid}.(signame);
+M = size(sig,2);
+[selec(:,1),selec(:,2:M)] = clipper(sig(:,1),sig(:,2:M),t(1),t(2));
+for c = 2:M
+    fit = polyfit(selec(:,1),selec(:,c),1);
+    % First Row = Slope, 2nd Row = offset;
+    g.(handles.dmnptud{7}){fileid}.(signame)(:,c-1) = fit;
+end
+
+%-------------------------------------------------------------------------
+% --- Executes on button press in check_subdrift.
+function check_subdrift_Callback(hObject, eventdata, handles)
+updatemainfig(handles);
+
 %-------------------------------------------------------------------------
 % --- Executes on button press in check_psd.
 function check_psd_Callback(hObject, eventdata, handles)
@@ -303,27 +347,77 @@ if get(hObject,'Value')
     set(handles.check_psd,'Value',1);
 end
 %-------------------------------------------------------------------------
-% --- Executes on button press in button_drawbox.
-% Put the main figure in the focus and let user (re) draw a box by 
-% dragging mouse.
-function button_drawbox_Callback(hObject, eventdata, handles)
-if (0 == figflag(getmainfigname(handles)))
-   updatemainfig(handles,'new');
+% --- Executes on button press in radio_drawbox.
+function radio_drawbox_Callback(hObject, eventdata, handles)
+manageboxradiogroup(handles,1,get(hObject,'value'));
+%-------------------------------------------------------------------------
+% --- Executes on button press in radio_dragbox.
+function radio_dragbox_Callback(hObject, eventdata, handles)
+manageboxradiogroup(handles,2,get(hObject,'value'));
+%-------------------------------------------------------------------------
+% --- Executes on button press in radio_nothing.
+function radio_nothing_Callback(hObject, eventdata, handles)
+manageboxradiogroup(handles,3,get(hObject,'value'));
+
+%-----------------------------------------------------------------------
+function manageboxradiogroup(handles,radind,radstat)
+hmf = get(handles.radio_drawbox,'UserData');
+if isempty(hmf) | hmf == 0
+    sigid = get(handles.menu_signal,'UserData');
+    hmf = handles.mainfigids(sigid);
+    set(handles.radio_drawbox,'UserData',hmf);
 end
-if get(handles.toggle_dragbox,'value')
-    set(handles.toggle_dragbox,'value',0);
-    set(handles.toggle_dragbox,'String','Drag Box');
+hma = findobj(hmf,'Type','Axes','Tag','');
+% some constants
+hrad(1) = handles.radio_drawbox;
+hrad(2) = handles.radio_dragbox;
+hrad(3) = handles.radio_nothing;
+
+for c = 1:3 % reset all radios first
+    set(hrad(c),'Value',0);
 end
-hmf = get(handles.button_drawbox,'UserData');
+if radstat == 0
+    set(hrad(3), 'Value', 1);
+    set(hma,'ButtonDownFcn',{@DoNothingFcn,handles});
+else
+    switch radind
+        case 1
+            if (0 == figflag(getmainfigname(handles)))
+                updatemainfig(handles,'new');
+            end    
+            set(hrad(1), 'Value', 1);
+            set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});
+        case 2
+            if (0 == figflag(getmainfigname(handles)))
+                    updatemainfig(handles,'new');
+            end
+            if isempty(findobj(hma,'Tag','Box'))
+                errordlg('First draw a box to enable this mode.','Error');                
+                set(hrad(1), 'Value', 1);
+                set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});
+                return
+            else                
+                set(hrad(2), 'Value', 1);
+                set(hma,'ButtonDownFcn',{@DragBoxFcn,handles});
+            end
+        case 3
+            set(hrad(3), 'Value', 1);
+            set(hma,'ButtonDownFcn',{@DoNothingFcn,handles});
+        otherwise
+            prompt_user('Unrecognized radio index');
+    end
+end
+%-------------------------------------------------------------------------
+function DrawNewBoxFcn(hcaller,eventdata,handles)
+% ----Executes when mouse is pressed inside the main axes and the box radio 
+% is set to 'Draw New Box'
+hmf = get(handles.radio_drawbox,'UserData');
 % find the handle of the axes of the main figure
 hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend'
 
-% delete the box that already exists
+% delete the old box 
 delete(findobj(hma,'Tag','Box'));
-% axes(hma); % Make sure  main axes is in focus: NO DON'T DO THAT
-% DOING THIS PUTS THE AXES ON THE FRONT, MAKSING THE LEGEND
-%Now let the user draw the box.
-waitforbuttonpress; 
+
 point1 = get(hma,'CurrentPoint');    % button down detected
 b.figbox = rbbox;                      % return figure units
 point2 = get(hma,'CurrentPoint');    % button up detected
@@ -333,59 +427,69 @@ point2 = point2(1);
 x1 = min(point1,point2);             % calculate locations
 width = abs(point1-point2);         % and dimensions
 ylims = get(hma,'Ylim');
+b.xlims = [x1, x1+width];
 b.dbox = [x1, ylims(1), width, ylims(2)-ylims(1)];
-set(handles.toggle_dragbox,'UserData',b);
-updatebox(handles,hma,0);
-%-------------------------------------------------------------------------
-% --- Executes on button press in toggle_dragbox.
-function toggle_dragbox_Callback(hObject, eventdata, handles)
 
-if get(hObject,'value')
-    if (0 == figflag(getmainfigname(handles)))
-        updatemainfig(handles,'new');
-    end    
-    hmf = get(handles.button_drawbox,'UserData');
-    % find the handle of the axes of the main figure
-    hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend' 
+updatebox(handles,hma,0,b);
+%-------------------------------------------------------------------------
+% ----Executes when mouse is pressed inside the main axes and the box mode
+% is set to 'Drag Box'
+function DragBoxFcn(hcaller,eventdata,handles)
+hmf = get(handles.radio_drawbox,'UserData');
+% find the handle of the axes of the main figure
+hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend'
+hbox = findobj(hma,'Tag','Box');
+b = get(hbox,'UserData'); %b must not be empty, if everything is working.
     
-    hbox = findobj(hma,'Tag','Box');
-    if isempty(hbox)
-        errordlg('First draw a box to be able to drag it.','Error');
-        set(hObject,'value',0);
-        return
-    end
-    set(hObject,'String','Stop dragging');
-    b = get(hObject,'UserData'); %contains info about the box
-    waitforbuttonpress; 
-    while get(hObject,'value')        
-        point1 = get(hma,'CurrentPoint');    % button down detected
-        b.figbox = dragrect(b.figbox);              % return figure units
-        point2 = get(hma,'CurrentPoint');    % button up detected
-        point1 = point1(1);              % extract x 
-        point2 = point2(1);       
-        displace = point2-point1;
-        updatebox(handles,hma,displace);
-        waitforbuttonpress; 
-    end
-else
-    set(hObject,'String','Drag Box');
-end
+point1 = get(hma,'CurrentPoint');    % button down detected
+b.figbox = dragrect(b.figbox);              % return figure units
+point2 = get(hma,'CurrentPoint');    % button up detected
+point1 = point1(1);              % extract x 
+point2 = point2(1);       
+displace = point2-point1;
+updatebox(handles,hma,displace,b);
+
+%-------------------------------------------------------------------------
+% ----Executes when mouse is pressed inside the main axes and the box mode
+% is set to 'Do Nothing'
+function DoNothingFcn(hcaller,eventdata,handles)
+return
 %------------------------
-function updatebox(handles,hma,displace);
-b = get(handles.toggle_dragbox,'UserData');
-if ~isempty(b)
-    hbox = findobj(hma,'Tag','Box'); delete(hbox);
-    ylims = get(hma,'Ylim');
-    b.dbox(1) = b.dbox(1) + displace;
-    b.dbox([2,4]) = [ylims(1) ,ylims(2) - ylims(1)];
-    b.xlims = [b.dbox(1), b.dbox(1) + b.dbox(3)];
-    hold on;
-    hbox = rectangle('Position',b.dbox);
-    set(hbox,'EdgeColor','r','Tag','Box','Linewidth',2,'LineStyle','-.');
-    hold off;
-    set(handles.toggle_dragbox,'UserData',b);
-    updateboxresults(handles);
+%---This routine updates the existing box or draws a new box.
+function updatebox(handles,hma,displace,b);
+hbox = findobj(hma,'Tag','Box');
+% look for the box-parameters in the UserData of the box itself, ONLY IF
+% box-parameters are not supplied exlicitely
+if (nargin < 4 | isempty(b)) 
+    if isempty(hbox)
+        b = [];
+    else
+        b = get(hbox,'UserData');
+    end
 end
+if isempty(b) 
+    prompt_user('Error in updatebox. Box params can not be found');
+    return;
+end
+if (nargin < 3 | isempty(displace))
+    displace = 0;
+end
+delete(hbox); %delete old box
+ylims = get(hma,'Ylim');
+b.dbox(1) = b.dbox(1) + displace;
+b.dbox([2,4]) = [ylims(1) ,ylims(2) - ylims(1)];
+b.xlims = [b.dbox(1), b.dbox(1) + b.dbox(3)];
+hold on;
+hbox = rectangle('Position',b.dbox);
+set(hbox,'EdgeColor','r','Tag','Box','Linewidth',2,'LineStyle','-.');
+hold off;
+set(hbox,'UserData',b);
+updateboxresults(handles,hbox);
+
+if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'Value') == 1)
+    plot3dfigure(handles);
+end
+
 % --- Executes on selection change in menu_dispres.
 function menu_dispres_Callback(hObject, eventdata, handles)
 val = get(hObject,'Value');
@@ -449,38 +553,31 @@ function button_save_Callback(hObject, eventdata, handles)
 
 %%%$$$$$$$$$$$$$$$$  NON-CALLBACK ROUTINES     $$$$$$$$$$$$$$$$$$$$$$$$
 %-----------------------------------------------------------------------
-function updateboxresults(handles)
+function updateboxresults(handles,hbox)
 global g
-% keyboard
-b = get(handles.toggle_dragbox,'UserData'); %has the xy location of box
-% hmain  = get(handles.button_drawbox,'UserData');% current 'main' figure id
+dbstop if error
+b = get(hbox,'UserData'); %has the xy location of box
+% hmain  = get(handles.radio_drawbox,'UserData');% current 'main' figure id
 fileid = get(handles.menu_files,'Value');
 sigid = get(handles.menu_signal,'UserData');% internal ID of currently selected signal.
-sigval = g.(handles.dmnptue{1}){1,fileid}.(handles.signames.intr{sigid}); 
+signame = handles.signames.intr{sigid};
+sigmat = g.(handles.dmnptud{1}){1,fileid}.(signame); 
 
 % Now grab the points that fall inside the box
-istart = max(find(sigval.time <= b.xlims(1)));
-iend = max(find(sigval.time <= b.xlims(2)));
-tsel = sigval.time(istart:iend);
-switch sigid
-    case {1,2}
-        selec(:,2) = sigval.x(istart:iend);
-        selec(:,3) = sigval.y(istart:iend);
-        selec(:,4) = sigval.z(istart:iend);
-        selec(:,1) = sqrt(selec(:,2).^2 + selec(:,3).^2 + selec(:,4).^2);      
-    case 3
-        selec(:,1) = sigval.q1(istart:iend);
-        selec(:,2) = sigval.q2(istart:iend);
-        selec(:,3) = sigval.q3(istart:iend);
-        selec(:,4) = sigval.q4(istart:iend);
-    case 4
-        selec = sigval.intensity(istart:iend);
+[tsel, selec] = clipper(sigmat(:,1),sigmat(:,2:end),b.xlims(1),b.xlims(2));
+
+% Subtract out the background drift, if we are told to do so
+if get(handles.check_subdrift,'Value')
+    selec = subtract_background_drift(tsel,selec,handles,signame);
 end
 
 % Now perform computations and make the result strings
 str.trend = []; str.detrms = []; str.p2p = []; str.detp2p = []; tab = '    ';
 sf = '%+05.3f';
 if sigid == 1 | sigid ==2 %if the signal is a position measurement
+    % calculate and prepend a column of R
+    selec(:,2:4) = selec;
+    selec(:,1) = sqrt(selec(:,2).^2 + selec(:,3).^2 + selec(:,4).^2);
     dims = get(handles.list_dims,'Value'); %selected dimensions
     strdims = get(handles.list_dims,'String');% all strings    
     for c = 1:length(dims)
@@ -512,7 +609,7 @@ set(htext.trend,'String',['Avg Trend [dY/dX]: ',str.trend]);
 set(htext.p2p,'String',  ['Peak-to-Peak     : ',str.p2p]);
 set(htext.detrms,'String',  ['Detrended RMS  : ',str.detrms]);
 set(htext.detp2p,'String',  ['Detrended Range: ',str.detp2p]);
-% disp('results updated');
+dbclear if error
 %-----------------------------------------------------------------------
 function initresultfig(h)
 sp = get(0,'ScreenSize');
@@ -552,7 +649,7 @@ disp(str);
 function str = getmainfigname(handles);
 sigid = get(handles.menu_signal,'Value');
 sigstr = get(handles.menu_signal,'String');
-figid = get(handles.button_drawbox,'UserData');
+figid = get(handles.radio_drawbox,'UserData');
 str = [num2str(figid),':',sigstr{sigid}];
 %-----------------------------------------------------------------------
 % --- Executes on button press in check_overlaymag.
@@ -560,42 +657,48 @@ function check_overlaymag_Callback(hObject, eventdata, handles)
 overlaymag(handles);
 
 %-----------------------------------------------------------------------
-% make the matrices of signal values to be displayed
-function [sigout, tout, annots] = fillsig(sigin,res,signame,handles)
+% make the matrices of signal values to be displayed and related annotations
+function [sigout, annots] = filldispsig(sigin,res,signame,handles)
+% first make the time abscissa with correct resolution
 if res == 0;
-    tout = sigin.time;
+    tout = sigin(:,1);
 else
-    tout = [sigin.time(1):res:sigin.time(end)]';
+    tout = [sigin(1,1):res:sigin(end,1)]';
 end
+
+for k = 2:size(sigin,2)
+    if res == 0
+        temp(:,k-1) = sigin(:,k);
+    else
+        temp(:,k-1) = interp1(sigin(:,1),sigin(:,k),tout,'nearest');
+    end    
+end
+% Subtract out the background drift, if we are told to do so
+if get(handles.check_subdrift,'Value')
+    temp = subtract_background_drift(tout,temp,handles,signame);
+end
+sigout(:,1) = tout; % first column is always the time
 switch signame
     case {handles.signames.intr{1},handles.signames.intr{2}} %bead and stage pos                   
-        if res == 0
-            temp(:,1) = sigin.x;
-            temp(:,2) = sigin.y;
-            temp(:,3) = sigin.z;
-        else    % interpolate to the nearest neighbour, so no averaging artifacts
-            temp(:,1) = interp1(sigin.time,sigin.x,tout,'nearest');
-            temp(:,2) = interp1(sigin.time,sigin.y,tout,'nearest');
-            temp(:,3) = interp1(sigin.time,sigin.z,tout,'nearest');
-        end
+        
         % now pick the only dimesions that are requested
         dims = get(handles.list_dims,'value');
         for c = 1:length(dims)
             switch dims(c)
                 case 1 %R
-                    sigout(:,c) = sqrt(temp(:,1).^2 + temp(:,2).^2 + temp(:,3).^2);
+                    sigout(:,c+1) = sqrt(temp(:,1).^2 + temp(:,2).^2 + temp(:,3).^2);
                     annots.legstr{c} = 'R';
                     annots.colorOrder(c,:) = [0,0,0]; % R is always black
                 case 2 %X
-                    sigout(:,c) = temp(:,1);
+                    sigout(:,c+1) = temp(:,1);
                     annots.legstr{c} = 'X';
                     annots.colorOrder(c,:) = [0,0,1]; % X is always blule
                 case 3 %Y
-                    sigout(:,c) = temp(:,2);                    
+                    sigout(:,c+1) = temp(:,2);                    
                     annots.legstr{c} = 'Y';
                     annots.colorOrder(c,:) = [0,1,0]; % Y is always green          
                 case 4 %Z
-                    sigout(:,c) = temp(:,3);
+                    sigout(:,c+1) = temp(:,3);
                     annots.legstr{c} = 'Z';
                     annots.colorOrder(c,:) = [1,0,0]; % Z is always red             
                 otherwise
@@ -610,28 +713,14 @@ switch signame
             annots.t = 'Stage Postion (sensed)';
         end
     case handles.signames.intr{3} % qpd signals
-        if rate == 0
-            sigout(:,1) = sigin.q1;
-            sigout(:,2) = sigin.q2;
-            sigout(:,3) = sigin.q3;
-            sigout(:,4) = sigin.q4;
-        else
-            sigout(:,1) = interp1(sigin.time,sigin.q1,tout,'nearest');
-            sigout(:,2) = interp1(sigin.time,sigin.q2,tout,'nearest');
-            sigout(:,3) = interp1(sigin.time,sigin.q3,tout,'nearest');
-            sigout(:,4) = interp1(sigin.time,sigin.q4,tout,'nearest');
-        end
+        sigout(:,2:5) = temp;
         annots.legstr = {'Q1','Q2','Q3','Q4'};
         annots.colorOrder = [0 0 1; 0 1 0; 1 0 0; 0 0 0];
         annots.y = 'Volts';
         annots.x = 'Seconds';
         annots.t = 'QPD Signals';        
     case handles.signames.intr{4} %channel 8 
-        if rate == 0
-            sigout(:,1) = sigin.intensity;            
-        else
-            sigout(:,1) = interp1(sigin.time,sigin.intensity,tout,'nearest');            
-        end
+        sigout(:,2) = temp;
         annots.legstr = {'Ch 8'};
         annots.colorOrder = [0 0 1];
         annots.y = 'Volts';
@@ -641,12 +730,23 @@ switch signame
         prompt_user('Error: Unrecognized signalName');
 end
 %-----------------------------------------------------------------------
-
+% This function removes the pre-calculated background drift from selected
+% section of the dataset. This is different than 'trend' or 'detrending' 
+% which is displayed in the result-figure. 'Trend' referes to the slope of 
+% the selected dataset itself, while 'drift' refers to the slope of the
+% dataset previously designated as 'drift-section'.
+function dout = subtract_background_drift(t,vals,handles,signame);
+global g
+fileid = get(handles.menu_files,'Value');
+drift = g.(handles.dmnptud{7}){fileid}.(signame);
+for c = 1:size(vals,2)% repeat for all columns
+    dout(:,c) = vals(:,c) - polyval(drift(:,c),t) + drift(2,c);
+end    
 %-----------------------------------------------------------------------
 function updatemainfig(handles,modestr)
 global g
 dbstop if error
-if ~exist('g') | isempty(g.(handles.dmnptue{1}))
+if ~exist('g') | isempty(g.(handles.dmnptud{1}))
     % if dataset empty, close all main figures
     for c = 1:length(handles.mainfigids)
         if ishandle(handles.mainfigids(c))
@@ -661,28 +761,28 @@ sigid = get(handles.menu_signal,'UserData');
 % sigid = find(strcmp(handles.signames.disp, dispname) == 1);
 signame = handles.signames.intr{1,sigid};
 figid = handles.mainfigids(sigid); %handle of the main figure
-set(handles.button_drawbox,'UserData',figid);% share with others
+set(handles.radio_drawbox,'UserData',figid);% share with others
 
-if ishandle(figid) % if the figure is open,          
+if ishandle(figid) % if the figure is open,   
+    % delete old data lines
     dlinesh = findobj(figid,'Type','Line','Tag','data');    
-    delete(dlinesh);
-    figure(figid); hold on;
+    delete(dlinesh);   
 end
 
 fileid = get(handles.menu_files,'value');
-sigvals = g.(handles.dmnptue{1}){1,fileid}.(signame);
+sigvals = g.(handles.dmnptud{1}){1,fileid}.(signame);
 switch get(handles.menu_dispres,'value')
     case 1 % full or raw resolution
-        [dispval tout annots] = fillsig(sigvals,0,signame,handles);
+        [dispmat annots] = filldispsig(sigvals,0,signame,handles);
     case 2 % 1 ms resolution       
-        [dispval tout annots] = fillsig(sigvals,1e-3,signame,handles);        
+        [dispmat annots] = filldispsig(sigvals,1e-3,signame,handles);        
     case 3 % 10 ms resolution
-        [dispval tout annots] = fillsig(sigvals,1e-2,signame,handles);
+        [dispmat annots] = filldispsig(sigvals,1e-2,signame,handles);
     otherwise
         prompt_user('Error: Unrecognized time resolution');
 end
 %now ready to plot the data
-figure(figid);
+ figure(figid); hold on;
 % I prefer not to use gca and gcf, so that user accidentally clicking
 % somewhere doesn't mess me up.
 hma = findobj(figid,'Type','Axes','Tag','');
@@ -692,10 +792,15 @@ if isempty(hma) % if this is the very first time figure is plotted then axes won
     hma = findobj(figid,'Type','Axes','Tag','');
     hold off
 end
+b = []; hbox = findobj(hma,'Tag','Box'); replot_box = 0;
+if ~isempty(hbox)
+    b = get(hbox,'UserData');
+    replot_box = 1;
+end
 set(hma,'colorOrder',annots.colorOrder,'NextPlot','replacechildren');
-% so that each dimension has same color each time it is plotted.
-
-plot(tout,dispval,'Tag','data'); % all lines will be tagged as 'data' lines
+% set colororder so that each dimension has same color each time it is plotted.
+% Not settig 'nextplot' replaces the parent ie axes itself.
+plot(dispmat(:,1),dispmat(:,2:end),'Tag','data'); % all lines will be tagged as 'data' lines
 title(annots.t);
 xlabel(annots.x);
 ylabel(annots.y);
@@ -704,14 +809,11 @@ legend(hma,annots.legstr,0);
 
 % Now remove the old box and redraw it according to new axis limits
 axis(hma,'tight');
-if findobj(hma,'Tag','Box')
-    updatebox(handles,hma,0);
+if replot_box
+    updatebox(handles,hma,0,b);
 end
-if isequal(lower(get(handles.check_overlaymag,'Enable')),'on') & (get(handles.check_overlaymag,'Value') == 1)
+if isequal(lower(get(handles.check_overlaymag,'Enable')),'on')
     overlaymag(handles,figid);
-end
-if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'Value') == 1)
-    plot3dfigure(handles,sigvals);
 end
 dbclear if error
 %-----------------------------------------------------------------------
@@ -723,52 +825,78 @@ if nargin < 2
     sigid = get(handles.menu_signal,'UserData');
     figid = handles.mainfigids(sigid);
 else
-    figid = vararing{2};
+    figid = varargin{2};
 end
-mags = g.(handles.dmnptue{1}){fileid}.(handles.signames.intr{4});
 oldmag = findobj(figid,'Type','Line','Tag','Mag');
 delete(oldmag);
-figure(figid); hold on;
-plot(mags.time,mags.intensity,'m','Tag','Mag');%magenta color
-hold off;
+% replot the magnets only if the box is checked
+if get(handles.check_overlaymag,'value')
+    mags = g.(handles.dmnptud{1}){fileid}.(handles.signames.intr{4});
+    % Now adjust the range so that mags are visible in the current axis
+    hma = findobj(figid,'Type','Axes','Tag','');
+    ylims = get(hma,'Ylim');
+    mags(:,2) = mags(:,2) + ylims(1);    
+    
+    figure(figid); hold on;
+    plot(mags(:,1),mags(:,2),'m','Tag','Mag');%magenta color
+    hold off;
+end
 
 %-----------------------------------------------------------------------
 function plot3dfigure(varargin)
+global g
 handles = varargin{1};
 get(handles.menu_signal,'String');
 dispname = ans{get(handles.menu_signal,'val')};
 if nargin < 2    
     sigid = get(handles.menu_signal,'UserData');
-    % sigid = find(strcmp(handles.signames.disp, dispname) == 1);
     signame = handles.signames.intr{1,sigid};
     
     fileid = get(handles.menu_files,'value');
-    sigvals = g.(handles.dmnptue{1}){1,fileid}.(signame);
+    sigvals = g.(handles.dmnptud{1}){1,fileid}.(signame);
 else
     sigvals = varargin{2};
 end
-sigvals.x = sigvals.x - sigvals.x(1,1);
-sigvals.y = sigvals.y - sigvals.y(1,1);
-sigvals.z = sigvals.z - sigvals.z(1,1);
-p.t = sigvals.time(1):0.01:sigvals.time(end);
-p.x = interp1(sigvals.time,sigvals.x,p.t,'nearest');
-p.y = interp1(sigvals.time,sigvals.y,p.t,'nearest');
-p.z = interp1(sigvals.time,sigvals.z,p.t,'nearest');
-figure(handles.threeDfig); plot3(p.x,p.y,p.z,'k');
-xlabel('X');    ylabel('Y');    zlabel('Z');
-set(handles.threeDfig,'Name',['3d ',dispname],'NumberTitle','Off');
+sigvals(:,2:4) = sigvals(:,2:4) - repmat(sigvals(1,2:4),size(sigvals,1),1);
+t = [sigvals(1,1):0.01:sigvals(end,1)]';
+for c = 1:3
+    p(:,c) =  interp1(sigvals(:,1),sigvals(:,c+1),t,'nearest');   
+end
+hmf = get(handles.radio_drawbox,'UserData');
+if isempty(hmf) | hmf == 0
+    sigid = get(handles.menu_signal,'UserData');
+    hmf = handles.mainfigids(sigid);
+    set(handles.radio_drawbox,'UserData',hmf);
+end
+inbox = []; prebox = []; postbox = [];
+hbox = findobj(hmf,'Tag','Box');
+if ~isempty(hbox)
+    b = get(hbox,'UserData');
+    prebox = find(t <= b.xlims(1));
+    inbox = find(t < b.xlims(2) & t > b.xlims(1));
+    postbox = find(t >= b.xlims(2));
+end
 
+figure(handles.threeDfig); 
+plot3(p(prebox,1),p(prebox,2),p(prebox,3),'k'); hold on;
+plot3(p(inbox,1),p(inbox,2),p(inbox,3),'m'); 
+plot3(p(postbox,1),p(postbox,2),p(postbox,3),'k'); hold off;
+xlabel('X');    ylabel('Y');    zlabel('Z');
+set(gca,'Xcolor','b','Ycolor','g','Zcolor','r');
+set(handles.threeDfig,'Name',['3d ',dispname],'NumberTitle','Off');
 
 %-----------------------------------------------------------------------
 % This routine updates two menus: menu_files and menu_signal
+% This routine is called only by 'add' and 'remove' buttons
 function updatemenu(handles)
 updatefilemenu(handles);
 updatesignalmenu(handles);
 %-----------------------------------------------------------------------
 % This routine updates file menu
+% This routine does not replot the main figure.
 function updatefilemenu(handles)
 global g
-if ~exist('g') | isempty(g.(handles.dmnptue{1})) %database is empty
+if ~exist('g') | isempty(g.(handles.dmnptud{1})) %database is empty
     filestr = {''};        
     set(handles.menu_files,'String',filestr);
     set(handles.menu_files,'value',1);    
@@ -778,18 +906,22 @@ end
 % Leave the 'selected' pointer for the menu unchanged; unless
 % it points to the index outside the new size of the menu, in 
 % which case reset the pointer to point to one - point to first file.
-for c=1:length(g.(handles.dmnptue{3}))
-    filestr{1,c} = ['[',g.(handles.dmnptue{5}){1,c},']  ',g.(handles.dmnptue{3}){1,c}];
+for c=1:length(g.(handles.dmnptud{3}))
+    filestr{1,c} = ['[',g.(handles.dmnptud{5}){1,c},']  ',g.(handles.dmnptud{3}){1,c}];
 end
 set(handles.menu_files,'String',filestr);
 if get(handles.menu_files,'Value') > length(get(handles.menu_files,'String'))
     set(handles.menu_files,'Value',1);
 end
 %-----------------------------------------------------------------------
-% This routine updates signal menu
+% This routine updates signal menu:
+% 1. Checks and fills in the permitted signalNames in the signal menu
+% 2. Shares the internal index (sigid) for the currently selected signal
+% 3. Enables/disables 'overlay magnets' and ['3d' % 'dimension(s)'] objects
+% 4. Updates the main figure
 function updatesignalmenu(handles)
 global g
-if ~exist('g') | isempty(g.(handles.dmnptue{1})) %database is empty     
+if ~exist('g') | isempty(g.(handles.dmnptud{1})) %database is empty     
     set(handles.menu_signal,'String',{''});
     set(handles.menu_signal,'value',1);    
     return;
@@ -801,12 +933,12 @@ end
 last_sigid = get(handles.menu_signal,'UserData');%could be empty
 sigid = -1; %impossible value;
 k = 0;
-val = get(handles.menu_files,'Value');
+fileid = get(handles.menu_files,'Value');
 for c=1:size(handles.signames.intr,2) %check for each possible signal name
     % if a field with the 'internal name' for this signal type is present in the 
     % currently selected file,
     % then put the associated 'display name' in the string-set for menu_signal.
-    if isfield(g.(handles.dmnptue{1}){1,val},handles.signames.intr{1,c})
+    if isfield(g.(handles.dmnptud{1}){1,fileid},handles.signames.intr{1,c})
         k = k+1;
         sigstr{1,k} = handles.signames.disp{1,c};
         if c == last_sigid %the last selected signal is also present in this file
@@ -831,7 +963,16 @@ else
     sigid = find(TF==1);    
 end
 set(handles.menu_signal,'UserData',sigid);%share sigid with others
-checkdimsvalidity(handles);
+
+% if the current file has ch 8 loaded, then enable overlay of mags
+if isfield(g.(handles.dmnptud{1}){fileid}, handles.signames.intr{4})
+    set(handles.check_overlaymag,'Enable','On');
+else
+    set(handles.check_overlaymag,'Enable','Off');
+    set(handles.chekc_overlaymag,'Value',0);
+end
+
+checkdimsvalidity(handles);% check if RXYZ and/or 3D is applicable
 updatemainfig(handles,'new');
 
 %%%********************************************************************
@@ -989,7 +1130,7 @@ if get(handles.check_bead,'value')
             
         end        
         for c = 1:length(ids)        
-            bp = g.(handles.dmnptue{1}){1,ids(c)}.beadpos;
+            bp = g.(handles.dmnptud{1}){1,ids(c)}.beadpos;
             srate = handles.srate; %reset sample rate if changed by previous file
             if (range(diff(bp.time)) > 1e-6)            
                 fnames = get(handles.menu_files,'String');            
@@ -1101,7 +1242,7 @@ if get(handles.check_bead,'value')
     if get(handles.check_3d,'Value')
         figure(handles.threeDfig);    
         for c = 1:length(ids)        
-            bp = g.(handles.dmnptue{1}){1,ids(c)}.beadpos;
+            bp = g.(handles.dmnptud{1}){1,ids(c)}.beadpos;
             bp.x = bp.x - bp.x(1,1);
             bp.y = bp.y - bp.y(1,1);
             bp.z = bp.z - bp.z(1,1);
@@ -1110,7 +1251,7 @@ if get(handles.check_bead,'value')
             xlabel('X');
             ylabel('Y');
             zlabel('Z');
-            title(g.(handles.dmnptue{5}){1,ids(c)});
+            title(g.(handles.dmnptud{5}){1,ids(c)});
             pretty_plot;
         end
     end
@@ -1118,12 +1259,12 @@ if get(handles.check_bead,'value')
     if get(handles.check_T1ms,'value')
         figure(handles.T1msfig);    
         for c = 1:1 %plot this for the first tag only        
-            bp = g.(handles.dmnptue{1}){1,ids(c)}.beadpos;
+            bp = g.(handles.dmnptud{1}){1,ids(c)}.beadpos;
             bp = interpXYZpos(bp,1/1000);
             plot(bp.time,[bp.x,bp.y,bp.z]);
             xlabel('Seconds');
             ylabel('Microns');
-            title(g.(handles.dmnptue{5}){1,ids(c)});
+            title(g.(handles.dmnptud{5}){1,ids(c)});
             legend('X','Y','Z');
             pretty_plot;
         end        
@@ -1131,12 +1272,12 @@ if get(handles.check_bead,'value')
     if get(handles.check_T10ms,'value')
         figure(handles.T10msfig);    
         for c = 1:1 %plot this for the first tag only     
-            bp = g.(handles.dmnptue{1}){1,ids(c)}.beadpos;
+            bp = g.(handles.dmnptud{1}){1,ids(c)}.beadpos;
             bp = interpXYZpos(bp,1/100);
             plot(bp.time,[bp.x,bp.y,bp.z]);
             xlabel('Seconds');
             ylabel('Microns');
-            title(g.(handles.dmnptue{5}){1,ids(c)});
+            title(g.(handles.dmnptud{5}){1,ids(c)});
             legend('X','Y','Z');
             pretty_plot;
         end        
@@ -1160,7 +1301,7 @@ if get(handles.check_stage,'value')
             
         end        
         for c = 1:length(ids)        
-            sp = g.(handles.dmnptue{1}){1,ids(c)}.stageReport;
+            sp = g.(handles.dmnptud{1}){1,ids(c)}.stageReport;
             srate = handles.srate; %reset sample rate if changed by previous file
             if (range(diff(sp.time)) > 1e-6)            
                 fnames = get(handles.menu_files,'String');            
@@ -1272,7 +1413,7 @@ if get(handles.check_stage,'value')
     if get(handles.check_3d,'Value')
         figure(handles.threeDfigS);    
         for c = 1:length(ids)        
-            sp = g.(handles.dmnptue{1}){1,ids(c)}.stageReport;
+            sp = g.(handles.dmnptud{1}){1,ids(c)}.stageReport;
             sp.x = sp.x - sp.x(1,1);
             sp.y = sp.y - sp.y(1,1);
             sp.z = sp.z - sp.z(1,1);        
@@ -1292,19 +1433,19 @@ function list_tags_Callback(hObject, eventdata, handles)
 % --- Executes on button press in button_preview.
 function button_preview_Callback(hObject, eventdata, handles)
 global g
-if ~exist('g') | isempty(g.(handles.dmnptue{1}))
+if ~exist('g') | isempty(g.(handles.dmnptud{1}))
     prompt_user('No file exists in the database');
     return;
 end
 id = get(handles.menu_files,'Value');
-bp = g.(handles.dmnptue{1}){1,id}.beadpos;
+bp = g.(handles.dmnptud{1}){1,id}.beadpos;
 figure(handles.mainfig); clf; ha = gca; hf = gcf;
 set(hf,'name',getfocusfigname(handles),'NumberTitle','Off');
 plot(bp.time, [bp.x,bp.y,bp.z]); 
 hold on;
 lims = get(ha,'Ylim');
 [scale, imax] = max(abs(lims)); scale = scale*scale/lims(imax(1));
-% laser = g.(handles.dmnptue{1}){1,id}.laser;
+% laser = g.(handles.dmnptud{1}){1,id}.laser;
 dt = diff(bp.time);
 flag = zeros(size(bp.time));
 % flag all time stamps that were not within +/-0.01us allowance from 100us
@@ -1318,8 +1459,8 @@ xlabel('Seconds');
 %-----------------------------------------------------------------------
 function updatetaglist(handles)
 global g
-if exist('g') & ~isempty(g.(handles.dmnptue{1}));
-    set(handles.list_tags,'String',g.(handles.dmnptue{5}));
+if exist('g') & ~isempty(g.(handles.dmnptud{1}));
+    set(handles.list_tags,'String',g.(handles.dmnptud{5}));
 else
     set(handles.list_tags,'String','');
 end

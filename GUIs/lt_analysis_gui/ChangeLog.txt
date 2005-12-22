@@ -1,3 +1,15 @@
+2005-12-22 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m:
+	- Upgraded the whole program to exploit the new 'matrix output' feature of load_laser_tracking.
+	- corrected the positioning of overlayed magnets, so that they are reliably visible
+	- added 7th field in the global master database: 'drift' and removed the field: 'experType'
+	- Added  ability to select 'drift section' and then remove that drift from rest of the data
+	- Improved interface for drawing and dragging box, now using radios and buttonDownFcns
+	- Changed the 'cut' behavior to 'remove inside box' instead of 'remove outside box'
+	- Now in the 3D plot the data inside box has different color than data outside box.
+	- Several miscellaneous fixes of typos and bugs.
+	* lt_anlaysis_gui.fig: same
+
 2005-12-20 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: 
 	- Added  3d plotting ability
