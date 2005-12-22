@@ -1,4 +1,7 @@
 2005-12-22 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: Miscellaneous bug/typo fixes.
+
+2005-12-22 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:
 	- Upgraded the whole program to exploit the new 'matrix output' feature of load_laser_tracking.
 	- corrected the positioning of overlayed magnets, so that they are reliably visible

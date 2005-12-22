@@ -254,6 +254,7 @@ updatefilemenu(handles); % do not replot the main figure, just change menu entri
 % --- Executes on button press in button_cut.
 function button_cut_Callback(hObject, eventdata, handles)%XXX
 global g
+dbstop if error
 if ~exist('g') | isempty(g.(handles.dmnptud{1}))
     errordlg('Database is empty, first add files to it','Error');
     return;
@@ -279,20 +280,21 @@ id = get(handles.menu_files,'Value');
 for c = 1:length(handles.signames.intr)
     cursig = handles.signames.intr{c};
     if (isfield(g.(handles.dmnptud{1}){1,id}, cursig))
-        sigold = g.(handles.dmnptud{1}){1,id}.(cursig);
-        g.(handles.dmnptud{1}){1,id}.(cursig) = [];
+        sigold = g.(handles.dmnptud{1}){1,id}.(cursig);        
 %         find indices outside the selected box
-        linds = find(sigold(:,1) < t(1)); %indices before box
-        uinds = find(sigold(:,1) > t(2)); %indices after box
+        linds = sort(find(sigold(:,1) < t(1))); %indices before box
+        uinds = sort(find(sigold(:,1) > t(2))); %indices after box
         %adjust the data after box such that there is no step visible after
         %cutting the box
-        steps = sigold(uinds(1),:) - sigold(linds(end),:);
-        sigold(uinds,:) = sigold(uinds,:) - repmat(steps,length(uinds),1);
-        g.(handles.dmnptud{1}){1,id}.(cursig) = sigold([linds(:) uinds(:)],:);
+        steps = sigold(uinds(1),:) - sigold(linds(end)+1,:);
+        sigold(uinds,:) = sigold(uinds,:) - repmat(steps,size(uinds,1),1);
+        g.(handles.dmnptud{1}){1,id}.(cursig) = [];
+        g.(handles.dmnptud{1}){1,id}.(cursig) = sigold(union(linds, uinds),:);
         clear sigold;
     end
 end
 updatemainfig(handles,'cut');
+dbclear if error
 %-------------------------------------------------------------------------
 % --- Executes on button press in button_selectdrift.
 % This function lets user select a box that is to be considered as
@@ -875,6 +877,8 @@ if ~isempty(hbox)
     prebox = find(t <= b.xlims(1));
     inbox = find(t < b.xlims(2) & t > b.xlims(1));
     postbox = find(t >= b.xlims(2));
+else % if there is no box
+    prebox = 1:size(p,1);
 end
 
 figure(handles.threeDfig); 
@@ -969,7 +973,7 @@ if isfield(g.(handles.dmnptud{1}){fileid}, handles.signames.intr{4})
     set(handles.check_overlaymag,'Enable','On');
 else
     set(handles.check_overlaymag,'Enable','Off');
-    set(handles.chekc_overlaymag,'Value',0);
+    set(handles.check_overlaymag,'Value',0);
 end
 
 checkdimsvalidity(handles);% check if RXYZ and/or 3D is applicable
