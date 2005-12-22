@@ -1,3 +1,6 @@
+2005-12-22  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m: Fixed a missing semicolon, which caused flood on the prompt when 'position error' field was sought for.
+
 2005-12-21  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m: version 1.01
 	- Added option to request output fields in the form of a [time, vals] matrix rather than the traditional structure.

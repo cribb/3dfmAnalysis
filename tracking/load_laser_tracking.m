@@ -219,7 +219,7 @@ if(strfind(fields,'b'))
         ss = d.stageReport;
     end
     if ~isfield(d,'posError') %is the position error parsed?
-        pe = extractfield(cegjlqs{2},flags,{'x','y','z'},Toffset,THIS_IS_POS)
+        pe = extractfield(cegjlqs{2},flags,{'x','y','z'},Toffset,THIS_IS_POS);
     else
         pe = d.posError;
     end
