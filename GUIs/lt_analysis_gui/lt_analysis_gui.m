@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_gui
 
-% Last Modified by GUIDE v2.5 21-Dec-2005 21:21:08
+% Last Modified by GUIDE v2.5 23-Dec-2005 17:24:00
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -61,7 +61,7 @@ global g
 
 % Choose default command line output for lt_analysis_gui
 handles.output = hObject;
-% a signature storing the names of the fields in global structure
+% dmnptud: a signature storing the names of the fields in global structure
 % This way is much flexible if we need to add/remove/rename fields later
 handles.dmnptud = {'data','magnets','name','path','tag','usermetadata','drift'};
 % NOTE: if change any of the strings above, also change the field name
@@ -74,16 +74,16 @@ set(handles.button_add,'UserData',handles.default_path);
 handles.signames.intr = {'beadpos' ,'stageReport','qpd','laser'};
 % Names of signals to be displayed on GUI control menu_signal
 handles.signames.disp = {'Bead Pos','Stage Pos'  ,'QPD','Channel 8'};
+handles.posids = [1, 2];
 % Figure numbers allocated to 'main-figures' for various signals
 handles.mainfigids =      [   1,          2,          3,         4];
-
+handles.psdfigids =       [  10,         20,         30,        40];
+handles.dvsffigids =  handles.psdfigids + 5;      % accumulated displacement 
+handles.frespfigids =     [ 50]; % Frequency response plot is pertinent to beadpos only.
+                      % R = 50, X = 51, Y = 52, Z = 53  
 % Some other figure numbers allocated to specific types of plot
 handles.threeDfig = 9;
-handles.psdfig = 10; % psd
-                % 10 = r, 11 = x, 12 = y, 13 = z;
-handles.dvsffig = 20; % accumulated displacement 
-handles.frespfig = 30; % frequency response (only FSweep experiments)
-handles.boxresfig = 1000;
+handles.boxresfig = 100;
 %  ....add to this list as more types of plots are supported
 % Some other constants
 handles.srate = 10000;
@@ -252,7 +252,7 @@ g.(handles.dmnptud{6}){1,fileid} = userinput{2};
 updatefilemenu(handles); % do not replot the main figure, just change menu entries.
 
 % --- Executes on button press in button_cut.
-function button_cut_Callback(hObject, eventdata, handles)%XXX
+function button_cut_Callback(hObject, eventdata, handles)
 global g
 dbstop if error
 if ~exist('g') | isempty(g.(handles.dmnptud{1}))
@@ -527,8 +527,164 @@ updatemainfig(handles,'dims');
 % --- Executes on button press in button_addfsinfo.
 function button_addfsinfo_Callback(hObject, eventdata, handles)
 
+% --- Executes on button press in check_fdbox.
+function check_fdbox_Callback(hObject, eventdata, handles)
+if get(hObject,'value')
+    set(handles.button_many,'Enable','off');
+%     set(handles.button_plot,'UserData',[]);
+else
+    set(handles.button_many,'Enable','On');
+end
 % --- Executes on button press in button_many.
 function button_many_Callback(hObject, eventdata, handles)
+% can not consider box if selecting multiple files
+set(handles.check_fdbox,'value',0); 
+[selec,ok] = listdlg('ListString',get(handles.menu_files,'String'),...
+                    'InitialValue',get(handles.menu_files,'value'),...
+                    'OKstring','Select',...
+                    'Name','Select file(s) to be analyzed');
+if ok
+    set(handles.button_plot,'UserData',selec);
+end
+%-----------------------------------------------------------------------
+% --- Executes on button press in button_plot.
+function button_plot_Callback(hObject, eventdata, handles)
+global g
+dbstop if error
+sigid = get(handles.menu_signal,'UserData');
+signame = handles.signames.intr{sigid};
+if strcmp(get(handles.list_dims,'Enable'),'On')
+    % R X Y Z enabled?
+    cols = get(handles.list_dims,'value');
+    strs = get(handles.list_dims,'String');
+else %non-positional sigal, so process for all columns
+    cols = 1:size(g.(handles.dmnptu{1}).(signame),2);
+    for k = 1:cols, strs{k} = num2str(k); end
+end
+colrs = 'brkgym';
+xlims = [-Inf, Inf];
+% determine the ids of the files  to be plotted
+if get(handles.check_fdbox,'value')
+    ids = get(handles.menu_files,'Value');% only 1 file
+    hmf = handles.mainfigids(sigid);
+    hma = findobj(hmf,'Type','Axes','Tag','');
+    hbox = findobj(hma,'Tag','Box');
+    if ~isempty(hbox)
+        get(hbox,'UserData');
+        xlims = ans.xlims;
+    end
+else
+    ids = get(handles.button_plot,'UserData');
+    if isempty(ids)
+        ids = get(handles.menu_files,'value');
+    end
+end
+%%=========== COMPUTE AND PLOT PSD + CUMULATIVE DISTANCE ===============
+if get(handles.check_psd,'Value')
+    % set up figures for all columns of the signal
+    for c = 1:length(cols)
+        % setup psd figure
+        figure(handles.psdfigids(sigid) + cols(c) - 1); clf;
+        title([handles.signames.disp{sigid}, '-PSD: ',strs{cols(c)}]);
+        if any(sigid == posid) % if this signal is a position measurement
+            ylabel('Micron^2/Hz');
+        else 
+            ylabel('Volts^2/Hz');
+        end
+        hold on;
+        % setup 'area under psd' figure if we should
+        if get(handles.check_cumdisp,'value')
+            figure(handles.dvsffigids(sigid) + cols(c) - 1); clf;
+            if any(sigid == posid) % if this signal is a position measurement
+                title([handles.signames.disp{sigid}, '-Cumulative Displacement: ',strs{cols(c)}]);
+                ylabel('Micron^2/Hz');
+            else 
+                title([handles.signames.disp{sigid}, '- sqrt[Area under PSD]: ',strs{cols(c)}]);
+                ylabel('Volts^2/Hz');
+            end                
+            ylabel('Micron');
+            hold on;
+        end            
+    end
+    % process + plot each file one by one
+    for fi = 1:length(ids) %repeat for all files selected
+        % grab the signal to be processed;
+        sig = g.(handles.dmnptud{1}){ids(fi)}.(signame);
+        % First check if we are told to consider inside the Box only
+        if get(handles.check_fdbox,'value')
+            if (fi > 1)
+                disp('Error: Was told to consider only ''inside box'' data, but multiple files were selected');
+                disp('Will ignore the box and process all files');
+                set(handles.check_fdbox,'value',0);
+            else
+                oldsig = sig; sig = [];
+                [sig(:,1), sig(:,2:end)] = clipper(oldsig(:,1), oldsig(:,2:end),xlims(1),xlims(2));
+                clear oldsig;
+            end
+        end        
+        % now check if the timestamps are evenly spaced and adjust sampling rate accordingly        
+        srate = handles.srate; %reset sample rate if changed by previous file
+        if (range(diff(sig(:,1))) > 1e-6)            
+            fnames = get(handles.menu_files,'String');            
+            prompt_user(['UnEven TimeStamps: ',fnames{ids(f)}]);
+            srate = srate*0.1;
+            prompt_user(['This file will be resampled at ',num2str(srate),' Hz']);            
+            oldsig = sig;
+            sig = [];
+            sig(:,1) = [oldsig(1,1):1/srate:oldsig(end,1)]';
+            for k = 2:size(sig,2);
+                sig(:,k) = interp1(oldsig(:,1),oldsig(:,k),sig(:,1));
+            end
+            clear oldsig
+        end        
+        % Are we told to plot psd of R? then we need to calculate it. Note, this is the only
+        % reason why we assign 'cols' differently when the signal is a position than when it is not.
+        if any(cols == 1) & any(sigid == posid)% need to calculate R?
+            sig(:,3:5) = sig(:,2:4);
+            sig(:,2) = sqrt(sig(:,3).^2 + sig(:,4).^2 + sig(:,5).^2);
+        end
+        % now remove the offset from original signal before computing psd
+        sig(:,2:end) = sig(:,2:end) - repmat(mean(sig(:,2:end),1),size(sig,1),1);
+        
+        % set the psd-resolution such that we have about 10 cycles of the lowest frequency.
+        psdres = 10/range(sig(:,1));        
+        % Now, ready to compute psd and, if we are told to, area under psd
+        for c = 1:length(cols)
+            [p f] = mypsd(sig(:,cols(c)),srate,psdres,handles.psdwin);
+            figure(handles.psdfigids(sigid) + cols(c) -1);
+            loglog(f,p,['.-',colrs(mod(f-1,length(colrs))+1)]);                        
+            if get(handles.check_cumdisp,'value')
+                dc = sqrt(cumsum(p)*mean(diff(f)));% sqrt of area under psd
+                figure(handles.dvsffigids(sigid) + cols(c)-1);
+                semilogx(f,dc,['.-',colrs(mod(f-1,length(colrs))+1)]);
+            end
+            if (fi == length(ids))% if this is last file
+                alltags = g.(handles.dmnptud{5}){:};
+                
+                figure(handles.psdfigids(sigid) + cols(c) -1);
+                legend(gca,alltags{ids});
+                set(gca,'Xscale','Log','Yscale','Log');
+                hold off;
+                
+                figure(handles.dvsffigids(sigid) + cols(c) -1);
+                legend(gca,alltags{ids});
+                set(gca,'Xscale','Log','Yscale','Linear');
+                hold off;
+            end   
+        end       
+    end    
+end %%=========== COMPLETED PLOTTING PSD + CUMULATIVE DISTANCE ===============
+
+
+%%***********       FREQUENCY RESPONSE COMPUTATION       ******************
+% forth coming
+%
+%
+%%===========   COMPLETED FREQUENCY RESPONSE COMPUTATION    ===============
+
+% clear the memory of file-ids that were selected last time.
+set(handles.button_plot,'UserData',[]);
+dbclear if error
 
 % --- Executes on button press in check_fresponse.
 function check_fresponse_Callback(hObject, eventdata, handles)
@@ -576,7 +732,7 @@ end
 % Now perform computations and make the result strings
 str.trend = []; str.detrms = []; str.p2p = []; str.detp2p = []; tab = '    ';
 sf = '%+05.3f';
-if sigid == 1 | sigid ==2 %if the signal is a position measurement
+if any(sigid == posid) % if this signal is a position measurement
     % calculate and prepend a column of R
     selec(:,2:4) = selec;
     selec(:,1) = sqrt(selec(:,2).^2 + selec(:,3).^2 + selec(:,4).^2);
@@ -880,7 +1036,6 @@ if ~isempty(hbox)
 else % if there is no box
     prebox = 1:size(p,1);
 end
-
 figure(handles.threeDfig); 
 plot3(p(prebox,1),p(prebox,2),p(prebox,3),'k'); hold on;
 plot3(p(inbox,1),p(inbox,2),p(inbox,3),'m'); 
@@ -888,7 +1043,6 @@ plot3(p(postbox,1),p(postbox,2),p(postbox,3),'k'); hold off;
 xlabel('X');    ylabel('Y');    zlabel('Z');
 set(gca,'Xcolor','b','Ycolor','g','Zcolor','r');
 set(handles.threeDfig,'Name',['3d ',dispname],'NumberTitle','Off');
-
 %-----------------------------------------------------------------------
 % This routine updates two menus: menu_files and menu_signal
 % This routine is called only by 'add' and 'remove' buttons
@@ -1103,378 +1257,10 @@ function menu_exper_Callback(hObject, eventdata, handles)
 % Hints: contents = get(hObject,'String') returns menu_exper contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_exper
 
-%888888888888888%888888888888888%888888888888888%888888888888888
-%888888888888888   ALL BELOW IS DEPRECATED      %888888888888888
-%888888888888888%888888888888888%888888888888888%888888888888888
-% --- Executes on button press in button_plot.
-function button_plot_Callback(hObject, eventdata, handles)
-global g
-dbstop if error
-alltags = get(handles.list_tags,'String');
-ids = get(handles.list_tags,'Value');
-dims = get(handles.list_dims,'value');
-strdim = get(handles.list_dims,'String');    
-colrs = 'bgrkym';
-
-%%=========== COMPUTE AND PLOT PSD + CUMULATIVE DISTANCE ===============
-if get(handles.check_bead,'value')
-    if get(handles.check_psd,'Value')
-        % set up all figures
-        for c = 1:length(dims)
-            figure(handles.psdfig + c - 1); clf;
-            title(['Bead PSD: ',strdim{dims(c)}]);
-            ylabel('Micron^2/Hz');
-            hold on;
-            if get(handles.check_cumdisp,'value')
-                figure(handles.dvsffig + c - 1); clf;
-                title(['Bead Cumulative Displacement: ',strdim{dims(c)}]);
-                ylabel('Micron');
-                hold on;
-            end
-            
-        end        
-        for c = 1:length(ids)        
-            bp = g.(handles.dmnptud{1}){1,ids(c)}.beadpos;
-            srate = handles.srate; %reset sample rate if changed by previous file
-            if (range(diff(bp.time)) > 1e-6)            
-                fnames = get(handles.menu_files,'String');            
-                prompt_user(['UnEven TimeStamps: ',fnames{ids(c)}]);
-                srate = srate*0.1;
-                prompt_user(['I will resample this file at ',num2str(srate),' Hz']);            
-                t = [bp.time(1):1/srate:bp.time(end)]';
-                x = interp1(bp.time,bp.x,t);
-                y = interp1(bp.time,bp.y,t);
-                z = interp1(bp.time,bp.z,t);
-                bp = [];            
-                [bp.time bp.x bp.y bp.z] = deal(t, x, y, z);
-            end
-            bp.x = bp.x - mean(bp.x);
-            bp.y = bp.y - mean(bp.y);
-            bp.z = bp.z - mean(bp.z);
-            psdres = 10/range(bp.time);
-            for cd = 1:length(dims)
-                switch strdim{dims(cd)}
-                    case strdim{1}
-                        bp.r = sqrt(bp.x.^2 + bp.y.^2 + bp.z.^2);
-                        bp.r = bp.r - mean(bp.r);
-                        if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.r,srate,psdres,handles.psdwin,[],'yes');
-                            figure(handles.dvsffig + 1 -1);           
-                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                            if (c == length(ids))% if this is last file
-                                legend(gca,alltags{ids});
-                                set(gca,'Xscale','Log','Yscale','Linear');
-                                hold off;
-                            end
-                        else
-                            [p f] = mypsd(bp.r,srate,psdres);
-                        end
-                        figure(handles.psdfig + 1 -1);           
-                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                        if (c == length(ids))% if this is last file
-                            legend(gca,alltags{ids});
-                            set(gca,'Xscale','Log','Yscale','Log');
-                            hold off;
-                        end
-                    case strdim{2}
-                        if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.x,srate,psdres,handles.psdwin,[],'yes');
-                            figure(handles.dvsffig + 2 -1);           
-                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                            if (c == length(ids))% if this is last file
-                                legend(gca,alltags{ids});
-                                set(gca,'Xscale','Log','Yscale','Linear');
-                                hold off;
-                            end
-                        else
-                            [p f] = mypsd(bp.x,srate,psdres);
-                        end
-                        figure(handles.psdfig + 2 -1);           
-                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                        if (c == length(ids))% if this is last file
-                            legend(gca,alltags{ids});
-                            set(gca,'Xscale','Log','Yscale','Log');
-                            hold off;
-                        end
-                    case strdim{3}
-                        if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.y,srate,psdres,handles.psdwin,[],'yes');
-                            figure(handles.dvsffig + 3 -1);           
-                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                            if (c == length(ids))% if this is last file
-                                legend(gca,alltags{ids});
-                                set(gca,'Xscale','Log','Yscale','Linear');
-                                hold off;
-                            end
-                        else
-                            [p f] = mypsd(bp.y,srate,psdres);
-                        end
-                        figure(handles.psdfig + 3 -1);           
-                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                        if (c == length(ids))% if this is last file
-                            legend(gca,alltags{ids});
-                            set(gca,'Xscale','Log','Yscale','Log');
-                            hold off;
-                        end
-                    case strdim{4}
-                        if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(bp.z,srate,psdres,handles.psdwin,[],'yes');
-                            figure(handles.dvsffig + 4 -1);           
-                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                            if (c == length(ids))% if this is last file
-                                legend(gca,alltags{ids});
-                                set(gca,'Xscale','Log','Yscale','Linear');
-                                hold off;
-                            end
-                        else
-                            [p f] = mypsd(bp.z,srate,psdres);
-                        end
-                        figure(handles.psdfig + 4 -1);           
-                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                        if (c == length(ids))% if this is last file
-                            legend(gca,alltags{ids});
-                            hold off;
-                            set(gca,'Xscale','Log','Yscale','Log');
-                        end
-                    otherwise
-                        prompt_user('Unrecognized type (not among r,x,y,z) for psd calculation');
-                end
-            end
-        end    
-    end
-    %% ==================   PLOT 3D TRACE   =====================
-    if get(handles.check_3d,'Value')
-        figure(handles.threeDfig);    
-        for c = 1:length(ids)        
-            bp = g.(handles.dmnptud{1}){1,ids(c)}.beadpos;
-            bp.x = bp.x - bp.x(1,1);
-            bp.y = bp.y - bp.y(1,1);
-            bp.z = bp.z - bp.z(1,1);
-            bp = interpXYZpos(bp,1/100);
-            plot3(bp.x,bp.y,bp.z,colrs(mod(c-1,length(colrs))+1));
-            xlabel('X');
-            ylabel('Y');
-            zlabel('Z');
-            title(g.(handles.dmnptud{5}){1,ids(c)});
-            pretty_plot;
-        end
-    end
-    %% ==================   PLOT TIME-DOMAIN XYZ TRACES   =====================
-    if get(handles.check_T1ms,'value')
-        figure(handles.T1msfig);    
-        for c = 1:1 %plot this for the first tag only        
-            bp = g.(handles.dmnptud{1}){1,ids(c)}.beadpos;
-            bp = interpXYZpos(bp,1/1000);
-            plot(bp.time,[bp.x,bp.y,bp.z]);
-            xlabel('Seconds');
-            ylabel('Microns');
-            title(g.(handles.dmnptud{5}){1,ids(c)});
-            legend('X','Y','Z');
-            pretty_plot;
-        end        
-    end
-    if get(handles.check_T10ms,'value')
-        figure(handles.T10msfig);    
-        for c = 1:1 %plot this for the first tag only     
-            bp = g.(handles.dmnptud{1}){1,ids(c)}.beadpos;
-            bp = interpXYZpos(bp,1/100);
-            plot(bp.time,[bp.x,bp.y,bp.z]);
-            xlabel('Seconds');
-            ylabel('Microns');
-            title(g.(handles.dmnptud{5}){1,ids(c)});
-            legend('X','Y','Z');
-            pretty_plot;
-        end        
-    end
-end
-%%=========== stage: COMPUTE AND PLOT PSD + CUMULATIVE DISTANCE ===============
-if get(handles.check_stage,'value')
-    if get(handles.check_psd,'Value')
-        % set up all figures
-        for c = 1:length(dims)
-            figure(handles.psdfigS + c - 1); clf;
-            title(['Stage PSD: ',strdim{dims(c)}]);
-            ylabel('Micron^2/Hz');
-            hold on;
-            if get(handles.check_cumdisp,'value')
-                figure(handles.dvsffigS + c - 1); clf;
-                title(['Stage Cumulative Displacement: ',strdim{dims(c)}]);
-                ylabel('Micron');
-                hold on;
-            end
-            
-        end        
-        for c = 1:length(ids)        
-            sp = g.(handles.dmnptud{1}){1,ids(c)}.stageReport;
-            srate = handles.srate; %reset sample rate if changed by previous file
-            if (range(diff(sp.time)) > 1e-6)            
-                fnames = get(handles.menu_files,'String');            
-                prompt_user(['UnEven TimeStamps: ',fnames{ids(c)}]);
-                srate = srate*0.1;
-                prompt_user(['I will resample this file at ',num2str(srate),' Hz']);            
-                t = [sp.time(1):1/srate:sp.time(end)]';
-                x = interp1(sp.time,sp.x,t);
-                y = interp1(sp.time,sp.y,t);
-                z = interp1(sp.time,sp.z,t);
-                sp = [];            
-                [sp.time sp.x sp.y sp.z] = deal(t, x, y, z);
-            end
-            sp.x = sp.x - mean(sp.x);
-            sp.y = sp.y - mean(sp.y);
-            sp.z = sp.z - mean(sp.z);
-            psdres = 10/range(sp.time);
-            for cd = 1:length(dims)
-                switch strdim{dims(cd)}
-                    case strdim{1}
-                        sp.r = sqrt(sp.x.^2 + sp.y.^2 + sp.z.^2);
-                        sp.r = sp.r - mean(sp.r);
-                        if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.r,srate,psdres,handles.psdwin,[],'yes');
-                            figure(handles.dvsffigS + 1 -1);           
-                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                            if (c == length(ids))% if this is last file
-                                legend(gca,alltags{ids});
-                                set(gca,'Xscale','Log','Yscale','Linear');
-                                hold off;
-                            end
-                        else
-                            [p f] = mypsd(sp.r,srate,psdres);
-                        end
-                        figure(handles.psdfigS + 1 -1);           
-                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                        if (c == length(ids))% if this is last file
-                            legend(gca,alltags{ids});
-                            set(gca,'Xscale','Log','Yscale','Log');
-                            hold off;
-                        end
-                    case strdim{2}
-                        if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.x,srate,psdres,handles.psdwin,[],'yes');
-                            figure(handles.dvsffigS + 2 -1);           
-                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                            if (c == length(ids))% if this is last file
-                                legend(gca,alltags{ids});
-                                set(gca,'Xscale','Log','Yscale','Linear');
-                                hold off;
-                            end
-                        else
-                            [p f] = mypsd(sp.x,srate,psdres);
-                        end
-                        figure(handles.psdfigS + 2 -1);           
-                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                        if (c == length(ids))% if this is last file
-                            legend(gca,alltags{ids});
-                            set(gca,'Xscale','Log','Yscale','Log');
-                            hold off;
-                        end
-                    case strdim{3}
-                        if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.y,srate,psdres,handles.psdwin,[],'yes');
-                            figure(handles.dvsffigS + 3 -1);           
-                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                            if (c == length(ids))% if this is last file
-                                legend(gca,alltags{ids});
-                                set(gca,'Xscale','Log','Yscale','Linear');
-                                hold off;
-                            end
-                        else
-                            [p f] = mypsd(sp.y,srate,psdres);
-                        end
-                        figure(handles.psdfigS + 3 -1);           
-                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                        if (c == length(ids))% if this is last file
-                            legend(gca,alltags{ids});
-                            set(gca,'Xscale','Log','Yscale','Log');
-                            hold off;
-                        end
-                    case strdim{4}
-                        if get(handles.check_cumdisp,'Value')
-                            [p f Id] = mypsd(sp.z,srate,psdres,handles.psdwin,[],'yes');
-                            figure(handles.dvsffigS + 4 -1);           
-                            semilogx(f,Id,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                            if (c == length(ids))% if this is last file
-                                legend(gca,alltags{ids});
-                                set(gca,'Xscale','Log','Yscale','Linear');
-                                hold off;
-                            end
-                        else
-                            [p f] = mypsd(sp.z,srate,psdres);
-                        end
-                        figure(handles.psdfigS + 4 -1);           
-                        loglog(f,p,['.-',colrs(mod(c-1,length(colrs))+1)]);
-                        if (c == length(ids))% if this is last file
-                            legend(gca,alltags{ids});
-                            hold off;
-                            set(gca,'Xscale','Log','Yscale','Log');
-                        end
-                    otherwise
-                        prompt_user('Unrecognized type (not among r,x,y,z) for psd calculation');
-                end
-            end
-        end    
-    end
-    %% ==================   PLOT 3D TRACE   =====================
-    if get(handles.check_3d,'Value')
-        figure(handles.threeDfigS);    
-        for c = 1:length(ids)        
-            sp = g.(handles.dmnptud{1}){1,ids(c)}.stageReport;
-            sp.x = sp.x - sp.x(1,1);
-            sp.y = sp.y - sp.y(1,1);
-            sp.z = sp.z - sp.z(1,1);        
-            plot3(sp.x,sp.y,sp.z,colrs(mod(c-1,length(colrs))+1));
-        end
-    end
-end
-% keyboard
-dbclear if error
-
-
-% --- Executes on selection change in list_tags.
-function list_tags_Callback(hObject, eventdata, handles)
-% Hints: contents = get(hObject,'String') returns list_tags contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from list_tags
-
-% --- Executes on button press in button_preview.
-function button_preview_Callback(hObject, eventdata, handles)
-global g
-if ~exist('g') | isempty(g.(handles.dmnptud{1}))
-    prompt_user('No file exists in the database');
-    return;
-end
-id = get(handles.menu_files,'Value');
-bp = g.(handles.dmnptud{1}){1,id}.beadpos;
-figure(handles.mainfig); clf; ha = gca; hf = gcf;
-set(hf,'name',getfocusfigname(handles),'NumberTitle','Off');
-plot(bp.time, [bp.x,bp.y,bp.z]); 
-hold on;
-lims = get(ha,'Ylim');
-[scale, imax] = max(abs(lims)); scale = scale*scale/lims(imax(1));
-% laser = g.(handles.dmnptud{1}){1,id}.laser;
-dt = diff(bp.time);
-flag = zeros(size(bp.time));
-% flag all time stamps that were not within +/-0.01us allowance from 100us
-flag(find(abs(dt - 1e-4) > 1e-8)) = 0.5*scale;
-axes(ha);
-plot(bp.time, flag,'k');
-hold off;
-legend('X','Y','Z','Interval');
-ylabel('Microns (no units for black line)');
-xlabel('Seconds');
-%-----------------------------------------------------------------------
-function updatetaglist(handles)
-global g
-if exist('g') & ~isempty(g.(handles.dmnptud{1}));
-    set(handles.list_tags,'String',g.(handles.dmnptud{5}));
-else
-    set(handles.list_tags,'String','');
-end
-val = get(handles.list_tags,'value');
-if any(val > length(get(handles.list_tags,'String')))
-    set(handles.list_tags,'value',length(handles.list_tags));
-end
 %%%####################################################################
 %%%#############    GUIDE WILL ADD NEW CALLBACKS BELOW      ###########
 %%%####################################################################
+
 
 
 

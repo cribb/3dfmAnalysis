@@ -1,3 +1,10 @@
+2005-12-23 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: 
+	- Added back the ability to compute psd, compute 'accumulative displacement' and overlay the results for multiple files on a common plot. Enabled 'plot' button.
+	- Added checkbox to do frequency-domain analysis of the data selected in time-domain by drawing a box.
+	* lt_analysis_gui.fig: Same +
+	- Moved 'Add FS data' button into master database management panel.
+
 2005-12-22 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: Miscellaneous bug/typo fixes.
 
