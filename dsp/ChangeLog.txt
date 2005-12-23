@@ -1,3 +1,9 @@
+2005-12-22  Kalpit Desai <kvdesai@cs.unc.edu>
+	* mypsd.m: 
+	- Calculation of 'integrated displacement' is much efficient now.
+	- Last argument, flag for calculating id, is now obsolete and ignored.
+	- Improved documentation
+
 2005-09-24  Kalpit Desai <kvdesai@cs.unc.edu>
 	* processpeak.m: Made interactive. 
 
