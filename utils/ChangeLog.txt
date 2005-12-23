@@ -1,3 +1,5 @@
+2005-12-23  Kalpit Desai <kvdesai@email.unc.edu>
+	* drawlines.m: Better documentation
 2005-09-06  Kalpit Desai <kvdesai@email.unc.edu>
 	* drawlines.m: There must be an accidental commit of this file which had one line deleted. Fixed it.
 2005-08-31  Kalpit Desai <kvdesai@email.unc.edu>
