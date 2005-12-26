@@ -210,6 +210,10 @@ prompt_user(['Finished Loading. Loaded ',num2str(nloaded),' files']);
 % --- Executes on button press in button_remove
 function button_remove_Callback(hObject, eventdata, handles)
 global g
+if cellfun('isempty',g.data)
+   errordlg('Database is empty, nothing to be removed.','Alert');
+   return;
+end
 [selec,ok] = listdlg('ListString',get(handles.menu_files,'String'),...
                     'OKstring','Remove',...
                     'Name','Select file(s) to be removed');
@@ -264,7 +268,7 @@ function button_cut_Callback(hObject, eventdata, handles)
 global g
 dbstop if error
 if ~exist('g') | isempty(g.data)
-    errordlg('Database is empty, first add files to it','Error');
+    errordlg('Database is empty, first add files to it','Alert');
     return;
 end
 % check if the main figure is plotted and in focus
@@ -312,7 +316,7 @@ dbclear if error
 function button_selectdrift_Callback(hObject, eventdata, handles)
 global g
 if ~exist('g') | isempty(g.data)
-    errordlg('Database is empty, first add files to it','Error');
+    errordlg('Database is empty, first add files to it','Alert');
     return;
 end
 % check if the main figure is plotted and in focus
@@ -402,7 +406,7 @@ else
                     updatemainfig(handles,'new');
             end
             if isempty(findobj(hma,'Tag','Box'))
-                errordlg('First draw a box to enable this mode.','Error');                
+                errordlg('First draw a box to enable this mode.','Alert');                
                 set(hrad(1), 'Value', 1);
                 set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});
                 return
@@ -414,7 +418,7 @@ else
             set(hrad(3), 'Value', 1);
             set(hma,'ButtonDownFcn',{@DoNothingFcn,handles});
         otherwise
-            prompt_user('Unrecognized radio index');
+            prompt_user('Error:Unrecognized radio index');
     end
 end
 %-------------------------------------------------------------------------
@@ -868,7 +872,7 @@ switch signame
                     annots.legstr{c} = 'Z';
                     annots.colorOrder(c,:) = [1,0,0]; % Z is always red             
                 otherwise
-                    prompt_user('Unrecognized dimension');
+                    prompt_user('Error: Unrecognized dimension (not among RXYZ)');
             end
         end
         annots.y = 'Microns';
