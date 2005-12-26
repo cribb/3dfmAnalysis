@@ -1,3 +1,8 @@
+2005-12-26 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: 
+	- Replaced the referenced fieldnames of the global database with absolute names, thus improving readability of the code and  speed of the program. Referencing was useful only while the absolute names were in experimental phase.
+	- Fixed a typo.
+
 2005-12-23 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: 
 	- Added back the ability to compute psd, compute 'accumulative displacement' and overlay the results for multiple files on a common plot. Enabled 'plot' button.

@@ -61,38 +61,46 @@ global g
 
 % Choose default command line output for lt_analysis_gui
 handles.output = hObject;
-% dmnptud: a signature storing the names of the fields in global structure
-% This way is much flexible if we need to add/remove/rename fields later
-handles.dmnptud = {'data','magnets','name','path','tag','usermetadata','drift'};
-% NOTE: if change any of the strings above, also change the field name
-% to reflect the initials arranged in the same order as the fields are.
+
+% a list of fields in the global dataset, useful to access each field by
+% index rather than by absolute name.
+handles.gfields = {'data','magdata','fname','path','tag','metadata','drift'};
+% NOTE: if change any of the strings above, also change the field name of
+% g in the whole file, and vice versa.
 
 handles.default_path = pwd;
 set(handles.button_add,'UserData',handles.default_path); 
 
 % Names of signals in the structure given by load_laser_tracking
+% If we want to add a signal later, just change all the fields below (e.g
+% siganmes.intr, signmaes.disp, posid, and all figids accordingly. Rest of
+% the program *should* still work unchanged.
 handles.signames.intr = {'beadpos' ,'stageReport','qpd','laser'};
 % Names of signals to be displayed on GUI control menu_signal
 handles.signames.disp = {'Bead Pos','Stage Pos'  ,'QPD','Channel 8'};
-handles.posids = [1, 2];
+handles.posid = [1, 2]; %index of the signals which are position measurements
 % Figure numbers allocated to 'main-figures' for various signals
 handles.mainfigids =      [   1,          2,          3,         4];
 handles.psdfigids =       [  10,         20,         30,        40];
 handles.dvsffigids =  handles.psdfigids + 5;      % accumulated displacement 
-handles.frespfigids =     [ 50]; % Frequency response plot is pertinent to beadpos only.
-                      % R = 50, X = 51, Y = 52, Z = 53  
+%  ....add to this list as more types of plots are supported
+
+% Below are some figids pertinent to only specific signal types
+handles.frespfigids =     [ 60]; % Frequency response plot is pertinent to beadpos only.
+                      % R = 60, X = 61, Y = 62, Z = 63  
 % Some other figure numbers allocated to specific types of plot
 handles.threeDfig = 9;
 handles.boxresfig = 100;
 %  ....add to this list as more types of plots are supported
+
 % Some other constants
 handles.srate = 10000;
 handles.psdwin = 'blackman';
 handles.emptyflag_str = 'Database is empty';
 
 % initialize the global structure
-for c = 1:length(handles.dmnptud)
-    g.(handles.dmnptud{c}) = {};
+for c = 1:length(handles.gfields)
+    g.(handles.gfields{c}) = {};
 end
 
 guidata(hObject, handles);
@@ -142,16 +150,16 @@ flags.matoutput = 1; %request output fields in the [time vals] matrix form.
 nloaded = 0;
 for(c = 1:length(f))
     pack
-    if exist('g') & ~isempty(g.(handles.dmnptud{1})) & any(strcmp(g.(handles.dmnptud{3}),f{c}) == 1)
+    if exist('g') & ~isempty(g.data) & any(strcmp(g.fname,f{c}) == 1)
         prompt_user(['The file ',f{c},' is already in the database.']);                
     else
         prompt_user(['...currently loading ','[',num2str(c),'of',num2str(length(f)),'] :',f{c}],handles);
         
         %put newly added dataset on the top of the list
         %shift all existing datasets down by one
-        if (exist('g') & ~isempty(g.(handles.dmnptud{1})))
-            for cf = 1:length(handles.dmnptud) 
-                g.(handles.dmnptud{cf}) = [ {0}, g.(handles.dmnptud{cf})];
+        if (exist('g') & ~isempty(g.data))
+            for cf = 1:length(handles.gfields) 
+                g.(handles.gfields{cf}) = [ {0}, g.(handles.gfields{cf})];
             end
         end
         %Make the cell arrays in the form of 1xN, and keep that form as the
@@ -159,24 +167,24 @@ for(c = 1:length(f))
         %is creating arrays in the form of 1xN by default.
         try
             % load only those fields which are pertinent to the selected experiment type
-            g.(handles.dmnptud{1}){1,1} = load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
+            g.data{1,1} = load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
             % fullfile usage is handy and protects code against platform variations
-            g.(handles.dmnptud{2}){1,1} = {}; %start out with empty magnet data
-            g.(handles.dmnptud{3}){1,1} = f{c}; %file name
-            g.(handles.dmnptud{4}){1,1} = p; %file path
+            g.magdata{1,1} = {}; %start out with empty magnet data
+            g.fname{1,1} = f{c}; %file name
+            g.path{1,1} = p; %file path
             % Now add the default tag
             NoTagInd = get(handles.button_tag,'UserData');
             if(isempty(NoTagInd) | NoTagInd < 1), NoTagInd = 1; end
-            g.(handles.dmnptud{5}){1,1} = ['NoTag',num2str(NoTagInd)]; %tag
+            g.tag{1,1} = ['NoTag',num2str(NoTagInd)]; %tag
             set(handles.button_tag,'UserData',NoTagInd+1);
-            g.(handles.dmnptud{6}){1,1} = 'NoMetaData'; %user specified metadata                
+            g.metadata{1,1} = 'NoMetaData'; %user specified metadata                
             for k = 1:length(handles.signames.intr)
-                if isfield(g.(handles.dmnptud{1}){1},handles.signames.intr{k})
+                if isfield(g.data{1},handles.signames.intr{k})
                     % calculate # of columns in the current signal
-                    M = size(g.(handles.dmnptud{1}){1}.(handles.signames.intr{k}),2);                    
+                    M = size(g.data{1}.(handles.signames.intr{k}),2);                    
                     % enter zero as the place-holder in the drift fields to start with.
                     % do not allocate space for drift for the first column which is time
-                    g.(handles.dmnptud{7}){1,1}.(handles.signames.intr{k}) = zeros(2,M-1);
+                    g.drift{1,1}.(handles.signames.intr{k}) = zeros(2,M-1);
                         % First Row = Slope, Second Row = Offset
                 end
             end            
@@ -186,9 +194,9 @@ for(c = 1:length(f))
             prompt_user(lasterr);
             prompt_user([f{c}, ' could not be added to the database.'],handles);
             % shift back every field up by one
-            if(exist('g') & ~isempty(g.(handles.dmnptud{1})))
-                for cf = 1:length(handles.dmnptud)                    
-                    g.(handles.dmnptud{cf}) = g.(handles.dmnptud{cf})(2:end); 
+            if(exist('g') & ~isempty(g.data))
+                for cf = 1:length(handles.gfields)                    
+                    g.(handles.gfields{cf}) = g.(handles.gfields{cf})(2:end); 
                 end                 
             end
             break;
@@ -206,15 +214,15 @@ global g
                     'OKstring','Remove',...
                     'Name','Select file(s) to be removed');
 for c=1:length(selec)
-    for cf = 1:length(handles.dmnptud) %delete all fields for that file id
-        g.(handles.dmnptud{cf}){1,selec(c)} = {};
+    for cf = 1:length(handles.gfields) %delete all fields for that file id
+        g.(handles.gfields{cf}){1,selec(c)} = {};
     end
 end
 % keyboard
 % Now remove the empty cells from each field
-for cf = 1:length(handles.dmnptud) 
-    ifilled = ~cellfun('isempty',g.(handles.dmnptud{cf}));
-    g.(handles.dmnptud{cf}) = g.(handles.dmnptud{cf})(ifilled); 
+for cf = 1:length(handles.gfields) 
+    ifilled = ~cellfun('isempty',g.(handles.gfields{cf}));
+    g.(handles.gfields{cf}) = g.(handles.gfields{cf})(ifilled); 
 end
 % updatetaglist(handles);
 updatemenu(handles);
@@ -239,23 +247,23 @@ dlg_title = ['Edit metadata:',contents{fileid}];
 num_lines= [1;2];
 while 1    
     userinput = inputdlg(prompt,dlg_title,num_lines,...
-        {g.(handles.dmnptud{5}){1,fileid}, g.(handles.dmnptud{6}){1,fileid}});  
-    sameid = find(strcmp(g.(handles.dmnptud{5}),userinput{1}) == 1);
+        {g.tag{1,fileid}, g.metadata{1,fileid}});  
+    sameid = find(strcmp(g.tag,userinput{1}) == 1);
     if sameid == fileid | isempty(sameid) % if there is no another tag of same string
         break;        
     else
         errordlg('A tag with the same string already exists. Please change the tag.','Error');
     end
 end
-g.(handles.dmnptud{5}){1,fileid} = userinput{1};
-g.(handles.dmnptud{6}){1,fileid} = userinput{2};
+g.tag{1,fileid} = userinput{1};
+g.metadata{1,fileid} = userinput{2};
 updatefilemenu(handles); % do not replot the main figure, just change menu entries.
 
 % --- Executes on button press in button_cut.
 function button_cut_Callback(hObject, eventdata, handles)
 global g
 dbstop if error
-if ~exist('g') | isempty(g.(handles.dmnptud{1}))
+if ~exist('g') | isempty(g.data)
     errordlg('Database is empty, first add files to it','Error');
     return;
 end
@@ -279,8 +287,8 @@ t = sort(t);
 id = get(handles.menu_files,'Value');
 for c = 1:length(handles.signames.intr)
     cursig = handles.signames.intr{c};
-    if (isfield(g.(handles.dmnptud{1}){1,id}, cursig))
-        sigold = g.(handles.dmnptud{1}){1,id}.(cursig);        
+    if (isfield(g.data{1,id}, cursig))
+        sigold = g.data{1,id}.(cursig);        
 %         find indices outside the selected box
         linds = sort(find(sigold(:,1) < t(1))); %indices before box
         uinds = sort(find(sigold(:,1) > t(2))); %indices after box
@@ -288,8 +296,8 @@ for c = 1:length(handles.signames.intr)
         %cutting the box
         steps = sigold(uinds(1),:) - sigold(linds(end)+1,:);
         sigold(uinds,:) = sigold(uinds,:) - repmat(steps,size(uinds,1),1);
-        g.(handles.dmnptud{1}){1,id}.(cursig) = [];
-        g.(handles.dmnptud{1}){1,id}.(cursig) = sigold(union(linds, uinds),:);
+        g.data{1,id}.(cursig) = [];
+        g.data{1,id}.(cursig) = sigold(union(linds, uinds),:);
         clear sigold;
     end
 end
@@ -303,7 +311,7 @@ dbclear if error
 % updates the drift parameters in the global master database.
 function button_selectdrift_Callback(hObject, eventdata, handles)
 global g
-if ~exist('g') | isempty(g.(handles.dmnptud{1}))
+if ~exist('g') | isempty(g.data)
     errordlg('Database is empty, first add files to it','Error');
     return;
 end
@@ -322,13 +330,13 @@ t = sort(t);
 sigid = get(handles.menu_signal,'UserData');
 signame = handles.signames.intr{sigid};
 fileid = get(handles.menu_files,'Value');
-sig = g.(handles.dmnptud{1}){fileid}.(signame);
+sig = g.data{fileid}.(signame);
 M = size(sig,2);
 [selec(:,1),selec(:,2:M)] = clipper(sig(:,1),sig(:,2:M),t(1),t(2));
 for c = 2:M
     fit = polyfit(selec(:,1),selec(:,c),1);
     % First Row = Slope, 2nd Row = offset;
-    g.(handles.dmnptud{7}){fileid}.(signame)(:,c-1) = fit;
+    g.drift{fileid}.(signame)(:,c-1) = fit;
 end
 
 %-------------------------------------------------------------------------
@@ -558,7 +566,7 @@ if strcmp(get(handles.list_dims,'Enable'),'On')
     cols = get(handles.list_dims,'value');
     strs = get(handles.list_dims,'String');
 else %non-positional sigal, so process for all columns
-    cols = 1:size(g.(handles.dmnptu{1}).(signame),2);
+    cols = 1:size(g.data.(signame),2);
     for k = 1:cols, strs{k} = num2str(k); end
 end
 colrs = 'brkgym';
@@ -586,7 +594,7 @@ if get(handles.check_psd,'Value')
         % setup psd figure
         figure(handles.psdfigids(sigid) + cols(c) - 1); clf;
         title([handles.signames.disp{sigid}, '-PSD: ',strs{cols(c)}]);
-        if any(sigid == posid) % if this signal is a position measurement
+        if any(sigid == handles.posid) % if this signal is a position measurement
             ylabel('Micron^2/Hz');
         else 
             ylabel('Volts^2/Hz');
@@ -595,7 +603,7 @@ if get(handles.check_psd,'Value')
         % setup 'area under psd' figure if we should
         if get(handles.check_cumdisp,'value')
             figure(handles.dvsffigids(sigid) + cols(c) - 1); clf;
-            if any(sigid == posid) % if this signal is a position measurement
+            if any(sigid == handles.posid) % if this signal is a position measurement
                 title([handles.signames.disp{sigid}, '-Cumulative Displacement: ',strs{cols(c)}]);
                 ylabel('Micron^2/Hz');
             else 
@@ -609,7 +617,7 @@ if get(handles.check_psd,'Value')
     % process + plot each file one by one
     for fi = 1:length(ids) %repeat for all files selected
         % grab the signal to be processed;
-        sig = g.(handles.dmnptud{1}){ids(fi)}.(signame);
+        sig = g.data{ids(fi)}.(signame);
         % First check if we are told to consider inside the Box only
         if get(handles.check_fdbox,'value')
             if (fi > 1)
@@ -639,7 +647,7 @@ if get(handles.check_psd,'Value')
         end        
         % Are we told to plot psd of R? then we need to calculate it. Note, this is the only
         % reason why we assign 'cols' differently when the signal is a position than when it is not.
-        if any(cols == 1) & any(sigid == posid)% need to calculate R?
+        if any(cols == 1) & any(sigid == handles.posid)% need to calculate R?
             sig(:,3:5) = sig(:,2:4);
             sig(:,2) = sqrt(sig(:,3).^2 + sig(:,4).^2 + sig(:,5).^2);
         end
@@ -659,7 +667,7 @@ if get(handles.check_psd,'Value')
                 semilogx(f,dc,['.-',colrs(mod(f-1,length(colrs))+1)]);
             end
             if (fi == length(ids))% if this is last file
-                alltags = g.(handles.dmnptud{5}){:};
+                alltags = g.tag{:};
                 
                 figure(handles.psdfigids(sigid) + cols(c) -1);
                 legend(gca,alltags{ids});
@@ -719,7 +727,7 @@ b = get(hbox,'UserData'); %has the xy location of box
 fileid = get(handles.menu_files,'Value');
 sigid = get(handles.menu_signal,'UserData');% internal ID of currently selected signal.
 signame = handles.signames.intr{sigid};
-sigmat = g.(handles.dmnptud{1}){1,fileid}.(signame); 
+sigmat = g.data{1,fileid}.(signame); 
 
 % Now grab the points that fall inside the box
 [tsel, selec] = clipper(sigmat(:,1),sigmat(:,2:end),b.xlims(1),b.xlims(2));
@@ -732,7 +740,7 @@ end
 % Now perform computations and make the result strings
 str.trend = []; str.detrms = []; str.p2p = []; str.detp2p = []; tab = '    ';
 sf = '%+05.3f';
-if any(sigid == posid) % if this signal is a position measurement
+if any(sigid == handles.posid) % if this signal is a position measurement
     % calculate and prepend a column of R
     selec(:,2:4) = selec;
     selec(:,1) = sqrt(selec(:,2).^2 + selec(:,3).^2 + selec(:,4).^2);
@@ -896,7 +904,7 @@ end
 function dout = subtract_background_drift(t,vals,handles,signame);
 global g
 fileid = get(handles.menu_files,'Value');
-drift = g.(handles.dmnptud{7}){fileid}.(signame);
+drift = g.drift{fileid}.(signame);
 for c = 1:size(vals,2)% repeat for all columns
     dout(:,c) = vals(:,c) - polyval(drift(:,c),t) + drift(2,c);
 end    
@@ -904,7 +912,7 @@ end
 function updatemainfig(handles,modestr)
 global g
 dbstop if error
-if ~exist('g') | isempty(g.(handles.dmnptud{1}))
+if ~exist('g') | isempty(g.data)
     % if dataset empty, close all main figures
     for c = 1:length(handles.mainfigids)
         if ishandle(handles.mainfigids(c))
@@ -928,7 +936,7 @@ if ishandle(figid) % if the figure is open,
 end
 
 fileid = get(handles.menu_files,'value');
-sigvals = g.(handles.dmnptud{1}){1,fileid}.(signame);
+sigvals = g.data{1,fileid}.(signame);
 switch get(handles.menu_dispres,'value')
     case 1 % full or raw resolution
         [dispmat annots] = filldispsig(sigvals,0,signame,handles);
@@ -989,7 +997,7 @@ oldmag = findobj(figid,'Type','Line','Tag','Mag');
 delete(oldmag);
 % replot the magnets only if the box is checked
 if get(handles.check_overlaymag,'value')
-    mags = g.(handles.dmnptud{1}){fileid}.(handles.signames.intr{4});
+    mags = g.data{fileid}.(handles.signames.intr{4});
     % Now adjust the range so that mags are visible in the current axis
     hma = findobj(figid,'Type','Axes','Tag','');
     ylims = get(hma,'Ylim');
@@ -1011,7 +1019,7 @@ if nargin < 2
     signame = handles.signames.intr{1,sigid};
     
     fileid = get(handles.menu_files,'value');
-    sigvals = g.(handles.dmnptud{1}){1,fileid}.(signame);
+    sigvals = g.data{1,fileid}.(signame);
 else
     sigvals = varargin{2};
 end
@@ -1054,7 +1062,7 @@ updatesignalmenu(handles);
 % This routine does not replot the main figure.
 function updatefilemenu(handles)
 global g
-if ~exist('g') | isempty(g.(handles.dmnptud{1})) %database is empty
+if ~exist('g') | isempty(g.data) %database is empty
     filestr = {''};        
     set(handles.menu_files,'String',filestr);
     set(handles.menu_files,'value',1);    
@@ -1064,8 +1072,8 @@ end
 % Leave the 'selected' pointer for the menu unchanged; unless
 % it points to the index outside the new size of the menu, in 
 % which case reset the pointer to point to one - point to first file.
-for c=1:length(g.(handles.dmnptud{3}))
-    filestr{1,c} = ['[',g.(handles.dmnptud{5}){1,c},']  ',g.(handles.dmnptud{3}){1,c}];
+for c=1:length(g.fname)
+    filestr{1,c} = ['[',g.tag{1,c},']  ',g.fname{1,c}];
 end
 set(handles.menu_files,'String',filestr);
 if get(handles.menu_files,'Value') > length(get(handles.menu_files,'String'))
@@ -1079,7 +1087,7 @@ end
 % 4. Updates the main figure
 function updatesignalmenu(handles)
 global g
-if ~exist('g') | isempty(g.(handles.dmnptud{1})) %database is empty     
+if ~exist('g') | isempty(g.data) %database is empty     
     set(handles.menu_signal,'String',{''});
     set(handles.menu_signal,'value',1);    
     return;
@@ -1096,7 +1104,7 @@ for c=1:size(handles.signames.intr,2) %check for each possible signal name
     % if a field with the 'internal name' for this signal type is present in the 
     % currently selected file,
     % then put the associated 'display name' in the string-set for menu_signal.
-    if isfield(g.(handles.dmnptud{1}){1,fileid},handles.signames.intr{1,c})
+    if isfield(g.data{1,fileid},handles.signames.intr{1,c})
         k = k+1;
         sigstr{1,k} = handles.signames.disp{1,c};
         if c == last_sigid %the last selected signal is also present in this file
@@ -1123,7 +1131,7 @@ end
 set(handles.menu_signal,'UserData',sigid);%share sigid with others
 
 % if the current file has ch 8 loaded, then enable overlay of mags
-if isfield(g.(handles.dmnptud{1}){fileid}, handles.signames.intr{4})
+if isfield(g.data{fileid}, handles.signames.intr{4})
     set(handles.check_overlaymag,'Enable','On');
 else
     set(handles.check_overlaymag,'Enable','Off');
