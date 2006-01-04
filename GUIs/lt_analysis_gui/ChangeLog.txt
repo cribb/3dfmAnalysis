@@ -1,3 +1,11 @@
+2006-01-04 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: 
+	- Added ability to play sound for the data selected inside box
+	- Also plots a spectrogram of the signal while playing the sound.
+	* lt_analysis_gui.fig
+	- Added button for playing sound
+	- Added a frame, using to mask the controls when program is busy and needs to avoid accidental clicks.
+	
 2005-12-26 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: Added a check for empty database in couple of places.
 

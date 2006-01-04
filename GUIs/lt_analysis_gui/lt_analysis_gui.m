@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_gui
 
-% Last Modified by GUIDE v2.5 23-Dec-2005 17:24:00
+% Last Modified by GUIDE v2.5 04-Jan-2006 12:56:37
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -91,6 +91,7 @@ handles.frespfigids =     [ 60]; % Frequency response plot is pertinent to beadp
 % Some other figure numbers allocated to specific types of plot
 handles.threeDfig = 9;
 handles.boxresfig = 100;
+handles.specgram = 90;
 %  ....add to this list as more types of plots are supported
 
 % Some other constants
@@ -122,6 +123,7 @@ varargout{1} = handles.output;
 % --- Executes on button press in button_add.
 function button_add_Callback(hObject, eventdata, handles)
 global g % using global (as oppose to 'UserData') prevents creating multiple copies
+set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
 switch get(handles.menu_exper,'value')
     case 1 %Passive Diffusion   
         fieldstr = 'b';
@@ -206,6 +208,7 @@ end
 % set(hObject,'UserData', g); %use global instead
 updatemenu(handles);
 prompt_user(['Finished Loading. Loaded ',num2str(nloaded),' files']);
+set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 
 % --- Executes on button press in button_remove
 function button_remove_Callback(hObject, eventdata, handles)
@@ -237,7 +240,9 @@ function menu_files_Callback(hObject, eventdata, handles)
 global g
 % Hints: contents = get(hObject,'String') returns menu_files contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_files
+set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
 updatesignalmenu(handles);% this will also refresh the main figure
+set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 
 % --- Executes on button press in button_tag.
 function button_tag_Callback(hObject, eventdata, handles)
@@ -271,6 +276,7 @@ if ~exist('g') | isempty(g.data)
     errordlg('Database is empty, first add files to it','Alert');
     return;
 end
+set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
 % check if the main figure is plotted and in focus
 if (0 == figflag(getmainfigname(handles)))
    updatemainfig(handles,'new'); 
@@ -306,6 +312,7 @@ for c = 1:length(handles.signames.intr)
     end
 end
 updatemainfig(handles,'cut');
+set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 dbclear if error
 %-------------------------------------------------------------------------
 % --- Executes on button press in button_selectdrift.
@@ -563,9 +570,11 @@ end
 function button_plot_Callback(hObject, eventdata, handles)
 global g
 dbstop if error
+set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
+
 sigid = get(handles.menu_signal,'UserData');
 signame = handles.signames.intr{sigid};
-if strcmp(get(handles.list_dims,'Enable'),'On')
+if any(sigid == handles.posid)
     % R X Y Z enabled?
     cols = get(handles.list_dims,'value');
     strs = get(handles.list_dims,'String');
@@ -629,8 +638,9 @@ if get(handles.check_psd,'Value')
                 disp('Will ignore the box and process all files');
                 set(handles.check_fdbox,'value',0);
             else
+                M = size(sig,2);
                 oldsig = sig; sig = [];
-                [sig(:,1), sig(:,2:end)] = clipper(oldsig(:,1), oldsig(:,2:end),xlims(1),xlims(2));
+                [sig(:,1), sig(:,2:M)] = clipper(oldsig(:,1), oldsig(:,2:M),xlims(1),xlims(2));
                 clear oldsig;
             end
         end        
@@ -696,6 +706,8 @@ end %%=========== COMPLETED PLOTTING PSD + CUMULATIVE DISTANCE ===============
 
 % clear the memory of file-ids that were selected last time.
 set(handles.button_plot,'UserData',[]);
+set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
+
 dbclear if error
 
 % --- Executes on button press in check_fresponse.
@@ -704,7 +716,10 @@ function check_fresponse_Callback(hObject, eventdata, handles)
 % --- Executes on selection in check_3d.
 function check_3d_Callback(hObject, eventdata, handles)
 if (get(hObject,'Value'))
+    set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
     plot3dfigure(handles);
+    set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
+
 else
     if (ishandle(handles.threeDfig))
         close(handles.threeDfig);
@@ -803,7 +818,7 @@ set(h, 'UserData', htext);
 %-----------------------------------------------------------------------
 function checkdimsvalidity(handles)
 val = get(handles.menu_signal,'Value');
-if val == 1 | val == 2
+if any(val == handles.posid)
     set(handles.list_dims,'Enable','On');
     set(handles.check_3d,'Enable','On');
 else
@@ -826,6 +841,59 @@ str = [num2str(figid),':',sigstr{sigid}];
 function check_overlaymag_Callback(hObject, eventdata, handles)
 overlaymag(handles);
 
+%-----------------------------------------------------------------------
+% --- Executes on button press in button_sound.
+function button_sound_Callback(hObject, eventdata, handles)
+global g
+
+xlims = [-Inf, Inf];
+% adjust limits if there is a box drawn
+fileid = get(handles.menu_files,'Value');
+sigid = get(handles.menu_signal,'UserData');
+signame = handles.signames.intr{sigid};
+hmf = handles.mainfigids(sigid);
+hma = findobj(hmf,'Type','Axes','Tag','');
+hbox = findobj(hma,'Tag','Box');
+if ~isempty(hbox)
+    get(hbox,'UserData');
+    xlims = ans.xlims;
+end
+sig = g.data{fileid}.(signame);
+M = size(sig,2); % Number of colums
+oldsig = sig; sig = [];
+[sig(:,1), sig(:,2:M)] = clipper(oldsig(:,1), oldsig(:,2:M),xlims(1),xlims(2));
+clear oldsig;
+% Policy for playing sound: If this is a position signal, always play R
+% (regardless what dimension is selected by user). This is to put the
+% matlab sound player in alignment with particle tracker (cur ver 05.01) sound player, so
+% that user experience similar sounds for similar events, regardless what 
+% program they use to play it from. If features or abilities are added to the sound player
+% in particle tracker, then and then only, add only those abilities to this sound player.
+% Also, the particle tracker (cur ver 05.01) plays the position-error
+% signals (i.e. the bead position relative to laser), while we here have
+% positions relative to specimen. The closest we can get is by taking
+% first-differences. 
+
+% On the other hand, if this is not a position signal, then play first
+% column of the matrix. (e.g. Q1 for QPD signals).
+if any(sigid == handles.posid) % if this signal is a position measurement
+    raw = sqrt(sig(:,2).^2 + sig(:,3).^2 + sig(:,4).^2);
+    % scale the numbers so that -0.1 micron to 0.1 micron steps are transformed to -1 to 1
+    % This means the steps larger than 100 nm will be clipped during playback
+    k = 10;
+else
+    raw = sig(:,2);
+    k = 1; % No scaling for non-positional signal
+end
+
+playsig = k*diff(raw);
+figure(handles.specgram); 
+specgram(playsig,512,handles.srate); colormap gray;
+Nbits = 16; %# of bits that P'tracker sound player seems to be using
+set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
+sound(playsig,handles.srate,Nbits);
+set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
+ 
 %-----------------------------------------------------------------------
 % make the matrices of signal values to be displayed and related annotations
 function [sigout, annots] = filldispsig(sigin,res,signame,handles)
@@ -1272,7 +1340,6 @@ function menu_exper_Callback(hObject, eventdata, handles)
 %%%####################################################################
 %%%#############    GUIDE WILL ADD NEW CALLBACKS BELOW      ###########
 %%%####################################################################
-
 
 
 
