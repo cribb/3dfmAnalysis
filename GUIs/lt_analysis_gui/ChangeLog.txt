@@ -1,5 +1,11 @@
 2006-01-04 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: 
+	- Fixed the bug where program crashed while trying to 3d-plot empty data.
+	- Fixed the behaviour of dragging box after zoom
+	- Now prints the results on command line in addition of displaying it.
+
+2006-01-04 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: 
 	- Added ability to play sound for the data selected inside box
 	- Also plots a spectrogram of the signal while playing the sound.
 	* lt_analysis_gui.fig

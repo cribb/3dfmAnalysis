@@ -410,7 +410,7 @@ else
             set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});
         case 2
             if (0 == figflag(getmainfigname(handles)))
-                    updatemainfig(handles,'new');
+                updatemainfig(handles,'new');
             end
             if isempty(findobj(hma,'Tag','Box'))
                 errordlg('First draw a box to enable this mode.','Alert');                
@@ -432,6 +432,7 @@ end
 function DrawNewBoxFcn(hcaller,eventdata,handles)
 % ----Executes when mouse is pressed inside the main axes and the box radio 
 % is set to 'Draw New Box'
+dbstop if error
 hmf = get(handles.radio_drawbox,'UserData');
 % find the handle of the axes of the main figure
 hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend'
@@ -450,26 +451,77 @@ width = abs(point1-point2);         % and dimensions
 ylims = get(hma,'Ylim');
 b.xlims = [x1, x1+width];
 b.dbox = [x1, ylims(1), width, ylims(2)-ylims(1)];
-
 updatebox(handles,hma,0,b);
+
+%Now switch to 'drag box' mode automatically.
+manageboxradiogroup(handles,2,1)
+dbclear if error
 %-------------------------------------------------------------------------
 % ----Executes when mouse is pressed inside the main axes and the box mode
 % is set to 'Drag Box'
 function DragBoxFcn(hcaller,eventdata,handles)
+dbstop if error
 hmf = get(handles.radio_drawbox,'UserData');
 % find the handle of the axes of the main figure
 hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend'
 hbox = findobj(hma,'Tag','Box');
+if isempty(hbox)
+    errordlg('Box not found, redraw it. Switching to draw new box mode...');
+    %Now switch to 'draw new box' mode automatically.
+    manageboxradiogroup(handles,1,1);
+    return;
+end
 b = get(hbox,'UserData'); %b must not be empty, if everything is working.
-    
+% The box is drawn in figure units which are usually 'pixels' but the 
+% axis units are 'normalized' by default. Moreover, we have the coordinates
+% of the box in data units, and to be able to show the shadow while
+% dragging, we need to convert them into 'pixels' or the figure units.
+% So, idea is to first set the axis units to same as figure units, then
+% take two points: bottom-left corner and top-righ corner. 
+% Asking 'position' property gives info about coordinates of
+% this points in axes units (and thus figure units), and asking 'Xlim' and 'Ylim'
+% property gives info about coordinates of this points in data units.
+% Figure out the transfer function from data to figure units and apply it
+% to the box.
+figunits = get(hmf,'Units');
+axunits = get(hma,'Units'); % remember so we can restore it before leaving
+
+set(hma,'Units',figunits); % make axes units same as figure units
+posf = get(hma,'Position'); % axis position in figure units
+set(hma,'Units',axunits); %restore original units of axes
+
+xlims = get(hma,'Xlim'); ylims = get(hma,'Ylim');
+% Now change the ylimits of box so that shadow is always lock-lock on Yaxis
+b.dbox(2) = ylims(1); b.dbox(4) = ylims(2)-ylims(1);
+% Now check if the old box is outside current X axis limits, in which case put it
+% inside in the center of the axis but do not do any boxresults calculations
+if b.xlims < xlims(1) | b.xlims > xlims(2) % both limits of the box should be out of view
+    prompt_user('Warning: Old box was outside view, resetting the box. Happens after zoom.');
+    b.dbox(1) = mean(xlims); 
+end
+if b.dbox(3) > xlims(2) - xlims(1) % too wide?
+    prompt_user('Warning: Old box was too wide, resetting the width. Happens after zoom.');
+    b.dbox(3) = 0.25*range(xlims);
+end
+
+% Now figure out the transfer function from data units to figure units
+scale.x = posf(3)/(xlims(2) - xlims(1));
+scale.y = posf(4)/(ylims(2) - ylims(1));
+offset.x = posf(1) - xlims(1)*scale.x;
+offset.y = posf(2) - ylims(1)*scale.y;
+
+% calculate position of the old box in figure units
+b.figbox = [b.dbox(1)*scale.x + offset.x, b.dbox(2)*scale.y + offset.y, ...
+        b.dbox(3)*scale.x, b.dbox(4)*scale.y];
 point1 = get(hma,'CurrentPoint');    % button down detected
-b.figbox = dragrect(b.figbox);              % return figure units
+b.figbox = dragrect(b.figbox);
 point2 = get(hma,'CurrentPoint');    % button up detected
 point1 = point1(1);              % extract x 
 point2 = point2(1);       
 displace = point2-point1;
 updatebox(handles,hma,displace,b);
-
+% keyboard
+dbclear if error
 %-------------------------------------------------------------------------
 % ----Executes when mouse is pressed inside the main axes and the box mode
 % is set to 'Do Nothing'
@@ -547,6 +599,7 @@ updatemainfig(handles,'dims');
 function button_addfsinfo_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in check_fdbox.
+% should we consider box for the frequency domain analysis
 function check_fdbox_Callback(hObject, eventdata, handles)
 if get(hObject,'value')
     set(handles.button_many,'Enable','off');
@@ -715,11 +768,13 @@ function check_fresponse_Callback(hObject, eventdata, handles)
 
 % --- Executes on selection in check_3d.
 function check_3d_Callback(hObject, eventdata, handles)
+global g
 if (get(hObject,'Value'))
-    set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
-    plot3dfigure(handles);
-    set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
-
+    if ~isempty(g.data)
+        set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
+        plot3dfigure(handles);
+        set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
+    end
 else
     if (ishandle(handles.threeDfig))
         close(handles.threeDfig);
@@ -740,7 +795,6 @@ function button_save_Callback(hObject, eventdata, handles)
 %-----------------------------------------------------------------------
 function updateboxresults(handles,hbox)
 global g
-dbstop if error
 b = get(hbox,'UserData'); %has the xy location of box
 % hmain  = get(handles.radio_drawbox,'UserData');% current 'main' figure id
 fileid = get(handles.menu_files,'Value');
@@ -794,7 +848,11 @@ set(htext.trend,'String',['Avg Trend [dY/dX]: ',str.trend]);
 set(htext.p2p,'String',  ['Peak-to-Peak     : ',str.p2p]);
 set(htext.detrms,'String',  ['Detrended RMS  : ',str.detrms]);
 set(htext.detp2p,'String',  ['Detrended Range: ',str.detp2p]);
-dbclear if error
+disp(['|-------Results for: ',num2str(b.xlims(1)),' to ',num2str(b.xlims(2)), ' -------|']);
+disp(get(htext.trend,'String'));
+disp(get(htext.p2p,'String'));
+disp(get(htext.detrms,'String'));
+disp(get(htext.detp2p,'String'));
 %-----------------------------------------------------------------------
 function initresultfig(h)
 sp = get(0,'ScreenSize');
