@@ -60,6 +60,9 @@ for D_type = 1:3
 	msd = msd(1:end-1,:);
 	tau = tau(1:end-1,:);
 
+    % Compute D and ratios.. Store in output structure.
+    
+    % make frequencies
     f = 1 ./ tau;
 	w = f/(2*pi);
 

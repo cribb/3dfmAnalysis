@@ -67,6 +67,12 @@ for beadID = 0 : get_beadmax(v);
         msd_r(w, beadID+1) = mean(msd_radial);
         
         tau(w, beadID+1) = window(w) * mean(diff(b(:,TIME)));
+         
+        D_p = (msd_p(w, beadID+1)) / (2*tau (w, beadID+1));
+        D_n = (msd_n(w, beadID+1)) / (2*tau (w, beadID+1));
+        D_r = (msd_r(w, beadID+1)) / (4*tau (w, beadID+1));
+        
+        
     end   
 end
 
@@ -94,6 +100,7 @@ ste_logmsd_r = std(logmsd_r,0,2) ./ sqrt(cols(msd_r));
 	ylabel('log_{10}(MSD) [m^2]');
 	grid on;
 	pretty_plot;
+   
 
 %     figure;
 %     plot(
@@ -103,6 +110,9 @@ d.tau = tau;
 d.msd_p = msd_p;
 d.msd_n = msd_n;
 d.msd_r = msd_r;
+d.D_p = D_p;
+d.D_n = D_n;
+d.D_r = D_r;
 d.n = get_beadmax(v)+1; % because beadID's are indexed by 0.
 
 

@@ -1,3 +1,8 @@
+2006-01-12  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: now writes the final MSD data structure to a tab-delimited file.
+	* rod_msd.m: same. also added recording of diffusion constants in the output structure.
+	* rod.ve.m: added comments.
+
 2005-12-08  Jeremy Cribb <jcribb@email.unc.edu>
 	* rod_msd.m: added. computes the mean square displacement vs. a time-window for a diffusing rod.
 	* rod_ve.m: added. computes complex modulus and viscosity for a diffusing rod, using output from rod_msd.m.

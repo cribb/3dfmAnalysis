@@ -85,6 +85,9 @@ ste_logmsd = std(logmsd,0,2) ./ sqrt(cols(msd));
 	grid on;
 	pretty_plot;
 
+    dlmwrite('file.msd.txt', [mean_logtau(:), mean_logmsd(:), ste_logtau(:), ste_logmsd(:)], '\t');
+    
+    
 % outputs
 d.tau = tau;
 d.msd = msd;
