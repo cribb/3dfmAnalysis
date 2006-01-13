@@ -632,8 +632,9 @@ if any(sigid == handles.posid)
     cols = get(handles.list_dims,'value');
     strs = get(handles.list_dims,'String');
 else %non-positional sigal, so process for all columns
-    cols = 1:size(g.data.(signame),2);
-    for k = 1:cols, strs{k} = num2str(k); end
+    cols = 1:size(g.data.(signame),2)-1; 
+        % first column is always timestamp
+    for k = 1:size(cols), strs{k} = num2str(k); end
 end
 colrs = 'brkgym';
 xlims = [-Inf, Inf];
@@ -712,11 +713,19 @@ if get(handles.check_psd,'Value')
             end
             clear oldsig
         end        
-        % Are we told to plot psd of R? then we need to calculate it. Note, this is the only
-        % reason why we assign 'cols' differently when the signal is a position than when it is not.
-        if any(cols == 1) & any(sigid == handles.posid)% need to calculate R?
-            sig(:,3:5) = sig(:,2:4);
-            sig(:,2) = sqrt(sig(:,3).^2 + sig(:,4).^2 + sig(:,5).^2);
+        % Now the columns in the data loaded for a positional signal are
+        % x,y,z but the columns in the listbox displayed on UI are
+        % r,x,y,z. So push down x,y and z by one column. Then calculate R
+        % if we need to.
+        if any(sigid == handles.posid) % is this a position signal?
+            temp = sig; sig = [];
+            sig(:,1) = temp(:,1); % timestamps
+            sig(:,2) = zeros(size(sig,1),1); % R
+            sig(:,3:5) = temp(:,2:4); % xyz
+            clear temp
+            if any(cols == 1) % need to calculate R?
+                sig(:,2) = sqrt(sig(:,3).^2 + sig(:,4).^2 + sig(:,5).^2);
+            end
         end
         % now remove the offset from original signal before computing psd
         sig(:,2:end) = sig(:,2:end) - repmat(mean(sig(:,2:end),1),size(sig,1),1);
@@ -725,26 +734,27 @@ if get(handles.check_psd,'Value')
         psdres = 10/range(sig(:,1));        
         % Now, ready to compute psd and, if we are told to, area under psd
         for c = 1:length(cols)
-            [p f] = mypsd(sig(:,cols(c)),srate,psdres,handles.psdwin);
+            [p f] = mypsd(sig(:,cols(c)+1),srate,psdres,handles.psdwin);
             figure(handles.psdfigids(sigid) + cols(c) -1);
-            loglog(f,p,['.-',colrs(mod(f-1,length(colrs))+1)]);                        
+            loglog(f,p,['.-',colrs(mod(fi-1,length(colrs))+1)]);                        
             if get(handles.check_cumdisp,'value')
                 dc = sqrt(cumsum(p)*mean(diff(f)));% sqrt of area under psd
                 figure(handles.dvsffigids(sigid) + cols(c)-1);
-                semilogx(f,dc,['.-',colrs(mod(f-1,length(colrs))+1)]);
+                semilogx(f,dc,['.-',colrs(mod(fi-1,length(colrs))+1)]);
             end
-            if (fi == length(ids))% if this is last file
-                alltags = g.tag{:};
+            if (fi == length(ids))% if this is last file, annotate
+                alltags = g.tag;
                 
                 figure(handles.psdfigids(sigid) + cols(c) -1);
                 legend(gca,alltags{ids});
                 set(gca,'Xscale','Log','Yscale','Log');
                 hold off;
-                
-                figure(handles.dvsffigids(sigid) + cols(c) -1);
-                legend(gca,alltags{ids});
-                set(gca,'Xscale','Log','Yscale','Linear');
-                hold off;
+                if get(handles.check_cumdisp,'value')
+                    figure(handles.dvsffigids(sigid) + cols(c) -1);
+                    legend(gca,alltags{ids});
+                    set(gca,'Xscale','Log','Yscale','Linear');
+                    hold off;
+                end
             end   
         end       
     end    
@@ -1110,6 +1120,9 @@ if replot_box
 end
 if isequal(lower(get(handles.check_overlaymag,'Enable')),'on')
     overlaymag(handles,figid);
+end
+if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'Value') == 1)
+    plot3dfigure(handles);
 end
 dbclear if error
 %-----------------------------------------------------------------------

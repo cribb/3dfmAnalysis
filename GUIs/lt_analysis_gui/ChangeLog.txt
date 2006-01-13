@@ -1,3 +1,8 @@
+2006-01-12 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: 
+	- Fixed several bugs with PSD computation and plotting
+	* lt_analysis_gui.fig: All fonts are now 8 points, this makes it look right on Tim's laptop. 
+
 2006-01-04 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: 
 	- Fixed the bug where program crashed while trying to 3d-plot empty data.
