@@ -1,3 +1,6 @@
+2006-01-17  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: added pixels-to-microns conversion factor to accomodate more than one objective/multiplier.
+
 2006-01-12  Jeremy Cribb <jcribb@email.unc.edu>
 	* msd.m: now writes the final MSD data structure to a tab-delimited file.
 	* rod_msd.m: same. also added recording of diffusion constants in the output structure.
