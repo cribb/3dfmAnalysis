@@ -111,8 +111,8 @@ for D_type = 1:3
         
 		subplot(2, 3, col)
         hold on;
-		errorbar(mean_logw, mean_loggp, ste_loggp, 'b');
-		errorbar(mean_logw, mean_loggpp, ste_loggpp, 'r');
+		errorbar(mean_logw, real(mean_loggp), real(ste_loggp), 'b');
+		errorbar(mean_logw, real(mean_loggpp), real(ste_loggpp), 'r');
         hold off;
         title(['MSD for ' dtype ' direction']);
         xlabel('log_{10}(\omega) [rad/s]');
@@ -123,8 +123,8 @@ for D_type = 1:3
 		
 		subplot(2, 3, col + 3)
         hold on;
-		errorbar(mean_logw, mean_lognp, ste_lognp, 'b');
-		errorbar(mean_logw, mean_lognpp, ste_lognpp, 'r');
+		errorbar(mean_logw, real(mean_lognp), real(ste_lognp), 'b');
+		errorbar(mean_logw, real(mean_lognpp), real(ste_lognpp), 'r');
         hold off;
         title(['MSD for ' dtype ' direction']);
 		xlabel('log_{10}(\omega) [rad/s]');

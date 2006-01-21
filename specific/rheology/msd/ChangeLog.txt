@@ -1,4 +1,8 @@
 2006-01-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* ve.m: used real component when plotting errorbars to avoid "plotting neg (imag) parts in log space" warning.
+	* rod_ve.m: same.
+
+2006-01-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* msd.m: switched to use of "NaN" functions so that it is no longer required for all trackers to exist for all known time points for mean-square displacement and viscoelastic methods.  The standard error reported by the code is weighted by the number of existing datapoints for each window size rather than the global number of trackers for the entire input dataset.
 	* ve.m: same.
 	* rod_msd.m: same.
