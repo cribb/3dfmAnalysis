@@ -1,13 +1,13 @@
 function d = msd(files, calib_um, window, dim)
 % 3DFM function  
 % Rheology 
-% last modified 06/29/05 (jcribb)
+% last modified 01/21/06 (jcribb)
 %  
 % This function computes the mean-square displacements (via 
 % the Stokes-Einstein relation) for an aggregate number of beads.
 %  
 %  [d] = msd;
-%  [d] = msd(files, window, dim);  
+%  [d] = msd(files, calib_um, window, dim);  
 %   
 %  where "files" is the filename containing video tracking data (wildcards ok) 
 %        "window" is a vector containing window sizes of tau when computing MSD. 
@@ -74,10 +74,14 @@ end
 % errorbars on a loglog plot, it seems, so we have to set it up here.
 logtau = log10(tau);
 logmsd = log10(msd);
-mean_logtau = mean(logtau,2);
-mean_logmsd = mean(logmsd,2);
-ste_logtau = std(logtau,0,2) ./ sqrt(cols(tau));
-ste_logmsd = std(logmsd,0,2) ./ sqrt(cols(msd));
+
+mean_logtau = nanmean(logtau');
+mean_logmsd = nanmean(logmsd');
+
+sample_count = sum(~isnan(logmsd),2);
+
+ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
+ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
 
 	figure;
 	errorbar(mean_logtau, mean_logmsd, ste_logmsd);
@@ -86,12 +90,12 @@ ste_logmsd = std(logmsd,0,2) ./ sqrt(cols(msd));
 	grid on;
 	pretty_plot;
 
-    dlmwrite('file.msd.txt', [mean_logtau(:), mean_logmsd(:), ste_logtau(:), ste_logmsd(:)], '\t');
+dlmwrite('file.msd.txt', [mean_logtau(:), mean_logmsd(:), ste_logtau(:), ste_logmsd(:)], '\t');
     
     
 % outputs
 d.tau = tau;
 d.msd = msd;
-d.n = get_beadmax(v)+1; % because beadID's are indexed by 0.
+d.n = sample_count; % because beadID's are indexed by 0.
 
 

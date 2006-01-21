@@ -1,3 +1,9 @@
+2006-01-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: switched to use of "NaN" functions so that it is no longer required for all trackers to exist for all known time points for mean-square displacement and viscoelastic methods.  The standard error reported by the code is weighted by the number of existing datapoints for each window size rather than the global number of trackers for the entire input dataset.
+	* ve.m: same.
+	* rod_msd.m: same.
+	* rod_ve.m: Same.
+
 2006-01-17  Jeremy Cribb <jcribb@email.unc.edu>
 	* msd.m: added pixels-to-microns conversion factor to accomodate more than one objective/multiplier.
 

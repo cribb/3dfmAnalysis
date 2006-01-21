@@ -5,7 +5,7 @@ function v = ve(d, bead_radius);
 %  
 % ve computes the viscoelastic moduli from mean-square displacement data.
 % The output structure of ve contains four members: raw (contains data for 
-% each individual trakcer/bead), mean (contains means across trackers/beads), and 
+% each individual tracker/bead), mean (contains means across trackers/beads), and 
 % error (contains standard error (stdev/sqrt(N) about the mean value, and N (the
 % number of trackers/beads in the dataset.
 %
@@ -23,7 +23,7 @@ T = 298;
 
 msd = d.msd;
 tau = d.tau;
-N = d.n; % corresponds to the number of trackers (beads)
+N = d.n(1:end-1); % corresponds to the number of trackers at each tau
 
 % [dydx, newx, newy] = windiff(y, x, window_size)
 % [alpha, logtau, logmsd] = windiff(log10(msd), log10(tau), 1);
@@ -53,23 +53,23 @@ npp= gp  .* tau;
 % errorbars on a loglog plot, it seems, so we have to set them up here.
 logtau = log10(tau);
 logmsd = log10(msd);
-mean_logtau = mean(logtau,2);
-mean_logf = mean(log10(f),2);
-mean_logw = mean(log10(w),2);
+mean_logtau = nanmean(logtau');
+mean_logf = nanmean(log10(f)');
+mean_logw = nanmean(log10(w)');
 
 loggp  = log10(gp);
 loggpp = log10(gpp);
-mean_loggp = mean(loggp,2);
-mean_loggpp= mean(loggpp,2);
-ste_loggp  = std(logtau,0,2) ./ sqrt(N);
-ste_loggpp = std(logmsd,0,2) ./ sqrt(N);
+mean_loggp = nanmean(loggp');
+mean_loggpp= nanmean(loggpp');
+ste_loggp  = nanstd(logtau') ./ sqrt(N');
+ste_loggpp = nanstd(logmsd') ./ sqrt(N');
 
 lognp = log10(np);
 lognpp= log10(npp);
-mean_lognp = mean(lognp,2);
-mean_lognpp= mean(lognpp,2);
-ste_lognp = std(lognp,0,2) ./ sqrt(N);
-ste_lognpp= std(lognpp,0,2) ./ sqrt(N);
+mean_lognp = nanmean(lognp');
+mean_lognpp= nanmean(lognpp');
+ste_lognp = nanstd(lognp') ./ sqrt(N');
+ste_lognpp= nanstd(lognpp') ./ sqrt(N');
 
 	figure;
     hold on;
@@ -104,27 +104,27 @@ v.raw.gpp=gpp;
 v.raw.np = np;
 v.raw.npp = npp;
 
-v.mean.f = mean(f, 2);
-v.mean.tau = mean(tau, 2);
-v.mean.msd = mean(msd, 2);
-v.mean.alpha = mean(alpha, 2);
-v.mean.gamma = mean(MYgamma, 2);
-v.mean.gstar = mean(gstar, 2);
-v.mean.gp = mean(gp, 2);
-v.mean.gpp = mean(gpp, 2);
-v.mean.np = mean(np, 2);
-v.mean.npp = mean(npp, 2);
+v.mean.f = nanmean(f')';
+v.mean.tau = nanmean(tau')';
+v.mean.msd = nanmean(msd')';
+v.mean.alpha = nanmean(alpha')';
+v.mean.gamma = nanmean(MYgamma')';
+v.mean.gstar = nanmean(gstar')';
+v.mean.gp = nanmean(gp')';
+v.mean.gpp = nanmean(gpp')';
+v.mean.np = nanmean(np')';
+v.mean.npp = nanmean(npp')';
 
-v.error.f = std(f, 0, 2) ./ sqrt(N);
-v.error.tau = std(tau,0,2) ./ sqrt(N);
-v.error.msd = std(msd,0,2) ./ sqrt(N);
-v.error.alpha = std(alpha,0,2) ./ sqrt(N);
-v.error.gamma = std(MYgamma,0,2) ./ sqrt(N);
-v.error.gstar = std(gstar,0,2) ./ sqrt(N);
-v.error.gp = std(gp,0,2) ./ sqrt(N);
-v.error.gpp = std(gpp,0,2) ./ sqrt(N);
-v.error.np = std(np,0,2) ./ sqrt(N);
-v.error.npp = std(npp,0,2) ./ sqrt(N);
+v.error.f = (nanstd(f') ./ sqrt(N'))';
+v.error.tau = (nanstd(tau') ./ sqrt(N'))';
+v.error.msd = (nanstd(msd') ./ sqrt(N'))';
+v.error.alpha = (nanstd(alpha') ./ sqrt(N'))';
+v.error.gamma = (nanstd(MYgamma') ./ sqrt(N'))';
+v.error.gstar = (nanstd(gstar') ./ sqrt(N'))';
+v.error.gp = (nanstd(gp') ./ sqrt(N'))';
+v.error.gpp = (nanstd(gpp') ./ sqrt(N'))';
+v.error.np = (nanstd(np') ./ sqrt(N'))';
+v.error.npp = (nanstd(npp') ./ sqrt(N'))';
 
 v.n = N;
 

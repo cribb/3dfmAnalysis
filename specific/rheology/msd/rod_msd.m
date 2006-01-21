@@ -1,28 +1,28 @@
-function d = rod_msd(files, window, dim)
+function d = rod_msd(files, calib_um, window)
 % 3DFM function  
 % Rheology 
-% last modified 06/29/05 (jcribb)
+% last modified 01/21/06 (jcribb)
 %  
 % This function computes the mean-square displacements (via 
-% the Stokes-Einstein relation) for an aggregate number of beads.
+% the Stokes-Einstein relation) for an aggregate number of rod trackers.
 %  
 %  [d] = msd;
-%  [d] = msd(files, window, dim);  
+%  [d] = msd(files, calib_um, window);
 %   
 %  where "files" is the filename containing video tracking data (wildcards ok) 
 %        "window" is a vector containing window sizes of tau when computing MSD. 
-%		 "dim" is the dimension of the input data (2D).
+%
 %  
 % Notes: - No arguments will run a 2D msd on all .mat files in the current
 %          directory and use default window sizes.
 %        - Use empty matrices to substitute default values.
 %        - default files = '*.mat'
 %        - default window = [1 2 5 10 20 50 100 200 500 1000]
-%        - default dim = 2
+%        - assumption: rod diffusion is a 2-dimensional process
 %
 
-if (nargin < 3) | isempty(dim)    dim = 2;   end
-if (nargin < 2) | isempty(window) window = [1 2 5 10 20 50 100 200 500 1000 1001];  end
+if (nargin < 3) | isempty(window) window = [1 2 5 10 20 50 100 200 500 1000 1001];  end
+if (nargin < 2) | isempty(calib_um) calib_um = 0.152; end;
 if (nargin < 1) | isempty(files)  files = '*.mat'; end
 
 % load in the constants that identify the output's column headers for the current
@@ -30,7 +30,7 @@ if (nargin < 1) | isempty(files)  files = '*.mat'; end
 video_tracking_constants;
 
 % load video data
-v = load_video_tracking(files, [], 'm', 0.152, 'relative', 'yes', 'table');
+v = load_video_tracking(files, [], 'm', calib_um, 'relative', 'yes', 'table');
 
 % for every bead
 for beadID = 0 : get_beadmax(v);
@@ -62,9 +62,9 @@ for beadID = 0 : get_beadmax(v);
         msd_normal = (S .* cos(phi)).^2; % ./ (2*window(w));
         msd_radial = (BYAW - AYAW).^2; % / (4 * window(w));         
  
-        msd_p(w, beadID+1) = mean(msd_parallel);
-        msd_n(w, beadID+1) = mean(msd_normal);
-        msd_r(w, beadID+1) = mean(msd_radial);
+        msd_p(w, beadID+1) = nanmean(msd_parallel');
+        msd_n(w, beadID+1) = nanmean(msd_normal');
+        msd_r(w, beadID+1) = nanmean(msd_radial');
         
         tau(w, beadID+1) = window(w) * mean(diff(b(:,TIME)));
          
@@ -83,15 +83,17 @@ logmsd_p = log10(msd_p);
 logmsd_n = log10(msd_n);
 logmsd_r = log10(msd_r);
 
-mean_logtau = mean(logtau,2);
-mean_logmsd_p = mean(logmsd_p,2);
-mean_logmsd_n = mean(logmsd_n,2);
-mean_logmsd_r = mean(logmsd_r,2);
+mean_logtau = nanmean(logtau');
+mean_logmsd_p = nanmean(logmsd_p');
+mean_logmsd_n = nanmean(logmsd_n');
+mean_logmsd_r = nanmean(logmsd_r');
 
-ste_logtau = std(logtau,0,2) ./ sqrt(cols(tau));
-ste_logmsd_p = std(logmsd_p,0,2) ./ sqrt(cols(msd_p));
-ste_logmsd_n = std(logmsd_n,0,2) ./ sqrt(cols(msd_n));
-ste_logmsd_r = std(logmsd_r,0,2) ./ sqrt(cols(msd_r));
+sample_count = sum(~isnan(logmsd_p),2);
+
+ste_logtau   = nanstd(logtau)   ./ sqrt(sample_count');
+ste_logmsd_p = nanstd(logmsd_p) ./ sqrt(sample_count');
+ste_logmsd_n = nanstd(logmsd_n) ./ sqrt(sample_count');
+ste_logmsd_r = nanstd(logmsd_r) ./ sqrt(sample_count');
 
 	figure;
 	errorbar(repmat(mean_logtau,1,3), [mean_logmsd_p mean_logmsd_n mean_logmsd_r], ...
@@ -100,11 +102,9 @@ ste_logmsd_r = std(logmsd_r,0,2) ./ sqrt(cols(msd_r));
 	ylabel('log_{10}(MSD) [m^2]');
 	grid on;
 	pretty_plot;
-   
 
-%     figure;
-%     plot(
-    
+dlmwrite('file.msd.txt', [mean_logtau(:), mean_logmsd_p(:), mean_logmsd_n(:), mean_logmsd_r(:), ste_logmsd_p(:), ste_logmsd_n(:), ste_logmsd_r(:)], '\t');    
+
 % outputs
 d.tau = tau;
 d.msd_p = msd_p;
