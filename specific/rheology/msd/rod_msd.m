@@ -58,9 +58,9 @@ for beadID = 0 : get_beadmax(v);
         theta = AYAW;
         phi = 90 - theta - alpha;
                 
-        msd_parallel = (S .* sin(phi)).^2; % ./ (2*window(w));
-        msd_normal = (S .* cos(phi)).^2; % ./ (2*window(w));
-        msd_radial = (BYAW - AYAW).^2; % / (4 * window(w));         
+        msd_parallel = (S .* sin(phi)).^2;
+        msd_normal = (S .* cos(phi)).^2;
+        msd_radial = (BYAW - AYAW).^2;         
  
         msd_p(w, beadID+1) = nanmean(msd_parallel');
         msd_n(w, beadID+1) = nanmean(msd_normal');
@@ -68,9 +68,9 @@ for beadID = 0 : get_beadmax(v);
         
         tau(w, beadID+1) = window(w) * mean(diff(b(:,TIME)));
          
-        D_p = (msd_p(w, beadID+1)) / (2*tau (w, beadID+1));
-        D_n = (msd_n(w, beadID+1)) / (2*tau (w, beadID+1));
-        D_r = (msd_r(w, beadID+1)) / (4*tau (w, beadID+1));
+        D_p = (msd_p(w, beadID+1)) / (2*tau(w, beadID+1));
+        D_n = (msd_n(w, beadID+1)) / (2*tau(w, beadID+1));
+        D_r = (msd_r(w, beadID+1)) / (4*tau(w, beadID+1));
         
         
     end   
@@ -90,14 +90,14 @@ mean_logmsd_r = nanmean(logmsd_r');
 
 sample_count = sum(~isnan(logmsd_p),2);
 
-ste_logtau   = nanstd(logtau)   ./ sqrt(sample_count');
-ste_logmsd_p = nanstd(logmsd_p) ./ sqrt(sample_count');
-ste_logmsd_n = nanstd(logmsd_n) ./ sqrt(sample_count');
-ste_logmsd_r = nanstd(logmsd_r) ./ sqrt(sample_count');
+ste_logtau   = nanstd(logtau')  ./ sqrt(sample_count');
+ste_logmsd_p = nanstd(logmsd_p') ./ sqrt(sample_count');
+ste_logmsd_n = nanstd(logmsd_n') ./ sqrt(sample_count');
+ste_logmsd_r = nanstd(logmsd_r') ./ sqrt(sample_count');
 
 	figure;
-	errorbar(repmat(mean_logtau,1,3), [mean_logmsd_p mean_logmsd_n mean_logmsd_r], ...
-                          [ste_logmsd_p ste_logmsd_n ste_logmsd_r]);
+	errorbar(repmat(mean_logtau',1,3), [mean_logmsd_p' mean_logmsd_n' mean_logmsd_r'], ...
+                          [ste_logmsd_p' ste_logmsd_n' ste_logmsd_r']);
 	xlabel('log_{10}(\tau) [s]');
 	ylabel('log_{10}(MSD) [m^2]');
 	grid on;
@@ -113,6 +113,6 @@ d.msd_r = msd_r;
 d.D_p = D_p;
 d.D_n = D_n;
 d.D_r = D_r;
-d.n = get_beadmax(v)+1; % because beadID's are indexed by 0.
+d.n = sample_count; % because beadID's are indexed by 0.
 
 

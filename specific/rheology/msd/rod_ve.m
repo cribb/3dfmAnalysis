@@ -1,15 +1,15 @@
-function ve = ve(d, L, r);
+function ve = rod_ve(d, L, r);
 % 3DFM function  
 % Rheology 
 % last modified 10/06/05 (jcribb)
 %  
-% ve computes the viscoelastic moduli from mean-square displacement data.
+% rod_ve computes the viscoelastic moduli from mean-square displacement data.
 % The output structure of ve contains four members: raw (contains data for 
 % each individual tracker/bead), mean (contains means across trackers/beads), and 
 % error (contains standard error (stdev/sqrt(N) about the mean value, and N (the
 % number of trackers/beads in the dataset.
 %
-%  [v] = ve(d, L, r);  
+%  [v] = rod_ve(d, L, r);  
 %   
 %  where "d" is the output structure of msd.
 %        "L" is in rod length in [m]
@@ -33,15 +33,20 @@ for D_type = 1:3
         case 1
             dtype = 'parallel';
           	msd = d.msd_p;
+            % The shape constant is actually the drag coefficient (usually
+            % named gamme) in the stokes-einstein relation.
             shape_constant = (2   * pi * L  ) / ( log( L / (2*r) ) - 0.20 );
+            degrees_of_freedom = 1;
         case 2
             dtype = 'normal';
           	msd = d.msd_n;
             shape_constant = (4   * pi * L  ) / ( log( L / (2*r) ) + 0.84 );    
+            degrees_of_freedom = 1;
         case 3
             dtype = 'radial';
           	msd = d.msd_r;
             shape_constant = (1/3 * pi * L^3) / ( log( L / (2*r) ) - 0.66 );
+            degrees_of_freedom = 1;
     end    
 
 	tau = d.tau;
@@ -67,7 +72,7 @@ for D_type = 1:3
 	w = f/(2*pi);
 
 %  <<original method>>    
-	gstar = (k .* T) ./ (shape_constant .* msd .* MYgamma);  	
+	gstar = (2 * degrees_of_freedom * k .* T) ./ (shape_constant .* msd .* MYgamma);  	
 
     gp = gstar .* cos(pi/2 .* alpha);
 	gpp= gstar .* sin(pi/2 .* alpha);
@@ -97,8 +102,9 @@ for D_type = 1:3
 	lognpp= log10(npp);
 	mean_lognp = nanmean(lognp');
 	mean_lognpp= nanmean(lognpp');
-	ste_lognp = nanstd(lognp,0,2) ./ sqrt(N');
-	ste_lognpp= nanstd(lognpp,0,2) ./ sqrt(N');
+	warning off MATLAB:divideByZero; % cheating here to avoid filtering N when window is too long.
+	ste_lognp = nanstd(lognp') ./ sqrt(N');
+	ste_lognpp= nanstd(lognpp') ./ sqrt(N');
 	    
     switch D_type
         case 1

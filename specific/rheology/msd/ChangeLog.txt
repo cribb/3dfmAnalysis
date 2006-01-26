@@ -1,3 +1,7 @@
+2006-01-26 Jeremy Cribb <jcribb@email.unc.edu>
+	* rod_ve.m: fixed transpose errors, added degrees of freedom variable, updated comments and documentation.
+	* rod_msd.m: removed debugging code, fixed transpose errors, changed particle counting.
+
 2006-01-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* ve.m: used real component when plotting errorbars to avoid "plotting neg (imag) parts in log space" warning.
 	* rod_ve.m: same.
