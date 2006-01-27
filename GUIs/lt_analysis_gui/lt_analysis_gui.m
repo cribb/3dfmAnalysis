@@ -661,23 +661,23 @@ if get(handles.check_psd,'Value')
         % setup psd figure
         figure(handles.psdfigids(sigid) + cols(c) - 1); clf;
         title([handles.signames.disp{sigid}, '-PSD: ',strs{cols(c)}]);
+        xlabel('log_{10} Frequency [Hz]');
         if any(sigid == handles.posid) % if this signal is a position measurement
-            ylabel('Micron^2/Hz');
+            ylabel('log_{10} Micron^2/Hz');
         else 
-            ylabel('Volts^2/Hz');
+            ylabel('log_{10} Volts^2/Hz');
         end
         hold on;
         % setup 'area under psd' figure if we should
         if get(handles.check_cumdisp,'value')
             figure(handles.dvsffigids(sigid) + cols(c) - 1); clf;
             if any(sigid == handles.posid) % if this signal is a position measurement
-                title([handles.signames.disp{sigid}, '-Cumulative Displacement: ',strs{cols(c)}]);
-                ylabel('Micron^2/Hz');
+                title([handles.signames.disp{sigid}, '-Cumulative Displacement: ',strs{cols(c)}]);                
             else 
                 title([handles.signames.disp{sigid}, '- sqrt[Area under PSD]: ',strs{cols(c)}]);
-                ylabel('Volts^2/Hz');
             end                
             ylabel('Micron');
+            xlabel('log_{10} Frequency [Hz]');
             hold on;
         end            
     end
@@ -736,23 +736,23 @@ if get(handles.check_psd,'Value')
         for c = 1:length(cols)
             [p f] = mypsd(sig(:,cols(c)+1),srate,psdres,handles.psdwin);
             figure(handles.psdfigids(sigid) + cols(c) -1);
-            loglog(f,p,['.-',colrs(mod(fi-1,length(colrs))+1)]);                        
+            plot(log10(f),log10(p),['.-',colrs(mod(fi-1,length(colrs))+1)]);                        
             if get(handles.check_cumdisp,'value')
                 dc = sqrt(cumsum(p)*mean(diff(f)));% sqrt of area under psd
                 figure(handles.dvsffigids(sigid) + cols(c)-1);
-                semilogx(f,dc,['.-',colrs(mod(fi-1,length(colrs))+1)]);
+                plot(log10(f),dc,['.-',colrs(mod(fi-1,length(colrs))+1)]);
             end
             if (fi == length(ids))% if this is last file, annotate
                 alltags = g.tag;
                 
                 figure(handles.psdfigids(sigid) + cols(c) -1);
                 legend(gca,alltags{ids});
-                set(gca,'Xscale','Log','Yscale','Log');
+%                 set(gca,'Xscale','Log','Yscale','Log');
                 hold off;
                 if get(handles.check_cumdisp,'value')
                     figure(handles.dvsffigids(sigid) + cols(c) -1);
                     legend(gca,alltags{ids});
-                    set(gca,'Xscale','Log','Yscale','Linear');
+%                     set(gca,'Xscale','Log','Yscale','Linear');
                     hold off;
                 end
             end   

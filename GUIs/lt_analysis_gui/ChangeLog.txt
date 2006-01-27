@@ -1,3 +1,6 @@
+2006-01-27 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: Now loglog plots are plotted taking log of the signal first and then plotting on linear axis.
+	
 2006-01-12 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: 
 	- Fixed several bugs with PSD computation and plotting
