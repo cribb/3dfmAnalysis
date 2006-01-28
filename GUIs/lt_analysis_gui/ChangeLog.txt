@@ -1,3 +1,11 @@
+2006-01-28 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: 
+	- Now asks user for confirmation when a file in the 'to load list' is already loaded in the data base. Eliminates need of first removing the file and reloading it when changing the experiment type.
+	- Fixed a bug in plotting of multiples PSDs of lowbandwidth data
+	- Fixed a crash that happened when user 'cancelled' edits of tag.
+	- Now 'Cut' allows to select a point outside axis as the boundary. Useful when we want to remove all the data before or after certain time.
+	* lt_analysis_gui.fig: 'Overlay Ch 8' renamed to 'Overlay Mags'
+
 2006-01-27 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: Now loglog plots are plotted taking log of the signal first and then plotting on linear axis.
 	

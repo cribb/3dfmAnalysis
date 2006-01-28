@@ -62,9 +62,9 @@ global g
 % Choose default command line output for lt_analysis_gui
 handles.output = hObject;
 
-% a list of fields in the global dataset, useful to access each field by
-% index rather than by absolute name.
-handles.gfields = {'data','magdata','fname','path','tag','metadata','drift'};
+% a list of fields in the global dataset, useful when an operation is to be
+% performed in all the existing fields.
+handles.gfields = {'data','magdata','fname','path','tag','metadata','drift','exptype'};
 % NOTE: if change any of the strings above, also change the field name of
 % g in the whole file, and vice versa.
 
@@ -124,7 +124,8 @@ varargout{1} = handles.output;
 function button_add_Callback(hObject, eventdata, handles)
 global g % using global (as oppose to 'UserData') prevents creating multiple copies
 set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
-switch get(handles.menu_exper,'value')
+curexptype = get(handles.menu_exper,'value');
+switch curexptype
     case 1 %Passive Diffusion   
         fieldstr = 'b';
     case 2 %Pulling + Diffusion
@@ -152,9 +153,24 @@ flags.matoutput = 1; %request output fields in the [time vals] matrix form.
 nloaded = 0;
 for(c = 1:length(f))
     pack
+    doload = 1;
     if exist('g') & ~isempty(g.data) & any(strcmp(g.fname,f{c}) == 1)
-        prompt_user(['The file ',f{c},' is already in the database.']);                
-    else
+        isame = find(strcmp(g.fname,f{c}) == 1);
+        if (g.exptype{isame} == curexptype)
+            button = questdlg(['The file ',f{c},' is already in the database. Reload it?'],...
+                'File already loaded','Yes','No','No');            
+            if strcmpi(button,'no')
+                doload = 0;
+            end            
+        else
+            button = questdlg(['The file ',f{c},' is already loaded with different experiment type. Reload it?'],...
+                'File already loaded','Yes','No','No');            
+            if strcmpi(button,'no')
+                doload = 0;
+            end
+        end
+    end
+    if doload
         prompt_user(['...currently loading ','[',num2str(c),'of',num2str(length(f)),'] :',f{c}],handles);
         
         %put newly added dataset on the top of the list
@@ -189,7 +205,8 @@ for(c = 1:length(f))
                     g.drift{1,1}.(handles.signames.intr{k}) = zeros(2,M-1);
                         % First Row = Slope, Second Row = Offset
                 end
-            end            
+            end
+            g.exptype{1,1} = curexptype;
             prompt_user([f{c}, ' added to the database.'],handles);
             nloaded = nloaded + 1; %total files loaded
         catch
@@ -206,8 +223,11 @@ for(c = 1:length(f))
     end
 end
 % set(hObject,'UserData', g); %use global instead
-updatemenu(handles);
+
 prompt_user(['Finished Loading. Loaded ',num2str(nloaded),' files']);
+if nloaded 
+    updatemenu(handles);
+end
 set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 
 % --- Executes on button press in button_remove
@@ -257,8 +277,14 @@ num_lines= [1;2];
 while 1    
     userinput = inputdlg(prompt,dlg_title,num_lines,...
         {g.tag{1,fileid}, g.metadata{1,fileid}});  
-    sameid = find(strcmp(g.tag,userinput{1}) == 1);
-    if sameid == fileid | isempty(sameid) % if there is no another tag of same string
+    if ~isempty(userinput) 
+        sameid = find(strcmp(g.tag,userinput{1}) == 1);
+    else   %if user pressed cancel
+        sameid = [];
+        userinput{1} = g.tag{1,fileid};
+        userinput{2} = g.metadata{1,fileid};
+    end
+    if isempty(sameid) | isequal(sameid, fileid) % if there is no another tag of same string
         break;        
     else
         errordlg('A tag with the same string already exists. Please change the tag.','Error');
@@ -304,8 +330,10 @@ for c = 1:length(handles.signames.intr)
         uinds = sort(find(sigold(:,1) > t(2))); %indices after box
         %adjust the data after box such that there is no step visible after
         %cutting the box
-        steps = sigold(uinds(1),:) - sigold(linds(end)+1,:);
-        sigold(uinds,:) = sigold(uinds,:) - repmat(steps,size(uinds,1),1);
+        if ~isempty(uinds) & ~isempty(linds)
+            steps = sigold(uinds(1),:) - sigold(linds(end)+1,:);
+            sigold(uinds,:) = sigold(uinds,:) - repmat(steps,size(uinds,1),1);
+        end
         g.data{1,id}.(cursig) = [];
         g.data{1,id}.(cursig) = sigold(union(linds, uinds),:);
         clear sigold;
@@ -702,13 +730,13 @@ if get(handles.check_psd,'Value')
         srate = handles.srate; %reset sample rate if changed by previous file
         if (range(diff(sig(:,1))) > 1e-6)            
             fnames = get(handles.menu_files,'String');            
-            prompt_user(['UnEven TimeStamps: ',fnames{ids(f)}]);
+            prompt_user(['UnEven TimeStamps: ',fnames{ids(fi)}]);
             srate = srate*0.1;
             prompt_user(['This file will be resampled at ',num2str(srate),' Hz']);            
             oldsig = sig;
             sig = [];
             sig(:,1) = [oldsig(1,1):1/srate:oldsig(end,1)]';
-            for k = 2:size(sig,2);
+            for k = 2:size(oldsig,2);
                 sig(:,k) = interp1(oldsig(:,1),oldsig(:,k),sig(:,1));
             end
             clear oldsig
@@ -736,12 +764,14 @@ if get(handles.check_psd,'Value')
         for c = 1:length(cols)
             [p f] = mypsd(sig(:,cols(c)+1),srate,psdres,handles.psdwin);
             figure(handles.psdfigids(sigid) + cols(c) -1);
+            warning off % No better way in matlab 6.5 to turn off 'log of zero' warning 
             plot(log10(f),log10(p),['.-',colrs(mod(fi-1,length(colrs))+1)]);                        
             if get(handles.check_cumdisp,'value')
                 dc = sqrt(cumsum(p)*mean(diff(f)));% sqrt of area under psd
                 figure(handles.dvsffigids(sigid) + cols(c)-1);
                 plot(log10(f),dc,['.-',colrs(mod(fi-1,length(colrs))+1)]);
             end
+            warning on
             if (fi == length(ids))% if this is last file, annotate
                 alltags = g.tag;
                 
