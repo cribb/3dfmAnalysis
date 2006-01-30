@@ -146,7 +146,7 @@ function [v,q] = center_of_mass(data, drift_start_time, drift_end_time);
         y_data_fit = polyfit(t(thisbead_idx), data(thisbead_idx, Y), order);
         z_data_fit = polyfit(t(thisbead_idx), data(thisbead_idx, Z), order);    
         
-        logentry(['tracker ' num2str(k) ': x-slope: ' num2str(x_data_fit(1)) '  x-intercept: ' num2str(x_data_fit(2))]);
+        logentry(['tracker ' num2str(k) ': x-slope: ' num2str(x_data_fit(1)) '  x-intercept: ' num2str(x_data_fit(2)) '  y-slope: ' num2str(y_data_fit(1)) '  y-intercept: ' num2str(y_data_fit(2))]);
         x_data_val = polyval(x_data_fit, t(thisbead_idx));
         y_data_val = polyval(y_data_fit, t(thisbead_idx));
         z_data_val = polyval(z_data_fit, t(thisbead_idx));

@@ -1,3 +1,6 @@
+2006-01-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* remove_drift.m: output log now reports y's slope and intercept as well as x's.
+
 2005-12-22  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m: Fixed a missing semicolon, which caused flood on the prompt when 'position error' field was sought for.
 
