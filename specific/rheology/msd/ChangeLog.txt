@@ -1,4 +1,7 @@
-2006-01-26 Jeremy Cribb <jcribb@email.unc.edu>
+2006-01-30    Jeremy Cribb <jcribb@email.unc.edu>
+	* laser_msd.m: added.  semi-stable function that computes mean-square displacement for laser-tracked particles.
+
+2006-01-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* rod_ve.m: fixed transpose errors, added degrees of freedom variable, updated comments and documentation.
 	* rod_msd.m: removed debugging code, fixed transpose errors, changed particle counting.
 
