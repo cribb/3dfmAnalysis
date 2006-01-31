@@ -441,7 +441,8 @@ function pushbutton_export_bead_Callback(hObject, eventdata, handles)
     bead.t      = bead.t - min(handles.table(:,TIME));
     bead.x      = handles.table(k,X);
     bead.y      = handles.table(k,Y);
-
+    bead.yaw    = handles.table(idx,YAW);
+    
     assignin('base', ['bead' num2str(currentBead)], bead);
     
     
@@ -458,6 +459,7 @@ function pushbutton_export_all_beads_Callback(hObject, eventdata, handles)
         bead(k+1).t      = handles.table(idx,TIME) - min(handles.table(:,TIME));
         bead(k+1).x      = handles.table(idx,X);
         bead(k+1).y      = handles.table(idx,Y);
+        bead(k+1).yaw    = handles.table(idx,YAW);
         
     end
     

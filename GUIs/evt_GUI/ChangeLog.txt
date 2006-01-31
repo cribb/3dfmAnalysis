@@ -1,3 +1,6 @@
+2006-01-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: exporting trackers to base workspace now includes YAW values.
+
 2005-12-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: enabled the 'center-of-mass' drift subtraction ability in the GUI.
 
