@@ -109,7 +109,7 @@ function [v,q] = center_of_mass(data, drift_start_time, drift_end_time);
     y_drift_fit = polyfit(timevec, com(:,2), order);
     z_drift_fit = polyfit(timevec, com(:,3), order);    
 
-    logentry(['center-of-mass: x-slope: ' num2str(x_drift_fit(1)) '  x-intercept: ' num2str(x_drift_fit(2))]);
+    logentry(['center-of-mass: x-slope: ' num2str(x_drift_fit(1)) '  x-intercept: ' num2str(x_drift_fit(2)) '  y-slope: ' num2str(y_drift_fit(1)) '  y-intercept: ' num2str(y_drift_fit(2))]);
         
         % test plot
         figure(66);
