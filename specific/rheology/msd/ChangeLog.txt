@@ -1,4 +1,34 @@
-2006-01-30    Jeremy Cribb <jcribb@email.unc.edu>
+2006-02-02  Jeremy Cribb <jcribb@email.unc.edu>
+	* batch_drift_br.m: removed. obsolete.
+	* batch_drift_fl.m: removed. obsolete.
+	* batch_find_diff_co.m: removed. obsolete.
+	* batch_load_video_tracking_br.m: removed. obsolete.
+	* batch_load_video_tracking_fl.m: removed. obsolete.
+	* batch_load_vrpn_tracking.m: removed. obsolete.
+	* batch_msd2pt.m: removed. obsolete.
+	* batch_msd_2d.m: removed. obsolete.
+	* batch_msd_2d_d.m: removed. obsolete.
+	* batch_msd_2d_n.m: removed. obsolete.
+	* batch_normal_br.m: removed. obsolete.
+	* batch_normal_fl.m: removed. obsolete.
+	* bdb.m: removed. obsolete.
+	* bdf.m: removed. obsolete.
+	* bnb.m: removed. obsolete.
+	* bnf.m: removed. obsolete.
+	* data_merge.m: removed. obsolete.
+	* data_merge_tube.m: removed. obsolete.
+	* drift_buster_multi.m: removed. obsolete.
+	* drift_buster_multi_a.m: removed. obsolete.
+	* find_diff_co.m: removed. obsolete.
+	* find_diff_co_all.m: removed. obsolete.
+	* find_diff_co_dis.m: removed. obsolete.
+	* load_video_tracking_dbh.m: removed. obsolete.
+	* make_pulnix_tifs_a.m: removed. obsolete.
+	* msd_1d.m: removed. obsolete.
+	* msd_2d.m: removed. obsolete.
+	* msd_3d.m: removed. obsolete.
+
+2006-01-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* laser_msd.m: added.  semi-stable function that computes mean-square displacement for laser-tracked particles.
 
 2006-01-26  Jeremy Cribb <jcribb@email.unc.edu>
