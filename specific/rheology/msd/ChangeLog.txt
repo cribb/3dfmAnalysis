@@ -1,4 +1,7 @@
 2006-02-02  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: added frame_rate as a parameter for tracking datasets in the case we use confocal or other videos not of the pulnix type.
+
+2006-02-02  Jeremy Cribb <jcribb@email.unc.edu>
 	* batch_drift_br.m: removed. obsolete.
 	* batch_drift_fl.m: removed. obsolete.
 	* batch_find_diff_co.m: removed. obsolete.
