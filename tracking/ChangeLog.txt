@@ -1,3 +1,7 @@
+2006-02-03  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: cleaned up documentation and fixed a bug where log message incorrectly reported correct usage of time stamps.
+
+
 2006-01-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m: added drift velocity estimates for y to output log.
 

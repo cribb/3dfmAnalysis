@@ -18,28 +18,10 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absol
 %       "table" is 'struct' or 'table', denoting the style of the output data
 %
 % Notes:
-%
 % - This function is designed to work under default conditions with
 %   only the filename as an input argument.
 %
-% 08/04/03 - created from load_vrpn_tracking
-% 08/09/03 - added the upsampling feature
-% 09/22/04 - updated documentation
-% 10/23/04 - added filter on input file (in case it's not a struct)
-% 01/24/05 - added the timestamps ability
-% 05/09/05 - MAJOR CHANGES to output format.  Prior to this version,
-%            load_video_tracking outputted a matrix that required all beads to exist
-%            for all times.  This was changed to reflect Video Spot Tracker's output
-%            more truthfully.  Use 'get_bead' to extract a specific bead's
-%            data.  Also added support for '.evt.mat' data format.
-% 05/22/05 - added table parameter that will change output from matrix to structure of vectors 
-%            for easier coding.
-% 06/16/05 - now you can use filemasks to aggregate several video tracks into a single 
-%            data table.
-% 07/19/05 - timestamps are now in unixutc format (Number of seconds 
-%            since 00:00:00 1970/01/01) and now two-column timestamps are handled.
 
-% load video tracking constants
 video_tracking_constants;
 
 % handle the argument list
@@ -199,6 +181,9 @@ for fid = 1:length(filelist)
             end
             active_frames = data(idx, FRAME);
             data(idx,TIME) = times(active_frames+1);
+
+            logentry('Successfully loaded and attached time stamps.');
+
         end
         
         if strcmp(tstamps, 'no')
@@ -210,7 +195,6 @@ for fid = 1:length(filelist)
             end                
         end    
 
-        logentry('Successfully loaded and attached time stamps.');
 
     end
 
