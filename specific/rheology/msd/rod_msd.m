@@ -1,4 +1,4 @@
-function d = rod_msd(files, calib_um, window)
+function d = rod_msd(files, window, frame_rate, calib_um)
 % 3DFM function  
 % Rheology 
 % last modified 01/21/06 (jcribb)
@@ -21,8 +21,9 @@ function d = rod_msd(files, calib_um, window)
 %        - assumption: rod diffusion is a 2-dimensional process
 %
 
-if (nargin < 3) | isempty(window) window = [1 2 5 10 20 50 100 200 500 1000 1001];  end
-if (nargin < 2) | isempty(calib_um) calib_um = 0.152; end;
+if (nargin < 4) | isempty(calib_um) calib_um = 0.152; end;
+if (nargin < 3) | isempty(frame_rate) frame_rate = []; end;
+if (nargin < 2) | isempty(window) window = [1 2 5 10 20 50 100 200 500 1000 1001];  end
 if (nargin < 1) | isempty(files)  files = '*.mat'; end
 
 % load in the constants that identify the output's column headers for the current
@@ -30,7 +31,7 @@ if (nargin < 1) | isempty(files)  files = '*.mat'; end
 video_tracking_constants;
 
 % load video data
-v = load_video_tracking(files, [], 'm', calib_um, 'relative', 'yes', 'table');
+v = load_video_tracking(files, frame_rate, 'm', calib_um, 'relative', 'yes', 'table');
 
 % for every bead
 for beadID = 0 : get_beadmax(v);
