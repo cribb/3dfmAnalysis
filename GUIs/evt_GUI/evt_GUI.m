@@ -22,7 +22,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 21-Nov-2005 20:19:21
+% Last Modified by GUIDE v2.5 03-Feb-2006 17:23:22
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -247,7 +247,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     handles.table = table;
     handles.mintime = mintime;
     handles.maxtime = maxtime;
-    
+    handles.tstamp_times = table(:,TIME);
     guidata(hObject, handles);
 
     plot_data(hObject, eventdata, handles);
@@ -840,3 +840,49 @@ function logentry(txt)
      
      fprintf('%s%s\n', headertext, txt);
 
+   
+% --- Executes on button press in checkbox_frame_rate.
+function checkbox_frame_rate_Callback(hObject, eventdata, handles)
+    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+
+    if get(hObject, 'Value')      
+        set(handles.checkbox_frame_rate, 'Enable', 'off');
+    else
+        handles.table(:,TIME) = handles.tstamp_times;
+        handles.mintime = min(handles.table(:,TIME));
+        handles.maxtime = max(handles.table(:,TIME));
+        guidata(hObject, handles);
+	
+        plot_data(hObject, eventdata, handles);
+        drawnow;
+    end
+
+    
+% --- Executes during object creation, after setting all properties.
+function edit_frame_rate_CreateFcn(hObject, eventdata, handles)
+	if ispc
+        set(hObject,'BackgroundColor','white');
+	else
+        set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+	end
+
+
+function edit_frame_rate_Callback(hObject, eventdata, handles)
+    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+
+    table = handles.table;
+
+    if get(handles.checkbox_frame_rate, 'Value');
+        table(:,TIME) = table(:,FRAME) / str2num(get(hObject, 'String'));
+        mintime = min(table(:,TIME));
+        maxtime = max(table(:,TIME));
+	
+        handles.table = table;
+        handles.maxtime = maxtime;
+        handles.mintime = mintime;
+        guidata(hObject, handles);
+	
+        plot_data(hObject, eventdata, handles);
+        drawnow;
+    end
+    
