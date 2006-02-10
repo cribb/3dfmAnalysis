@@ -77,7 +77,7 @@ set(handles.button_add,'UserData',handles.default_path);
 % the program *should* still work unchanged.
 handles.signames.intr = {'beadpos' ,'stageReport','qpd','laser'};
 % Names of signals to be displayed on GUI control menu_signal
-handles.signames.disp = {'Bead Pos','Stage Pos'  ,'QPD','Channel 8'};
+handles.signames.disp = {'Probe Pos','Stage Pos'  ,'QPD','Channel 8'};
 handles.posid = [1, 2]; %index of the signals which are position measurements
 % Figure numbers allocated to 'main-figures' for various signals
 handles.mainfigids =      [   1,          2,          3,         4];
@@ -983,14 +983,51 @@ else
     raw = sig(:,2);
     k = 1; % No scaling for non-positional signal
 end
-
+t = sig(:,1) - sig(1,1);
+if range(diff(t)) > 1E-6
+    tmax = t(end);
+    clear t;
+    t = [0:1/handles.srate:tmax];
+    newraw = interp1(sig(:,1)-sig(1,1), raw, t);
+    clear raw; raw = newraw; clear newraw;
+end
 playsig = k*diff(raw);
-figure(handles.specgram); 
-specgram(playsig,512,handles.srate); colormap gray;
+plotsig = raw(1:10:end); % plot only every 10 th point
+plott = t(1:10:end);
+% figure(handles.specgram); 
+% specgram(playsig,512,handles.srate); colormap gray;
+
 Nbits = 16; %# of bits that P'tracker sound player seems to be using
-set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
-sound(playsig,handles.srate,Nbits);
-set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
+% set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
+    
+N_sec = floor(t(end)); % Number to 1sec slots
+tsvec = [0:1:N_sec];
+dbstop if error
+figure(1235); clf;
+plot(plott,plotsig); pretty_plot; hold on;
+set(1235,'DoubleBuffer','On');
+ylims = get(gca,'Ylim');
+hline = line([tsvec(1), tsvec(1)],ylims,'LineStyle',':','Color','m');
+for c = 1:length(tsvec)    
+    ist(c) = max(find(t <=tsvec(c)));
+    if c == length(tsvec)
+        iend(c) = length(t)-1;
+    else 
+        iend(c) = max(find(t <= tsvec(c+1)));
+    end
+end
+figure(1235); pause(1);
+k = 1;
+while k <= c    
+    set(hline,'Xdata',[tsvec(k), tsvec(k)]);
+%     sound(playsig(ist(k):iend(k)),handles.srate,Nbits);   
+    wavplay(playsig(ist(k):iend(k)), handles.srate,'sync');
+%     pause(0.001);
+    k = k+1;
+end
+wavplay(playsig,handles.srate)
+dbclear if error    
+% set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
  
 %-----------------------------------------------------------------------
 % make the matrices of signal values to be displayed and related annotations
@@ -1044,7 +1081,7 @@ switch signame
         annots.y = 'Microns';
         annots.x = 'Seconds';
         if isequal(signame,handles.signames.intr{1}) %if this is bead position
-            annots.t = 'Bead Postion (relative to specimen)';
+            annots.t = 'Probe Postion (relative to specimen)';
         else
             annots.t = 'Stage Postion (sensed)';
         end
@@ -1151,6 +1188,7 @@ end
 if isequal(lower(get(handles.check_overlaymag,'Enable')),'on')
     overlaymag(handles,figid);
 end
+pretty_plot;
 if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'Value') == 1)
     plot3dfigure(handles);
 end
@@ -1222,8 +1260,9 @@ plot3(p(prebox,1),p(prebox,2),p(prebox,3),'k'); hold on;
 plot3(p(inbox,1),p(inbox,2),p(inbox,3),'m'); 
 plot3(p(postbox,1),p(postbox,2),p(postbox,3),'k'); hold off;
 xlabel('X');    ylabel('Y');    zlabel('Z');
-set(gca,'Xcolor','b','Ycolor','g','Zcolor','r');
+set(gca,'Xcolor','b','Ycolor',[0.25, 0.5, 0.5],'Zcolor','r');
 set(handles.threeDfig,'Name',['3d ',dispname],'NumberTitle','Off');
+pretty_plot;
 %-----------------------------------------------------------------------
 % This routine updates two menus: menu_files and menu_signal
 % This routine is called only by 'add' and 'remove' buttons
