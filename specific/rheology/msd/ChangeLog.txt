@@ -1,3 +1,6 @@
+2006-03-05  Kalpit Desai <kvdesai@email.unc.edu>
+	* msdbase.m: Added. A script that computes msd from raw time vs position data.
+
 2006-02-03  Jeremy Cribb <jcribb@email.unc.edu>
 	* rod_msd.m: added frame_rate as a parameter for tracking datasets in the case we use confocal or other videos not of the pulnix type.
 
