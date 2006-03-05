@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_gui
 
-% Last Modified by GUIDE v2.5 04-Jan-2006 12:56:37
+% Last Modified by GUIDE v2.5 04-Mar-2006 23:08:30
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -77,17 +77,18 @@ set(handles.button_add,'UserData',handles.default_path);
 % the program *should* still work unchanged.
 handles.signames.intr = {'beadpos' ,'stageReport','qpd','laser'};
 % Names of signals to be displayed on GUI control menu_signal
-handles.signames.disp = {'Probe Pos','Stage Pos'  ,'QPD','Channel 8'};
+handles.signames.disp = {'Probe Pos','Stage Pos' ,'QPD','Channel 8'};
 handles.posid = [1, 2]; %index of the signals which are position measurements
 % Figure numbers allocated to 'main-figures' for various signals
 handles.mainfigids =      [   1,          2,          3,         4];
 handles.psdfigids =       [  10,         20,         30,        40];
 handles.dvsffigids =  handles.psdfigids + 5;      % accumulated displacement 
+handles.msdfigids = 70;
 %  ....add to this list as more types of plots are supported
 
 % Below are some figids pertinent to only specific signal types
-handles.frespfigids =     [ 60]; % Frequency response plot is pertinent to beadpos only.
-                      % R = 60, X = 61, Y = 62, Z = 63  
+handles.frespfigids =     [60]; % Frequency response plot is pertinent to beadpos only.
+                           % R = 60, X = 61, Y = 62, Z = 63  
 % Some other figure numbers allocated to specific types of plot
 handles.threeDfig = 9;
 handles.boxresfig = 100;
@@ -108,7 +109,6 @@ guidata(hObject, handles);
 % UIWAIT makes lt_analysis_gui wait for user response (see UIRESUME)
 % uiwait(handles.GUI);
 
-
 % --- Outputs from this function are returned to the command line.
 function varargout = lt_analysis_gui_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
@@ -122,8 +122,8 @@ varargout{1} = handles.output;
 %%% $$$$$$$$$$$$$$$$$$$       CALLBACKS     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % --- Executes on button press in button_add.
 function button_add_Callback(hObject, eventdata, handles)
-global g % using global (as oppose to 'UserData') prevents creating multiple copies
-set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
+global g % using global (as oppose to 'UserData') prevents creating multiple copies and conserves memory
+% set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
 curexptype = get(handles.menu_exper,'value');
 switch curexptype
     case 1 %Passive Diffusion   
@@ -228,7 +228,7 @@ prompt_user(['Finished Loading. Loaded ',num2str(nloaded),' files']);
 if nloaded 
     updatemenu(handles);
 end
-set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
+% set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 
 % --- Executes on button press in button_remove
 function button_remove_Callback(hObject, eventdata, handles)
@@ -260,9 +260,10 @@ function menu_files_Callback(hObject, eventdata, handles)
 global g
 % Hints: contents = get(hObject,'String') returns menu_files contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_files
-set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
-updatesignalmenu(handles);% this will also refresh the main figure
-set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
+% set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
+updatesignalmenu(handles);
+updatemainfig(handles);
+% set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 
 % --- Executes on button press in button_tag.
 function button_tag_Callback(hObject, eventdata, handles)
@@ -302,7 +303,7 @@ if ~exist('g') | isempty(g.data)
     errordlg('Database is empty, first add files to it','Alert');
     return;
 end
-set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
+% set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
 % check if the main figure is plotted and in focus
 if (0 == figflag(getmainfigname(handles)))
    updatemainfig(handles,'new'); 
@@ -340,7 +341,7 @@ for c = 1:length(handles.signames.intr)
     end
 end
 updatemainfig(handles,'cut');
-set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
+% set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 dbclear if error
 %-------------------------------------------------------------------------
 % --- Executes on button press in button_selectdrift.
@@ -381,7 +382,7 @@ end
 %-------------------------------------------------------------------------
 % --- Executes on button press in check_subdrift.
 function check_subdrift_Callback(hObject, eventdata, handles)
-updatemainfig(handles);
+% updatemainfig(handles);
 
 %-------------------------------------------------------------------------
 % --- Executes on button press in check_psd.
@@ -598,7 +599,7 @@ if isequal(val,get(hObject,'UserData'))
     return; % do nothing, if this was an accidental click selecting same things
 end
 set(hObject,'UserData',val);%remember the last selection
-updatemainfig(handles,'dispres');
+% updatemainfig(handles,'dispres');
 
 
 % --- Executes on selection change in menu_signal.
@@ -612,7 +613,7 @@ if isequal(sigid,get(hObject,'UserData'))
 end
 set(hObject,'UserData',sigid);%remember the last selection
 checkdimsvalidity(handles);
-updatemainfig(handles,'quant');
+% updatemainfig(handles,'quant');
 
 % --- Executes on selection change in list_dims.
 function list_dims_Callback(hObject, eventdata, handles)
@@ -621,7 +622,7 @@ if isequal(val,get(hObject,'UserData'))
     return; % do nothing, if this was an accidental click selecting same things
 end
 set(hObject,'UserData',val);%remember the last selection
-updatemainfig(handles,'dims');
+% % updatemainfig(handles,'dims');
 
 % --- Executes on button press in button_addfsinfo.
 function button_addfsinfo_Callback(hObject, eventdata, handles)
@@ -631,7 +632,7 @@ function button_addfsinfo_Callback(hObject, eventdata, handles)
 function check_fdbox_Callback(hObject, eventdata, handles)
 if get(hObject,'value')
     set(handles.button_many,'Enable','off');
-%     set(handles.button_plot,'UserData',[]);
+%     set(handles.button_plotfreq,'UserData',[]);
 else
     set(handles.button_many,'Enable','On');
 end
@@ -644,14 +645,14 @@ set(handles.check_fdbox,'value',0);
                     'OKstring','Select',...
                     'Name','Select file(s) to be analyzed');
 if ok
-    set(handles.button_plot,'UserData',selec);
+    set(handles.button_plotfreq,'UserData',selec);
 end
 %-----------------------------------------------------------------------
-% --- Executes on button press in button_plot.
-function button_plot_Callback(hObject, eventdata, handles)
+% --- Executes on button press in button_plotfreq.
+function button_plotfreq_Callback(hObject, eventdata, handles)
 global g
 dbstop if error
-set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
+% set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
 
 sigid = get(handles.menu_signal,'UserData');
 signame = handles.signames.intr{sigid};
@@ -666,7 +667,7 @@ else %non-positional sigal, so process for all columns
 end
 colrs = 'brkgym';
 xlims = [-Inf, Inf];
-% determine the ids of the files  to be plotted
+% determine the ids of the files  to be processed
 if get(handles.check_fdbox,'value')
     ids = get(handles.menu_files,'Value');% only 1 file
     hmf = handles.mainfigids(sigid);
@@ -677,14 +678,25 @@ if get(handles.check_fdbox,'value')
         xlims = ans.xlims;
     end
 else
-    ids = get(handles.button_plot,'UserData');
+    ids = get(handles.button_plotfreq,'UserData');
     if isempty(ids)
         ids = get(handles.menu_files,'value');
     end
 end
-%%=========== COMPUTE AND PLOT PSD + CUMULATIVE DISTANCE ===============
-if get(handles.check_psd,'Value')
-    % set up figures for all columns of the signal
+
+% First setup figures for msd and psd computations if we should. Then fill
+% in the plots for each file one by one.
+% Setup MSD figure
+if get(handles.check_msd,'Value')
+    % setup msd figure
+    figure(handles.msdfigids(sigid)); clf;
+    title([handles.signames.disp{sigid}, '-MSD']);
+    xlabel('log_{10}(\tau)      [seconds]');	                        
+    ylabel('log_{10}(MSD)       [micron^2]');    
+    hold on;
+end
+if get(handles.check_psd,'value')
+    % set up PSD figures for all columns of the signal
     for c = 1:length(cols)
         % setup psd figure
         figure(handles.psdfigids(sigid) + cols(c) - 1); clf;
@@ -709,55 +721,58 @@ if get(handles.check_psd,'Value')
             hold on;
         end            
     end
-    % process + plot each file one by one
-    for fi = 1:length(ids) %repeat for all files selected
-        % grab the signal to be processed;
-        sig = g.data{ids(fi)}.(signame);
-        % First check if we are told to consider inside the Box only
-        if get(handles.check_fdbox,'value')
-            if (fi > 1)
-                disp('Error: Was told to consider only ''inside box'' data, but multiple files were selected');
-                disp('Will ignore the box and process all files');
-                set(handles.check_fdbox,'value',0);
-            else
-                M = size(sig,2);
-                oldsig = sig; sig = [];
-                [sig(:,1), sig(:,2:M)] = clipper(oldsig(:,1), oldsig(:,2:M),xlims(1),xlims(2));
-                clear oldsig;
-            end
-        end        
-        % now check if the timestamps are evenly spaced and adjust sampling rate accordingly        
-        srate = handles.srate; %reset sample rate if changed by previous file
-        if (range(diff(sig(:,1))) > 1e-6)            
-            fnames = get(handles.menu_files,'String');            
-            prompt_user(['UnEven TimeStamps: ',fnames{ids(fi)}]);
-            srate = srate*0.1;
-            prompt_user(['This file will be resampled at ',num2str(srate),' Hz']);            
-            oldsig = sig;
-            sig = [];
-            sig(:,1) = [oldsig(1,1):1/srate:oldsig(end,1)]';
-            for k = 2:size(oldsig,2);
-                sig(:,k) = interp1(oldsig(:,1),oldsig(:,k),sig(:,1));
-            end
-            clear oldsig
-        end        
-        % Now the columns in the data loaded for a positional signal are
-        % x,y,z but the columns in the listbox displayed on UI are
-        % r,x,y,z. So push down x,y and z by one column. Then calculate R
-        % if we need to.
-        if any(sigid == handles.posid) % is this a position signal?
-            temp = sig; sig = [];
-            sig(:,1) = temp(:,1); % timestamps
-            sig(:,2) = zeros(size(sig,1),1); % R
-            sig(:,3:5) = temp(:,2:4); % xyz
-            clear temp
-            if any(cols == 1) % need to calculate R?
-                sig(:,2) = sqrt(sig(:,3).^2 + sig(:,4).^2 + sig(:,5).^2);
-            end
+end
+% Now process + plot each file one by one
+for fi = 1:length(ids) %repeat for all files selected
+    % grab the signal to be processed
+    sig = g.data{ids(fi)}.(signame);
+    % First check if we are told to consider data inside the Box only
+    if get(handles.check_fdbox,'value')
+        if (fi > 1)
+            disp('Error: Was told to consider only ''inside box'' data, but multiple files were selected');
+            disp('Will ignore the box and process all files');
+            set(handles.check_fdbox,'value',0);
+        else % only one file to be processed, and boxlimits have been set previously
+            M = size(sig,2);
+            oldsig = sig; sig = [];
+            [sig(:,1), sig(:,2:M)] = clipper(oldsig(:,1), oldsig(:,2:M),xlims(1),xlims(2));
+            clear oldsig;
         end
-        % now remove the offset from original signal before computing psd
-        sig(:,2:end) = sig(:,2:end) - repmat(mean(sig(:,2:end),1),size(sig,1),1);
-        
+    end        
+    % now check if the timestamps are evenly spaced and adjust sampling rate accordingly        
+    srate = handles.srate; %reset sample rate if changed by previous file
+    if (range(diff(sig(:,1))) > 1e-6)            
+        fnames = get(handles.menu_files,'String');            
+        prompt_user(['UnEven TimeStamps: ',fnames{ids(fi)}]);
+        srate = srate*0.1;
+        prompt_user(['This file will be resampled at ',num2str(srate),' Hz']);            
+        oldsig = sig;
+        sig = [];
+        sig(:,1) = [oldsig(1,1):1/srate:oldsig(end,1)]';
+        for k = 2:size(oldsig,2);
+            sig(:,k) = interp1(oldsig(:,1),oldsig(:,k),sig(:,1));
+        end
+        clear oldsig
+    end
+    % Now the columns in the data loaded for a positional signal are
+    % x,y,z but the columns in the listbox displayed on UI are
+    % r,x,y,z. So push down x,y and z by one column. Then calculate R
+    % if we need to.
+    if any(sigid == handles.posid) % is this a position signal?
+        temp = sig; sig = [];
+        sig(:,1) = temp(:,1); % timestamps
+        sig(:,2) = zeros(size(sig,1),1); % R
+        sig(:,3:5) = temp(:,2:4); % xyz
+        clear temp
+        if any(cols == 1) & get(handles.check_psd,'value') % need to calculate R?
+            sig(:,2) = sqrt(sig(:,3).^2 + sig(:,4).^2 + sig(:,5).^2);
+        end
+    end
+    % now remove the offset from original signal before computing psd
+    sig(:,2:end) = sig(:,2:end) - repmat(mean(sig(:,2:end),1),size(sig,1),1);
+    
+    %%=========== COMPUTE AND PLOT PSD + CUMULATIVE DISTANCE ===============
+    if get(handles.check_psd,'Value')        
         % set the psd-resolution such that we have about 10 cycles of the lowest frequency.
         psdres = 10/range(sig(:,1));        
         % Now, ready to compute psd and, if we are told to, area under psd
@@ -773,33 +788,52 @@ if get(handles.check_psd,'Value')
             end
             warning on
             if (fi == length(ids))% if this is last file, annotate
-                alltags = g.tag;
-                
+                alltags = g.tag;                
                 figure(handles.psdfigids(sigid) + cols(c) -1);
                 legend(gca,alltags{ids});
-%                 set(gca,'Xscale','Log','Yscale','Log');
+                %                 set(gca,'Xscale','Log','Yscale','Log');
                 hold off;
                 if get(handles.check_cumdisp,'value')
                     figure(handles.dvsffigids(sigid) + cols(c) -1);
                     legend(gca,alltags{ids});
-%                     set(gca,'Xscale','Log','Yscale','Linear');
+                    %              set(gca,'Xscale','Log','Yscale','Linear');
                     hold off;
                 end
             end   
         end       
+    end   
+    %%=========== COMPLETED PLOTTING PSD + CUMULATIVE DISTANCE ===============
+    
+    %%********      MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION      **********
+    if get(handles.check_msd,'value')
+        % Allow msd for position-signal only. So this signal has 5 columns
+        % (trxyz) guaranteed. 
+        [msd, tau] = msdbase([sig(:,1), sig(:,3:5)],[]);% use default msd TAUs
+        figure(handles.msdfigids(sigid));
+        warning off % No better way in matlab 6.5 to turn off 'log of zero' warning 
+        plot(log10(tau),log10(msd),['.-',colrs(mod(fi-1,length(colrs))+1)]);
+        warning on
+        if (fi == length(ids))% if this is last file, annotate
+            alltags = g.tag;                
+            figure(handles.msdfigids(sigid));
+            legend(gca,alltags{ids});
+            pretty_plot;
+            %                 set(gca,'Xscale','Log','Yscale','Log');
+            hold off;
+        end       
     end    
-end %%=========== COMPLETED PLOTTING PSD + CUMULATIVE DISTANCE ===============
-
-
-%%***********       FREQUENCY RESPONSE COMPUTATION       ******************
-% forth coming
-%
-%
-%%===========   COMPLETED FREQUENCY RESPONSE COMPUTATION    ===============
-
+    %%======   COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   ========
+    
+    %%***********       FREQUENCY RESPONSE COMPUTATION       ******************
+    % forth coming
+    %
+    %
+    %%===========   COMPLETED FREQUENCY RESPONSE COMPUTATION    ===============
+    
+end % Finished processing + plotting all files
 % clear the memory of file-ids that were selected last time.
-set(handles.button_plot,'UserData',[]);
-set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
+set(handles.button_plotfreq,'UserData',[]);
+% set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 
 dbclear if error
 
@@ -811,9 +845,9 @@ function check_3d_Callback(hObject, eventdata, handles)
 global g
 if (get(hObject,'Value'))
     if ~isempty(g.data)
-        set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
+%         set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
         plot3dfigure(handles);
-        set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
+%         set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
     end
 else
     if (ishandle(handles.threeDfig))
@@ -928,7 +962,7 @@ function prompt_user(str,handles)
 % set(handles.text_message,'String',str);
 disp(str);
 
-%--------------makes the name string for edit figure -------------------
+%--------------makes the name string for the main figure ---------------
 function str = getmainfigname(handles);
 sigid = get(handles.menu_signal,'Value');
 sigstr = get(handles.menu_signal,'String');
@@ -1296,7 +1330,7 @@ end
 % 1. Checks and fills in the permitted signalNames in the signal menu
 % 2. Shares the internal index (sigid) for the currently selected signal
 % 3. Enables/disables 'overlay magnets' and ['3d' % 'dimension(s)'] objects
-% 4. Updates the main figure
+% CALLED OFF 4. Updates the main figure
 function updatesignalmenu(handles)
 global g
 if ~exist('g') | isempty(g.data) %database is empty     
@@ -1351,8 +1385,24 @@ else
 end
 
 checkdimsvalidity(handles);% check if RXYZ and/or 3D is applicable
-updatemainfig(handles,'new');
+% updatemainfig(handles,'new');
 
+
+% --- Executes on button press in button_plottime.
+function button_plottime_Callback(hObject, eventdata, handles)
+
+updatemainfig(handles);
+
+% --- Executes on button press in check_msd.
+function check_msd_Callback(hObject, eventdata, handles)
+if get(hObject,'value')
+    sigid = get(handles.menu_signal,'UserData');    
+    if ~any(sigid == handles.posid)
+        errordlg(['Signal must be of position-measurement type to compute MSD.'  ... 
+                    'Please change signal type'],'Error');
+        set(hObject,'value',0);    
+    end
+end
 %%%********************************************************************
 %%%**********     ALL BELOW IS NEEDED BUT NOT-USED     ****************
 %%%********************************************************************
@@ -1480,6 +1530,8 @@ function menu_exper_Callback(hObject, eventdata, handles)
 %%%####################################################################
 %%%#############    GUIDE WILL ADD NEW CALLBACKS BELOW      ###########
 %%%####################################################################
+
+
 
 
 

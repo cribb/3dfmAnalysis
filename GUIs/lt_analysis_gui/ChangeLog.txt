@@ -1,4 +1,8 @@
-2006-01-28 Kalpit Desai <kvdesai@email.unc.edu>
+2006-03-05 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m, lt_analysis_gui.fig: 
+	- Now doesn't refresh time-domain plots automatically when any setting is changed. Added a separate button for that.
+	- Incorporated msdbase code (soon to be committed) into gui.
+2006-01-28 Kalpit Desai <kvdsai@email.unc.edu>
 	* lt_analysis_gui.m: 
 	- Now asks user for confirmation when a file in the 'to load list' is already loaded in the data base. Eliminates need of first removing the file and reloading it when changing the experiment type.
 	- Fixed a bug in plotting of multiples PSDs of lowbandwidth data
