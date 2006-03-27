@@ -1,3 +1,6 @@
+2006-03-27 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m, lt_analysis_gui.fig: 
+	- Added ability to save modified files as well as load thus saved files.
 2006-03-05 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m, lt_analysis_gui.fig: 
 	- Now doesn't refresh time-domain plots automatically when any setting is changed. Added a separate button for that.

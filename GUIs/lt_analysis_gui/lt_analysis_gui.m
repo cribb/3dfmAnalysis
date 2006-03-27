@@ -184,29 +184,44 @@ for(c = 1:length(f))
         %standard. Nx1 standardization would work as well, but it seems my matlab
         %is creating arrays in the form of 1xN by default.
         try
-            % load only those fields which are pertinent to the selected experiment type
-            g.data{1,1} = load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
-            % fullfile usage is handy and protects code against platform variations
-            g.magdata{1,1} = {}; %start out with empty magnet data
-            g.fname{1,1} = f{c}; %file name
-            g.path{1,1} = p; %file path
-            % Now add the default tag
-            NoTagInd = get(handles.button_tag,'UserData');
-            if(isempty(NoTagInd) | NoTagInd < 1), NoTagInd = 1; end
-            g.tag{1,1} = ['NoTag',num2str(NoTagInd)]; %tag
-            set(handles.button_tag,'UserData',NoTagInd+1);
-            g.metadata{1,1} = 'NoMetaData'; %user specified metadata                
-            for k = 1:length(handles.signames.intr)
-                if isfield(g.data{1},handles.signames.intr{k})
-                    % calculate # of columns in the current signal
-                    M = size(g.data{1}.(handles.signames.intr{k}),2);                    
-                    % enter zero as the place-holder in the drift fields to start with.
-                    % do not allocate space for drift for the first column which is time
-                    g.drift{1,1}.(handles.signames.intr{k}) = zeros(2,M-1);
+            if findstr(f{c},'.vrpn.mat')
+                % load only those fields which are pertinent to the selected experiment type
+                g.data{1,1} = load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
+                % fullfile usage is handy and protects code against platform variations
+                g.magdata{1,1} = {}; %start out with empty magnet data
+                g.fname{1,1} = f{c}; %file name
+                g.path{1,1} = p; %file path
+                % Now add the default tag
+                NoTagInd = get(handles.button_tag,'UserData');
+                if(isempty(NoTagInd) | NoTagInd < 1), NoTagInd = 1; end
+                g.tag{1,1} = ['NoTag',num2str(NoTagInd)]; %tag
+                set(handles.button_tag,'UserData',NoTagInd+1);
+                g.metadata{1,1} = 'NoMetaData'; %user specified metadata                
+                for k = 1:length(handles.signames.intr)
+                    if isfield(g.data{1},handles.signames.intr{k})
+                        % calculate # of columns in the current signal
+                        M = size(g.data{1}.(handles.signames.intr{k}),2);                    
+                        % enter zero as the place-holder in the drift fields to start with.
+                        % do not allocate space for drift for the first column which is time
+                        g.drift{1,1}.(handles.signames.intr{k}) = zeros(2,M-1);
                         % First Row = Slope, Second Row = Offset
+                    end
                 end
+                g.exptype{1,1} = curexptype;
+            elseif findstr(f{c},'.edited.mat')
+                load(fullfile(p,f{c}));
+                g.data{1,1} = d.data;
+                g.metadata{1,1} = d.metadata;
+                g.tag{1,1} = d.tag;
+                g.fname{1,1} = d.fname;
+                g.path{1,1} = d.path;
+                g.magdata{1,1} = d.magdata;
+                g.drift{1,1} =d.drift;
+                g.exptype{1,1} =d.exptype;                    
+            else
+                error('Unrecognied file format, only know about .vrpn.mat and .edited.mat formats');
             end
-            g.exptype{1,1} = curexptype;
+            
             prompt_user([f{c}, ' added to the database.'],handles);
             nloaded = nloaded + 1; %total files loaded
         catch
@@ -234,12 +249,12 @@ end
 function button_remove_Callback(hObject, eventdata, handles)
 global g
 if cellfun('isempty',g.data)
-   errordlg('Database is empty, nothing to be removed.','Alert');
-   return;
+    errordlg('Database is empty, nothing to be removed.','Alert');
+    return;
 end
 [selec,ok] = listdlg('ListString',get(handles.menu_files,'String'),...
-                    'OKstring','Remove',...
-                    'Name','Select file(s) to be removed');
+    'OKstring','Remove',...
+    'Name','Select file(s) to be removed');
 for c=1:length(selec)
     for cf = 1:length(handles.gfields) %delete all fields for that file id
         g.(handles.gfields{cf}){1,selec(c)} = {};
@@ -863,8 +878,17 @@ function button_export_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in button_save.
 function button_save_Callback(hObject, eventdata, handles)
-
-
+global g
+fid = get(handles.menu_files,'value');
+[filename, pathname] = uiputfile([g.fname{1,fid}(1:end-9),'.edited.mat'], 'Save Currently active file as');
+if isequal(filename,0)|isequal(pathname,0)
+    prompt_user('User aborted saving');
+else
+    for cf = 1:length(handles.gfields) %copy all fields for that file id
+        d.(handles.gfields{cf}) = g.(handles.gfields{cf}){1,fid};
+    end
+    save(fullfile(pathname,filename),'d');
+end
 %%%$$$$$$$$$$$$$$$$  NON-CALLBACK ROUTINES     $$$$$$$$$$$$$$$$$$$$$$$$
 %-----------------------------------------------------------------------
 function updateboxresults(handles,hbox)
