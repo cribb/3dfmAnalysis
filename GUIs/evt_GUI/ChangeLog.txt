@@ -1,3 +1,7 @@
+2006-03-27  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: removed code for "Close All Figures" button.  Now, the existence of an XY, XT, or RT figure is checked and used if exists, otherwise it generates a new figure.  Reduces the number of open figures.
+	* evt_gui.fig: removed "Close All Figures" button.
+
 2006-02-03  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: now includes an edit box for setting custom frame rates.
 	* evt_gui.fig: same.

@@ -224,9 +224,26 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     beadID = table(:,ID);
     x = table(:,X);
     y = table(:,Y);
-    XYfig = figure;
-    XTfig = figure;
-    RTfig = figure; 
+
+    if isfield(handles, 'XYfig')
+        XYfig = figure(handles.XYfig);
+    else
+        XYfig = figure;
+    end
+    
+    if isfield(handles, 'XTfig')
+        XTfig = figure(handles.XTfig);
+    else
+        XTfig = figure;
+    end
+
+    if isfield(handles, 'RTfig')
+        RTfig = figure(handles.RTfig);
+    else            
+        RTfig = figure;         
+    end
+    
+    
     currentBead = 0;
     
 	slider_max = max(beadID);
@@ -591,12 +608,51 @@ function checkbox_attach_magnets_Callback(hObject, eventdata, handles)
 		guidata(hObject, handles);
         
     end
+% --- Executes on button press in checkbox_frame_rate.
+function checkbox_frame_rate_Callback(hObject, eventdata, handles)
+    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+
+    if get(hObject, 'Value')      
+        set(handles.checkbox_frame_rate, 'Enable', 'off');
+    else
+        handles.table(:,TIME) = handles.tstamp_times;
+        handles.mintime = min(handles.table(:,TIME));
+        handles.maxtime = max(handles.table(:,TIME));
+        guidata(hObject, handles);
+	
+        plot_data(hObject, eventdata, handles);
+        drawnow;
+    end
 
     
-% --- Executes on button press in pushbutton_close_figures.
-function pushbutton_close_figures_Callback(hObject, eventdata, handles)
-    close all;
+% --- Executes during object creation, after setting all properties.
+function edit_frame_rate_CreateFcn(hObject, eventdata, handles)
+	if ispc
+        set(hObject,'BackgroundColor','white');
+	else
+        set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+	end
 
+
+function edit_frame_rate_Callback(hObject, eventdata, handles)
+    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+
+    table = handles.table;
+
+    if get(handles.checkbox_frame_rate, 'Value');
+        table(:,TIME) = table(:,FRAME) / str2num(get(hObject, 'String'));
+        mintime = min(table(:,TIME));
+        maxtime = max(table(:,TIME));
+	
+        handles.table = table;
+        handles.maxtime = maxtime;
+        handles.mintime = mintime;
+        guidata(hObject, handles);
+	
+        plot_data(hObject, eventdata, handles);
+        drawnow;
+    end
+    
     
 % =========================================================================
 % Everything below this point are functions related to computation and data
@@ -841,48 +897,3 @@ function logentry(txt)
      fprintf('%s%s\n', headertext, txt);
 
    
-% --- Executes on button press in checkbox_frame_rate.
-function checkbox_frame_rate_Callback(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
-
-    if get(hObject, 'Value')      
-        set(handles.checkbox_frame_rate, 'Enable', 'off');
-    else
-        handles.table(:,TIME) = handles.tstamp_times;
-        handles.mintime = min(handles.table(:,TIME));
-        handles.maxtime = max(handles.table(:,TIME));
-        guidata(hObject, handles);
-	
-        plot_data(hObject, eventdata, handles);
-        drawnow;
-    end
-
-    
-% --- Executes during object creation, after setting all properties.
-function edit_frame_rate_CreateFcn(hObject, eventdata, handles)
-	if ispc
-        set(hObject,'BackgroundColor','white');
-	else
-        set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-	end
-
-
-function edit_frame_rate_Callback(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
-
-    table = handles.table;
-
-    if get(handles.checkbox_frame_rate, 'Value');
-        table(:,TIME) = table(:,FRAME) / str2num(get(hObject, 'String'));
-        mintime = min(table(:,TIME));
-        maxtime = max(table(:,TIME));
-	
-        handles.table = table;
-        handles.maxtime = maxtime;
-        handles.mintime = mintime;
-        guidata(hObject, handles);
-	
-        plot_data(hObject, eventdata, handles);
-        drawnow;
-    end
-    
