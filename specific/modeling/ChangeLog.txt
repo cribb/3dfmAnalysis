@@ -1,3 +1,6 @@
+2006-03-27  Jeremy Cribb <jcribb@email.unc.edu>
+	* modeling_msd_dep_on_Temp_time.m:  added.  Models the dependence of the mean square displacement of sucrose solutions as a function of sucrose concentration, solution temperature, and observation time.
+
 2006-01-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* ramp_response_Kelvin_Voight.m: added.  Script (for now) that simulates the response of a Kelvin-Voight fluid to a ramp input.
 
