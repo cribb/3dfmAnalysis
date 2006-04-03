@@ -1,3 +1,6 @@
+2006-04-03  Jeremy Cribb <jcribb@email.unc.edu>
+	* mypsd.m: fixed typo in printed output.
+
 2005-12-22  Kalpit Desai <kvdesai@cs.unc.edu>
 	* mypsd.m: 
 	- Calculation of 'integrated displacement' is much efficient now.

@@ -53,7 +53,7 @@ end
 
 nw = fix(rate/(2*res))*2;
 if (nw > size(s,1))
-    disp('mypsd ERROR: Not enough data for requested freuqncy-resolution.');
+    disp('mypsd ERROR: Not enough data for requested frequency-resolution.');
     disp('Time span of data should atleast be 1/resolution');
     return;   
 end
