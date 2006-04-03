@@ -43,10 +43,11 @@ for f = 1 : length(file)
     movieout = [movieout(1:end-3) 'avi'];
 	
 	% setup the output file
-	mov = avifile(movieout,'quality',60,'fps',frame_rate,'keyframe',2.0,'compression','none');
-        % avifile('example.avi','quality',60,'fps',5,'keyframe',2.0,'compression','DIVX')
+  	mov = avifile(movieout,'quality',60,'fps',frame_rate,'keyframe',2.0,'compression','none');
+%   mov = avifile(movieout,'quality',60,'fps',frame_rate,'keyframe',2.0,'compression','XviD');
+%   mov = avifile(movieout,'compression','XviD');
 
-	% initialize figure and set initial properties
+    % initialize figure and set initial properties
 	fig = figure;
 	set(fig, 'visible','off' ...
            , 'Position', [1 1 cols rows] ...
@@ -70,11 +71,11 @@ for f = 1 : length(file)
 		
 		im = fread(fid, [648,484],'uint8');   % read in the next frame
         im = balance_pulnix_gains(im);
-        
-		imagesc(im','parent',ax);               % puts image in invisible axes  
+
+        imagesc(im','parent',ax);               % puts image in invisible axes  
 		axis off;
         drawnow;
-		mov = addframe(mov,ax);               % adds frames to the AVI file 
+		mov = addframe(mov,im);               % adds frames to the AVI file 
 		status = fseek(fid, frame_size*k, 'bof');  % advance to next frame
 		
 		% handle timer
