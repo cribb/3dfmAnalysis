@@ -1,3 +1,6 @@
+2006-04-04  Jeremy Cribb <jcribb@email.unc.edu>
+	* laser_msd.m: patch so that 'edited.mat' files from lt_analysis_GUI can be read.
+
 2006-03-05  Kalpit Desai <kvdesai@email.unc.edu>
 	* msdbase.m: Added. A script that computes msd from raw time vs position data.
 

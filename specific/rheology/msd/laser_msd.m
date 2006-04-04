@@ -25,9 +25,6 @@ if (nargin < 3) | isempty(dim)      dim = 3;   end
 if (nargin < 2) | isempty(window)   window = [1 2 5 10 20 50 100 200 500 1000 1001];  end
 % if (nargin < 1) | isempty(file)    file = '*.mat'; end
 
-% load in the constants that identify the output's column headers for the current
-% version of the vrpn-to-matlab program.
-% % % video_tracking_constants;
 
 % load laser data
 flags.inmicrons = 0;
@@ -43,13 +40,24 @@ Z = 4;
 files = dir(files);
 filemax = length(files);
 
-for idx = 1 : filemax
-    filename = files(idx).name;
-	v = load_laser_tracking(filename, 'b', flags);
-    
-    b = [v.beadpos.time v.beadpos.x v.beadpos.y v.beadpos.z];    
-%     framemax = max(b(:,FRAME));
-    
+for fid = 1 : filemax
+    filename = files(fid).name;
+% 	v = load_laser_tracking(filename, 'b', flags);    
+%   b = [v.beadpos.time v.beadpos.x v.beadpos.y v.beadpos.z];    
+
+    d = load(filename);
+    b = d.d.data.beadpos;
+    drift_vector = d.d.drift.beadpos;
+    drift_est_x = polyval(drift_vector(:,1), b(:,1));
+    drift_est_y = polyval(drift_vector(:,2), b(:,1));
+    drift_est_z = polyval(drift_vector(:,3), b(:,1));
+
+    b(:,X) = b(:,X) - drift_est_x;
+    b(:,Y) = b(:,Y) - drift_est_y;
+    b(:,Z) = b(:,Z) - drift_est_z;
+
+    b(:,2:end) = b(:,2:end) * 1e-6;
+
     % for every window size (or tau)
     for w = 1:length(window)
         
@@ -76,8 +84,8 @@ for idx = 1 : filemax
                 error('dimension must be 1D, 2D, or 3D.');
         end        
  
-        msd(w, idx) = mean(r2);
-        tau(w, idx) = window(w) * mean(diff(b(:,TIME)));
+        msd(w, fid) = mean(r2);
+        tau(w, fid) = window(w) * mean(diff(b(:,TIME)));
     end   
 end
 
@@ -87,17 +95,16 @@ end
 logtau = log10(tau);
 logmsd = log10(msd);
 
-mean_logtau = nanmean(logtau);
-mean_logmsd = nanmean(logmsd);
+mean_logtau = nanmean(logtau');
+mean_logmsd = nanmean(logmsd');
 
 sample_count = sum(~isnan(logmsd),2);
 
-% ste_logtau = nanstd(logtau) ./ sqrt(sample_count);
-% ste_logmsd = nanstd(logmsd) ./ sqrt(sample_count);
+ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
+ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
 
 	figure;
-    plot(mean_logtau, mean_logmsd);
-% 	errorbar(mean_logtau, mean_logmsd, ste_logmsd);
+	errorbar(mean_logtau, mean_logmsd, ste_logmsd);
 	xlabel('log_{10}(\tau) [s]');
 	ylabel('log_{10}(MSD) [m^2]');
 	grid on;
@@ -109,6 +116,7 @@ sample_count = sum(~isnan(logmsd),2);
 % outputs
 d.tau = tau;
 d.msd = msd;
+d.error_msd = ste_logmsd(:);
 d.n = sample_count; % because beadID's are indexed by 0.
 
 
