@@ -1,3 +1,6 @@
+2006-04-07  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m: Fixed a bug in removing time offset, when offset was zero. Corrected stagezReport to stageReport.
+
 2006-02-03  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: cleaned up documentation and fixed a bug where log message incorrectly reported correct usage of time stamps.
 

@@ -80,6 +80,7 @@ if (nargin < 3 | isempty(flags))
     flags.keepuct = 1;
     flags.askforinput = 0;
     flags.keepoffset = 0;
+    flags.matoutput = 0;
 else
     % fill in the missing fields
     if (~isfield(flags,'inmicrons')); flags.inmicrons = 1; end;
@@ -97,7 +98,7 @@ if strfind(fields,'a')
 end
 
 % Take care of all version records
-version_string = '01.01';
+version_string = '01.02';
 LTver = 'NotAvailable';
 V2Mver = 'NotAvailable';
 d.info.orig.matOutputFileName = 'NotAvailable';
@@ -172,7 +173,7 @@ if(strfind(fields,'c')) % handle stage command logs
 end
 
 if(strfind(fields,'s')) % handle stage sensed positions
-    d.stagezReport = extractfield(cegjlqs{7},flags,{'x','y','z'},Toffset,THIS_IS_POS);
+    d.stageReport = extractfield(cegjlqs{7},flags,{'x','y','z'},Toffset,THIS_IS_POS);
 end
 
 if(strfind(fields,'q')) % handle qpd signals
@@ -254,8 +255,10 @@ function tout = removeToffset(tin, toffset)
 tout_sec(:,1) = tin(:,1) - toffset(1,1);
 tout_usec(:,1) = tin(:,2) - toffset(1,2);
 inegs = find(tout_usec < 0); %indices where the difference went negative
-tout_usec(inegs,1) = tout_usec(inegs,1) + 1E6;
-tout_sec(inegs,1) = tout_sec(inegs,1) - 1;
+if ~isempty(inegs) % would be empty when toffset is zero
+    tout_usec(inegs,1) = tout_usec(inegs,1) + 1E6;
+    tout_sec(inegs,1) = tout_sec(inegs,1) - 1;
+end
 tout = tout_sec + tout_usec*1e-6;
 
 %-------------------------------------------------------------------------
