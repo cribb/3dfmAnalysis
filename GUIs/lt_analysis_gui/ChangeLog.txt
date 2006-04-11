@@ -1,3 +1,8 @@
+2006-04-11 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m, lt_analysis_gui.fig: 
+	- Loads and saves files correctly
+	- Removes stage noise by default
+	- Fixed couple of bugs and typos in frequency processing.
 2006-03-27 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m, lt_analysis_gui.fig: 
 	- Added ability to save modified files as well as load thus saved files.

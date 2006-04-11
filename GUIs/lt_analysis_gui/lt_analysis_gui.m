@@ -75,13 +75,13 @@ set(handles.button_add,'UserData',handles.default_path);
 % If we want to add a signal later, just change all the fields below (e.g
 % siganmes.intr, signmaes.disp, posid, and all figids accordingly. Rest of
 % the program *should* still work unchanged.
-handles.signames.intr = {'beadpos' ,'stageReport','qpd','laser'};
+handles.signames.intr = {'beadpos' ,'stageReport','qpd','laser', 'posError'};
 % Names of signals to be displayed on GUI control menu_signal
-handles.signames.disp = {'Probe Pos','Stage Pos' ,'QPD','Channel 8'};
-handles.posid = [1, 2]; %index of the signals which are position measurements
+handles.signames.disp = {'Probe Pos','Stage Pos' ,'QPD','Channel 8', 'Pos Error'};
+handles.posid = [1, 2, 5]; %index of the signals which are position measurements
 % Figure numbers allocated to 'main-figures' for various signals
-handles.mainfigids =      [   1,          2,          3,         4];
-handles.psdfigids =       [  10,         20,         30,        40];
+handles.mainfigids =      [   1,          2,          3,         4,     5];
+handles.psdfigids =       [  10,         20,         30,        40,     50];
 handles.dvsffigids =  handles.psdfigids + 5;      % accumulated displacement 
 handles.msdfigids = 70;
 %  ....add to this list as more types of plots are supported
@@ -149,6 +149,7 @@ if (get(hObject,'UserData') == 0),  set(hObject,'UserData',handles.default_path)
 set(hObject,'UserData',p); %memorize the last browsing path
 prompt_user('Wait...Loading selected files',handles);
 flags.keepuct = 0; flags.keepoffset = 0; flags.askforinput = 0;flags.inmicrons = 1;
+flags.filterstage = 1; % Lowpass Filter stage-sensed values with 600Hz cutoff
 flags.matoutput = 1; %request output fields in the [time vals] matrix form.
 nloaded = 0;
 for(c = 1:length(f))
@@ -186,7 +187,8 @@ for(c = 1:length(f))
         try
             if findstr(f{c},'.vrpn.mat')
                 % load only those fields which are pertinent to the selected experiment type
-                g.data{1,1} = load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
+                load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
+                g.data{1,1} = ans.data;
                 % fullfile usage is handy and protects code against platform variations
                 g.magdata{1,1} = {}; %start out with empty magnet data
                 g.fname{1,1} = f{c}; %file name
@@ -196,7 +198,11 @@ for(c = 1:length(f))
                 if(isempty(NoTagInd) | NoTagInd < 1), NoTagInd = 1; end
                 g.tag{1,1} = ['NoTag',num2str(NoTagInd)]; %tag
                 set(handles.button_tag,'UserData',NoTagInd+1);
-                g.metadata{1,1} = 'NoMetaData'; %user specified metadata                
+                if ~isfield(ans,'metadata')
+                    g.metadata{1,1} = 'NoMetaData'; %user specified metadata                
+                else
+                    g.metadata = ans.metadata;
+                end
                 for k = 1:length(handles.signames.intr)
                     if isfield(g.data{1},handles.signames.intr{k})
                         % calculate # of columns in the current signal
@@ -209,15 +215,15 @@ for(c = 1:length(f))
                 end
                 g.exptype{1,1} = curexptype;
             elseif findstr(f{c},'.edited.mat')
-                load(fullfile(p,f{c}));
-                g.data{1,1} = d.data;
-                g.metadata{1,1} = d.metadata;
-                g.tag{1,1} = d.tag;
-                g.fname{1,1} = d.fname;
-                g.path{1,1} = d.path;
-                g.magdata{1,1} = d.magdata;
-                g.drift{1,1} =d.drift;
-                g.exptype{1,1} =d.exptype;                    
+                load_laser_tracking(fullfile(p,f{c}));
+                g.data{1,1} = ans.data;
+                g.metadata{1,1} = ans.metadata;
+                g.tag{1,1} = ans.tag;
+                g.fname{1,1} = ans.fname;
+                g.path{1,1} = ans.path;
+                g.magdata{1,1} = ans.magdata;
+                g.drift{1,1} = ans.drift;
+                g.exptype{1,1} = ans.exptype;                    
             else
                 error('Unrecognied file format, only know about .vrpn.mat and .edited.mat formats');
             end
@@ -671,15 +677,7 @@ dbstop if error
 
 sigid = get(handles.menu_signal,'UserData');
 signame = handles.signames.intr{sigid};
-if any(sigid == handles.posid)
-    % R X Y Z enabled?
-    cols = get(handles.list_dims,'value');
-    strs = get(handles.list_dims,'String');
-else %non-positional sigal, so process for all columns
-    cols = 1:size(g.data.(signame),2)-1; 
-        % first column is always timestamp
-    for k = 1:size(cols), strs{k} = num2str(k); end
-end
+
 colrs = 'brkgym';
 xlims = [-Inf, Inf];
 % determine the ids of the files  to be processed
@@ -698,7 +696,16 @@ else
         ids = get(handles.menu_files,'value');
     end
 end
-
+% Now determine the columns/dimensions of the signal to be processed
+if any(sigid == handles.posid)
+    % which of the R X Y Z are selected?
+    cols = get(handles.list_dims,'value');
+    strs = get(handles.list_dims,'String');
+else %non-positional sigal, so process for all columns
+    cols = 1:size(g.data{ids(1)}.(signame),2)-1; 
+        % first column is always timestamp
+    for k = 1:length(cols), strs{k} = num2str(k); end
+end
 % First setup figures for msd and psd computations if we should. Then fill
 % in the plots for each file one by one.
 % Setup MSD figure
@@ -885,9 +892,9 @@ if isequal(filename,0)|isequal(pathname,0)
     prompt_user('User aborted saving');
 else
     for cf = 1:length(handles.gfields) %copy all fields for that file id
-        d.(handles.gfields{cf}) = g.(handles.gfields{cf}){1,fid};
+        edited.(handles.gfields{cf}) = g.(handles.gfields{cf}){1,fid};
     end
-    save(fullfile(pathname,filename),'d');
+    save(fullfile(pathname,filename),'edited');
 end
 %%%$$$$$$$$$$$$$$$$  NON-CALLBACK ROUTINES     $$$$$$$$$$$$$$$$$$$$$$$$
 %-----------------------------------------------------------------------
@@ -1055,7 +1062,7 @@ plott = t(1:10:end);
 % figure(handles.specgram); 
 % specgram(playsig,512,handles.srate); colormap gray;
 
-Nbits = 16; %# of bits that P'tracker sound player seems to be using
+Nbits = 16; % Number of bits that P'tracker sound player seems to be using
 % set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
     
 N_sec = floor(t(end)); % Number to 1sec slots
