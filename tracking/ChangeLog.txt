@@ -1,3 +1,9 @@
+2006-04-11  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m: 
+	- Loads files by filtering out stage noise.
+	- Fixed a bug in handling QPD values
+	- handles files saving and loading correctly
+
 2006-04-07  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m: Fixed a bug in removing time offset, when offset was zero. Corrected stagezReport to stageReport.
 
