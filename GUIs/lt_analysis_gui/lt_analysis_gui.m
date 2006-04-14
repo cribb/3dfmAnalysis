@@ -394,10 +394,15 @@ fileid = get(handles.menu_files,'Value');
 sig = g.data{fileid}.(signame);
 M = size(sig,2);
 [selec(:,1),selec(:,2:M)] = clipper(sig(:,1),sig(:,2:M),t(1),t(2));
-for c = 2:M
+for c = 2:M % repeat for all columns
     fit = polyfit(selec(:,1),selec(:,c),1);
     % First Row = Slope, 2nd Row = offset;
-    g.drift{fileid}.(signame)(:,c-1) = fit;
+    % since we need only the slope and not offset, we can set the offset to
+    % zero.
+    % If we don't set the offset to zero, the code that uses this drift
+    % (polyval) will have to add the offset manually after subtracting
+    % drift.
+    g.drift{fileid}.(signame)(:,c-1) = [fit(1), 0];
 end
 
 %-------------------------------------------------------------------------
