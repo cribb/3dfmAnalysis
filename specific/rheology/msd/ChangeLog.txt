@@ -1,3 +1,9 @@
+2006-04-13  Kalpit Desai <kvdesai@email.unc.edu>
+	* laser_msd.m:
+	- Fixed a typo, so now doesn't crash when no file argument is supplied
+	- Corrected the way data is loaded, compatible  to load_laser_tracking.
+	- Corrected the function signature in the documentations
+
 2006-04-04  Jeremy Cribb <jcribb@email.unc.edu>
 	* laser_msd.m: patch so that 'edited.mat' files from lt_analysis_GUI can be read.
 

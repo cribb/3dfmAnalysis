@@ -1,13 +1,13 @@
 function d = laser_msd(files, window, dim)
 % 3DFM function  
 % Rheology 
-% last modified 01/21/06 (jcribb)
+% last modified 04/13/06 (kvdesai)
 %  
 % This function computes the mean-square displacements (via 
-% the Stokes-Einstein relation) for an aggregate number of beads.
+% the Stokes-Einstein relation) for an aggregate number of beads tracked by laser.
 %  
 %  [d] = laser_msd;
-%  [d] = laser_msd(files, calib_um, window, dim);  
+%  [d] = laser_msd(files, window, dim);  
 %   
 %  where "files" is the filename containing video tracking data (wildcards ok) 
 %        "window" is a vector containing window sizes of tau when computing MSD. 
@@ -37,25 +37,26 @@ Y = 3;
 Z = 4;
 
 % for every bead (i.e. every file)
-files = dir(files);
+files = dir('*.mat');
 filemax = length(files);
-
+dbstop if error
 for fid = 1 : filemax
     filename = files(fid).name;
 % 	v = load_laser_tracking(filename, 'b', flags);    
 %   b = [v.beadpos.time v.beadpos.x v.beadpos.y v.beadpos.z];    
 
-    d = load(filename);
-    b = d.d.data.beadpos;
-    drift_vector = d.d.drift.beadpos;
-    drift_est_x = polyval(drift_vector(:,1), b(:,1));
-    drift_est_y = polyval(drift_vector(:,2), b(:,1));
-    drift_est_z = polyval(drift_vector(:,3), b(:,1));
+    d = load_laser_tracking(filename);
+    b = d.data.beadpos;
+    if isfield(d,'drift')
+        drift_vector = d.drift.beadpos;
+        drift_est_x = polyval(drift_vector(:,1), b(:,1));
+        drift_est_y = polyval(drift_vector(:,2), b(:,1));
+        drift_est_z = polyval(drift_vector(:,3), b(:,1));
 
-    b(:,X) = b(:,X) - drift_est_x;
-    b(:,Y) = b(:,Y) - drift_est_y;
-    b(:,Z) = b(:,Z) - drift_est_z;
-
+        b(:,X) = b(:,X) - drift_est_x;
+        b(:,Y) = b(:,Y) - drift_est_y;
+        b(:,Z) = b(:,Z) - drift_est_z;
+    end
     b(:,2:end) = b(:,2:end) * 1e-6;
 
     % for every window size (or tau)
