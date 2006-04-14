@@ -190,7 +190,7 @@ for(c = 1:length(f))
                 load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
                 g.data{1,1} = ans.data;
                 % fullfile usage is handy and protects code against platform variations
-                g.magdata{1,1} = {}; %start out with empty magnet data
+                g.magdata{1,1} = {0}; %start out with empty magnet data
                 g.fname{1,1} = f{c}; %file name
                 g.path{1,1} = p; %file path
                 % Now add the default tag
@@ -283,7 +283,7 @@ global g
 %        contents{get(hObject,'Value')} returns selected item from menu_files
 % set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
 updatesignalmenu(handles);
-updatemainfig(handles);
+% updatemainfig(handles);
 % set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 
 % --- Executes on button press in button_tag.
@@ -886,6 +886,7 @@ function button_export_Callback(hObject, eventdata, handles)
 % --- Executes on button press in button_save.
 function button_save_Callback(hObject, eventdata, handles)
 global g
+dbstop if error
 fid = get(handles.menu_files,'value');
 [filename, pathname] = uiputfile([g.fname{1,fid}(1:end-9),'.edited.mat'], 'Save Currently active file as');
 if isequal(filename,0)|isequal(pathname,0)
@@ -896,6 +897,7 @@ else
     end
     save(fullfile(pathname,filename),'edited');
 end
+dbclear if error
 %%%$$$$$$$$$$$$$$$$  NON-CALLBACK ROUTINES     $$$$$$$$$$$$$$$$$$$$$$$$
 %-----------------------------------------------------------------------
 function updateboxresults(handles,hbox)
