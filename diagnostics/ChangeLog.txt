@@ -1,3 +1,6 @@
+2006-04-19	Kalpit Desai <kvdesai@email.unc.edu>
+	* teststreaks.m: Removed the code that asked to save the data. It wasn't being used ever, and was annoying. Fixed documentation.
+
 2005-10-03	Kalpit Desai <kvdesai@email.unc.edu>
 	* teststreaks.m: Fixed old comments.
 2005-10-03	Kalpit Desai <kvdesai@email.unc.edu>
