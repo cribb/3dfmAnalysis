@@ -1,5 +1,9 @@
 2006-04-21 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:
+	- Turned off filtering of stage. Untill this option is made accessible through GUI, filtering would have to be done manually. Automatic filtering seems to be a bad idea when tracking is lost and the originial file contains uneven time-stamps for a small span.
+
+2006-04-21 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m:
 	- Sets and supplies correct flags to load new or edited files. Comaptible with load_laser_tracking 02.01
 2006-04-14 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:
