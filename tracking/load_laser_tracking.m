@@ -1,6 +1,6 @@
 function out = load_laser_tracking(file, fields, flags);
 % 3DFM function
-% Last modified: 12/21/05 -kvdesai
+% Last modified: 04/21/06 -kvdesai
 % Created: 10/12/05 - kvdesai
 % 
 % This function is supposed to replace the load_vrpn_tracking function. It performs 
@@ -68,49 +68,68 @@ function out = load_laser_tracking(file, fields, flags);
 % 'data' is a structure containing the fields that were requested.
 %         The field names are exactly same as those given by load_vrpn_tracking.
 %         Name of the fields in the 'data' structure:
-%             .beadpos
-%             .stageCom
-%             .stageReport
-%             .posError
-%             .qpd
-%             .laser
-%             .gains
-%             .Jacobian
-%             .info
-%     
+%             .beadpos = bead position in specimen coordinate frame
+%             .stageCom = stage drive signal
+%             .stageReport = stage sensed positions
+%             .posError = position of the beam relative to beam
+%             .qpd = qpd signals (volts)
+%             .laser = laser intensity or whatever was plugged into ADC Ch8%     
+%             .gains = PID controller gains
+%             .QtoPmap = The mapping from QPD signals to XYZ positions
+%             .info = metadata
+%                   .flags = flags that were used 
+%                   .orig = metadata added if input is .tracking.vrpn.mat
+%                           file.                                   
+%                   .orig.vrpnLogToMatlabVersion
+%                        .LaserTrackerVersion
+%                        .vrpnRawFileName = when file was creatd by laser
+%                                           tracker
+%                        .perturbationProperties
+%                        .matOutputFileName = when file was converted to
+%                                           .mat
+%                        .xyzunits = position units for the original data 
+%                                       microns ('u') or meters('m')
+%                        .uct_offset= UCT offset (seconds) for the file
+%                        .beadpos_offset = offset in the beadposition
 % NOTES: The elder brother of this function 'load_vrpn_tracking' may get
 % obsolete at some point. It is encouraged to use this function instead.
 global dd  % make the original dataset global to avert multiple copies
-global ceglqs % the cell array containing names of the fields in original .mat file
 
-%  the cell array containing names of some of the fields in original .mat file
-cegjlqs = {'stageCommandSecUsecZeroXYZ', ... 
+%  the cell array containing names of the fields in original vrpn.mat file
+bcegjlqs.in = {'','stageCommandSecUsecZeroXYZ', ... 
           'posErrorSecUsecXYZ', ...
           'gainsSecUsecPxyzIxyzDxyz', ... 
           'JacDataSecUsecQPDsStagesensors', ...
           'laserIntensitySecUsecVal', ...
           'QPDsSecUsecVals', ...
           'stageSenseSecUsecXYZsense'};
+% the cell array containing names of the fields in output file
+bcegjlqs.out = {'beadpos', ... 
+          'stageCom', ...
+          'posError', ...
+          'gains', ... 
+          'QtoPmap', ...
+          'laser', ...
+          'qpd', ...
+          'stageReport'};
+fmaster = 'bcegjlqs'; % the string containg the name of the structure that 
+                    % contains the order of the input/output field names.
+                    % MUST BE SAME as the name of the structure above.
 THIS_IS_POS = 1;          
 % handle the argument list
-if (nargin < 3 | isempty(flags))
-    flags.inmicrons = 1;         
-    flags.keepuct = 1;
-    flags.askforinput = 0;
-    flags.keepoffset = 0;
-    flags.matoutput = 0;
-    flags.filterstage = 0;
-else
-    % fill in the missing fields
+if (nargin < 3) % no flags are supplied
+    flags = []; % so that we don't have to copy the defaulting code for flags
+end
+    % set the missing flags to default values
     if (~isfield(flags,'inmicrons')); flags.inmicrons = 1; end;
     if (~isfield(flags,'keepuct')); flags.keepuct = 1; end;
     if (~isfield(flags,'askforinput')); flags.askforinput = 0; end;
     if (~isfield(flags,'keepoffset')); flags.keepoffset = 0; end;
     if (~isfield(flags,'matoutput')); flags.matoutput = 0; end;
     if (~isfield(flags,'filterstage')); flags.filterstage = 0; end;
-end
 
-if (nargin < 2 | isempty(fields));  fields = 'a';       end;
+if (nargin < 2 | isempty(fields));  fields = 'a';       end; % all fields by default
+
 
 %if requested to provide all the fields then make the field vector contain all the characters
 if strfind(fields,'a')
@@ -118,7 +137,7 @@ if strfind(fields,'a')
 end
 
 % Take care of all version records
-version_string = '02.00';
+version_string = '02.01';
 LTver = 'NotAvailable';
 V2Mver = 'NotAvailable';
 d.info.orig.matOutputFileName = 'NotAvailable';
@@ -149,10 +168,115 @@ if(ischar(file)) % file contains the name of the file as a string
     elseif findstr(file,'.edited.mat')
         % file is saved by lt_analysis_gui tool
         load(file); % saved as a structure named 'edited'
+        %-----------------------
+        % Check that all requested fields are present in edited.mat file.
+        new_fields = fields;
+        for cf = 1:length(fields)
+            ihere = findstr(fmaster,fields(cf)); %index of this field
+            if ~isfield(edited.data, bcegjlqs.out{ihere})
+                disp([' WARNING: Requested field, ',bcegjlqs.out{ihere},' is not ', ...
+                    'present in the input .edited.mat file. Can not load.'])
+                disp('To fix, load the original .vrpn.mat file with correct fields');
+                new_fields = setdiff(new_fields,fields(cf));
+            end
+        end
+        fields = new_fields; clear new_fields;       
+        % Now compare the flags that were used to load this file last time
+        % with flags that are supposed to be used to load the file this
+        % time, and handle offsets + scales accordingly.
+        last_flags = edited.data.info.flags;
+        %-----------------------
+        % First, handle the offset in bead position if requested
+        % This has to be done in the same units in which the information
+        % about the offset is stored. SO we have to handle this before
+        % changing units of the position.
+        if ~isequal(last_flags.keepoffset, flags.keepoffset) && findstr(fields,'b')
+            if flags.keepoffset% input: no offset, output: need offset
+                posadjust = -edited.data.info.beadpos_offset;
+            else % input: has offset, output: need zero offset
+                posadjust = edited.data.info.beadpos_offset;
+            end
+            edited.data.(bcegjlqs.out{1}) = ...
+                removePosOffset(edited.data.(bcegjlqs.out{1}),posadjust,last_flags.matoutput);
+        end
+        %-----------------------
+        % Second, handle the Time offset
+        if ~isequal(last_flags.keepuct, flags.keepuct)
+            if flags.keepuct ==1 % input: time relative to start of experiment
+                tadjust = -edited.data.info.orig.uct_offset; %add the offset
+            else %input: time relative to 1st Jan 1970 midnight.
+                tadjust = edited.data.info.orig.uct_offset; %subtract offset
+            end
+            for cf = 1:length(fields)
+                ihere = findstr(fmaster,fields(cf)); %index of this field
+                if ihere == 5, continue; end; %don't dare to adjust jacobian data
+                if last_flags.matoutput
+                    edited.data.(bcegjlqs.out{ihere})(:,1) = ...
+                        removeToffset(edited.data.(bcegjlqs.out{ihere})(:,1),tadjust);
+                else
+                    edited.data.(bcegjlqs.out{ihere}).t = ...
+                        removeToffset(edited.data.(bcegjlqs.out{ihere}).t,tadjust);
+                end                
+            end       
+        end
+        %-----------------------
+        % Third, handle the displacement units: meters or microns?
+        if ~isequal(last_flags.inmicrons, flags.inmicrons)
+            if flags.inmicrons == 0               
+                %output requested in meters, input loaded in microns, 
+               fmult = 1E-6;
+            else%output requested in microns, input loaded in meters,
+               fmult = 1E6;
+            end
+            for cf = 1:length(fields)
+                switch fields(cf)
+                    case {'b','e','s'} % the position signals
+                       ihere = findstr(fmaster,fields(cf)); %index of this field
+                       edited.data.(bcegjlqs.out{ihere}) = ...
+                           scaleme(edited.data.(bcegjlqs.out{ihere}),fmult,last_flags.matoutput);                    
+                    case 'j' % Data used to fit the QtoP map
+                        if isfield(edited.data.(bcegjlqs.out{6}),'FitData')
+                            edited.data.(bcegjlqs.out{6}).stage = edited.data.(bcegjlqs.out{6}).stage*fmult;
+                        end % ignore if we have QtoP map but no fitting data.                        
+                    otherwise % ignore all other fields which are not positions                        
+                end
+            end
+        end
+        %-----------------------
+        % Fourth, if the user has requested to change the format of the
+        % output from structure to matrix, (or from matrix to structure),
+        % tell that it is impossible to do because we don't know the
+        % field-names in the structure format and how they are ordered in the corresponding
+        % matrix format.
+        if ~isequal(last_flags.matoutput, flags.matoutput)           
+            if flags.matoutput %input: structure, output: matrix
+                disp('WARNING: requested to convert output format from structure to matrix.');
+                disp('Do not know how to. Output will be given in the structure form only.');
+                disp('To fix, re-load and save original .vrpn.mat file with correct flags');                            
+            else %input: matrix, output: structure
+                disp('WARNING: requested to convert output format from matrix to structure.');
+                disp('Do not know how to. Output will be given in the matrix form only.');
+                disp('To fix, re-load and save original .vrpn.mat file with correct flags');
+            end
+            flags.matoutput = last_flags.matoutput;
+        end
+        %-----------------------
+        % Fifth, if the user has requested to change the filterstage flag then
+        % tell that it is impossible to do because we can't un-filter once
+        % filtered; and we don't know the component of stage position in
+        % bead position.
+        if ~isequal(last_flags.filterstage, flags.filterstage)
+            disp('WARNING: requested to change the ''filter-stgae'' flag.');
+            disp('Not supported at this point.');
+            disp('To fix, re-load and save original .vrpn.mat file with correct flags');
+            flags.filterstage = last_flags.filterstage;
+        end
+        %-----------------------
+        edited.data.info.flags = flags;
         out = edited;
-        return;
+        return;        
     else
-        error('Unrecognied file format, only know about .vrpn.mat and .edited.mat formats');
+        error('Unrecognized file format, only know about .vrpn.mat and .edited.mat formats');
     end
 else % 'file' is a variable present in the workspace
     dd.tracking = file;
@@ -182,18 +306,16 @@ if flags.askforinput
 end
 
 % handle the time-offset
-% determine who started logging earliest: JacData or QPD?
-if(isfield(dd.tracking,cegjlqs{4}))
-    if(removeToffset(dd.tracking.(cegjlqs{4})(1,1:2), dd.tracking.(cegjlqs{6})(1,1:2)) < 0)
-        d.info.orig.uct_offset = dd.tracking.(cegjlqs{4})(1,1:2); %JacData started earlier
+% determine who was first to start logging: JacData or QPD?
+if(isfield(dd.tracking,bcegjlqs.in{1+4}))
+    if(removeToffset(dd.tracking.(bcegjlqs.in{1+4})(1,1:2), dd.tracking.(bcegjlqs.in{1+6})(1,1:2)) < 0)
+        d.info.orig.uct_offset = dd.tracking.(bcegjlqs.in{1+4})(1,1:2); %JacData started earlier
     else
-        d.info.orig.uct_offset = dd.tracking.(cegjlqs{6})(1,1:2);%QPD started earlier
+        d.info.orig.uct_offset = dd.tracking.(bcegjlqs.in{1+6})(1,1:2);%QPD started earlier
     end
 else
-    d.info.orig.uct_offset = dd.tracking.(cegjlqs{6})(1,1:2);
+    d.info.orig.uct_offset = dd.tracking.(bcegjlqs.in{1+6})(1,1:2);
 end
-
-d.info.orig.filterstage = flags.filterstage; % was stage filtered?
 
 if(flags.keepuct)
     Toffset = [0 0];
@@ -201,89 +323,90 @@ else
     Toffset = [d.info.orig.uct_offset];
 end
 
-% Now parse in the fields 
+% Now parse in the fields
 
 if(strfind(fields,'c')) % handle stage command logs
     strs = {'','x','y','z'}; %ignore the first column since it is index of tracker in vrpn
-    d.stageCom = extractfield(cegjlqs{1},flags,strs,Toffset,THIS_IS_POS);
+    d.(bcegjlqs.out{2}) = extractfield(bcegjlqs.in{1+1},flags,strs,Toffset,THIS_IS_POS);
 end
-
 if(strfind(fields,'s')) % handle stage sensed positions
-    d.stageReport = extractfield(cegjlqs{7},flags,{'x','y','z'},Toffset,THIS_IS_POS);
+    d.(bcegjlqs.out{8}) = extractfield(bcegjlqs.in{1+7},flags,{'x','y','z'},Toffset,THIS_IS_POS);
 end
-
 if(strfind(fields,'q')) % handle qpd signals
-    d.qpd = extractfield(cegjlqs{6},flags,{'q1','q2','q3','q4'},Toffset,~THIS_IS_POS);
+    d.(bcegjlqs.out{7}) = extractfield(bcegjlqs.in{1+6},flags,{'q1','q2','q3','q4'},Toffset,~THIS_IS_POS);
 end
-
-if(strfind(fields,'l')) % handle laser intensity
-    d.laser = extractfield(cegjlqs{5},flags,{'intensity'},Toffset,~THIS_IS_POS);
+if(strfind(fields,'l')) % handle laser intensity OR ADC channel 8 signal
+    d.(bcegjlqs.out{6}) = extractfield(bcegjlqs.in{1+5},flags,{'intensity'},Toffset,~THIS_IS_POS);
 end
 
 if(strfind(fields,'e')) % handle position errors
-    d.posError = extractfield(cegjlqs{2},flags,{'x','y','z'},Toffset,THIS_IS_POS);
+    d.(bcegjlqs.out{3}) = extractfield(bcegjlqs.in{1+2},flags,{'x','y','z'},Toffset,THIS_IS_POS);
 end
 
 if(strfind(fields,'g')) % handle PID controller gains
-    d.gains = extractfield(cegjlqs{3},flags,{'Px','Py','Pz','Ix','Iy','Iz','Dx','Dy','Dz'},Toffset,~THIS_IS_POS);
+    d.(bcegjlqs.out{4}) = extractfield(bcegjlqs.in{1+3},flags,{'Px','Py','Pz','Ix','Iy','Iz','Dx','Dy','Dz'},Toffset,~THIS_IS_POS);
 end
 
-if(strfind(fields,'j'))  % handle Jacobian and JacobianData
+if(strfind(fields,'j'))  % handle Jacobian and JacobianData. This field is renamed to QtoPmap.
     names = fieldnames(dd.tracking);
     for c = 1:length(names)
 %         'JacDataSecUsecQPDsStagesensors'
         if findstr(names{c},'JacData') % if this is JacobianData, then parse it
-            d.Jacobian.FitData.stage = dd.tracking.(names{c})(:,7:9);
-            d.Jacobian.FitData.qpd = dd.tracking.(names{c})(:,3:6);
+            d.(bcegjlqs.out{5}).FitData.stage = dd.tracking.(names{c})(:,7:9);
+            d.(bcegjlqs.out{5}).FitData.qpd = dd.tracking.(names{c})(:,3:6);
             if flags.keepuct
-                d.Jacobian.FitData.time = removeToffset(dd.tracking.(names{c})(:,1:2),[0 0]);
+                d.(bcegjlqs.out{5}).FitData.time = removeToffset(dd.tracking.(names{c})(:,1:2),[0 0]);
             else
-                d.Jacobian.FitData.time = removeToffset(dd.tracking.(names{c})(:,1:2),d.info.orig.uct_offset);
+                d.(bcegjlqs.out{5}).FitData.time = removeToffset(dd.tracking.(names{c})(:,1:2),d.info.orig.uct_offset);
             end
             dd.tracking.(names{c}) = [];%free up memory as we go
         elseif findstr(names{c},'Jac') % if the field name contains the string 'jac', take it as is.
-            d.Jacobian.(names{c}) = dd.tracking.(names{c});
+            d.(bcegjlqs.out{5}).(names{c}) = dd.tracking.(names{c});
             dd.tracking.(names{c}) = [];%free up memory as we go
         end
     end
 end
-
 % compute the position of the bead at QPD bandwidth if bead position is requested
-if(strfind(fields,'b'))
-    if ~isfield(d,'stageReport') %is the stagesensed position parsed?
-        ss = extractfield(cegjlqs{7},flags,{'x','y','z'},Toffset,THIS_IS_POS);
+if(strfind(fields,'b')) 
+    if ~isfield(d,bcegjlqs.out{8}) %is the stagesensed position parsed?
+        ss = extractfield(bcegjlqs.in{1+7},flags,{'x','y','z'},Toffset,THIS_IS_POS);
     else
-        ss = d.stageReport;
+        ss = d.(bcegjlqs.out{8});
     end
-    if ~isfield(d,'posError') %is the position error parsed?
-        pe = extractfield(cegjlqs{2},flags,{'x','y','z'},Toffset,THIS_IS_POS);
+    if ~isfield(d,bcegjlqs.out{3}) %is the position error parsed?
+        pe = extractfield(bcegjlqs.in{1+2},flags,{'x','y','z'},Toffset,THIS_IS_POS);
     else
-        pe = d.posError;
+        pe = d.(bcegjlqs.out{3});
     end
-    
     if flags.matoutput
-        d.beadpos(:,1) = ss(:,1);
+        d.(bcegjlqs.out{1})(:,1) = ss(:,1);
         % In the laer coordinate frame, feedback moves the stage in the
         % opposite direction to compensate for the motion of the bead.    
-        d.beadpos(:,2:4) = -ss(:,2:4) + pe(:,2:4);
+        d.(bcegjlqs.out{1})(:,2:4) = -ss(:,2:4) + pe(:,2:4);
         if ~flags.keepoffset
-            d.beadpos(:,2:4) = d.beadpos(:,2:4) - repmat(d.beadpos(1,2:4),size(d.beadpos,1),1);
+            d.(bcegjlqs.out{1})(:,2:4) = d.(bcegjlqs.out{1})(:,2:4) - repmat(d.(bcegjlqs.out{1})(1,2:4),size(d.(bcegjlqs.out{1}),1),1);
         end
+        d.info.orig.beadpos_offset(1,1:3) = d.(bcegjlqs.out{1})(1,2:4);
     else
-        d.beadpos.time = ss.time;
+        d.(bcegjlqs.out{1}).time = ss.time;
         % In the specimen coordinate frame, feedback moves the stage in the
         % opposite direction to the bead.
-        d.beadpos.x = -ss.x(1:end) + pe.x(1:end);
-        d.beadpos.y = -ss.y(1:end) + pe.y(1:end);
-        d.beadpos.z = -ss.z(1:end) + pe.z(1:end);        
+        d.(bcegjlqs.out{1}).x = -ss.x(1:end) + pe.x(1:end);
+        d.(bcegjlqs.out{1}).y = -ss.y(1:end) + pe.y(1:end);
+        d.(bcegjlqs.out{1}).z = -ss.z(1:end) + pe.z(1:end);        
         if ~flags.keepoffset %if we don't want offset in bead positions.
-            d.beadpos.x = d.beadpos.x - d.beadpos.x(1,1);
-            d.beadpos.y = d.beadpos.y - d.beadpos.y(1,1);
-            d.beadpos.z = d.beadpos.z - d.beadpos.z(1,1);
+            d.(bcegjlqs.out{1}).x = d.(bcegjlqs.out{1}).x - d.(bcegjlqs.out{1}).x(1,1);
+            d.(bcegjlqs.out{1}).y = d.(bcegjlqs.out{1}).y - d.(bcegjlqs.out{1}).y(1,1);
+            d.(bcegjlqs.out{1}).z = d.(bcegjlqs.out{1}).z - d.(bcegjlqs.out{1}).z(1,1);
         end
+        d.info.orig.beadpos_offset.x = d.(bcegjlqs.out{1}).x(1);
+        d.info.orig.beadpos_offset.y = d.(bcegjlqs.out{1}).y(1);
+        d.info.orig.beadpos_offset.z = d.(bcegjlqs.out{1}).z(1);
     end
+
     clear ss pe %clear memory as we go
 end
+d.info.flags = flags; %pass on flags that were used for this session
 out.data = d;
 
 %-------------------------------------------------------------------------
@@ -297,6 +420,33 @@ if ~isempty(inegs) % would be empty when toffset is zero
     tout_sec(inegs,1) = tout_sec(inegs,1) - 1;
 end
 tout = tout_sec + tout_usec*1e-6;
+%-------------------------------------------------------------------------
+% handle scaling of displacements when .edited file units are different
+% than requested.
+function posout = scaleme(posin,fmult,matoutput)
+
+if matoutput == 0
+    posout.t = posin.t;
+    posout.x = posin.x*fmult;
+    posout.y = posin.y*fmult;
+    posout.z = posin.z*fmult;
+else
+    posout(:,1) = posin(:,1);
+    posout(:,2:4) = posin(:,2:4)*fmult;
+end
+
+%-------------------------------------------------------------------------
+% handle offsets in the displacements 
+function posout = removePosOffset(posin,posoffset,matoutput)
+if matoutput == 0
+    posout.t = posin.t;
+    posout.x = posin.x - posoffset.x;
+    posout.y = posin.y - posoffset.y;
+    posout.z = posin.z - posoffset.z;
+else
+    posout(:,1) = posin(:,1);
+    posout(:,2:4) = posin(:,2:4)-repmat(posoffset,size(posin,1),1);
+end
 
 %-------------------------------------------------------------------------
 % a common algorithm to extract the requested field. 
@@ -334,11 +484,11 @@ if flags.matoutput
 else
     fout.time = t;
 end
-% if this is stage-sensed positions, and if we are told to filter it
-% then do so
+% if this is stage-sensed positions, and if we are told to filter it then 
+% do so -------------------------------------------------------------
 if strfind(fin_name,'stageSense') & (flags.filterstage == 1)
     if (range(diff(t)) > 1e-6)            
-        disp('load_laser_tracking: User requested to filter stage sensed positions, but time-stamps were unever.');
+        disp('load_laser_tracking: User requested to filter stage sensed positions, but time-stamps were uneven.');
         disp('I will upsample the data at 10000 Hz, filter it, and then resample at the original time stamps');
         srate = 10000;        
         teven = [t(1):1/srate:t(end)]';
@@ -367,8 +517,9 @@ if strfind(fin_name,'stageSense') & (flags.filterstage == 1)
     clear sig filtsig teven
     disp(['stage sensed positions were filtered with ',num2str(MCL_CUTOFF_HZ),' Hz cutoff']);
 end
+% ----------    FINISHED FILETERING STAGE   ------------------------------
 
-% Now readin the values and put them in the appropriate form
+% Now read in the values and put them in the appropriate form
 k = 1; % 1 column occupied by time 
 for c = 1:M
     if isempty(strs{c})

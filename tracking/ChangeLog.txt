@@ -1,6 +1,9 @@
+2006-04-21  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m: 
+	- Now correctly handles change in the flags when edited file is loaded with new flags.
 2006-04-11  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m: 
-	- Loads files by filtering out stage noise.
+	- Option to load files by filtering out stage noise.
 	- Fixed a bug in handling QPD values
 	- handles files saving and loading correctly
 
