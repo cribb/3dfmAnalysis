@@ -149,7 +149,7 @@ if (get(hObject,'UserData') == 0),  set(hObject,'UserData',handles.default_path)
 set(hObject,'UserData',p); %memorize the last browsing path
 prompt_user('Wait...Loading selected files',handles);
 flags.keepuct = 0; flags.keepoffset = 0; flags.askforinput = 0;flags.inmicrons = 1;
-flags.filterstage = 1; % Lowpass Filter stage-sensed values with 600Hz cutoff
+flags.filterstage = 0; % Lowpass Filter stage-sensed values with 600Hz cutoff?
 flags.matoutput = 1; %request output fields in the [time vals] matrix form.
 nloaded = 0;
 for(c = 1:length(f))
@@ -215,7 +215,7 @@ for(c = 1:length(f))
                 end
                 g.exptype{1,1} = curexptype;
             elseif findstr(f{c},'.edited.mat')
-                load_laser_tracking(fullfile(p,f{c}));
+                load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
                 g.data{1,1} = ans.data;
                 g.metadata{1,1} = ans.metadata;
                 g.tag{1,1} = ans.tag;
