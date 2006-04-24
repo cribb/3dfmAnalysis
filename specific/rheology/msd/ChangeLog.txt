@@ -1,4 +1,12 @@
 2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
+	* rod_coord_corr.m: added.  beginning of a function that will analyze the correlation between coordinate axes for a diffusing rod (axial, normal, and radial).
+	* laser_msd.m: 
+			- file loading is now fixed to use latest load_laser_tracking.
+			- computation of mean and error in plot is now fixed.
+	* msd.m: added code to ignore window sizes that do not exist.
+	* ve.m: added code to ignore window sizes that do not exist.
+	
+2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
 	* ve.m: removed redundant legend entries.
 
 2006-04-13  Kalpit Desai <kvdesai@email.unc.edu>

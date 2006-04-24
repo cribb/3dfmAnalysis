@@ -57,6 +57,11 @@ mean_logtau = nanmean(logtau');
 mean_logf = nanmean(log10(f)');
 mean_logw = nanmean(log10(w)');
 
+sample_count = sum(~isnan(logmsd),2);
+
+ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
+ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
+
 loggp  = log10(gp);
 loggpp = log10(gpp);
 mean_loggp = nanmean(loggp');

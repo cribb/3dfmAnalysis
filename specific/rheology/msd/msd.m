@@ -83,9 +83,18 @@ mean_logmsd = nanmean(logmsd');
 
 sample_count = sum(~isnan(logmsd),2);
 
-ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
-ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
+% warning('off', 'MATLAB:divideByZero');
 
+% % remove window sizes that returned no data
+% idx = find(sample_count > 0);
+% logtau = logtau(idx);
+% logmsd = logmsd(idx);
+% sample_count = sample_count(idx);
+
+    ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
+    ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
+
+    
 	figure;
 	errorbar(mean_logtau, mean_logmsd, ste_logmsd);
 	xlabel('log_{10}(\tau) [s]');
@@ -93,12 +102,13 @@ ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
 	grid on;
 	pretty_plot;
 
-dlmwrite('file.msd.txt', [mean_logtau(:), mean_logmsd(:), ste_logtau(:), ste_logmsd(:)], '\t');
+% dlmwrite('file.msd.txt', [mean_logtau(:), mean_logmsd(:), ste_logtau(:), ste_logmsd(:)], '\t');
     
     
 % outputs
 d.tau = tau;
 d.msd = msd;
+d.error_msd = ste_logmsd(:);
 d.n = sample_count; % because beadID's are indexed by 0.
 
 

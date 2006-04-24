@@ -1,4 +1,4 @@
-function d = laser_msd(files, window, dim)
+function d = laser_msd(filemask, window, dim)
 % 3DFM function  
 % Rheology 
 % last modified 04/13/06 (kvdesai)
@@ -23,30 +23,31 @@ function d = laser_msd(files, window, dim)
 
 if (nargin < 3) | isempty(dim)      dim = 3;   end
 if (nargin < 2) | isempty(window)   window = [1 2 5 10 20 50 100 200 500 1000 1001];  end
-% if (nargin < 1) | isempty(file)    file = '*.mat'; end
+if (nargin < 1) | isempty(filemask)    filemask = '*.mat'; end
 
+files = dir(filemask);
 
-% load laser data
-flags.inmicrons = 0;
-flags.keepuct = 0;
-flags.keepoffset = 0;
+% load laser data flags
+flags.inmicrons = 0;  % set output to meters
+flags.keepuct = 0;    % set time to seconds since experiment started 
+flags.keepoffset = 0; 
+flags.matoutput = 1;  % sets bead position data to output as txyz
 
+% mapping columns of bead position data to constants for readibility
 TIME = 1;
 X = 2;
 Y = 3;
 Z = 4;
 
-% for every bead (i.e. every file)
-files = dir('*.mat');
 filemax = length(files);
-dbstop if error
-for fid = 1 : filemax
-    filename = files(fid).name;
-% 	v = load_laser_tracking(filename, 'b', flags);    
-%   b = [v.beadpos.time v.beadpos.x v.beadpos.y v.beadpos.z];    
 
-    d = load_laser_tracking(filename);
+% for every bead (i.e. every file)
+for fid = 1 : filemax
+    
+	d = load_laser_tracking(files(fid).name, 'b', flags);    
+
     b = d.data.beadpos;
+
     if isfield(d,'drift')
         drift_vector = d.drift.beadpos;
         drift_est_x = polyval(drift_vector(:,1), b(:,1));
@@ -57,7 +58,6 @@ for fid = 1 : filemax
         b(:,Y) = b(:,Y) - drift_est_y;
         b(:,Z) = b(:,Z) - drift_est_z;
     end
-    b(:,2:end) = b(:,2:end) * 1e-6;
 
     % for every window size (or tau)
     for w = 1:length(window)
@@ -96,8 +96,11 @@ end
 logtau = log10(tau);
 logmsd = log10(msd);
 
-mean_logtau = nanmean(logtau');
-mean_logmsd = nanmean(logmsd');
+mean_tau = nanmean(tau');
+mean_msd = nanmean(msd');
+
+log_mean_tau = log10(mean_tau);
+log_mean_msd = log10(mean_msd);
 
 sample_count = sum(~isnan(logmsd),2);
 
@@ -105,13 +108,13 @@ ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
 ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
 
 	figure;
-	errorbar(mean_logtau, mean_logmsd, ste_logmsd);
+	errorbar(log_mean_tau, log_mean_msd, ste_logmsd);
 	xlabel('log_{10}(\tau) [s]');
 	ylabel('log_{10}(MSD) [m^2]');
 	grid on;
 	pretty_plot;
 
-% dlmwrite('file.msd.txt', [mean_logtau(:), mean_logmsd(:), ste_logtau(:), ste_logmsd(:)], '\t');
+% dlmwrite('file.msd.txt', [log_mean_tau(:), log_mean_msd(:), ste_logtau(:), ste_logmsd(:)], '\t');
     
     
 % outputs
