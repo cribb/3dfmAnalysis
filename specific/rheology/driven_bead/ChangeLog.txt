@@ -1,4 +1,7 @@
 2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
+	* noise_expt.m:  added.  first pass at video tracking calibration and noise characterization.  Will be prettied up very soon.
+
+2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
 	* shear_wave_MCL_controller.m: removed extra zerodaq call that prematurely exited the expected normal run.
 
 2005-11-11  Jeremy Cribb <jcribb@email.unc.edu>
