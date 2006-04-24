@@ -1,3 +1,9 @@
+2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_newt_fluid.m: added.  simulates Newtonian fluid random walk in any dimension.
+	* sim_newt_fluid_1D.m: removed.
+	* sim_newt_fluid_2D.m: removed.
+	* sim_newt_fluid_3D.m: removed.
+
 2006-03-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* modeling_msd_dep_on_Temp_time.m:  added.  Models the dependence of the mean square displacement of sucrose solutions as a function of sucrose concentration, solution temperature, and observation time.
 
