@@ -1,3 +1,6 @@
+2006-04-24  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m: Fixed a bug in handling drift as well as time-offset when loading an edited.mat file.
+
 2006-04-21  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m: 
 	- Now correctly handles change in the flags when edited file is loaded with new flags.

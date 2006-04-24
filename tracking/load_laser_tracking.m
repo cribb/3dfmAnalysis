@@ -202,20 +202,21 @@ if(ischar(file)) % file contains the name of the file as a string
         %-----------------------
         % Second, handle the Time offset
         if ~isequal(last_flags.keepuct, flags.keepuct)
-            if flags.keepuct ==1 % input: time relative to start of experiment
-                tadjust = -edited.data.info.orig.uct_offset; %add the offset
+            twocoloffset = edited.data.info.orig.uct_offset;
+            if flags.keepuct ==1 % input: time relative to start of experiment                
+                tadjust = -(twocoloffset(1) + twocoloffset(2)*1E-6); %add the offset
             else %input: time relative to 1st Jan 1970 midnight.
-                tadjust = edited.data.info.orig.uct_offset; %subtract offset
+                tadjust = -(twocoloffset(1) + twocoloffset(2)*1E-6); %subtract offset
             end
             for cf = 1:length(fields)
                 ihere = findstr(fmaster,fields(cf)); %index of this field
                 if ihere == 5, continue; end; %don't dare to adjust jacobian data
                 if last_flags.matoutput
                     edited.data.(bcegjlqs.out{ihere})(:,1) = ...
-                        removeToffset(edited.data.(bcegjlqs.out{ihere})(:,1),tadjust);
+                        edited.data.(bcegjlqs.out{ihere})(:,1) - tadjust;
                 else
                     edited.data.(bcegjlqs.out{ihere}).t = ...
-                        removeToffset(edited.data.(bcegjlqs.out{ihere}).t,tadjust);
+                        edited.data.(bcegjlqs.out{ihere}).t - tadjust;
                 end                
             end       
         end
@@ -233,7 +234,8 @@ if(ischar(file)) % file contains the name of the file as a string
                     case {'b','e','s'} % the position signals
                        ihere = findstr(fmaster,fields(cf)); %index of this field
                        edited.data.(bcegjlqs.out{ihere}) = ...
-                           scaleme(edited.data.(bcegjlqs.out{ihere}),fmult,last_flags.matoutput);                    
+                           scaleme(edited.data.(bcegjlqs.out{ihere}),fmult,last_flags.matoutput);
+                       edited.drift.(bcegjlqs.out{ihere}) = edited.drift.(bcegjlqs.out{ihere})*fmult;
                     case 'j' % Data used to fit the QtoP map
                         if isfield(edited.data.(bcegjlqs.out{6}),'FitData')
                             edited.data.(bcegjlqs.out{6}).stage = edited.data.(bcegjlqs.out{6}).stage*fmult;
