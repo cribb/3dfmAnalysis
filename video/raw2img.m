@@ -78,6 +78,10 @@ if (nargin <= 2)
     end_frame = number_of_frames;
 end
 
+if (length(end_frame) == 0)
+    end_frame = number_of_frames;
+end
+
 % check validity of parameters
 if (start_frame < 0) | (start_frame > number_of_frames)
     error('The start_frame parameter is less than zero, or exceeds the number of frames in the RAW stack.');    
