@@ -1,4 +1,7 @@
 2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
+	- ve.m: minor changes to plot linestyle and output structure.
+
+2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
 	* rod_coord_corr.m: added.  beginning of a function that will analyze the correlation between coordinate axes for a diffusing rod (axial, normal, and radial).
 	* laser_msd.m: 
 			- file loading is now fixed to use latest load_laser_tracking.

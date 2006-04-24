@@ -1,4 +1,4 @@
-function d = laser_msd(filemask, window, dim)
+function v = laser_msd(filemask, window, dim)
 % 3DFM function  
 % Rheology 
 % last modified 04/13/06 (kvdesai)
@@ -108,7 +108,7 @@ ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
 ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
 
 	figure;
-	errorbar(log_mean_tau, log_mean_msd, ste_logmsd);
+	errorbar(log_mean_tau, log_mean_msd, ste_logmsd, '.-');
 	xlabel('log_{10}(\tau) [s]');
 	ylabel('log_{10}(MSD) [m^2]');
 	grid on;
@@ -118,9 +118,9 @@ ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
     
     
 % outputs
-d.tau = tau;
-d.msd = msd;
-d.error_msd = ste_logmsd(:);
-d.n = sample_count; % because beadID's are indexed by 0.
+v.tau = tau;
+v.msd = msd;
+v.error_msd = ste_logmsd(:);
+v.n = sample_count; % because beadID's are indexed by 0.
 
 
