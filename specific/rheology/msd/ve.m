@@ -78,7 +78,7 @@ ste_lognpp= nanstd(lognpp') ./ sqrt(N');
     hold off;
     xlabel('log_{10}(\omega) [rad/s]');
 	ylabel('log_{10}(modulus) [Pa]');
-	h = legend('G''(\omega)', '', 'G''''(\omega)', '', 0);
+	h = legend('G''(\omega)', 'G''''(\omega)', 0);
 	grid on;
 	pretty_plot;
 	
@@ -89,7 +89,7 @@ ste_lognpp= nanstd(lognpp') ./ sqrt(N');
     hold off;
 	xlabel('log_{10}(\omega) [rad/s]');
 	ylabel('log_{10}(viscosity) [Pa sec]');
-	legend('\eta''(\omega)', '', '\eta''''(\omega)', '', 0);
+	legend('\eta''(\omega)', '\eta''''(\omega)', 0);
 	grid on;
 	pretty_plot;
 

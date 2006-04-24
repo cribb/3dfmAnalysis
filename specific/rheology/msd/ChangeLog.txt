@@ -1,3 +1,6 @@
+2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
+	* ve.m: removed redundant legend entries.
+
 2006-04-13  Kalpit Desai <kvdesai@email.unc.edu>
 	* laser_msd.m:
 	- Fixed a typo, so now doesn't crash when no file argument is supplied
