@@ -14,8 +14,8 @@ function v = shear_wave_MCL_controller(amplitude, freq, vel, testtype)
 % of coils in the 3dfm pole geometry, the number of DAQ Analog-Out 
 % channels on the DAQ board, the identity of the DAQ board, etc...
 
-DAQid = 'daqtest';
-% DAQid = 'PCI-6733';
+% DAQid = 'daqtest';
+DAQid = 'PCI-6733';
 nDACout = 3;
 DAQ_sampling_rate = 10000;  % [Hz]
 amplitude_oscillation = amplitude;  % microns
@@ -55,9 +55,7 @@ signal = [x y z];
 DACoperator(signal, Nrepeat, DAQid, channels, DAQ_sampling_rate, Vrange);
 
 % pause(end_time+0.5);
-
-zerodaq([5 5 5 0 0 0 0 0]);
-
+% zerodaq([5 5 5 0 0 0 0 0]);
 % daqreset;
 
 v = 0;

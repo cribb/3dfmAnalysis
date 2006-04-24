@@ -1,3 +1,6 @@
+2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
+	* shear_wave_MCL_controller.m: removed extra zerodaq call that prematurely exited the expected normal run.
+
 2005-11-11  Jeremy Cribb <jcribb@email.unc.edu>
 	* shear_wave_MCL_controller.m: added.  extended version of oscillator that does additional testing types- constant velocity thus far.  more waveforms forthcoming....
 
