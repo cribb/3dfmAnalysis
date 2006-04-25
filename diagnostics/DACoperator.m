@@ -97,7 +97,7 @@ if (AOid < 0) | strcmp(board,'daqtest');
     fprintf('\n Voltage Range: [%d %d]', Vrange(1), Vrange(2));
     fprintf('\n Number of repeats: %d', Nrepeat);
     fprintf('\n Writing to output channels: %i', channels);
-    fprintf('\n Signals to send to DAq channels are plotted.');
+    fprintf('\n Signals to send to DAq channels are plotted.\n\n');
     
     return;
 end

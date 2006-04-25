@@ -1,3 +1,6 @@
+2006-04-25  Jeremy Cribb <jcribb@email.unc.edu>
+	* DACoperator.m: added newline to end of daqtest output.
+
 2006-04-19	Kalpit Desai <kvdesai@email.unc.edu>
 	* teststreaks.m: Removed the code that asked to save the data. It wasn't being used ever, and was annoying. Fixed documentation.
 
