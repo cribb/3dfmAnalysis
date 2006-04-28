@@ -1,3 +1,6 @@
+2006-04-28 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: Turned off 'pretty_plot' command for main figure. According to profiler it was taking a long time to execute. Should came back to it and find out why.
+
 2006-04-21 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:
 	- Turned off filtering of stage. Untill this option is made accessible through GUI, filtering would have to be done manually. Automatic filtering seems to be a bad idea when tracking is lost and the originial file contains uneven time-stamps for a small span.

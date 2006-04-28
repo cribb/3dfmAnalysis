@@ -1257,10 +1257,14 @@ axis(hma,'tight');
 if replot_box
     updatebox(handles,hma,0,b);
 end
+
+% Now update the overlaid magnets/channel 8 trace if we are told to
 if isequal(lower(get(handles.check_overlaymag,'Enable')),'on')
     overlaymag(handles,figid);
 end
-pretty_plot;
+% pretty_plot;
+
+% Now plot the 3D trace if we are told to
 if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'Value') == 1)
     plot3dfigure(handles);
 end
@@ -1269,22 +1273,27 @@ dbclear if error
 function overlaymag(varargin)
 global g
 handles = varargin{1};
-fileid = get(handles.menu_files,'value');
 if nargin < 2    
     sigid = get(handles.menu_signal,'UserData');
     figid = handles.mainfigids(sigid);
 else
     figid = varargin{2};
 end
+% Proceed only if the main figure is open, otherwise return
+if ~ishandle(figid)
+    return;
+end
+% Find the handle to the old magnet trace and delete it
 oldmag = findobj(figid,'Type','Line','Tag','Mag');
 delete(oldmag);
 % replot the magnets only if the box is checked
 if get(handles.check_overlaymag,'value')
+    fileid = get(handles.menu_files,'value');
     mags = g.data{fileid}.(handles.signames.intr{4});
     % Now adjust the range so that mags are visible in the current axis
     hma = findobj(figid,'Type','Axes','Tag','');
-    ylims = get(hma,'Ylim');
-    mags(:,2) = mags(:,2) + ylims(1);    
+    ylims = get(hma,'Ylim')
+    mags(:,2) = mags(:,2) + ylims(1) - mags(1,2);    
     
     figure(figid); hold on;
     plot(mags(:,1),mags(:,2),'m','Tag','Mag');%magenta color
@@ -1306,28 +1315,38 @@ if nargin < 2
 else
     sigvals = varargin{2};
 end
+% remove offset 
 sigvals(:,2:4) = sigvals(:,2:4) - repmat(sigvals(1,2:4),size(sigvals,1),1);
+% decimate to 100 Hz so that the 3D trace loads faster
 t = [sigvals(1,1):0.01:sigvals(end,1)]';
 for c = 1:3
     p(:,c) =  interp1(sigvals(:,1),sigvals(:,c+1),t,'nearest');   
 end
+
+% get the id of the main figure
 hmf = get(handles.radio_drawbox,'UserData');
 if isempty(hmf) | hmf == 0
     sigid = get(handles.menu_signal,'UserData');
     hmf = handles.mainfigids(sigid);
     set(handles.radio_drawbox,'UserData',hmf);
 end
+
 inbox = []; prebox = []; postbox = [];
-hbox = findobj(hmf,'Tag','Box');
-if ~isempty(hbox)
-    b = get(hbox,'UserData');
-    prebox = find(t <= b.xlims(1));
-    inbox = find(t < b.xlims(2) & t > b.xlims(1));
-    postbox = find(t >= b.xlims(2));
-else % if there is no box
+% if the main figure does not exist, consider everything outside the box
+if ~ishandle(hmf)
     prebox = 1:size(p,1);
+else
+    hbox = findobj(hmf,'Tag','Box');
+    if ~isempty(hbox)
+        b = get(hbox,'UserData');
+        prebox = find(t <= b.xlims(1));
+        inbox = find(t < b.xlims(2) & t > b.xlims(1));
+        postbox = find(t >= b.xlims(2));
+    else % if there is no box
+        prebox = 1:size(p,1);
+    end
 end
-figure(handles.threeDfig); 
+figure(handles.threeDfig);
 plot3(p(prebox,1),p(prebox,2),p(prebox,3),'k'); hold on;
 plot3(p(inbox,1),p(inbox,2),p(inbox,3),'m'); 
 plot3(p(postbox,1),p(postbox,2),p(postbox,3),'k'); hold off;
@@ -1428,9 +1447,10 @@ checkdimsvalidity(handles);% check if RXYZ and/or 3D is applicable
 
 % --- Executes on button press in button_plottime.
 function button_plottime_Callback(hObject, eventdata, handles)
-
+% profile on
 updatemainfig(handles);
-
+% profile viewer
+% profile off
 % --- Executes on button press in check_msd.
 function check_msd_Callback(hObject, eventdata, handles)
 if get(hObject,'value')
