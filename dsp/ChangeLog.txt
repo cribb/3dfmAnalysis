@@ -1,3 +1,6 @@
+2006-05-05  Kalpit Desai <kvdesai@email.unc.edu>
+	* myspectrogram.m: Added. This function wraps the matlab-inbuilt 'spectrogram' function with parameters that are easy to understand for the user. Analogous to 'mypsd' and 'mytfe'.
+
 2006-04-03  Jeremy Cribb <jcribb@email.unc.edu>
 	* mypsd.m: fixed typo in printed output.
 
