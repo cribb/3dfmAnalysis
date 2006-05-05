@@ -99,7 +99,7 @@ handles.specgram = 90;
 handles.srate = 10000;
 handles.psdwin = 'blackman';
 handles.emptyflag_str = 'Database is empty';
-
+handles.placeholder.magdata = {0};
 % initialize the global structure
 for c = 1:length(handles.gfields)
     g.(handles.gfields{c}) = {};
@@ -158,14 +158,17 @@ for(c = 1:length(f))
     if exist('g') & ~isempty(g.data) & any(strcmp(g.fname,f{c}) == 1)
         isame = find(strcmp(g.fname,f{c}) == 1);
         if (g.exptype{isame} == curexptype)
-            button = questdlg(['The file ',f{c},' is already in the database. Reload it?'],...
+            button = questdlg(['The file ',f{c},' is already in the database.',...
+                'Reloading it will discard any modifications made to it (e.g. cut, metadata etc).',
+                'Continue?'],...
                 'File already loaded','Yes','No','No');            
             if strcmpi(button,'no')
                 doload = 0;
             end            
         else
-            button = questdlg(['The file ',f{c},' is already loaded with different experiment type. Reload it?'],...
-                'File already loaded','Yes','No','No');            
+            button = questdlg(['The file ',f{c},' is already loaded with ',g.exptype{isame}, ' experiment type. ' ...
+                'Should I re-load it with ', curexptype,' experiment type?'],...
+                'File loaded with different experiment type','Yes','No','No');            
             if strcmpi(button,'no')
                 doload = 0;
             end
@@ -181,16 +184,19 @@ for(c = 1:length(f))
                 g.(handles.gfields{cf}) = [ {0}, g.(handles.gfields{cf})];
             end
         end
-        %Make the cell arrays in the form of 1xN, and keep that form as the
-        %standard. Nx1 standardization would work as well, but it seems my matlab
-        %is creating arrays in the form of 1xN by default.
+        % First try to load the file. Loading can fail if there is not
+        % enough memory, or if the file is of wrong format. If the loading
+        % fails, print what the error was.
         try
             if findstr(f{c},'.vrpn.mat')
                 % load only those fields which are pertinent to the selected experiment type
+                %POLICY: Make the cell arrays in the form of 1xN, and keep that form as the
+                %standard. Nx1 standardization would work as well, but it seems my matlab
+                %is creating arrays in the form of 1xN by default.
                 load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
                 g.data{1,1} = ans.data;
                 % fullfile usage is handy and protects code against platform variations
-                g.magdata{1,1} = {0}; %start out with empty magnet data
+                g.magdata{1,1} = handles.placeholder.magdata; %start out with empty magnet data
                 g.fname{1,1} = f{c}; %file name
                 g.path{1,1} = p; %file path
                 % Now add the default tag
@@ -397,11 +403,10 @@ M = size(sig,2);
 for c = 2:M % repeat for all columns
     fit = polyfit(selec(:,1),selec(:,c),1);
     % First Row = Slope, 2nd Row = offset;
-    % since we need only the slope and not offset, we can set the offset to
-    % zero.
-    % If we don't set the offset to zero, the code that uses this drift
-    % (polyval) will have to add the offset manually after subtracting
-    % drift.
+ % since we need only the slope and not offset, we can set the offset to zero.
+ % If we don't set the offset to zero, the code that uses this drift
+ % (polyval) will have to add the offset manually after subtracting
+ % drift.
     g.drift{fileid}.(signame)(:,c-1) = [fit(1), 0];
 end
 
@@ -652,6 +657,21 @@ set(hObject,'UserData',val);%remember the last selection
 
 % --- Executes on button press in button_addfsinfo.
 function button_addfsinfo_Callback(hObject, eventdata, handles)
+global g
+% This routine interactively walks the user through the process of
+% attaching the frequency sweep excitations with the laser tracking data
+
+%First check that the field associated with channel 8 ('laser') was loaded.
+fid = get(handles.menu_files,'value');
+if ~isfield(g.data{fid},handles.signames.intr{4})
+    prompt_user(['The magnet-synchorizer field was not loaded.', ...
+        'Choose ''Discrete Freq Sweep'' as the experiment type and reload the file.']);
+    return;
+end
+[f, p] = uigetfiles('*.mat','Browse and select the appropriate *freqSweep.mat logfile',get(hObject,'UserData'));
+g.magdata{fid} = load(fullfile(p,f));
+prompt_user(['Frequency sweep excitation log was attached to the tracking logfile ',g.fname{fid}]);
+set(handles.check_fresponse,'Enable','On');
 
 % --- Executes on button press in check_fdbox.
 % should we consider box for the frequency domain analysis
@@ -857,7 +877,7 @@ for fi = 1:length(ids) %repeat for all files selected
     %
     %%===========   COMPLETED FREQUENCY RESPONSE COMPUTATION    ===============
     
-end % Finished processing + plotting all files
+end % Finished processing + plotting all files in frequency domain
 % clear the memory of file-ids that were selected last time.
 set(handles.button_plotfreq,'UserData',[]);
 % set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
@@ -1441,9 +1461,14 @@ else
     set(handles.check_overlaymag,'Value',0);
 end
 
+% if the current file has freq sweep excitation data attached, then
+% enable 'frequency response' check box
+if isequal(g.magdata{fileid},handles.placeholder.magdata)
+    set(handles.check_fresponse,'Enable','Off');
+else
+    set(handles.check_fresponse,'Enable','On');
+end
 checkdimsvalidity(handles);% check if RXYZ and/or 3D is applicable
-% updatemainfig(handles,'new');
-
 
 % --- Executes on button press in button_plottime.
 function button_plottime_Callback(hObject, eventdata, handles)

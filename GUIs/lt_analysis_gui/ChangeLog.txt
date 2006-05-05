@@ -1,3 +1,8 @@
+2006-05-03 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m:
+		- Added ability to attach frequency-sweep excitation data with tracker log. 
+		- Made some progress towards processing frequency sweep data, left incomplete.
+	* lt_analysis_gui.fig: Some cosmetic improvements and disambiguation.
 2006-04-28 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: Turned off 'pretty_plot' command for main figure. According to profiler it was taking a long time to execute. Should came back to it and find out why.
 
