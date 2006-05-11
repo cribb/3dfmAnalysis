@@ -1,3 +1,12 @@
+2006-05-11 Kalpit Desai <kvdesai@email.unc.edu>
+	* threePoleFreqSweep.fig: Version 2.2
+	- All coils now share a common slider for amplitude.
+	- Instead of three edit-boxes, a pull-down menu is provided to select the coil configuration
+	- Added a 'synthesize' button to let user synthesize the drive signal before hand. Eliminates the undetermined delay between when user told to start the sweep and when it actually started.
+	* threePoleFreqSweep.m:
+	- Quickened signal synthesis using matlab profiler.
+	- Coding that was necessary to implement the above mentioned changes in the architecture.
+
 2005-10-06 Kalpit Desai <kvdesai@email.unc.edu>
 	* ChangeLog.txt: fixed the date of last two commits.
 2005-10-05 Kalpit Desai <kvdesai@email.unc.edu>
