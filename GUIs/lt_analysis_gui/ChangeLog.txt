@@ -1,3 +1,6 @@
+2006-05-10 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: One step closer to analyzing frequency sweep data. Also couple of improvements in how removal and reloading of datasets is handled.
+
 2006-05-03 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:
 		- Added ability to attach frequency-sweep excitation data with tracker log. 

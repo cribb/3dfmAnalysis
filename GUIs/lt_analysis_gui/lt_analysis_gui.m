@@ -164,13 +164,17 @@ for(c = 1:length(f))
                 'File already loaded','Yes','No','No');            
             if strcmpi(button,'no')
                 doload = 0;
-            end            
+            else % Remove the old file from the data base
+                remove_file(isame,handles);
+            end
         else
             button = questdlg(['The file ',f{c},' is already loaded with ',g.exptype{isame}, ' experiment type. ' ...
                 'Should I re-load it with ', curexptype,' experiment type?'],...
                 'File loaded with different experiment type','Yes','No','No');            
             if strcmpi(button,'no')
                 doload = 0;
+            else % remove the old file  from the database
+                remove_file(isame,handles);
             end
         end
     end
@@ -267,18 +271,22 @@ end
 [selec,ok] = listdlg('ListString',get(handles.menu_files,'String'),...
     'OKstring','Remove',...
     'Name','Select file(s) to be removed');
-for c=1:length(selec)
-    for cf = 1:length(handles.gfields) %delete all fields for that file id
-        g.(handles.gfields{cf}){1,selec(c)} = {};
-    end
-end
-% keyboard
-% Now remove the empty cells from each field
-for cf = 1:length(handles.gfields) 
-    ifilled = ~cellfun('isempty',g.(handles.gfields{cf}));
-    g.(handles.gfields{cf}) = g.(handles.gfields{cf})(ifilled); 
-end
-% updatetaglist(handles);
+remove_file(selec, handles);
+
+% COMMENTED OUT BECAUSE THERE IS A BETTER WAY TO REMOVE FILES. DELETE WHEN
+% THE REMOVE_FILE FUNCTION HAS BEEN TESTED WORKING.
+% for c=1:length(selec)
+%     for cf = 1:length(handles.gfields) %delete all fields for that file id
+%         g.(handles.gfields{cf}){1,selec(c)} = {};
+%     end
+% end
+% % keyboard
+% % Now remove the empty cells from each field
+% for cf = 1:length(handles.gfields) 
+%     ifilled = ~cellfun('isempty',g.(handles.gfields{cf}));
+%     g.(handles.gfields{cf}) = g.(handles.gfields{cf})(ifilled); 
+% end
+
 updatemenu(handles);
 prompt_user([num2str(length(selec)),' files were removed from the database.'],handles);
 
@@ -1194,6 +1202,19 @@ switch signame
     otherwise
         prompt_user('Error: Unrecognized signalName');
 end
+%-----------------------------------------------------------------------
+function remove_file(ids, handles)
+global g
+% ids is a list of the file-indexes that needs to be removed
+
+allid = 1:1:length(g.(handles.gfields{1}));
+keepid = setdiff(allid,ids); % indexes of the files that would be kept
+
+for cf = 1:length(handles.gfields) 
+    g.(handles.gfields{cf}) = g.(handles.gfields{cf})(keepid); 
+end
+
+
 %-----------------------------------------------------------------------
 % This function removes the pre-calculated background drift from selected
 % section of the dataset. This is different than 'trend' or 'detrending' 
