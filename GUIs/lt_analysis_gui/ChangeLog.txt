@@ -1,3 +1,16 @@
+2006-05-15 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m, lt_analysis_gui.fig:
+	- Added ability to invoke other guis from within lt_analysis_gui. Using this for recently developed frequency_sweep analysis GUI.
+	- Added a box on the GUI itself that displays useful information, e.g. guidelines for user, task being executed, status etc.
+	- Added a checkbox to let user specify if the stage position needs to be filtered or not, at the time of loading the file itself.
+	- Added ability to view spectrogram. (only one file at a time, no overlay). Useful to quickly diagnose frequency sweep data.
+	- Removed frequency response checkbox. A whole new sub-gui serves its purpose now.
+	- several other minor modifications here and there.
+
+	* fsanalysis_subgui.m, fsanalysis_subgui.fig:
+	- The subgui for frequency sweep analysis, that can be called from lt_analysis_gui.
+	- Works for the data analyzed so far.	 	
+
 2006-05-10 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: One step closer to analyzing frequency sweep data. Also couple of improvements in how removal and reloading of datasets is handled.
 

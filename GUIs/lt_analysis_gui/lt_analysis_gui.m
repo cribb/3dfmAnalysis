@@ -1,28 +1,28 @@
 function varargout = lt_analysis_gui(varargin)
-% LT_ANALYSIS_GUI M-file for lt_analysis_gui.fig
-%      LT_ANALYSIS_GUI, by itself, creates a new LT_ANALYSIS_GUI or raises the existing
+% LT_ANALYSIS_ltaGUI M-file for lt_analysis_ltagui.fig
+%      LT_ANALYSIS_ltaGUI, by itself, creates a new LT_ANALYSIS_ltaGUI or raises the existing
 %      singleton*.
 %
-%      H = LT_ANALYSIS_GUI returns the handle to a new LT_ANALYSIS_GUI or the handle to
+%      H = LT_ANALYSIS_ltaGUI returns the handle to a new LT_ANALYSIS_ltaGUI or the handle to
 %      the existing singleton*.
 %
-%      LT_ANALYSIS_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in LT_ANALYSIS_GUI.M with the given input arguments.
+%      LT_ANALYSIS_ltaGUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in LT_ANALYSIS_ltaGUI.M with the given input arguments.
 %
-%      LT_ANALYSIS_GUI('Property','Value',...) creates a new LT_ANALYSIS_GUI or raises the
+%      LT_ANALYSIS_ltaGUI('Property','Value',...) creates a new LT_ANALYSIS_ltaGUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before lt_analysis_gui_OpeningFunction gets called.  An
+%      applied to the ltaGUI before lt_analysis_ltagui_OpeningFunction gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to lt_analysis_gui_OpeningFcn via varargin.
+%      stop.  All inputs are passed to lt_analysis_ltagui_OpeningFcn via varargin.
 %
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      *See ltaGUI Options on GUIDE's Tools menu.  Choose "ltaGUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help lt_analysis_gui
+% Edit the above text to modify the response to help lt_analysis_ltagui
 
-% Last Modified by GUIDE v2.5 04-Mar-2006 23:08:30
+% Last Modified by GUIDE v2.5 13-May-2006 12:40:12
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -50,16 +50,16 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before lt_analysis_gui is made visible.
+% --- Executes just before lt_analysis_ltagui is made visible.
 function lt_analysis_gui_OpeningFcn(hObject, eventdata, handles, varargin)
 global g
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to lt_analysis_gui (see VARARGIN)
+% varargin   command line arguments to lt_analysis_ltagui (see VARARGIN)
 
-% Choose default command line output for lt_analysis_gui
+% Choose default command line output for lt_analysis_ltagui
 handles.output = hObject;
 
 % a list of fields in the global dataset, useful when an operation is to be
@@ -76,7 +76,7 @@ set(handles.button_add,'UserData',handles.default_path);
 % siganmes.intr, signmaes.disp, posid, and all figids accordingly. Rest of
 % the program *should* still work unchanged.
 handles.signames.intr = {'beadpos' ,'stageReport','qpd','laser', 'posError'};
-% Names of signals to be displayed on GUI control menu_signal
+% Names of signals to be displayed on ltaGUI control menu_signal
 handles.signames.disp = {'Probe Pos','Stage Pos' ,'QPD','Channel 8', 'Pos Error'};
 handles.posid = [1, 2, 5]; %index of the signals which are position measurements
 % Figure numbers allocated to 'main-figures' for various signals
@@ -86,13 +86,10 @@ handles.dvsffigids =  handles.psdfigids + 5;      % accumulated displacement
 handles.msdfigids = 70;
 %  ....add to this list as more types of plots are supported
 
-% Below are some figids pertinent to only specific signal types
-handles.frespfigids =     [60]; % Frequency response plot is pertinent to beadpos only.
-                           % R = 60, X = 61, Y = 62, Z = 63  
 % Some other figure numbers allocated to specific types of plot
 handles.threeDfig = 9;
-handles.boxresfig = 100;
-handles.specgram = 90;
+handles.boxresfig = 99;
+handles.specgramfigid = 90;
 %  ....add to this list as more types of plots are supported
 
 % Some other constants
@@ -106,8 +103,8 @@ for c = 1:length(handles.gfields)
 end
 
 guidata(hObject, handles);
-% UIWAIT makes lt_analysis_gui wait for user response (see UIRESUME)
-% uiwait(handles.GUI);
+% UIWAIT makes lt_analysis_ltagui wait for user response (see UIRESUME)
+% uiwait(handles.ltaGUI);
 
 % --- Outputs from this function are returned to the command line.
 function varargout = lt_analysis_gui_OutputFcn(hObject, eventdata, handles)
@@ -123,25 +120,25 @@ varargout{1} = handles.output;
 % --- Executes on button press in button_add.
 function button_add_Callback(hObject, eventdata, handles)
 global g % using global (as oppose to 'UserData') prevents creating multiple copies and conserves memory
-% set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
-curexptype = get(handles.menu_exper,'value');
+allexptype = get(handles.menu_exper,'String');
+curexptype = allexptype{get(handles.menu_exper,'value')};
 switch curexptype
-    case 1 %Passive Diffusion   
+    case allexptype{1} %Passive Diffusion   
         fieldstr = 'b';
-    case 2 %Pulling + Diffusion
+    case allexptype{2} %Pulling + Diffusion
         fieldstr = 'lb';
-    case 3 %Discrete Freqeuncy Sweep
+    case allexptype{3} %Discrete Freqeuncy Sweep
         fieldstr = 'lb';        
-    case 4 %Noise (QPD+laser)
+    case allexptype{4} %Noise (QPD+laser)
         fieldstr = 'lq';
-    case 5 %Noise (Stage only)
+    case allexptype{5} %Noise (Stage only)
         fieldstr = 's';
-    case 6 % All fields
+    case allexptype{6} % All fields
         fieldstr = 'a';
     otherwise
-        prompt_user('Error: Unrecognized experiment type');
+        prompt_user('Error: Unrecognized experiment type',handles);
 end
-% A cheap hacky fix to the bug where GUI sometimes forgets the last path
+% A cheap hacky fix to the bug where ltaGUI sometimes forgets the last path
 if (get(hObject,'UserData') == 0),  set(hObject,'UserData',handles.default_path); end    
 
 [f, p] = uigetfiles('*.mat','Browse and select one or more files',get(hObject,'UserData'));
@@ -149,7 +146,7 @@ if (get(hObject,'UserData') == 0),  set(hObject,'UserData',handles.default_path)
 set(hObject,'UserData',p); %memorize the last browsing path
 prompt_user('Wait...Loading selected files',handles);
 flags.keepuct = 0; flags.keepoffset = 0; flags.askforinput = 0;flags.inmicrons = 1;
-flags.filterstage = 0; % Lowpass Filter stage-sensed values with 600Hz cutoff?
+flags.filterstage = get(handles.check_filterMCL,'value'); % Lowpass Filter stage-sensed values with 600Hz cutoff?
 flags.matoutput = 1; %request output fields in the [time vals] matrix form.
 nloaded = 0;
 for(c = 1:length(f))
@@ -157,7 +154,7 @@ for(c = 1:length(f))
     doload = 1;
     if exist('g') & ~isempty(g.data) & any(strcmp(g.fname,f{c}) == 1)
         isame = find(strcmp(g.fname,f{c}) == 1);
-        if (g.exptype{isame} == curexptype)
+        if isequal(g.exptype{isame}, curexptype)
             button = questdlg(['The file ',f{c},' is already in the database.',...
                 'Reloading it will discard any modifications made to it (e.g. cut, metadata etc).',
                 'Continue?'],...
@@ -241,7 +238,7 @@ for(c = 1:length(f))
             prompt_user([f{c}, ' added to the database.'],handles);
             nloaded = nloaded + 1; %total files loaded
         catch
-            prompt_user(lasterr);
+            prompt_user(lasterr,handles);
             prompt_user([f{c}, ' could not be added to the database.'],handles);
             % shift back every field up by one
             if(exist('g') & ~isempty(g.data))
@@ -255,11 +252,10 @@ for(c = 1:length(f))
 end
 % set(hObject,'UserData', g); %use global instead
 
-prompt_user(['Finished Loading. Loaded ',num2str(nloaded),' files']);
+prompt_user(['Finished Loading. Loaded ',num2str(nloaded),' files'],handles);
 if nloaded 
     updatemenu(handles);
 end
-% set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 
 % --- Executes on button press in button_remove
 function button_remove_Callback(hObject, eventdata, handles)
@@ -295,10 +291,8 @@ function menu_files_Callback(hObject, eventdata, handles)
 global g
 % Hints: contents = get(hObject,'String') returns menu_files contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_files
-% set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
 updatesignalmenu(handles);
 % updatemainfig(handles);
-% set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 
 % --- Executes on button press in button_tag.
 function button_tag_Callback(hObject, eventdata, handles)
@@ -338,7 +332,6 @@ if ~exist('g') | isempty(g.data)
     errordlg('Database is empty, first add files to it','Alert');
     return;
 end
-% set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
 % check if the main figure is plotted and in focus
 if (0 == figflag(getmainfigname(handles)))
    updatemainfig(handles,'new'); 
@@ -376,7 +369,6 @@ for c = 1:length(handles.signames.intr)
     end
 end
 updatemainfig(handles,'cut');
-% set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 dbclear if error
 %-------------------------------------------------------------------------
 % --- Executes on button press in button_selectdrift.
@@ -493,7 +485,7 @@ else
             set(hrad(3), 'Value', 1);
             set(hma,'ButtonDownFcn',{@DoNothingFcn,handles});
         otherwise
-            prompt_user('Error:Unrecognized radio index');
+            prompt_user('Error:Unrecognized radio index',handles);
     end
 end
 %-------------------------------------------------------------------------
@@ -564,11 +556,11 @@ b.dbox(2) = ylims(1); b.dbox(4) = ylims(2)-ylims(1);
 % Now check if the old box is outside current X axis limits, in which case put it
 % inside in the center of the axis but do not do any boxresults calculations
 if b.xlims < xlims(1) | b.xlims > xlims(2) % both limits of the box should be out of view
-    prompt_user('Warning: Old box was outside view, resetting the box. Happens after zoom.');
+    prompt_user('Warning: Old box was outside view, resetting the box. Happens after zoom.',handles);
     b.dbox(1) = mean(xlims); 
 end
 if b.dbox(3) > xlims(2) - xlims(1) % too wide?
-    prompt_user('Warning: Old box was too wide, resetting the width. Happens after zoom.');
+    prompt_user('Warning: Old box was too wide, resetting the width. Happens after zoom.',handles);
     b.dbox(3) = 0.25*range(xlims);
 end
 
@@ -609,7 +601,7 @@ if (nargin < 4 | isempty(b))
     end
 end
 if isempty(b) 
-    prompt_user('Error in updatebox. Box params can not be found');
+    prompt_user('Error in updatebox. Box params can not be found',handles);
     return;
 end
 if (nargin < 3 | isempty(displace))
@@ -647,11 +639,12 @@ val = get(hObject,'Value');
 strs = get(hObject,'String');
 TF = strcmp(handles.signames.disp,strs{val});
 sigid = find(TF == 1);
-if isequal(sigid,get(hObject,'UserData'))
-    return; % do nothing, if this was an accidental click selecting same things
-end
+% if isequal(sigid,get(hObject,'UserData'))
+%     return; % do nothing, if this was an accidental click selecting same things
+% end
 set(hObject,'UserData',sigid);%remember the last selection
 checkdimsvalidity(handles);
+checkdriftvalidity(handles);
 % updatemainfig(handles,'quant');
 
 % --- Executes on selection change in list_dims.
@@ -672,14 +665,15 @@ global g
 %First check that the field associated with channel 8 ('laser') was loaded.
 fid = get(handles.menu_files,'value');
 if ~isfield(g.data{fid},handles.signames.intr{4})
-    prompt_user(['The magnet-synchorizer field was not loaded.', ...
-        'Choose ''Discrete Freq Sweep'' as the experiment type and reload the file.']);
+    prompt_user(['The magnet-synchorizer signal was not found.', ...
+        'Choose ''Discrete Freq Sweep'' as the experiment type and reload the file.'],handles);
     return;
 end
-[f, p] = uigetfiles('*.mat','Browse and select the appropriate *freqSweep.mat logfile',get(hObject,'UserData'));
-g.magdata{fid} = load(fullfile(p,f));
-prompt_user(['Frequency sweep excitation log was attached to the tracking logfile ',g.fname{fid}]);
-set(handles.check_fresponse,'Enable','On');
+[f, p] = uigetfiles('*freqSweep.mat','Browse and select the appropriate *freqSweep.mat logfile',get(handles.button_add,'UserData'));
+load(fullfile(p,f{1})); % outputs a structure
+g.magdata{fid} = data;
+prompt_user(['Frequency sweep excitation log was attached to the tracking logfile ',g.fname{fid}],handles);
+% set(handles.check_fresponse,'Enable','On');
 
 % --- Executes on button press in check_fdbox.
 % should we consider box for the frequency domain analysis
@@ -706,7 +700,6 @@ end
 function button_plotfreq_Callback(hObject, eventdata, handles)
 global g
 dbstop if error
-% set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
 
 sigid = get(handles.menu_signal,'UserData');
 signame = handles.signames.intr{sigid};
@@ -729,6 +722,7 @@ else
         ids = get(handles.menu_files,'value');
     end
 end
+
 % Now determine the columns/dimensions of the signal to be processed
 if any(sigid == handles.posid)
     % which of the R X Y Z are selected?
@@ -739,9 +733,11 @@ else %non-positional sigal, so process for all columns
         % first column is always timestamp
     for k = 1:length(cols), strs{k} = num2str(k); end
 end
+
 % First setup figures for msd and psd computations if we should. Then fill
 % in the plots for each file one by one.
-% Setup MSD figure
+    
+% $$$$$$$$ Setup MSD figures if we should
 if get(handles.check_msd,'Value')
     % setup msd figure
     figure(handles.msdfigids(sigid)); clf;
@@ -750,8 +746,9 @@ if get(handles.check_msd,'Value')
     ylabel('log_{10}(MSD)       [micron^2]');    
     hold on;
 end
-if get(handles.check_psd,'value')
-    % set up PSD figures for all columns of the signal
+
+% $$$$$$$$ Setup PSD figure if we should
+if get(handles.check_psd,'value')  
     for c = 1:length(cols)
         % setup psd figure
         figure(handles.psdfigids(sigid) + cols(c) - 1); clf;
@@ -777,6 +774,7 @@ if get(handles.check_psd,'value')
         end            
     end
 end
+
 % Now process + plot each file one by one
 for fi = 1:length(ids) %repeat for all files selected
     % grab the signal to be processed
@@ -798,9 +796,9 @@ for fi = 1:length(ids) %repeat for all files selected
     srate = handles.srate; %reset sample rate if changed by previous file
     if (range(diff(sig(:,1))) > 1e-6)            
         fnames = get(handles.menu_files,'String');            
-        prompt_user(['UnEven TimeStamps: ',fnames{ids(fi)}]);
+        prompt_user(['UnEven TimeStamps: ',fnames{ids(fi)}],handles);
         srate = srate*0.1;
-        prompt_user(['This file will be resampled at ',num2str(srate),' Hz']);            
+        prompt_user(['This file will be resampled at ',num2str(srate),' Hz'],handles);            
         oldsig = sig;
         sig = [];
         sig(:,1) = [oldsig(1,1):1/srate:oldsig(end,1)]';
@@ -811,19 +809,17 @@ for fi = 1:length(ids) %repeat for all files selected
     end
     % Now the columns in the data loaded for a positional signal are
     % x,y,z but the columns in the listbox displayed on UI are
-    % r,x,y,z. So push down x,y and z by one column. Then calculate R
-    % if we need to.
+    % r,x,y,z. So push down x,y and z by one column. Then calculate R  
     if any(sigid == handles.posid) % is this a position signal?
-        temp = sig; sig = [];
-        sig(:,1) = temp(:,1); % timestamps
-        sig(:,2) = zeros(size(sig,1),1); % R
-        sig(:,3:5) = temp(:,2:4); % xyz
-        clear temp
-        if any(cols == 1) & get(handles.check_psd,'value') % need to calculate R?
-            sig(:,2) = sqrt(sig(:,3).^2 + sig(:,4).^2 + sig(:,5).^2);
+        if size(sig,2) <= 4 % if there are only 4 columns then R has not been calculated
+            temp = sig; sig = [];
+            sig(:,1) = temp(:,1); % timestamps
+            sig(:,2) = sqrt(temp(:,2).^2 + temp(:,3).^2 + temp(:,4).^2); %R           
+            sig(:,3:5) = temp(:,2:4); % xyz
+            clear temp            
         end
     end
-    % now remove the offset from original signal before computing psd
+    % now remove the mean from original signal before computing psd
     sig(:,2:end) = sig(:,2:end) - repmat(mean(sig(:,2:end),1),size(sig,1),1);
     
     %%=========== COMPUTE AND PLOT PSD + CUMULATIVE DISTANCE ===============
@@ -877,40 +873,29 @@ for fi = 1:length(ids) %repeat for all files selected
             hold off;
         end       
     end    
-    %%======   COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   ========
-    
-    %%***********       FREQUENCY RESPONSE COMPUTATION       ******************
-    % forth coming
-    %
-    %
-    %%===========   COMPLETED FREQUENCY RESPONSE COMPUTATION    ===============
+    %%======   COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   ========   
     
 end % Finished processing + plotting all files in frequency domain
+
 % clear the memory of file-ids that were selected last time.
 set(handles.button_plotfreq,'UserData',[]);
-% set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
 
 dbclear if error
-
-% --- Executes on button press in check_fresponse.
-function check_fresponse_Callback(hObject, eventdata, handles)
 
 % --- Executes on selection in check_3d.
 function check_3d_Callback(hObject, eventdata, handles)
 global g
 if (get(hObject,'Value'))
     if ~isempty(g.data)
-%         set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
         plot3dfigure(handles);
-%         set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
     end
 else
     if (ishandle(handles.threeDfig))
         close(handles.threeDfig);
     end
 end
-% --- Executes on button press in button_test.
-function button_test_Callback(hObject, eventdata, handles)
+% --- Executes on button press in button_backdoor.
+function button_backdoor_Callback(hObject, eventdata, handles)
 global g
 keyboard
 % --- Executes on button press in button_export.
@@ -919,18 +904,17 @@ function button_export_Callback(hObject, eventdata, handles)
 % --- Executes on button press in button_save.
 function button_save_Callback(hObject, eventdata, handles)
 global g
-dbstop if error
 fid = get(handles.menu_files,'value');
 [filename, pathname] = uiputfile([g.fname{1,fid}(1:end-9),'.edited.mat'], 'Save Currently active file as');
 if isequal(filename,0)|isequal(pathname,0)
-    prompt_user('User aborted saving');
+    prompt_user('User aborted saving',handles);
 else
     for cf = 1:length(handles.gfields) %copy all fields for that file id
         edited.(handles.gfields{cf}) = g.(handles.gfields{cf}){1,fid};
     end
     save(fullfile(pathname,filename),'edited');
+    prompt_user(['Edited file was saved at',pathname],handles);
 end
-dbclear if error
 %%%$$$$$$$$$$$$$$$$  NON-CALLBACK ROUTINES     $$$$$$$$$$$$$$$$$$$$$$$$
 %-----------------------------------------------------------------------
 function updateboxresults(handles,hbox)
@@ -1025,7 +1009,7 @@ else
 end
 %-----------------------------------------------------------------------
 function prompt_user(str,handles)
-% set(handles.text_message,'String',str);
+set(handles.text_message,'String',str);
 disp(str);
 
 %--------------makes the name string for the main figure ---------------
@@ -1094,11 +1078,10 @@ end
 playsig = k*diff(raw);
 plotsig = raw(1:10:end); % plot only every 10 th point
 plott = t(1:10:end);
-% figure(handles.specgram); 
+% figure(handles.specgramfigid); 
 % specgram(playsig,512,handles.srate); colormap gray;
 
 Nbits = 16; % Number of bits that P'tracker sound player seems to be using
-% set(handles.frame_mask,'Visible','On'); % Busy...avoid accidental clicks
     
 N_sec = floor(t(end)); % Number to 1sec slots
 tsvec = [0:1:N_sec];
@@ -1127,7 +1110,6 @@ while k <= c
 end
 wavplay(playsig,handles.srate)
 dbclear if error    
-% set(handles.frame_mask,'Visible','Off'); % done...un-mask the ui-controls
  
 %-----------------------------------------------------------------------
 % make the matrices of signal values to be displayed and related annotations
@@ -1175,7 +1157,7 @@ switch signame
                     annots.legstr{c} = 'Z';
                     annots.colorOrder(c,:) = [1,0,0]; % Z is always red             
                 otherwise
-                    prompt_user('Error: Unrecognized dimension (not among RXYZ)');
+                    prompt_user('Error: Unrecognized dimension (not among RXYZ)',handles);
             end
         end
         annots.y = 'Microns';
@@ -1200,7 +1182,7 @@ switch signame
         annots.x = 'Seconds';
         annots.t = 'ADC channel 8 (laser intensity OR magnets)';
     otherwise
-        prompt_user('Error: Unrecognized signalName');
+        prompt_user('Error: Unrecognized signalName',handles);
 end
 %-----------------------------------------------------------------------
 function remove_file(ids, handles)
@@ -1227,7 +1209,23 @@ fileid = get(handles.menu_files,'Value');
 drift = g.drift{fileid}.(signame);
 for c = 1:size(vals,2)% repeat for all columns
     dout(:,c) = vals(:,c) - polyval(drift(:,c),t) + drift(2,c);
-end    
+end   
+
+
+
+
+% --- DELETED FROM GUI. READ BELOW FOR WHY. Executes on button press in button_filterMCL.
+%-----------------------------------------------------------------------
+% This function WAS written to remove the high frequency noise from MCL stage-sensor. 
+% But then I realized we can't filter the stage after loading the file,
+% because we don't necessarily load the 'stage sensed positions' field. So
+% filtering has to be done at the time of loading the file, and by
+% load_laser_tracking. So the better way would be to put a check_box on the
+% lt_analysis_gui that lets user specify if he want's to filter the stage
+% at the time of loading. 
+function button_filterMCL_Callback(hObject, eventdata, handles)
+fileid = get(handles.menu_files,'Value');
+
 %-----------------------------------------------------------------------
 function updatemainfig(handles,modestr)
 global g
@@ -1265,7 +1263,7 @@ switch get(handles.menu_dispres,'value')
     case 3 % 10 ms resolution
         [dispmat annots] = filldispsig(sigvals,1e-2,signame,handles);
     otherwise
-        prompt_user('Error: Unrecognized time resolution');
+        prompt_user('Error: Unrecognized time resolution',handles);
 end
 %now ready to plot the data
  figure(figid); hold on;
@@ -1333,7 +1331,7 @@ if get(handles.check_overlaymag,'value')
     mags = g.data{fileid}.(handles.signames.intr{4});
     % Now adjust the range so that mags are visible in the current axis
     hma = findobj(figid,'Type','Axes','Tag','');
-    ylims = get(hma,'Ylim')
+    ylims = get(hma,'Ylim');
     mags(:,2) = mags(:,2) + ylims(1) - mags(1,2);    
     
     figure(figid); hold on;
@@ -1457,7 +1455,7 @@ for c=1:size(handles.signames.intr,2) %check for each possible signal name
     end
 end
 if k == 0% none of the recognized signals are present (shouldn't happen)
-    prompt_user('Error: Selected file has none of the recognized signal types');
+    prompt_user('Error: Selected file has none of the recognized signal types',handles);
     keyboard
     return;
 end
@@ -1481,16 +1479,23 @@ else
     set(handles.check_overlaymag,'Enable','Off');
     set(handles.check_overlaymag,'Value',0);
 end
-
-% if the current file has freq sweep excitation data attached, then
-% enable 'frequency response' check box
-if isequal(g.magdata{fileid},handles.placeholder.magdata)
-    set(handles.check_fresponse,'Enable','Off');
-else
-    set(handles.check_fresponse,'Enable','On');
-end
 checkdimsvalidity(handles);% check if RXYZ and/or 3D is applicable
+checkdriftvalidity(handles);% check if drift subtraction is allowed
+% --- -------------------------------------------------------
+function checkdriftvalidity(handles);
+% check if current file and signal has drift parameters calculated
+% and thus if drift subtraction is allowed
+global g
 
+sigid = get(handles.menu_signal,'UserData');
+fileid = get(handles.menu_file,'value');
+
+if any(any(g.drift{fileid}.(handles.signames.intr{sigid}) ~=0 )) == 1
+    set(handles.check_subdrift,'Enable','On');
+else
+    set(handles.check_subdrift,'Enable','Off');
+    set(handles.check_subdrift,'Value',0);
+end
 % --- Executes on button press in button_plottime.
 function button_plottime_Callback(hObject, eventdata, handles)
 % profile on
@@ -1507,6 +1512,14 @@ if get(hObject,'value')
         set(hObject,'value',0);    
     end
 end
+
+% --- Executes on button press in button_invokeFSgui.
+function button_invokeFSgui_Callback(hObject, eventdata, handles)
+
+setappdata(handles.ltaGUI,'ltahandles',handles);
+fsanalysis_subgui;
+
+
 %%%********************************************************************
 %%%**********     ALL BELOW IS NEEDED BUT NOT-USED     ****************
 %%%********************************************************************
@@ -1631,11 +1644,27 @@ function menu_exper_Callback(hObject, eventdata, handles)
 % Hints: contents = get(hObject,'String') returns menu_exper contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_exper
 
+% --- Executes on button press in check_filterMCL.
+function check_filterMCL_Callback(hObject, eventdata, handles)
+% hObject    handle to check_filterMCL (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_filterMCL
+
 %%%####################################################################
 %%%#############    GUIDE WILL ADD NEW CALLBACKS BELOW      ###########
 %%%####################################################################
 
 
 
+
+% --- Executes on button press in check_spectrogram.
+function check_spectrogram_Callback(hObject, eventdata, handles)
+% hObject    handle to check_spectrogram (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_spectrogram
 
 
