@@ -1,3 +1,8 @@
+2006-05-15  Kalpit Desai <kvdesai@email.unc.edu>
+	* mypsd.m: Fixed a bug in calculation of default frequency resolution.
+	* myspectrogram.m: same.
+	* processpeak.m: Better handling of boundary cases. Also fixed a bug that caused program to return zero values when search frequency falled exactly between two bins.
+
 2006-05-05  Kalpit Desai <kvdesai@email.unc.edu>
 	* myspectrogram.m: Added. This function wraps the matlab-inbuilt 'spectrogram' function with parameters that are easy to understand for the user. Analogous to 'mypsd' and 'mytfe'.
 

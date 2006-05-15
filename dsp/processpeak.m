@@ -2,7 +2,7 @@ function peak = processpeak(pp, pf,f,interactive)
 % 3DFM function  
 % DSP 
 % Created 01/20/05 - kvdesai. 
-% Last modified 09/23/05 - kvdesai
+% Last modified 05/15/06 - kvdesai
 % Usage: peak = processpeak(pp, pf,fsearch,interactive)
 %   pp = output of psd in units of [power/frequency] or [disp^2/frequency]
 %   pf = frequency vector corresponding to pp
@@ -12,27 +12,40 @@ function peak = processpeak(pp, pf,f,interactive)
 % peak.p = power at fsearch
 % peak.ampli = amplitude of sine wave at fsearch
 % peak.fsearch = fsearch
+
+if nargin < 4 | isempty(interactive) interactive = 0; end
+
 fres = mean(diff(pf));%the step size in frequencies
 if (~interactive)
-    NBIN = 3; %Number of bins to be integrated on both sides to calculate total power
-    i = find(abs(pf - f) < fres/2); %find the index of pf that has value nearest to search frquency
+    NBOTH = 3; %Number of bins to be integrated on both sides to calculate total power
+    isrch = find(abs(pf - f) <= fres/2); %find the index of pf that has value nearest to search frquency
     peak.p = 0;
-    if    isempty(i)
+    if    isempty(isrch)
         peak.f = []; % a signal that search frquency was out of the range of data provided.
 %         keyboard;
     else
-        if(i - NBIN > 1)
-            for k = 1:2*NBIN+1
-                inow = i - NBIN-1+k;
-                peak.p = peak.p + (pp(inow))*(pf(inow)-pf(inow-1)); %discrete integration over 2*NBIN + 1 bins
+        isrch = isrch(1); %Sometime the search freqeuncy could fall exactly between two bins
+        if(isrch - NBOTH >= 1) & (isrch + NBOTH <= length(pf)) 
+            % search freq is not on either edge of the frequency range provided
+            for k = 1:2*NBOTH+1
+                inow = isrch - NBOTH-1+k;
+                peak.p = peak.p + (pp(inow))*fres; %discrete integration over 2*NBOTH + 1 bins
             end
-            peak.f = pf(i -NBIN:i+NBIN);
-        else % this might be the lowest frequency, so we don't have enough bins on lower side
-            for k = 1:NBIN+1
-                inow = i-1+k;
-                peak.p = peak.p + (pp(inow))*(pf(inow)-pf(inow-1)); %discrete integration over NBIN + 1 bins
+            peak.f = pf(isrch -NBOTH:isrch+NBOTH);
+        elseif (isrch - NBOTH < 1)% 
+            % search freq is on the lower edge of the frequency range
+            for k = 1:NBOTH+isrch
+                inow = k;
+                peak.p = peak.p + (pp(inow))*fres; %discrete integration over NBOTH + 1 bins
             end  
-            peak.f = pf(i:i+NBIN);
+            peak.f = pf(1:isrch+NBOTH);
+        else
+            % search freq is on the upper edge of the frequency range
+            for k = 1:NBOTH+1+length(pf)-isrch
+                inow = isrch-NBOTH-1+k;
+                peak.p = peak.p + (pp(inow))*fres; %discrete integration over NBOTH + 1 bins
+            end  
+            peak.f = pf(isrch-NBOTH:end);
         end
     end
     peak.ampli = sqrt(peak.p*2);%conversion from power to amplitude of sine wave

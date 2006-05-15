@@ -48,13 +48,14 @@ if(nargin < 4 | isempty(window_type))
    	window_type = 'blackman';
 end
 if(nargin < 3 | isempty(res))
-  res = ceil(size(s,1)/rate);%the finest possible resolution with given data
+  res = ceil(rate/size(s,1));%the finest possible resolution with given data
 end
 
 nw = fix(rate/(2*res))*2;
 if (nw > size(s,1))
     disp('mypsd ERROR: Not enough data for requested frequency-resolution.');
     disp('Time span of data should atleast be 1/resolution');
+    keyboard
     return;   
 end
 win = zeros(nw,1);

@@ -36,7 +36,7 @@ varargout = cell(nargout); %initialize outputs with empty cells
 if(nargin < 5 | isempty(clrmap))  	clrmap = gray; end
 if(nargin < 4 | isempty(window_type))  	window_type = 'blackman'; end
 if(nargin < 3 | isempty(fres))
-  fres = ceil(size(sig,1)/rate);%the finest possible resolution with given data
+  fres = ceil(rate/size(sig,1));%the finest possible resolution with given data
 end
 
 nw = fix(rate/(2*fres))*2; %length of fft
