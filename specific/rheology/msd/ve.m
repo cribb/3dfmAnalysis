@@ -1,4 +1,4 @@
-function v = ve(d, bead_radius);
+function v = ve(d, bead_radius, freq_type);
 % 3DFM function  
 % Rheology 
 % last modified 10/06/05 (jcribb)
@@ -9,14 +9,19 @@ function v = ve(d, bead_radius);
 % error (contains standard error (stdev/sqrt(N) about the mean value, and N (the
 % number of trackers/beads in the dataset.
 %
-%  [v] = ve(d, bead_radius);  
+%  [v] = ve(d, bead_radius, freq_type);  
 %   
 %  where "d" is the output structure of msd.
 %        "bead_radius" is in [m].
+%        "freq_type" is 'f' for [Hz] or 'w' for [rad/s], default is [Hz]
 %  
 %  Notes:  
 %  - This algorithm came from Mason 2000 Rheol Acta paper.
 %  
+
+if (nargin < 3) | isempty(freq_type)     freq_type = 'f';   end
+if (nargin < 2) | isempty(bead_radius)   bead_radius = 0.5e-6; end
+if (nargin < 1) | isempty(d)    error('no data struct found'); end
 
 k = 1.38e-23;
 T = 298;
@@ -76,25 +81,42 @@ mean_lognpp= nanmean(lognpp');
 ste_lognp = nanstd(lognp') ./ sqrt(N');
 ste_lognpp= nanstd(lognpp') ./ sqrt(N');
 
+    switch freq_type
+        case 'f'
+            plot_freq = mean_logf;
+            freq_label = 'log_{10}(f) [Hz]';
+            gp_label = 'G''(f)';
+            gpp_label = 'G''''(f)';
+            np_label = '\eta''(f)';
+            npp_label = '\eta''''(f)';
+        case 'w'
+            plot_freq = mean_logw;
+            freq_label = 'log_{10}(\omega) [rad/s]';
+            gp_label = 'G''(\omega)';
+            gpp_label = 'G''''(\omega)';
+            np_label = '\eta''(\omega)';
+            npp_label = '\eta''''(\omega)';
+    end
+
 	figure;
     hold on;
-	errorbar(mean_logw, real(mean_loggp), real(ste_loggp), 'b');
-	errorbar(mean_logw, real(mean_loggpp), real(ste_loggpp), 'r');
+	errorbar(plot_freq, real(mean_loggp), real(ste_loggp), 'b');
+	errorbar(plot_freq, real(mean_loggpp), real(ste_loggpp), 'r');
     hold off;
-    xlabel('log_{10}(\omega) [rad/s]');
+    xlabel(freq_label);
 	ylabel('log_{10}(modulus) [Pa]');
-	h = legend('G''(\omega)', 'G''''(\omega)', 0);
+	h = legend(gp_label, gpp_label, 0);
 	grid on;
 	pretty_plot;
 	
 	figure;
     hold on;
-	errorbar(mean_logw, real(mean_lognp), real(ste_lognp), 'b');
-	errorbar(mean_logw, real(mean_lognpp), real(ste_lognpp), 'r');
+	errorbar(plot_freq, real(mean_lognp), real(ste_lognp), 'b');
+	errorbar(plot_freq, real(mean_lognpp), real(ste_lognpp), 'r');
     hold off;
-	xlabel('log_{10}(\omega) [rad/s]');
+	xlabel(freq_label);
 	ylabel('log_{10}(viscosity) [Pa sec]');
-	legend('\eta''(\omega)', '\eta''''(\omega)', 0);
+	legend(np_label, npp_label, 0);
 	grid on;
 	pretty_plot;
 

@@ -1,3 +1,6 @@
+2006-05-16  Jeremy Cribb <jcribb@email.unc.edu>
+	- ve.m: added parameter to plot output in [Hz] or [rad/s].
+
 2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
 	- ve.m: minor changes to plot linestyle and output structure.
 
