@@ -96,10 +96,22 @@ handles.specgramfigid = 90;
 handles.srate = 10000;
 handles.psdwin = 'blackman';
 handles.emptyflag_str = 'Database is empty';
-handles.placeholder.magdata = {0};
-% initialize the global structure
+
+% initialize the global structure and placeholders
 for c = 1:length(handles.gfields)
     g.(handles.gfields{c}) = {};
+    if isequal(handles.gfields{c},'drift')
+    % 'drift' field must be treated differenty because when initializing, we will assign 
+    % values to individual field of drift structure (unlike the whole structure as in 'data')
+    % . This causes a warning on matlab 7.04 R14SP2. "allowed structure assignment
+    % to a non-empty non-structure to overwrite the previous value".
+        for c = 1:length(handles.signames.intr)
+            handles.ph.drift.(handles.signames.intr{c}) = 0;
+        end
+        handles.ph.drift = {handles.ph.drift};
+    else
+        handles.ph.(handles.gfields{c}) = {0};
+    end
 end
 
 guidata(hObject, handles);
@@ -120,6 +132,7 @@ varargout{1} = handles.output;
 % --- Executes on button press in button_add.
 function button_add_Callback(hObject, eventdata, handles)
 global g % using global (as oppose to 'UserData') prevents creating multiple copies and conserves memory
+dbstop if error
 allexptype = get(handles.menu_exper,'String');
 curexptype = allexptype{get(handles.menu_exper,'value')};
 switch curexptype
@@ -182,7 +195,7 @@ for(c = 1:length(f))
         %shift all existing datasets down by one
         if (exist('g') & ~isempty(g.data))
             for cf = 1:length(handles.gfields) 
-                g.(handles.gfields{cf}) = [ {0}, g.(handles.gfields{cf})];
+                g.(handles.gfields{cf}) = [handles.ph.(handles.gfields{cf}), g.(handles.gfields{cf})];
             end
         end
         % First try to load the file. Loading can fail if there is not
@@ -197,7 +210,7 @@ for(c = 1:length(f))
                 load_laser_tracking(fullfile(p,f{c}),fieldstr,flags);
                 g.data{1,1} = ans.data;
                 % fullfile usage is handy and protects code against platform variations
-                g.magdata{1,1} = handles.placeholder.magdata; %start out with empty magnet data
+                g.magdata{1,1} = handles.ph.magdata; %start out with placeholder magnet data
                 g.fname{1,1} = f{c}; %file name
                 g.path{1,1} = p; %file path
                 % Now add the default tag
@@ -1488,7 +1501,7 @@ function checkdriftvalidity(handles);
 global g
 
 sigid = get(handles.menu_signal,'UserData');
-fileid = get(handles.menu_file,'value');
+fileid = get(handles.menu_files,'value');
 
 if any(any(g.drift{fileid}.(handles.signames.intr{sigid}) ~=0 )) == 1
     set(handles.check_subdrift,'Enable','On');
