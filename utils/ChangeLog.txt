@@ -1,3 +1,6 @@
+2006-05-17  Kalpit Desai <kvdesai@email.unc.edu>
+	* parse_csv_int.m: Added. A utility that reliably parses a string containing comma (or whitespace) separated integers. 
+
 2005-12-23  Kalpit Desai <kvdesai@email.unc.edu>
 	* drawlines.m: Better documentation
 2005-09-06  Kalpit Desai <kvdesai@email.unc.edu>
