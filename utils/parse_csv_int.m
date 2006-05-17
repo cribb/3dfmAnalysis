@@ -1,10 +1,10 @@
 function numerVec = parse_csv_int(str)
 % 3DFM Function
 % Utility
-% This function parses the comma separated list and extracts
-% out the numbers from that. It is flexible enough that as long as user
-% puts one comma AND/OR one space between consequtive frequencies, it works.
-% Created: 05/17/06     -kvdesai
+% This function parses a string which contains integers separated by non-numeric characters (e.g. comma, whitespace etc).
+% The first element of the string must be numeric.
+% Created: ??/??/2005     -kvdesai
+% Last Modified: 05/17/06 -kvdesai
 
 if(isempty(str))
     error('Error: Frequency vector can not be left empty');
