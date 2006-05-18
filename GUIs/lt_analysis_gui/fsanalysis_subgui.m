@@ -172,7 +172,7 @@ for dim = 1:length(dl)
     if get(handles.check_FvsAllH,'Value')
         hfthis = handles.FvsAllHfigid + dl(dim); figlist = [figlist,hfthis];
         figure(hfthis); clf;          
-        title(['Freq Sweep response @ 1st to 4th harmonic: ', sdim]);        
+        title(['Frequency response @ 1st to 4th harmonic: ', sdim]);        
         xlabel('Frequency [Hz]');
         ylabel(['Response [',stry,']']);
         hold on;        
@@ -180,7 +180,7 @@ for dim = 1:length(dl)
     if get(handles.check_FvsFs1,'Value')
         hfthis = handles.FvsFs1figid + dl(dim); figlist = [figlist,hfthis];
         figure(hfthis); clf;     
-        title(['Freq Sweep response @ Fundamental: ', sdim]);        
+        title(['Frequency response @ Fundamental: ', sdim]);        
         xlabel('Frequency [Hz]');
         ylabel(['Response [',stry,']']);
         hold on;        
@@ -188,7 +188,7 @@ for dim = 1:length(dl)
     if get(handles.check_FvsFs2,'Value')
         hfthis = handles.FvsFs2figid + dl(dim); figlist = [figlist,hfthis];
         figure(hfthis); clf;    
-        title(['Freq Sweep response @ 2nd harmonic: ', sdim]);        
+        title(['Frequency response @ 2nd harmonic: ', sdim]);        
         xlabel('Frequency [Hz]');
         ylabel(['Response [',stry,']']);
         hold on;        
@@ -262,8 +262,8 @@ end % Looping through dimensions
 for fi = 1:length(figlist)
     figure(figlist(fi));
     hold off; 
-%     set(gca,'Xscale','log','Yscale','log');
-    set(gca,'Xscale','linear','Yscale','log');
+    set(gca,'Xscale','log','Yscale','log');
+%     set(gca,'Xscale','linear','Yscale','log');
 %     set(gca,'Xscale','log','Yscale','linear');
     legend(gca,alltags{dfs.fid});
 end
@@ -273,24 +273,31 @@ dbclear if error
 % ------------------------------------------------------------------------
 function slider_fseg_Callback(hObject, eventdata, handles)
 update_fseg(handles,'slider');
-% ------------------------------------------------------------------------
-function edit_fseg_Callback(hObject, eventdata, handles)
-update_fseg(handles,'edit');
 pause(0.5);
 button_segpsd_Callback(handles.button_segpsd, eventdata, handles);
 % ------------------------------------------------------------------------
+function edit_fseg_Callback(hObject, eventdata, handles)
+update_fseg(handles,'edit');
+
+% ------------------------------------------------------------------------
 function update_fseg(handles,caller);
 lastarray = get(handles.slider_fseg,'UserData');
+if length(lastarray) > 1
+    fstep = mean(diff(lastarray));
+else
+    fstep = 10;
+end
 switch caller
     case 'slider'
-        if get(handles.slider_fseg,'value') > 0
-            newarray = lastarray - min(lastarray) + max(lastarray) + mean(diff(lastarray));
-        elseif get(handles.slider_fseg,'value') < 0
-            newarray = lastarray + min(lastarray) - max(lastarray) -  mean(diff(lastarray));
+        if get(handles.slider_fseg,'value') >= 5
+            newarray = lastarray - min(lastarray) + max(lastarray) + fstep;
+        elseif get(handles.slider_fseg,'value') < 5
+            newarray = lastarray + min(lastarray) - max(lastarray) -  fstep;
             if any(newarray) <= 0
                 newarray = lastarray;
             end
         end
+        set(handles.slider_fseg,'value',5);
     case 'edit'
         newarray = parse_csv_int(get(handles.edit_fseg,'String'));
         if isempty(newarray)
@@ -303,7 +310,7 @@ if (length(newarray) > 10)
 end
 set(handles.slider_fseg,'UserData',newarray);
 set(handles.edit_fseg,'string',num2str(newarray));
-newarray
+
 % --- Executes on button press in button_segpsd.
 function button_segpsd_Callback(hObject, eventdata, handles)
 % Plot psd of the segments that correspond to frequencies listed in
@@ -319,10 +326,10 @@ clrs = handles.colors;
 alltags = g.tag;
 for ifreq = 1:length(fseg) % Process and plot for each frequency one by one.
     for dim = 1:length(dl) % process and plot for each requested dimension one by one        
-        figure(handles.segpsdfigid +10*(ifreq-1) + dl(dim));
+        figure(handles.segpsdfigid +10*(ifreq-1) + dl(dim)); clf;
         xlabel('Frequency Hz');
         ylabel('PSD Power/Hz');
-        title(['Segment PSD for excitation frequency: ', fseg(ifreq), ' Hz',...
+        title(['Segment PSD for excitation frequency: ', num2str(fseg(ifreq)), ' Hz',...
             ', Dimension: ', rxyz(dl(dim))]);
         hold on
         for iex = 1:length(rexp.fid) %process each file in the 'experiment' list one by one
@@ -333,27 +340,44 @@ for ifreq = 1:length(fseg) % Process and plot for each frequency one by one.
             inearest = round(interp1(allf,[1:1:length(allf)],fseg(ifreq)));
             i_st = rexp.iseg(fileid).bpos_st(inearest);
             i_end = rexp.iseg(fileid).bpos_end(inearest);
-            pseg = g.data{fileid}.beadpos(i_st:i_end,dl(dim)+1);
+            txyz = g.data{fileid}.beadpos(i_st:i_end,:);
+            if dl(dim) == 1 % THis is radial dimension
+                pseg = sqrt(txyz(:,2).^2 + txyz(:,3).^2 + txyz(:,4).^2);
+            else
+                pseg = txyz(:,dl(dim)+1-1);
+            end            
             [p, f] = mypsd(pseg,handles.lta.srate);
             loglog(f,p,['.-',clrs(mod(iex-1,length(clrs))+1)]);
         end
-        % Now process each file in the 'fixed bead' list one by one
-        coff = length(rexp.fid);
-        for ifx = 1:length(rfix.fid)
-            fileid = rfix.fid(ifx);
-            allf = rfix.iseg(fileid).ftest;
-            % find index of the nearest excitation frequency. This gives pointer
-            % to the segment that needs to be processed
-            inearest = round(interp1(allf,[1:1:length(allf)],fseg(ifreq)));
-            i_st = rfix.iseg(fileid).bpos_st(inearest);
-            i_end = rfix.iseg(fileid).bpos_end(inearest);
-            pseg = g.data{fileid}.beadpos(i_st:i_end,dl(dim)+1);
-            [p, f] = mypsd(pseg,handles.lta.srate);
-            % Plot the fixed bead psd withot any marker
-            loglog(f,p,['-',clrs(mod(coff+ifx-1,length(clrs))+1)]);
+        legstr = alltags(rexp.fid);
+
+        if ~isempty(rfix)
+            % Now process each file in the 'fixed bead' list one by one
+            coff = length(rexp.fid); %offset in color
+            for ifx = 1:length(rfix.fid)
+                fileid = rfix.fid(ifx);
+                allf = rfix.iseg(fileid).ftest;
+                % find index of the nearest excitation frequency. This gives pointer
+                % to the segment that needs to be processed
+                inearest = round(interp1(allf,[1:1:length(allf)],fseg(ifreq)));
+                i_st = rfix.iseg(fileid).bpos_st(inearest);
+                i_end = rfix.iseg(fileid).bpos_end(inearest);
+                txyz = g.data{fileid}.beadpos(i_st:i_end,:);
+                if dl(dim) == 1 % THis is radial dimension
+                    pseg = sqrt(txyz(:,2).^2 + txyz(:,3).^2 + txyz(:,4).^2);
+                else
+                    pseg = txyz(:,dl(dim)+1-1);
+                end
+                [p, f] = mypsd(pseg,handles.lta.srate);
+                % Plot the fixed bead psd withot any marker
+                loglog(f,p,['-',clrs(mod(coff+ifx-1,length(clrs))+1)]);
+            end
+            legstr =alltags([rexp.fid,rfix.fid]);
         end
-        legend(gca,alltags{[rexp.fid,rfix.fid]});       
+        
         hold off; set(gca,'Xscale','log','Yscale','log');
+        drawlines(gca,fseg(ifreq)*[1:4]);
+        legend(gca,legstr,'Location','Best');
     end
 end
 

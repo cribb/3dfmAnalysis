@@ -1,4 +1,12 @@
 2006-05-18 Kalpit Desai <kvdesai@email.unc.edu>
+	* fsanalysis_subgui.m, fsanalysis_subgui.fig:
+	- fixed a bug in shifting the under-hood frequency window
+	- Now shows harmonic markers for excitation frequency, while looking underh the hood
+	- Added a menu that allows user to select the units of yaxis (e.g. Power, displacement, displacement*frequency etc).
+	- Coding necessary for providing choices for the units of Y axis
+	- Added option to view total harmonic distortion vs frequency
+	- Fixed a bug in parsing the input array for under-the-hood frequencies
+2006-05-18 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: Fixed a bug where positionError field was ignored even when asked to be plotted.
 	* fsanalysis_subgui.m, fsanalysis_subgui.fig:
 	- Improved the speed of segment detection by ~300 times. Processing time is now within limits of patience.
