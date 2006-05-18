@@ -1,3 +1,8 @@
+2006-05-18 Kalpit Desai <kvdesai@email.unc.edu>
+	* threePoleFreqSweep.m: Version 2.3
+	- Fixed a bug where because of the 120 degree phase separation, number of sinusoidal force cycles would be one less than that requested.
+	- Set the highest frequency by default to be 1000 Hz, because we are seeing upto 4th harmonic and we can only compute psd upto 5 kHz.
+
 2006-05-11 Kalpit Desai <kvdesai@email.unc.edu>
 	* threePoleFreqSweep.fig: Version 2.2
 	- All coils now share a common slider for amplitude.

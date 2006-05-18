@@ -61,7 +61,7 @@ function threePoleFreqSweep_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for threePoleFreqSweep
 handles.output = hObject;
 global AO version_str;
-version_str = '2.2';
+version_str = '2.3';
 % Update handles structure
 guidata(hObject, handles);
 clc;
@@ -219,7 +219,12 @@ if ~isequal(lastp, partp);
     rawA = [];    rawB = []; rawC = [];
     for c = 1:length(p.fvec)
         % how long should we do this frequency to apply Ncycles
-        tt = 0:1/p.srate:(p.nCycles/p.fvec(c));
+        trueNcycles = p.nCycles + 1; 
+        % Because the sinusoids are 120 deg apart in phase, and that we
+        % always start and stop sinusoids at zero (for amplifier stability)
+        % we have to go on for a duration of nCycles + 1 in order to get clean nCycles of 
+        % span with all three coils have sinusoids on them.
+        tt = 0:1/p.srate:(trueNcycles/p.fvec(c));
         tgap = zeros(1,ceil(p.srate*p.dwell/p.fvec(c)));
         tsinebase = sin(2*pi*p.fvec(c)*tt); %zero phase sine
         % Now shift the sinebase back/forth to apply appropriate phase.
@@ -310,9 +315,9 @@ close(handles.threePoleFreqSweep);
 % --- Executes on button press in button_defaults.
 function button_defaults_Callback(hObject, eventdata, handles)
 
-default.fmin = 10;
+default.fmin = 1;
 default.fstep = 5;
-default.fmax = 2000;
+default.fmax = 1000;
 default.fcont = 125;
 default.nCycles = 10;
 default.dwell = 10;
@@ -415,9 +420,11 @@ function handle_sweep_param_change(handles)
 set(handles.button_go,'Enable','Off');
 % Now reestimate the time for sweep
 p = read_settings(handles);
-span = sum(1./p.fvec)*(p.nCycles+1 + p.dwell);
-%                               1 added since the 1 cycle is added for
-%                               phase adjustment
+span = sum(1./p.fvec)*(p.nCycles+2 + p.dwell);
+%                               2 since 1 cycle is padded with zero (2/3
+%                               before, 1/3 at last). And 1 cycle is added
+%                              to have total nCycles where all three coils
+%                               are excited with sinusoids
 if (p.docontrol == 1)
     %span would be double since control frequency would be interleaved with
     %dwell
