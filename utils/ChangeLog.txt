@@ -1,3 +1,6 @@
+2006-05-18  Kalpit Desai <kvdesai@email.unc.edu>
+	* parse_csv_int.m: Fixed a bug where multidigit numbers in the string weren't recognized correctly.
+
 2006-05-17  Kalpit Desai <kvdesai@email.unc.edu>
 	* parse_csv_int.m: Now also supports colon (:) operator to make a linearly spaced array.
 
