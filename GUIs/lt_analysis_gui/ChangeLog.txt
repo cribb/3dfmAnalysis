@@ -1,3 +1,13 @@
+2006-05-18 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: Fixed a bug where positionError field was ignored even when asked to be plotted.
+	* fsanalysis_subgui.m, fsanalysis_subgui.fig:
+	- Improved the speed of segment detection by ~300 times. Processing time is now within limits of patience.
+	- Added ability to 'look under the hood' for what happens while processing a small user-selectable list of frequencies. Plots raw psd.
+	- Now imports and puts legends on all the figures
+	- Now only processes for the dimensions which are selected in the lt_analysis_gui
+	- Added a "shifter" on GUI that conveniently shifts the 'look under the hood' frequency window.
+	- Improved speed of computation of frequency sweep response
+	- several other bug fixes.
 2006-05-17 Kalpit Desai <kvdesai@email.unc.edu>
 	* partial commit. Need to switch computer.
 2006-05-15 Kalpit Desai <kvdesai@email.unc.edu>

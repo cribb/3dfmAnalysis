@@ -1147,8 +1147,8 @@ if get(handles.check_subdrift,'Value')
 end
 sigout(:,1) = tout; % first column is always the time
 switch signame
-    case {handles.signames.intr{1},handles.signames.intr{2}} %bead and stage pos                   
-        
+    case {handles.signames.intr{1},handles.signames.intr{2},handles.signames.intr{5}} 
+        %bead pos, stage pos, and pos error        
         % now pick the only dimesions that are requested
         dims = get(handles.list_dims,'value');
         for c = 1:length(dims)
@@ -1223,21 +1223,6 @@ drift = g.drift{fileid}.(signame);
 for c = 1:size(vals,2)% repeat for all columns
     dout(:,c) = vals(:,c) - polyval(drift(:,c),t) + drift(2,c);
 end   
-
-
-
-
-% --- DELETED FROM GUI. READ BELOW FOR WHY. Executes on button press in button_filterMCL.
-%-----------------------------------------------------------------------
-% This function WAS written to remove the high frequency noise from MCL stage-sensor. 
-% But then I realized we can't filter the stage after loading the file,
-% because we don't necessarily load the 'stage sensed positions' field. So
-% filtering has to be done at the time of loading the file, and by
-% load_laser_tracking. So the better way would be to put a check_box on the
-% lt_analysis_gui that lets user specify if he want's to filter the stage
-% at the time of loading. 
-function button_filterMCL_Callback(hObject, eventdata, handles)
-fileid = get(handles.menu_files,'Value');
 
 %-----------------------------------------------------------------------
 function updatemainfig(handles,modestr)
