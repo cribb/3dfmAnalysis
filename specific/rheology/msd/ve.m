@@ -47,7 +47,7 @@ tau = tau(1:end-1,:);
 gstar = (2/3) * (k*T) ./ (pi * bead_radius .* msd .* MYgamma);
 
 f = 1 ./ tau;
-w = f/(2*pi);
+w = 2*pi*f;
 
 gp = gstar .* cos(pi/2 .* alpha);
 gpp= gstar .* sin(pi/2 .* alpha);

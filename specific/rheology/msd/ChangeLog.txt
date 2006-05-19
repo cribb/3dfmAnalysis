@@ -1,3 +1,6 @@
+2006-05-19  Jeremy Cribb <jcribb@email.unc.edu>
+	- ve.m: fixed minor bug in determination of w.
+
 2006-05-16  Jeremy Cribb <jcribb@email.unc.edu>
 	- ve.m: added parameter to plot output in [Hz] or [rad/s].
 
