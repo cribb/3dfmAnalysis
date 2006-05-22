@@ -75,7 +75,7 @@ for f = 1 : length(file)
         imagesc(im','parent',ax);               % puts image in invisible axes  
 		axis off;
         drawnow;
-		mov = addframe(mov,im);               % adds frames to the AVI file 
+		mov = addframe(mov,ax);               % adds frames to the AVI file 
 		status = fseek(fid, frame_size*k, 'bof');  % advance to next frame
 		
 		% handle timer

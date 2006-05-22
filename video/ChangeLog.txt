@@ -1,3 +1,6 @@
+2006-05-22  Jeremy Cribb <jcribb@email.unc.edu>
+	* raw2avi.m: removed an experimental change to the code (committed by mistake).
+
 2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
 	* raw2img.m: fixed error when end_frame wasn't defined.  Now it sets end_frame to the number of frames in the raw file.
 
