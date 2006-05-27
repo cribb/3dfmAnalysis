@@ -1,3 +1,6 @@
+2006-05-27  Kalpit Desai <kvdesai@email.unc.edu>
+	* mypsd.m: Fixed the crash when input signal had more columns than rows. Now if needed, warns the user and transposes the input matrix before computing psd.
+
 2006-05-15  Kalpit Desai <kvdesai@email.unc.edu>
 	* mypsd.m: Fixed a bug in calculation of default frequency resolution.
 	* myspectrogram.m: same.

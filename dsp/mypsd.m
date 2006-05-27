@@ -41,6 +41,13 @@ function varargout = mypsd(s, rate, res, window_type, style, obsoletearg)
 %  05/07/04 - added integrated displacement option; kvdesai
 %  
 varargout = cell(nargout); %initialize outputs with empty cells
+
+% First make sure that the input signal is in format of columns
+if (size(s,1) < size(s,2))
+    disp('mypsd warning: Input signal matrix had more columns than rows.')
+    disp('I will transpose the input and then compute columnwise psd.');
+    s = s';
+end
 if(nargin < 5 | isempty(style))
 	style = '-';
 end
