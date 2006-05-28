@@ -1,3 +1,8 @@
+2006-05-29 Kalpit Desai <kvdesai@email.unc.edu>
+	* fsanalysis_subgui.fig: Grouped 'spectrogram' and 'in box only' into a new subpanel for processing active file only.	
+	* fsanalysis_subgui.m: Rewrote the computation and plotting of spectrogram so that it actually works now. 
+	- Also added overlay of time-domain trace on to the spectrogram itself.
+
 2006-05-18 Kalpit Desai <kvdesai@email.unc.edu>
 	* fsanalysis_subgui.m, fsanalysis_subgui.fig:
 	- fixed a bug in shifting the under-hood frequency window

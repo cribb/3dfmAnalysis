@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_ltagui
 
-% Last Modified by GUIDE v2.5 13-May-2006 12:40:12
+% Last Modified by GUIDE v2.5 28-May-2006 15:58:35
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -83,13 +83,13 @@ handles.posid = [1, 2, 5]; %index of the signals which are position measurements
 handles.mainfigids =      [   1,          2,          3,         4,     5];
 handles.psdfigids =       [  10,         20,         30,        40,     50];
 handles.dvsffigids =  handles.psdfigids + 5;      % accumulated displacement 
-handles.msdfigids = 70;
+handles.msdfigids = 60;
 %  ....add to this list as more types of plots are supported
 
 % Some other figure numbers allocated to specific types of plot
 handles.threeDfig = 9;
 handles.boxresfig = 99;
-handles.specgramfigid = 90;
+handles.specgramfigid = [110,   120,    130,    140,    150];
 %  ....add to this list as more types of plots are supported
 
 % Some other constants
@@ -719,18 +719,27 @@ signame = handles.signames.intr{sigid};
 
 colrs = 'brkgym';
 xlims = [-Inf, Inf];
+manyfiles = 1;
 % determine the ids of the files  to be processed
-if get(handles.check_fdbox,'value')
+if get(handles.check_fdbox,'value')    
     ids = get(handles.menu_files,'Value');% only 1 file
     hmf = handles.mainfigids(sigid);
-    hma = findobj(hmf,'Type','Axes','Tag','');
-    hbox = findobj(hma,'Tag','Box');
-    if ~isempty(hbox)
-        get(hbox,'UserData');
-        xlims = ans.xlims;
+    if ~(ishandle(hmf))
+        set(handles.check_fdbox,'value',0);
+    else
+        hma = findobj(hmf,'Type','Axes','Tag','');
+        hbox = findobj(hma,'Tag','Box');
+        if ~isempty(hbox)
+            get(hbox,'UserData');
+            xlims = ans.xlims;
+        end
+        manyfiles = 0;
     end
-else
+end
+if manyfiles
     ids = get(handles.button_plotfreq,'UserData');
+    % if 'select many files' button was not used, then consider the
+    % curretly active file only.
     if isempty(ids)
         ids = get(handles.menu_files,'value');
     end
@@ -787,8 +796,7 @@ if get(handles.check_psd,'value')
         end            
     end
 end
-
-% Now process + plot each file one by one
+% LOOP TO PROCESS EACH FILE ONE BY ONE
 for fi = 1:length(ids) %repeat for all files selected
     % grab the signal to be processed
     sig = g.data{ids(fi)}.(signame);
@@ -886,8 +894,31 @@ for fi = 1:length(ids) %repeat for all files selected
             hold off;
         end       
     end    
-    %%======   COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   ========   
-    
+    %%=====  COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   =======    
+
+    %%=========== COMPUTE AND PLOT SPECTROGRAM FOR THE FIRST FILE =========
+    if fi == 1 & get(handles.check_spectrogram,'Value')         
+        figure(handles.specgramfigid(sigid));
+        for c = 1:length(cols)
+%             tres = []; % Use the best tradeoff between time and freq. resol
+            tres = 0.1; % explicitly specify the time resolution
+            [s f t p] = myspectrogram(sig(:,cols(c)+1),srate,tres,handles.psdwin);
+            figure(handles.specgramfigid(sigid) + cols(c) - 1);            
+            args = {t,f,10*log10(abs(p)+eps)}; 
+            surf(args{:},'EdgeColor','none'); axis tight; colormap(gray); colorbar;
+            % Now overlay the time domain trace on the surface;
+            hold on;
+            overt = sig(1:100:end,1)-sig(1,1);
+            overy = sig(1:100:end,cols(c) + 1);
+            overy = (overy-overy(1)+f(1))*range(f)/range(overy);
+            plot(overt,overy,'.-k')
+            hold off;
+            view(0,90); % Looking from top down
+            xlabel('Time [S]'); ylabel('Frequency [Hz]');
+            title(['Spectrogram: File ID = ', g.tag{ids(fi)}, ' --', signame]);
+        end
+    end
+    %%=======  COMPLETED SPECTROGRAM COMPUTATION AND PLOTTING   ===========
 end % Finished processing + plotting all files in frequency domain
 
 % clear the memory of file-ids that were selected last time.
@@ -1209,6 +1240,11 @@ for cf = 1:length(handles.gfields)
     g.(handles.gfields{cf}) = g.(handles.gfields{cf})(keepid); 
 end
 
+
+
+
+% --- Executes on button press in check_spectrogram.
+function check_spectrogram_Callback(hObject, eventdata, handles)
 
 %-----------------------------------------------------------------------
 % This function removes the pre-calculated background drift from selected
@@ -1655,14 +1691,12 @@ function check_filterMCL_Callback(hObject, eventdata, handles)
 %%%####################################################################
 
 
-
-
-% --- Executes on button press in check_spectrogram.
-function check_spectrogram_Callback(hObject, eventdata, handles)
-% hObject    handle to check_spectrogram (see GCBO)
+% --- Executes on button press in checkbox21.
+function checkbox21_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox21 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of check_spectrogram
+% Hint: get(hObject,'Value') returns toggle state of checkbox21
 
 
