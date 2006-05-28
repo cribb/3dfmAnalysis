@@ -1,6 +1,8 @@
 2006-05-29 Kalpit Desai <kvdesai@email.unc.edu>
-	* fsanalysis_subgui.fig: Grouped 'spectrogram' and 'in box only' into a new subpanel for processing active file only.	
-	* fsanalysis_subgui.m: Rewrote the computation and plotting of spectrogram so that it actually works now. 
+	* lt_analysis_gui.fig, lt_analysis_gui.m: Previous commit was wrong version, committing correct versions.
+2006-05-29 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.fig: Grouped 'spectrogram' and 'in box only' into a new subpanel for processing active file only.	
+	* lt_analysis_gui.m: Rewrote the computation and plotting of spectrogram so that it actually works now. 
 	- Also added overlay of time-domain trace on to the spectrogram itself.
 
 2006-05-18 Kalpit Desai <kvdesai@email.unc.edu>

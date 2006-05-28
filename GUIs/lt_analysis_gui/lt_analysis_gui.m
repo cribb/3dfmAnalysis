@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_ltagui
 
-% Last Modified by GUIDE v2.5 28-May-2006 15:58:35
+% Last Modified by GUIDE v2.5 28-May-2006 17:21:25
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -910,7 +910,7 @@ for fi = 1:length(ids) %repeat for all files selected
             hold on;
             overt = sig(1:100:end,1)-sig(1,1);
             overy = sig(1:100:end,cols(c) + 1);
-            overy = (overy-overy(1)+f(1))*range(f)/range(overy);
+            overy = (overy-min(overy)+f(1))*range(f)/range(overy);
             plot(overt,overy,'.-k')
             hold off;
             view(0,90); % Looking from top down
@@ -1690,13 +1690,5 @@ function check_filterMCL_Callback(hObject, eventdata, handles)
 %%%#############    GUIDE WILL ADD NEW CALLBACKS BELOW      ###########
 %%%####################################################################
 
-
-% --- Executes on button press in checkbox21.
-function checkbox21_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox21 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox21
 
 
