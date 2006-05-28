@@ -1,3 +1,9 @@
+2006-05-29  Kalpit Desai <kvdesai@email.unc.edu>
+	* myspectrogram.m: 
+	- Replaced the input argument 'frequency resolution' by 'time resolution' because time resolution is more intuitive.
+	- Instead of finest possible resolution, the default is now set to achieve best tradeoff between time resolution and frequency resolution.
+	- Exposed one more output argument: PSD for each time segment
+
 2006-05-27  Kalpit Desai <kvdesai@email.unc.edu>
 	* mypsd.m: Fixed the crash when input signal had more columns than rows. Now if needed, warns the user and transposes the input matrix before computing psd.
 
