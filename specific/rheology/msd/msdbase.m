@@ -43,9 +43,11 @@ if (nargin < 2) | isempty(tau)
     tau = reshape(taumat,1,[]);% vectorize   
 end
 
-% Check that time stamps are evenly spaced
+% Check that time stamps are evenly spaced. Interpolation is wrong since 
+% diffusion is a nonlinear process, but we will go with interpolation until
+% we have alternate method.
 if std(dt) > 1E-2/srate %less than 1 percent spread allowed in sample-intervals. Arbitrarily chosen.
-    srate = srate*2;    %resample at double of the original sample-rate. 
+    srate = 10000;    %resample at double of the original sample-rate. 
     disp(['MSD: Timestamps were unevenly spaced. Will resample at ',num2str(srate),' Hz and interpolate.']);    
     tnew = t(1):1/srate:t(end);
     for c = 1:size(pos,2)

@@ -1,3 +1,10 @@
+2006-06-05  Kalpit Desai <kvdesai@email.unc.edu>
+	* laser_msd.m: 
+	- Essentially rewrote the whole module. Now allows to look at diffusion along each axis (X,Y,Z) as well as in each plane (XY, YZ, ZX) independently.
+	- Output interface had to be changed to report 1D and 2D diffusion parameters
+	- Corrected documentation to reflect changes in the interface.
+	* msdbase.m: Added some comments
+
 2006-06-05  Jeremy Cribb <jcribb@email.unc.edu>
 	- ve.m: corrected documentation and added w to output structure.
 
