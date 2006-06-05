@@ -1,3 +1,9 @@
+2006-06-04 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.fig, lt_analysis_gui.m: 
+	- Added one more experiment type in the list, allows to load bead position and position error.
+	- Fixed a bug in annotating figure for position error signal.
+	- Fixed the disabled 'subtract drift' checkbox even when drift data was selected.
+
 2006-05-29 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.fig, lt_analysis_gui.m: Previous commit was wrong version, committing correct versions.
 2006-05-29 Kalpit Desai <kvdesai@email.unc.edu>

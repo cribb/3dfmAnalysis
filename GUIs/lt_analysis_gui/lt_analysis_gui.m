@@ -140,13 +140,15 @@ switch curexptype
         fieldstr = 'b';
     case allexptype{2} %Pulling + Diffusion
         fieldstr = 'lb';
-    case allexptype{3} %Discrete Freqeuncy Sweep
-        fieldstr = 'lb';        
-    case allexptype{4} %Noise (QPD+laser)
+    case allexptype{3} %Discrete Frequency Sweep
+        fieldstr = 'lb';
+    case allexptype{4} %Load (BeadPos & PosError)
+        fieldstr = 'be';
+    case allexptype{5} %Load (QPD & Channel 8)
         fieldstr = 'lq';
-    case allexptype{5} %Noise (Stage only)
+    case allexptype{6} %Load (Stage only)
         fieldstr = 's';
-    case allexptype{6} % All fields
+    case allexptype{7} %Load All fields
         fieldstr = 'a';
     otherwise
         prompt_user('Error: Unrecognized experiment type',handles);
@@ -422,7 +424,7 @@ for c = 2:M % repeat for all columns
  % drift.
     g.drift{fileid}.(signame)(:,c-1) = [fit(1), 0];
 end
-
+set(handles.check_subdrift,'Enable','On');
 %-------------------------------------------------------------------------
 % --- Executes on button press in check_subdrift.
 function check_subdrift_Callback(hObject, eventdata, handles)
@@ -1206,10 +1208,15 @@ switch signame
         end
         annots.y = 'Microns';
         annots.x = 'Seconds';
-        if isequal(signame,handles.signames.intr{1}) %if this is bead position
-            annots.t = 'Probe Postion (relative to specimen)';
-        else
-            annots.t = 'Stage Postion (sensed)';
+        switch signame
+            case handles.signames.intr{1} %bead position
+                annots.t = 'Probe Postion (relative to specimen)';
+            case handles.signames.intr{2} % stage sensed postion
+                annots.t = 'Stage Postion (sensed)';
+            case handles.signames.intr{5} % position error
+                annots.t = 'Position error';
+            otherwise 
+                promptuser('Error: Unrecognized signal type');                
         end
     case handles.signames.intr{3} % qpd signals
         sigout(:,2:5) = temp;
