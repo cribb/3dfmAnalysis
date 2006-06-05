@@ -1,3 +1,6 @@
+2006-06-05  Jeremy Cribb <jcribb@email.unc.edu>
+	- ve.m: corrected documentation and added w to output structure.
+
 2006-05-19  Jeremy Cribb <jcribb@email.unc.edu>
 	- ve.m: fixed minor bug in determination of w.
 
