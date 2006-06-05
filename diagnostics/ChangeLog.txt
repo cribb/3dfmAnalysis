@@ -1,3 +1,11 @@
+2006-06-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* DACoperator.m: 
+		- changed default number of repeats to zero.  this means the default behavior is to run the input signal once (i.e. no repeats).
+		- added repeats to virtual DAC output
+		- now reports starting time from clock (as close as possible to start)
+	* zerodaq.m:
+		- changed default DAq board.
+
 2006-04-25  Jeremy Cribb <jcribb@email.unc.edu>
 	* DACoperator.m: added newline to end of daqtest output.
 

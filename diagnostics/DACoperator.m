@@ -1,7 +1,7 @@
-function varargout = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange)
+function v = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange)
 % 3DFM function  
 % DSP / DAQ 
-% last modified 12/18/04 
+% last modified 06.05.2006
 %
 % data = DACoperator(inputs, duration, board, channels, srate);  
 %
@@ -28,12 +28,12 @@ else
 end
 
 if (nargin < 2 | isempty(Nrepeat))  
-    Nrepeat = 1;          
+    Nrepeat = 0;          
 end;
 
 if (nargin < 3 | isempty(board))  
-    board = 'PCI-6733';             
-    warning('DACoperator: Using default AO board: PCI-6733 (stage-controller)...');   
+    board = 'PCI-6713';             
+    warning('DACoperator: Using default AO board: PCI-6733 (magnet-controller)...');   
 end;
 
 if (nargin < 4 | isempty(channels))   
@@ -78,14 +78,23 @@ inputs = min(inputs,Vrange(1,2));
 % output information to "virtual daq board" to convey what *would* have
 % gone to DAQout had a real board been specified in the function call.
 if (AOid < 0) | strcmp(board,'daqtest');  
-    warning(['DACoperator: output board not found or board == daqtest.  '  ...
-             'Plotting DACout instead of sending to DAq board.']);  
-    daqreset;
+    logentry(['output board not found or board == daqtest.'...
+             '  Plotting DACout instead of sending to DAq board.']);  
+
+    t = [0:1/srate:(length(inputs)*(Nrepeat+1) - 1)/srate]';
+    fullinput = repmat(inputs, Nrepeat+1, 1);
+    start_time = date2unixsecs;
     
-    t = [0:1/srate:(length(inputs)-1)/srate];
-    
+    logentry(['Board ID: ' board]);
+    logentry(['Sampling Rate: ' num2str(srate)]);
+    logentry(['Voltage Range: [' num2str(Vrange(1)) ' ' num2str(Vrange(2)) ']']);
+    logentry(['Number of repeats: ' num2str(Nrepeat) ] );
+    logentry(['Writing to output channels: ' num2str(channels') ]);
+    logentry(['Start time would have been: ' num2str((start_time))]);
+    logentry(['Signals to send to DAq channels are plotted.']);
+
     figure;
-    plot(t, inputs);
+    plot(t, fullinput);
     axis([0 t(end) Vrange(1) Vrange(2)]);    
     title('DAQtest Output');
     xlabel('time (s)');
@@ -99,6 +108,9 @@ if (AOid < 0) | strcmp(board,'daqtest');
     fprintf('\n Writing to output channels: %i', channels);
     fprintf('\n Signals to send to DAq channels are plotted.\n\n');
     
+    v = start_time;    
+    daqreset;
+   
     return;
 end
 
@@ -114,5 +126,22 @@ set(AO, 'RepeatOutput', Nrepeat);
 
 
 putdata(AO, inputs); % enqueue the data
+v = date2unixsecs;
 start(AO); % send the data
+
+return;
+
+
+% ----------------
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'DACoperator: '];
+     
+     fprintf('%s%s\n', headertext, txt);
 
