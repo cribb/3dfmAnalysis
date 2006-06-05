@@ -1,4 +1,7 @@
-2005-10-31  Jeremy Crivv <jcribb@email.unc.edu>
+2006-06-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* forcecal2d.m: removed bug that crashed function when no data existed for a particular tracker.
+
+2005-10-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* forcecal2d.m: better derivative handling, added plot.
 
 2005-10-06  Jeremy Cribb <jcribb@email.unc.edu>

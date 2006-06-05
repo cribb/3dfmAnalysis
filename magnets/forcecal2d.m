@@ -52,7 +52,10 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
             vel = dxydt;            
             velmag = magnitude(vel);
             force = 6*pi*viscosity*bead_radius*velmag*calib_um*1e-6;
-            
+        else
+            % there's no information in this trackerID, so continue to next
+            % iteration.
+            continue;
 		end
             
         % setup the output variables
