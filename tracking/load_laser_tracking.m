@@ -268,7 +268,7 @@ if(ischar(file)) % file contains the name of the file as a string
         % filtered; and we don't know the component of stage position in
         % bead position.
         if ~isequal(last_flags.filterstage, flags.filterstage)
-            disp('WARNING: requested to change the ''filter-stgae'' flag.');
+            disp('WARNING: requested to change the ''filter-stage'' flag.');
             disp('Not supported at this point.');
             disp('To fix, re-load and save original .vrpn.mat file with correct flags');
             flags.filterstage = last_flags.filterstage;

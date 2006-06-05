@@ -1,3 +1,6 @@
+2006-06-05  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m: Fixed a typo.
+
 2006-04-24  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m: Fixed a bug in handling drift as well as time-offset when loading an edited.mat file.
 
