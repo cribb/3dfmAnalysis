@@ -830,6 +830,13 @@ for fi = 1:length(ids) %repeat for all files selected
         end
         clear oldsig
     end
+    % now Subtract out the drift if we are told to do so
+    if get(handles.check_subdrift,'value')
+        drift = g.drift{ids(fi)}.(signame);
+        for j = 2:size(sig,2)
+            sig(:,j) = sig(:,j) - polyval(drift(:,j-1),sig(:,1)) + drift(2,j-1);
+        end
+    end
     % Now the columns in the data loaded for a positional signal are
     % x,y,z but the columns in the listbox displayed on UI are
     % r,x,y,z. So push down x,y and z by one column. Then calculate R  
@@ -842,8 +849,9 @@ for fi = 1:length(ids) %repeat for all files selected
             clear temp            
         end
     end
-    % now remove the mean from original signal before computing psd
+    % now remove the mean from original signal
     sig(:,2:end) = sig(:,2:end) - repmat(mean(sig(:,2:end),1),size(sig,1),1);
+    
     
     %%=========== COMPUTE AND PLOT PSD + CUMULATIVE DISTANCE ===============
     if get(handles.check_psd,'Value')        
@@ -899,25 +907,30 @@ for fi = 1:length(ids) %repeat for all files selected
     %%=====  COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   =======    
 
     %%=========== COMPUTE AND PLOT SPECTROGRAM FOR THE FIRST FILE =========
-    if fi == 1 & get(handles.check_spectrogram,'Value')         
+    srxyz = 'RXYZ';
+    if fi == 1 & get(handles.check_spectrogram,'Value')% Only one file         
         figure(handles.specgramfigid(sigid));
         for c = 1:length(cols)
 %             tres = []; % Use the best tradeoff between time and freq. resol
             tres = 0.1; % explicitly specify the time resolution
             [s f t p] = myspectrogram(sig(:,cols(c)+1),srate,tres,handles.psdwin);
-            figure(handles.specgramfigid(sigid) + cols(c) - 1);            
+            figure(handles.specgramfigid(sigid) + cols(c) - 1); clf;           
             args = {t,f,10*log10(abs(p)+eps)}; 
             surf(args{:},'EdgeColor','none'); axis tight; colormap(gray); colorbar;
             % Now overlay the time domain trace on the surface;
-            hold on;
+            hold on;           
+
             overt = sig(1:100:end,1)-sig(1,1);
             overy = sig(1:100:end,cols(c) + 1);
             overy = (overy-min(overy)+f(1))*range(f)/range(overy);
             plot(overt,overy,'.-k')
+            % Now overlay the magnet log if are told to do so
+            overlaymag(handles,gcf,1); % This causes the figure to hold off
+            %----
             hold off;
             view(0,90); % Looking from top down
             xlabel('Time [S]'); ylabel('Frequency [Hz]');
-            title(['Spectrogram: File ID = ', g.tag{ids(fi)}, ' --', signame]);
+            title(['Spectrogram: File ID = ', g.tag{ids(fi)}, ' --', signame, ': ', srxyz(cols(c))]);
         end
     end
     %%=======  COMPLETED SPECTROGRAM COMPUTATION AND PLOTTING   ===========
@@ -1350,33 +1363,41 @@ if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'
 end
 dbclear if error
 %-----------------------------------------------------------------------
-function overlaymag(varargin)
+function overlaymag(handles,figid,remtoff)
+% Called by mainfigure update routine and spectrogram plotting routine.
 global g
-handles = varargin{1};
-if nargin < 2    
-    sigid = get(handles.menu_signal,'UserData');
-    figid = handles.mainfigids(sigid);
-else
-    figid = varargin{2};
+if nargin < 3  | isempty(remtoff)    
+    remtoff = 0; % Do not remove offset in time
 end
-% Proceed only if the main figure is open, otherwise return
+if nargin < 2  | isempty(figid) 
+    sigid = get(handles.menu_signal,'UserData');
+    figid = handles.mainfigids(sigid);    
+end
+
+% Proceed only if the target figure is open, otherwise return
 if ~ishandle(figid)
     return;
 end
 % Find the handle to the old magnet trace and delete it
 oldmag = findobj(figid,'Type','Line','Tag','Mag');
 delete(oldmag);
+axis tight; % Resize axes after deleting old magnet trace
 % replot the magnets only if the box is checked
 if get(handles.check_overlaymag,'value')
     fileid = get(handles.menu_files,'value');
     mags = g.data{fileid}.(handles.signames.intr{4});
+    overt = mags(1:100:end,1);    
+    if (remtoff) overt = overt - overt(1); end
     % Now adjust the range so that mags are visible in the current axis
     hma = findobj(figid,'Type','Axes','Tag','');
-    ylims = get(hma,'Ylim');
-    mags(:,2) = mags(:,2) + ylims(1) - mags(1,2);    
+    ylims = get(hma,'Ylim');   
+    overy = mags(1:100:end,2)*0.25*range(ylims)/range(mags(:,2));
+    % Now shift the magnet trace so that LOW state is always at bottom of
+    % the plot
+    overy = (overy + ylims(1) - min(overy));    
     
     figure(figid); hold on;
-    plot(mags(:,1),mags(:,2),'m','Tag','Mag');%magenta color
+    plot(overt,overy,'m','Tag','Mag');%magenta color
     hold off;
 end
 

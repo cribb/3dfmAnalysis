@@ -1,3 +1,10 @@
+2006-06-06 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: 
+	- Now when told to do so, drift is subtracted out before frequency domain analysis is performed
+	- Now the spectrogram plot displays the dimension used, i.e. R/X/Y/Z
+	- Now magnet log (channel 8) is overlayed on the spectrogram
+	- Fixed a bug in overlaymags method that caused the magnet trace display to show up outside the axis limits
+
 2006-06-04 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.fig, lt_analysis_gui.m: 
 	- Added one more experiment type in the list, allows to load bead position and position error.
