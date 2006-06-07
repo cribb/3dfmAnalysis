@@ -916,7 +916,7 @@ for fi = 1:length(ids) %repeat for all files selected
             [s f t p] = myspectrogram(sig(:,cols(c)+1),srate,tres,handles.psdwin);
             figure(handles.specgramfigid(sigid) + cols(c) - 1); clf;           
             args = {t,f,10*log10(abs(p)+eps)}; 
-            surf(args{:},'EdgeColor','none'); axis tight; colormap(gray); colorbar;
+            surf(args{:},'EdgeColor','none'); axis tight; colormap(bone); colorbar;
             % Now overlay the time domain trace on the surface;
             hold on;           
 

@@ -1,4 +1,8 @@
 2006-06-06 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: Now uses 'bone' colormap instead of 'gray' for spectrogram.
+	* lt_analysis_gui.fig: minor cosmetic changes.
+
+2006-06-06 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: 
 	- Now when told to do so, drift is subtracted out before frequency domain analysis is performed
 	- Now the spectrogram plot displays the dimension used, i.e. R/X/Y/Z
