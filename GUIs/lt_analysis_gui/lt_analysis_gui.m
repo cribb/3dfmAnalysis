@@ -479,7 +479,9 @@ else
                 updatemainfig(handles,'new');
             end    
             set(hrad(1), 'Value', 1);
-            set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});
+            set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});            
+            % delete the old box
+            delete(findobj(hma,'Tag','Box'));
         case 2
             if (0 == figflag(getmainfigname(handles)))
                 updatemainfig(handles,'new');
@@ -503,14 +505,15 @@ end
 %-------------------------------------------------------------------------
 function DrawNewBoxFcn(hcaller,eventdata,handles)
 % ----Executes when mouse is pressed inside the main axes and the box radio 
-% is set to 'Draw New Box'
+% is set to 'Draw New Box'. Because this function is called by the figure,
+% we are sure that gcf gives the handle of the main figure and gca gives 
+% handle of the axis of the main figure
 dbstop if error
-hmf = get(handles.radio_drawbox,'UserData');
-% find the handle of the axes of the main figure
-hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend'
 
-% delete the old box 
-delete(findobj(hma,'Tag','Box'));
+% NO NEED hmf = get(handles.radio_drawbox,'UserData');   
+% % find the handle of the axes of the main figure
+% hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend'
+hma = gca;
 
 point1 = get(hma,'CurrentPoint');    % button down detected
 b.figbox = rbbox;                      % return figure units
@@ -529,16 +532,19 @@ updatebox(handles,hma,0,b);
 manageboxradiogroup(handles,2,1)
 dbclear if error
 %-------------------------------------------------------------------------
-% ----Executes when mouse is pressed inside the main axes and the box mode
-% is set to 'Drag Box'
+% Executes when mouse is pressed inside the main axes and the box mode
+% is set to 'Drag Box'. Because this function is called by the figure,
+% we are sure that gcf gives the handle of the main figure and gca gives 
+% handle of the axis of the main figure
 function DragBoxFcn(hcaller,eventdata,handles)
 dbstop if error
-hmf = get(handles.radio_drawbox,'UserData');
-% find the handle of the axes of the main figure
-hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend'
+hmf = gcf; hma = gca;
+% NO NEED hmf = get(handles.radio_drawbox,'UserData');
+% % find the handle of the axes of the main figure
+% hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend'
 hbox = findobj(hma,'Tag','Box');
 if isempty(hbox)
-    errordlg('Box not found, redraw it. Switching to draw new box mode...');
+    errordlg('Box not found, redraw it. Switching to ''draw new box'' mode...');
     %Now switch to 'draw new box' mode automatically.
     manageboxradiogroup(handles,1,1);
     return;
@@ -1023,69 +1029,81 @@ for fi = 1:length(ids) %repeat for all files selected
 %             tres = []; % Use the best tradeoff between time and freq. resol
             tres = 1; % explicitly specify the time resolution
             [s f t p] = myspectrogram(sig(:,cols(c)+1),srate,tres,handles.psdwin);          
+            % Now remove the zero frequency component because
+            % 1. It causes problems on loglog plots
+            % 2. I don't think we can ever sample zero frequency 
+            igood = find(f ~= 0);
+            f = f(igood);
+            s = s(igood,:);
+            p = p(igood,:);
+            
             p = p.*repmat(f,1,size(t,2));
             figure(fignum); clf;
             logf = log10(f);
             args = {t,logf,log10(abs(p)+eps)}; 
             surf(args{:},'EdgeColor','none'); axis tight; colormap(bone); colorbar;
             hold on;           
+            surfaceplot = 0;
+            if surfaceplot
+                % try to make the 60,600,1800 Hz line red
+                i60 = max(find(f <=60));
+                i600 = max(find(f <=600));
+                i1800 = max(find(f <=1800));
 
-            % try to make the 60,600,1800 Hz line red
-            i60 = max(find(f <=60));
-%             i600 = max(find(f <=600));
-%             i1800 = max(find(f <=1800));
+                msync = g.data{ids(fi)}.(handles.signames.intr{4});% channel 8;
+                imags = find(msync(:,2) > 0.01); % When were the magnets on?
+                tmag = msync(:,1) - msync(1,1);
+                % If the box is in use, then we need to translate imags in to
+                % indices relative to box
+                itrue = interp1(t,[1:length(t)],tmag(imags),'nearest');
+                itrue = unique(itrue);
+
+                line(t(itrue),repmat(log10(f(i60)),size(itrue)),log10(abs(p(i60,itrue))+eps),'Color',[1 0 0],'LineWidth',2);
+                line(t(itrue),repmat(log10(f(i600)),size(itrue)),log10(abs(p(i600,itrue))+eps),'Color',[1 0 0],'LineWidth',2);
+                line(t(itrue),repmat(log10(f(i1800)),size(itrue)),log10(abs(p(i1800,itrue))+eps),'Color',[1 0 0],'LineWidth',2);
+                hold off;
+
+                view(75,60);
+            else
+                % Now overlay the time domain trace on the surface;
+                overt = sig(1:100:end,1)-sig(1,1);
+                overy = sig(1:100:end,cols(c) + 1);
+                overy = overy*range(logf)/range(overy);
+                overy = (overy-min(overy)+min(logf));
+                plot(overt,overy,'.-k')
+                % Now overlay the magnet log if are told to do so
+                overlaymag(handles,gcf,1); % This causes the figure to hold  off
+                view(0,90); % Looking from top down - looks like colormap
+            end
+            xlabel('Time [S]'); ylabel('Log_{10} Frequency [Hz]');
+            title(['Spectrogram: File ID = ', g.tag{ids(fi)}, ' --', signame, ': ', srxyz(cols(c))]);
             
-            msync = g.data{ids(fi)}.(handles.signames.intr{4});% channel 8;
-            imags = find(msync(:,2) > 0.1); % When were the magnets on? 
-            tmag = msync(:,1) - msync(1,1);
-            % If the box is in use, then we need to translate imags in to
-            % indices relative to box
-            itrue = interp1(t,[1:length(t)],tmag(imags),'nearest');
-            itrue = unique(itrue);
-            
-            line(t(itrue),repmat(log10(f(i60)),size(itrue)),log10(abs(p(i60,itrue))+eps),'Color',[1 0 0],'LineWidth',2);
-%             line(t(itrue),repmat(log10(f(i600)),size(itrue)),log10(abs(p(i600,itrue))+eps),'Color',[1 0 0],'LineWidth',2);
-%             line(t(itrue),repmat(log10(f(i1800)),size(itrue)),log10(abs(p(i1800,itrue))+eps),'Color',[1 0 0],'LineWidth',2);
-            
+%             %---- This, plotting energy vs time, may be temporaray
+%             figure(fignum+5);
+%             binres = 0.5;% jumping window size to compute rms on
+%             nbins = floor(range(sig(:,1))/binres);
+%             nperbin = floor(srate*binres);
+%             tzero = sig(1,1);
+%             for j = 1:nbins
+%                 ibinst = (j-1)*nperbin + 1;
+%                 binsig = sig(ibinst:j*nperbin, c+1)-sig(ibinst,c+1);
+%                 energy(j) = rms(binsig);
+%                 time(j) = sig(ibinst+floor(nperbin/2),1)-tzero;                
+%             end
+%             plot(time,energy,'.-r');
 %             % Now overlay the time domain trace on the surface;
+%             hold on;           
+% 
 %             overt = sig(1:100:end,1)-sig(1,1);
 %             overy = sig(1:100:end,cols(c) + 1);
-%             overy = (overy-min(overy)+min(logf))*range(logf)/range(overy);
+%             overy = overy*range(energy)/range(overy);
+%             overy = (overy-min(overy)+min(energy));
 %             plot(overt,overy,'.-k')
 %             % Now overlay the magnet log if are told to do so
 %             overlaymag(handles,gcf,1); % This causes the figure to hold off
-            hold off;
-%             view(0,90); % Looking from top down - looks like colormap
-            view(75,60);    
-            xlabel('Time [S]'); ylabel('Frequency [Hz]');
-            title(['Spectrogram: File ID = ', g.tag{ids(fi)}, ' --', signame, ': ', srxyz(cols(c))]);
-            %---- This, plotting energy vs time, may be temporaray
-            figure(fignum+5);
-            binres = 0.5;% jumping window size to compute rms on
-            nbins = floor(range(sig(:,1))/binres);
-            nperbin = floor(srate*binres);
-            tzero = sig(1,1);
-            for j = 1:nbins
-                ibinst = (j-1)*nperbin + 1;
-                binsig = sig(ibinst:j*nperbin, c+1)-sig(ibinst,c+1);
-                energy(j) = rms(binsig);
-                time(j) = sig(ibinst+floor(nperbin/2),1)-tzero;                
-            end
-            plot(time,energy,'.-r');
-            % Now overlay the time domain trace on the surface;
-            hold on;           
-
-            overt = sig(1:100:end,1)-sig(1,1);
-            overy = sig(1:100:end,cols(c) + 1);
-            overy = overy*range(energy)/range(overy);
-            overy = (overy-min(overy)+min(energy));
-            plot(overt,overy,'.-k')
-            % Now overlay the magnet log if are told to do so
-            overlaymag(handles,gcf,1); % This causes the figure to hold off
-            hold off;           
-%             legend('Energy','Bead diplacement','Magnets');
-            xlabel('Time [S]'); ylabel('Energy');
-            title(['Spectrogram: File ID = ', g.tag{ids(fi)}, ' --', signame, ': ', srxyz(cols(c))]);
+%             hold off;           
+% %             legend('Energy','Bead diplacement','Magnets');
+%             xlabel('Time [S]'); ylabel('Energy');            
         end
     end
     %%=======  COMPLETED SPECTROGRAM COMPUTATION AND PLOTTING   ===========
@@ -1411,16 +1429,12 @@ end
 function remove_file(ids, handles)
 global g
 % ids is a list of the file-indexes that needs to be removed
-
 allid = 1:1:length(g.(handles.gfields{1}));
 keepid = setdiff(allid,ids); % indexes of the files that would be kept
 
 for cf = 1:length(handles.gfields) 
     g.(handles.gfields{cf}) = g.(handles.gfields{cf})(keepid); 
 end
-
-
-
 
 % --- Executes on button press in check_spectrogram.
 function check_spectrogram_Callback(hObject, eventdata, handles)
@@ -1575,8 +1589,8 @@ if nargin < 2
 else
     sigvals = varargin{2};
 end
-% remove offset 
-sigvals(:,2:4) = sigvals(:,2:4) - repmat(sigvals(1,2:4),size(sigvals,1),1);
+% remove offset in position and in time
+sigvals = sigvals - repmat(sigvals(1,:),size(sigvals,1),1);
 % decimate to 100 Hz so that the 3D trace loads faster
 t = [sigvals(1,1):0.01:sigvals(end,1)]';
 for c = 1:3
@@ -1606,14 +1620,21 @@ else
         prebox = 1:size(p,1);
     end
 end
+if ishandle(handles.threeDfig)
+    figure(handles.threeDfig);
+    [az el] = view;
+else
+    az = 45; el = 45;
+end
 figure(handles.threeDfig);
 plot3(p(prebox,1),p(prebox,2),p(prebox,3),'k'); hold on;
 plot3(p(inbox,1),p(inbox,2),p(inbox,3),'m'); 
 plot3(p(postbox,1),p(postbox,2),p(postbox,3),'k'); hold off;
 xlabel('X');    ylabel('Y');    zlabel('Z');
 set(gca,'Xcolor','b','Ycolor',[0.25, 0.5, 0.5],'Zcolor','r');
-set(handles.threeDfig,'Name',['3d ',dispname],'NumberTitle','Off');
+set(handles.threeDfig,'Name',['3d ',dispname]);
 pretty_plot;
+view(az,el); axis equal;
 %-----------------------------------------------------------------------
 % This routine updates two menus: menu_files and menu_signal
 % This routine is called only by 'add' and 'remove' buttons
@@ -1740,7 +1761,19 @@ function button_invokeFSgui_Callback(hObject, eventdata, handles)
 setappdata(handles.ltaGUI,'ltahandles',handles);
 fsanalysis_subgui;
 
-
+% --- Executes during object creation, after setting all properties.
+function menu_dispres_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to menu_dispres (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(hObject,'BackgroundColor','white');
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+set(hObject,'value',3); % Set to 10 ms resolution by default
 %%%********************************************************************
 %%%**********     ALL BELOW IS NEEDED BUT NOT-USED     ****************
 %%%********************************************************************
@@ -1842,19 +1875,6 @@ else
     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
-% --- Executes during object creation, after setting all properties.
-function menu_dispres_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to menu_dispres (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
 
 % --- Executes on selection change in menu_exper.
 function menu_exper_Callback(hObject, eventdata, handles)

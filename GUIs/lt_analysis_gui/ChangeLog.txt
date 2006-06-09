@@ -1,4 +1,10 @@
 2006-06-09 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m:	
+	- Fixed a bug in plotting spectrogram in log scale. Also, default view is set back to looking down from top, since 3D view wasn't much helpful.
+	- Commented out the code for plotting energy vs time. Will add back after putting a checkbox in the advanced option window.
+	- Fixed the annoying delay that happened when trying to draw a new box when one box already exists. Now first deletes the old box before switching to 'drag box' mode.
+
+2006-06-09 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.fig:
 	- Added a button to let user clear the stack created using 'plot freq domain results for this box in the stack' button.
 	* lt_analysis_gui.m:
