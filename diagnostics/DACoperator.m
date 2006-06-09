@@ -38,6 +38,7 @@ end;
 
 if (nargin < 4 | isempty(channels))   
     channels = 0:length;
+
     warning(['DACoperator: Using default AO channels: 0 to ,',num2str(N-1)]);
 end;
 
@@ -58,7 +59,15 @@ end
 
 % find the board id that goes with the name
 if ~strcmp(board,'daqtest')
-	hwinfo = daqhwinfo('nidaq');
+    try
+        hwinfo = daqhwinfo('nidaq');
+    catch
+        board = 'daqtest';
+        logentry('No NI DAq boards found.  Defaulting to "daqtest" virtual board.');
+    end
+end
+
+if ~strcmp(board,'daqtest')
 	AOid = -1;
 	for i=1:length(hwinfo.BoardNames)
       if strcmp(char(hwinfo.BoardNames(i)), board)

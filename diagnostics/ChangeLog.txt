@@ -1,3 +1,6 @@
+2006-06-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* DACoperator.m: used try-catch when querying available DAq boards.  Now you can use the "virtual" board on machines that have no DAq boards installed at all.
+
 2006-06-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* DACoperator.m: 
 		- changed default number of repeats to zero.  this means the default behavior is to run the input signal once (i.e. no repeats).
