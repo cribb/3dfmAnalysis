@@ -1,3 +1,16 @@
+2006-06-08 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.fig:
+	- Added a button that allows user to compare frequency domain plots for different parts of the same file. Not tested.
+	- Added a checkbox that allows user to specify if the statistics of the data within box is to be recomputed
+	- Deleted 'Do Nothing' radio box.
+	* lt_analysis_gui.fig: 
+	- Coding necessary to facilitate the above mentioned changes.
+	- Now spectrogram is plotted as a surface (instead of colormap) and in log scale.
+	- Commented out overlaying of position data on spectrogram, doesn't go well with surface.
+	- Added a routine that computes and plots energy vs time. This may just be temporary.
+	
+	
+
 2006-06-06 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: Now uses 'bone' colormap instead of 'gray' for spectrogram.
 	* lt_analysis_gui.fig: minor cosmetic changes.

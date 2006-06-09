@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_ltagui
 
-% Last Modified by GUIDE v2.5 28-May-2006 17:21:25
+% Last Modified by GUIDE v2.5 08-Jun-2006 21:19:08
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -351,15 +351,9 @@ end
 if (0 == figflag(getmainfigname(handles)))
    updatemainfig(handles,'new'); 
 end
-% hmf = get(handles.radio_drawbox,'UserData')
-% hma = findobj(hmf,'Type','Axes','Tag','');
 % set the buttonDownFcn to DoNothing.
-manageboxradiogroup(handles,3,1);
+% % manageboxradiogroup(handles,3,1);
 
-% [t(1),y] = ginput(1);
-% drawlines(hma,t(1));
-% [t(2),y] = ginput(1);
-% drawlines(hma,t(2));
 [t,y] = ginput(2);
 
 t = sort(t);
@@ -402,9 +396,8 @@ if (0 == figflag(getmainfigname(handles)))
    updatemainfig(handles,'new'); 
 end
 % set the buttonDownFcn to DoNothing.
-manageboxradiogroup(handles,3,1);
-% hmf = get(handles.radio_drawbox,'UserData')
-% hma = findobj(hmf,'Type','Axes','Tag','');
+% % manageboxradiogroup(handles,3,1);
+
 [t,y] = ginput(2);
 
 t = sort(t);
@@ -450,7 +443,7 @@ manageboxradiogroup(handles,1,get(hObject,'value'));
 % --- Executes on button press in radio_dragbox.
 function radio_dragbox_Callback(hObject, eventdata, handles)
 manageboxradiogroup(handles,2,get(hObject,'value'));
-%-------------------------------------------------------------------------
+%--------------------DELETED THIS RADIO ON JUNE 08, 2006------------------
 % --- Executes on button press in radio_nothing.
 function radio_nothing_Callback(hObject, eventdata, handles)
 manageboxradiogroup(handles,3,get(hObject,'value'));
@@ -467,14 +460,14 @@ hma = findobj(hmf,'Type','Axes','Tag','');
 % some constants
 hrad(1) = handles.radio_drawbox;
 hrad(2) = handles.radio_dragbox;
-hrad(3) = handles.radio_nothing;
+% hrad(3) = handles.radio_nothing;
 
-for c = 1:3 % reset all radios first
+for c = 1:2 % reset all radios first
     set(hrad(c),'Value',0);
 end
 if radstat == 0
-    set(hrad(3), 'Value', 1);
-    set(hma,'ButtonDownFcn',{@DoNothingFcn,handles});
+    set(hrad(1), 'Value', 1);
+    set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});
 else
     switch radind
         case 1
@@ -496,7 +489,7 @@ else
                 set(hrad(2), 'Value', 1);
                 set(hma,'ButtonDownFcn',{@DragBoxFcn,handles});
             end
-        case 3
+        case 3 %DELETED THIS RADIO ON JUNE 08, 2006
             set(hrad(3), 'Value', 1);
             set(hma,'ButtonDownFcn',{@DoNothingFcn,handles});
         otherwise
@@ -550,7 +543,7 @@ b = get(hbox,'UserData'); %b must not be empty, if everything is working.
 % The box is drawn in figure units which are usually 'pixels' but the 
 % axis units are 'normalized' by default. Moreover, we have the coordinates
 % of the box in data units, and to be able to show the shadow while
-% dragging, we need to convert them into 'pixels' or the figure units.
+% dragging, we need to convert them into the figure units i.e. 'pixels'.
 % So, idea is to first set the axis units to same as figure units, then
 % take two points: bottom-left corner and top-righ corner. 
 % Asking 'position' property gives info about coordinates of
@@ -632,10 +625,25 @@ hbox = rectangle('Position',b.dbox);
 set(hbox,'EdgeColor','r','Tag','Box','Linewidth',2,'LineStyle','-.');
 hold off;
 set(hbox,'UserData',b);
-updateboxresults(handles,hbox);
 
+% Update the window showing basic statistics for the data within the box 
+if get(handles.check_boxstat,'value')
+    updateboxresults(handles,hbox);
+else
+    if ishandle(handles.boxresfig)
+        close(handles.boxresfig);
+    end
+end
+
+% Update 3D plot to show what falls inside the selected box
 if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'Value') == 1)
     plot3dfigure(handles);
+end
+
+% Stack the frequency domain results for data that falls within this new 
+% position of the box.
+if get(handles.button_stack,'value')
+ % Call the plot_freq routine here with appropriate parameters
 end
 
 % --- Executes on selection change in menu_dispres.
@@ -713,21 +721,34 @@ end
 %-----------------------------------------------------------------------
 % --- Executes on button press in button_plotfreq.
 function button_plotfreq_Callback(hObject, eventdata, handles)
+stack_mode = 0;
+plotfreqdom(handles,stack_mode);
+return;
+
+% --- Executes on button press in button_stack.
+function button_stack_Callback(hObject, eventdata, handles)
+stack_mode = 1;
+plotfreqdom(handles,stack_mode);
+return;
+%-----------------------------------------------------------------------
+function plotfreqdom(handles,stack_mode)
 global g
+persistent cbox
 dbstop if error
 
 sigid = get(handles.menu_signal,'UserData');
 signame = handles.signames.intr{sigid};
 
-colrs = 'brkgym';
+
 xlims = [-Inf, Inf];
 manyfiles = 1;
 % determine the ids of the files  to be processed
-if get(handles.check_fdbox,'value')    
+if stack_mode | get(handles.check_fdbox,'value')    
     ids = get(handles.menu_files,'Value');% only 1 file
     hmf = handles.mainfigids(sigid);
     if ~(ishandle(hmf))
         set(handles.check_fdbox,'value',0);
+        if (stack_mode) return; end        
     else
         hma = findobj(hmf,'Type','Axes','Tag','');
         hbox = findobj(hma,'Tag','Box');
@@ -760,11 +781,20 @@ end
 
 % First setup figures for msd and psd computations if we should. Then fill
 % in the plots for each file one by one.
-    
+if stack_mode
+    msdfignum = handles.msdfigids(sigid) + 100;
+    psdfignum = handles.psdfigids(sigid) + 100;
+    dvsffignum = handles.dvsffigids(sigid) + 100;
+else
+    msdfignum = handles.msdfigids(sigid);
+    psdfignum = handles.psdfigids(sigid);
+    dvsffignum = handles.dvsffigids(sigid);
+end
 % $$$$$$$$ Setup MSD figures if we should
 if get(handles.check_msd,'Value')
     % setup msd figure
-    figure(handles.msdfigids(sigid)); clf;
+    figure(msdfignum); 
+    if ~stack_mode          clf;    end
     title([handles.signames.disp{sigid}, '-MSD']);
     xlabel('log_{10}(\tau)      [seconds]');	                        
     ylabel('log_{10}(MSD)       [micron^2]');    
@@ -775,7 +805,9 @@ end
 if get(handles.check_psd,'value')  
     for c = 1:length(cols)
         % setup psd figure
-        figure(handles.psdfigids(sigid) + cols(c) - 1); clf;
+        figure(psdfignum + cols(c) - 1);
+        if ~stack_mode      clf;    end
+        
         title([handles.signames.disp{sigid}, '-PSD: ',strs{cols(c)}]);
         xlabel('log_{10} Frequency [Hz]');
         if any(sigid == handles.posid) % if this signal is a position measurement
@@ -786,7 +818,9 @@ if get(handles.check_psd,'value')
         hold on;
         % setup 'area under psd' figure if we should
         if get(handles.check_cumdisp,'value')
-            figure(handles.dvsffigids(sigid) + cols(c) - 1); clf;
+            figure(dvsffignum + cols(c) - 1);
+            if ~stack_mode      clf;    end
+  
             if any(sigid == handles.posid) % if this signal is a position measurement
                 title([handles.signames.disp{sigid}, '-Cumulative Displacement: ',strs{cols(c)}]);                
             else 
@@ -798,7 +832,8 @@ if get(handles.check_psd,'value')
         end            
     end
 end
-% LOOP TO PROCESS EACH FILE ONE BY ONE
+scolor = 'brkgmy';
+% LOOP TO PROCESS EACH FILE ONE BY ONE (when not in stack_mode)
 for fi = 1:length(ids) %repeat for all files selected
     % grab the signal to be processed
     sig = g.data{ids(fi)}.(signame);
@@ -816,11 +851,18 @@ for fi = 1:length(ids) %repeat for all files selected
         end
     end        
     % now check if the timestamps are evenly spaced and adjust sampling rate accordingly        
-    srate = handles.srate; %reset sample rate if changed by previous file
+    
+    if stack_mode
+        if isempty(cbox)    cbox = 0; end
+        cbox = cbox + 1;
+        scolor_now = scolor(mod(cbox-1,length(scolor))+1);
+    else 
+        scolor_now = scolor(mod(fi-1,length(scolor))+1);
+    end
     if (range(diff(sig(:,1))) > 1e-6)            
         fnames = get(handles.menu_files,'String');            
         prompt_user(['UnEven TimeStamps: ',fnames{ids(fi)}],handles);
-        srate = srate*0.1;
+        srate = handles.srate*0.1;
         prompt_user(['This file will be resampled at ',num2str(srate),' Hz'],handles);            
         oldsig = sig;
         sig = [];
@@ -829,6 +871,8 @@ for fi = 1:length(ids) %repeat for all files selected
             sig(:,k) = interp1(oldsig(:,1),oldsig(:,k),sig(:,1));
         end
         clear oldsig
+    else
+        srate = round(1/mean(diff(sig(:,1)))); %reset sample rate if changed by previous file
     end
     % now Subtract out the drift if we are told to do so
     if get(handles.check_subdrift,'value')
@@ -844,12 +888,14 @@ for fi = 1:length(ids) %repeat for all files selected
         if size(sig,2) <= 4 % if there are only 4 columns then R has not been calculated
             temp = sig; sig = [];
             sig(:,1) = temp(:,1); % timestamps
-            sig(:,2) = sqrt(temp(:,2).^2 + temp(:,3).^2 + temp(:,4).^2); %R           
+            sig(:,2) = sqrt((temp(:,2) - temp(1,2)).^2 + ...
+                (temp(:,3) - temp(1,3)).^2 + ...
+                (temp(:,4) - temp(1,4)).^2); % R
             sig(:,3:5) = temp(:,2:4); % xyz
             clear temp            
         end
     end
-    % now remove the mean from original signal
+    % now remove mean from the original signal
     sig(:,2:end) = sig(:,2:end) - repmat(mean(sig(:,2:end),1),size(sig,1),1);
     
     
@@ -860,23 +906,42 @@ for fi = 1:length(ids) %repeat for all files selected
         % Now, ready to compute psd and, if we are told to, area under psd
         for c = 1:length(cols)
             [p f] = mypsd(sig(:,cols(c)+1),srate,psdres,handles.psdwin);
-            figure(handles.psdfigids(sigid) + cols(c) -1);
+            figure(psdfignum + cols(c) -1);
             warning off % No better way in matlab 6.5 to turn off 'log of zero' warning 
-            plot(log10(f),log10(p),['.-',colrs(mod(fi-1,length(colrs))+1)]);                        
+            plot(log10(f),log10(p),['.-',scolor_now]);                        
             if get(handles.check_cumdisp,'value')
                 dc = sqrt(cumsum(p)*mean(diff(f)));% sqrt of area under psd
-                figure(handles.dvsffigids(sigid) + cols(c)-1);
-                plot(log10(f),dc,['.-',colrs(mod(fi-1,length(colrs))+1)]);
+                figure(dvsffignum + cols(c)-1);
+                plot(log10(f),dc,['.-',scolor_now]);
             end
             warning on
-            if (fi == length(ids))% if this is last file, annotate
+            if stack_mode % if we just stacked results of this box position, annotate
+                figure(psdfignum + cols(c) -1);
+                % first get the old legend strings
+                [lh oh ph strs] = legend(gca);
+                legstr = ['t:',num2str(xlims(1)),'-',num2str(xlims(2))];
+                legend([strs,legstr],'Location','Best');
+                %                 set(gca,'Xscale','Log','Yscale','Log');
+                pretty_plot;
+                hold off;
+                if get(handles.check_cumdisp,'value')
+                    figure(dvsffignum + cols(c) -1);
+                    % first get the old legend strings
+                    [lh oh ph strs] = legend(gca);
+                    legstr = ['t:',num2str(xlims(1)),'-',num2str(xlims(2))];
+                    legend([strs,legstr],'Location','Best');
+                    %              set(gca,'Xscale','Log','Yscale','Linear');
+                    pretty_plot;
+                    hold off;
+                end                
+            elseif (fi == length(ids))% if this is last file, annotate
                 alltags = g.tag;                
-                figure(handles.psdfigids(sigid) + cols(c) -1);
+                figure(psdfignum + cols(c) -1);
                 legend(gca,alltags{ids});
                 %                 set(gca,'Xscale','Log','Yscale','Log');
                 hold off;
                 if get(handles.check_cumdisp,'value')
-                    figure(handles.dvsffigids(sigid) + cols(c) -1);
+                    figure(dvsffignum + cols(c) -1);
                     legend(gca,alltags{ids});
                     %              set(gca,'Xscale','Log','Yscale','Linear');
                     hold off;
@@ -891,13 +956,19 @@ for fi = 1:length(ids) %repeat for all files selected
         % Allow msd for position-signal only. So this signal has 5 columns
         % (trxyz) guaranteed. 
         [msd, tau] = msdbase([sig(:,1), sig(:,3:5)],[]);% use default msd TAUs
-        figure(handles.msdfigids(sigid));
+        figure(msdfignum);
         warning off % No better way in matlab 6.5 to turn off 'log of zero' warning 
-        plot(log10(tau),log10(msd),['.-',colrs(mod(fi-1,length(colrs))+1)]);
+        plot(log10(tau),log10(msd),['.-',scolor_now]);
         warning on
-        if (fi == length(ids))% if this is last file, annotate
+        if stack_mode % if we just stacked results of this box position, annotate
+            % first get the old legend strings
+            [lh oh ph strs] = legend(gca);
+            legstr = ['t:',num2str(xlims(1)),'-',num2str(xlims(2))];
+            legend([strs,legstr],'Location','Best');
+            pretty_plot;
+            hold off;
+        elseif (fi == length(ids))% if this is last file, annotate
             alltags = g.tag;                
-            figure(handles.msdfigids(sigid));
             legend(gca,alltags{ids});
             pretty_plot;
             %                 set(gca,'Xscale','Log','Yscale','Log');
@@ -907,29 +978,75 @@ for fi = 1:length(ids) %repeat for all files selected
     %%=====  COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   =======    
 
     %%=========== COMPUTE AND PLOT SPECTROGRAM FOR THE FIRST FILE =========
-    srxyz = 'RXYZ';
-    if fi == 1 & get(handles.check_spectrogram,'Value')% Only one file         
-        figure(handles.specgramfigid(sigid));
+    if ~stack_mode & fi == 1 & get(handles.check_spectrogram,'Value')% Only one file
+        srxyz = 'RXYZ';
         for c = 1:length(cols)
+            fignum = handles.specgramfigid(sigid) + cols(c) - 1;
 %             tres = []; % Use the best tradeoff between time and freq. resol
-            tres = 0.1; % explicitly specify the time resolution
-            [s f t p] = myspectrogram(sig(:,cols(c)+1),srate,tres,handles.psdwin);
-            figure(handles.specgramfigid(sigid) + cols(c) - 1); clf;           
-            args = {t,f,10*log10(abs(p)+eps)}; 
+            tres = 1; % explicitly specify the time resolution
+            [s f t p] = myspectrogram(sig(:,cols(c)+1),srate,tres,handles.psdwin);          
+            p = p.*repmat(f,1,size(t,2));
+            figure(fignum); clf;
+            logf = log10(f);
+            args = {t,logf,log10(abs(p)+eps)}; 
             surf(args{:},'EdgeColor','none'); axis tight; colormap(bone); colorbar;
+            hold on;           
+
+            % try to make the 60,600,1800 Hz line red
+            i60 = max(find(f <=60));
+%             i600 = max(find(f <=600));
+%             i1800 = max(find(f <=1800));
+            
+            msync = g.data{ids(fi)}.(handles.signames.intr{4});% channel 8;
+            imags = find(msync(:,2) > 0.1); % When were the magnets on? 
+            tmag = msync(:,1) - msync(1,1);
+            % If the box is in use, then we need to translate imags in to
+            % indices relative to box
+            itrue = interp1(t,[1:length(t)],tmag(imags),'nearest');
+            itrue = unique(itrue);
+            
+            line(t(itrue),repmat(log10(f(i60)),size(itrue)),log10(abs(p(i60,itrue))+eps),'Color',[1 0 0],'LineWidth',2);
+%             line(t(itrue),repmat(log10(f(i600)),size(itrue)),log10(abs(p(i600,itrue))+eps),'Color',[1 0 0],'LineWidth',2);
+%             line(t(itrue),repmat(log10(f(i1800)),size(itrue)),log10(abs(p(i1800,itrue))+eps),'Color',[1 0 0],'LineWidth',2);
+            
+%             % Now overlay the time domain trace on the surface;
+%             overt = sig(1:100:end,1)-sig(1,1);
+%             overy = sig(1:100:end,cols(c) + 1);
+%             overy = (overy-min(overy)+min(logf))*range(logf)/range(overy);
+%             plot(overt,overy,'.-k')
+%             % Now overlay the magnet log if are told to do so
+%             overlaymag(handles,gcf,1); % This causes the figure to hold off
+            hold off;
+%             view(0,90); % Looking from top down - looks like colormap
+            view(75,60);    
+            xlabel('Time [S]'); ylabel('Frequency [Hz]');
+            title(['Spectrogram: File ID = ', g.tag{ids(fi)}, ' --', signame, ': ', srxyz(cols(c))]);
+            %---- This, plotting energy vs time, may be temporaray
+            figure(fignum+5);
+            binres = 0.5;% jumping window size to compute rms on
+            nbins = floor(range(sig(:,1))/binres);
+            nperbin = floor(srate*binres);
+            tzero = sig(1,1);
+            for j = 1:nbins
+                ibinst = (j-1)*nperbin + 1;
+                binsig = sig(ibinst:j*nperbin, c+1)-sig(ibinst,c+1);
+                energy(j) = rms(binsig);
+                time(j) = sig(ibinst+floor(nperbin/2),1)-tzero;                
+            end
+            plot(time,energy,'.-r');
             % Now overlay the time domain trace on the surface;
             hold on;           
 
             overt = sig(1:100:end,1)-sig(1,1);
             overy = sig(1:100:end,cols(c) + 1);
-            overy = (overy-min(overy)+f(1))*range(f)/range(overy);
+            overy = overy*range(energy)/range(overy);
+            overy = (overy-min(overy)+min(energy));
             plot(overt,overy,'.-k')
             % Now overlay the magnet log if are told to do so
             overlaymag(handles,gcf,1); % This causes the figure to hold off
-            %----
-            hold off;
-            view(0,90); % Looking from top down
-            xlabel('Time [S]'); ylabel('Frequency [Hz]');
+            hold off;           
+%             legend('Energy','Bead diplacement','Magnets');
+            xlabel('Time [S]'); ylabel('Energy');
             title(['Spectrogram: File ID = ', g.tag{ids(fi)}, ' --', signame, ': ', srxyz(cols(c))]);
         end
     end
@@ -1397,7 +1514,7 @@ if get(handles.check_overlaymag,'value')
     overy = (overy + ylims(1) - min(overy));    
     
     figure(figid); hold on;
-    plot(overt,overy,'m','Tag','Mag');%magenta color
+    plot(overt,overy,'.m','Tag','Mag');%magenta color
     hold off;
 end
 
@@ -1714,9 +1831,26 @@ function check_filterMCL_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of check_filterMCL
 
+% --- Executes on button press in button_advopt.
+function button_advopt_Callback(hObject, eventdata, handles)
+% hObject    handle to button_advopt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% --- Executes on button press in check_boxstat.
+function check_boxstat_Callback(hObject, eventdata, handles)
+% hObject    handle to check_boxstat (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_boxstat
+
+
 %%%####################################################################
 %%%#############    GUIDE WILL ADD NEW CALLBACKS BELOW      ###########
 %%%####################################################################
+
+
 
 
 
