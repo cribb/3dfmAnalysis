@@ -1,3 +1,11 @@
+2006-06-09 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.fig:
+	- Added a button to let user clear the stack created using 'plot freq domain results for this box in the stack' button.
+	* lt_analysis_gui.m:
+	- Coding associated with 'clear stack' button
+	- Fixed a bug in stacking the frequency domain results as the user drags box, now actually works.
+	- Also plots a time-domain trace color coded to indicate position of each element of stack
+
 2006-06-08 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.fig:
 	- Added a button that allows user to compare frequency domain plots for different parts of the same file. Not tested.

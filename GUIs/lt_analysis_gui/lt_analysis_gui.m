@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_ltagui
 
-% Last Modified by GUIDE v2.5 08-Jun-2006 21:19:08
+% Last Modified by GUIDE v2.5 09-Jun-2006 01:59:16
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -90,6 +90,8 @@ handles.msdfigids = 60;
 handles.threeDfig = 9;
 handles.boxresfig = 99;
 handles.specgramfigid = [110,   120,    130,    140,    150];
+handles.tstackfigid = 160;
+handles.stackfigidoff = 200;
 %  ....add to this list as more types of plots are supported
 
 % Some other constants
@@ -362,7 +364,8 @@ id = get(handles.menu_files,'Value');
 for c = 1:length(handles.signames.intr)
     cursig = handles.signames.intr{c};
     if (isfield(g.data{1,id}, cursig))
-        sigold = g.data{1,id}.(cursig);        
+        sigold = g.data{1,id}.(cursig);  
+        sigold(:,1) = sigold(:,1) - sigold(1,1); % remove offset in time
 %         find indices outside the selected box
         linds = sort(find(sigold(:,1) < t(1))); %indices before box
         uinds = sort(find(sigold(:,1) > t(2))); %indices after box
@@ -406,6 +409,7 @@ sigid = get(handles.menu_signal,'UserData');
 signame = handles.signames.intr{sigid};
 fileid = get(handles.menu_files,'Value');
 sig = g.data{fileid}.(signame);
+sig(:,1) = sig(:,1) - sig(1,1); %Remove offset in time.
 M = size(sig,2);
 [selec(:,1),selec(:,2:M)] = clipper(sig(:,1),sig(:,2:M),t(1),t(2));
 for c = 2:M % repeat for all columns
@@ -640,11 +644,6 @@ if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'
     plot3dfigure(handles);
 end
 
-% Stack the frequency domain results for data that falls within this new 
-% position of the box.
-if get(handles.button_stack,'value')
- % Call the plot_freq routine here with appropriate parameters
-end
 
 % --- Executes on selection change in menu_dispres.
 function menu_dispres_Callback(hObject, eventdata, handles)
@@ -730,15 +729,21 @@ function button_stack_Callback(hObject, eventdata, handles)
 stack_mode = 1;
 plotfreqdom(handles,stack_mode);
 return;
+
+% --- Executes on button press in button_clearstack.
+function button_clearstack_Callback(hObject, eventdata, handles)
+stack_count = 0;
+set(handles.button_clearstack,'UserData',stack_count);
+close(findobj('Tag','boxstack'));
+return;
+
 %-----------------------------------------------------------------------
 function plotfreqdom(handles,stack_mode)
 global g
-persistent cbox
 dbstop if error
 
 sigid = get(handles.menu_signal,'UserData');
 signame = handles.signames.intr{sigid};
-
 
 xlims = [-Inf, Inf];
 manyfiles = 1;
@@ -748,7 +753,9 @@ if stack_mode | get(handles.check_fdbox,'value')
     hmf = handles.mainfigids(sigid);
     if ~(ishandle(hmf))
         set(handles.check_fdbox,'value',0);
-        if (stack_mode) return; end        
+        if (stack_mode) 
+            return; 
+        end        
     else
         hma = findobj(hmf,'Type','Axes','Tag','');
         hbox = findobj(hma,'Tag','Box');
@@ -776,15 +783,17 @@ if any(sigid == handles.posid)
 else %non-positional sigal, so process for all columns
     cols = 1:size(g.data{ids(1)}.(signame),2)-1; 
         % first column is always timestamp
-    for k = 1:length(cols), strs{k} = num2str(k); end
+    for k = 1:length(cols) 
+        strs{k} = num2str(k); 
+    end
 end
 
 % First setup figures for msd and psd computations if we should. Then fill
 % in the plots for each file one by one.
 if stack_mode
-    msdfignum = handles.msdfigids(sigid) + 100;
-    psdfignum = handles.psdfigids(sigid) + 100;
-    dvsffignum = handles.dvsffigids(sigid) + 100;
+    msdfignum = handles.msdfigids(sigid) + handles.stackfigidoff;
+    psdfignum = handles.psdfigids(sigid) + handles.stackfigidoff;
+    dvsffignum = handles.dvsffigids(sigid) + handles.stackfigidoff;
 else
     msdfignum = handles.msdfigids(sigid);
     psdfignum = handles.psdfigids(sigid);
@@ -794,7 +803,9 @@ end
 if get(handles.check_msd,'Value')
     % setup msd figure
     figure(msdfignum); 
-    if ~stack_mode          clf;    end
+    if ~stack_mode          
+        clf;    
+    end
     title([handles.signames.disp{sigid}, '-MSD']);
     xlabel('log_{10}(\tau)      [seconds]');	                        
     ylabel('log_{10}(MSD)       [micron^2]');    
@@ -806,7 +817,9 @@ if get(handles.check_psd,'value')
     for c = 1:length(cols)
         % setup psd figure
         figure(psdfignum + cols(c) - 1);
-        if ~stack_mode      clf;    end
+        if ~stack_mode      
+            clf;    
+        end
         
         title([handles.signames.disp{sigid}, '-PSD: ',strs{cols(c)}]);
         xlabel('log_{10} Frequency [Hz]');
@@ -819,8 +832,9 @@ if get(handles.check_psd,'value')
         % setup 'area under psd' figure if we should
         if get(handles.check_cumdisp,'value')
             figure(dvsffignum + cols(c) - 1);
-            if ~stack_mode      clf;    end
-  
+            if ~stack_mode      
+                clf;    
+            end  
             if any(sigid == handles.posid) % if this signal is a position measurement
                 title([handles.signames.disp{sigid}, '-Cumulative Displacement: ',strs{cols(c)}]);                
             else 
@@ -836,9 +850,10 @@ scolor = 'brkgmy';
 % LOOP TO PROCESS EACH FILE ONE BY ONE (when not in stack_mode)
 for fi = 1:length(ids) %repeat for all files selected
     % grab the signal to be processed
-    sig = g.data{ids(fi)}.(signame);
+    sig = g.data{ids(fi)}.(signame); 
+    sig(:,1) = sig(:,1) - sig(1,1); % Remove offset from time
     % First check if we are told to consider data inside the Box only
-    if get(handles.check_fdbox,'value')
+    if stack_mode | get(handles.check_fdbox,'value')
         if (fi > 1)
             disp('Error: Was told to consider only ''inside box'' data, but multiple files were selected');
             disp('Will ignore the box and process all files');
@@ -853,8 +868,8 @@ for fi = 1:length(ids) %repeat for all files selected
     % now check if the timestamps are evenly spaced and adjust sampling rate accordingly        
     
     if stack_mode
-        if isempty(cbox)    cbox = 0; end
-        cbox = cbox + 1;
+        cbox = get(handles.button_clearstack,'UserData')+1;
+        set(handles.button_clearstack,'UserData',cbox);
         scolor_now = scolor(mod(cbox-1,length(scolor))+1);
     else 
         scolor_now = scolor(mod(fi-1,length(scolor))+1);
@@ -919,20 +934,23 @@ for fi = 1:length(ids) %repeat for all files selected
                 figure(psdfignum + cols(c) -1);
                 % first get the old legend strings
                 [lh oh ph strs] = legend(gca);
-                legstr = ['t:',num2str(xlims(1)),'-',num2str(xlims(2))];
+                legstr = sprintf('t: %.1f to %.1f',xlims(1),xlims(2));
+%                 legstr = ['t:',num2str(xlims(1)),'-',num2str(xlims(2))];
                 legend([strs,legstr],'Location','Best');
                 %                 set(gca,'Xscale','Log','Yscale','Log');
                 pretty_plot;
                 hold off;
+                set(gcf,'Tag','boxstack');
                 if get(handles.check_cumdisp,'value')
                     figure(dvsffignum + cols(c) -1);
                     % first get the old legend strings
                     [lh oh ph strs] = legend(gca);
-                    legstr = ['t:',num2str(xlims(1)),'-',num2str(xlims(2))];
+                    legstr = sprintf('t: %.1f to %.1f',xlims(1),xlims(2));
                     legend([strs,legstr],'Location','Best');
                     %              set(gca,'Xscale','Log','Yscale','Linear');
                     pretty_plot;
                     hold off;
+                    set(gcf,'Tag','boxstack');
                 end                
             elseif (fi == length(ids))% if this is last file, annotate
                 alltags = g.tag;                
@@ -963,10 +981,11 @@ for fi = 1:length(ids) %repeat for all files selected
         if stack_mode % if we just stacked results of this box position, annotate
             % first get the old legend strings
             [lh oh ph strs] = legend(gca);
-            legstr = ['t:',num2str(xlims(1)),'-',num2str(xlims(2))];
+            legstr = sprintf('t: %.1f to %.1f',xlims(1),xlims(2));
             legend([strs,legstr],'Location','Best');
             pretty_plot;
             hold off;
+            set(gcf,'Tag','boxstack');
         elseif (fi == length(ids))% if this is last file, annotate
             alltags = g.tag;                
             legend(gca,alltags{ids});
@@ -977,6 +996,25 @@ for fi = 1:length(ids) %repeat for all files selected
     end    
     %%=====  COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   =======    
 
+    if stack_mode % then update the figure that shows each box color coded
+        if ~ishandle(handles.tstackfigid);
+            sigid = get(handles.menu_signal,'UserData');            
+            signame = handles.signames.intr{1,sigid};            
+            fileid = get(handles.menu_files,'value');
+            sigvals = g.data{1,fileid}.(signame);
+            sigvals(:,1) = sigvals(:,1) - sigvals(1,1); %remove offset  from time
+            figure(handles.tstackfigid); set(gcf,'Tag','boxstack');
+            rsig = sqrt(sigvals(1:100:end,2).^2 + sigvals(1:100:end,3).^2 + sigvals(1:100:end,4).^2);
+            plot(sigvals(1:100:end,1), rsig,':k','tag','stack');
+            overlaymag(handles,gcf,1);
+        end
+        figure(handles.tstackfigid); hold on;
+        hstack = findobj(gcf,'type','Line','tag','stack'); %Handle to the data line
+        x = get(hstack,'Xdata'); y = get(hstack,'Ydata');
+        ist = max(find(x <= xlims(1))); iend = min(find(x >= xlims(2)));
+        plot(x(ist:iend),y(ist:iend),['.-',scolor_now]);
+    end
+    
     %%=========== COMPUTE AND PLOT SPECTROGRAM FOR THE FIRST FILE =========
     if ~stack_mode & fi == 1 & get(handles.check_spectrogram,'Value')% Only one file
         srxyz = 'RXYZ';
@@ -1057,6 +1095,8 @@ end % Finished processing + plotting all files in frequency domain
 set(handles.button_plotfreq,'UserData',[]);
 
 dbclear if error
+return;
+
 
 % --- Executes on selection in check_3d.
 function check_3d_Callback(hObject, eventdata, handles)
@@ -1304,6 +1344,8 @@ for k = 2:size(sigin,2)
         temp(:,k-1) = interp1(sigin(:,1),sigin(:,k),tout,'nearest');
     end    
 end
+% Remove offset from time
+tout = tout - tout(1);
 % Subtract out the background drift, if we are told to do so
 if get(handles.check_subdrift,'Value')
     temp = subtract_background_drift(tout,temp,handles,signame);
@@ -1470,7 +1512,7 @@ end
 
 % Now update the overlaid magnets/channel 8 trace if we are told to
 if isequal(lower(get(handles.check_overlaymag,'Enable')),'on')
-    overlaymag(handles,figid);
+    overlaymag(handles,figid,1);
 end
 % pretty_plot;
 
@@ -1656,7 +1698,7 @@ if isfield(g.data{fileid}, handles.signames.intr{4})
     set(handles.check_overlaymag,'Enable','On');
 else
     set(handles.check_overlaymag,'Enable','Off');
-    set(handles.check_overlaymag,'Value',0);
+    set(handles.check_overlaymag,'Value',1);
 end
 checkdimsvalidity(handles);% check if RXYZ and/or 3D is applicable
 checkdriftvalidity(handles);% check if drift subtraction is allowed
@@ -1849,8 +1891,6 @@ function check_boxstat_Callback(hObject, eventdata, handles)
 %%%####################################################################
 %%%#############    GUIDE WILL ADD NEW CALLBACKS BELOW      ###########
 %%%####################################################################
-
-
 
 
 
