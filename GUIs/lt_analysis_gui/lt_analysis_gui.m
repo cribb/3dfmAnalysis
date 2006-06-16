@@ -886,10 +886,10 @@ for fi = 1:length(ids) %repeat for all files selected
         cbox = get(handles.button_clearstack,'UserData')+1;
         set(handles.button_clearstack,'UserData',cbox);
         scolor_now = scolor(mod(cbox-1,length(scolor))+1);
-        smarker_now = ceil(cbox/length(smarker));
+        smarker_now = smarker(ceil(cbox/length(scolor)));
     else 
         scolor_now = scolor(mod(fi-1,length(scolor))+1);
-        smarker_now = ceil(fi/length(smarker));
+        smarker_now = smarker(ceil(fi/length(scolor)));
     end
     if (range(diff(sig(:,1))) > 1e-6)            
         fnames = get(handles.menu_files,'String');            
@@ -1149,8 +1149,19 @@ function button_export_Callback(hObject, eventdata, handles)
 % --- Executes on button press in button_save.
 function button_save_Callback(hObject, eventdata, handles)
 global g
+amibusy(1,handles);
 fid = get(handles.menu_files,'value');
-[filename, pathname] = uiputfile([g.fname{1,fid}(1:end-9),'.edited.mat'], 'Save Currently active file as');
+fname = g.fname{1,fid};
+itracking = findstr(fname,'tracking.');
+if isempty(itracking)
+    fname = [fname,'.tracking.mat'];
+    itracking = length(fname) - 4;
+end
+lastpwd = pwd;
+tp = get(handles.button_add,'UserData');%target path
+cd(tp);
+[filename, pathname] = uiputfile([fname(1:itracking+7),'.edited.mat'], 'Save Currently active file as');
+
 if isequal(filename,0)|isequal(pathname,0)
     prompt_user('User aborted saving',handles);
 else
@@ -1160,6 +1171,8 @@ else
     save(fullfile(pathname,filename),'edited');
     prompt_user(['Edited file was saved at',pathname],handles);
 end
+cd(lastpwd);
+amibusy(0,handles);
 %%%$$$$$$$$$$$$$$$$  NON-CALLBACK ROUTINES     $$$$$$$$$$$$$$$$$$$$$$$$
 %-----------------------------------------------------------------------
 function updateboxresults(handles,hbox)

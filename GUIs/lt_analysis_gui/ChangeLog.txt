@@ -1,4 +1,7 @@
 2006-06-16 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m:	Several bug fixes in the newly added features.
+
+2006-06-16 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:	
 	- Now plots a flag-line if & when the time stamps are unevenly spaced.
 	- Added a list of markers that can be looped through (in addition of colors) when overlaying several datasets.
