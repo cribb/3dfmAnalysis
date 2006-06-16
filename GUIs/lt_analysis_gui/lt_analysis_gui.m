@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_ltagui
 
-% Last Modified by GUIDE v2.5 09-Jun-2006 01:59:16
+% Last Modified by GUIDE v2.5 15-Jun-2006 19:12:04
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -162,6 +162,7 @@ if (get(hObject,'UserData') == 0),  set(hObject,'UserData',handles.default_path)
 
 set(hObject,'UserData',p); %memorize the last browsing path
 prompt_user('Wait...Loading selected files',handles);
+amibusy(1,handles);
 flags.keepuct = 0; flags.keepoffset = 0; flags.askforinput = 0;flags.inmicrons = 1;
 flags.filterstage = get(handles.check_filterMCL,'value'); % Lowpass Filter stage-sensed values with 600Hz cutoff?
 flags.matoutput = 1; %request output fields in the [time vals] matrix form.
@@ -172,9 +173,9 @@ for(c = 1:length(f))
     if exist('g') & ~isempty(g.data) & any(strcmp(g.fname,f{c}) == 1)
         isame = find(strcmp(g.fname,f{c}) == 1);
         if isequal(g.exptype{isame}, curexptype)
-            button = questdlg(['The file ',f{c},' is already in the database.',...
-                'Reloading it will discard any modifications made to it (e.g. cut, metadata etc).',
-                'Continue?'],...
+            button = questdlg(['The file ',f{c},' is already in the database. ',...
+                'Reloading it will discard any modifications made to it ',...
+                '(e.g. cut, drift selection, metadata etc). ','Continue?'],...
                 'File already loaded','Yes','No','No');            
             if strcmpi(button,'no')
                 doload = 0;
@@ -182,7 +183,7 @@ for(c = 1:length(f))
                 remove_file(isame,handles);
             end
         else
-            button = questdlg(['The file ',f{c},' is already loaded with ',g.exptype{isame}, ' experiment type. ' ...
+            button = questdlg(['The file ',f{c},' already loaded with ',g.exptype{isame}, ' experiment type. ' ...
                 'Should I re-load it with ', curexptype,' experiment type?'],...
                 'File loaded with different experiment type','Yes','No','No');            
             if strcmpi(button,'no')
@@ -270,6 +271,7 @@ end
 % set(hObject,'UserData', g); %use global instead
 
 prompt_user(['Finished Loading. Loaded ',num2str(nloaded),' files'],handles);
+amibusy(0,handles);
 if nloaded 
     updatemenu(handles);
 end
@@ -608,6 +610,7 @@ return
 %------------------------
 %---This routine updates the existing box or draws a new box.
 function updatebox(handles,hma,displace,b);
+amibusy(1,handles);
 hbox = findobj(hma,'Tag','Box');
 % look for the box-parameters in the UserData of the box itself, ONLY IF
 % box-parameters are not supplied exlicitely
@@ -650,7 +653,7 @@ if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'
     plot3dfigure(handles);
 end
 
-
+amibusy(0,handles);
 % --- Executes on selection change in menu_dispres.
 function menu_dispres_Callback(hObject, eventdata, handles)
 val = get(hObject,'Value');
@@ -747,7 +750,7 @@ return;
 function plotfreqdom(handles,stack_mode)
 global g
 dbstop if error
-
+amibusy(1,handles);
 sigid = get(handles.menu_signal,'UserData');
 signame = handles.signames.intr{sigid};
 
@@ -1111,7 +1114,7 @@ end % Finished processing + plotting all files in frequency domain
 
 % clear the memory of file-ids that were selected last time.
 set(handles.button_plotfreq,'UserData',[]);
-
+amibusy(0,handles);
 dbclear if error
 return;
 
@@ -1243,9 +1246,22 @@ else
 end
 %-----------------------------------------------------------------------
 function prompt_user(str,handles)
-set(handles.text_message,'String',str);
+set(handles.text_message,'String',str); drawnow;
 disp(str);
 
+%-----------------------------------------------------------------------
+function amibusy(busy,handles)
+cbusy = [1 0.45 0.45];
+cready_frame = [0.760784 0.854902 0.843137];
+cready_text = [1 1 0.501961];
+if busy
+    set(handles.frame_busy,'BackgroundColor',cbusy);
+    set(handles.text_message,'BackgroundColor',cbusy);
+else
+    set(handles.frame_busy,'BackgroundColor',cready_frame);
+    set(handles.text_message,'BackgroundColor',cready_text);
+end
+drawnow;
 %--------------makes the name string for the main figure ---------------
 function str = getmainfigname(handles);
 sigid = get(handles.menu_signal,'Value');
@@ -1456,6 +1472,7 @@ end
 %-----------------------------------------------------------------------
 function updatemainfig(handles,modestr)
 global g
+amibusy(1,handles);
 dbstop if error
 if ~exist('g') | isempty(g.data)
     % if dataset empty, close all main figures
@@ -1534,6 +1551,7 @@ end
 if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'Value') == 1)
     plot3dfigure(handles);
 end
+amibusy(0,handles);
 dbclear if error
 %-----------------------------------------------------------------------
 function overlaymag(handles,figid,remtoff)
@@ -1719,7 +1737,7 @@ if isfield(g.data{fileid}, handles.signames.intr{4})
     set(handles.check_overlaymag,'Enable','On');
 else
     set(handles.check_overlaymag,'Enable','Off');
-    set(handles.check_overlaymag,'Value',1);
+    set(handles.check_overlaymag,'Value',0);
 end
 checkdimsvalidity(handles);% check if RXYZ and/or 3D is applicable
 checkdriftvalidity(handles);% check if drift subtraction is allowed

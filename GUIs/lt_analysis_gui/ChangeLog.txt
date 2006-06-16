@@ -1,3 +1,9 @@
+2006-06-15 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m, lt_analysis_gui.fig:	
+	- Fixed a bug while loading a file that is already loaded in the database.
+	- Now shows 'red' background while busy computing, so that user doesn't accidentally click everywhere.
+	- Fixed a typo where instead of disabling 'overlay mags' functionality, program enabled it causing a crash later on.
+
 2006-06-09 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:	
 	- Fixed a bug in plotting spectrogram in log scale. Also, default view is set back to looking down from top, since 3D view wasn't much helpful.
@@ -22,8 +28,6 @@
 	- Now spectrogram is plotted as a surface (instead of colormap) and in log scale.
 	- Commented out overlaying of position data on spectrogram, doesn't go well with surface.
 	- Added a routine that computes and plots energy vs time. This may just be temporary.
-	
-	
 
 2006-06-06 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: Now uses 'bone' colormap instead of 'gray' for spectrogram.
