@@ -147,18 +147,20 @@ d.info.orig.LoadLaserTrackingVersion = version_string;
 % if it is saved by lt_analysis_gui OR
 % if it is present as a workspace variable 
 if(ischar(file)) % file contains the name of the file as a string
+    % get filename by subtracting filepath
+    islash = max(find(file(:)=='\'));
+    if(isempty(islash))
+        thisname = file;
+        thispath = pwd;
+    else
+        thisname = file(islash+1:end);
+        thispath = file(1:islash);
+    end
     if findstr(file,'.vrpn.mat')
         % 'file' is the original, unedited, .vrpn.mat log file
-        dd= load(file);
-        % get filename by subtracting filepath
-        id = max(find(file(:)=='\'));
-        if(isempty(id))
-            out.fname = file;
-            out.path = pwd;
-        else
-            out.fname = file(id+1:end);
-            out.path = file(1:id);
-        end
+        dd= load(file);        
+        out.fname = thisname;
+        out.path = thispath;
         % load in the version info etc metadata from the vrpn.mat file
         if isfield(dd.tracking,'info')
             d.info.orig = dd.tracking.info;
@@ -168,6 +170,16 @@ if(ischar(file)) % file contains the name of the file as a string
     elseif findstr(file,'.edited.mat')
         % file is saved by lt_analysis_gui tool
         load(file); % saved as a structure named 'edited'
+        % Now compare the name of the file that is stored in the file
+        % itself with the current name of the file.
+        if ~strcmp(thisname,edited.fname)
+            edited.previousname = edited.fname;
+            edited.fname = thisname;
+        end
+        if ~strcmp(thispath,edited.path)
+            edited.previouspath = edited.path;
+            edited.path = thispath;
+        end
         %-----------------------
         % Check that all requested fields are present in edited.mat file.
         new_fields = fields;

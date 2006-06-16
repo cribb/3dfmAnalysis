@@ -1,3 +1,9 @@
+2006-06-15  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m:
+	- For .edited format, now stores the name at the time of loading as the current name of the file.
+	- If this name is different than the name stored, designates the stored name as the previous name.
+	- Same for path. This helps in tracking down the changes made to the location of the file.
+
 2006-06-05  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m: Fixed a typo.
 
