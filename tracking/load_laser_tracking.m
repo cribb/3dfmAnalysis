@@ -1,16 +1,20 @@
 function out = load_laser_tracking(file, fields, flags);
 % 3DFM function
-% Last modified: 04/21/06 -kvdesai
+% Last modified: 06/16/06 -kvdesai
 % Created: 10/12/05 - kvdesai
 % 
-% This function is supposed to replace the load_vrpn_tracking function. It performs 
-% all the tasks that load_vrpn_tracking does but in a better and user friendly way.
-% It reads in a 3DFM laser tracking dataset of the form .vrpn.mat. Laser Tracker
-% program writes logfiles in .vrpn format and then they are converted to matlab compatible 
-% .vrpn.mat format by vrpnLogToMatlab program. 
+% load_laser_tracking loads two types of laser tracking datasets
+% 1. Dataset of the format .vrpn.mat, produced by vrpnLogToMatlab program.
+% 2. Dataset saved by lt_analysis_gui, of the format .edited.mat
+% 
+% Laser Tracker program writes logfiles in .vrpn format and then they are 
+% converted to matlab compatible .vrpn.mat format by vrpnLogToMatlab program. 
+% load_laser_tracking reads in a 3DFM laser tracking dataset of the form .vrpn.mat.
 % load_laser_tracking is compatible to Laser Tracker versions 04.00 and
 % beyond only. For datasets created by earlier versions of Laser Tracker,
-% user load_vrpn_tracking.
+% user load_vrpn_tracking. load_laser_tracking is supposed to replace the 
+% load_vrpn_tracking function. It performs all the tasks that load_vrpn_tracking 
+% does but in a better and user friendly way.
 % 
 % USAGE:
 % out = load_laser_tracking(file, fields, flags);
@@ -20,8 +24,7 @@ function out = load_laser_tracking(file, fields, flags);
 % "file" : required arguement
 %     it can be a string containing name of the the .mat file 
 %     OR it can be the 'tracking' structure created by double-clicking the .mat file
-%     OR it can be the .edited.mat file saved by lt_analysis_gui, in which
-%           case "fields" and "flags" would be ignored. 
+%     OR it can be the .edited.mat file saved by lt_analysis_gui.
 %     
 % "fields": a string containing one or more of the following characters
 %     'a': all the fields listed below
@@ -188,7 +191,7 @@ if(ischar(file)) % file contains the name of the file as a string
             if ~isfield(edited.data, bcegjlqs.out{ihere})
                 disp([' WARNING: Requested field, ',bcegjlqs.out{ihere},' is not ', ...
                     'present in the input .edited.mat file. Can not load.'])
-                disp('To fix, load the original .vrpn.mat file with correct fields');
+                disp('To fix, re-load original .vrpn.mat file with correct flags and save');
                 new_fields = setdiff(new_fields,fields(cf));
             end
         end
@@ -266,24 +269,53 @@ if(ischar(file)) % file contains the name of the file as a string
             if flags.matoutput %input: structure, output: matrix
                 disp('WARNING: requested to convert output format from structure to matrix.');
                 disp('Do not know how to. Output will be given in the structure form only.');
-                disp('To fix, re-load and save original .vrpn.mat file with correct flags');                            
+                disp('To fix, re-load original .vrpn.mat file with correct flags and save');                            
             else %input: matrix, output: structure
                 disp('WARNING: requested to convert output format from matrix to structure.');
                 disp('Do not know how to. Output will be given in the matrix form only.');
-                disp('To fix, re-load and save original .vrpn.mat file with correct flags');
+                disp('To fix, re-load original .vrpn.mat file with correct flags and save');
             end
             flags.matoutput = last_flags.matoutput;
         end
         %-----------------------
         % Fifth, if the user has requested to change the filterstage flag then
-        % tell that it is impossible to do because we can't un-filter once
-        % filtered; and we don't know the component of stage position in
+        % in the case where user has asked to filter the stage position,
+        % check that either (bead position and position error) or stage position 
+        % is present in the old data. Otherwise, tell that it is impossible 
+        % to change the flag becuase we can't un-filter once
+        % filtered; or we don't know the component of stage position in
         % bead position.
         if ~isequal(last_flags.filterstage, flags.filterstage)
-            disp('WARNING: requested to change the ''filter-stage'' flag.');
-            disp('Not supported at this point.');
-            disp('To fix, re-load and save original .vrpn.mat file with correct flags');
-            flags.filterstage = last_flags.filterstage;
+            if flags.filterstage == 1 
+                if (findstr(fields,'b') & findstr(fields,'e'))
+                    oldb = edited.data.(bcegjlqs.out{1});
+                    olde = edited.data.(bcegjlqs.out{3});
+                    oldt = olde(:,1);
+                    oldpos = olde(:,2:4) - oldb(:,2:4);
+                    filtpos = filterMCLsense(oldt, oldpos);
+                    % For now assuming that only 'matrix output' formatted
+                    % files will need this functionality
+                    edited.data.(bcegjlqs.out{8}) = [oldt,filtpos];
+                    clear oldb olde oldt filtpos oldpos 
+                    flags.filterstage = 1;
+                elseif findstr(fields,'s')
+                    oldstage = edited.data.(bcegjlqs.out{8});
+                    filtpos = filterMCLsense(oldstage(:,1),oldstage(:,2:4));
+                    edited.data.(bcegjlqs.out{8}) = [oldstage(:,1), filtpos];
+                    clear oldstage filtpos
+                    flags.filterstage = 1;
+                else
+                    disp('WARNING: requested filter the stage sensed positions.');
+                    disp('Do not have the original stage positions.');
+                    disp('To fix, re-load original .vrpn.mat file with correct flags and save');
+                    flags.filterstage = last_flags.filterstage;
+                end
+            else
+                disp('WARNING: requested to unfilter previously filtered stage positions.');
+                disp('Impossible.');
+                disp('To fix, re-load original .vrpn.mat file with correct flags and save');
+                flags.filterstage = last_flags.filterstage;
+            end
         end
         %-----------------------
         edited.data.info.flags = flags;
@@ -472,7 +504,6 @@ end
 % fout = output matrix Or structure
 function fout = extractfield(fin_name,flags,strs,toffset,ispos)
 global dd %declaring global conserves lot of memory for huge datasets
-MCL_CUTOFF_HZ = 600;
 t = removeToffset(dd.tracking.(fin_name)(:,1:2),toffset);
 
 if length(strs) ~= (size(dd.tracking.(fin_name),2) - 2)
@@ -498,41 +529,13 @@ if flags.matoutput
 else
     fout.time = t;
 end
-% if this is stage-sensed positions, and if we are told to filter it then 
-% do so -------------------------------------------------------------
+% if this is stage-sensed positions, then filter it if we are told to do so
+% -------------------------------------------------------------
 if strfind(fin_name,'stageSense') & (flags.filterstage == 1)
-    if (range(diff(t)) > 1e-6)            
-        disp('load_laser_tracking: User requested to filter stage sensed positions, but time-stamps were uneven.');
-        disp('I will upsample the data at 10000 Hz, filter it, and then resample at the original time stamps');
-        srate = 10000;        
-        teven = [t(1):1/srate:t(end)]';
-        for k = 1:M;
-            sig(:,k) = interp1(t,dd.tracking.(fin_name)(:,k+2),teven);
-        end
-        downsample = 1;        
-    else        
-        sig(:,1:M) = dd.tracking.(fin_name)(:,3:M+2);
-        downsample = 0;        
-        srate = 1/mean(diff(t));
-    end
-    [filt.b,filt.a] = butter(4, MCL_CUTOFF_HZ*2/srate);    
-    for cl = 1:size(sig,2)
-        filtsig(:,cl) = filtfilt(filt.b,filt.a,sig(:,cl));
-    end
-    % IF data was upsampled to apply filtering, downsample at the original
-    % timestamps so that size of posError and stageReport arrays are same.
-    if downsample
-        for cl = 1:M
-            dd.tracking.(fin_name)(:,cl+2) = interp1(teven,filtsig(:,cl),t);
-        end
-    else
-        dd.tracking.(fin_name)(:,3:M+2) = filtsig;
-    end
-    clear sig filtsig teven
-    disp(['stage sensed positions were filtered with ',num2str(MCL_CUTOFF_HZ),' Hz cutoff']);
+    pos = dd.tracking.(fin_name)(:,3:M+2);
+    filtpos = filterMCLsense(t,pos);
+    dd.tracking.(fin_name)(:,3:M+2) = filtpos;    
 end
-% ----------    FINISHED FILETERING STAGE   ------------------------------
-
 % Now read in the values and put them in the appropriate form
 k = 1; % 1 column occupied by time 
 for c = 1:M
@@ -547,3 +550,39 @@ for c = 1:M
     end
 end
 dd.tracking.(fin_name) = []; % free up memory as we go  
+
+% ----------   FILETERING STAGE SENSED POSITIONS  -------------------------
+function filtpos = filterMCLsense(t, pos)
+% NOTE: Can not use global dd here, because in the case of edited file,
+% there won't be any dd.
+MCL_CUTOFF_HZ = 600;
+M = size(pos,2);
+
+if (range(diff(t)) > 1e-6)
+    disp('load_laser_tracking: User requested to filter stage sensed positions, but time-stamps were uneven.');
+    disp('I will upsample the data at 10000 Hz, filter it, and then resample at the original time stamps');
+    srate = 10000;
+    teven = [t(1):1/srate:t(end)]';
+    for k = 1:M;
+        sig(:,k) = interp1(t,pos(:,k),teven);
+    end
+    downsample = 1;
+else
+    sig(:,1:M) = pos(:,1:M);
+    downsample = 0;
+    srate = 1/mean(diff(t));
+end
+[filt.b,filt.a] = butter(4, MCL_CUTOFF_HZ*2/srate);
+for cl = 1:size(sig,2)
+    filtsig(:,cl) = filtfilt(filt.b,filt.a,sig(:,cl));
+end
+% IF data was upsampled to apply filtering, downsample at the original
+% timestamps so that size of posError and stageReport arrays are same.
+if downsample
+    for cl = 1:M
+        filtpos(:,cl) = interp1(teven,filtsig(:,cl),t);
+    end
+else
+    filtpos = filtsig;
+end
+disp(['stage sensed positions were filtered with ',num2str(MCL_CUTOFF_HZ),' Hz cutoff']);

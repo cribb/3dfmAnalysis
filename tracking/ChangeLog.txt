@@ -1,3 +1,9 @@
+2006-06-16  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m:
+	- Now facilitates filtering of stage sensed position even when the saved .edited.mat file has unfiltered stage position. 
+	- This is possible for only a limited set of circumstances e.g. EITHER bead & error signal OR stage have to be present in saved file.
+	- Fixed documentation.
+
 2006-06-15  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m:
 	- For .edited format, now stores the name at the time of loading as the current name of the file.
