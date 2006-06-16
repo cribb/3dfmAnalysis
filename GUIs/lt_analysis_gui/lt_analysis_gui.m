@@ -336,7 +336,12 @@ while 1
     if isempty(sameid) | isequal(sameid, fileid) % if there is no another tag of same string
         break;        
     else
-        errordlg('A tag with the same string already exists. Please change the tag.','Error');
+        button = questdlg(['Some other file has already been assigned the tag ',userinput{1},...
+            '. Press CONTINUE to continue or BACK to go back to change the tag'],...
+            'Tag already exists','Continue','Back','Back');
+        if strcmpi(button,'continue')
+            break;
+        end
     end
 end
 g.tag{1,fileid} = userinput{1};
@@ -855,7 +860,8 @@ if get(handles.check_psd,'value')
         end            
     end
 end
-scolor = 'brkgmy';
+scolor = 'brkgmc';
+smarker = '.^+';
 % LOOP TO PROCESS EACH FILE ONE BY ONE (when not in stack_mode)
 for fi = 1:length(ids) %repeat for all files selected
     % grab the signal to be processed
@@ -880,8 +886,10 @@ for fi = 1:length(ids) %repeat for all files selected
         cbox = get(handles.button_clearstack,'UserData')+1;
         set(handles.button_clearstack,'UserData',cbox);
         scolor_now = scolor(mod(cbox-1,length(scolor))+1);
+        smarker_now = ceil(cbox/length(smarker));
     else 
         scolor_now = scolor(mod(fi-1,length(scolor))+1);
+        smarker_now = ceil(fi/length(smarker));
     end
     if (range(diff(sig(:,1))) > 1e-6)            
         fnames = get(handles.menu_files,'String');            
@@ -932,11 +940,11 @@ for fi = 1:length(ids) %repeat for all files selected
             [p f] = mypsd(sig(:,cols(c)+1),srate,psdres,handles.psdwin);
             figure(psdfignum + cols(c) -1);
             warning off % No better way in matlab 6.5 to turn off 'log of zero' warning 
-            plot(log10(f),log10(p),['.-',scolor_now]);                        
+            plot(log10(f),log10(p),[smarker_now,'-',scolor_now]);                        
             if get(handles.check_cumdisp,'value')
                 dc = sqrt(cumsum(p)*mean(diff(f)));% sqrt of area under psd
                 figure(dvsffignum + cols(c)-1);
-                plot(log10(f),dc,['.-',scolor_now]);
+                plot(log10(f),dc,[smarker_now,'-',scolor_now]);
             end
             warning on
             if stack_mode % if we just stacked results of this box position, annotate
@@ -985,7 +993,7 @@ for fi = 1:length(ids) %repeat for all files selected
         [msd, tau] = msdbase([sig(:,1), sig(:,3:5)],[]);% use default msd TAUs
         figure(msdfignum);
         warning off % No better way in matlab 6.5 to turn off 'log of zero' warning 
-        plot(log10(tau),log10(msd),['.-',scolor_now]);
+        plot(log10(tau),log10(msd),[smarker_now,'-',scolor_now]);
         warning on
         if stack_mode % if we just stacked results of this box position, annotate
             % first get the old legend strings
@@ -1021,7 +1029,7 @@ for fi = 1:length(ids) %repeat for all files selected
         hstack = findobj(gcf,'type','Line','tag','stack'); %Handle to the data line
         x = get(hstack,'Xdata'); y = get(hstack,'Ydata');
         ist = max(find(x <= xlims(1))); iend = min(find(x >= xlims(2)));
-        plot(x(ist:iend),y(ist:iend),['.-',scolor_now]);
+        plot(x(ist:iend),y(ist:iend),[smarker_now,'-',scolor_now]);
     end
     
     %%=========== COMPUTE AND PLOT SPECTROGRAM FOR THE FIRST FILE =========
@@ -1545,6 +1553,10 @@ end
 if isequal(lower(get(handles.check_overlaymag,'Enable')),'on')
     overlaymag(handles,figid,1);
 end
+% Now overlay the bad-time-interval flag if we are told to
+% if isequal(lower(get(handles.check_overlaydt,'Enable')),'on')
+    overlaydt(handles,figid);
+% end
 % pretty_plot;
 
 % Now plot the 3D trace if we are told to
@@ -1553,6 +1565,39 @@ if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'
 end
 amibusy(0,handles);
 dbclear if error
+%-----------------------------------------------------------------------
+function overlaydt(handles,figid)
+% Called by mainfigure update routine and spectrogram plotting routine.
+global g
+sigid = get(handles.menu_signal,'UserData');
+if nargin < 2  | isempty(figid)     
+    figid = handles.mainfigids(sigid);    
+end
+
+% Proceed only if the target figure is open, otherwise return
+if ~ishandle(figid)
+    return;
+end
+
+% if get(handles.check_overlaymag,'value')
+    fileid = get(handles.menu_files,'value');
+    t = g.data{fileid}.(handles.signames.intr{sigid})(:,1);
+    dt = diff(t);
+    if range(dt) > 0.01*mean(dt)
+        ibad = find(dt > 1.1*min(dt));
+        % Find points that have uneven time intervals.
+        overt = t(ibad);
+        overy = ones(size(overt));
+        % Now adjust the level so that Dt trace is visible at the top of axis
+        hma = findobj(figid,'Type','Axes','Tag','');
+        ylims = get(hma,'Ylim');
+        overy = overy*0.99*ylims(2);
+        figure(figid); hold on;
+        plot(overt,overy,'.r','Tag','Mag');%magenta color
+        hold off;
+    end
+% end
+
 %-----------------------------------------------------------------------
 function overlaymag(handles,figid,remtoff)
 % Called by mainfigure update routine and spectrogram plotting routine.
