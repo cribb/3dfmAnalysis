@@ -32,7 +32,7 @@ function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
     end;
     
     if nargin < 1 | isempty(data); 
-        error('No data found.'); 
+        error('No data found. Exiting function.'); 
     end;
 
 	switch type
@@ -186,7 +186,7 @@ function [v,q] = linear(data, drift_start_time, drift_end_time);
 
     global TIME ID FRAME X Y Z ROLL PITCH YAW;   
 
-    for k = 0 : get_beadmax(data);
+    for k = unique(data(:,ID))'
 
         bead = get_bead(data, k);
 

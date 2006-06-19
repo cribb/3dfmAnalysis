@@ -1,3 +1,7 @@
+2006-06-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* video_tracking_constants.m: added PULSE and SEQ to column headers.
+	* remove_drift.m: only existing trackers are queried.
+
 2006-06-16  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m:
 	- Now facilitates filtering of stage sensed position even when the saved .edited.mat file has unfiltered stage position. 
@@ -30,7 +34,6 @@
 
 2006-02-03  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: cleaned up documentation and fixed a bug where log message incorrectly reported correct usage of time stamps.
-
 
 2006-01-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m: added drift velocity estimates for y to output log.
