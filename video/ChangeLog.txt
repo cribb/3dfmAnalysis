@@ -1,3 +1,6 @@
+2006-06-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* get_mips.m: now you can choose 'min'imum or 'max'imum intensity projection directly in get_mips.
+
 2006-05-22  Jeremy Cribb <jcribb@email.unc.edu>
 	* raw2avi.m: removed an experimental change to the code (committed by mistake).
 

@@ -1,4 +1,4 @@
-function get_mips(rawfiles, stride, start, stop)
+function get_mips(rawfiles, stride, start, stop, type)
 % 3DFM function  
 % Image Analysis 
 % last modified 01/26/05
@@ -6,7 +6,7 @@ function get_mips(rawfiles, stride, start, stop)
 % This function computes and saves a Maximum or Minimum Intensity 
 % Projection image for any RAW file matching "rawfiles".
 %  
-%  [im] = get_mips(rawfiles, stride, start, stop);
+%  [im] = get_mips(rawfiles, stride, start, stop, type);
 %   
 %  where "rawfiles" is the name of the rawfile (wildcards accepted) 
 %        "stride" is the number of frames to jump between "start" and "stop"
@@ -14,15 +14,21 @@ function get_mips(rawfiles, stride, start, stop)
 %        "stop" is the frame number where the mip should stop computing
 %
 
+if nargin < 5 | isempty(type);      type = 'min';        end;
 if nargin < 4 | isempty(stop);      stop = [];           end;
 if nargin < 3 | isempty(start);     start = 1;           end;
 if nargin < 2 | isempty(stride);    stride = 8;          end;
 if nargin < 1 | isempty(rawfiles);  rawfiles = '*.raw';  end;
 
+if ~strcmp(type, 'min') & ~strcmp(type, 'max')
+    warning('MIP type unknown, defaulting to minimum.');
+    type = 'min';
+end
+
 rawfiles = dir(rawfiles);
 
 for k = 1 : length(rawfiles)
-    imMIP = mip(rawfiles(k).name, start, stop, stride, 'min');
+    imMIP = mip(rawfiles(k).name, start, stop, stride, type);
     
     new_filename = [rawfiles(k).name(1:end-3) 'MIP.bmp'];
     
