@@ -1,3 +1,7 @@
+2006-06-20  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m:
+	- Fixed a bug while checking if filtering of stage position from input edited file is possible.
+
 2006-06-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* video_tracking_constants.m: added PULSE and SEQ to column headers.
 	* remove_drift.m: only existing trackers are queried.

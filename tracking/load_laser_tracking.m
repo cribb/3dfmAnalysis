@@ -287,7 +287,7 @@ if(ischar(file)) % file contains the name of the file as a string
         % bead position.
         if ~isequal(last_flags.filterstage, flags.filterstage)
             if flags.filterstage == 1 
-                if (findstr(fields,'b') & findstr(fields,'e'))
+                if isfield(edited.data,bcegjlqs.out{1}) & isfield(edited.data,bcegjlqs.out{3})
                     oldb = edited.data.(bcegjlqs.out{1});
                     olde = edited.data.(bcegjlqs.out{3});
                     oldt = olde(:,1);
@@ -298,16 +298,16 @@ if(ischar(file)) % file contains the name of the file as a string
                     edited.data.(bcegjlqs.out{8}) = [oldt,filtpos];
                     clear oldb olde oldt filtpos oldpos 
                     flags.filterstage = 1;
-                elseif findstr(fields,'s')
+                elseif isfield(edited.data,bcegjlqs.out{8})
                     oldstage = edited.data.(bcegjlqs.out{8});
                     filtpos = filterMCLsense(oldstage(:,1),oldstage(:,2:4));
                     edited.data.(bcegjlqs.out{8}) = [oldstage(:,1), filtpos];
                     clear oldstage filtpos
                     flags.filterstage = 1;
                 else
-                    disp('WARNING: requested filter the stage sensed positions.');
-                    disp('Do not have the original stage positions.');
-                    disp('To fix, re-load original .vrpn.mat file with correct flags and save');
+                    disp('WARNING: User requested to filter the stage sensed positions.');
+                    disp('Cannot find or compute the original stage positions in the input .edited.mat file.');
+                    disp('To fix, re-load original .vrpn.mat file with correct flags and save.');
                     flags.filterstage = last_flags.filterstage;
                 end
             else
