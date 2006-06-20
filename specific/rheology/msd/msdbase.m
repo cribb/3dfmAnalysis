@@ -35,7 +35,7 @@ srate = 1/mean(dt);
 % If tau is not supplied, generate in logspace from 
 % 1/srate to 1/10th of dataspan or 10 seconds (whichever is less).
 if (nargin < 2) | isempty(tau) 
-    decapt = [1; 2; 5]; %points in each decade. Arbitrariy chosen.
+    decapt = [1; 2; 3; 5; 7]; %points in each decade. Arbitrariy chosen.
     maxTau = min(10,range(t)/10); %ensure that tau is not longer than span
     Ndeca = ceil(log10(srate*maxTau)); % number of decades
     mul = (1/srate)*(10.^[0:1:Ndeca-1]);
