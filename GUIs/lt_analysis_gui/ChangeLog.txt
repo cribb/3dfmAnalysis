@@ -1,5 +1,9 @@
 2006-06-20 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:	
+	- Fixed a bug in stack-box mode when selected signal was not of position type.
+
+2006-06-20 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m:	
 	- Fixed a bug in plotting uneven-timestamps flag line.
 	- Fixed a bug while switching from drag box mode to draw new box mode.
 

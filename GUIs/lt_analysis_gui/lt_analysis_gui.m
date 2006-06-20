@@ -137,6 +137,7 @@ global g % using global (as oppose to 'UserData') prevents creating multiple cop
 dbstop if error
 allexptype = get(handles.menu_exper,'String');
 curexptype = allexptype{get(handles.menu_exper,'value')};
+% load only those fields which are pertinent to the selected experiment 
 switch curexptype
     case allexptype{1} %Passive Diffusion   
         fieldstr = 'b';
@@ -194,7 +195,7 @@ for(c = 1:length(f))
         end
     end
     if doload
-        prompt_user(['...currently loading ','[',num2str(c),'of',num2str(length(f)),'] :',f{c}],handles);
+        prompt_user(['Currently loading ','[',num2str(c),'of',num2str(length(f)),'] :',f{c}],handles);
         
         %put newly added dataset on the top of the list
         %shift all existing datasets down by one
@@ -253,11 +254,11 @@ for(c = 1:length(f))
                 error('Unrecognied file format, only know about .vrpn.mat and .edited.mat formats');
             end
             
-            prompt_user([f{c}, ' added to the database.'],handles);
+            prompt_user(['  ',f{c}, ' added to the database.'],handles);
             nloaded = nloaded + 1; %total files loaded
         catch
             prompt_user(lasterr,handles);
-            prompt_user([f{c}, ' could not be added to the database.'],handles);
+            prompt_user(['  ',f{c}, ' could not be added to the database.'],handles);
             % shift back every field up by one
             if(exist('g') & ~isempty(g.data))
                 for cf = 1:length(handles.gfields)                    
@@ -287,21 +288,6 @@ end
     'OKstring','Remove',...
     'Name','Select file(s) to be removed');
 remove_file(selec, handles);
-
-% COMMENTED OUT BECAUSE THERE IS A BETTER WAY TO REMOVE FILES. DELETE WHEN
-% THE REMOVE_FILE FUNCTION HAS BEEN TESTED WORKING.
-% for c=1:length(selec)
-%     for cf = 1:length(handles.gfields) %delete all fields for that file id
-%         g.(handles.gfields{cf}){1,selec(c)} = {};
-%     end
-% end
-% % keyboard
-% % Now remove the empty cells from each field
-% for cf = 1:length(handles.gfields) 
-%     ifilled = ~cellfun('isempty',g.(handles.gfields{cf}));
-%     g.(handles.gfields{cf}) = g.(handles.gfields{cf})(ifilled); 
-% end
-
 updatemenu(handles);
 prompt_user([num2str(length(selec)),' files were removed from the database.'],handles);
 
@@ -316,7 +302,7 @@ updatesignalmenu(handles);
 % --- Executes on button press in button_tag.
 function button_tag_Callback(hObject, eventdata, handles)
 global g
-% Note: Multiple tags of same string are not acceptable.
+% Note: Multiple tags of same string are discouraged.
 fileid = get(handles.menu_files,'Value');
 contents = get(handles.menu_files,'string');
 prompt = {'Short tag (e.g. to be used as a legend entry in a plot) for this file',...
@@ -805,11 +791,11 @@ end
 % First setup figures for msd and psd computations if we should. Then fill
 % in the plots for each file one by one.
 if stack_mode
-    msdfignum = handles.msdfigids(sigid) + handles.stackfigidoff;
+    msdfignum = handles.msdfigids + handles.stackfigidoff;
     psdfignum = handles.psdfigids(sigid) + handles.stackfigidoff;
     dvsffignum = handles.dvsffigids(sigid) + handles.stackfigidoff;
 else
-    msdfignum = handles.msdfigids(sigid);
+    msdfignum = handles.msdfigids;
     psdfignum = handles.psdfigids(sigid);
     dvsffignum = handles.dvsffigids(sigid);
 end
@@ -870,7 +856,7 @@ for fi = 1:length(ids) %repeat for all files selected
     % First check if we are told to consider data inside the Box only
     if stack_mode | get(handles.check_fdbox,'value')
         if (fi > 1)
-            disp('Error: Was told to consider only ''inside box'' data, but multiple files were selected');
+            disp('Warning: Was told to consider only ''inside box'' data, but multiple files were selected');
             disp('Will ignore the box and process all files');
             set(handles.check_fdbox,'value',0);
         else % only one file to be processed, and boxlimits have been set previously
@@ -1021,8 +1007,12 @@ for fi = 1:length(ids) %repeat for all files selected
             sigvals = g.data{1,fileid}.(signame);
             sigvals(:,1) = sigvals(:,1) - sigvals(1,1); %remove offset  from time
             figure(handles.tstackfigid); set(gcf,'Tag','boxstack');
-            rsig = sqrt(sigvals(1:100:end,2).^2 + sigvals(1:100:end,3).^2 + sigvals(1:100:end,4).^2);
-            plot(sigvals(1:100:end,1), rsig,':k','tag','stack');
+            if any(sigid == handles.posid)
+                rsig = sqrt(sigvals(1:100:end,2).^2 + sigvals(1:100:end,3).^2 + sigvals(1:100:end,4).^2);
+                plot(sigvals(1:100:end,1), rsig,':k','tag','stack');
+            else
+                plot(sigvals(1:100:end,1), sigvals(1:100:end,2), ':k','tag','stack');
+            end
             overlaymag(handles,gcf,1);
         end
         figure(handles.tstackfigid); hold on;
