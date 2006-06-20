@@ -484,11 +484,11 @@ else
         case 1
             if (0 == figflag(getmainfigname(handles)))
                 updatemainfig(handles,'new');
-            end    
-            set(hrad(1), 'Value', 1);
-            set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});            
+            end                       
             % delete the old box
             delete(findobj(hma,'Tag','Box'));
+            set(hrad(1), 'Value', 1);
+            set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles}); 
         case 2
             if (0 == figflag(getmainfigname(handles)))
                 updatemainfig(handles,'new');
@@ -1557,7 +1557,7 @@ set(figid,'name',getmainfigname(handles),'NumberTitle','Off');
 legend(hma,annots.legstr,0);
 
 % Now remove the old box and redraw it according to new axis limits
-axis(hma,'tight');
+axis(hma,'tight'); set(hma,'Box','On');
 if replot_box
     updatebox(handles,hma,0,b);
 end
@@ -1592,9 +1592,13 @@ if ~ishandle(figid)
     return;
 end
 
-% if get(handles.check_overlaymag,'value')
+olddt = findobj(figid,'Type','Line','Tag','difft');
+delete(olddt);
+axis tight;
+% if get(handles.check_overlaydt,'value')
     fileid = get(handles.menu_files,'value');
     t = g.data{fileid}.(handles.signames.intr{sigid})(:,1);
+    t = t - t(1);
     dt = diff(t);
     if range(dt) > 0.01*mean(dt)
         ibad = find(dt > 1.1*min(dt));
@@ -1606,7 +1610,7 @@ end
         ylims = get(hma,'Ylim');
         overy = overy*0.99*ylims(2);
         figure(figid); hold on;
-        plot(overt,overy,'.r','Tag','Mag');%magenta color
+        plot(overt,overy,'.r','Tag','difft');%magenta color
         hold off;
     end
 % end
