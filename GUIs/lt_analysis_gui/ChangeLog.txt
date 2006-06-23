@@ -1,3 +1,9 @@
+2006-06-22 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m:	
+	- Now handles the box modes appropriately when the main figure is closed and then reploted by user.
+	- Better handling of signal variety for time domain plot in stack mode.
+	- Fixed a bug whereby time domain plot for stack wouldn't update if the box was partially out of axes limits.
+
 2006-06-20 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:	
 	- Fixed a bug in stack-box mode when selected signal was not of position type.

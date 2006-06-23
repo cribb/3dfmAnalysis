@@ -453,6 +453,9 @@ if isempty(hmf) | hmf == 0
     hmf = handles.mainfigids(sigid);
     set(handles.radio_drawbox,'UserData',hmf);
 end
+if ~ishandle(hmf) % If user wants to do anything with box, figure must exist
+    updatemainfig(handles,'new');
+end
 hma = findobj(hmf,'Type','Axes','Tag','');
 % some constants
 hrad(1) = handles.radio_drawbox;
@@ -467,18 +470,12 @@ if radstat == 0
     set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});
 else
     switch radind
-        case 1
-            if (0 == figflag(getmainfigname(handles)))
-                updatemainfig(handles,'new');
-            end                       
+        case 1                               
             % delete the old box
             delete(findobj(hma,'Tag','Box'));
             set(hrad(1), 'Value', 1);
             set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles}); 
         case 2
-            if (0 == figflag(getmainfigname(handles)))
-                updatemainfig(handles,'new');
-            end
             if isempty(findobj(hma,'Tag','Box'))
                 errordlg('First draw a box to enable this mode.','Alert');                
                 set(hrad(1), 'Value', 1);
@@ -859,6 +856,7 @@ for fi = 1:length(ids) %repeat for all files selected
             disp('Warning: Was told to consider only ''inside box'' data, but multiple files were selected');
             disp('Will ignore the box and process all files');
             set(handles.check_fdbox,'value',0);
+            stack_mode = 0;
         else % only one file to be processed, and boxlimits have been set previously
             M = size(sig,2);
             oldsig = sig; sig = [];
@@ -999,26 +997,37 @@ for fi = 1:length(ids) %repeat for all files selected
     end    
     %%=====  COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   =======    
 
-    if stack_mode % then update the figure that shows each box color coded
+    if stack_mode % then update the time domain figure that shows each box color coded
         if ~ishandle(handles.tstackfigid);
+            % because the previous code only parses that data within the
+            % box, we have to recollect the data across the whole duration.
             sigid = get(handles.menu_signal,'UserData');            
             signame = handles.signames.intr{1,sigid};            
             fileid = get(handles.menu_files,'value');
-            sigvals = g.data{1,fileid}.(signame);
-            sigvals(:,1) = sigvals(:,1) - sigvals(1,1); %remove offset  from time
+            allvals = g.data{1,fileid}.(signame);
+            allvals(:,1) = allvals(:,1) - allvals(1,1); %remove offset  from time
+            % Now down sample for faster display
+            downvals = allvals(1:100:end,:); clear allvals;
             figure(handles.tstackfigid); set(gcf,'Tag','boxstack');
-            if any(sigid == handles.posid)
-                rsig = sqrt(sigvals(1:100:end,2).^2 + sigvals(1:100:end,3).^2 + sigvals(1:100:end,4).^2);
-                plot(sigvals(1:100:end,1), rsig,':k','tag','stack');
+            if any(sigid == handles.posid) % If this is position then compute and insert R                
+                ov = downvals; downvals = [];
+                downvals(:,1) = ov(:,1);
+                downvals(:,2) = sqrt(ov(:,2).^2 + ov(:,3).^2 + ov(:,4).^2);
+                downvals(:,3:5) = ov(:,2:4);
+                clear ov
+                ylstr = 'Microns';
             else
-                plot(sigvals(1:100:end,1), sigvals(1:100:end,2), ':k','tag','stack');
+                ylstr = 'Volts';
             end
+            plot(downvals(:,1), downvals(:,1+cols(1)), ':k', 'tag', 'stack');
+            xlabel('Time [s]'); ylabel(ylstr);
+            % Now overlay magnets if user has told us to do so
             overlaymag(handles,gcf,1);
         end
         figure(handles.tstackfigid); hold on;
         hstack = findobj(gcf,'type','Line','tag','stack'); %Handle to the data line
         x = get(hstack,'Xdata'); y = get(hstack,'Ydata');
-        ist = max(find(x <= xlims(1))); iend = min(find(x >= xlims(2)));
+        ist = min(find(x >= xlims(1))); iend = max(find(x <= xlims(2)));
         plot(x(ist:iend),y(ist:iend),[smarker_now,'-',scolor_now]);
     end
     
@@ -1505,7 +1514,7 @@ set(handles.radio_drawbox,'UserData',figid);% share with others
 if ishandle(figid) % if the figure is open,   
     % delete old data lines
     dlinesh = findobj(figid,'Type','Line','Tag','data');    
-    delete(dlinesh);   
+    delete(dlinesh);     
 end
 
 fileid = get(handles.menu_files,'value');
@@ -1550,7 +1559,12 @@ legend(hma,annots.legstr,0);
 axis(hma,'tight'); set(hma,'Box','On');
 if replot_box
     updatebox(handles,hma,0,b);
+else
+    % If not reploting the box, it means that box didn't exist. 
+    % If box didn't exist then automatically switch to 'Draw New Box' mode.
+    manageboxradiogroup(handles,1,1);
 end
+    
 
 % Now update the overlaid magnets/channel 8 trace if we are told to
 if isequal(lower(get(handles.check_overlaymag,'Enable')),'on')
@@ -1558,7 +1572,7 @@ if isequal(lower(get(handles.check_overlaymag,'Enable')),'on')
 end
 % Now overlay the bad-time-interval flag if we are told to
 % if isequal(lower(get(handles.check_overlaydt,'Enable')),'on')
-    overlaydt(handles,figid);
+overlaydt(handles,figid);
 % end
 % pretty_plot;
 
