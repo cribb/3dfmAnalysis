@@ -804,8 +804,10 @@ if get(handles.check_msd,'Value')
         clf;    
     end
     title([handles.signames.disp{sigid}, '-MSD']);
-    xlabel('log_{10}(\tau)      [seconds]');	                        
-    ylabel('log_{10}(MSD)       [micron^2]');    
+    % xlabel('log_{10}(\tau)      [seconds]');	                        
+    % ylabel('log_{10}(MSD)       [micron^2]');
+    xlabel('{\tau}     [S]');
+    ylabel('MSD   [micron^2]');    
     hold on;
 end
 
@@ -977,8 +979,12 @@ for fi = 1:length(ids) %repeat for all files selected
         [msd, tau] = msdbase([sig(:,1), sig(:,3:5)],[]);% use default msd TAUs
         figure(msdfignum);
         warning off % No better way in matlab 6.5 to turn off 'log of zero' warning 
-        plot(log10(tau),log10(msd),[smarker_now,'-',scolor_now]);
+        % plot(log10(tau),log10(msd),[smarker_now,'-',scolor_now]);
+        loglog(tau, msd,[smarker_now,'-',scolor_now]);
         warning on
+        alld.msd{fi} = msd;
+        alld.tau{fi} = tau;
+        alld.fname{fi} = g.fname{ids(fi)};
         if stack_mode % if we just stacked results of this box position, annotate
             % first get the old legend strings
             [lh oh ph strs] = legend(gca);
@@ -991,8 +997,9 @@ for fi = 1:length(ids) %repeat for all files selected
             alltags = g.tag;                
             legend(gca,alltags{ids});
             pretty_plot;
-            %                 set(gca,'Xscale','Log','Yscale','Log');
+            %                 set(gca,'Xscale','Log','Yscale','Log');            
             hold off;
+            assignin('base','alld');            
         end       
     end    
     %%=====  COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   =======    
@@ -1182,7 +1189,8 @@ fileid = get(handles.menu_files,'Value');
 sigid = get(handles.menu_signal,'UserData');% internal ID of currently selected signal.
 signame = handles.signames.intr{sigid};
 sigmat = g.data{1,fileid}.(signame); 
-
+% Remove offset in time
+sigmat(:,1) = sigmat(:,1) - sigmat(1,1);
 % Now grab the points that fall inside the box
 [tsel, selec] = clipper(sigmat(:,1),sigmat(:,2:end),b.xlims(1),b.xlims(2));
 

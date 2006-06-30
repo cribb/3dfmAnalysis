@@ -1,3 +1,6 @@
+2006-06-30 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m:	Now automatically exports results of msd to base workspace. Also plots msd on loglog scale instead of linearized log scale.
+	
 2006-06-22 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:	
 	- Now handles the box modes appropriately when the main figure is closed and then reploted by user.
