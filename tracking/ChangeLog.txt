@@ -1,3 +1,8 @@
+2006-07-03  Kalpit Desai <kvdesai@email.unc.edu>
+	* load_laser_tracking.m:
+	- Increased the filter order to 8 for reducing stage sensor electronic noise, in order to achieve steep rolloff.
+	- Reduced the cutoff frequency to 550, still sticking to butterworth for its monotonicity.
+
 2006-06-20  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m:
 	- Fixed a bug while checking if filtering of stage position from input edited file is possible.

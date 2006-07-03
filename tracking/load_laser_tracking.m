@@ -555,7 +555,6 @@ dd.tracking.(fin_name) = []; % free up memory as we go
 function filtpos = filterMCLsense(t, pos)
 % NOTE: Can not use global dd here, because in the case of edited file,
 % there won't be any dd.
-MCL_CUTOFF_HZ = 600;
 M = size(pos,2);
 
 if (range(diff(t)) > 1e-6)
@@ -572,9 +571,15 @@ else
     downsample = 0;
     srate = 1/mean(diff(t));
 end
-[filt.b,filt.a] = butter(4, MCL_CUTOFF_HZ*2/srate);
+
+% Now design an 8th order butterworth filter with -3db cutoff at 550 Hz. Also, use
+% forward-backward filtering to ensure zero phase distortion.
+MCL_CUTOFF_HZ = 550; 
+FILTER_ORDER = 8;
+
+[fnum fden] = butter(FILTER_ORDER/2, MCL_CUTOFF_HZ*2/srate);
 for cl = 1:size(sig,2)
-    filtsig(:,cl) = filtfilt(filt.b,filt.a,sig(:,cl));
+    filtsig(:,cl) = filtfilt(fnum,fden,sig(:,cl));
 end
 % IF data was upsampled to apply filtering, downsample at the original
 % timestamps so that size of posError and stageReport arrays are same.
