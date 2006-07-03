@@ -1,3 +1,6 @@
+2006-07-03 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m:	Now allows looking at 1D msd of individual dimension (x,y,z).
+
 2006-06-30 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:	Now automatically exports results of msd to base workspace. Also plots msd on loglog scale instead of linearized log scale.
 	

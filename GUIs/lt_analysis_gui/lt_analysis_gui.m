@@ -75,15 +75,16 @@ set(handles.button_add,'UserData',handles.default_path);
 % If we want to add a signal later, just change all the fields below (e.g
 % siganmes.intr, signmaes.disp, posid, and all figids accordingly. Rest of
 % the program *should* still work unchanged.
+%   Names of the signals as they are recognized by analysis codes
 handles.signames.intr = {'beadpos' ,'stageReport','qpd','laser', 'posError'};
-% Names of signals to be displayed on ltaGUI control menu_signal
+%   Names of signals to be displayed on ltaGUI control menu_signal
 handles.signames.disp = {'Probe Pos','Stage Pos' ,'QPD','Channel 8', 'Pos Error'};
 handles.posid = [1, 2, 5]; %index of the signals which are position measurements
 % Figure numbers allocated to 'main-figures' for various signals
 handles.mainfigids =      [   1,          2,          3,         4,     5];
 handles.psdfigids =       [  10,         20,         30,        40,     50];
 handles.dvsffigids =  handles.psdfigids + 5;      % accumulated displacement 
-handles.msdfigids = 60;
+handles.msdfigids = 60; % ONLY for Probe Pos signal
 %  ....add to this list as more types of plots are supported
 
 % Some other figure numbers allocated to specific types of plot
@@ -776,12 +777,12 @@ end
 if any(sigid == handles.posid)
     % which of the R X Y Z are selected?
     cols = get(handles.list_dims,'value');
-    strs = get(handles.list_dims,'String');
+    colstr = get(handles.list_dims,'String');
 else %non-positional sigal, so process for all columns
     cols = 1:size(g.data{ids(1)}.(signame),2)-1; 
         % first column is always timestamp
     for k = 1:length(cols) 
-        strs{k} = num2str(k); 
+        colstr{k} = num2str(k); 
     end
 end
 
@@ -792,23 +793,31 @@ if stack_mode
     psdfignum = handles.psdfigids(sigid) + handles.stackfigidoff;
     dvsffignum = handles.dvsffigids(sigid) + handles.stackfigidoff;
 else
-    msdfignum = handles.msdfigids;
+    msdfignum = handles.msdfigids; % ONLY FOR BEAD POSITION
     psdfignum = handles.psdfigids(sigid);
     dvsffignum = handles.dvsffigids(sigid);
 end
 % $$$$$$$$ Setup MSD figures if we should
 if get(handles.check_msd,'Value')
-    % setup msd figure
-    figure(msdfignum); 
-    if ~stack_mode          
-        clf;    
+    if ~isequal(handles.signames.intr{sigid},'beadpos')
+        % This is not the bead-position signal so don't compute msd
+        set(handles.check_msd,'value',0);
+        prompt_user('WARNING: MSD computation is only supported for bead position signal');
+    else
+        % setup msd figure
+        for c = 1:length(cols)
+            figure(msdfignum + cols(c) - 1);
+            if ~stack_mode
+                clf;
+            end
+            title([handles.signames.disp{sigid}, '-MSD',colstr{cols(c)}]);
+            % xlabel('log_{10}(\tau)      [seconds]');
+            % ylabel('log_{10}(MSD)       [micron^2]');
+            xlabel('{\tau}     [S]');
+            ylabel('MSD   [micron^2]');
+            hold on;
+        end
     end
-    title([handles.signames.disp{sigid}, '-MSD']);
-    % xlabel('log_{10}(\tau)      [seconds]');	                        
-    % ylabel('log_{10}(MSD)       [micron^2]');
-    xlabel('{\tau}     [S]');
-    ylabel('MSD   [micron^2]');    
-    hold on;
 end
 
 % $$$$$$$$ Setup PSD figure if we should
@@ -820,7 +829,7 @@ if get(handles.check_psd,'value')
             clf;    
         end
         
-        title([handles.signames.disp{sigid}, '-PSD: ',strs{cols(c)}]);
+        title([handles.signames.disp{sigid}, '-PSD: ',colstr{cols(c)}]);
         xlabel('log_{10} Frequency [Hz]');
         if any(sigid == handles.posid) % if this signal is a position measurement
             ylabel('log_{10} Micron^2/Hz');
@@ -835,9 +844,9 @@ if get(handles.check_psd,'value')
                 clf;    
             end  
             if any(sigid == handles.posid) % if this signal is a position measurement
-                title([handles.signames.disp{sigid}, '-Cumulative Displacement: ',strs{cols(c)}]);                
+                title([handles.signames.disp{sigid}, '-Cumulative Displacement: ',colstr{cols(c)}]);                
             else 
-                title([handles.signames.disp{sigid}, '- sqrt[Area under PSD]: ',strs{cols(c)}]);
+                title([handles.signames.disp{sigid}, '- sqrt[Area under PSD]: ',colstr{cols(c)}]);
             end                
             ylabel('Micron');
             xlabel('log_{10} Frequency [Hz]');
@@ -974,35 +983,39 @@ for fi = 1:length(ids) %repeat for all files selected
     
     %%********      MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION      **********
     if get(handles.check_msd,'value')
-        % Allow msd for position-signal only. So this signal has 5 columns
-        % (trxyz) guaranteed. 
-        [msd, tau] = msdbase([sig(:,1), sig(:,3:5)],[]);% use default msd TAUs
-        figure(msdfignum);
-        warning off % No better way in matlab 6.5 to turn off 'log of zero' warning 
-        % plot(log10(tau),log10(msd),[smarker_now,'-',scolor_now]);
-        loglog(tau, msd,[smarker_now,'-',scolor_now]);
-        warning on
-        alld.msd{fi} = msd;
-        alld.tau{fi} = tau;
-        alld.fname{fi} = g.fname{ids(fi)};
-        if stack_mode % if we just stacked results of this box position, annotate
-            % first get the old legend strings
-            [lh oh ph strs] = legend(gca);
-            legstr = sprintf('t: %.1f to %.1f',xlims(1),xlims(2));
-            legend([strs,legstr],'Location','Best');
-            pretty_plot;
-            hold off;
-            set(gcf,'Tag','boxstack');
-        elseif (fi == length(ids))% if this is last file, annotate
-            alltags = g.tag;                
-            legend(gca,alltags{ids});
-            pretty_plot;
-            %                 set(gca,'Xscale','Log','Yscale','Log');            
-            hold off;
-            assignin('base','alld');            
-        end       
-    end    
-    %%=====  COMPLETED MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION   =======    
+        % Allow msd for bead-position signal only. So this signal has 5 columns
+        % (trxyz) guaranteed.
+        for c = 1:length(cols)
+            [msd, tau] = msdbase([sig(:,1), sig(:,cols(c)+1)],[]);% use default msd TAUs
+            figure(msdfignum + cols(c) - 1);
+            warning off % No better way in matlab 6.5 to turn off 'log of zero' warning
+            % plot(log10(tau),log10(msd),[smarker_now,'-',scolor_now]);
+            loglog(tau, msd,[smarker_now,'-',scolor_now]);
+            warning on
+            alld.(colstr{cols(c)}).msd{fi} = msd;
+            alld.(colstr{cols(c)}).tau{fi} = tau;
+            alld.fname{fi} = g.fname{ids(fi)};
+            if stack_mode % if we just stacked results of this box position, annotate
+                % first get the old legend strings
+                [lh oh ph strs] = legend(gca);
+                legstr = sprintf('t: %.1f  ->  %.1f',xlims(1),xlims(2));
+                legend([strs,legstr],'Location','Best');
+                pretty_plot;
+                hold off;
+                set(gcf,'Tag','boxstack');
+            elseif (fi == length(ids))% if this is last file, annotate
+                alltags = g.tag;
+                legend(gca,alltags{ids});
+                pretty_plot;
+                %                 set(gca,'Xscale','Log','Yscale','Log');
+                hold off;
+                % Export the results to workspace so that advanced user can
+                % play around with it.
+                assignin('base',['allmsd',colstr{cols(c)}],alld.(colstr{cols(c)}));
+            end
+        end        
+    end
+    %%=====  COMPLETED PLOTTING MEAN-SQUARE-DISPLACEMENT (MSD)  =======    
 
     if stack_mode % then update the time domain figure that shows each box color coded
         if ~ishandle(handles.tstackfigid);
