@@ -31,6 +31,8 @@ options = optimset('MaxFunEvals', 20000*2*n, ...
                    'MaxIter', 2000, ...
                    'ShowStatusWindow', 'off');
 
+logentry(['Fitting for Kelvin-Voight, ' num2str(n) ' modes.']);
+
 % normalize recovery to start at 1 and end at 0
 xt = xt - mean(xt(end-5:end));
 xt = xt / max(xt);
@@ -87,6 +89,9 @@ for k = 1 : length(J)
     end
 end
 
+logentry(['Resulting relaxation times (tau): ' num2str(tau) '.']);
+logentry(['Goodness of fit: ' num2str(R_square) '.']);
+
 figure;
 % subplot(1,2,1);
 plot(t, xt, '.', t, fit_xt, 'r');
@@ -99,3 +104,23 @@ legend('data', 'fit');
 % xlabel('time [s]');
 % ylabel('normalized recovery');
 % legend('data', 'fit');
+
+
+%%%%
+%% extraneous functions
+%%%%
+
+%% Prints out a log message complete with timestamp.
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'relaxation_time: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+    return
