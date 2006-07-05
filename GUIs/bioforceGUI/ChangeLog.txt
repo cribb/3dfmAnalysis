@@ -1,3 +1,7 @@
+2006-07-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* bioforceGUI.fig: Added text box that sets the number of modes for fitting to a Kelvin Voight fluid model.
+	* bioforceGUI.m: same. 
+
 2005-11-20  Jeremy Cribb <jcribb@email.unc.edu>
 	* bioforceGUI.fig: Added fields that report total distance translated/recovered.
 	* bioforceGUI.m: same.
