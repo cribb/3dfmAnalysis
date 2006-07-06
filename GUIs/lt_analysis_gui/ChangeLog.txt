@@ -1,3 +1,7 @@
+2006-07-05 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m:	
+	- Fixed the bug where gui forgot the default browsing path. 
+	
 2006-07-03 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:	Now allows looking at 1D msd of individual dimension (x,y,z).
 

@@ -136,9 +136,24 @@ varargout{1} = handles.output;
 function button_add_Callback(hObject, eventdata, handles)
 global g % using global (as oppose to 'UserData') prevents creating multiple copies and conserves memory
 dbstop if error
+
+% A cheap hacky fix to the bug where ltaGUI sometimes forgets the last path
+if (get(hObject,'UserData') == 0),  set(hObject,'UserData',handles.default_path); end    
+
+[f, p] = uigetfiles('*.mat','Browse and select one or more files',get(hObject,'UserData'));
+%when user presses 'cancel' instead of selecting files: P = 0, and f = {}
+if isempty(f)
+    prompt_user('Adding files to the database was cancelled by the user.',handles);
+    return;
+else %Atlease one file was selected for adding to the database
+    set(hObject,'UserData',p); %memorize the browsed path
+end
+prompt_user('Wait...Loading selected files',handles);
+amibusy(1,handles);
+% Now decide the fields that need to be loaded. Load only those fields
+% which are pertinent to the selected experiment type
 allexptype = get(handles.menu_exper,'String');
 curexptype = allexptype{get(handles.menu_exper,'value')};
-% load only those fields which are pertinent to the selected experiment 
 switch curexptype
     case allexptype{1} %Passive Diffusion   
         fieldstr = 'b';
@@ -157,20 +172,14 @@ switch curexptype
     otherwise
         prompt_user('Error: Unrecognized experiment type',handles);
 end
-% A cheap hacky fix to the bug where ltaGUI sometimes forgets the last path
-if (get(hObject,'UserData') == 0),  set(hObject,'UserData',handles.default_path); end    
-
-[f, p] = uigetfiles('*.mat','Browse and select one or more files',get(hObject,'UserData'));
-
-set(hObject,'UserData',p); %memorize the last browsing path
-prompt_user('Wait...Loading selected files',handles);
-amibusy(1,handles);
+% These are the flags to be used by load_laser_tracking. Refer to the
+% manual of load_laser_tracking module for more information.
 flags.keepuct = 0; flags.keepoffset = 0; flags.askforinput = 0;flags.inmicrons = 1;
-flags.filterstage = get(handles.check_filterMCL,'value'); % Lowpass Filter stage-sensed values with 600Hz cutoff?
-flags.matoutput = 1; %request output fields in the [time vals] matrix form.
-nloaded = 0;
-for(c = 1:length(f))
-    pack
+flags.filterstage = get(handles.check_filterMCL,'value'); % Lowpass Filter stage-sensed values?
+flags.matoutput = 1; %request output fields in the [time, vals] matrix form.
+nloaded = 0; 
+for(c = 1:length(f)) 
+    pack %conserving memory is the key for this GUI to be useful
     doload = 1;
     if exist('g') & ~isempty(g.data) & any(strcmp(g.fname,f{c}) == 1)
         isame = find(strcmp(g.fname,f{c}) == 1);
@@ -230,14 +239,14 @@ for(c = 1:length(f))
                 else
                     g.metadata = ans.metadata;
                 end
+                 % Now put zero as the place-holder in the drift fields 
                 for k = 1:length(handles.signames.intr)
                     if isfield(g.data{1},handles.signames.intr{k})
                         % calculate # of columns in the current signal
-                        M = size(g.data{1}.(handles.signames.intr{k}),2);                    
-                        % enter zero as the place-holder in the drift fields to start with.
+                        M = size(g.data{1}.(handles.signames.intr{k}),2);                                           
                         % do not allocate space for drift for the first column which is time
                         g.drift{1,1}.(handles.signames.intr{k}) = zeros(2,M-1);
-                        % First Row = Slope, Second Row = Offset
+                                % First Row = Slope, Second Row = Offset
                     end
                 end
                 g.exptype{1,1} = curexptype;
@@ -256,7 +265,7 @@ for(c = 1:length(f))
             end
             
             prompt_user(['  ',f{c}, ' added to the database.'],handles);
-            nloaded = nloaded + 1; %total files loaded
+            nloaded = nloaded + 1; %number of files loaded in this session
         catch
             prompt_user(lasterr,handles);
             prompt_user(['  ',f{c}, ' could not be added to the database.'],handles);
@@ -272,7 +281,7 @@ for(c = 1:length(f))
 end
 % set(hObject,'UserData', g); %use global instead
 
-prompt_user(['Finished Loading. Loaded ',num2str(nloaded),' files'],handles);
+prompt_user(['Finished Loading. Loaded ',num2str(nloaded),' files.'],handles);
 amibusy(0,handles);
 if nloaded 
     updatemenu(handles);
@@ -1772,7 +1781,8 @@ end
 % This routine updates signal menu:
 % 1. Checks and fills in the permitted signalNames in the signal menu
 % 2. Shares the internal index (sigid) for the currently selected signal
-% 3. Enables/disables 'overlay magnets' and ['3d' % 'dimension(s)'] objects
+% 3. Enables/disables 'overlay magnets', 'sbutract drift', '3d' and 
+%                                           'dimension(s)' options
 % CALLED OFF 4. Updates the main figure
 function updatesignalmenu(handles)
 global g
@@ -1882,34 +1892,6 @@ set(hObject,'value',3); % Set to 10 ms resolution by default
 %%%********************************************************************
 %%%**********     ALL BELOW IS NEEDED BUT NOT-USED     ****************
 %%%********************************************************************
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 % --- Executes during object creation, after setting all properties.
 function menu_files_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to menu_files (see GCBO)
