@@ -1,3 +1,7 @@
+2006-07-05  Kalpit Desai <kvdesai@email.unc.edu>
+	* msdbase.m: 
+	- Fixed nasty errors in the documentation and brought it up to date.
+	- Exposed the standard error results to the output.
 2006-06-20  Kalpit Desai <kvdesai@email.unc.edu>
 	* msdbase.m: Now puts five points (instead of 3) in each decade for default window vector.
 2006-06-05  Kalpit Desai <kvdesai@email.unc.edu>
