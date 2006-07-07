@@ -32,24 +32,23 @@ if (nargin < 2 | isempty(Nrepeat))
 end;
 
 if (nargin < 3 | isempty(board))  
-    board = 'PCI-6713';             
-    warning('DACoperator: Using default AO board: PCI-6733 (magnet-controller)...');   
+    board = 'daqtest';             
+    logentry('No board specified.  Using virtual board "daqtest" as default');   
 end;
 
 if (nargin < 4 | isempty(channels))   
     channels = 0:length;
-
-    warning(['DACoperator: Using default AO channels: 0 to ,',num2str(N-1)]);
+    logentry(['DACoperator: Using default AO channels: 0 to ,',num2str(N-1)]);
 end;
 
 if (nargin < 5 | isempty(srate))   
     srate  = 10000;	
-    disp(['DACoperator: Sampling rate defaulted to ',num2str(srate),'Hz']);
+    logentry(['Sampling rate defaulted to ',num2str(srate),'Hz']);
 end;
 
 if (nargin < 6 | isempty(Vrange))   
     Vrange = [-10 10];	
-    disp(['DACoperator: Voltage range defaulted as ',num2str(Vrange(1)),' to ', num2str(Vrange(2)),' volts']);
+    logentry(['DACoperator: Voltage range defaulted as ',num2str(Vrange(1)),' to ', num2str(Vrange(2)),' volts']);
 end;
 
 if (N ~= length(channels))
@@ -98,7 +97,7 @@ if (AOid < 0) | strcmp(board,'daqtest');
     logentry(['Sampling Rate: ' num2str(srate)]);
     logentry(['Voltage Range: [' num2str(Vrange(1)) ' ' num2str(Vrange(2)) ']']);
     logentry(['Number of repeats: ' num2str(Nrepeat) ] );
-    logentry(['Writing to output channels: ' num2str(channels') ]);
+    logentry(['Writing to output channels: ' num2str(channels(:)') ]);
     logentry(['Start time would have been: ' num2str((start_time))]);
     logentry(['Signals to send to DAq channels are plotted.']);
 
