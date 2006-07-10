@@ -1,3 +1,5 @@
+2006-07-10  Kalpit Desai <kvdesai@email.unc.edu>
+	* msdbase.m: Fixed a typo and a bug in calculation of default Tau.
 2006-07-05  Kalpit Desai <kvdesai@email.unc.edu>
 	* msdbase.m: 
 	- Fixed nasty errors in the documentation and brought it up to date.

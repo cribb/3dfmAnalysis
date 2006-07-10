@@ -48,9 +48,9 @@ CLIP_TAU = 70; %Clip Tau to 70 seconds
 % If tau is not supplied, generate in logspace from 1/srate to MaxTau
 if (nargin < 2) | isempty(tau) 
     decapt = [1; 2; 3; 5; 7]; %points in each decade. Arbitrariy chosen.
-    Nord = floor(log10(range(t)); %the order of the highest full decade
+    Nord = floor(log10(range(t))); %the order of the highest full decade
     Nord_maxpt = max(decapt)*10^Nord;
-    if Nord_maxpt < range(t)
+    if Nord_maxpt >= range(t)
         %ensure that longest tau is not longer than duration
         Nord_maxpt = max(decapt)*10^(Nord-1);
     end
@@ -84,7 +84,7 @@ for w = 1:length(win)
     B = pos(win(w)+1:end,:);
     r2 = sum((B - A).^2, 2); % squared displacement    
     
-    count(w,1) = length(r2);
+    count(w,1) = length(r2);    
     msd(w,1) = mean(r2);
     ste(w,1) = nanstd(r2)/sqrt(count(w,1));
     Tau(w,1) = win(w)/srate; % Actual tau used
