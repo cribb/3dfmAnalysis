@@ -1,3 +1,8 @@
+2006-07-10 Kalpit Desai <kvdesai@email.unc.edu>
+	* threePoleFreqSweep.m: Version 2.4
+	- This is an intermediate version where frequency vector is hardcoded to be 1 2 3 5 7 points in each decade.
+	- Later on, this should be specified through UI, but need to commit now in order to track what version created the dataset.
+
 2006-05-18 Kalpit Desai <kvdesai@email.unc.edu>
 	* threePoleFreqSweep.m: Version 2.3
 	- Fixed a bug where because of the 120 degree phase separation, number of sinusoidal force cycles would be one less than that requested.

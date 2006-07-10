@@ -61,7 +61,7 @@ function threePoleFreqSweep_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for threePoleFreqSweep
 handles.output = hObject;
 global AO version_str;
-version_str = '2.3';
+version_str = '2.4';
 % Update handles structure
 guidata(hObject, handles);
 clc;
@@ -105,7 +105,8 @@ param.fcont = str2double(get(handles.edit_controlFreq,'string'));
 fmin = str2double(get(handles.edit_freqMin,'string'));
 fmax = str2double(get(handles.edit_freqMax,'string'));
 fstep = str2double(get(handles.edit_freqStep,'string'));
-param.fvec = fmin:fstep:fmax;
+% param.fvec = fmin:fstep:fmax;
+param.fvec = [2000 1000 700 500 300 200 100 70 50 30 20 10 7 5 3 2 1]; 
 
 param.Nrepeat = 0; % 0 times repeat the frquency sweep. Add edit-box on UI in future if needed.
 
