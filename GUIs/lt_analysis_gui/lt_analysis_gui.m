@@ -1012,11 +1012,12 @@ for fi = 1:length(ids) %repeat for all files selected
                 pretty_plot;
                 hold off;
                 set(gcf,'Tag','boxstack');
+                set(gca,'Xscale','Log','Yscale','Log');
             elseif (fi == length(ids))% if this is last file, annotate
                 alltags = g.tag;
                 legend(gca,alltags{ids});
                 pretty_plot;
-                %                 set(gca,'Xscale','Log','Yscale','Log');
+                set(gca,'Xscale','Log','Yscale','Log');
                 hold off;
                 % Export the results to workspace so that advanced user can
                 % play around with it.
