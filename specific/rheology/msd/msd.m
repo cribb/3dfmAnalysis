@@ -37,6 +37,7 @@ video_tracking_constants;
 v = load_video_tracking(files, frame_rate, 'm', calib_um, 'relative', 'yes', 'table');
 
 % for every bead
+warning('off', 'MATLAB:divideByZero');
 for beadID = 0 : get_beadmax(v);
     
     b = get_bead(v, beadID);    
@@ -72,40 +73,42 @@ for beadID = 0 : get_beadmax(v);
         tau(w, beadID+1) = window(w) * mean(diff(b(:,TIME)));
     end   
 end
+warning('on', 'MATLAB:divideByZero');
 
 % setting up axis transforms for the figure plotted below.  You cannot plot
 % errorbars on a loglog plot, it seems, so we have to set it up here.
 logtau = log10(tau);
 logmsd = log10(msd);
 
-mean_logtau = nanmean(logtau');
-mean_logmsd = nanmean(logmsd');
-
 sample_count = sum(~isnan(logmsd),2);
 
-% warning('off', 'MATLAB:divideByZero');
+% remove window sizes that returned no data
+idx = find(sample_count > 0);
+logtau = logtau(idx,:);
+logmsd = logmsd(idx,:);
+sample_count = sample_count(idx);
 
-% % remove window sizes that returned no data
-% idx = find(sample_count > 0);
-% logtau = logtau(idx);
-% logmsd = logmsd(idx);
-% sample_count = sample_count(idx);
+mean_logtau = nanmean(logtau');
+mean_logmsd = nanmean(logmsd');
 
     ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
     ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
 
-    
-	figure;
+    figure;
 	errorbar(mean_logtau, mean_logmsd, ste_logmsd);
 	xlabel('log_{10}(\tau) [s]');
 	ylabel('log_{10}(MSD) [m^2]');
 	grid on;
 	pretty_plot;
 
+
 % dlmwrite('file.msd.txt', [mean_logtau(:), mean_logmsd(:), ste_logtau(:), ste_logmsd(:)], '\t');
     
-    
 % outputs
+% d.raw.tau = tau;
+% d.raw.msd = msd;
+% 
+% d.mean.tau = 
 d.tau = tau;
 d.msd = msd;
 d.error_msd = ste_logmsd(:);
