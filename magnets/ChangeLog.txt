@@ -1,3 +1,6 @@
+2006-07-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* varforcecal.  added this folder.
+
 2006-06-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* forcecal2d.m: removed bug that crashed function when no data existed for a particular tracker.
 
