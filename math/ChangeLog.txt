@@ -1,3 +1,6 @@
+2006-07-18  Jeremy Cribb <jcribb@email.unc.edu>
+	* uncertainty_in_slope.m: added check for data of reasonable length for error determination and implemented messaging.
+
 2005-10-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* windiff.m: minor changes to make code more readable.
 

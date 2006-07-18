@@ -17,18 +17,40 @@ function v = uncertainty_in_slope(x, y, fit)
 %  
 %  07/25/05 - created. (jcribb)
 %
-
     N = length(x);
-    
-    B = fit(1);
-    A = fit(2);
-    
-    delta = N * sum(x.^2) - sum(x)^2;
-    
-    sy2 = 1/(N-2) * sum( (y - A - B*x) .^ 2);
-    
-    sB2 = N * sy2 / delta;
+
+    if N <= 2
+        logentry('You need more than two points to have measureable error. Reporting NaN for convenience.');
+        sB2 = NaN;
+    else 
+        B = fit(1);
+        A = fit(2);
+
+        delta = N * sum(x.^2) - sum(x)^2;
+
+        sy2 = 1/(N-2) * sum( (y - A - B*x) .^ 2);
+
+        sB2 = N * sy2 / delta;
+    end
     
     v = sqrt(abs(sB2));
     
     
+%%%%
+%% extraneous functions
+%%%%
+
+%% Prints out a log message complete with timestamp.
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'uncertainty_in_slope: '];
+
+     fprintf('%s%s\n', headertext, txt);
+
+    return
