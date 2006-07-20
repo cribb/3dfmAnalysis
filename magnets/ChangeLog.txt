@@ -1,3 +1,7 @@
+2006-07-20  Jeremy Cribb <jcribb@email.unc.edu>
+	* forces2d.m: added.  computes 2d forces on beads in Newtonian fluid using Stokes drag.
+	* forcecal2d.m:  simplified code by using forces2d and bin2d.
+	
 2006-07-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* varforcecal.  added this folder.
 

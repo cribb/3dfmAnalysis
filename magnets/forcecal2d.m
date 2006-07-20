@@ -30,12 +30,22 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
 %  the granularity is set too low (<4)
 %   
 
-    if nargin < 7 | isempty(window_size)
-        window_size = 1;
-    end
+    if ( nargin < 7 | isempty(window_size) );
+        logentry('No window size defined.  Setting default window_size of 1');
+        window_size = 1;   
+    end;
+    
+    if ( nargin < 6 | isempty(granularity) ); 
+        logentry('No granularity defined.  Setting granularity to 16 pixels.');
+        granularity = 16;  
+    end;
+    
     
     video_tracking_constants;
     
+    width = 648;
+	height = 484;	
+
     % for every file, get its filename and reduce the dataset to a single table.
     d = load_video_tracking(files,[],'pixels',calib_um,'absolute','yes','table');
 	
@@ -44,19 +54,7 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
 
         temp = get_bead(d, k);
 
-        if(length(temp)>window_size) % avoid taking the derivative for any track 
-                                     % whose number of points is less than the 
-                                     % window size of the derivative.
-
-            [dxydt, newt, newxy] = windiff(temp(:,X:Y),temp(:,TIME),window_size);		
-            vel = dxydt;            
-            velmag = magnitude(vel);
-            force = 6*pi*viscosity*bead_radius*velmag*calib_um*1e-6;
-        else
-            % there's no information in this trackerID, so continue to next
-            % iteration.
-            continue;
-		end
+        [newxy,force] = forces2d(temp, viscosity, bead_radius, calib_um, window_size);
             
         % setup the output variables
         if ~exist('finalxy');  
@@ -96,73 +94,61 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
         myMIP = 0;
     end
     
-    % now, for the plots...
-	figure;
-    subplot(1,3,1);
-    imagesc(x_grid * calib_um, y_grid * calib_um, myMIP); 
-    colormap(copper(256));
-    hold on;
-		plot(x * calib_um,y * calib_um,'.');
-    hold off;
-    axis([0 648*calib_um 0 484*calib_um]);
-	xlabel('x [\mum]'); ylabel('y [\mum]'); set(gca, 'YDir', 'reverse');
-    
-    newr = magnitude((x-poleloc(1)),(y-poleloc(2)));
-    subplot(1,3,2);
-    plot(newr, F*1e12, '.');
-    grid on;
-	xlabel('r'); ylabel('force (pN)');
-    set(gcf, 'Position', [65 675 1354 420]);
-    drawnow;
+        % now, for the plots...
+        figure;
+        subplot(1,3,1);
+        imagesc(x_grid * calib_um, y_grid * calib_um, myMIP); 
+        colormap(copper(256));
+        hold on;
+            plot(x * calib_um,y * calib_um,'.');
+        hold off;
+        axis([0 648*calib_um 0 484*calib_um]);
+        xlabel('x [\mum]'); ylabel('y [\mum]'); set(gca, 'YDir', 'reverse');
 
-    subplot(1,3,3);
-    loglog(newr, F*1e12, '.');
-    grid on;
-	xlabel('r'); ylabel('force (pN)');
-%     set(gcf, 'Position', [65 675 1354 420]);
-    drawnow;
+        newr = magnitude((x-poleloc(1)),(y-poleloc(2)));
+        subplot(1,3,2);
+        plot(newr, F*1e12, '.');
+        grid on;
+        xlabel('r'); ylabel('force (pN)');
+        set(gcf, 'Position', [65 675 1354 420]);
+        drawnow;
+
+        subplot(1,3,3);
+        loglog(newr, F*1e12, '.');
+        grid on;
+        xlabel('r'); ylabel('force (pN)');
+        % set(gcf, 'Position', [65 675 1354 420]);
+        drawnow;
     
     % now set up the binning process
     warning off MATLAB:divideByZero; % if there is no data in a bin, it's a divide by zero. we don't care about that.
     
-	width = 648;
-	height = 484;
-	
-% 	granularity = 4;
-	
 	col_bins = [1 : granularity : width];
 	row_bins = [1 : granularity : height];
 	
-	for k = 1 : length(col_bins)-1
-		for m = 1 : length(row_bins)-1
-            idx = find( x >= col_bins(k) & x < col_bins(k+1) ...
-                      & y >= row_bins(m) & y < row_bins(m+1));
-            im_mean(m,k) = mean(F(idx));
-            im_stderr(m,k) = std(F(idx))/sqrt(length(idx));        
-        end
-	end
+    [im_mean, im_stderr] = forcecal_2d_binning(x, y, F, col_bins, row_bins);
 
     xpos = (col_bins(1:end-1) - poleloc(1)) * calib_um;
     xpos = xpos(:);
     ypos = (row_bins(1:end-1) - poleloc(2)) * calib_um;
     ypos = ypos(:);
         
-    % plot the binning outputs 
-	figure; 
-	subplot(1,2,1);
-	imagesc(xpos, ypos, im_mean * 1e12);
-    title('Mean Calibrated Force (pN)');
-	xlabel('\mum'); ylabel('\mum');
-	colormap(hot);
-	colorbar; 
-	
-	subplot(1,2,2);
-	imagesc((col_bins - poleloc(1))* calib_um, (row_bins - poleloc(2)) * calib_um, im_stderr./im_mean);
-    title('Standard Error / Mean');
-	xlabel('\mum'); ylabel('\mum');
-	colormap(hot);
-	colorbar;     
-    set(gcf, 'Position', [65 153 1353 420]);
+        % plot the binning outputs 
+        figure; 
+        subplot(1,2,1);
+        imagesc(xpos, ypos, im_mean * 1e12);
+        title('Mean Calibrated Force (pN)');
+        xlabel('\mum'); ylabel('\mum');
+        colormap(hot);
+        colorbar; 
+
+        subplot(1,2,2);
+        imagesc((col_bins - poleloc(1))* calib_um, (row_bins - poleloc(2)) * calib_um, im_stderr./im_mean);
+        title('Standard Error / Mean');
+        xlabel('\mum'); ylabel('\mum');
+        colormap(hot);
+        colorbar;     
+        set(gcf, 'Position', [65 153 1353 420]);
     
     % to do the surface, we have to remap some matrices
     sx = repmat(xpos, 1, length(ypos))'; 
@@ -179,18 +165,37 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
 	[xi,yi] = meshgrid(xpos, ypos);
 	zi = griddata(sx, sy, sF * 1e12, xi, yi);
     
-    figure;
-	surf(xi, yi, zi);
-	colormap(hot);
-	zlabel('force (pN)');
-	
-	figure; 
-	imagesc(xpos, ypos, zi);
-	colormap(hot);
-	colorbar;         
+        figure;
+        surf(xi, yi, zi);
+        colormap(hot);
+        zlabel('force (pN)');
+
+        figure; 
+        imagesc(xpos, ypos, zi);
+        colormap(hot);
+        colorbar;         
 
     % output variables
     Ftable   = im_mean * 1e12;
     errtable = im_stderr * 1e12;
     step     = calib_um * granularity;
+
     
+%%%%
+%% extraneous functions
+%%%%
+
+%% Prints out a log message complete with timestamp.
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'forcecal2d: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+    return    
