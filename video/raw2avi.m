@@ -1,33 +1,47 @@
-function v = raw2avi(rawfilein, stride, frame_rate)
+function v = raw2avi(rawfilein, stride, frame_rate, framesize_vector)
 % 3DFM function  
 % Video 
-% last modified 11/19/2004 
+% last modified 06.26.2006 (jcribb) 
 %  
 % This function converts RAW files from the Pulnix camera
 % (via take, GLUItake, etc...) into an AVI file.
 %  
-%  v = raw2avi(rawfilein, stride, frame_rate);  
+%  v = raw2avi(rawfilein, stride, frame_rate, framesize_vector);  
 %   
 %  where "rawfilein" is the filename of the input RAW file (wildcards ok)
 %        "stride" takes every <stride> frame (reduces bandwidth, removes timelapse)
 %        "frame_rate" is the frame_rate of the output AVI.
+%        "framesize_vector" is the [width height] of framein pixels,
+%                           default [648 484]
 %   
-%  ??/??/?? - created.  jcribb.
-%  09/07/04 - added documentation and removed a bug that only
-%             allowed one to capture 60 frames.  jcribb.
-%  11/19/04 - added stride and changed name to raw2avi (from 
-%             make_pulnix_movie).  added "time remaining indicator
-%             updated documentation.  removed movieout. output filename
-%             is the input filename with .avi extension; jcribb.
-%  
 
+if nargin < 4 | isempty(framesize_vector)
+    cols = 648;
+    rows = 484;
+    logentry('No frame size for raw file specified. Setting to default 648x484 pixels.');
+else
+    cols = framesize_vector(1);
+    rows = framesize_vector(2);
+end
+
+if nargin < 3 | isempty(frame_rate)
+    frame_rate = 30;
+    logentry('No output AVI frame rate specified.  Setting to default 30 fps.');
+end
+
+if nargin < 2 | isempty(stride);
+    stride = 4;
+    logentry('No stride defined.  Using default stride of every 4 frame.');
+end
+
+if nargin < 1 | isempty();
+    error('No input rawfile defined.');
+end
 
 % get input file information
 file = dir(rawfilein);
 
 % frame properties
-rows = 484;
-cols = 648;
 color_depth = 1; % bytes
 frame_size = rows * cols * color_depth;
 
@@ -98,3 +112,23 @@ for f = 1 : length(file)
 end    
     
 v = 0;
+
+return;
+
+
+%%%%%%%%%%%  EXTERNAL FUNCTIONS  %%%%%%%%%%%%%
+
+%% Prints out a log message complete with timestamp.
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'raw2avi: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+    return
