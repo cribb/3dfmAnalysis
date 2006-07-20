@@ -1,3 +1,6 @@
+2005-07-20  Jeremy Cribb <jcribb@email.unc.edu>
+	* bin2d.m:  added.  works like griddata for arranging 2D data into a matrix, but instead of just averaging the values in a selected bin, it reports the standard error as well.  Also, interpolation between values is not done. (Use interp2 for this).
+
 2006-05-18  Kalpit Desai <kvdesai@email.unc.edu>
 	* parse_csv_int.m: Fixed a bug where multidigit numbers in the string weren't recognized correctly.
 
