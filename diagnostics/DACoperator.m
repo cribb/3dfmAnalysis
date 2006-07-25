@@ -1,7 +1,7 @@
 function v = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange)
 % 3DFM function  
 % DSP / DAQ 
-% last modified 06.05.2006
+% last modified 07.25.2006 (jcribb)
 %
 % data = DACoperator(inputs, duration, board, channels, srate);  
 %
@@ -101,8 +101,26 @@ if (AOid < 0) | strcmp(board,'daqtest');
     logentry(['Start time would have been: ' num2str((start_time))]);
     logentry(['Signals to send to DAq channels are plotted.']);
 
+    % set up decimation of signal for quicker plotting.
+    if length(t) > 1000000
+        t_p = t(1:1000:end);
+        fullinput_p = fullinput(1:1000:end,:);
+        logentry('Plotting vector is decimated 1:1000');        
+    elseif length(t) > 100000
+        t_p = t(1:100:end);
+        fullinput_p = fullinput(1:100:end,:);        
+        logentry('Plotting vector is decimated 1:100');
+    elseif length(t) > 10000
+        t_p = t(1:10:end);
+        fullinput_p = fullinput(1:10:end,:);
+        logentry('Plotting vector is decimated 1:10');
+    else
+        t_p = t;
+        fullinput_p = fullinput;
+    end
+    
     figure;
-    plot(t, fullinput);
+    plot(t_p, fullinput_p);
     axis([0 t(end) Vrange(1) Vrange(2)]);    
     title('DAQtest Output');
     xlabel('time (s)');
