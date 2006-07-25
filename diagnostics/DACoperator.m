@@ -90,7 +90,15 @@ if (AOid < 0) | strcmp(board,'daqtest');
              '  Plotting DACout instead of sending to DAq board.']);  
 
     t = [0:1/srate:(length(inputs)*(Nrepeat+1) - 1)/srate]';
-    fullinput = repmat(inputs, Nrepeat+1, 1);
+    
+    try
+        fullinput = repmat(inputs, Nrepeat+1, 1);
+    catch
+        logentry('Input is too long.  Shorten the experiment duration or the sampling rate.');
+        v = 0;
+        beep;
+        return;
+    end
     start_time = date2unixsecs;
     
     logentry(['Board ID: ' board]);
@@ -102,7 +110,11 @@ if (AOid < 0) | strcmp(board,'daqtest');
     logentry(['Signals to send to DAq channels are plotted.']);
 
     % set up decimation of signal for quicker plotting.
-    if length(t) > 1000000
+    if length(t) > 10000000
+        t_p = t(1:10000:end);
+        fullinput_p = fullinput(1:10000:end,:);
+        logentry('Plotting vector is decimated 1:10000');                
+    elseif length(t) > 1000000
         t_p = t(1:1000:end);
         fullinput_p = fullinput(1:1000:end,:);
         logentry('Plotting vector is decimated 1:1000');        

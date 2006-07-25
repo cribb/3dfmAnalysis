@@ -1,4 +1,7 @@
 2006-07-25  Jeremy Cribb <jcribb@email.unc.edu>
+	* DACoperator.m: added try-catch to contain "out of memory" error, and added another level to signal decimation.  Matlab gets ornery when plots exceed a million points or so.
+
+2006-07-25  Jeremy Cribb <jcribb@email.unc.edu>
 	* DACoperator.m: added decimation of signal sent to the daqtest plot.  Matlab gets ornery when plots exceed a million points or so.  A message is sent to text output warning of the decimation.
 
 2006-07-07  Jeremy Cribb <jcribb@email.unc.edu>
