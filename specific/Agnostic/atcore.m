@@ -22,7 +22,7 @@ function varargout = atcore(d, settings, flags);
 %             .residrms - rms value of residuals for 3 axis
 %             .stagerms - rms value of stagesensed positions
 %             .ratio - ratio of the two rms values
-version_str = '1.5 - 12th Oct 05';
+version_str = '1.6 - 31st July 06';
 % disp(['atcore version: ', version_str]);
 dbstop if error
 
@@ -105,12 +105,14 @@ if flags.usereciprocals
     end          
 end
 % use a high-pass filter or simply subtract off a trend.
+% This is to remove the frequencies that are within loop bandwidth, because
+% this frequencies are present in stage but not seen by QPD.
 % have to do this after handling reciprocals otherwise get 1/0 issue
 if flags.HPstage
     [b,a] = butter(2, settings.HPhz*2/srate, 'high');
     for i = 1:3
         sfit(:,i) = myfilt(b,a,sfit(:,i));
-        stest(:,i) = myfilt(b,a,stest(:,i));% ????SHOULD WE REALLY FILTER THE TESTBED DATA HERE????
+        stest(:,i) = myfilt(b,a,stest(:,i));
         squiet(:,i) = myfilt(b,a,squiet(:,i));
     end
 end    
@@ -144,14 +146,20 @@ if flags.detrend
     end    
 end
 
-% the stage sense signal seems dubious above about 200 Hz
-% I DONT THINK WE SHOULD FILTER TESTBED OR QUIET DATA HERE.
+% the stage sense signal seems dubious above about 550 Hz
+% We should also filter the testbed and quiet data here because
+% we know that stage doesn't move beyond 550 Hz and removing those
+% high frequencies is always going to bring the data closer to the truth.
 if flags.LPstage
     [b,a] = butter(4, settings.LPhz*2/srate);
     for i = 1:3
         sfit(:,i) = myfilt(b,a,sfit(:,i));
+        stest(:,i) = myfilt(b,a,stest(:,i));
+        squiet(:,i) = myfilt(b,a,squiet(:,i));
     end
 end
+
+% Filter QPD signals also. Usually this is not selected.
 if flags.LPqpd
     [b,a] = butter(4, settings.LPhz*2/srate);
     for i = 1:size(qfit,2)

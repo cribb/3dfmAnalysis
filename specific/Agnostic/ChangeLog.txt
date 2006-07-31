@@ -1,3 +1,8 @@
+2006-07-31  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* atcore.m: version 1.6. 
+	- Now applies the low pass filter (when selected) to stage reports for all zones (fit, test, quiet).
+	- Filtering testbed and quiet zone positions is justified because it only brings the data closer to truth.
+
 2005-10-12  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* atcore.m: version 1.5
 	- Plugged in the newly invented Jacobian estimation method for pure sinusoidal perturbations. 
