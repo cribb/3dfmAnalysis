@@ -1,3 +1,6 @@
+2005-07-31  Jeremy Cribb <jcribb@email.unc.edu>
+	* bin2d.m:  added handling for 'divide by zero' cases.
+
 2005-07-20  Jeremy Cribb <jcribb@email.unc.edu>
 	* bin2d.m:  added.  works like griddata for arranging 2D data into a matrix, but instead of just averaging the values in a selected bin, it reports the standard error as well.  Also, interpolation between values is not done. (Use interp2 for this).
 
@@ -15,27 +18,38 @@
 
 2005-12-23  Kalpit Desai <kvdesai@email.unc.edu>
 	* drawlines.m: Better documentation
+	
 2005-09-06  Kalpit Desai <kvdesai@email.unc.edu>
 	* drawlines.m: There must be an accidental commit of this file which had one line deleted. Fixed it.
+
 2005-08-31  Kalpit Desai <kvdesai@email.unc.edu>
 	* drawlines.m: Added ability to tag the lines so that they can be identified later.
+
 2005-08-14  Kalpit Desai <kvdesai@email.unc.edu>
 	* drawlines.m: Fixed couple of typos and bugs. Tested for both horizontal and vertical lines now.
+
 2005-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* select_data_in_box.m: added.  using the coordinates of two captured mouse clicks, this function returns all of the points in the bounding box.2005-07-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* pretty_plot.m: added support for multiple axes in figure (e.g. yy-overlays).
 	* figurelist.m: returns a sorted vector containing the handles of all existing matlab figures.
+
 2005-07-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* unixutc.m: now it will convert timestamps from YYYY-MM-DD-hh-mm-ss.sssss to unixtime AND vice versa.  also updated documentation.
+
 2005-07-13  Kalpit Desai <kvdesai@email.unc.edu>
 	* drawlines.m:  	- A tool to draw horizontal (or vertical) lines from specified points on Y (or X) axis. LineStyle and Color can be specified.
+
 2005-05-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* rows.m:  stupid typo.
+
 2005-05-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* rows.m:  added.  returns the number or rows in a matrix.
+
 2005-01-03  Jeremy Cribb <jcribb@email.unc.edu>
-        * pretty_plot.m: fixed case-sensitive typo; jcribb
+  * pretty_plot.m: fixed case-sensitive typo; jcribb
+
 2004-06-18  Kalpit Desai <kvdesai@cs.unc.edu>
 	* Added a file unixUtc.m: Takes time in YYYY-MM-DD-hh-mm-ss.sssss format and converts it to the unix time(toal number of seconds elapsed since 1970/01/01 midnight). The output is adjusted assuming that the input time is the local timeat NC, USA or Eastern Standard Time zone. This file is useful in comparing various matlab timestamps to tracking data time stamps.
+
 2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 	* Initial Version
