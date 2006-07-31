@@ -178,16 +178,15 @@ function pushbutton_compute_Callback(hObject, eventdata, handles)
     x = str2num(get(handles.edit_poleloc_x, 'String'));
     y = str2num(get(handles.edit_poleloc_y, 'String'));   
     poleloc = [x y];
+    interp = 'on';
     
-    [Ftable, errtable, step] = forcecal2d(trackfile, ...
-                                          viscosity, ...
-                                          bead_radius * 1e-6, ...
-                                          poleloc, ...
-                                          calib_um, ...
-                                          granularity, ...
-                                          window_size);
-
-    assignin('base', 'force_table', Ftable);
+    logentry(['Viscosity is set to ' num2str(viscosity) ' [Pa s].']);
+    logentry(['Bead radius is set to ' num2str(bead_radius) ' [um].']);
+    
+    force_cal = forcecal2d( trackfile, viscosity, bead_radius * 1e-6, ...
+                    poleloc, calib_um, granularity, window_size, interp);
+                
+    assignin('base', 'force_cal', force_cal);
 
 %     close(video_forcecal_GUI);
 

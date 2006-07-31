@@ -1,3 +1,6 @@
+2006-07-31  Jeremy Cribb <jcribb@email.unc.edu>
+	* video_forcecal_GUI.m: updated function call to forcecal2d to include new changes in code.
+
 2005-09-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* video_forcecal_GUI.m: added x and y positions to output.
 	* video_forcecal_GUI.fig: same.
