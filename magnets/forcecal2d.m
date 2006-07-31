@@ -1,35 +1,39 @@
-function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity, window_size)
+function v = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity, window_size, interp)
 % 3DFM function  
 % Magnetics
-% last modified 08/16/05 (jcribb)
+% last modified 07/31/06 (jcribb)
 %  
 % Run a 2D force calibration using data from EVT_GUI.
 %  
 %  [Ftable, errtable, step] =  forcecal2d(files, viscosity, bead_radius, ...
 %                                         poleloc, calib_um, granularity, window_size); 
 %   
-%  where "Ftable" is the average force computed for each pixel.
-%        "xpos" are the xpositions in the Ftable
-%        "ypos" are the ypositions in the Ftable
-%        "errtable" is the standard error (std(X)/sqrt(N)) for Ftable.
-%        "step" is the stepsize for each pixel.  Each pixel is assumed square.
-%        "F" is the output 2D force grid linearly interpolated by beads in "files"
-%        "files" is a string containing the file name(s) for analysis (wildcards ok)
+%  where "files" is a string containing the file name(s) for analysis
+%          (wildcards ok) OR a previously loaded and defined video tracking
+%          structure/variable/dataset.
 %        "viscosity" is the calibration fluid viscosity in [Pa s]
 %        "bead_radius" is the radius of the probe particles in [m]
 %        "poleloc" is the pole location, i.e. [pole_x, pole_y] in [pixels]
 %        "calib_um" is the microns per pixel calibration factor.
 %        "granularity" is the binning for 2D force determination
 %        "window_size" is an integer describing the derivative's time-step, tau
+%        "interp" is 'on' or 'off', and performs 2d interpolation between spatial datapoints.
 %
-%  01/??/05 - created; jcribb.  
-%  06/16/05 - added documentation. cleaned up code. fixed bug in
-%  force-distance 1D plot.
-%  06/20/05 - commented out linear-interp code for 2D plot and added
-%  2D binning force calibration.  This can take a LONG time to compute if
-%  the granularity is set too low (<4)
-%   
+% The output structure, v, contains the following fields:
+%        "force_map" is the average force computed for each pixel.
+%        "error_map" are the xpositions in the Ftable
+%        "x_bins" are the x-positions in the force_map & error_map
+%        "y_bins" are the ypositions in the force_map & error_map 
+%        "step" is the stepsize for each pixel.  Each pixel is assumed square.
+%        "poleloc" is the pole location in [meters]
+%
 
+    % handle the argument list
+    if ( nargin < 8 | isempty(interp) );
+        logentry('Interpolation choice not defined.  Assuming no interpolation between spatial values is desired.');
+        interp = 'off';
+    end
+        
     if ( nargin < 7 | isempty(window_size) );
         logentry('No window size defined.  Setting default window_size of 1');
         window_size = 1;   
@@ -38,23 +42,45 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
     if ( nargin < 6 | isempty(granularity) ); 
         logentry('No granularity defined.  Setting granularity to 16 pixels.');
         granularity = 16;  
-    end;
+    end;  
+        
+    if exist('files') & ischar(files)
+        % for every file, get its filename and reduce the dataset to a single table.
+        d = load_video_tracking(files,[],'m',calib_um,'absolute','yes','table');
+    else
+        % This could be bad.  There is no check for what data are contained
+        % in 'files.'  Weird errors may happen if the correct data
+        % structure (i.e. the video tracking table structure) is not used.
+        d = files;
+    end
     
-    
+    % handle the constants used in the computations.  
     video_tracking_constants;
     
+    % image size in pixels
     width = 648;
-	height = 484;	
+    height = 484;	
 
-    % for every file, get its filename and reduce the dataset to a single table.
-    d = load_video_tracking(files,[],'pixels',calib_um,'absolute','yes','table');
-	
+    % We would like to start with everything in SI units to keep scaling 
+    % errors at a minimum 
+    
+    % pole location given in pixels, converted to meters
+    poleloc = poleloc * calib_um * 1e-6;
+
+    x_bins(:,1) = [1 : granularity : width]' * calib_um * 1e-6;
+    y_bins(:,1) = [1 : granularity : height]' * calib_um * 1e-6;
+
+    x_bins = x_bins - poleloc(1);
+    y_bins = y_bins - poleloc(2);
+    
+    %% Computation of Forces %%
+    
     % for each beadID, compute its velocity:magnitude and force:magnitude.
 	for k = 0 : get_beadmax(d)
 
         temp = get_bead(d, k);
-
-        [newxy,force] = forces2d(temp, viscosity, bead_radius, calib_um, window_size);
+        
+        [newxy,force] = forces2d(temp(:,TIME), temp(:,X:Y), viscosity, bead_radius, window_size);
             
         % setup the output variables
         if ~exist('finalxy');  
@@ -69,121 +95,37 @@ function [Ftable, xpos, ypos, errtable, step] = forcecal2d(files, viscosity, bea
             finalF = [finalF ; force];
         end
                 
-	end
-    
-    % output variables
-    x = finalxy(:,1);
-    y = finalxy(:,2);
-    F = finalF;
-    
-    % set up for generic plotting
-    warning off MATLAB:griddata:DuplicateDataPoints; 
-
-    x_grid = 1:648; 
-    y_grid = 1:484; 
-    
-    sfile = strrep(files, '.raw', '');
-    sfile = strrep(sfile, '.vrpn', '');
-    sfile = strrep(sfile, '.mat', '');
-    sfile = strrep(sfile, '.evt', '');
-    mipfile = [sfile, '.MIP.bmp'];
-    
-    try 
-        myMIP = mip(mipfile);
-    catch
-        myMIP = 0;
     end
     
-        % now, for the plots...
-        figure;
-        subplot(1,3,1);
-        imagesc(x_grid * calib_um, y_grid * calib_um, myMIP); 
-        colormap(copper(256));
-        hold on;
-            plot(x * calib_um,y * calib_um,'.');
-        hold off;
-        axis([0 648*calib_um 0 484*calib_um]);
-        xlabel('x [\mum]'); ylabel('y [\mum]'); set(gca, 'YDir', 'reverse');
-
-        newr = magnitude((x-poleloc(1)),(y-poleloc(2)));
-        subplot(1,3,2);
-        plot(newr, F*1e12, '.');
-        grid on;
-        xlabel('r'); ylabel('force (pN)');
-        set(gcf, 'Position', [65 675 1354 420]);
-        drawnow;
-
-        subplot(1,3,3);
-        loglog(newr, F*1e12, '.');
-        grid on;
-        xlabel('r'); ylabel('force (pN)');
-        % set(gcf, 'Position', [65 675 1354 420]);
-        drawnow;
+    %% Procedure for Binning of forces %%
+    [force_map, error_map] = bin2d( finalxy(:,1), finalxy(:,2), finalF, x_bins, y_bins);
     
-    % now set up the binning process
-    warning off MATLAB:divideByZero; % if there is no data in a bin, it's a divide by zero. we don't care about that.
+    % output variables in SI units
+    step     = granularity * calib_um * 1e-6;
+
+    if strcmp(interp, 'on')
+        v.force_map_interp = interp_forces2d(x_bins, y_bins, force_map);
+    end
+
+    % output variables to structure, v
+    v.force_map = force_map;
+    v.error_map = error_map;
+    v.x_bins = x_bins;
+    v.y_bins = y_bins;
+    v.step = step;
+    v.poleloc = poleloc;
     
-	col_bins = [1 : granularity : width];
-	row_bins = [1 : granularity : height];
-	
-    [im_mean, im_stderr] = forcecal_2d_binning(x, y, F, col_bins, row_bins);
+%% PLOTTING CODE %%
+plot_forcecal2d(x_bins, y_bins, force_map, error_map, 'fe');
 
-    xpos = (col_bins(1:end-1) - poleloc(1)) * calib_um;
-    xpos = xpos(:);
-    ypos = (row_bins(1:end-1) - poleloc(2)) * calib_um;
-    ypos = ypos(:);
-        
-        % plot the binning outputs 
-        figure; 
-        subplot(1,2,1);
-        imagesc(xpos, ypos, im_mean * 1e12);
-        title('Mean Calibrated Force (pN)');
-        xlabel('\mum'); ylabel('\mum');
-        colormap(hot);
-        colorbar; 
+if strcmp(interp, 'on')
+    plot_forcecal2d(x_bins, y_bins, v.force_map_interp, [], 'sf');
+end
 
-        subplot(1,2,2);
-        imagesc((col_bins - poleloc(1))* calib_um, (row_bins - poleloc(2)) * calib_um, im_stderr./im_mean);
-        title('Standard Error / Mean');
-        xlabel('\mum'); ylabel('\mum');
-        colormap(hot);
-        colorbar;     
-        set(gcf, 'Position', [65 153 1353 420]);
-    
-    % to do the surface, we have to remap some matrices
-    sx = repmat(xpos, 1, length(ypos))'; 
-    sx = reshape(sx, length(xpos)*length(ypos), 1);
-    sy = repmat(ypos, 1, length(xpos)); 
-    sy = reshape(sy, length(xpos)*length(ypos), 1);    
-    sF = reshape(im_mean, length(xpos)*length(ypos), 1);
-
-    idx = isfinite(sF);
-    sx = sx(idx);
-    sy = sy(idx);
-    sF = sF(idx);
-    
-	[xi,yi] = meshgrid(xpos, ypos);
-	zi = griddata(sx, sy, sF * 1e12, xi, yi);
-    
-        figure;
-        surf(xi, yi, zi);
-        colormap(hot);
-        zlabel('force (pN)');
-
-        figure; 
-        imagesc(xpos, ypos, zi);
-        colormap(hot);
-        colorbar;         
-
-    % output variables
-    Ftable   = im_mean * 1e12;
-    errtable = im_stderr * 1e12;
-    step     = calib_um * granularity;
-
-    
 %%%%
 %% extraneous functions
 %%%%
+
 
 %% Prints out a log message complete with timestamp.
 function logentry(txt)
@@ -199,3 +141,5 @@ function logentry(txt)
      fprintf('%s%s\n', headertext, txt);
      
     return    
+
+    

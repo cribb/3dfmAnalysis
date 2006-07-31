@@ -1,3 +1,13 @@
+2006-07-31  Jeremy Cribb <jcribb@email.unc.edu>
+	* interp_forces2d.m: added.  Interpolates forces in 2d when given 2d forcemap dataset. 
+	* plot_forcecal2d.m: added.  Plots a 2D force calibration dataset.
+	* forcecal2d.m: 
+			- expanded and updated documentation.  
+			- changed code so that SI units are used as early as possible (to minimize scaling bugs).
+			- removed plotting code and placed into its own function (works for varforcecal too).
+			- changed output from multiple variable outputs to a structure with similar fields.
+	* forces2d.m: removed dependence on video datatype.  now inputs must be in SI units or scaling errors may occur!
+
 2006-07-20  Jeremy Cribb <jcribb@email.unc.edu>
 	* forces2d.m: added documentation.
 
