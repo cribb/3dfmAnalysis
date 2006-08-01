@@ -1,7 +1,7 @@
 function v = laser_msd(filemask, window, dim)
 % 3DFM function  
 % Rheology 
-% last modified 06/05/06 (kvdesai)
+% last modified 07/31/06 (kvdesai)
 %  
 % This function computes the mean-square displacements (via the 
 % Stokes-Einstein relation) for an aggregate number of beads tracked by laser.
@@ -70,7 +70,10 @@ for fid = 1 : filemax
         b(:,Y) = b(:,Y) - drift_est_y;
         b(:,Z) = b(:,Z) - drift_est_z;
     end
-
+% NOTE: putting semantics (here, dimension info) into the data by using
+% diffrent field names for 1D, 2D and 3D is horrible because it creates
+% code dependencies within and across files. But, I don't see a better way
+% to encode the semantics yet. 
     switch dim
 % %         [msd,Tau] = msdbase(tpos, tau)
         case 1            
@@ -89,48 +92,63 @@ end
 % Processed all files, now plot
 switch dim
         case 1            
-            [lmmsd(:,1) lmtau(:,1) ste_lmsd.x ste_ltau.x n] =  setup_loglog(msd.x, tau.x);
-            [lmmsd(:,2) lmtau(:,2) ste_lmsd.y ste_ltau.y n] =  setup_loglog(msd.y, tau.y);
-            [lmmsd(:,3) lmtau(:,3) ste_lmsd.z ste_ltau.z n] =  setup_loglog(msd.z, tau.z);
+            n = sum(~isnan(msd.x));
+            mmsd.x = nanmean(msd.x,1); ste_sd.x = nanstd(msd.x,1)./sqrt(n);
+            mmsd.y = nanmean(msd.y,1); ste_sd.y = nanstd(msd.y,1)./sqrt(n);
+            mmsd.z = nanmean(msd.z,1); ste_sd.z = nanstd(msd.z,1)./sqrt(n);
             
-            figure; hold on;
-            errorbar(lmtau(:,1), lmmsd(:,1), ste_lmsd.x, '.-b'); % X
-            errorbar(lmtau(:,2), lmmsd(:,2), ste_lmsd.y, '.-g'); % Y
-            errorbar(lmtau(:,3), lmmsd(:,3), ste_lmsd.z, '.-r'); % Z
-            xlabel('log_{10}(\tau) [s]');
-            ylabel('log_{10}(MSD) [micron^2]');
-            grid on; legend('X','Y','Z');
-            pretty_plot;        hold off;
+            mtau.x = nanmean(tau.x,1); ste_tau.x = nanstd(tau.x,1)./sqrt(n);
+            mtau.y = nanmean(tau.y,1); ste_tau.y = nanstd(tau.y,1)./sqrt(n);
+            mtau.z = nanmean(tau.z,1); ste_tau.z = nanstd(tau.z,1)./sqrt(n);
             
+            logerrorbar(mmsd.x, mtau.x, ste_sd.x,'.-b'); hold on;
+            logerrorbar(mmsd.y, mtau.y, ste_sd.y,'.-g'); hold on;
+            logerrorbar(mmsd.z, mtau.z, ste_sd.z,'.-r'); hold off;            
+
+            h = findobj(gca,'Marker','.');
+            legend(h,'X','Y','Z' );
+            xlabel('Window Length ({\tau})     [Seconds]');
+            ylabel('MSD      [Micron^2]');
+            pretty_plot;
         case 2            
-            [lmmsd(:,1) lmtau(:,1) ste_lmsd.xy ste_ltau.xy n] =  setup_loglog(msd.xy, tau.xy);
-            [lmmsd(:,2) lmtau(:,2) ste_lmsd.yz ste_ltau.yz n] =  setup_loglog(msd.yz, tau.yz);
-            [lmmsd(:,3) lmtau(:,3) ste_lmsd.zx ste_ltau.zx n] =  setup_loglog(msd.zx, tau.zx);
+            n = sum(~isnan(msd.xy));
+            mmsd.xy = nanmean(msd.xy,1); ste_sd.xy = nanstd(msd.xy,1)./sqrt(n);
+            mmsd.yz = nanmean(msd.yz,1); ste_sd.yz = nanstd(msd.yz,1)./sqrt(n);
+            mmsd.zx = nanmean(msd.zx,1); ste_sd.zx = nanstd(msd.zx,1)./sqrt(n);
             
-            figure; hold on;
-            errorbar(lmtau(:,1), lmmsd(:,1), ste_lmsd.xy, '.-b'); % XY
-            errorbar(lmtau(:,2), lmmsd(:,2), ste_lmsd.yz, '.-g'); % YZ
-            errorbar(lmtau(:,3), lmmsd(:,3), ste_lmsd.zx, '.-r'); % ZX
-            xlabel('log_{10}(\tau) [s]');
-            ylabel('log_{10}(MSD) [micron^2]');
-            grid on; legend('XY','YZ','ZX');
-            pretty_plot;        hold off;
+            mtau.xy = nanmean(tau.xy,1); ste_tau.xy = nanstd(tau.xy,1)./sqrt(n);
+            mtau.yz = nanmean(tau.yz,1); ste_tau.yz = nanstd(tau.yz,1)./sqrt(n);
+            mtau.zx = nanmean(tau.zx,1); ste_tau.zx = nanstd(tau.zx,1)./sqrt(n);
             
-        case 3            
-            [lmmsd(:,1) lmtau(:,1) ste_lmsd.r ste_ltau.r n] =  setup_loglog(msd.r, tau.r);
-                        
-            figure; hold on;
-            errorbar(lmtau(:,1), lmmsd(:,1), ste_lmsd.r, '.-b'); % R
-            xlabel('log_{10}(\tau) [s]');
-            ylabel('log_{10}(MSD) [micron^2]');
-            grid on; legend('R');
-            pretty_plot;        hold off;                
+            logerrorbar(mmsd.xy, mtau.xy, ste_sd.xy,'.-b'); hold on;
+            logerrorbar(mmsd.yz, mtau.yz, ste_sd.yz,'.-g'); hold on;
+            logerrorbar(mmsd.zx, mtau.zx, ste_sd.zx,'.-r'); hold off;            
+
+            h = findobj(gca,'Marker','.');
+            legend(h,'XY','YZ','ZX' );
+            xlabel('Window Length ({\tau})     [Seconds]');
+            ylabel('MSD      [Micron^2]');
+            pretty_plot;
+            
+        case 3
+            n = sum(~isnan(msd.r));
+            mmsd.r = nanmean(msd.r,1); ste_sd.r = nanstd(msd.r,1)./sqrt(n);            
+            mtau.r = nanmean(tau.r,1); ste_tau.r = nanstd(tau.r,1)./sqrt(n);
+            
+            logerrorbar(mmsd.r, mtau.r, ste_sd.r,'.-b');
+            
+            h = findobj(gca,'Marker','.');
+            legend(h,'Radial');
+            xlabel('Window Length ({\tau})     [Seconds]');
+            ylabel('MSD      [Micron^2]');
+            pretty_plot;                
 end
 
 % outputs
 v.tau = tau;
 v.msd = msd;
-v.error_msd = ste_lmsd;
+v.ste_sd = ste_sd;
+v.ste_tau = ste_tau;
 v.n = n; 
 return
 

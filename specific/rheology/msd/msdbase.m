@@ -1,7 +1,7 @@
 function varargout = msdbase(tpos, tau)
 % 3DFM function  
 % Rheology 
-% last modified 07/05/06 -kvdesai
+% last modified 07/31/06 -kvdesai
 %  
 % Computes mean-square displacements for varying window-length (Tau)
 % from given time vs position data.
@@ -9,7 +9,7 @@ function varargout = msdbase(tpos, tau)
 % USAGE:
 %
 %  [msd, Tau] = msdbase(tpos, tau)  
-%  [msd, Tau, ste, count] = msdbase(tpos, tau)
+%  [msd, Tau, ste_d, ste_t, count] = msdbase(tpos, tau)
 %   
 % Inputs:
 %   tpos: matrix with N rows and D+1 columns containing coordinates of 
@@ -35,8 +35,10 @@ function varargout = msdbase(tpos, tau)
 %       msd: M x 1 vector containing msd value for each given window-length
 %       Tau: M x 1 vector containing the actual 'tau' in units of seconds.
 %               Output Tau is same as or really close to input tau.
-%       ste: M x 1 vector containing standard error value for squared
+%       ste_d: M x 1 vector containing standard error value for squared
 %               displacement for each given window-length
+%       ste_t: M x 1 vector containing standard error value for the window
+%               lengths. Use this when time stamps are uneven.
 %       count: M x 1 vector containing number of points that fell within each
 %               window
 %
@@ -65,15 +67,16 @@ end
 % diffusion is a nonlinear process, but we will go with interpolation until
 % we have alternate method.
 if std(dt) > 1E-2/srate %less than 1 percent spread allowed in sample-intervals. Arbitrarily chosen.
-    srate = 10000;    %resample at double of the original sample-rate. 
-    disp(['MSD: Timestamps were unevenly spaced. Will resample at ',num2str(srate),' Hz and interpolate.']);    
-    tnew = t(1):1/srate:t(end);
-    for c = 1:size(pos,2)
-        posnew(:,c) = interp1(t,pos(:,c),tnew); % interpolate with new sampling rate
-    end
-    clear t pos;
-    t = tnew; pos = posnew; 
-    clear tnew posnew;
+%     srate = 10000;    %resample at double of the original sample-rate. 
+%     disp(['MSD: Timestamps were unevenly spaced. Will resample at ',num2str(srate),' Hz and interpolate.']);    
+%     tnew = t(1):1/srate:t(end);
+%     for c = 1:size(pos,2)
+%         posnew(:,c) = interp1(t,pos(:,c),tnew); % interpolate with new sampling rate
+%     end
+%     clear t pos;
+%     t = tnew; pos = posnew; 
+%     clear tnew posnew;
+    disp('MSDBASE: Time stamps are uneven by more than 1%. You should use errorbars for Tau also.'); 
 end
 
 win = ceil(tau*srate); % window-lengths in units of number of samples
@@ -84,18 +87,29 @@ for w = 1:length(win)
     B = pos(win(w)+1:end,:);
     r2 = sum((B - A).^2, 2); % squared displacement    
     
-    count(w,1) = length(r2);    
-    msd(w,1) = mean(r2);
-    ste(w,1) = nanstd(r2)/sqrt(count(w,1));
-    Tau(w,1) = win(w)/srate; % Actual tau used
+    count(w,1) = length(r2);
+    if count(w,1) == 0 %Avoid 'divide by zero' warning when computing standard error
+        msd(w,1) = NaN;
+        ste_d(w,1) = NaN;
+        Tau(w,1) = NaN;
+        ste_t(w,1) = NaN;
+    else
+        msd(w,1) = mean(r2); 
+        ste_d(w,1) = std(r2)/sqrt(count(w,1));
+        %     Tau(w,1) = win(w)/srate; % Actual tau used
+        tdiff = t(win(w)+1:end) - t(1:end-win(w));
+        Tau(w,1) = mean(tdiff);
+        ste_t(w,1) = std(tdiff)/sqrt(count(w,1));
+    end
 end
 
 switch nargout
-    case 4
+    case 5
         varargout{1} = msd;
         varargout{2} = Tau;
-        varargout{3} = ste;
-        varargout{4} = count;
+        varargout{3} = ste_d;
+        varargout{4} = ste_t;
+        varargout{5} = count;
     case 2
         varargout{1} = msd;
         varargout{2} = Tau;

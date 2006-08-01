@@ -1,3 +1,15 @@
+2006-08-01  Kalpit Desai <kvdesai@email.unc.edu>
+	* msdbase.m: 
+	- Turned off interpolation when timestamps are uneven. Instead just warns on console and computes the error in Tau.
+	- Reports error in Tau.
+	* laser_msd_crossover.m:
+	- Added. A utility that computes average msd for an ensemble of tracking files. 
+	- Computes msd for bead position, position error and stage position and plots them to show crossover.
+	- Handy to determine feedback bandwidth.
+	* laser_msd.m:
+	- Changed to call newly added logerrorbar instead of manually setting up the errorbars.
+	- Some comments about the bad interface to external code that needs to be improved at some point.
+
 2006-07-11  Jeremy Cribb <jcribb@email.unc.edu>
 	- msd.m: suppressed warning for dividing by zero when requested window is too large.  Also removed NaN's that were reported when the window size was too large.
 
