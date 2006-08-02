@@ -18,7 +18,7 @@ function force_map_interp = interp_forces2d(xpos, ypos, force_map)
     sx = reshape(sx, length(xpos)*length(ypos), 1);
     sy = repmat(ypos, 1, length(xpos)); 
     sy = reshape(sy, length(xpos)*length(ypos), 1);    
-    sF = reshape(force_map, length(xpos)*length(ypos), 1);
+    sF = reshape(force_map, (length(xpos)-1)*(length(ypos)-1), 1);
 
     idx = isfinite(sF);
     sx = sx(idx);

@@ -1,3 +1,7 @@
+2006-08-02  Jeremy Cribb <jcribb@email.unc.edu>
+	* bead_suscept.m: added.  computes bead to bead variability in force and bead susceptibility when a properly described magnet (field gradient) is used to pull beads across the field of view.  uses video data from load_video_tracking.
+	* interp_forces2d.m: fixed an off-by-one error.
+	
 2006-07-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* interp_forces2d.m: added.  Interpolates forces in 2d when given 2d forcemap dataset. 
 	* plot_forcecal2d.m: added.  Plots a 2D force calibration dataset.
