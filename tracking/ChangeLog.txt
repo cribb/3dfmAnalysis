@@ -1,3 +1,6 @@
+2006-08-02  Jeremy Cribb <jcribb@email.unc.edu>
+	* video_tracking_constants.m: removed PULSE and SEQ column headers.  added documentation.
+
 2006-07-03  Kalpit Desai <kvdesai@email.unc.edu>
 	* load_laser_tracking.m:
 	- Increased the filter order to 8 for reducing stage sensor electronic noise, in order to achieve steep rolloff.
