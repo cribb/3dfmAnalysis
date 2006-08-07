@@ -1,5 +1,8 @@
+2005-08-07  Jeremy Cribb <jcribb@email.unc.edu>
+	* bin2d.m:  now handles edge condition correctly.  (finally found the source of the strange off-by-1 error.
+
 2005-07-31  Jeremy Cribb <jcribb@email.unc.edu>
-	* bin2d.m:  added handling for 'divide by zero' cases.
+* bin2d.m:  added handling for 'divide by zero' cases.
 
 2005-07-20  Jeremy Cribb <jcribb@email.unc.edu>
 	* bin2d.m:  added.  works like griddata for arranging 2D data into a matrix, but instead of just averaging the values in a selected bin, it reports the standard error as well.  Also, interpolation between values is not done. (Use interp2 for this).

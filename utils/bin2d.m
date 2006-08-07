@@ -16,12 +16,21 @@ function [im_mean, im_stderr] = bin2d(x, y, Fxy, x_bins, y_bins)
 %        "x_bins" and "y_bins" are vectors containing the data bins
 %   
 
+Lx = length(x_bins);
+Ly = length(y_bins);
 
-    for k = 1 : length(x_bins)-1
-		for m = 1 : length(y_bins)-1
-            
-            idx = find( x >= x_bins(k) & x < x_bins(k+1) ...
-                      & y >= y_bins(m) & y < y_bins(m+1));
+    for k = 1 : Lx
+		for m = 1 : Ly
+
+            % bin the data for all bins except the very last one (edge
+            % condition).
+            if (k ~= Lx) & (m ~= Ly)
+                idx = find( x >= x_bins(k) & x < x_bins(k+1) ...
+                          & y >= y_bins(m) & y < y_bins(m+1));
+            else
+                % have to handle the edge condition.
+                idx = find( x >= x_bins(k) & y > y_bins(m) );
+            end
 
             % we have to divide by length(idx) so if there's no data in
             % this particular bin, just set that bin to NaN to avoid pesky
