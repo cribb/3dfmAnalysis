@@ -1,3 +1,7 @@
+2006-08-07  Jeremy Cribb <jcribb@email.unc.edu>
+	* forcecal2d.m:  offsets for pole location are now handled at the correct place.  corrected documentation.  
+	* interp_forces2d.m:  added better documentation and improved naming of variables.
+	
 2006-08-02  Jeremy Cribb <jcribb@email.unc.edu>
 	* bead_suscept.m: added.  computes bead to bead variability in force and bead susceptibility when a properly described magnet (field gradient) is used to pull beads across the field of view.  uses video data from load_video_tracking.
 	* interp_forces2d.m: fixed an off-by-one error.

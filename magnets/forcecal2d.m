@@ -1,12 +1,11 @@
 function v = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity, window_size, interp)
 % 3DFM function  
 % Magnetics
-% last modified 07/31/06 (jcribb)
+% last modified 08/07/06 (jcribb)
 %  
 % Run a 2D force calibration using data from EVT_GUI.
 %  
-%  [Ftable, errtable, step] =  forcecal2d(files, viscosity, bead_radius, ...
-%                                         poleloc, calib_um, granularity, window_size); 
+%  v = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granularity, window_size, interp)
 %   
 %  where "files" is a string containing the file name(s) for analysis
 %          (wildcards ok) OR a previously loaded and defined video tracking
@@ -67,11 +66,9 @@ function v = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granul
     % pole location given in pixels, converted to meters
     poleloc = poleloc * calib_um * 1e-6;
 
+    % x and y bins converted to meters
     x_bins(:,1) = [1 : granularity : width]' * calib_um * 1e-6;
     y_bins(:,1) = [1 : granularity : height]' * calib_um * 1e-6;
-
-    x_bins = x_bins - poleloc(1);
-    y_bins = y_bins - poleloc(2);
     
     %% Computation of Forces %%
     
@@ -107,6 +104,9 @@ function v = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granul
         v.force_map_interp = interp_forces2d(x_bins, y_bins, force_map);
     end
 
+    x_bins = x_bins - poleloc(1);
+    y_bins = y_bins - poleloc(2);
+    
     % output variables to structure, v
     v.force_map = force_map;
     v.error_map = error_map;
