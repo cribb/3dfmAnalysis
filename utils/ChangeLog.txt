@@ -1,3 +1,6 @@
+2006-08-07  Kalpit Desai <kvdesai@email.unc.edu>
+	* drawlines.m: Now sets the lengths of the lines to whichever is larger, auto axis range and given axis range. This enables to zooming in and out without affecting the lines.	
+	
 2005-08-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* bin2d.m:  now handles edge condition correctly.  (finally found the source of the strange off-by-1 error.
 
