@@ -1,0 +1,3 @@
+2006-08-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* changelog.txt:  added this changelog for the variable force calibration protocol.
+	
