@@ -1,2 +1,0 @@
-2006-07-20  Jeremy Cribb <jcribb@email.unc.edu>
-	* varforcecal.  added this folder.

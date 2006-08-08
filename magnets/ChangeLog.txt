@@ -1,3 +1,7 @@
+2006-08-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* varforce: added this folder to replace varforcecal.
+	* varforcecal:  removed this folder.  shortened the name elsewhere, so it's probably best to do it here too before things get rolling.
+
 2006-08-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* forcecal2d.m:  offsets for pole location are now handled at the correct place.  corrected documentation.  
 	* interp_forces2d.m:  added better documentation and improved naming of variables.
