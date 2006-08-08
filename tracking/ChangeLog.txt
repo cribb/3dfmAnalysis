@@ -1,3 +1,6 @@
+2006-08-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* remove_drift.m: removed text output that reported how much drift was removed.  This information is already an output variable.
+
 2006-08-02  Jeremy Cribb <jcribb@email.unc.edu>
 	* video_tracking_constants.m: removed PULSE and SEQ column headers.  added documentation.
 
