@@ -1,3 +1,6 @@
+2006-08-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* remove_drift.m: now concatenates all computed drift vectors for all beads instead of just the last one.
+
 2006-08-08  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m: removed text output that reported how much drift was removed.  This information is already an output variable.
 
