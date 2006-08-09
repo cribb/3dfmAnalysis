@@ -1,23 +1,23 @@
 function v = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange)
 % 3DFM function  
 % DSP / DAQ 
-% last modified 07.25.2006 (jcribb)
+% last modified 08.9.2006 (kvdesai)
 %
-% data = DACoperator(inputs, duration, board, channels, srate);  
+% data = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange);  
 %
 % This function sends the input vector to specified channels on specified AO board. 
 % This function is mainly used as the back-end of custom signal generator UI.  
 % where 
 % inputs : M X N matrix containing M input samples for each of the N channels
 %           All inputs are in units of Volts.
-% Nrepeat: No of times to repeat the input vector [defaulted to 1]
-% board: DAC board number [defaulted to 'PCI-6733'], or 'daqtest' for
-%        signal testing on non-DAq containing PCs.
+% Nrepeat: No of times to repeat the input vector [defaulted to 0]
+% board: DAC board number or 'daqtest' (default) for
+%        signal testing on PCs that don't have DAC board
 % channels: 1 X N vector containing channel indices [defaulted to 0:N-1]
 % srate: Sample rate that the board should operate on [defaulted to 10000]
 % Vrange: 1 X 2 matrix for Voltage range setting for ALL channels on the specified board
 %           defaulted to [-10 10]
-% Created : 05/02/04
+% Created : 05/02/04  kvdesai, jcribb
 %
 
 %----check validity of arguments

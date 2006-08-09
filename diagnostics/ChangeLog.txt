@@ -1,3 +1,6 @@
+2006-08-09  Kaplpit Desai <kvdesai@email.unc.edu>
+	* DACoperator.m: Fixed several errors in the documentation. Now in sync with the code.
+	
 2006-07-25  Jeremy Cribb <jcribb@email.unc.edu>
 	* DACoperator.m: added try-catch to contain "out of memory" error, and added another level to signal decimation.  Matlab gets ornery when plots exceed a million points or so.
 
