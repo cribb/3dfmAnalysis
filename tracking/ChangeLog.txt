@@ -1,4 +1,7 @@
 2006-08-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* remove_drift.m: turns out that those diff tags were not the only thing cvs added to my file because of a conflict.  It copied the entire function.  This confused me until Kalpit set me straight.  Everything should be functioning correctly now (har har).
+
+2006-08-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m: removed cvs diff tag information that was mistakenly incorporated into file.
 
 2006-08-09  Jeremy Cribb <jcribb@email.unc.edu>
