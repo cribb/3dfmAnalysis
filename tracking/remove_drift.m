@@ -1,4 +1,3 @@
-<<<<<<< remove_drift.m
 function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
 %
 % [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
@@ -491,4 +490,3 @@ function logentry(txt)
      
      fprintf('%s%s\n', headertext, txt);
 
->>>>>>> 1.10
