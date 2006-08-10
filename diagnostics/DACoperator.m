@@ -1,7 +1,7 @@
 function v = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange)
 % 3DFM function  
 % DSP / DAQ 
-% last modified 08.9.2006 (kvdesai)
+% last modified 08.10.2006 (jcribb)
 %
 % data = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange);  
 %
@@ -138,13 +138,6 @@ if (AOid < 0) | strcmp(board,'daqtest');
     xlabel('time (s)');
     ylabel('Voltage (V)');
     pretty_plot;
-    
-    fprintf('\n Board ID: %s', board);
-    fprintf('\n Sampling Rate: %i', srate);
-    fprintf('\n Voltage Range: [%d %d]', Vrange(1), Vrange(2));
-    fprintf('\n Number of repeats: %d', Nrepeat);
-    fprintf('\n Writing to output channels: %i', channels);
-    fprintf('\n Signals to send to DAq channels are plotted.\n\n');
     
     v = start_time;    
     daqreset;
