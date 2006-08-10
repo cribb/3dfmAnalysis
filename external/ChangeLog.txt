@@ -1,7 +1,12 @@
+2006-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* axis_rotation: added folder containing quaternion and rotation code implemented by L. Vicci.
+
 2006-07-31  Kalpit Desai <kvdesai@email.unc.edu>
 	* logerrorbar.m: Added. Puts errorbars on loglog plot. Got off of matlab exchange forum. Seems to be working after a couple of tweaks.
+
 2005-10-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* Added the 'dlls' folder, where useful dlls from third-parties could be put. For now resided 'uigetfiles.dll'
+
 2005-07-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* Added the 'timeutils' folder, a library of date-handling functions.
 
