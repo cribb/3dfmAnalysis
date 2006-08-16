@@ -1,3 +1,6 @@
+2006-08-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* bioforceGUI.m: added more statistics to report to stdout when making fits.
+
 2006-07-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* bioforceGUI.fig: Added text box that sets the number of modes for fitting to a Kelvin Voight fluid model.
 	* bioforceGUI.m: same. 
