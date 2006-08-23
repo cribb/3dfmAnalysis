@@ -1,3 +1,9 @@
+2006-08-23 Kalpit Desai <kvdesai@email.unc.edu>
+	* fs_analysis_gui.m:	Now supports analysis of data that was taken with control-frequency bursts interleaved between test-freqeuncy bursts.
+	- Normalizes the response at test-frequencies by the average response at the two adjucent control-frequency bursts.
+	- This control is required to account for the change in the position of the bead relative to poles. 
+	* fs_analysis_gui.fig: Added a checkbox to let user specify if the control-frequency normalization is to be done.
+
 2006-07-10 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:	msd plot axes are reset to loglog when done plotting.
 

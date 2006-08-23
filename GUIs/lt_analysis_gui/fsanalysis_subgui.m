@@ -1,19 +1,25 @@
-function varargout = guidetemplate0(varargin)
-% GUIDETEMPLATE0 M-file for guidetemplate0.fig
-%      GUIDETEMPLATE0, by itself, creates a new GUIDETEMPLATE0 or raises the existing
-%      singleton*.
+function varargout = fsanalysis_subgui(varargin)
+% FSANALYSIS_SUBGUI
+% 3DFM UTILITY
+% Written by: Kalpit Desai, May 1, 2006.
 %
-%      H = GUIDETEMPLATE0 returns the handle to a new GUIDETEMPLATE0 or the handle to
-%      the existing singleton*.
+% FSANALYSIS_SUBGUI M-file for fsanalysis_subgui.fig
+%      FSANALYSIS_SUBGUI, by itself, creates a new FSANALYSIS_SUBGUI or
+%      raises the existing singleton*.
 %
-%      GUIDETEMPLATE0('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in GUIDETEMPLATE0.M with the given input arguments.
+%      H = FSANALYSIS_SUBGUI returns the handle to a new FSANALYSIS_SUBGUI
+%      or the handle to the existing singleton*.
 %
-%      GUIDETEMPLATE0('Property','Value',...) creates a new GUIDETEMPLATE0 or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before guidetemplate0_OpeningFunction gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to guidetemplate0_OpeningFcn via varargin.
+%      FSANALYSIS_SUBGUI('CALLBACK',hObject,eventData,handles,...) calls
+%      the local function named CALLBACK in FSANALYSIS_SUBGUI.M with the
+%      given input arguments.
+%
+%      FSANALYSIS_SUBGUI('Property','Value',...) creates a new
+%      FSANALYSIS_SUBGUI or raises the existing singleton*.  Starting from
+%      the left, property value pairs are applied to the GUI before
+%      fsanalysis_subgui_OpeningFunction gets called.  An unrecognized
+%      property name or invalid value makes property application stop.  All
+%      inputs are passed to fsanalysis_subgui_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
@@ -22,16 +28,16 @@ function varargout = guidetemplate0(varargin)
 
 % Copyright 2002-2003 The MathWorks, Inc.
 
-% Edit the above text to modify the response to help guidetemplate0
+% Edit the above text to modify the response to help fsanalysis_subgui
 
-% Last Modified by GUIDE v2.5 17-May-2006 22:05:14
+% Last Modified by GUIDE v2.5 23-Aug-2006 02:45:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @guidetemplate0_OpeningFcn, ...
-                   'gui_OutputFcn',  @guidetemplate0_OutputFcn, ...
+                   'gui_OpeningFcn', @fsanalysis_subgui_OpeningFcn, ...
+                   'gui_OutputFcn',  @fsanalysis_subgui_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -46,15 +52,15 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before guidetemplate0 is made visible.
-function guidetemplate0_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before fsanalysis_subgui is made visible.
+function fsanalysis_subgui_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to guidetemplate0 (see VARARGIN)
+% varargin   command line arguments to fsanalysis_subgui (see VARARGIN)
 
-% Choose default command line output for guidetemplate0
+% Choose default command line output for fsanalysis_subgui
 handles.output = hObject;
 
 % Now add any info that needs to be shared across all callbacks
@@ -71,12 +77,12 @@ handles.colors = 'brkgmy';
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes guidetemplate0 wait for user response (see UIRESUME)
+% UIWAIT makes fsanalysis_subgui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = guidetemplate0_OutputFcn(hObject, eventdata, handles) 
+function varargout = fsanalysis_subgui_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -98,7 +104,7 @@ if isempty(igood)
 else
     allstr = get(handles.lta.menu_files,'String');
     goodstr = allstr(igood); % CURLY BRACES DOESN'T WORK HERE!!
-    [selec,ok] = listdlg('ListString',get(handles.lta.menu_files,'String'),...
+    [selec,ok] = listdlg('ListString',goodstr,...
         'InitialValue',1,...
         'OKstring','Select',...
         'Name','Select real experiment freq sweep file(s)');
@@ -123,7 +129,7 @@ if isempty(igood)
 else
     allstr = get(handles.lta.menu_files,'String');
     goodstr = allstr(igood);
-    [selec,ok] = listdlg('ListString',get(handles.lta.menu_files,'String'),...
+    [selec,ok] = listdlg('ListString',goodstr,...
         'InitialValue',1,'OKstring','Select',...
         'Name','Select fixed bead freq sweep file(s)');
     if ok
@@ -147,20 +153,25 @@ end
 % --- Executes on button press in button_plotfs.
 function button_plotfs_Callback(hObject, eventdata, handles)
 global g
-
+dbstop if error
 dfs = get(handles.button_selectFS,'UserData'); 
 dfx = get(handles.button_selectFixed,'UserData'); 
 
 if get(handles.check_compensate,'value')
-    [resfix, meanfix]  = computefs(dfx.fid, dfx.iseg, handles);
-    assignin('base','resfix',resfix);
+    outfix  = computefs(dfx.fid, dfx.iseg, handles);
+    assignin('base','outfix',outfix);
+    % Normalizing by the interleave control-frequency doesn't make sense
+    % for the fixed bead case. 
+    resfix = outfix.res; meanfix = outfix.meanres;
+    
 end
-[resfs, meanfs] = computefs(dfs.fid, dfs.iseg, handles);
-
-dbstop if error
-assignin('base','resfs',resfs);
-set(hObject,'UserData',resfs);
-
+out = computefs(dfs.fid, dfs.iseg, handles);
+assignin('base','outfs',out);
+if get(handles.check_normalize,'Value')
+    resfs = out.normres; meanfs = out.meannormres;    
+else
+    resfs = out.res; meanfs = out.meanres;
+end
 allstr = get(handles.menu_yaxis,'string');
 stry = allstr{get(handles.menu_yaxis,'value')};
 alltags = g.tag;
@@ -169,6 +180,7 @@ rxyz = 'rxyz';
 dl = get(handles.lta.list_dims,'value');
 for dim = 1:length(dl)
     sdim = rxyz(dl(dim));
+    % Initialize all figures for this dimension
     if get(handles.check_FvsAllH,'Value')
         hfthis = handles.FvsAllHfigid + dl(dim); figlist = [figlist,hfthis];
         figure(hfthis); clf;          
@@ -207,8 +219,12 @@ for dim = 1:length(dl)
     for fid = 1:length(dfs.fid) % Plot each file one by one
         dplot(fid).(sdim).ftest = resfs(fid).(sdim).ftest;
         if get(handles.check_compensate,'value')
-            % Compensate for the motion of whole magnet-holding stage.            
-            dplot(fid).(sdim).power = resfs(fid).(sdim).power - meanfix.(sdim).power;
+            % Compensate for the motion of whole magnet-holding stage.
+            for j = 1:length(dplot(fid).(sdim).ftest)
+                fthis = dplot(fid).(sdim).ftest(j);
+                dplot(fid).(sdim).power(j,:) = resfs(fid).(sdim).power(j,:)...
+                - meanfix.(sdim).power(find(meanfix.(sdim).ftest == fthis),:);
+            end
         else
             dplot(fid).(sdim).power = resfs(fid).(sdim).power;
         end
@@ -229,7 +245,7 @@ for dim = 1:length(dl)
                     dyaxis(fid).(sdim).allH = sqrt(sum(dyaxis(fid).(sdim).indH, 2)*2)*ftest; 
                 end
             otherwise
-                    disp('Unrecognized option for Y axis. Tell some programmer to fix');
+                    error('Unrecognized option for Y axis. Tell some programmer to fix');
         end
         
         if get(handles.check_FvsAllH,'Value')
@@ -292,7 +308,7 @@ switch caller
         if get(handles.slider_fseg,'value') >= 5
             newarray = lastarray - min(lastarray) + max(lastarray) + fstep;
         elseif get(handles.slider_fseg,'value') < 5
-            newarray = lastarray + min(lastarray) - max(lastarray) -  fstep;
+            newarray = lastarray + min(lastarray) - max(lastarray) - fstep;
             if any(newarray) <= 0
                 newarray = lastarray;
             end
@@ -335,6 +351,9 @@ for ifreq = 1:length(fseg) % Process and plot for each frequency one by one.
         for iex = 1:length(rexp.fid) %process each file in the 'experiment' list one by one
             fileid = rexp.fid(iex);
             allf = rexp.iseg(fileid).ftest;
+            if g.magdata{fileid}.info.param.docontrol == 1
+                allf = allf(find(allf ~= g.magdata{fileid}.info.param.fcont));
+            end
             % find index of the nearest excitation frequency. This gives pointer
             % to the segment that needs to be processed
             inearest = round(interp1(allf,[1:1:length(allf)],fseg(ifreq)));
@@ -359,6 +378,9 @@ for ifreq = 1:length(fseg) % Process and plot for each frequency one by one.
                 allf = rfix.iseg(fileid).ftest;
                 % find index of the nearest excitation frequency. This gives pointer
                 % to the segment that needs to be processed
+                if g.magdata{fileid}.info.param.docontrol == 1
+                    allf = allf(find(allf ~= g.magdata{fileid}.info.param.fcont));
+                end
                 inearest = round(interp1(allf,[1:1:length(allf)],fseg(ifreq)));
                 i_st = rfix.iseg(fileid).bpos_st(inearest);
                 i_end = rfix.iseg(fileid).bpos_end(inearest);
@@ -369,7 +391,7 @@ for ifreq = 1:length(fseg) % Process and plot for each frequency one by one.
                     pseg = txyz(:,dl(dim)+1-1);
                 end
                 [p, f] = mypsd(pseg,handles.lta.srate);
-                % Plot the fixed bead psd withot any marker
+                % Plot the fixed bead psd without any marker
                 loglog(f,p,['-',clrs(mod(coff+ifx-1,length(clrs))+1)]);
             end
             legstr =alltags([rexp.fid,rfix.fid]);
@@ -408,31 +430,38 @@ for c = 1:length(fids)
     bpos = g.data{fids(c)}.beadpos;    
     magdata = g.magdata{fids(c)};
     msync = g.data{fids(c)}.laser;
+    if magdata.info.param.docontrol == 1 % if the control frequency was interleaved
+        allf(1,:) = magdata.info.param.fvec;
+        allf(2,:) = repmat(magdata.info.param.fcont,size(magdata.info.param.fvec));
+        fvecall = reshape(allf,1,[]);
+    else
+        fvecall = magdata.info.param.fvec;
+    end
     % Now segment the data
     idx = find(diff(msync(:,2)>THRESHOLD)>0); % detect +ve edge threshold crosssings
     % Check that number of crossings detected match with number of test
-    % frequencies. This is the only test that our edge-detection
-    % algorithm works
-    if ~isequal(length(idx),length(magdata.info.param.fvec))
+    % frequencies. This is the only test verifying that our edge-detection
+    % algorithm worked successfully.
+    if ~isequal(length(idx),length(fvecall))
         disp(['Error: number of edge-detection crossings do not match',num2str(fids(c))]);
-        goon =questdlg(['Error: number of edge-detection crossings do not match', ...
-            num2str(fids(c)),'What is your wish?'], 'Ignore and move to next file', ...
-            'Debug');
-        if isequal(goon,'Debug');
+        goon =questdlg(['Error: number of edge-detection crossings do not match for file #', ...
+            num2str(fids(c)),' What is your wish?'], 'Error in detecting segments', ...
+            'Ignore and move to next file', 'Debug matlab code' , 'Ignore and move to next file');
+        if isequal(goon,'Debug matlab code');
             keyboard;
         else
             for dim = 1:4
                 iseg(fids(c)).bpos_st = [];
                 iseg(fids(c)).bpos_end = [];
                 iseg(fids(c)).icrossing = [];
-                iset(fid(c)).ftest = [];
+                iset(fids(c)).ftest = [];
             end
             fail_count = fail_count + 1;
             continue;
         end
     else
         iseg(fids(c)).icrossing = idx;
-        fvec = magdata.info.param.fvec;        
+            
         % Because the amplifier can go unstable for step inputs,
         % we start and stop all sinewaves exactly at zero. Because the
         % three sine waves are 120 degree apart in phase, we don't have
@@ -456,8 +485,8 @@ for c = 1:length(fids)
             
         % Now process each segment
         for k = 1:length(idx)
-            % remove the intial 2/3rd of cycle and last 2/3rd of cycle
-            ftest = fvec(k);
+            % remove the intial 2/3rd of a cycle and last 2/3rd of a cycle
+            ftest = fvecall(k);
             Ncut = ceil((2/3)*tsrate/ftest);
             ilaser_st = idx(k)+ Ncut;
             ilaser_end = floor(ilaser_st + tsrate*(1/ftest)*(magdata.info.param.nCycles - Nless)); % points for nCycles - 1
@@ -477,21 +506,42 @@ for c = 1:length(fids)
 end
 %--------------------------------------------------------------------------
 %%***********       FREQUENCY RESPONSE COMPUTATION       ******************
-function    [res, meanres] = computefs(fids,iseg,handles)
+% fids: File indices
+% iseg: index-pairs of segment boundaries
+% res(:).ibeadpos
+% res(:).(r,x,y,z).power
+% res(:).(r,x,y,z).ftest
+function out = computefs(fids,iseg,handles)
 global g
 dbstop if error
 rxyz = 'rxyz';
 for c = 1:length(fids)
+    magdata = g.magdata{fids(c)};
     % iseg containts segments for all excitation frequencies. First focus down
     % to the excitation frequencies that the user is interested in and then
-    % loop through all associated segments
+    % loop through all associated segments. If the control frequency was
+    % interleaved then consider it in the list of the frequencies even if it
+    % falls out of range.
     fAll = iseg(fids(c)).ftest;
+    if magdata.info.param.docontrol == 1
+        fcont = magdata.info.param.fcont;
+        iclean = (find(fAll ~= magdata.info.param.fcont));
+    else
+        iclean = 1:length(fAll);
+    end
+    
     frange(1) = str2double(get(handles.edit_fmin,'string'));
     frange(2) = str2double(get(handles.edit_fmax,'string'));
-    iwithin = find(fAll <= frange(2) & fAll >= frange(1));
+    iwithin = iclean(find(fAll(iclean) >= frange(1) & fAll(iclean) <= frange(2)));
+    if magdata.info.param.docontrol == 1
+        iwithin = sort([iwithin, iwithin+1]);
+        % Assuming that all test-frequency bursts are followed by one
+        % control-frequency burst.
+    end    
     fwithin = fAll(iwithin);
     bpos = g.data{fids(c)}.beadpos;
     % Now process each segment
+    kk = 0;
     for k = 1:length(fwithin)
         ftest = fwithin(k);
         ibpos_st = iseg(fids(c)).bpos_st(iwithin(k));
@@ -519,30 +569,71 @@ for c = 1:length(fids)
 
         % process peaks upto 4 hormonics
         for dim = 1:4
-            res(c).ibeadpos = [ibpos_st, ibpos_end];
+            sdim = rxyz(dim);
+            res(c).ibeadpos(k,:) = [ibpos_st, ibpos_end];
             for ip = 1:4
                 peak = processpeak(segp(:,dim),segf,ftest*ip,0);
                 if peak.p == 0
-                    keyboard;
+%                     keyboard;
                 end
-                res(c).(rxyz(dim)).power(k,ip) = peak.p;
-                res(c).(rxyz(dim)).ftest(k) = ftest;
+                res(c).(sdim).power(k,ip) = peak.p;
+                res(c).(sdim).ftest(k) = ftest;
                 % Initiate meanres if this is the first file
                 if c == 1
-                    meanres.(rxyz(dim)).power(k,ip) = peak.p;
+                    meanres.(sdim).power(k,ip) = peak.p;
                 else
-                    meanres.(rxyz(dim)).power(k,ip) = meanres.(rxyz(dim)).power(k,ip) + peak.p;
+                    meanres.(sdim).power(k,ip) = meanres.(sdim).power(k,ip) + peak.p;
                 end
-                meanres.(rxyz(dim)).ftest(k) = ftest;
+                meanres.(sdim).ftest(k) = ftest;
                 % Now normalize if this is the last file
                 if c == length(fids)
-                    meanres.(rxyz(dim)).power(k,ip) = meanres.(rxyz(dim)).power(k,ip)/c;
+                    meanres.(sdim).power(k,ip) = meanres.(sdim).power(k,ip)/c;
                 end
             end %looping through harmonics
         end % looping through dimensions
-    end % looping through segments
-end % looping through files
-
+        % If the control-frequency busrts were interleaved, then normalize
+        % the response at the test frequency by the average of the
+        % responses at the control-frequency bursts immediately before and
+        % after the particular test-frequency burst. Then check
+        % if the current segment is a control-frequency burst and if it is
+        % then normalize the response at the previous burst.
+        if magdata.info.param.docontrol == 1 & isequal(ftest, fcont) & k > 1
+            kk = kk + 1;            
+            for dim = 1:4
+                sdim = rxyz(dim);
+                normres(c).(sdim).ftest(kk) = res(c).(sdim).ftest(k-1);
+                if k < 3
+                    normres(c).(sdim).power(kk,:) = ...
+                        res(c).(sdim).power(k-1,:) ./ ...
+                        res(c).(sdim).power(k,:);
+                else                     
+                    normres(c).(sdim).power(kk,:) = ...
+                        res(c).(sdim).power(k-1,:) ./ ...
+                        (0.5*(res(c).(sdim).power(k,:) + ...
+                        res(c).(sdim).power(k-2,:)));
+                end
+                                
+                if c == 1% Initiate meannormres if this is the first file
+                    meannormres.(sdim).power(kk,:) = normres(c).(sdim).power(kk,:);
+                else
+                    meannormres.(sdim).power(kk,:) = ...
+                        meannormres.(sdim).power(kk,:) + normres(c).(sdim).power(kk,:);
+                end
+                meannormres.(sdim).ftest(kk) = normres(c).(sdim).ftest(kk);
+                % Now take average if this is the last file
+                if c == length(fids)
+                    meannormres.(sdim).power(kk,:) = meannormres.(sdim).power(kk,:)/c;
+                end
+            end % looping through dimensions
+        end % checking if we need normalization
+    end % looping through segments (k)
+end % looping through files (c)
+out.res = res;
+out.meanres = meanres;
+if exist('normres','var')
+    out.normres = normres;
+    out.meannormres = meannormres;
+end   
 dbclear if error
 
 %%===========   COMPLETED FREQUENCY RESPONSE COMPUTATION    ===============
@@ -709,5 +800,12 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 
+% --- Executes on button press in check_normalize.
+function check_normalize_Callback(hObject, eventdata, handles)
+% hObject    handle to check_normalize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_normalize
 
 
