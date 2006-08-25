@@ -30,7 +30,7 @@ function varargout = fsanalysis_subgui(varargin)
 
 % Edit the above text to modify the response to help fsanalysis_subgui
 
-% Last Modified by GUIDE v2.5 23-Aug-2006 02:45:08
+% Last Modified by GUIDE v2.5 24-Aug-2006 13:54:02
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -116,6 +116,20 @@ else
     end
 end
 
+% --- Executes on button press in button_selectPass.
+function button_selectPass_Callback(hObject, eventdata, handles)
+% select file associated with passive diffusion. 
+global g
+allstr = get(handles.lta.menu_files,'String');
+[selec,ok] = listdlg('ListString',allstr,...
+    'InitialValue',1,'OKstring','Select',...
+    'Name','Select fixed bead freq sweep file(s)');
+if ok
+    set(handles.button_selectPass,'UserData',selec);
+else
+    set(handles.button_selectPass,'UserData',[]);
+end
+
 % --- Executes on button press in button_selectFixed.
 function button_selectFixed_Callback(hObject, eventdata, handles)
 % select file associated with fixed bead frequency sweep
@@ -157,13 +171,12 @@ dbstop if error
 dfs = get(handles.button_selectFS,'UserData'); 
 dfx = get(handles.button_selectFixed,'UserData'); 
 
-if get(handles.check_compensate,'value')
+if get(handles.check_compnFixed,'value')
     outfix  = computefs(dfx.fid, dfx.iseg, handles);
     assignin('base','outfix',outfix);
-    % Normalizing by the interleave control-frequency doesn't make sense
-    % for the fixed bead case. 
-    resfix = outfix.res; meanfix = outfix.meanres;
-    
+    % Normalizing by the response to the interleaved control-frequency
+    % doesn't make sense for the fixed bead case. 
+    resfix = outfix.res; meanfix = outfix.meanres;    
 end
 out = computefs(dfs.fid, dfs.iseg, handles);
 assignin('base','outfs',out);
@@ -176,10 +189,10 @@ allstr = get(handles.menu_yaxis,'string');
 stry = allstr{get(handles.menu_yaxis,'value')};
 alltags = g.tag;
 figlist = [];
-rxyz = 'rxyz';
+xyzrr = {'x','y','z','xy','r'};
 dl = get(handles.lta.list_dims,'value');
 for dim = 1:length(dl)
-    sdim = rxyz(dl(dim));
+    sdim = xyzrr{dl(dim)};
     % Initialize all figures for this dimension
     if get(handles.check_FvsAllH,'Value')
         hfthis = handles.FvsAllHfigid + dl(dim); figlist = [figlist,hfthis];
@@ -218,8 +231,17 @@ for dim = 1:length(dl)
     
     for fid = 1:length(dfs.fid) % Plot each file one by one
         dplot(fid).(sdim).ftest = resfs(fid).(sdim).ftest;
-        if get(handles.check_compensate,'value')
+        if get(handles.check_compnDiffuse,'Value')
+            dplot(fid).(sdim).power = resfs(fid).(sdim).active_power;
+        elseif get(handles.check_compnFixed,'value') %DEPRICATED???
             % Compensate for the motion of whole magnet-holding stage.
+            % NOTE: This approach assumes that motion of the stage seen for
+            % the fixed-beads specimen is comparable to the motion of the stage seen
+            % for the specimen of the real experiment. However, this
+            % assumption may not be true. Unless you know what you are doing, 
+            % IT IS ADVISABLE NOT TO USE THIS OPTION. Also, for most of the cases, the
+            % overall motion of the stage could be avoided by not using the
+            % shorted coils. 
             for j = 1:length(dplot(fid).(sdim).ftest)
                 fthis = dplot(fid).(sdim).ftest(j);
                 dplot(fid).(sdim).power(j,:) = resfs(fid).(sdim).power(j,:)...
@@ -333,7 +355,7 @@ function button_segpsd_Callback(hObject, eventdata, handles)
 % edit_fseg box. Overlay each file one by one.
 global g
 dl = get(handles.lta.list_dims,'value'); % list of requested dimensions
-rxyz = 'rxyz';
+xyzrr = {'x','y','z','xy','r'};
 fseg = get(handles.slider_fseg,'UserData');
 
 rexp = get(handles.button_selectFS,'UserData');
@@ -346,7 +368,7 @@ for ifreq = 1:length(fseg) % Process and plot for each frequency one by one.
         xlabel('Frequency Hz');
         ylabel('PSD Power/Hz');
         title(['Segment PSD for excitation frequency: ', num2str(fseg(ifreq)), ' Hz',...
-            ', Dimension: ', rxyz(dl(dim))]);
+            ', Dimension: ', xyzrr{dl(dim)}]);
         hold on
         for iex = 1:length(rexp.fid) %process each file in the 'experiment' list one by one
             fileid = rexp.fid(iex);
@@ -360,10 +382,13 @@ for ifreq = 1:length(fseg) % Process and plot for each frequency one by one.
             i_st = rexp.iseg(fileid).bpos_st(inearest);
             i_end = rexp.iseg(fileid).bpos_end(inearest);
             txyz = g.data{fileid}.beadpos(i_st:i_end,:);
-            if dl(dim) == 1 % THis is radial dimension
-                pseg = sqrt(txyz(:,2).^2 + txyz(:,3).^2 + txyz(:,4).^2);
-            else
-                pseg = txyz(:,dl(dim)+1-1);
+            switch dl(dim)
+                case {1,2,3}
+                    pseg = txyz(:,dl(dim)+1);
+                case 4 % XY
+                    pseg = sqrt(sum(txyz(:,2:3) - repmat(txyz(1,2:3),size(txyz,1),1).^2, 2));
+                case 5 % R
+                    pseg = sqrt(sum(txyz(:,2:4) - repmat(txyz(1,2:4),size(txyz,1),1).^2, 2));
             end            
             [p, f] = mypsd(pseg,handles.lta.srate);
             loglog(f,p,['.-',clrs(mod(iex-1,length(clrs))+1)]);
@@ -473,7 +498,7 @@ for c = 1:length(fids)
         if str2double(magdata.info.version) <= 2.2
             Nless = 1;
         else
-            Nless = 0; % The bug is fixed in later versions than 2.2 by adding two extra cycles instead of one
+            Nless = 0; % The bug is fixed in versions later than 2.2 by adding two extra cycles instead of one
         end
         % Note, .laser and .beadpos MAY have some offset in time stamps.
         % Compute this offset before looping through segments.
@@ -491,11 +516,7 @@ for c = 1:length(fids)
             ilaser_st = idx(k)+ Ncut;
             ilaser_end = floor(ilaser_st + tsrate*(1/ftest)*(magdata.info.param.nCycles - Nless)); % points for nCycles - 1
             % Now find contemporary bead positions
-            
-%             ibpos_st = max(find(bpos(:,1) <= msync(ilaser_st,1)));
-%             ibpos_end = max(find(bpos(:,1) <= msync(ilaser_end,1)));            
-%             ibpos_st = ceil(interp1(bpos(:,1),indvec,msync(ilaser_st,1)));
-%             ibpos_end = floor(interp1(bpos(:,1),indvec,msync(ilaser_end,1)));
+           
             ibpos_st = ilaser_st - noff;
             ibpos_end = ilaser_end - noff;
             iseg(fids(c)).bpos_st(k) = ibpos_st;
@@ -508,14 +529,34 @@ end
 %%***********       FREQUENCY RESPONSE COMPUTATION       ******************
 % fids: File indices
 % iseg: index-pairs of segment boundaries
-% res(:).ibeadpos
-% res(:).(r,x,y,z).power
-% res(:).(r,x,y,z).ftest
+% out.res(:).ibeadpos
+%           .(x,y,z,xy,r).power
+%           .(x,y,z,xy,r).ftest
+%           .(x,y,z,xy,r).active_power (when opted to compensate for
+%                                       passive diffusion)
+% out.meanres.power 
+%            .ftest
+%            .active_power
+% out.normres(:) :: When opted for normalization. 
+%                   Structure is same as that of out.res, but the numbers
+%                 are normalized with the response at the control frequency
+% out.meannormres(:)
+% 
 function out = computefs(fids,iseg,handles)
 global g
 dbstop if error
-rxyz = 'rxyz';
-for c = 1:length(fids)
+xyzrr = {'x','y','z','xy','r'};
+% Check if user has selected to account for the passive diffusion
+if get(handles.check_compnDiffuse,'Value')
+    fpass = get(handles.button_selectPass,'UserData');
+    % consider only one file for the passive dataset. For now. Compute the
+    % radial positions.
+    passpos = radialpos(g.data{fpass(1)}.beadpos,[],1);
+    % Compute psd for the passive dataset
+    [passp, passf] = mypsd(passpos(:,2:end),handles.lta.srate,[]);
+end
+
+for c = 1:length(fids) % Process each file one by one
     magdata = g.magdata{fids(c)};
     % iseg containts segments for all excitation frequencies. First focus down
     % to the excitation frequencies that the user is interested in and then
@@ -560,38 +601,47 @@ for c = 1:length(fids)
             clear oldseg
         end
         % Now compute radial vector for bead positions in this segment
-        rseg(:,1) = seg(:,1);
-        rseg(:,3:5) = seg(:,2:4) - repmat(seg(1,2:4),size(seg,1),1);
-        rseg(:,2) = sqrt(rseg(:,3).^2 + rseg(:,4).^2 + rseg(:,5).^2);
-        clear seg; seg = rseg; clear rseg;
-        % Now compute psd of the segment, using best available frequency resolution
-        [segp, segf] = mypsd(seg(:,2:5),handles.lta.srate,[]);
-
-        % process peaks upto 4 hormonics
-        for dim = 1:4
-            sdim = rxyz(dim);
+        seg = radialpos(seg,[],1);
+        
+        % Now compute PSD of this segment and process the relevant peak
+        [segp, segf] = mypsd(seg(:,2:end),handles.lta.srate,[]);
+        
+        for dim = 1:length(xyzrr)
+            sdim = xyzrr{dim};
             res(c).ibeadpos(k,:) = [ibpos_st, ibpos_end];
-            for ip = 1:4
+            for ip = 1:4% process peaks upto 4 hormonics
                 peak = processpeak(segp(:,dim),segf,ftest*ip,0);
                 if peak.p == 0
 %                     keyboard;
                 end
+                
                 res(c).(sdim).power(k,ip) = peak.p;
                 res(c).(sdim).ftest(k) = ftest;
-                % Initiate meanres if this is the first file
-                if c == 1
-                    meanres.(sdim).power(k,ip) = peak.p;
-                else
-                    meanres.(sdim).power(k,ip) = meanres.(sdim).power(k,ip) + peak.p;
+                
+                % IF we are told to compensate for the passive diffusion,
+                % then process the relevant peaks in the psd of the passive
+                % motion
+                if get(handles.check_compnDiffuse,'value')
+                    passpeak = processpeak(passp(:,dim),passf,ftest*ip,0);
+                    res(c).(sdim).active_power(k,ip) = ...
+                        res(c).(sdim).power(k,ip) - passpeak.p;
                 end
-                meanres.(sdim).ftest(k) = ftest;
-                % Now normalize if this is the last file
-                if c == length(fids)
-                    meanres.(sdim).power(k,ip) = meanres.(sdim).power(k,ip)/c;
+                % Initiate meanres structure if this is the first file
+                if c == 1
+                    meanres.(sdim) = res(c).(sdim); 
+                else
+                    meanres.(sdim).power(k,ip) = (1/c)* ...
+                        (meanres.(sdim).power(k,ip)*(c-1) + res(c).(sdim).power(k,ip));
+                    if get(handles.check_compnDiffuse,'value')
+                        meanres.(sdim).active_power(k,ip) = (1/c)* ...
+                            (meanres.(sdim).active_power(k,ip)*(c-1) + ...
+                            res(c).(sdim).active_power(k,ip));                   
+                    end
+                    meanres.(sdim).ftest(k) = ftest;
                 end
             end %looping through harmonics
         end % looping through dimensions
-        % If the control-frequency busrts were interleaved, then normalize
+        % If the control-frequency bursts were interleaved, then normalize
         % the response at the test frequency by the average of the
         % responses at the control-frequency bursts immediately before and
         % after the particular test-frequency burst. Then check
@@ -599,8 +649,8 @@ for c = 1:length(fids)
         % then normalize the response at the previous burst.
         if magdata.info.param.docontrol == 1 & isequal(ftest, fcont) & k > 1
             kk = kk + 1;            
-            for dim = 1:4
-                sdim = rxyz(dim);
+            for dim = 1:length(xyzrr)
+                sdim = xyzrr{dim};
                 normres(c).(sdim).ftest(kk) = res(c).(sdim).ftest(k-1);
                 if k < 3
                     normres(c).(sdim).power(kk,:) = ...
@@ -612,18 +662,31 @@ for c = 1:length(fids)
                         (0.5*(res(c).(sdim).power(k,:) + ...
                         res(c).(sdim).power(k-2,:)));
                 end
-                                
-                if c == 1% Initiate meannormres if this is the first file
-                    meannormres.(sdim).power(kk,:) = normres(c).(sdim).power(kk,:);
+                if get(handles.check_compnDiffuse,'Value')
+                    if k < 3
+                        normres(c).(sdim).active_power(kk,:) = ...
+                            res(c).(sdim).active_power(k-1,:) ./ ...
+                            res(c).(sdim).active_power(k,:);
+                    else
+                        normres(c).(sdim).active_power(kk,:) = ...
+                            res(c).(sdim).active_power(k-1,:) ./ ...
+                            (0.5*(res(c).(sdim).active_power(k,:) + ...
+                            res(c).(sdim).active_power(k-2,:)));
+                    end
+                end
+                % Initiate meannormres structure if this is the first file
+                if c == 1
+                    meannormres.(sdim) = normres(c).(sdim); 
                 else
-                    meannormres.(sdim).power(kk,:) = ...
-                        meannormres.(sdim).power(kk,:) + normres(c).(sdim).power(kk,:);
-                end
-                meannormres.(sdim).ftest(kk) = normres(c).(sdim).ftest(kk);
-                % Now take average if this is the last file
-                if c == length(fids)
-                    meannormres.(sdim).power(kk,:) = meannormres.(sdim).power(kk,:)/c;
-                end
+                    meannormres.(sdim).power(kk,ip) = (1/c)* ...
+                        (meannormres.(sdim).power(kk,ip)*(c-1) + normres(c).(sdim).power(kk,ip));
+                    if get(handles.check_compnDiffuse,'value')
+                        meannormres.(sdim).active_power(kk,ip) = (1/c)* ...
+                            (meannormres.(sdim).active_power(kk,ip)*(c-1) + ...
+                            normres(c).(sdim).active_power(kk,ip));                   
+                    end
+                    meannormres.(sdim).ftest(kk) = ftest;
+                end                
             end % looping through dimensions
         end % checking if we need normalization
     end % looping through segments (k)
@@ -670,13 +733,13 @@ function menu_yaxis_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from menu_yaxis
 
 
-% --- Executes on button press in check_compensate.
-function check_compensate_Callback(hObject, eventdata, handles)
-% hObject    handle to check_compensate (see GCBO)
+% --- Executes on button press in check_compnFixed.
+function check_compnFixed_Callback(hObject, eventdata, handles)
+% hObject    handle to check_compnFixed (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of check_compensate
+% Hint: get(hObject,'Value') returns toggle state of check_compnFixed
 
 
 
@@ -807,5 +870,15 @@ function check_normalize_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of check_normalize
+
+
+
+% --- Executes on button press in check_.
+function check_compnDiffuse_Callback(hObject, eventdata, handles)
+% hObject    handle to check_ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_
 
 

@@ -80,6 +80,7 @@ handles.signames.intr = {'beadpos' ,'stageReport','qpd','laser', 'posError'};
 %   Names of signals to be displayed on ltaGUI control menu_signal
 handles.signames.disp = {'Probe Pos','Stage Pos' ,'QPD','Channel 8', 'Pos Error'};
 handles.posid = [1, 2, 5]; %index of the signals which are position measurements
+handles.poscolstrs = {'X','Y','Z','XY','R'}; %names of the columns of the position signal
 % Figure numbers allocated to 'main-figures' for various signals
 handles.mainfigids =      [   1,          2,          3,         4,     5];
 handles.psdfigids =       [  10,         20,         30,        40,     50];
@@ -116,6 +117,8 @@ for c = 1:length(handles.gfields)
         handles.ph.(handles.gfields{c}) = {0};
     end
 end
+set(handles.list_dims,'String',handles.poscolstrs);
+set(handles.list_dims,'Value',5);%Set to R by default
 
 guidata(hObject, handles);
 % UIWAIT makes lt_analysis_ltagui wait for user response (see UIRESUME)
@@ -784,7 +787,7 @@ end
 
 % Now determine the columns/dimensions of the signal to be processed
 if any(sigid == handles.posid)
-    % which of the R X Y Z are selected?
+    % which of the X Y Z XY R are selected?
     cols = get(handles.list_dims,'value');
     colstr = get(handles.list_dims,'String');
 else %non-positional sigal, so process for all columns
@@ -917,19 +920,8 @@ for fi = 1:length(ids) %repeat for all files selected
             sig(:,j) = sig(:,j) - polyval(drift(:,j-1),sig(:,1)) + drift(2,j-1);
         end
     end
-    % Now the columns in the data loaded for a positional signal are
-    % x,y,z but the columns in the listbox displayed on UI are
-    % r,x,y,z. So push down x,y and z by one column. Then calculate R  
     if any(sigid == handles.posid) % is this a position signal?
-        if size(sig,2) <= 4 % if there are only 4 columns then R has not been calculated
-            temp = sig; sig = [];
-            sig(:,1) = temp(:,1); % timestamps
-            sig(:,2) = sqrt((temp(:,2) - temp(1,2)).^2 + ...
-                (temp(:,3) - temp(1,3)).^2 + ...
-                (temp(:,4) - temp(1,4)).^2); % R
-            sig(:,3:5) = temp(:,2:4); % xyz
-            clear temp            
-        end
+        sig = radialpos(sig,[],1); % calculate radial vectors and append them
     end
     % now remove mean from the original signal
     sig(:,2:end) = sig(:,2:end) - repmat(mean(sig(:,2:end),1),size(sig,1),1);
@@ -992,8 +984,8 @@ for fi = 1:length(ids) %repeat for all files selected
     
     %%********      MEAN-SQUARE-DISPLACEMENT (MSD) COMPUTATION      **********
     if get(handles.check_msd,'value')
-        % Allow msd for bead-position signal only. So this signal has 5 columns
-        % (trxyz) guaranteed.
+        % Allow msd for bead-position signal only. So this signal has 6 columns
+        % (txyzrr) guaranteed.
         for c = 1:length(cols)
             [msd, tau] = msdbase([sig(:,1), sig(:,cols(c)+1)],[]);% use default msd TAUs
             figure(msdfignum + cols(c) - 1);
@@ -1039,17 +1031,15 @@ for fi = 1:length(ids) %repeat for all files selected
             % Now down sample for faster display
             downvals = allvals(1:100:end,:); clear allvals;
             figure(handles.tstackfigid); set(gcf,'Tag','boxstack');
-            if any(sigid == handles.posid) % If this is position then compute and insert R                
-                ov = downvals; downvals = [];
-                downvals(:,1) = ov(:,1);
-                downvals(:,2) = sqrt(ov(:,2).^2 + ov(:,3).^2 + ov(:,4).^2);
-                downvals(:,3:5) = ov(:,2:4);
-                clear ov
+            if any(sigid == handles.posid) % If this is position then compute and append radial vectors               
+                downvals = radialpos(downvals,[],1);
                 ylstr = 'Microns';
             else
                 ylstr = 'Volts';
             end
-            plot(downvals(:,1), downvals(:,1+cols(1)), ':k', 'tag', 'stack');
+            % For the color-coded time domain trace, only plot R for each
+            % box position
+            plot(downvals(:,1), downvals(:,end), ':k', 'tag', 'stack');
             xlabel('Time [s]'); ylabel(ylstr);
             % Now overlay magnets if user has told us to do so
             overlaymag(handles,gcf,1);
@@ -1063,7 +1053,7 @@ for fi = 1:length(ids) %repeat for all files selected
     
     %%=========== COMPUTE AND PLOT SPECTROGRAM FOR THE FIRST FILE =========
     if ~stack_mode & fi == 1 & get(handles.check_spectrogram,'Value')% Only one file
-        srxyz = 'RXYZ';
+        sxyzrr = handles.poscolstrs;
         for c = 1:length(cols)
             fignum = handles.specgramfigid(sigid) + cols(c) - 1;
 %             tres = []; % Use the best tradeoff between time and freq. resol
@@ -1116,7 +1106,7 @@ for fi = 1:length(ids) %repeat for all files selected
                 view(0,90); % Looking from top down - looks like colormap
             end
             xlabel('Time [S]'); ylabel('Log_{10} Frequency [Hz]');
-            title(['Spectrogram: File ID = ', g.tag{ids(fi)}, ' --', signame, ': ', srxyz(cols(c))]);
+            title(['Spectrogram: File ID = ', g.tag{ids(fi)}, ' --', signame, ': ', sxyzrr{cols(c)}]);
             
 %             %---- This, plotting energy vs time, may be temporaray
 %             figure(fignum+5);
@@ -1215,34 +1205,33 @@ sigmat = g.data{1,fileid}.(signame);
 % Remove offset in time
 sigmat(:,1) = sigmat(:,1) - sigmat(1,1);
 % Now grab the points that fall inside the box
-[tsel, selec] = clipper(sigmat(:,1),sigmat(:,2:end),b.xlims(1),b.xlims(2));
+[selec(:,1), selec(:,2:end)] = clipper(sigmat(:,1),sigmat(:,2:end),b.xlims(1),b.xlims(2));
 
 % Subtract out the background drift, if we are told to do so
 if get(handles.check_subdrift,'Value')
-    selec = subtract_background_drift(tsel,selec,handles,signame);
+    selec(:,2:end) = subtract_background_drift(selec(:,1),selec(:,2:end),handles,signame);
 end
 
 % Now perform computations and make the result strings
 str.trend = []; str.detrms = []; str.p2p = []; str.detp2p = []; tab = '    ';
 sf = '%+05.3f';
 if any(sigid == handles.posid) % if this signal is a position measurement
-    % calculate and prepend a column of R
-    selec(:,2:4) = selec;
-    selec(:,1) = sqrt(selec(:,2).^2 + selec(:,3).^2 + selec(:,4).^2);
+    % calculate and append columns of R and XY
+    selec = radialpos(selec,[],1);
     dims = get(handles.list_dims,'Value'); %selected dimensions
     strdims = get(handles.list_dims,'String');% all strings    
     for c = 1:length(dims)
-        [p s] = polyfit(tsel,selec(:,dims(c)),1);                
-        detrend = selec(:,dims(c)) - polyval(p,tsel);
+        [p s] = polyfit(selec(:,1),selec(:,dims(c)+1),1);                
+        detrend = selec(:,dims(c)+1) - polyval(p,selec(:,1));
         str.trend = [str.trend,' (',strdims{dims(c)},') ', num2str(p(1),sf),tab];
         str.detrms = [str.detrms,' (', strdims{dims(c)}, ') ',num2str(rms(detrend),sf),tab];
         str.detp2p = [str.detp2p,' (', strdims{dims(c)}, ') ',num2str(range(detrend),sf),tab];
-        str.p2p = [str.p2p,' (',strdims{dims(c)}, ') ',num2str(range(selec(:,dims(c))),sf),tab];
+        str.p2p = [str.p2p,' (',strdims{dims(c)}, ') ',num2str(range(selec(:,dims(c)+1)),sf),tab];
     end
 else % Not a position measurement, so no extra labels for dimensions
-    for c = 1:size(selec,2)
-        [p s] = polyfit(tsel,selec(:,c),1);                
-        detrend = selec(:,c) - polyval(p,tsel);
+    for c = 2:size(selec,2)
+        [p s] = polyfit(selec(:,1),selec(:,c),1);                
+        detrend = selec(:,c) - polyval(p,selec(:,1));
         str.trend = [str.trend, num2str(p(1),sf),tab];
         str.detrms = [str.detrms, num2str(rms(detrend),sf),tab];
         str.detp2p = [str.detp2p, num2str(range(detrend),sf),tab];    
@@ -1415,53 +1404,46 @@ dbclear if error
 %-----------------------------------------------------------------------
 % make the matrices of signal values to be displayed and related annotations
 function [sigout, annots] = filldispsig(sigin,res,signame,handles)
+dbstop if error
 % first make the time abscissa with correct resolution
+
 if res == 0;
-    tout = sigin(:,1);
+    temp(:,1) = sigin(:,1);
 else
-    tout = [sigin(1,1):res:sigin(end,1)]';
+    temp(:,1) = [sigin(1,1):res:sigin(end,1)]';
 end
 
 for k = 2:size(sigin,2)
     if res == 0
-        temp(:,k-1) = sigin(:,k);
+        temp(:,k) = sigin(:,k);
     else
-        temp(:,k-1) = interp1(sigin(:,1),sigin(:,k),tout,'nearest');
+        temp(:,k) = interp1(sigin(:,1),sigin(:,k),temp(:,1),'nearest');
     end    
 end
 % Remove offset from time
-tout = tout - tout(1);
+temp(:,1) = temp(:,1) - temp(1,1);
 % Subtract out the background drift, if we are told to do so
 if get(handles.check_subdrift,'Value')
-    temp = subtract_background_drift(tout,temp,handles,signame);
+    temp(:,2:end) = subtract_background_drift(temp(:,1),temp(:,2:end),handles,signame);
 end
-sigout(:,1) = tout; % first column is always the time
+sigout(:,1) = temp(:,1); % first column is always the time
 switch signame
     case {handles.signames.intr{1},handles.signames.intr{2},handles.signames.intr{5}} 
         %bead pos, stage pos, and pos error        
         % now pick the only dimesions that are requested
         dims = get(handles.list_dims,'value');
+        sxyzrr = handles.poscolstrs;
+        cxyzrr = [0 0 1;... %Blue
+            0 1 0; ...%Green
+            1 0 0; ...%Red
+            0.8 0.2 0.2; ... %Brown
+            0 0 0;]; %Black
+        % Compute radial vectors and append them
+        temp = radialpos(temp,[],1);
         for c = 1:length(dims)
-            switch dims(c)
-                case 1 %R
-                    sigout(:,c+1) = sqrt(temp(:,1).^2 + temp(:,2).^2 + temp(:,3).^2);
-                    annots.legstr{c} = 'R';
-                    annots.colorOrder(c,:) = [0,0,0]; % R is always black
-                case 2 %X
-                    sigout(:,c+1) = temp(:,1);
-                    annots.legstr{c} = 'X';
-                    annots.colorOrder(c,:) = [0,0,1]; % X is always blule
-                case 3 %Y
-                    sigout(:,c+1) = temp(:,2);                    
-                    annots.legstr{c} = 'Y';
-                    annots.colorOrder(c,:) = [0,1,0]; % Y is always green          
-                case 4 %Z
-                    sigout(:,c+1) = temp(:,3);
-                    annots.legstr{c} = 'Z';
-                    annots.colorOrder(c,:) = [1,0,0]; % Z is always red             
-                otherwise
-                    prompt_user('Error: Unrecognized dimension (not among RXYZ)',handles);
-            end
+            sigout(:,c+1) = temp(:,c+1);
+            annots.legstr{c} = sxyzrr{dims(c)};
+            annots.colorOrder(c,:) = cxyzrr(dims(c),:);
         end
         annots.y = 'Microns';
         annots.x = 'Seconds';
@@ -1492,6 +1474,7 @@ switch signame
     otherwise
         prompt_user('Error: Unrecognized signalName',handles);
 end
+dbclear if error
 %-----------------------------------------------------------------------
 function remove_file(ids, handles)
 global g
@@ -1837,7 +1820,7 @@ else
     set(handles.check_overlaymag,'Enable','Off');
     set(handles.check_overlaymag,'Value',0);
 end
-checkdimsvalidity(handles);% check if RXYZ and/or 3D is applicable
+checkdimsvalidity(handles);% check if xyzrr and/or 3D is applicable
 checkdriftvalidity(handles);% check if drift subtraction is allowed
 % --- -------------------------------------------------------
 function checkdriftvalidity(handles);

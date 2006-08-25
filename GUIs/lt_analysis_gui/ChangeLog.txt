@@ -1,8 +1,14 @@
+2006-08-25 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.fig: Added one more dimension 'XY' for looking at the motion in XY plane. Also changed the order of dimensions in the list box to a more intuitive one: x-y-z-xy-r
+	* lt_analysis_gui.m: Coding necessary for processing the motion in XY dimension, for each type of analysis.
+	* fsanalysis_subgui.fig: Added a button to load a passive diffusion data, if one wants to compensate for the diffusion energy also. Also added related checkbox.
+	* fsanalysis_subgui.m: Computation of frequency response now takes into account the diffusion energy, for both normalized and unnormalized case.
+
 2006-08-23 Kalpit Desai <kvdesai@email.unc.edu>
-	* fs_analysis_gui.m:	Now supports analysis of data that was taken with control-frequency bursts interleaved between test-freqeuncy bursts.
+	* fsanalysis_subgui.m:	Now supports analysis of data that was taken with control-frequency bursts interleaved between test-freqeuncy bursts.
 	- Normalizes the response at test-frequencies by the average response at the two adjucent control-frequency bursts.
 	- This control is required to account for the change in the position of the bead relative to poles. 
-	* fs_analysis_gui.fig: Added a checkbox to let user specify if the control-frequency normalization is to be done.
+	* fsanalysis_subgui.fig: Added a checkbox to let user specify if the control-frequency normalization is to be done.
 
 2006-07-10 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m:	msd plot axes are reset to loglog when done plotting.
