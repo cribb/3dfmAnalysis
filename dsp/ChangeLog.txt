@@ -1,3 +1,6 @@
+2006-08-25  Kalpit Desai <kvdesai@email.unc.edu>
+	* processpeak.m: More robust method of accurately locating the nearest point to the search frequency.
+
 2006-05-29  Kalpit Desai <kvdesai@email.unc.edu>
 	* myspectrogram.m: 
 	- Replaced the input argument 'frequency resolution' by 'time resolution' because time resolution is more intuitive.

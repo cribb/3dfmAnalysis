@@ -2,13 +2,13 @@ function peak = processpeak(pp, pf,f,interactive)
 % 3DFM function  
 % DSP 
 % Created 01/20/05 - kvdesai. 
-% Last modified 05/15/06 - kvdesai
+% Last modified 08/24/06 - kvdesai
 % Usage: peak = processpeak(pp, pf,fsearch,interactive)
 %   pp = output of psd in units of [power/frequency] or [disp^2/frequency]
 %   pf = frequency vector corresponding to pp
 %   fsearch = search frequency
 %   interactive = 0 or 1, select frquencies using cross-hair window.
-%           if 1, then fsearch ignored.
+%           if 1, then third argument is ignored ignored. Default 0.
 % peak.p = power at fsearch
 % peak.ampli = amplitude of sine wave at fsearch
 % peak.fsearch = fsearch
@@ -18,13 +18,17 @@ if nargin < 4 | isempty(interactive) interactive = 0; end
 fres = mean(diff(pf));%the step size in frequencies
 if (~interactive)
     NBOTH = 3; %Number of bins to be integrated on both sides to calculate total power
-    isrch = find(abs(pf - f) <= fres/2); %find the index of pf that has value nearest to search frquency
+    
+    %find the index of pf that has value nearest to search frquency    
+%     isrch = find(abs(pf - f) <= fres/2); 
+    isrch = interp1(pf,[1:length(pf)],f,'nearest');    
     peak.p = 0;
-    if    isempty(isrch)
+    if    isnan(isrch)
         peak.f = []; % a signal that search frquency was out of the range of data provided.
 %         keyboard;
     else
-        isrch = isrch(1); %Sometime the search freqeuncy could fall exactly between two bins
+%         isrch = isrch(1); %Sometime the search freqeuncy could fall
+%         exactly between two bins
         if(isrch - NBOTH >= 1) & (isrch + NBOTH <= length(pf)) 
             % search freq is not on either edge of the frequency range provided
             for k = 1:2*NBOTH+1
