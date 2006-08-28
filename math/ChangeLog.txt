@@ -1,5 +1,9 @@
+2006-08-28  Jeremy Cribb <jcribb@email.unc.edu>
+	* uncertainty_in_linefit.m: added.  reports error in slope and intercept for a linear fit.
+
 2006-08-25	Kalpit Desai <kvdesai@email.unc.edu>
 	* radialpos.m: Added. A function heavily used by Laser Tracking Analysis GUI to compute radial distances (in plane as well as in 3D) from position coordinates.
+
 2006-07-18  Jeremy Cribb <jcribb@email.unc.edu>
 	* uncertainty_in_slope.m: added check for data of reasonable length for error determination and implemented messaging.
 
