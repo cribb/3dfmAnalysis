@@ -94,6 +94,7 @@ handles.boxresfig = 99;
 handles.specgramfigid = [110,   120,    130,    140,    150];
 handles.tstackfigid = 160;
 handles.stackfigidoff = 200;
+handles.soundfigid = 1234;
 %  ....add to this list as more types of plots are supported
 
 % Some other constants
@@ -1366,39 +1367,40 @@ if range(diff(t)) > 1E-6
     clear raw; raw = newraw; clear newraw;
 end
 playsig = k*diff(raw);
-plotsig = raw(1:10:end); % plot only every 10 th point
-plott = t(1:10:end);
-% figure(handles.specgramfigid); 
-% specgram(playsig,512,handles.srate); colormap gray;
+plotsig = raw(1:100:end); % plot only every 100 th point
+plott = t(1:100:end);
+
 
 Nbits = 16; % Number of bits that P'tracker sound player seems to be using
-    
-N_sec = floor(t(end)); % Number to 1sec slots
-tsvec = [0:1:N_sec];
+
 dbstop if error
-figure(1235); clf;
-plot(plott,plotsig); pretty_plot; hold on;
-set(1235,'DoubleBuffer','On');
+
+figure(handles.soundfigid); clf;
+plot(plott,plotsig); overlaymag(handles,handles.soundfigid,1);
+pretty_plot; hold on;
+set(handles.soundfigid,'DoubleBuffer','On');
 ylims = get(gca,'Ylim');
-hline = line([tsvec(1), tsvec(1)],ylims,'LineStyle',':','Color','m');
-for c = 1:length(tsvec)    
-    ist(c) = max(find(t <=tsvec(c)));
-    if c == length(tsvec)
-        iend(c) = length(t)-1;
-    else 
-        iend(c) = max(find(t <= tsvec(c+1)));
-    end
+hline1 = line([t(1), t(1)],ylims,'LineStyle',':','Color','m', 'LineWidth',2);
+
+figure(handles.specgramfigid(end)); 
+specgram(playsig,512,handles.srate); colormap gray;
+overlaymag(handles,handles.specgramfigid(end),1);
+set(gcf,'DoubleBuffer','On');
+ylims = get(gca,'Ylim');
+hline2 = line([t(1), t(1)],ylims,'LineStyle',':','Color','m', 'LineWidth',2);
+
+figure(handles.soundfigid); pause(1);
+p = audioplayer(playsig, handles.srate, Nbits);
+play(p);
+tic
+while toc < t(end)    
+    set(hline1,'Xdata',[toc, toc]);
+    set(hline2,'Xdata',[toc, toc]);
+
+    drawnow
+    pause(0.001);
 end
-figure(1235); pause(1);
-k = 1;
-while k <= c    
-    set(hline,'Xdata',[tsvec(k), tsvec(k)]);
-%     sound(playsig(ist(k):iend(k)),handles.srate,Nbits);   
-    wavplay(playsig(ist(k):iend(k)), handles.srate,'sync');
-%     pause(0.001);
-    k = k+1;
-end
-wavplay(playsig,handles.srate)
+
 dbclear if error    
  
 %-----------------------------------------------------------------------
@@ -1441,7 +1443,7 @@ switch signame
         % Compute radial vectors and append them
         temp = radialpos(temp,[],1);
         for c = 1:length(dims)
-            sigout(:,c+1) = temp(:,c+1);
+            sigout(:,c+1) = temp(:,dims(c)+1);
             annots.legstr{c} = sxyzrr{dims(c)};
             annots.colorOrder(c,:) = cxyzrr(dims(c),:);
         end
