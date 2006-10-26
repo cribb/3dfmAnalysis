@@ -228,7 +228,13 @@ function [v,drift_vectors] = linear(data, drift_start_time, drift_end_time);
         end
     end    
 
-    v = newdata;
+    if exist('newdata')
+        v = newdata;
+    else
+        v = data;
+        drift_vectors = [NaN NaN NaN];
+        logentry('No drift removed.  Returning raw data.');
+    end
     
     return;
 
