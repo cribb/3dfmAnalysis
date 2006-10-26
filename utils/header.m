@@ -1,4 +1,4 @@
-function v = header(type)
+function header(type)
 % 3DFM function
 % Utilities
 % last modified on 07/29/2003
@@ -18,6 +18,10 @@ function v = header(type)
 % else  Miscellaneous
 %
 
+if nargin < 1 | isempty(type)
+    type = '';
+end
+
 switch upper(type)
     case 'R'
         subgroup = 'Rheology';
@@ -36,30 +40,25 @@ switch upper(type)
 end
     
 	
-	fprintf(' \n%% 3DFM function ');
-    fprintf(' \n%% %s', subgroup);
-    fprintf(' \n%% last modified 06/20/03');
-	fprintf(' \n%% ');
-	fprintf(' \n%% This function does something ');
-	fprintf(' \n%% ');
-	fprintf(' \n%%  [outputs] = function_name(parameter1, parameter2, etc...); ');
-	fprintf(' \n%%  ');
-	fprintf(' \n%%  where "parameter1" is [something] in units of [units]');
-	fprintf(' \n%%        "parameter2" is [something] in units of [units]');
-	fprintf(' \n%%		 etc... ');
-	fprintf(' \n%% ');
-	fprintf(' \n%%  Notes: ');
-	fprintf(' \n%%  ');
-	fprintf(' \n%%  - Extra information goes here ');
-	fprintf(' \n%%  - For a good example, look at load_vrpn_tracking');
-	fprintf(' \n%%  ');
-	fprintf(' \n%%  ');
-	fprintf(' \n%%  10/30/02 - created. ');
-	fprintf(' \n%%  11/12/02 - added feature1 & feature2. ');
-	fprintf(' \n%%  12/03/02 - bugfix ');
-	fprintf(' \n%%  ');
-	fprintf(' \n%%  ');
+	fprintf( ' \n%% 3DFM function ');
+    fprintf( ' \n%% %s', subgroup);
+    fprintf([' \n%% last modified ' date]);
+	fprintf( ' \n%% ');
+	fprintf( ' \n%% This function does something ');
+	fprintf( ' \n%% ');
+	fprintf( ' \n%%  [outputs] = function_name(parameter1, parameter2, etc...); ');
+	fprintf( ' \n%%  ');
+	fprintf( ' \n%%  where "parameter1" is [something] in units of [units]');
+	fprintf( ' \n%%        "parameter2" is [something] in units of [units]');
+	fprintf( ' \n%%		 etc... ');
+	fprintf( ' \n%% ');
+	fprintf( ' \n%%  Notes: ');
+	fprintf( ' \n%%  ');
+	fprintf( ' \n%%  - Extra information goes here ');
+	fprintf( ' \n%%  - For a good example, look at load_video_tracking');
+	fprintf( ' \n%% ');
+    fprintf( ' \n\n ');
+    
+    
 
-   v = 0;
-   
    

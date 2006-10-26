@@ -1,3 +1,7 @@
+2006-10-26  Jeremy Cribb <jcribb@email.unc.edu>
+	* header.m: freshened the output strings so that it makes more sense.
+	* pretty_plot.m: increased the font sizes for the text areas of figures.
+	
 2006-08-07  Kalpit Desai <kvdesai@email.unc.edu>
 	* drawlines.m: Now sets the lengths of the lines to whichever is larger, auto axis range and given axis range. This enables to zooming in and out without affecting the lines.	
 	

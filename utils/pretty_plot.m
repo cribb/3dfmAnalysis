@@ -30,10 +30,10 @@ for k = 1 : length(axes)
 	xlab = get(axes(k), 'Xlabel');
 	ylab = get(axes(k), 'Ylabel');
 	
-	set(titl, 'FontSize', 14, 'FontWeight', 'Bold');
-	set(legd, 'FontSize', 12, 'FontWeight', 'Bold');
-	set(xlab, 'FontSize', 12, 'FontWeight', 'Bold');
-	set(ylab, 'FontSize', 12, 'FontWeight', 'Bold');
-	set(axes(k), 'FontSize', 12, 'FontWeight', 'Bold');
+	set(titl, 'FontSize', 16, 'FontWeight', 'Bold');
+	set(legd, 'FontSize', 14, 'FontWeight', 'Bold');
+	set(xlab, 'FontSize', 14, 'FontWeight', 'Bold');
+	set(ylab, 'FontSize', 14, 'FontWeight', 'Bold');
+	set(axes(k), 'FontSize', 14, 'FontWeight', 'Bold');
 	
 end
