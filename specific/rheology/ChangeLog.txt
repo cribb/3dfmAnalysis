@@ -1,3 +1,15 @@
+2006-10-26  Jeremy Cribb <jcribb@email.unc.edu>
+	* Added kkr folder.
+  * app.m: moved to kkr folder.
+	* kkint.m: same.
+	* kkr.m: same.
+	* samplekkr.m: same.
+	* evaluateKK.m: same.
+	* jeffrey_model_step: Added.  Constructs a step response for jeffrey model, given parameters.
+	* jeffrey_step_fun: Added.  Fits data to jeffrey rheological model.
+	* jeffrey_step_fit: Added.  Fitting function for jeffrey_step_fun.m.
+	* relaxation_time.m: added switch that allows user to plot output or not.	
+	
 2006-07-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* relaxation_time.m: added printed output of relaxation times and goodness of fit.
 

@@ -1,4 +1,4 @@
-function [J,tau,R_square] = relaxation_time(t, xt, n)
+function [J,tau,R_square] = relaxation_time(t, xt, n, plot_results)
 % 3DFM function  
 % Rheology 
 % last modified 06/09/2005 
@@ -24,6 +24,11 @@ function [J,tau,R_square] = relaxation_time(t, xt, n)
 %  06/09/05 - created.  
 %  
 
+if nargin < 4 | isempty(plot_results)
+    logentry('Plotting results by default.');
+    plot_results = 'on';
+end
+
 % set parameters for the options structure sent to lsqcurvefit.
 options = optimset('MaxFunEvals', 20000*2*n, ...
                    'Diagnostics', 'off', ...
@@ -34,6 +39,10 @@ options = optimset('MaxFunEvals', 20000*2*n, ...
 logentry(['Fitting for Kelvin-Voight, ' num2str(n) ' modes.']);
 
 % normalize recovery to start at 1 and end at 0
+if sum(xt(1:5)) < sum(xt(end-5:end))
+    xt = -xt;
+end
+
 xt = xt - mean(xt(end-5:end));
 xt = xt / max(xt);
 t = t - min(t);
@@ -92,19 +101,13 @@ end
 logentry(['Resulting relaxation times (tau): ' num2str(tau) '.']);
 logentry(['Goodness of fit: ' num2str(R_square) '.']);
 
-figure;
-% subplot(1,2,1);
-plot(t, xt, '.', t, fit_xt, 'r');
-xlabel('time [s]');
-ylabel('normalized recovery');
-legend('data', 'fit');
-
-% subplot(1,2,2);
-% loglog(t, xt, '.', t, fit_xt, 'r');
-% xlabel('time [s]');
-% ylabel('normalized recovery');
-% legend('data', 'fit');
-
+if strcmp(plot_results, 'on')
+    figure;
+    plot(t, xt, '.', t, fit_xt, 'r');
+    xlabel('time [s]');
+    ylabel('normalized recovery');
+    legend('data', 'fit');
+end
 
 %%%%
 %% extraneous functions
