@@ -359,7 +359,7 @@ function slider_BeadID_CreateFcn(hObject, eventdata, handles)
 
 % --- Executes on slider movement.
 function slider_BeadID_Callback(hObject, eventdata, handles)
-	currentBead = get(handles.slider_BeadID, 'Value');
+	currentBead = round(get(handles.slider_BeadID, 'Value'));
 	set(handles.edit_BeadID, 'String', num2str(currentBead));
     
     plot_data(hObject, eventdata, handles);
