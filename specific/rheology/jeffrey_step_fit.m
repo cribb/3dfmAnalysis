@@ -39,7 +39,7 @@ function [K, D1, D2, R_square] = jeffrey_step_fit(t, y)
     
     x0 = [K D1 D2];
 	
-	[fit, resnorm, residuals] = lsqcurvefit('jeffrey_model_fun', x0, t, y, 0, [], options);
+	[fit, resnorm, residuals] = lsqcurvefit('jeffrey_step_fun', x0, t, y, 0, [], options);
 
     % standard deviation of measurements == rms of the residuals
 	rms_residuals = rms(residuals);

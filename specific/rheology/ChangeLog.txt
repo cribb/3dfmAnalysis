@@ -1,3 +1,6 @@
+2006-11-06  Jeremy Cribb <jcribb@email.unc.edu>
+	* jeffrey_step_fit.m:  fixed bug where jeffrey_step_fit called old fitting function file.
+
 2006-10-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* Added kkr folder.
   * app.m: moved to kkr folder.
