@@ -1,5 +1,8 @@
+2006-11-13 Kalpit Desai <kvdesai@email.unc.edu>
+	* fsanalysis_subgui.m: Old modifications. Seems this one also computes total response at 2nd and 4th harmonic.
+
 2006-09-29 Kalpit Desai <kvdesai@email.unc.edu>
-* lt_analysis_gui.m: Added real-time cursor for sound playback.
+	* lt_analysis_gui.m: Added real-time cursor for sound playback.
 2006-08-25 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.fig: Added one more dimension 'XY' for looking at the motion in XY plane. Also changed the order of dimensions in the list box to a more intuitive one: x-y-z-xy-r
 	* lt_analysis_gui.m: Coding necessary for processing the motion in XY dimension, for each type of analysis.

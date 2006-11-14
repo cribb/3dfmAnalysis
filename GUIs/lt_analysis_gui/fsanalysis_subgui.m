@@ -72,6 +72,7 @@ handles.FvsFs1figid = handles.figidoff + 10;
 handles.FvsFs2figid = handles.figidoff + 20;
 handles.FvsAllHfigid = handles.figidoff + 40;
 handles.FvsTHDfigid = handles.figidoff + 30;
+handles.FvsH24figid = handles.figidoff + 50;
 handles.segpsdfigid = handles.figidoff + 100;
 handles.colors = 'brkgmy';
 % Update handles structure
@@ -226,6 +227,14 @@ for dim = 1:length(dl)
         ylabel(['% THD ']);
         hold on;        
     end
+    if 1
+        hfthis = handles.FvsH24figid + dl(dim); figlist = [figlist,hfthis];
+        figure(hfthis); clf;                
+        title(['Total Response at 2nd and 4th Harmonic: ', sdim]);        
+        xlabel('Frequency [Hz]');
+        ylabel(['Response [',stry,']']);
+        hold on;        
+    end
     
     clrs = handles.colors;    
     
@@ -254,17 +263,20 @@ for dim = 1:length(dl)
         switch get(handles.menu_yaxis,'value')            
             case 1 % Power
                 dyaxis(fid).(sdim).indH = dplot(fid).(sdim).power; %rows = frequencies, cols = harmonics
-                dyaxis(fid).(sdim).allH = sum(dyaxis(fid).(sdim).indH, 2); % Sum all columns 
+                dyaxis(fid).(sdim).allH = sum(dyaxis(fid).(sdim).indH, 2); % Sum all columns
+                dyaxis(fid).(sdim).H24 = dyaxis(fid).(sdim).indH(:,2) + dyaxis(fid).(sdim).indH(:,4); %2nd and 4th harmonic
             case 2 % distance
                 for xs = 1:size(dplot(fid).(sdim).power,1) % loop for each frequency one by one
                     dyaxis(fid).(sdim).indH(xs,:) = sqrt(dplot(fid).(sdim).power(xs,:)*2); 
-                    dyaxis(fid).(sdim).allH = sqrt(sum(dyaxis(fid).(sdim).indH, 2)*2); 
+                    dyaxis(fid).(sdim).allH = sqrt(sum(dyaxis(fid).(sdim).indH, 2)*2);
+                    dyaxis(fid).(sdim).H24 = sqrt(dyaxis(fid).(sdim).indH(:,2).^2 + dyaxis(fid).(sdim).indH(:,4).^2);
                 end                
             case 3 % distance*Frequency
                 for xs = 1:size(dplot(fid).(sdim).power,1) % loop for each frequency one by one
                     ftest = dplot(fid).(sdim).ftest(xs);
                     dyaxis(fid).(sdim).indH(xs,:) = sqrt(dplot(fid).(sdim).power(xs,:)*2)*ftest; 
-                    dyaxis(fid).(sdim).allH = sqrt(sum(dyaxis(fid).(sdim).indH, 2)*2)*ftest; 
+                    dyaxis(fid).(sdim).allH = sqrt(sum(dyaxis(fid).(sdim).indH, 2)*2)*ftest;
+                    dyaxis(fid).(sdim).H24 = sqrt(dyaxis(fid).(sdim).indH(:,2).^2 + dyaxis(fid).(sdim).indH(:,4).^2)*ftest;
                 end
             otherwise
                     error('Unrecognized option for Y axis. Tell some programmer to fix');
@@ -293,7 +305,12 @@ for dim = 1:length(dl)
             thd = (sum(dplot(fid).(sdim).power,2)./dplot(fid).(sdim).power(:,1))-1;
 %             loglog(dplot(fid).(sdim).ftest,thd,['.-',clrs(mod(fid-1,length(clrs))+1)]);
             plot(dplot(fid).(sdim).ftest,thd,['.-',clrs(mod(fid-1,length(clrs))+1)]);
-        end         
+        end
+        
+        if (1) %Plot total response at 2nd and 4th harmonic
+            figure(handles.FvsH24figid + dl(dim));
+             plot(dplot(fid).(sdim).ftest,dyaxis(fid).(sdim).H24,['.-',clrs(mod(fid-1,length(clrs))+1)]);
+        end
     end % Looping through files   
 end % Looping through dimensions
 
@@ -374,11 +391,14 @@ for ifreq = 1:length(fseg) % Process and plot for each frequency one by one.
             fileid = rexp.fid(iex);
             allf = rexp.iseg(fileid).ftest;
             if g.magdata{fileid}.info.param.docontrol == 1
-                allf = allf(find(allf ~= g.magdata{fileid}.info.param.fcont));
+                irealexp = find(allf ~= g.magdata{fileid}.info.param.fcont);
+            else
+                irealexp = [1:1:length(allf)];
             end
+            inearest = round(interp1(allf(irealexp),irealexp,fseg(ifreq)));
             % find index of the nearest excitation frequency. This gives pointer
             % to the segment that needs to be processed
-            inearest = round(interp1(allf,[1:1:length(allf)],fseg(ifreq)));
+            
             i_st = rexp.iseg(fileid).bpos_st(inearest);
             i_end = rexp.iseg(fileid).bpos_end(inearest);
             txyz = g.data{fileid}.beadpos(i_st:i_end,:);
@@ -386,9 +406,9 @@ for ifreq = 1:length(fseg) % Process and plot for each frequency one by one.
                 case {1,2,3}
                     pseg = txyz(:,dl(dim)+1);
                 case 4 % XY
-                    pseg = sqrt(sum(txyz(:,2:3) - repmat(txyz(1,2:3),size(txyz,1),1).^2, 2));
+                    pseg = sqrt(sum((txyz(:,2:3) - repmat(txyz(1,2:3),size(txyz,1),1)).^2, 2));
                 case 5 % R
-                    pseg = sqrt(sum(txyz(:,2:4) - repmat(txyz(1,2:4),size(txyz,1),1).^2, 2));
+                    pseg = sqrt(sum((txyz(:,2:4) - repmat(txyz(1,2:4),size(txyz,1),1)).^2, 2));
             end            
             [p, f] = mypsd(pseg,handles.lta.srate);
             loglog(f,p,['.-',clrs(mod(iex-1,length(clrs))+1)]);
@@ -404,14 +424,18 @@ for ifreq = 1:length(fseg) % Process and plot for each frequency one by one.
                 % find index of the nearest excitation frequency. This gives pointer
                 % to the segment that needs to be processed
                 if g.magdata{fileid}.info.param.docontrol == 1
-                    allf = allf(find(allf ~= g.magdata{fileid}.info.param.fcont));
+                    irealexp = find(allf ~= g.magdata{fileid}.info.param.fcont);
+                else
+                    irealexp = [1:1:length(allf)];
                 end
-                inearest = round(interp1(allf,[1:1:length(allf)],fseg(ifreq)));
+                inearest = round(interp1(allf(irealexp),irealexp,fseg(ifreq)));
                 i_st = rfix.iseg(fileid).bpos_st(inearest);
                 i_end = rfix.iseg(fileid).bpos_end(inearest);
                 txyz = g.data{fileid}.beadpos(i_st:i_end,:);
-                if dl(dim) == 1 % THis is radial dimension
+                if dl(dim) == 5 % THis is radial dimension
                     pseg = sqrt(txyz(:,2).^2 + txyz(:,3).^2 + txyz(:,4).^2);
+                elseif dl(dim) == 4 % this is XY radial
+                    pseg = sqrt(txyz(:,2).^2 + txyz(:,3).^2);
                 else
                     pseg = txyz(:,dl(dim)+1-1);
                 end
