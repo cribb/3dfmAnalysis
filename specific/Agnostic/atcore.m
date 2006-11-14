@@ -208,8 +208,8 @@ if flags.puresine %pure sine perturbations
         tphi = sin(2*pi*fxyz(c)*tfit + phi); % phase aligned template
         [xc,xl] = xcorr(tphi,sfit(:,c));
         [ac,al] = xcorr(tphi,tphi);
-        amp = xc(find(xl == 0))/ ac(find(al==0)); %scaling necessary
-        template(:,c) = amp.*tphi; %scaled and aligned template
+        amp(c) = xc(find(xl == 0))/ ac(find(al==0)); %scaling necessary
+        template(:,c) = amp(c).*tphi; %scaled and aligned template
         figure(150);
         set(gcf,'name','Template','NumberTitle','Off');
         subplot(3,1,c);
@@ -218,7 +218,7 @@ if flags.puresine %pure sine perturbations
             title('Pure Sine template fit to stage sensed positions');
         end
     end
-    Afit = buildpoly(qfit,settings.order); %only linear order should be used
+    Afit = buildpoly(qfit,settings.order);
     Jac = Afit \ template;
     fitpred = Afit * Jac;
     fitresid = sfit - fitpred;
@@ -231,6 +231,32 @@ if flags.puresine %pure sine perturbations
     Aquiet = buildpoly(qquiet,settings.order);
     quietpred = Aquiet * Jac;
     quietresid = squiet - quietpred;
+    % Now compute the leak factor. Here is the logic:
+    % Ps_pert = Ps_quiet + kW, then goal is to estimate k
+    % E(W*Ps_pert) = E(W*Ps_quiet) + kE(W*W)
+    % We must use the "test" zone for Ps_pert. Also, for accurate
+    % estimation of the leak factor, it is preferable that "test" zone is
+    % fully spanned by sinusoids (no quiet parts).
+    [b,a] = butter(2,25*2/srate,'high');
+    for c = 1:3
+        % remove low frequencies from all signals, do this only locally
+        spert = filtfilt(b,a,stest(:,c));
+        ppert = filtfilt(b,a,testresid(:,c));
+        pquiet = filtfilt(b,a,quietresid(:,c));
+        % align the template W to Ps_quiet.
+        tplt = amp(c)*sin(2*pi*fxyz(c)*ttest);
+        [xc,xl] = xcorr(tplt,ppert);
+        phi = xl(find(xc == max(xc)))*2*pi*fxyz(c)/srate; %phase alignment necessary
+        tphi = amp(c)*sin(2*pi*fxyz(c)*ttest + phi); % phase aligned template
+        figure(210+c); plot(ttest,[ppert,tphi]);
+        testcorr = (1/length(ppert))*(ppert'*tphi);
+        % We don't expect a perturbation-frequency sinusoid in the quiet
+        % region, so aligning the template won't be helpful
+        quietcorr = (1/length(pquiet))*(pquiet'*[amp(c)*sin(2*pi*fxyz(c)*tquiet)]);
+        autocorr = (1/length(tplt))*(tplt'*tplt);
+        leakfactor(c) = (abs(testcorr) - abs(quietcorr))/autocorr;
+    end
+    
     
 else %old approach where we use filtering to get rid of the effects of feedback
     % build the equations for the indicated order
@@ -272,6 +298,7 @@ res.rmsQUIETstage = sqrt(mean(squiet.^2));
 res.rmsFITresid = sqrt(mean(fitresid.^2));
 res.rmsFITstage = sqrt(mean(sfit.^2));
 res.blipratio = res.rmsFITresid ./res.rmsQUIETresid;
+if flags.puresine, res.leakfactor = leakfactor; end
 
 switch (nargout)
     case 1

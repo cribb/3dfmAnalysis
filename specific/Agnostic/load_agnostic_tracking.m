@@ -1,6 +1,7 @@
 function dat = load_agnostic_tracking(fileName, flags)
 % Parse the laser-tracking log file for the purpose of analyzing agnostic tracking
-% compatible with LaserTracker version 03.02 to 04.00
+% compatible with LaserTracker version 03.02 and later.
+% USAGE: dat = load_agnostic_tracking(fileName, flags)
 % "Always Present" fields in the output structure dat:
 %   dat.info.name
 %         .ver.loadAT_m
@@ -50,6 +51,9 @@ if(isfield(d,'info'))
     if(isfield(d.info,'perturbationProperties'))
         noiseinfo = d.info.perturbationProperties;
     end
+else
+    dat.info.LaserTrackerVersion = '03.02'; %hack
+    noiseinfo = '';
 end
 % dat.info.name = fileName;
 dat.info.loadATmVersion = VERSION;
@@ -128,7 +132,7 @@ if(isfield(d,'posErrorActiveSecUsecXYZ') & (~flags.concise)) %if we have ActiveP
     d.posErrorActiveSecUsecXYZ = [];
 end
 
-if(isfield(d,'JacDataSecUsecQPDsStagesensors')) %if we have ActivePositionErrors computed 
+if(isfield(d,'JacDataSecUsecQPDsStagesensors')) 
     if(flags.remtoff)        
         dat.JacData.t = removeToffset([d.JacDataSecUsecQPDsStagesensors(:,1),d.JacDataSecUsecQPDsStagesensors(:,2)], dat.info.Toffset);
     else

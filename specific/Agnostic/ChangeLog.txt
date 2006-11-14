@@ -1,3 +1,6 @@
+2006-11-13  Kalpit Desai	<kvdesai@cs.unc.edu>
+	* atcore.m: Added computation of "leakage factor", a number showing what percent of perturbations leak into the measurements.
+	* load_agnostic_tracking.m: Minor comment fixes.
 2006-07-31  Kalpit Desai	<kvdesai@cs.unc.edu>
 	* atcore.m: version 1.6. 
 	- Now applies the low pass filter (when selected) to stage reports for all zones (fit, test, quiet).
