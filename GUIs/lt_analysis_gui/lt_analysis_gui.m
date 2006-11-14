@@ -1680,14 +1680,17 @@ global g
 handles = varargin{1};
 get(handles.menu_signal,'String');
 dispname = ans{get(handles.menu_signal,'val')};
-if nargin < 2    
-    sigid = get(handles.menu_signal,'UserData');
-    signame = handles.signames.intr{1,sigid};
-    
+sigid = get(handles.menu_signal,'UserData');
+signame = handles.signames.intr{1,sigid};
+if nargin < 2        
     fileid = get(handles.menu_files,'value');
     sigvals = g.data{1,fileid}.(signame);
 else
     sigvals = varargin{2};
+end
+% Subtract out the background drift, if we are told to do so
+if get(handles.check_subdrift,'Value')
+    sigvals(:,2:end) = subtract_background_drift(sigvals(:,1),sigvals(:,2:end),handles,signame);
 end
 % remove offset in position and in time
 sigvals = sigvals - repmat(sigvals(1,:),size(sigvals,1),1);

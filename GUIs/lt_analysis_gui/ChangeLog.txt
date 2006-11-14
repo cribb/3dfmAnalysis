@@ -1,4 +1,6 @@
 2006-11-13 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui: When told to, removes background drift before plotting 3D trace.
+2006-11-13 Kalpit Desai <kvdesai@email.unc.edu>
 	* fsanalysis_subgui.m: Old modifications. Seems this one also computes total response at 2nd and 4th harmonic.
 
 2006-09-29 Kalpit Desai <kvdesai@email.unc.edu>
