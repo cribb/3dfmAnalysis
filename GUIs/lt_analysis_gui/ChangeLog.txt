@@ -1,3 +1,6 @@
+2006-11-20 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui: Fixed the bug when UI occassionally forgot the default browsing path. Other minor changes.
+
 2006-11-13 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui: When told to, removes background drift before plotting 3D trace.
 2006-11-13 Kalpit Desai <kvdesai@email.unc.edu>

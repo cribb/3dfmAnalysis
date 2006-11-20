@@ -140,11 +140,12 @@ varargout{1} = handles.output;
 function button_add_Callback(hObject, eventdata, handles)
 global g % using global (as oppose to 'UserData') prevents creating multiple copies and conserves memory
 dbstop if error
+last_path = get(hObject,'Userdata');
 
 % A cheap hacky fix to the bug where ltaGUI sometimes forgets the last path
-if (get(hObject,'UserData') == 0),  set(hObject,'UserData',handles.default_path); end    
+if exist(last_path,'dir') == 0,  last_path = pwd; end
 
-[f, p] = uigetfiles('*.mat','Browse and select one or more files',get(hObject,'UserData'));
+[f, p] = uigetfiles('*.mat','Browse and select one or more files',last_path);
 %when user presses 'cancel' instead of selecting files: P = 0, and f = {}
 if isempty(f)
     prompt_user('Adding files to the database was cancelled by the user.',handles);
@@ -823,11 +824,12 @@ if get(handles.check_msd,'Value')
             if ~stack_mode
                 clf;
             end
-            title([handles.signames.disp{sigid}, '-MSD',colstr{cols(c)}]);
+            title([handles.signames.disp{sigid}, '-MSD: ',colstr{cols(c)}]);
             % xlabel('log_{10}(\tau)      [seconds]');
             % ylabel('log_{10}(MSD)       [micron^2]');
-            xlabel('{\tau}     [S]');
-            ylabel('MSD   [micron^2]');
+            xlabel('{\tau}     [s]');
+            ylabel('MSD   [{\mu}m^2]');
+            box on;
             hold on;
         end
     end
@@ -849,6 +851,7 @@ if get(handles.check_psd,'value')
         else 
             ylabel('log_{10} Volts^2/Hz');
         end
+        box on;
         hold on;
         % setup 'area under psd' figure if we should
         if get(handles.check_cumdisp,'value')
@@ -863,6 +866,7 @@ if get(handles.check_psd,'value')
             end                
             ylabel('Micron');
             xlabel('log_{10} Frequency [Hz]');
+            box on;
             hold on;
         end            
     end
@@ -971,11 +975,13 @@ for fi = 1:length(ids) %repeat for all files selected
                 figure(psdfignum + cols(c) -1);
                 legend(gca,alltags{ids});
                 %                 set(gca,'Xscale','Log','Yscale','Log');
+                pretty_plot;
                 hold off;
                 if get(handles.check_cumdisp,'value')
                     figure(dvsffignum + cols(c) -1);
                     legend(gca,alltags{ids});
                     %              set(gca,'Xscale','Log','Yscale','Linear');
+                    pretty_plot;
                     hold off;
                 end
             end   
