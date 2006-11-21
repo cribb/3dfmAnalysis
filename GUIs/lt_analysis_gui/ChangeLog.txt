@@ -1,3 +1,6 @@
+2006-11-21 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: Synching with the version on hydrogen-cs. Seems all are cosmetic changes making the plots of publication quality.
+
 2006-11-20 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui: Fixed the bug when UI occassionally forgot the default browsing path. Other minor changes.
 

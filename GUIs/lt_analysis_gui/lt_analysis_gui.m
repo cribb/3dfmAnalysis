@@ -829,7 +829,8 @@ if get(handles.check_msd,'Value')
             % ylabel('log_{10}(MSD)       [micron^2]');
             xlabel('{\tau}     [s]');
             ylabel('MSD   [{\mu}m^2]');
-            box on;
+            set(gca,'box','on');
+            pretty_plot;
             hold on;
         end
     end
@@ -851,7 +852,8 @@ if get(handles.check_psd,'value')
         else 
             ylabel('log_{10} Volts^2/Hz');
         end
-        box on;
+        set(gca,'box','on');
+        pretty_plot;
         hold on;
         % setup 'area under psd' figure if we should
         if get(handles.check_cumdisp,'value')
@@ -866,14 +868,16 @@ if get(handles.check_psd,'value')
             end                
             ylabel('Micron');
             xlabel('log_{10} Frequency [Hz]');
-            box on;
+            set(gca,'box','on');
+            pretty_plot;
             hold on;
         end            
     end
 end
 scolor = 'brkgmc';
 smarker = '.^+';
-% LOOP TO PROCESS EACH FILE ONE BY ONE (when not in stack_mode)
+% If not in stack_mode, loop to process each file one by one
+% If in stack_mode, then process the data within current box location
 for fi = 1:length(ids) %repeat for all files selected
     % grab the signal to be processed
     sig = g.data{ids(fi)}.(signame); 
@@ -1012,11 +1016,13 @@ for fi = 1:length(ids) %repeat for all files selected
                 hold off;
                 set(gcf,'Tag','boxstack');
                 set(gca,'Xscale','Log','Yscale','Log');
+                grid on; grid minor;
             elseif (fi == length(ids))% if this is last file, annotate
                 alltags = g.tag;
                 legend(gca,alltags{ids});
                 pretty_plot;
                 set(gca,'Xscale','Log','Yscale','Log');
+                grid on; grid minor;
                 hold off;
                 % Export the results to workspace so that advanced user can
                 % play around with it.
@@ -1441,11 +1447,11 @@ switch signame
         % now pick the only dimesions that are requested
         dims = get(handles.list_dims,'value');
         sxyzrr = handles.poscolstrs;
-        cxyzrr = [0 0 1;... %Blue
-            0 1 0; ...%Green
-            1 0 0; ...%Red
-            0.8 0.2 0.2; ... %Brown
-            0 0 0;]; %Black
+        cxyzrr = [0 0 1;... %Blue X
+            0 1 0; ...%Green Y
+            1 0 0; ...%Red Z
+            0 0.5 0.5; ... %for XY
+            0 0 0;]; %Black R
         % Compute radial vectors and append them
         temp = radialpos(temp,[],1);
         for c = 1:length(dims)
