@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_ltagui
 
-% Last Modified by GUIDE v2.5 15-Jun-2006 19:12:04
+% Last Modified by GUIDE v2.5 23-Nov-2006 16:13:50
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -312,7 +312,6 @@ global g
 % Hints: contents = get(hObject,'String') returns menu_files contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_files
 updatesignalmenu(handles);
-% updatemainfig(handles);
 
 % --- Executes on button press in button_tag.
 function button_tag_Callback(hObject, eventdata, handles)
@@ -433,7 +432,6 @@ set(handles.check_subdrift,'Enable','On');
 %-------------------------------------------------------------------------
 % --- Executes on button press in check_subdrift.
 function check_subdrift_Callback(hObject, eventdata, handles)
-% updatemainfig(handles);
 
 %-------------------------------------------------------------------------
 % --- Executes on button press in check_psd.
@@ -448,76 +446,49 @@ if get(hObject,'Value')
     set(handles.check_psd,'Value',1);
 end
 %-------------------------------------------------------------------------
-% --- Executes on button press in radio_drawbox.
-function radio_drawbox_Callback(hObject, eventdata, handles)
-manageboxradiogroup(handles,1,get(hObject,'value'));
-%-------------------------------------------------------------------------
-% --- Executes on button press in radio_dragbox.
-function radio_dragbox_Callback(hObject, eventdata, handles)
-manageboxradiogroup(handles,2,get(hObject,'value'));
-%--------------------DELETED THIS RADIO ON JUNE 08, 2006------------------
-% --- Executes on button press in radio_nothing.
-function radio_nothing_Callback(hObject, eventdata, handles)
-manageboxradiogroup(handles,3,get(hObject,'value'));
-
-%-----------------------------------------------------------------------
-function manageboxradiogroup(handles,radind,radstat)
-hmf = get(handles.radio_drawbox,'UserData');
+% --- Executes on button press in button_drawbox. Enables user to draw a
+% box on the main figure.
+% 1. Make sure that the main figure exists. Replot if it doesn't.
+% 2. Delete old box if there is one
+% 3. Switch figure-button-down function to DrawNewBoxFcn.
+% Called by: Only through GUI when user presses the button "Draw New Box"
+% Calls: updatemainfig
+function button_drawbox_Callback(hObject, eventdata, handles)
+dbstop if error
+hmf = get(handles.button_drawbox,'UserData');
 if isempty(hmf) | hmf == 0
     sigid = get(handles.menu_signal,'UserData');
     hmf = handles.mainfigids(sigid);
-    set(handles.radio_drawbox,'UserData',hmf);
+    set(handles.button_drawbox,'UserData',hmf);
 end
-if ~ishandle(hmf) % If user wants to do anything with box, figure must exist
+if ~ishandle(hmf) % If user wants to draw a box, the figure must exist
     updatemainfig(handles,'new');
 end
-hma = findobj(hmf,'Type','Axes','Tag','');
-% some constants
-hrad(1) = handles.radio_drawbox;
-hrad(2) = handles.radio_dragbox;
-% hrad(3) = handles.radio_nothing;
+hma = findobj(hmf,'Type','Axes','Tag',''); %legend is also an axis
 
-for c = 1:2 % reset all radios first
-    set(hrad(c),'Value',0);
-end
-if radstat == 0
-    set(hrad(1), 'Value', 1);
-    set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});
-else
-    switch radind
-        case 1                               
-            % delete the old box
-            delete(findobj(hma,'Tag','Box'));
-            set(hrad(1), 'Value', 1);
-            set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles}); 
-        case 2
-            if isempty(findobj(hma,'Tag','Box'))
-                errordlg('First draw a box to enable this mode.','Alert');                
-                set(hrad(1), 'Value', 1);
-                set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});
-                return
-            else                
-                set(hrad(2), 'Value', 1);
-                set(hma,'ButtonDownFcn',{@DragBoxFcn,handles});
-            end
-        case 3 %DELETED THIS RADIO ON JUNE 08, 2006
-            set(hrad(3), 'Value', 1);
-            set(hma,'ButtonDownFcn',{@DoNothingFcn,handles});
-        otherwise
-            prompt_user('Error:Unrecognized radio index',handles);
-    end
-end
+% delete the old box
+delete(findobj(hma,'Tag','Box'));
+% set the Button-down function to "Draw New Box"
+set(hma,'ButtonDownFcn',{@DrawNewBoxFcn,handles});
+dbclear if error
+
 %-------------------------------------------------------------------------
 function DrawNewBoxFcn(hcaller,eventdata,handles)
-% ----Executes when mouse is pressed inside the main axes and the box radio 
-% is set to 'Draw New Box'. Because this function is called by the figure,
-% we are sure that gcf gives the handle of the main figure and gca gives 
-% handle of the axis of the main figure
-dbstop if error
+% ----Executes when mouse is pressed inside the main axes after pressing
+% "Draw New Box" button. Draws a box around the X limits covered by the 
+% rectangle that the user stretches.
+% 1. Record the button-press location
+% 2. Follow the cursor until button is released, and acknowledge that
+% the program is follwing by drawing a temporary box.
+% 3. Record the button-release location
+% 4. Compute the coordinates of the box and tell 'updatebox' to draw it
+% 5. Set the "button-down" function to "drag the existing box"
+% Called by: Only when user clicks within axis while in "Draw New box" mode.
+% Calls: updatebox
 
-% NO NEED hmf = get(handles.radio_drawbox,'UserData');   
-% % find the handle of the axes of the main figure
-% hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend'
+% Because this function is called by the main figure,
+% we are sure that gcf gives the handle of the main figure and gca gives 
+% handle of the axis of the main figure.
 hma = gca;
 
 point1 = get(hma,'CurrentPoint');    % button down detected
@@ -534,35 +505,34 @@ b.dbox = [x1, ylims(1), width, ylims(2)-ylims(1)];
 updatebox(handles,hma,0,b);
 
 %Now switch to 'drag box' mode automatically.
-manageboxradiogroup(handles,2,1)
-dbclear if error
+set(hma,'ButtonDownFcn',{@DragBoxFcn,handles});
 %-------------------------------------------------------------------------
+function DragBoxFcn(hcaller,eventdata,handles)
 % Executes when mouse is pressed inside the main axes and the box mode
-% is set to 'Drag Box'. Because this function is called by the figure,
+% is set to 'Drag Box'.
+% Called by: Only when user clicks within axis while in "Drag box" mode.
+% Calls: updatebox, prompt_user
+
+% Because this function is called by the figure itself,
 % we are sure that gcf gives the handle of the main figure and gca gives 
 % handle of the axis of the main figure
-function DragBoxFcn(hcaller,eventdata,handles)
-dbstop if error
 hmf = gcf; hma = gca;
-% NO NEED hmf = get(handles.radio_drawbox,'UserData');
-% % find the handle of the axes of the main figure
-% hma = findobj(hmf,'Type','axes','Tag','');%legend is the other axes with tag 'legend'
 hbox = findobj(hma,'Tag','Box');
-if isempty(hbox)
-    errordlg('Box not found, redraw it. Switching to ''draw new box'' mode...');
-    %Now switch to 'draw new box' mode automatically.
-    manageboxradiogroup(handles,1,1);
+
+if isempty(hbox) | isequal(get(hbox,'Visible'),'Off')
+    % Do nothing if the box doesn't exist or if it is hidden
     return;
 end
 b = get(hbox,'UserData'); %b must not be empty, if everything is working.
-% The box is drawn in figure units which are usually 'pixels' but the 
+
+% The box is drawn in figure units, which are 'pixels' by default but the 
 % axis units are 'normalized' by default. Moreover, we have the coordinates
 % of the box in data units, and to be able to show the shadow while
 % dragging, we need to convert them into the figure units i.e. 'pixels'.
 % So, idea is to first set the axis units to same as figure units, then
 % take two points: bottom-left corner and top-righ corner. 
-% Asking 'position' property gives info about coordinates of
-% this points in axes units (and thus figure units), and asking 'Xlim' and 'Ylim'
+% Asking 'position' property gives info about coordinates of this points in 
+% axes units (and thus figure units), and asking 'Xlim' and 'Ylim'
 % property gives info about coordinates of this points in data units.
 % Figure out the transfer function from data to figure units and apply it
 % to the box.
@@ -574,18 +544,22 @@ posf = get(hma,'Position'); % axis position in figure units
 set(hma,'Units',axunits); %restore original units of axes
 
 xlims = get(hma,'Xlim'); ylims = get(hma,'Ylim');
-% Now change the ylimits of box so that shadow is always lock-lock on Yaxis
+% Now change the ylimits of the box so that shadow is always lock-lock on Yaxis
 b.dbox(2) = ylims(1); b.dbox(4) = ylims(2)-ylims(1);
-% Now check if the old box is outside current X axis limits, in which case put it
-% inside in the center of the axis but do not do any boxresults calculations
+% Now check if the old box is outside current X axis limits, in which case
+% put the left edge on the center of the X axis.
 if b.xlims < xlims(1) | b.xlims > xlims(2) % both limits of the box should be out of view
-    prompt_user('Warning: Old box was outside view, resetting the box. Happens after zoom.',handles);
+    prompt_user('Warning: Old box was outside view, resetting the box. Happens after zoom/pan.',handles);
     b.dbox(1) = mean(xlims); 
 end
-if b.dbox(3) > xlims(2) - xlims(1) % too wide?
-    prompt_user('Warning: Old box was too wide, resetting the width. Happens after zoom.',handles);
-    b.dbox(3) = 0.25*range(xlims);
-end
+
+% It is important that analysis be carried over same width. SO do not 
+% automatically change the width. User will know if the box is too wide and
+% then he should opt to redraw one if he wants.
+% if b.dbox(3) > xlims(2) - xlims(1) % too wide?
+%     prompt_user('Warning: Old box was too wide, resetting the width. Happens after zoom.',handles);
+%     b.dbox(3) = 0.25*range(xlims);
+% end
 
 % Now figure out the transfer function from data units to figure units
 scale.x = posf(3)/(xlims(2) - xlims(1));
@@ -603,37 +577,73 @@ point1 = point1(1);              % extract x
 point2 = point2(1);       
 displace = point2-point1;
 updatebox(handles,hma,displace,b);
-% keyboard
-dbclear if error
+
 %-------------------------------------------------------------------------
-% ----Executes when mouse is pressed inside the main axes and the box mode
-% is set to 'Do Nothing'
-function DoNothingFcn(hcaller,eventdata,handles)
-return
-%------------------------
+% --- Executes on button press in toggle_hidebox.
+function toggle_hidebox_Callback(hObject, eventdata, handles)
+curval = get(hObject,'value');
+
+hmf = get(handles.button_drawbox,'UserData');
+if isempty(hmf) | ~ishandle(hmf)
+    set(hObject,'Value', get(hObject,'Min'));
+    return; 
+end
+
+hma = findobj(hmf,'Type','Axes','Tag','');
+hbox = findobj(hma,'Tag','Box');
+if isempty(hbox) | hbox == 0
+    set(hObject,'Value', get(hObject,'Min'));
+    return; 
+end
+
+if curval == get(hObject,'Max') %Pressed, so hide mode
+    set(hbox,'Visible','Off');
+    set(hObject,'String','Show');
+    % delete old high-res lines if any are present
+    delete(findobj(hmf,'Type','Line','Tag','hres'));
+elseif curval == get(hObject,'Min') %Released, so show mode
+    set(hbox,'Visible','On');
+    set(hObject,'String','Hide');      
+    updatehighrespoints(handles,hbox);
+end
+    
+
+%-------------------------------------------------------------------------
 %---This routine updates the existing box or draws a new box.
 function updatebox(handles,hma,displace,b);
+% Handles updates of the box and its dependents when box is drawn, dragged
+% etc.
+% Called by: DrawNewBoxFcn, DragBoxFcn, updatemainfig,
+%        Main figure is guranteed to be in focus when update box is called
+% Calls: amibusy, updateboxresults, plot3dfigure, updatehighrespoints
+% 
+% 
+dbstop if error
 amibusy(1,handles);
 hbox = findobj(hma,'Tag','Box');
-% look for the box-parameters in the UserData of the box itself, ONLY IF
-% box-parameters are not supplied exlicitely
+
+% IF the box exists but is invisible, then there is nothing to do.
+if ~isempty(hbox) & isequal(get(hbox,'Visible'),'Off'), return; end
+
+% If box-parameters are not supplied exlicitely, look for the
+% box-parameters in the UserData of the box itself. Naturally,
+% box-paramters must be supplied when told to draw a new box.
 if (nargin < 4 | isempty(b)) 
-    if isempty(hbox)
-        b = [];
-    else
-        b = get(hbox,'UserData');
-    end
+    b = get(hbox,'UserData');
 end
 if isempty(b) 
-    prompt_user('Error in updatebox. Box params can not be found',handles);
+    prompt_user('WARNING: Box parameters neither supplied nor found. ',handles);
     return;
 end
+
 if (nargin < 3 | isempty(displace))
-    displace = 0;
+    displace = 0; %No displacement by default
 end
+
 delete(hbox); %delete old box
 ylims = get(hma,'Ylim');
 b.dbox(1) = b.dbox(1) + displace;
+b.dbox(3) = b.dbox(3); %Width doesn't change
 b.dbox([2,4]) = [ylims(1) ,ylims(2) - ylims(1)];
 b.xlims = [b.dbox(1), b.dbox(1) + b.dbox(3)];
 hold on;
@@ -641,6 +651,10 @@ hbox = rectangle('Position',b.dbox);
 set(hbox,'EdgeColor','r','Tag','Box','Linewidth',2,'LineStyle','-.');
 hold off;
 set(hbox,'UserData',b);
+
+%Update the high-resolution segments' location to be within the new
+%location of the box. 
+updatehighrespoints(handles,hbox);
 
 % Update the window showing basic statistics for the data within the box 
 if get(handles.check_boxstat,'value')
@@ -652,20 +666,54 @@ else
 end
 
 % Update 3D plot to show what falls inside the selected box
-if isequal(lower(get(handles.check_3d,'Enable')),'on') & (get(handles.check_3d,'Value') == 1)
+if isequal(lower(get(handles.check_3d,'Enable')),'on') & ...
+        (get(handles.check_3d,'Value') == 1)
     plot3dfigure(handles);
 end
 
 amibusy(0,handles);
-% --- Executes on selection change in menu_dispres.
-function menu_dispres_Callback(hObject, eventdata, handles)
-val = get(hObject,'Value');
-if isequal(val,get(hObject,'UserData'))
-    return; % do nothing, if this was an accidental click selecting same things
-end
-set(hObject,'UserData',val);%remember the last selection
-% updatemainfig(handles,'dispres');
+dbclear if error
+%-------------------------------------------------------------------------
+% --- Executes on selection change in check_highres. OBSOLETE
+% THIS MENU NO LONGER EXISTS IN THE GUI SINCE NOV 23, 2006
+function check_highres_Callback(hObject, eventdata, handles)
+hmf = get(handles.button_drawbox,'UserData');
+if isempty(hmf) | ~ishandle(hmf), return; end
 
+hma = findobj(hmf,'Type','Axes','Tag','');
+hbox = findobj(hma,'Tag','Box');
+
+if isempty(hbox) | hbox == 0, return; end
+
+updatehighrespoints(handles,hbox); 
+%-------------------------------------------------------------------------
+function updatehighrespoints(handles,hbox)
+global g mainf
+
+dbstop if error
+% First check that the main figure is plotted. If not then return;
+hmf = get(handles.button_drawbox,'Userdata');
+if isempty(hmf) | ~ishandle(hmf), return; end
+
+b = get(hbox,'UserData');
+
+% delete old high-res lines if any are present
+delete(findobj(hmf,'Type','Line','Tag','hres'));
+
+
+if get(handles.check_highres,'Value')
+    inbox = find(mainf.tval(:,1) < b.xlims(2) & mainf.tval(:,1) > b.xlims(1));
+
+    hma = findobj(hmf,'Type','Axes','Tag','');
+    set(hma,'colorOrder',mainf.annots.colorOrder,'NextPlot','replacechildren');
+    figure(hmf); hold on;
+    % set colororder so that each dimension has same color each time it is plotted.
+    % Not settig 'nextplot' replaces the parent ie axes itself.
+    plot(mainf.tval(inbox,1),mainf.tval(inbox,2:end),'.','Tag','hres'); % all lines are tagged as 'high res' lines
+    hold off
+end
+
+dbclear if error;
 
 % --- Executes on selection change in menu_signal.
 function menu_signal_Callback(hObject, eventdata, handles)
@@ -679,7 +727,6 @@ sigid = find(TF == 1);
 set(hObject,'UserData',sigid);%remember the last selection
 checkdimsvalidity(handles);
 checkdriftvalidity(handles);
-% updatemainfig(handles,'quant');
 
 % --- Executes on selection change in list_dims.
 function list_dims_Callback(hObject, eventdata, handles)
@@ -688,7 +735,6 @@ if isequal(val,get(hObject,'UserData'))
     return; % do nothing, if this was an accidental click selecting same things
 end
 set(hObject,'UserData',val);%remember the last selection
-% % updatemainfig(handles,'dims');
 
 % --- Executes on button press in button_addfsinfo.
 function button_addfsinfo_Callback(hObject, eventdata, handles)
@@ -1177,7 +1223,11 @@ global g
 keyboard
 % --- Executes on button press in button_export.
 function button_export_Callback(hObject, eventdata, handles)
-
+global g
+fid = get(handles.menu_files,'value');
+data = g.data{1,fid};
+assignin('base','exported',data);
+prompt_user('Data for active file was exported to base workspace',handles);
 % --- Executes on button press in button_save.
 function button_save_Callback(hObject, eventdata, handles)
 global g
@@ -1210,7 +1260,7 @@ amibusy(0,handles);
 function updateboxresults(handles,hbox)
 global g
 b = get(hbox,'UserData'); %has the xy location of box
-% hmain  = get(handles.radio_drawbox,'UserData');% current 'main' figure id
+% hmain  = get(handles.button_drawbox,'UserData');% current 'main' figure id
 fileid = get(handles.menu_files,'Value');
 sigid = get(handles.menu_signal,'UserData');% internal ID of currently selected signal.
 signame = handles.signames.intr{sigid};
@@ -1319,12 +1369,12 @@ drawnow;
 function str = getmainfigname(handles);
 sigid = get(handles.menu_signal,'Value');
 sigstr = get(handles.menu_signal,'String');
-figid = get(handles.radio_drawbox,'UserData');
+figid = get(handles.button_drawbox,'UserData');
 str = [num2str(figid),':',sigstr{sigid}];
 %-----------------------------------------------------------------------
 % --- Executes on button press in check_overlaymag.
 function check_overlaymag_Callback(hObject, eventdata, handles)
-overlaymag(handles);
+overlaymag(handles,[],1);
 
 %-----------------------------------------------------------------------
 % --- Executes on button press in button_sound.
@@ -1417,23 +1467,24 @@ dbclear if error
  
 %-----------------------------------------------------------------------
 % make the matrices of signal values to be displayed and related annotations
-function [sigout, annots] = filldispsig(sigin,res,signame,handles)
+function [sigout, annots] = filldispsig(sigin,signame,handles)
 dbstop if error
-% first make the time abscissa with correct resolution
-
-if res == 0;
-    temp(:,1) = sigin(:,1);
-else
-    temp(:,1) = [sigin(1,1):res:sigin(end,1)]';
-end
-
-for k = 2:size(sigin,2)
-    if res == 0
-        temp(:,k) = sigin(:,k);
-    else
-        temp(:,k) = interp1(sigin(:,1),sigin(:,k),temp(:,1),'nearest');
-    end    
-end
+% % % first make the time abscissa with correct resolution
+% % 
+% % if res == 0;
+% %     temp(:,1) = sigin(:,1);
+% % else
+% %     temp(:,1) = [sigin(1,1):res:sigin(end,1)]';
+% % end
+% % 
+% % for k = 2:size(sigin,2)
+% %     if res == 0
+% %         temp(:,k) = sigin(:,k);
+% %     else
+% %         temp(:,k) = interp1(sigin(:,1),sigin(:,k),temp(:,1),'nearest');
+% %     end    
+% % end
+temp = sigin;
 % Remove offset from time
 temp(:,1) = temp(:,1) - temp(1,1);
 % Subtract out the background drift, if we are told to do so
@@ -1519,7 +1570,7 @@ end
 
 %-----------------------------------------------------------------------
 function updatemainfig(handles,modestr)
-global g
+global g mainf
 amibusy(1,handles);
 dbstop if error
 if ~exist('g') | isempty(g.data)
@@ -1537,7 +1588,7 @@ sigid = get(handles.menu_signal,'UserData');
 % sigid = find(strcmp(handles.signames.disp, dispname) == 1);
 signame = handles.signames.intr{1,sigid};
 figid = handles.mainfigids(sigid); %handle of the main figure
-set(handles.radio_drawbox,'UserData',figid);% share with others
+set(handles.button_drawbox,'UserData',figid);% share with others
 
 if ishandle(figid) % if the figure is open,   
     % delete old data lines
@@ -1547,16 +1598,20 @@ end
 
 fileid = get(handles.menu_files,'value');
 sigvals = g.data{1,fileid}.(signame);
-switch get(handles.menu_dispres,'value')
-    case 1 % full or raw resolution
-        [dispmat annots] = filldispsig(sigvals,0,signame,handles);
-    case 2 % 1 ms resolution       
-        [dispmat annots] = filldispsig(sigvals,1e-3,signame,handles);        
-    case 3 % 10 ms resolution
-        [dispmat annots] = filldispsig(sigvals,1e-2,signame,handles);
-    otherwise
-        prompt_user('Error: Unrecognized time resolution',handles);
+[mainf.tval, mainf.annots] = filldispsig(sigvals,signame,handles);
+% mainf stores the displayed data (full res) and annotations (axis labels,
+% line colors, legend entries etc). mainf is shared with
+% updatehighrespoints, so that the high-res segments overlay perfectly on the
+% low-res lines.
+
+
+% Now downsample the data to 100 Hz, so that rendering is fast. Note that
+% this is done only for display.
+tdown = [mainf.tval(1,1):0.01:mainf.tval(end,1)];
+for c = 2:size(mainf.tval,2)
+    vdown(:,c-1) = interp1(mainf.tval(:,1), mainf.tval(:,c), tdown, 'nearest');
 end
+
 %now ready to plot the data
  figure(figid); hold on;
 % I prefer not to use gca and gcf, so that user accidentally clicking
@@ -1568,31 +1623,27 @@ if isempty(hma) % if this is the very first time figure is plotted then axes won
     hma = findobj(figid,'Type','Axes','Tag','');
     hold off
 end
-b = []; hbox = findobj(hma,'Tag','Box'); replot_box = 0;
-if ~isempty(hbox)
-    b = get(hbox,'UserData');
-    replot_box = 1;
+
+% Now set a flag to remember if we are supposed to replot the box or not
+replot_box = ~isempty(findobj(hma,'Tag','Box')); %If box exists, replot
+if replot_box % if going to replot the box, must need data
+    b = get(findobj(hma,'Tag','Box'),'Userdata');
 end
-set(hma,'colorOrder',annots.colorOrder,'NextPlot','replacechildren');
+
+set(hma,'colorOrder',mainf.annots.colorOrder,'NextPlot','replacechildren');
 % set colororder so that each dimension has same color each time it is plotted.
 % Not settig 'nextplot' replaces the parent ie axes itself.
-plot(dispmat(:,1),dispmat(:,2:end),'Tag','data'); % all lines will be tagged as 'data' lines
-title(annots.t);
-xlabel(annots.x);
-ylabel(annots.y);
+plot(tdown,vdown,'Tag','data'); % all lines will be tagged as 'data' lines
+title(mainf.annots.t);
+xlabel(mainf.annots.x);
+ylabel(mainf.annots.y);
 set(figid,'name',getmainfigname(handles),'NumberTitle','Off');
-legend(hma,annots.legstr,0);
-
-% Now remove the old box and redraw it according to new axis limits
+legend(hma,mainf.annots.legstr,0);
 axis(hma,'tight'); set(hma,'Box','On');
+% Now remove the old box and redraw it according to new axis limits
 if replot_box
     updatebox(handles,hma,0,b);
-else
-    % If not reploting the box, it means that box didn't exist. 
-    % If box didn't exist then automatically switch to 'Draw New Box' mode.
-    manageboxradiogroup(handles,1,1);
 end
-    
 
 % Now update the overlaid magnets/channel 8 trace if we are told to
 if isequal(lower(get(handles.check_overlaymag,'Enable')),'on')
@@ -1666,7 +1717,11 @@ end
 % Find the handle to the old magnet trace and delete it
 oldmag = findobj(figid,'Type','Line','Tag','Mag');
 delete(oldmag);
-axis tight; % Resize axes after deleting old magnet trace
+hma = findobj(figid,'Type','Axes','Tag','');
+
+% WHY RESIZE AXIS?
+% axis tight; % Resize axes after deleting old magnet trace
+
 % replot the magnets only if the box is checked
 if get(handles.check_overlaymag,'value')
     fileid = get(handles.menu_files,'value');
@@ -1674,7 +1729,7 @@ if get(handles.check_overlaymag,'value')
     overt = mags(1:100:end,1);    
     if (remtoff) overt = overt - overt(1); end
     % Now adjust the range so that mags are visible in the current axis
-    hma = findobj(figid,'Type','Axes','Tag','');
+    
     ylims = get(hma,'Ylim');   
     overy = mags(1:100:end,2)*0.25*range(ylims)/range(mags(:,2));
     % Now shift the magnet trace so that LOW state is always at bottom of
@@ -1713,11 +1768,11 @@ for c = 1:3
 end
 
 % get the id of the main figure
-hmf = get(handles.radio_drawbox,'UserData');
+hmf = get(handles.button_drawbox,'UserData');
 if isempty(hmf) | hmf == 0
     sigid = get(handles.menu_signal,'UserData');
     hmf = handles.mainfigids(sigid);
-    set(handles.radio_drawbox,'UserData',hmf);
+    set(handles.button_drawbox,'UserData',hmf);
 end
 
 inbox = []; prebox = []; postbox = [];
@@ -1784,7 +1839,6 @@ end
 % 2. Shares the internal index (sigid) for the currently selected signal
 % 3. Enables/disables 'overlay magnets', 'sbutract drift', '3d' and 
 %                                           'dimension(s)' options
-% CALLED OFF 4. Updates the main figure
 function updatesignalmenu(handles)
 global g
 if ~exist('g') | isempty(g.data) %database is empty     
@@ -1878,18 +1932,12 @@ setappdata(handles.ltaGUI,'ltahandles',handles);
 fsanalysis_subgui;
 
 % --- Executes during object creation, after setting all properties.
-function menu_dispres_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to menu_dispres (see GCBO)
+function check_highres_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to check_highres (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-set(hObject,'value',3); % Set to 10 ms resolution by default
+
+set(hObject,'value',0); % Set to 10 ms resolution by default
 %%%********************************************************************
 %%%**********     ALL BELOW IS NEEDED BUT NOT-USED     ****************
 %%%********************************************************************
@@ -2000,5 +2048,27 @@ function check_boxstat_Callback(hObject, eventdata, handles)
 %%%#############    GUIDE WILL ADD NEW CALLBACKS BELOW      ###########
 %%%####################################################################
 
+
+
+function edit_boxwidth_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_boxwidth (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_boxwidth as text
+%        str2double(get(hObject,'String')) returns contents of edit_boxwidth as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_boxwidth_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_boxwidth (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 

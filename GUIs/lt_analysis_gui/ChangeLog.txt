@@ -1,3 +1,9 @@
+2006-11-23 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_analysis_gui.m: 
+	- Allows to look at the data inside the box in full resolution. Useful to detect steps.
+	- Added button to hide/redisplay the box without deleting it.
+	- Clearer interface to box controls and better layout.
+
 2006-11-21 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: Synching with the version on hydrogen-cs. Seems all are cosmetic changes making the plots of publication quality.
 
