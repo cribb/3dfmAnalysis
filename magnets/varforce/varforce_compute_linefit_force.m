@@ -1,0 +1,189 @@
+function out = varforce_compute_linefit_force(varargin)
+% 3DFM function  
+% Magnetics
+% last modified 08/01/06 (jcribb)
+%  
+% Compute the force experienced by each bead by line-fitting displacements to
+% compute velocities for many pulses in many sequences.
+%  
+%  [out] = varforce_compute_linefit_force(varargin)
+%                                       
+%  usage: 
+%  
+%  [out] = varforce_compute_linefit_force(tablein, params)
+%  [out] = varforce_compute_linefit_force(tablein, params, error_tol)
+%
+%  where tablein is the varforce data matrix (slightly modified video matrix)
+%        params is the varforce parameters structure
+%        error_tol is a bypass error tolerance value (useful for relaxing error
+%                  tolerance constraints when looking at drift or VERY small forces)
+% 
+
+switch nargin
+    case 2
+        tablein = varargin{1};
+        params  = varargin{2};
+        error_tol = params.error_tol;
+    case 3
+        tablein = varargin{1};
+        params  = varargin{2};
+        error_tol = varargin{3};
+        logentry(['Bypassing requested error tolerance and using ' num2str(error_tol) '.']);
+    otherwise
+        error('Invalid arguments used to call varforce_compute_linefit_force.');
+end
+
+    % set up text-box for 'remaining time' display
+    [timefig,timetext] = init_timerfig;
+   
+    varforce_constants;
+
+    voltages    = params.voltages;
+    viscosity   = params.calibrator_viscosity;
+    bead_radius = params.bead_radius * 1e-6;
+    calib_um    = params.calibum;
+    poleloc     = params.poleloc;
+	trackers    = unique(tablein(:,ID))';
+    
+	for myTracker = 1:length(trackers)
+        tic;
+        
+        for mySeq = unique(tablein(:,SEQ))' 
+            
+            for myVoltage = unique(tablein(:,PULSE))'
+
+                if ~exist('count')
+                    count = 1;
+                end
+                
+                idx = find( tablein(:,ID) == trackers(myTracker) ...
+                          & tablein(:,SEQ) == mySeq ...
+                          & tablein(:,PULSE) == myVoltage);
+
+                if length(idx) > 1
+                    
+                    t = tablein(idx,TIME);
+                    x = tablein(idx,X);
+                    y = tablein(idx,Y);
+
+                    try
+                        warning off;
+                            vxfit = flipud(robustfit(t, x));
+                            vyfit = flipud(robustfit(t, y));
+                        warning on;
+                    catch
+                            vxfit = polyfit(t, x, 1);
+                            vyfit = polyfit(t, y, 1);
+                            logentry('Not enough data for robust fit.  Using regular polyfit instead.');
+                    end
+
+                    % uncertainty in velocity determination
+                    xerr = uncertainty_in_linefit(t, x, vxfit);
+                    yerr = uncertainty_in_linefit(t, y, vyfit);                    
+                    
+                    vxerr = xerr(1);
+                    vyerr = yerr(1);
+                    
+                    % scalar for converting velocity to force
+                    drag_coeff = 6*pi * viscosity * bead_radius;                    
+
+                    % rms of the residuals
+                    xres = rms(x - polyval(vxfit, t));
+                    yres = rms(y - polyval(vyfit, t));
+                    xyres = [xres yres];
+
+                    xy = [mean(x) mean(y)];                    
+
+                    % convert everything to force space
+                    Fxfit  = drag_coeff * vxfit;
+                    Fyfit  = drag_coeff * vyfit;
+                    Fxyerr = drag_coeff * [vxerr vyerr];                                                          
+                    Fxy    = drag_coeff * [vxfit(1) vyfit(1)];                    
+                    
+                    % compute error percent which is used to threshold
+                    % acceptable data via the error_tol value.
+                    if ( vxfit(1) ~= 0 )
+                        xerrpct = abs(vxerr / vxfit(1));
+                    else
+                        xerrpct = NaN;
+                        logentry('x-slope is zero.  Reporting NaN for Error');
+                    end
+                    
+                    if ( vyfit(1) ~= 0 )
+                        yerrpct = abs(vyerr / vyfit(1));
+                    else
+                        yerrpct = NaN;
+                        logentry('y-slope is zero.  Reporting NaN for Error');
+                    end
+                    
+                else
+
+                    vxfit    = NaN; vyfit    = NaN; 
+                    xres     = NaN; yres     = NaN; 
+                    xerrpct  = NaN; yerrpct  = NaN;
+                    newx     = NaN; newy     = NaN; 
+                    Fx       = NaN; Fy       = NaN;
+                    
+                end
+                
+                if ~isnan(xerrpct) & ~isnan(yerrpct)
+                    
+                    if xerrpct < error_tol & yerrpct < error_tol
+                        
+                        out.trackerid(count,1)   = myTracker;
+                        out.seqid(count,1)       = mySeq;
+                        out.volts(count,1)       = myVoltage;
+                        out.xy(count,:)          = xy;
+                        out.xyslope(count,:)     = [vxfit(1) vyfit(1)];
+                        out.xyintercept(count,:) = [vxfit(2) vyfit(2)];
+                        out.xyres(count,:)       = xyres;
+                        out.Fxy(count,:)         = Fxy;
+                        out.Fxyerr(count,:)      = Fxyerr;
+
+                        count = count + 1;
+                    end
+                end
+
+            end
+        end                 
+                
+        % handle timer
+        itertime = toc;
+        if ~exist('totaltime')
+            totaltime = itertime;
+        else
+            totaltime = totaltime + itertime;
+        end    
+        meantime = totaltime / myTracker;
+        timeleft = ( length(trackers) - myTracker) * meantime;
+        outs = [num2str(timeleft, '%5.0f') ' sec.'];
+        set(timetext, 'String', outs);
+        drawnow;
+    end
+    
+    close(timefig);
+    
+    % comment on why we have to do this
+    if count <= 1 
+        error('Analysis Error: No points within error tolerance for linefit estimates.');
+        return;
+    end
+
+%%%%
+%% extraneous functions
+%%%%
+
+%% Prints out a log message complete with timestamp.
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'varforce_compute_linefit_force: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+    return    

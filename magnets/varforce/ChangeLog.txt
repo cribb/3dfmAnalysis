@@ -1,3 +1,39 @@
+2006-12-11  Jeremy Cribb <jcribb@email.unc.edu>
+	- varforce_drive_GUI: added.  GUI for running driving code.
+
+	- varforce_drive: added.  driving code for varforce protocol.
+
+	- varforce_constants: added.  script that creates column constants for varforce calibration data matrix.
+
+	- varforce_run: added.  provides a sample function for running varforce calibration from the command line.  also useful in testing varforce code and developing additional analysis tools from the data.  very well commented to explain the protocol.  For now, the analysis GUI runs from this function.
+    
+	- varforce_init: added.  initializes and loads experimental parameters and video tracked data.  Requires user interaction to define breakpoint between two sequences as the temporal alignment between the driving computer and the video acquisition computer is not very good (needs to be <8ms for pulnix video).  Assigns pulse voltage and sequence ID for each tracker.
+
+	- varforce_remove_drift: added.  finds zero volt regions in each sequence, estimates drift, and subtracts it only from that sequence.  (uses remove_drift in 3dfmAnalysis) 
+    
+	- varforce_remove_buffer_points: added.  removes a given number of points that surround the shifts in voltage.  This should reduce the crosstalk between voltages as well as preferentially filter out any nonlinear shifts in the tracker position due to loose coils or other mechanical instability.
+    
+	- varforce_compute_inst_force: added.  compute force using instantaneous velocity method.  Searches for velocities at given voltages and generaes a forcemap for each.  Not completely finished.
+
+	- varforce_compute_linefit_force:  added.  computes force using matlab's "robust" linear fit method for each pulse in each sequence.  Points considered by robustfit to be outliers are disregsrded from by fitting routine and helps to reduce error in force detemrination.
+    
+	- varforce_handle_degauss: added.  finds zero volt regions in each sequence, estimates remanence force in pre-degauss regions via a linear fit to get the velocity.  Remanence is computed for each pre-degauss region in each sequence for each bead separately.  After the remanence is computed, the pre-degauss regions of the zero volt pulse are removed from the data matrix.  Presumably any drift remaining after degauss is due to sample drift and not due to remanent magnetization.
+    
+	- varforce_construct_spatial_map: added.  bins the data into pixels of selected size and calculates the force in each bin for each voltage in the experiment.  Computes error as well.
+
+	- varforce_compute_sat_data: added.  computes power law of log(distance) vs. log(force) for each voltage.  It uses these fits to place all data on one grid, allowing force from different voltages to be compared at the same distance. These data are later used to plot the saturation curve.
+
+	- plot_2d_spatial_calib: added.  For given data, plots the varforce calibration data as a 2d scalar fields with a hot colormap.  
+
+	- plot_force_power_law: added.  Plots log(distance) vs. log(force) along with power law fit for all voltages. These plots can add confidence to the saturation data produced by the power law.
+
+	- plot_sat_data: added.  For several position series, plots the data as force vs. current.  Useful for determining saturation currents for a dataset.
+
+	- plot_powerlaw_vs_current: added.  Plot the power law exponents versus current to learn more about the power laws that govern forces at given driving currents.
+    
+	- varforce_analysis_GUI: added.
+    using varforce_run as a template, or even as a called function, to generate a GUI for handling the customizable parameters in processing a varforce dataset.
+
 2006-08-08  Jeremy Cribb <jcribb@email.unc.edu>
 	* changelog.txt:  added this changelog for the variable force calibration protocol.
 	

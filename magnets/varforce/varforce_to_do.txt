@@ -1,0 +1,46 @@
+- propagate error from velocity estimates into the error determination of the powerlaw force vs. distance curve.  we use weighting to adjust for the values on the best fit line.  We should use these weights in estimating the error in the slope as well.
+
+- add second power law plot that shows the effect of pre-bead saturation (value of 2), post bead saturation (value of 1) and post pole tip satruation (value of 0).
+
+- rework analysis/plotting interface. design one on paper first.
+
+- move the for-loop in the powerlaw plot to the GUI and have the user decide which plot they wish to see via a slider that selects according to voltage tested.
+
+- finish spatial calibration procedure (if deemed necessary).
+
+- commit code.
+
+- ??? should we ??? add estimates of curvature in the line fits (via a 2nd order polynomial instead of a 1st order one).  This would allow us to monitor the tendency of the bead to accelerate as it comes in closer to the poletip.
+
+- (DONE) change polyfit3 to polyfitw
+
+- (DONE) add a plot function for looking at the powerlaw exponent value vs. input current.
+
+- (DONE) change the data structures from tabular format to organized structure for better navigation of output data.  This would require a substantial reworking of all functions starting from computing force data to plotting of that data.  Possible data structure can be found in varforce_design_notes.txt.
+
+- (DONE) rename varforcegui to varforce_drive_gui
+
+- (DONE) use .vfc extension as the calibration datafile.
+
+- (DONE) save the computation/calibration as a file.
+
+- (DONE) browsing of previously computed dataset 
+
+- (DONE) change .varforce extension to .vfd (VarForceDrive)
+
+- (DONE) apply error weights to fitting procedures to better fit the data without arbitrary tolerance levels.
+
+- (DONE) break apart "pole tip location" in varforce_analysis_gui into x and y boxes.  this will reduce user entry error in the [x y] format.
+
+- (DONE) put a default pole tip location of [0, 0] instead of [x, y].. [x,y] generates a Matlab error.
+
+- (DONE) rework commenting in the varforce_run file.
+
+- (DONE) Update documentation on all varforce functions.
+
+- (DONE) standardize error quantities and propage though data structure and add to plots (see below).
+
+- (DONE) add errorbars to most plots.  The data points that include error bars should include approximately 30 - 50% of the total population of points in the plot.  Some plots may require x as well as y error estimates.  It may be nice to select whether you want error bars or not, and define a percentage of points for which to apply errorbars.
+
+- (DONE) change all varforce files to vfd files.
+

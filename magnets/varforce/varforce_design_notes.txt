@@ -1,0 +1,161 @@
+Design notes for varforce calibration software
+
+
+=== Driving Code ===
+varforce_drive_GUI: implemented.
+    - add a button that shortcuts to the analysisGUI
+varforce_drive: implemented.
+    - better or more complete degauss handling.
+
+
+=== Processing Code ===
+- varforce_constants: implemented.
+    script that creates column constants for varforce calibration data matrix.
+
+- varforce_run: implemented.
+    provides a sample function for running varforce calibration from the command line.  also useful in testing varforce code and developing additional analysis tools from the data.  very well commented to explain the protocol.
+    
+- varforce_init: implemented.
+    initializes and loads experimental parameters and video tracked data.  Requires user interaction to define breakpoint between two sequences as the temporal alignment between the driving computer and the video acquisition computer is not very good (needs to be <8ms for pulnix video).  Assigns pulse voltage and sequence ID for each tracker.
+
+- varforce_remove_drift: implemented
+    finds zero volt regions in each sequence, estimates drift, and subtracts it only from that sequence.  (uses remove_drift in 3dfmAnalysis) 
+    
+- varforce_remove_buffer_points: implemented.
+    removes a given number of points that surround the shifts in voltage.  This should reduce the crosstalk between voltages as well as preferentially filter out any nonlinear shifts in the tracker position due to loose coils or other mechanical instability.
+    
+- varforce_select_only_cone_angle:  NOT implemented.
+    takes an input video tracked data set and rejects all points outside a angle specified as projected about the midline of the poletip and emanating from the defined monopole position.  This is currently not implemented because it is much easier to just manually delete the beads that escape this cone angle using evt_gui.
+
+- varforce_compute_inst_force: implemented.
+    compute force using instantaneous velocity method.
+
+- varforce_compute_linefit_force:  implemented.
+    compute force using linear fit to each pulse in each sequence.
+    
+
+=== Analysis Code ===
+- varforce_handle_degauss: NOT QUITE implemented.
+    finds zero volt regions in each sequence, estimates remanence force in pre-degauss regions via a linear fit to get the velocity.  Remanence is computed for each pre-degauss region in each sequence for each bead separately.  After the remanence is computed, the pre-degauss regions of the zero volt pulse is removed from the data matrix.  Presumably any drift remaining after degauss is due to sample drift and not due to remanent magnetization.
+    
+- varforce_construct_spatial_map: implemented.
+    bins the data into pixels of selected size and calculates the force in each bin for each voltage in the experiment.  Computes error as well.
+
+- varforce_compute_sat_data: implemented.
+    computes power law of log(distance) vs. log(force) for each voltage. Then uses these fits to place all data on one grid, allowing force from different voltages to be compared at the same distance. This data is later used to plot the saturation curve
+
+- compute_spatial_viscosity: not implemented.  
+    probably not part of varforce, but definitely should be able to input a varforce spatial force calibration.
+
+- varforce_compute_force_ratios: not implemented.
+    uses the voltage data as well as the remanence information to generate force ratios for a given calibration run.
+
+
+=== Plotting Code ===
+- plot_2d_spatial_calib: implemented.
+    for given data, plots the varforce calibration data as a 2d scalar fields with a hot colormap.  
+
+- plot_force_power_law: implemented.
+    plots log(distance) vs. log(force) along with power law fit for all voltages. These plots can add confidence to the saturation data produced by the power law.
+
+- plot_sat_data: implemented.
+    For several position series, plots the saturation data as force vs. current.
+
+- plot_powerlaw_vs_current: not implemented.
+    Plot the power law exponents versus current to learn more about the power laws that govern forces at given driving currents.
+    
+    
+=== Processing/Analysis GUI ===
+- varforce_analysis_GUI: implemented.
+    using varforce_run as a template, or even as a called function, to generate a GUI for handling the customizable parameters in processing a varforce dataset.
+    
+    
+=== OUTPUT STRUCTURE ===
+v.params.
+        .myDAQid
+        .DAQ_sampling_rate
+        .NRepeats
+        .my_pole_geometry
+        .voltages
+        .pulse_widths
+        .duration
+        .calibrator_viscosity
+        .bead_radius
+        .calibum
+        .degauss
+        .sent_signal
+        .start_time
+        .dominant_coil
+        .pulseID
+        .compute_linefit
+        .compute_inst
+        .num_buffer_points
+        .error_tol
+        .drift_remove
+        .poleloc
+        .trackfile
+        .metafile
+        .window_size
+        .granularity
+        .plot_results
+
+v.raw.
+     .video_table
+     .rem_table
+     .drift_table
+
+
+
+v.forcecal.
+          .data.
+               .trackerid
+               .seqid
+               .volts
+               .xy
+               .xyslope
+               .xyintercept
+               .xyres
+               .vxyerr
+               .Fxy
+          .results.
+                  .volts
+                  .fit
+                  .error
+                  .distances
+                  .forces
+v.remanence.
+          .data.
+               .trackerid
+               .seqid
+               .volts
+               .xy
+               .xyslope
+               .xyintercept
+               .xyres
+               .vxyerr
+               .Fxy
+          .results.
+                  .volts
+                  .fit
+                  .error
+                  .distances
+                  .forces
+v.drift.
+       .drift_vectors
+       .data.
+            .trackerid
+            .seqid
+            .volts
+            .xy
+            .xyslope
+            .xyintercept
+            .xyres
+            .vxyerr
+            .Fxy
+       .results.
+               .volts
+               .fit
+               .error
+               .distances
+               .forces
+
