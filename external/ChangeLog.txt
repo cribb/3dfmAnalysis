@@ -1,3 +1,6 @@
+2006-12-11  Jeremy Cribb <jcribb@email.unc.edu>
+	* polyfitw.m:  external code that allows error weighting for polynomial fits such that data with low error is weighted more heavily than data with high error.
+
 2006-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* axis_rotation: added folder containing quaternion and rotation code implemented by L. Vicci.
 
