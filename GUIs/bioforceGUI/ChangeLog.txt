@@ -1,3 +1,7 @@
+2007-01-18  Ben Smith <jaminben@email.unc.edu>
+	* bioforceGUI.fig: Removed DNA-related buttons and boxes.  Rearranged buttons for a more compact, toolbar-like interface.
+	* * bioforceGUI.m: same.
+
 2006-08-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* bioforceGUI.m: added more statistics to report to stdout when making fits.
 

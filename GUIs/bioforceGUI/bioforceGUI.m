@@ -22,7 +22,7 @@ function varargout = bioforceGUI(varargin)
 
 % Edit the above text to modify the response to help bioforceGUI
 
-% Last Modified by GUIDE v2.5 05-Jul-2006 11:29:15
+% Last Modified by GUIDE v2.5 18-Jan-2007 14:09:58
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -196,22 +196,6 @@ function pushbutton_slope_Callback(hObject, eventdata, handles)
     plot(x, fity, 'r');
 
 
-% --- Executes on button press in pushbutton_DNA.
-function pushbutton_DNA_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton_DNA (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-    r = handles.x;
-    F = handles.y;
-    
-    L = wlc(r, F);
-    
-    set(handles.text_persistence_length, 'String', num2str(L.Lp * 1e9));
-    set(handles.text_contour_length, 'String', num2str(L.Lc * 1e6));
-    set(handles.text_offset, 'String', num2str(L.offset * 1e6));    
-
-
 % --- Executes on button press in pushbutton_range.
 function pushbutton_range_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_range (see GCBO)
@@ -224,8 +208,11 @@ function pushbutton_range_Callback(hObject, eventdata, handles)
     
     set(handles.text_range, 'String', range(y));
     
-    figure(fig);
-    drawlines(gca, [], [], [], [min(y) max(y)], 'r')
+    
+	fprintf('y-range: %d \n', range(y));
+    
+%     figure(fig);
+%     drawlines(gca, [], [], [], [min(y) max(y)], 'r')
     
 
 
@@ -250,5 +237,27 @@ function edit_num_modes_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes during object creation, after setting all properties.
+function text_relaxtime_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to text_relaxtime (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes during object creation, after setting all properties.
+function text_slope_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to text_slope (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over pushbutton_range.
+function pushbutton_range_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to pushbutton_range (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
 
