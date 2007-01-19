@@ -50,7 +50,7 @@ end
         
         for mySeq = unique(tablein(:,SEQ))' 
             
-            for myVoltage = unique(tablein(:,PULSE))'
+            for myVoltage = unique(tablein(:,VOLTS))'
 
                 if ~exist('count')
                     count = 1;
@@ -58,7 +58,7 @@ end
                 
                 idx = find( tablein(:,ID) == trackers(myTracker) ...
                           & tablein(:,SEQ) == mySeq ...
-                          & tablein(:,PULSE) == myVoltage);
+                          & tablein(:,VOLTS) == myVoltage);
 
                 if length(idx) > 1
                     

@@ -32,10 +32,10 @@ if num_buffer_points > 0
         tic;
 
         for mySeq = unique(table(:,SEQ))';
-            for myVoltage = unique(table(:,PULSE))';
+            for myVoltage = unique(table(:,VOLTS))';
                    idx = find( table(:,ID)    == trackers(myTracker) & ...
                                table(:,SEQ)   == mySeq & ...
-                               table(:,PULSE) == myVoltage );
+                               table(:,VOLTS) == myVoltage );
 
                     minitable = table(idx,:);
 

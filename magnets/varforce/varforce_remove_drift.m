@@ -24,7 +24,7 @@ function [table_out, drift_vectors] = varforce_remove_drift(table, params)
         
         % determine the start and stop times for the drift section (i.e.
         % where the voltage is equal to zero.
-        idxP = find(my_seq(:,PULSE) == 0);
+        idxP = find(my_seq(:,VOLTS) == 0);
         drift_pulse = my_seq(idxP,:);
         min_drift_time = min(drift_pulse(:,TIME));
         max_drift_time = max(drift_pulse(:,TIME));

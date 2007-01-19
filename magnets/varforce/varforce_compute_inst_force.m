@@ -40,13 +40,13 @@ function Ftable = varforce_compute_inst_force(tablein, params)
             % reduce to current sequence
             SEQidx = find(this_bead(:,SEQ) == mySeq);
             
-            for myVoltage = unique(this_bead(SEQidx,PULSE))'
+            for myVoltage = unique(this_bead(SEQidx,VOLTS))'
 
                 % reduce bead to the points taken at mth voltage
-                PULSEidx = find(this_bead(SEQidx,PULSE) == myVoltage);
+                VOLTSidx = find(this_bead(SEQidx,VOLTS) == myVoltage);
 
-                t = this_bead(PULSEidx,TIME);
-                xy = this_bead(PULSEidx, X:Y);
+                t = this_bead(VOLTSidx,TIME);
+                xy = this_bead(VOLTSidx, X:Y);
                 
                 [newxy,force] = forces2d(t, xy, viscosity, bead_radius, window_size);
                

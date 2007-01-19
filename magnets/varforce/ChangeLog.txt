@@ -1,3 +1,12 @@
+2007-01-19  Ben Smith <jaminben@email.unc.edu>
+	- varforce_compute_inst_force: changed all "PULSE" to "VOLTS" because it is a better description of the value.
+	varforce_compute_linefit_force: same
+	varforce_constants: same
+	varforce_init: same
+	varforce_remove_buffer_points: same
+	varforce_remove_drift: same
+	varforce_run: same
+
 2006-12-11  Jeremy Cribb <jcribb@email.unc.edu>
 	- varforce_drive_GUI: added.  GUI for running driving code.
 

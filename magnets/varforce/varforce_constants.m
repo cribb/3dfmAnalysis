@@ -7,7 +7,7 @@
 % matrix.  The raw data for the varforce calibration is derived from the
 % video tracking data obtained from load_video_tracking.  It makes sense to
 % keep the same 2D tabular matrix and add additional columns for pulse
-% voltage (PULSE), sequence identification (SEQ), and zero-volt translation
+% voltage (VOLTS), sequence identification (SEQ), and zero-volt translation
 % data taken *after* a degauss routine (DEGAUSS).
 %
 
@@ -17,6 +17,6 @@
     video_tracking_constants;
     
     % new columns/labels.
-    PULSE  = 11;
+    VOLTS  = 11;
     SEQ    = 12;
     DEGAUSS= 13;
