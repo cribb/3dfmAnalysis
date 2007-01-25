@@ -1,7 +1,7 @@
 function d = msd(files, window, dim, frame_rate, calib_um)
 % 3DFM function  
 % Rheology 
-% last modified 01/21/06 (jcribb)
+% last modified 01/25/07 (jcribb)
 %  
 % This function computes the mean-square displacements (via 
 % the Stokes-Einstein relation) for an aggregate number of beads.
@@ -75,24 +75,23 @@ for beadID = 0 : get_beadmax(v);
 end
 warning('on', 'MATLAB:divideByZero');
 
+% trim the data by removing window sizes that returned no data
+sample_count = sum(~isnan(msd),2);
+idx = find(sample_count > 0);
+tau = tau(idx,:);
+msd = msd(idx,:);
+sample_count = sample_count(idx);
+
 % setting up axis transforms for the figure plotted below.  You cannot plot
 % errorbars on a loglog plot, it seems, so we have to set it up here.
 logtau = log10(tau);
 logmsd = log10(msd);
 
-sample_count = sum(~isnan(logmsd),2);
-
-% remove window sizes that returned no data
-idx = find(sample_count > 0);
-logtau = logtau(idx,:);
-logmsd = logmsd(idx,:);
-sample_count = sample_count(idx);
-
 mean_logtau = nanmean(logtau');
 mean_logmsd = nanmean(logmsd');
 
-    ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
-    ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
+ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
+ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
 
     figure;
 	errorbar(mean_logtau, mean_logmsd, ste_logmsd);

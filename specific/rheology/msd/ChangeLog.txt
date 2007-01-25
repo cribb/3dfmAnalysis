@@ -1,3 +1,8 @@
+2007-01-25  Jeremy Cribb <jcribb@email.unc.edu>
+	- plot_ve.m: added.  plots viscoelastic moduli given data from ve.m
+	- ve.m: removed plotting code and made new function.
+	- msd.m: filtered the sample count for NaNs so that ve works again.
+
 2006-08-01  Kalpit Desai <kvdesai@email.unc.edu>
 	* msdbase.m: 
 	- Turned off interpolation when timestamps are uneven. Instead just warns on console and computes the error in Tau.
@@ -20,8 +25,10 @@
 	* msdbase.m: 
 	- Fixed nasty errors in the documentation and brought it up to date.
 	- Exposed the standard error results to the output.
+
 2006-06-20  Kalpit Desai <kvdesai@email.unc.edu>
 	* msdbase.m: Now puts five points (instead of 3) in each decade for default window vector.
+
 2006-06-05  Kalpit Desai <kvdesai@email.unc.edu>
 	* laser_msd.m: 
 	- Essentially rewrote the whole module. Now allows to look at diffusion along each axis (X,Y,Z) as well as in each plane (XY, YZ, ZX) independently.

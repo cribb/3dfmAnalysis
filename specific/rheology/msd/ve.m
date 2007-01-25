@@ -1,7 +1,7 @@
 function v = ve(d, bead_radius, freq_type);
 % 3DFM function  
 % Rheology 
-% last modified 10/06/05 (jcribb)
+% last modified 01/25/07 (jcribb)
 %  
 % ve computes the viscoelastic moduli from mean-square displacement data.
 % The output structure of ve contains four members: raw (contains data for 
@@ -60,72 +60,6 @@ npp= gp  .* tau;
 %
 % setup very detailed output structure
 %
-% setting up axis transforms for the figures plotted below.  You cannot plot
-% errorbars on a loglog plot, it seems, so we have to set them up here.
-logtau = log10(tau);
-logmsd = log10(msd);
-mean_logtau = nanmean(logtau');
-mean_logf = nanmean(log10(f)');
-mean_logw = nanmean(log10(w)');
-
-sample_count = sum(~isnan(logmsd),2);
-
-ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
-ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
-
-loggp  = log10(gp);
-loggpp = log10(gpp);
-mean_loggp = nanmean(loggp');
-mean_loggpp= nanmean(loggpp');
-ste_loggp  = nanstd(logtau') ./ sqrt(N');
-ste_loggpp = nanstd(logmsd') ./ sqrt(N');
-
-lognp = log10(np);
-lognpp= log10(npp);
-mean_lognp = nanmean(lognp');
-mean_lognpp= nanmean(lognpp');
-ste_lognp = nanstd(lognp') ./ sqrt(N');
-ste_lognpp= nanstd(lognpp') ./ sqrt(N');
-
-    switch freq_type
-        case 'f'
-            plot_freq = mean_logf;
-            freq_label = 'log_{10}(f) [Hz]';
-            gp_label = 'G''(f)';
-            gpp_label = 'G''''(f)';
-            np_label = '\eta''(f)';
-            npp_label = '\eta''''(f)';
-        case 'w'
-            plot_freq = mean_logw;
-            freq_label = 'log_{10}(\omega) [rad/s]';
-            gp_label = 'G''(\omega)';
-            gpp_label = 'G''''(\omega)';
-            np_label = '\eta''(\omega)';
-            npp_label = '\eta''''(\omega)';
-    end
-
-	figure;
-    hold on;
-	errorbar(plot_freq, real(mean_loggp), real(ste_loggp), 'b');
-	errorbar(plot_freq, real(mean_loggpp), real(ste_loggpp), 'r');
-    hold off;
-    xlabel(freq_label);
-	ylabel('log_{10}(modulus) [Pa]');
-	h = legend(gp_label, gpp_label, 0);
-	grid on;
-	pretty_plot;
-	
-	figure;
-    hold on;
-	errorbar(plot_freq, real(mean_lognp), real(ste_lognp), 'b');
-	errorbar(plot_freq, real(mean_lognpp), real(ste_lognpp), 'r');
-    hold off;
-	xlabel(freq_label);
-	ylabel('log_{10}(viscosity) [Pa sec]');
-	legend(np_label, npp_label, 0);
-	grid on;
-	pretty_plot;
-
 
 v.raw.f = f;
 v.raw.w = w;
@@ -169,4 +103,4 @@ v.error.npp = (nanstd(npp') ./ sqrt(N'))';
 v.n = N;
 
 % plot output
-plot_ve(v);
+plot_ve(v, freq_type);
