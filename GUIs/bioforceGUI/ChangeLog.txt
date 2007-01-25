@@ -1,3 +1,6 @@
+2007-01-25  Jeremy Cribb <jcribb@email.unc.edu>
+	* bioforceGUI.m: now reports error in intercept too instead of just error in slope.
+
 2007-01-18  Ben Smith <jaminben@email.unc.edu>
 	* bioforceGUI.fig: Removed DNA-related buttons and boxes.  Rearranged buttons for a more compact, toolbar-like interface.
 	* * bioforceGUI.m: same.

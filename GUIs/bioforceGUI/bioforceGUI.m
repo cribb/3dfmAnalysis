@@ -173,7 +173,7 @@ function pushbutton_slope_Callback(hObject, eventdata, handles)
 
 	fit  = polyfit(x, y, 1);
 	fity = polyval(fit, x);
-	err  = uncertainty_in_slope(x, y, fit);
+	err = uncertainty_in_linefit(x, y, fit);
  
 	slope = fit(1);
 	icept = fit(2);
@@ -189,12 +189,12 @@ function pushbutton_slope_Callback(hObject, eventdata, handles)
     fprintf('\nStatistics\n');
 	fprintf('x-range: %d \ny-range: %d \n', range(x), range(y));
 	fprintf('slope = %g, icept = %g \n', slope, icept);
-    fprintf('error in slope = %g \n', err);
+    fprintf('error in slope = %g, intercep = %g \n', err(1), err(2));
     fprintf('R = %g \n', R2);
     figure(fig);
     hold on;
-    plot(x, fity, 'r');
-
+	    plot(x, fity, 'r');
+	hold off;
 
 % --- Executes on button press in pushbutton_range.
 function pushbutton_range_Callback(hObject, eventdata, handles)
