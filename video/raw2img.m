@@ -113,7 +113,7 @@ for k = start_frame : stride : (end_frame-1)
   status = fseek(fid, frame_size*k, 'bof');  % advance to next frame
     
   im = fread(fid, [648,484],'uint8');   % read in the next frame
-  imagesc(im','parent',ax);             % puts image in invisible axes  
+  image(im','parent',ax);             % puts image in invisible axes  
   colormap(gray(256));
   axis off;
   

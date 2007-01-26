@@ -34,7 +34,7 @@ if nargin < 2 | isempty(stride);
     logentry('No stride defined.  Using default stride of every 4 frame.');
 end
 
-if nargin < 1 | isempty();
+if nargin < 1 | isempty(rawfilein);
     error('No input rawfile defined.');
 end
 

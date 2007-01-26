@@ -1,3 +1,7 @@
+2007-01-26  Jeremy Cribb <jcribb@email.unc.edu>
+	* raw2avi.m: fixed typo.
+	* raw2img.m: outputted scaled image now defaults to unscaled image.
+
 2006-07-20  Jeremy Cribb <jcribb@email.unc.edu>
 	* clipraw.m:  added cropping functionality.  added variable output to available memory or to a file.  There is no way to put the new position info into the rawfile format so crop at your own risk.
 
