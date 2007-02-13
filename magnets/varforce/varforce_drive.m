@@ -1,4 +1,4 @@
-function params_out = varforce_cal_drive(params)
+function params_out = varforce_drive(params)
 % 3DFM function  
 % Magnetics/varforce
 % last modified 08/01/06 (jcribb)
@@ -100,6 +100,10 @@ switch my_pole_geometry
         poles_to_excite_pos = 1;
         poles_to_excite_neg = [3 4 5];
         dominant_coil = 1;
+    case 'oj-comb14'
+        poles_to_excite_pos = 1;
+        poles_to_excite_neg = [4];
+        dominant_coil = 1;
     case '3pole-246'
         poles_to_excite_pos = [2];
         poles_to_excite_neg = [4 6];        
@@ -108,6 +112,14 @@ switch my_pole_geometry
         poles_to_excite_pos = [1];
         poles_to_excite_neg = [3 5];        
         dominant_coil = 1;
+    case '3pole-351'
+        poles_to_excite_pos = [3];
+        poles_to_excite_neg = [1 5];        
+        dominant_coil = 3;        
+    case '3pole-513'
+        poles_to_excite_pos = [5];
+        poles_to_excite_neg = [1 3];        
+        dominant_coil = 5;        
     case '4pole-1245'
         poles_to_excite_pos = [1 2];
         poles_to_excite_neg = [4 5];        
