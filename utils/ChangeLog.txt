@@ -1,3 +1,8 @@
+2007-03-05  Kalpit Desai <kvdesai@email.unc.edu>
+	* slopper.m: Added a stand-alone utility to compute/fit slopes of curves.
+	Works for linear scale, log scale, and plots with overlayed curves.
+	Inspired by bioforcesGUI.
+
 2006-10-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* header.m: freshened the output strings so that it makes more sense.
 	* pretty_plot.m: increased the font sizes for the text areas of figures.
