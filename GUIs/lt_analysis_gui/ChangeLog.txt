@@ -1,3 +1,7 @@
+2007-03-05 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_anlaysis_gui.m:
+	- PSD plots in loglog scale not linearlized log
+	
 2006-11-23 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_analysis_gui.m: 
 	- Allows to look at the data inside the box in full resolution. Useful to detect steps.

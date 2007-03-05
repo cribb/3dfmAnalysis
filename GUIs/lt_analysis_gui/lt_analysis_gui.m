@@ -1,34 +1,33 @@
 function varargout = lt_analysis_gui(varargin)
-% LT_ANALYSIS_ltaGUI M-file for lt_analysis_ltagui.fig
-%      LT_ANALYSIS_ltaGUI, by itself, creates a new LT_ANALYSIS_ltaGUI or raises the existing
+% LT_ANALYSIS_GUI M-file for lt_analysis_gui.fig
+%      LT_ANALYSIS_GUI, by itself, creates a new LT_ANALYSIS_GUI or raises the existing
 %      singleton*.
 %
-%      H = LT_ANALYSIS_ltaGUI returns the handle to a new LT_ANALYSIS_ltaGUI or the handle to
+%      H = LT_ANALYSIS_GUI returns the handle to a new LT_ANALYSIS_GUI or the handle to
 %      the existing singleton*.
 %
-%      LT_ANALYSIS_ltaGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in LT_ANALYSIS_ltaGUI.M with the given input arguments.
+%      LT_ANALYSIS_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in LT_ANALYSIS_GUI.M with the given input arguments.
 %
-%      LT_ANALYSIS_ltaGUI('Property','Value',...) creates a new LT_ANALYSIS_ltaGUI or raises the
+%      LT_ANALYSIS_GUI('Property','Value',...) creates a new LT_ANALYSIS_GUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the ltaGUI before lt_analysis_ltagui_OpeningFunction gets called.  An
+%      applied to the GUI before lt_analysis_gui_OpeningFunction gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to lt_analysis_ltagui_OpeningFcn via varargin.
+%      stop.  All inputs are passed to lt_analysis_gui_OpeningFcn via varargin.
 %
-%      *See ltaGUI Options on GUIDE's Tools menu.  Choose "ltaGUI allows only one
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help lt_analysis_ltagui
+% Edit the above text to modify the response to help lt_analysis_gui
 
 % Last Modified by GUIDE v2.5 23-Nov-2006 16:13:50
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
-%  - Any file that is loaded in the database, is displayed with full name + tag in the file selection menu;
-%  and only tag in the tag list. 
-%  - Removing a file from the database removes it from the taglist and from the selection menu.
+%  - Any file that is loaded in the database, is displayed with full name +
+%  tag in the file selection menu.
      
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -892,11 +891,11 @@ if get(handles.check_psd,'value')
         end
         
         title([handles.signames.disp{sigid}, '-PSD: ',colstr{cols(c)}]);
-        xlabel('log_{10} Frequency [Hz]');
+        xlabel('Frequency [Hz]');
         if any(sigid == handles.posid) % if this signal is a position measurement
-            ylabel('log_{10} Micron^2/Hz');
+            ylabel('PSD [{\mum}^2/Hz]');
         else 
-            ylabel('log_{10} Volts^2/Hz');
+            ylabel('PSD [V^2/Hz]');
         end
         set(gca,'box','on');
         pretty_plot;
@@ -913,7 +912,7 @@ if get(handles.check_psd,'value')
                 title([handles.signames.disp{sigid}, '- sqrt[Area under PSD]: ',colstr{cols(c)}]);
             end                
             ylabel('Micron');
-            xlabel('log_{10} Frequency [Hz]');
+            xlabel('Frequency [Hz]');
             set(gca,'box','on');
             pretty_plot;
             hold on;
@@ -991,11 +990,13 @@ for fi = 1:length(ids) %repeat for all files selected
             [p f] = mypsd(sig(:,cols(c)+1),srate,psdres,handles.psdwin);
             figure(psdfignum + cols(c) -1);
             warning off % No better way in matlab 6.5 to turn off 'log of zero' warning 
-            plot(log10(f),log10(p),[smarker_now,'-',scolor_now]);                        
+%             plot(log10(f),log10(p),[smarker_now,'-',scolor_now]);
+            loglog(f,p,[smarker_now,'-',scolor_now]);
             if get(handles.check_cumdisp,'value')
                 dc = sqrt(cumsum(p)*mean(diff(f)));% sqrt of area under psd
                 figure(dvsffignum + cols(c)-1);
-                plot(log10(f),dc,[smarker_now,'-',scolor_now]);
+%                 plot(log10(f),dc,[smarker_now,'-',scolor_now]);
+                semilogx(f,dc,[smarker_now,'-',scolor_now]);
             end
             warning on
             if stack_mode % if we just stacked results of this box position, annotate
@@ -1005,7 +1006,7 @@ for fi = 1:length(ids) %repeat for all files selected
                 legstr = sprintf('t: %.1f to %.1f',xlims(1),xlims(2));
 %                 legstr = ['t:',num2str(xlims(1)),'-',num2str(xlims(2))];
                 legend([strs,legstr],'Location','Best');
-                %                 set(gca,'Xscale','Log','Yscale','Log');
+                set(gca,'Xscale','Log','Yscale','Log');
                 pretty_plot;
                 hold off;
                 set(gcf,'Tag','boxstack');
@@ -1015,7 +1016,7 @@ for fi = 1:length(ids) %repeat for all files selected
                     [lh oh ph strs] = legend(gca);
                     legstr = sprintf('t: %.1f to %.1f',xlims(1),xlims(2));
                     legend([strs,legstr],'Location','Best');
-                    %              set(gca,'Xscale','Log','Yscale','Linear');
+                    set(gca,'Xscale','Log','Yscale','Linear');
                     pretty_plot;
                     hold off;
                     set(gcf,'Tag','boxstack');
@@ -1024,13 +1025,13 @@ for fi = 1:length(ids) %repeat for all files selected
                 alltags = g.tag;                
                 figure(psdfignum + cols(c) -1);
                 legend(gca,alltags{ids});
-                %                 set(gca,'Xscale','Log','Yscale','Log');
+                set(gca,'Xscale','Log','Yscale','Log');
                 pretty_plot;
                 hold off;
                 if get(handles.check_cumdisp,'value')
                     figure(dvsffignum + cols(c) -1);
                     legend(gca,alltags{ids});
-                    %              set(gca,'Xscale','Log','Yscale','Linear');
+                    set(gca,'Xscale','Log','Yscale','Linear');
                     pretty_plot;
                     hold off;
                 end
@@ -1081,7 +1082,7 @@ for fi = 1:length(ids) %repeat for all files selected
     if stack_mode % then update the time domain figure that shows each box color coded
         if ~ishandle(handles.tstackfigid);
             % because the previous code only parses that data within the
-            % box, we have to recollect the data across the whole duration.
+            % box, we have to recollect the data across the whole file.
             sigid = get(handles.menu_signal,'UserData');            
             signame = handles.signames.intr{1,sigid};            
             fileid = get(handles.menu_files,'value');
@@ -1096,9 +1097,20 @@ for fi = 1:length(ids) %repeat for all files selected
             else
                 ylstr = 'Volts';
             end
-            % For the color-coded time domain trace, only plot R for each
-            % box position
-            plot(downvals(:,1), downvals(:,end), ':k', 'tag', 'stack');
+            
+            % Decide which dimension to plot for the color-coded time domain trace
+            if length(cols) == 1 %if only one is selected, plot the selected
+                stackdim = cols;
+            else %at least two dimensions are selected
+                if any(cols) > 3 %  XY or R or both are selected
+                    stackdim = cols(end); %plot the highest dimension
+                elseif any(cols) == 3 % Z is one of the dimensions selcted
+                    stackdim = 5; %if Z and one other selected, plot R
+                else %the two selected must be X and Y
+                    stackdim = 4; % plot XY in the stack
+                end
+            end
+            plot(downvals(:,1), downvals(:,stackdim+1), ':k', 'tag', 'stack');
             xlabel('Time [s]'); ylabel(ylstr);
             % Now overlay magnets if user has told us to do so
             overlaymag(handles,gcf,1);
