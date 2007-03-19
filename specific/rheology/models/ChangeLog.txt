@@ -1,0 +1,10 @@
+2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* jeffrey_step_fit.m: moved from parent folder.
+	* jeffrey_step_fun.m: moved from parent folder.
+	* KV_step_fit.m:  added.  performs fit for step response of a Kelvin-Voight fluid.
+	* KV_step_fun.m:  added.  contains fitting function for Kelvin-Voight fluid.
+	* MM_step_fit.m:  added.  performs fit for step response of a Maxwell fluid.
+	* MM_step_fun.m:  added.  contains fitting function for Maxwell fluid.
+	* Changelog.txt:  this file. added.
+	
+
