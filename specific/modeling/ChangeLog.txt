@@ -1,4 +1,7 @@
 2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* Changelog.txt: updated for last commit (forgot to save beforehand).
+
+2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* sphere_flow.m: clearer code.  Added quiver plot to convey full vector rather than just magnitude.  perhaps streamlines later.
 
 2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
