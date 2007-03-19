@@ -1,3 +1,7 @@
+2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: added ability to define origin as any pixel location for radial displacement.
+	* evt_gui.fig: same.
+
 2006-10-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: fixed the trackerID slider so that floating point values aren't possible... Matlab was complaining.
 

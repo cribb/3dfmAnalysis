@@ -22,7 +22,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 03-Feb-2006 17:23:22
+% Last Modified by GUIDE v2.5 21-Feb-2007 12:16:08
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -716,6 +716,20 @@ function plot_data(hObject, eventdata, handles)
             yinit = y(k); yinit = yinit(1);
             r = magnitude(x(k) - xinit, y(k) - yinit);
             plot(t(k) - mintime, r - r(1), '.');
+        elseif get(handles.checkbox_arb_origin, 'Value')
+            arb_origin = str2num(get(handles.edit_arb_origin, 'String'));
+            xinit = arb_origin(1);
+            yinit = arb_origin(2);
+            
+            % handle the case where 'microns' are selected
+            if get(handles.radio_microns, 'Value');
+                calib_um = str2num(get(handles.edit_calib_um, 'String')); 
+                xinit = xinit * calib_um;
+                yinit = yinit * calib_um;                
+            end
+            
+            r = magnitude(x(k) - xinit, y(k) - yinit);
+            plot(t(k) - mintime, r, '.');                        
         else
             r = magnitude(x(k), y(k));
             plot(t(k) - mintime, r - r(1), '.');
@@ -897,3 +911,48 @@ function logentry(txt)
      fprintf('%s%s\n', headertext, txt);
 
    
+
+
+% --- Executes on button press in checkbox_arb_origin.
+function checkbox_arb_origin_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_arb_origin (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_arb_origin
+    arb_origin = str2num(get(handles.edit_arb_origin, 'String'));
+
+    if length(arb_origin) ~= 2
+        logentry('Origin value is not valid.  Not plotting.')
+        set(handles.checkbox_arb_origin, 'Value', 0);
+    else
+        plot_data(hObject, eventdata, handles);
+    end
+
+
+
+
+function edit_arb_origin_Callback(hObject, eventdata, handles)
+    arb_origin = str2num(get(hObject, 'String'));
+
+    if length(arb_origin) ~= 2
+        logentry('Origin value is not valid.  Not plotting.')
+        set(handles.checkbox_arb_origin, 'Value', 0);
+    else
+        plot_data(hObject, eventdata, handles);
+    end
+    
+
+% --- Executes during object creation, after setting all properties.
+function edit_arb_origin_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_arb_origin (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
