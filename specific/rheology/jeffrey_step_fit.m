@@ -1,4 +1,4 @@
-function [K, D1, D2, R_square] = jeffrey_step_fit(t, y)
+function [K, D1, D2, R_square] = jeffrey_step_fit(t, y, report)
 % 3DFM function  
 % Rheology
 % last modified 26-Oct-2006 
@@ -7,19 +7,22 @@ function [K, D1, D2, R_square] = jeffrey_step_fit(t, y)
 % model's step response and provides fitting parameters
 % as well as an R_square fitness value.
 %  
-%  [K, D1, D2, R_square] = jeffrey_fit_step(t, y);  
+%  [K, D1, D2, R_square] = jeffrey_fit_step(t, y, report);  
 %   
 %  where "t" contains the time values for the inputted data.
 %        "y" contains the step response values for the inputted data.
+%        "report" is 'y' or 'n', default 'y', for reporting results in plot
+%                 and tabular form.
 %        "K" is the spring constant in units of [N m^-1] 
 %        "D1" is the damper parallel to the spring in [N s m^-1] 
 %        "D2" is the damper in series with K & D1 (voight body) in [N s m^-1] 
 %        "R_square" is the a measure of fitness.
 %
-
 % XXX Add a fitness structure in the future that contains resdiual analysis
-%     instead of just an Rsquare value.. They are not worth much.
+%     instead of just Rsquare values that are not worth much.
 %
+
+    if nargin < 3 | isempty(report); report = 'y'; end
 
    % set parameters for the options structure sent to lsqcurvefit.
 	options = optimset('MaxFunEvals', 20000*2, ...
@@ -35,7 +38,7 @@ function [K, D1, D2, R_square] = jeffrey_step_fit(t, y)
     
     % normalize t and y
     t = t - min(t);    
-    y = y - min(y);
+%     y = y - min(y);
     
     x0 = [K D1 D2];
 	
@@ -54,16 +57,18 @@ function [K, D1, D2, R_square] = jeffrey_step_fit(t, y)
 	D1 = fit(2);
 	D2 = fit(3);
     
-    fprintf('K = %g \t\t D1 = %g \t\t D2 = %g \t\t R^2 = %g\n', K, D1, D2, R_square);
-       
 	tau = D1/K;
     t1 = 0;
 
     % go to town.  this is our fitting function
     yfit = (1/K + (t-t1)/D2 - 1/K*exp(-K*(t-t1)/D1));
 
-    figure;
-    plot(t, y, '.', t, yfit, 'r');
+    if findstr(report, 'y')
+        fprintf('K = %g \t\t D1 = %g \t\t D2 = %g \t\t R^2 = %g\n', K, D1, D2, R_square);
+       
+        figure;
+        plot(t, y, '.', t, yfit, 'r');        
+    end
     
     fit_params = [K D1 D2];
     

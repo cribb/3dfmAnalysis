@@ -10,9 +10,12 @@ function varargout = percent_recovery(x)
 %  07/16/05 - created (jcribb) 
 % 
 
+    x = x - x(1);
+    
 	xrec = max(x) - x(end);    
-    xmax = max(x) - x(1);
-    pct_rec = (xrec) / (xmax) * 100;
+    pct_rec = xrec / max(x) * 100;
+    
+
     
     switch nargout
         case 1
