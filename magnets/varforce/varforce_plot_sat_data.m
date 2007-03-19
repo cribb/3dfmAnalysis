@@ -41,9 +41,5 @@ ylabel('Force [pN]');
 legend(legend_entries);
 pretty_plot;
 
-q = figure; 
-figure(q);
-errorbar();
-
 
 return;

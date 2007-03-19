@@ -1,3 +1,7 @@
+- fix radial distance measure so that pole tip radius is removed. currently only implemented in plotting code for varforce_compute_sat_data.
+
+- fix plotting code to make all plots include legends etc...
+
 - propagate error from velocity estimates into the error determination of the powerlaw force vs. distance curve.  we use weighting to adjust for the values on the best fit line.  We should use these weights in estimating the error in the slope as well.
 
 - add second power law plot that shows the effect of pre-bead saturation (value of 2), post bead saturation (value of 1) and post pole tip satruation (value of 0).
@@ -8,9 +12,10 @@
 
 - finish spatial calibration procedure (if deemed necessary).
 
-- commit code.
 
 - ??? should we ??? add estimates of curvature in the line fits (via a 2nd order polynomial instead of a 1st order one).  This would allow us to monitor the tendency of the bead to accelerate as it comes in closer to the poletip.
+
+- (DONE) commit code.
 
 - (DONE) change polyfit3 to polyfitw
 
