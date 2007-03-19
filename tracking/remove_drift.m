@@ -130,8 +130,12 @@ function [v,q] = center_of_mass(data, drift_start_time, drift_end_time);
 
         figure(66);
         subplot(2,2,4);
-        axis([0 648 0 484]);
-        plot(data(:,X), data(:,Y), 'bo', com(:,1), com(:,2), 'g.');
+        axis([0 648 0 484]);        
+        hold on;
+            plot(data(:,X), data(:,Y), 'bo', com(:,1), com(:,2), 'g.');
+            text(com(  1,1), com(  1,2), 'S', 'FontWeight', 'Demi');
+            text(com(end,1), com(end,2), 'E', 'FontWeight', 'Demi');
+        hold off;        
         xlabel('x position'); 
         ylabel('y position');
         

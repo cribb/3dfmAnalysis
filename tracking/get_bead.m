@@ -13,6 +13,8 @@ function v = get_bead(data, IDNum)
 %  05/09/05 - created; jcribb.
 %  05/22/05 - modified to accomodate table or stucture of vectors format
 
+video_tracking_constants;
+
 % determine whether the input data is in the table or structure of vectors
 % format...
 if isfield(data, 'id')
@@ -28,7 +30,7 @@ if isfield(data, 'id')
     if isfield(data,'pitch');   v.pitch= data.pitch(idx);   end;
     if isfield(data,'yaw');     v.yaw  = data.yaw(idx);     end;                    
 else
-    this_bead = find(data(:,2) == IDNum);
+    this_bead = find(data(:,ID) == IDNum);
     v = data(this_bead,:);
 end
 
