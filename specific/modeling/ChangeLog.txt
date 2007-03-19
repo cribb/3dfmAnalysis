@@ -1,3 +1,6 @@
+2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* sphere_flow.m: clearer code.  Added quiver plot to convey full vector rather than just magnitude.  perhaps streamlines later.
+
 2006-04-24  Jeremy Cribb <jcribb@email.unc.edu>
 	* sim_newt_fluid.m: added.  simulates Newtonian fluid random walk in any dimension.
 	* sim_newt_fluid_1D.m: removed.
