@@ -1,3 +1,10 @@
+2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* updating changelog for last commit (forgot to save before commit)
+
+2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* percent_recovery.m:  cosmetic changes to code.
+	* jeffery_step_fit.m:  added a switch for reporting fit results or not.
+
 2006-11-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* jeffrey_step_fit.m:  fixed bug where jeffrey_step_fit called old fitting function file.
 
