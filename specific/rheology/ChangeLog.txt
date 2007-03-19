@@ -1,4 +1,9 @@
 2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* added (rheological) 'models' folder.
+	* jeffrey_step_fit.m: removed.  moved to models folder.
+	* jeffrey_step_fun.m: same.
+
+2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* updating changelog for last commit (forgot to save before commit)
 
 2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
