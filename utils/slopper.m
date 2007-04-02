@@ -78,15 +78,20 @@ else
 end
 if annotate
     apos = get(ha,'position'); %apos: [bottom-left_x, "_y, width, height]
-    % begin drawing line from the center, so that it works for both
-    % positive and negative slopes
-    xd(1) = apos(1) + apos(3)/2; yd(1) = apos(2)+apos(4)/2;
+    % begin drawing line from the top left for -ve slopes and bottom left
+    % for +ve slopes
+    if slope > 0
+        xd(1) = apos(1); yd(1) = apos(2);
+    else
+        xd(1) = apos(1); yd(1) = apos(2)+apos(4);
+    end
+    
     xd(2) = xd(1)+ range(x)*apos(3)/range(axlim);
-    xd = xd - min(xd) + range(xd)/2;
+%     xd = xd - min(xd) + range(xd)/2;
 
     figslope = slope*(range(axlim)/apos(3))/(range(aylim)/apos(4));
     yd(2) = yd(1) + figslope*(xd(2)-xd(1));
-    yd = yd - min(yd) + range(yd)/2;
+%     yd = yd - min(yd) + range(yd)/2;
     annotation('Line',xd,yd,'Tag','slopper','LineWidth',2,'LineStyle','--');
 %     annotation('TextBox',[xd(2),yd(2),0.15,0.05],'LineStyle','none',...
 %         'string',[sprintf('%.2f',slope),' ','\pm',' ',sprintf('%.3f',err)]);
