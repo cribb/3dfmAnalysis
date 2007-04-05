@@ -1,3 +1,16 @@
+2007-04-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: lots of changes.
+			- figures opened by evt_gui now close automatically upon exit.
+			- renamed RTfigure to AUXillary figure to contain non-imperative data, such as radial displacement or trackers vs frame#.
+			- disabled controls until data has loaded (avoids annoying but understandable matlab errors).
+			- trimming data now works in pixel and micron length scales.
+			- selecting closest dataset now works in pixel and micron length scales.
+			- exporting a single bead to the base workspace now works.
+			- removed magnet log overlay.  no one uses it.  if it becomes necesary, it can be reinstated.
+			- radial plotting code now makes more sense.
+			- added commenting to old code as new code was written.
+	* evt_gui.fig: same.
+	
 2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: added ability to define origin as any pixel location for radial displacement.
 	* evt_gui.fig: same.

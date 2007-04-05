@@ -22,7 +22,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 21-Feb-2007 12:16:08
+% Last Modified by GUIDE v2.5 05-Apr-2007 11:22:52
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -44,7 +44,7 @@ function varargout = evt_GUI(varargin)
 	% End initialization code - DO NOT EDIT
 
     % set up global constants for data columns
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    video_tracking_constants;
     
     video_tracking_constants;
 
@@ -75,6 +75,30 @@ function varargout = evt_GUI_OutputFcn(hObject, eventdata, handles)
     
 % --- Executes on button press in pushbutton_close.
 function pushbutton_close_Callback(hObject, eventdata, handles)
+    if isfield(handles, 'XYfig');
+        try
+            close(handles.XYfig);
+        end
+    end
+
+    if isfield(handles, 'XTfig');
+        try
+            close(handles.XTfig);
+        end
+    end
+
+    if isfield(handles, 'AUXfig');
+        try
+            close(handles.AUXfig);
+        end
+    end
+
+    if isfield(handles, 'TrFrfig');
+        try
+            close(handles.TrFrfig);
+        end
+    end
+
 	close(evt_gui);
 
     
@@ -136,7 +160,7 @@ function edit_infile_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in pushbutton_loadfile.
 function pushbutton_loadfile_Callback(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    video_tracking_constants;
 
     % reset the Active Bead to 0
     set(handles.edit_BeadID, 'String', '0');
@@ -204,7 +228,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         end        
     end
     
-    % if the background image exists, attach it to handles structure
+    % if the background MIP image exists, attach it to handles structure
     if exist('im')
         handles.im = im;
     end
@@ -225,6 +249,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     x = table(:,X);
     y = table(:,Y);
 
+    % construct figure handles if they don't already exist
     if isfield(handles, 'XYfig')
         XYfig = figure(handles.XYfig);
     else
@@ -237,15 +262,32 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         XTfig = figure;
     end
 
-    if isfield(handles, 'RTfig')
-        RTfig = figure(handles.RTfig);
+    if isfield(handles, 'AUXfig')
+        AUXfig = figure(handles.AUXfig);
     else            
-        RTfig = figure;         
-    end
+        AUXfig = figure;         
+        set(AUXfig, 'Visible', 'off');
+    end    
     
+    % set default figure parameters
+    set(XYfig, 'Units', 'Normalized');
+    set(XYfig, 'Position', [0.1 0.05 0.4 0.4]);
+    set(XYfig, 'DoubleBuffer', 'on');
+    set(XYfig, 'BackingStore', 'off');
     
-    currentBead = 0;
+    set(XTfig, 'Units', 'Normalized');
+    set(XTfig, 'Position', [0.51 0.05 0.4 0.4]);
+    set(XTfig, 'DoubleBuffer', 'on');
+    set(XTfig, 'BackingStore', 'off');   
     
+    set(AUXfig, 'Units', 'Normalized');
+    set(AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
+    set(AUXfig, 'DoubleBuffer', 'on');
+    set(AUXfig, 'BackingStore', 'off');  
+
+%     currentBead = 0;
+    
+    % handle peculiarities of sliders (still not perfected)
 	slider_max = max(beadID);
 	slider_min = 0;
     if slider_min == slider_max
@@ -258,9 +300,10 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 	set(handles.slider_BeadID, 'Max', slider_max);
 	set(handles.slider_BeadID, 'SliderStep', [slider_step slider_step]);
 
+    % export important data to handles structure
     handles.XYfig = XYfig;
     handles.XTfig = XTfig;
-    handles.RTfig = RTfig;
+    handles.AUXfig = AUXfig;
     handles.table = table;
     handles.mintime = mintime;
     handles.maxtime = maxtime;
@@ -270,11 +313,42 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
     drawnow;
     
-    set(RTfig, 'Visible', 'off');
+    % Enable all of the controls now that data is loaded
+    set(handles.checkbox_frame_rate               , 'Enable', 'on');
+    set(handles.text_frame_rate                   , 'Enable', 'on');
+%     set(handles.edit_frame_rate                   , 'Enable', 'on');
+    set(handles.edit_BeadID                       , 'Enable', 'on');
+    set(handles.slider_BeadID                     , 'Enable', 'on');
+    set(handles.pushbutton_Select_Closest_dataset , 'Enable', 'on');
+    set(handles.radio_XYfig                       , 'Enable', 'on');
+    set(handles.radio_XTfig                       , 'Enable', 'on');
+%     set(handles.radio_AUXfig                      , 'Enable', 'on');
+    set(handles.radio_selected_dataset            , 'Enable', 'on');
+    set(handles.radio_boundingbox                 , 'Enable', 'on');
+    set(handles.radio_deletetimebefore            , 'Enable', 'on');
+    set(handles.radio_deletetimeafter             , 'Enable', 'on');
+    set(handles.pushbutton_Edit_Data              , 'Enable', 'on');
+    set(handles.radio_plotradius                  , 'Enable', 'on');
+    set(handles.radio_relative                    , 'Enable', 'on');
+    set(handles.radio_arb_origin                  , 'Enable', 'on');
+    set(handles.edit_arb_origin                   , 'Enable', 'on');
+    set(handles.radio_plotTrFr                    , 'Enable', 'on');
+    set(handles.radio_AUXoff                      , 'Enable', 'on');
+    set(handles.radio_com                         , 'Enable', 'on');
+    set(handles.radio_linear                      , 'Enable', 'on');
+    set(handles.pushbutton_select_drift_region    , 'Enable', 'on');
+    set(handles.pushbutton_remove_drift           , 'Enable', 'on');
+    set(handles.radio_pixels                      , 'Enable', 'on');
+    set(handles.radio_microns                     , 'Enable', 'on');
+    set(handles.edit_calib_um                     , 'Enable', 'on');
+    set(handles.text_calib_um                     , 'Enable', 'on');
+    set(handles.pushbutton_export_all_beads       , 'Enable', 'on');
+    set(handles.pushbutton_export_bead            , 'Enable', 'on');
     
+
 % --- Executes on button press in pushbutton_savefile.
 function pushbutton_savefile_Callback(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    video_tracking_constants;
 
 	outfile = get(handles.edit_outfile, 'String');
     
@@ -309,9 +383,10 @@ function edit_outfile_Callback(hObject, eventdata, handles)
 % --- Executes on button press in pushbutton_Edit_Data.
 function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
 
-	set(handles.radio_selected_dataset, 'Enable', 'Off');
+    set(handles.radio_selected_dataset, 'Enable', 'Off');
 	set(handles.radio_boundingbox, 'Enable', 'Off');
     set(handles.radio_deletetimebefore, 'Enable', 'Off');
+    set(handles.radio_deletetimeafter, 'Enable', 'Off');
 	
 	if (get(handles.radio_selected_dataset, 'Value'))
         delete_selected_dataset(hObject, eventdata, handles);
@@ -342,6 +417,7 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Enable', 'On');
 	set(handles.radio_boundingbox, 'Enable', 'On');
     set(handles.radio_deletetimebefore, 'Enable', 'On');
+    set(handles.radio_deletetimeafter, 'Enable', 'On');
     
     plot_data(hObject, eventdata, handles);
     drawnow;
@@ -381,11 +457,17 @@ function edit_BeadID_Callback(hObject, eventdata, handles)
     
 % --- Executes on button press in pushbutton_Select_Closest_dataset.
 function pushbutton_Select_Closest_dataset_Callback(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    video_tracking_constants;
 
     figure(handles.XYfig);
 	[xm, ym] = ginput(1);
-    
+        
+    if get(handles.radio_microns, 'Value')
+        calib_um = str2num(get(handles.edit_calib_um, 'String'));
+        xm = xm / calib_um;
+        ym = ym / calib_um;
+    end        
+        
     beadID = handles.table(:,ID);    
     x = handles.table(:,X);
     y = handles.table(:,Y);
@@ -404,15 +486,20 @@ function pushbutton_Select_Closest_dataset_Callback(hObject, eventdata, handles)
     drawnow;
     
 
-% --- Executes on button press in checkbox_plotradius.
-function checkbox_plotradius_Callback(hObject, eventdata, handles)
+% --- Executes on button press in radio_plotradius.
+function radio_plotradius_Callback(hObject, eventdata, handles)
+    set(handles.radio_AUXoff, 'Value', 0);
+    set(handles.radio_plotradius, 'Value', 1);
+    set(handles.radio_plotTrFr, 'Value', 0);
+    
     if get(hObject, 'Value')
-        set(handles.RTfig, 'Visible', 'on');
-%         plot_data(hObject, eventdata, handles);
+        set(handles.AUXfig, 'Visible', 'on');
     else
-        set(handles.RTfig, 'Visible', 'off');
+        set(handles.AUXfig, 'Visible', 'off');
     end
 
+    plot_data(hObject, eventdata, handles);
+    drawnow;
     
 % --- Executes on button press in pushbutton_select_drift_region.
 function pushbutton_select_drift_region_Callback(hObject, eventdata, handles)
@@ -447,7 +534,7 @@ function radio_linear_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in pushbutton_export_bead.
 function pushbutton_export_bead_Callback(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    video_tracking_constants;
 
     currentBead = get(handles.slider_BeadID, 'Value');
     beadID = handles.table(:,ID);
@@ -458,14 +545,16 @@ function pushbutton_export_bead_Callback(hObject, eventdata, handles)
     bead.t      = bead.t - min(handles.table(:,TIME));
     bead.x      = handles.table(k,X);
     bead.y      = handles.table(k,Y);
-    bead.yaw    = handles.table(idx,YAW);
+    if isfield(bead, 'yaw');
+        bead.yaw    = handles.table(idx,YAW);
+    end
     
     assignin('base', ['bead' num2str(currentBead)], bead);
     
     
 % --- Executes on button press in pushbutton_export_all_beads.
 function pushbutton_export_all_beads_Callback(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    video_tracking_constants;
     
     beadID = handles.table(:,ID);
 
@@ -485,15 +574,17 @@ function pushbutton_export_all_beads_Callback(hObject, eventdata, handles)
     
 % --- Executes on button press in radio_pixels.
 function radio_pixels_Callback(hObject, eventdata, handles)
-	set(handles.radio_pixels, 'Value', 1);
-	set(handles.radio_microns, 'Value', 0);
+    set(handles.radio_pixels, 'Value', 1);
+    set(handles.radio_microns, 'Value', 0);
+    
     plot_data(hObject, eventdata, handles);
 
 
 % --- Executes on button press in radio_microns.
 function radio_microns_Callback(hObject, eventdata, handles)
-	set(handles.radio_pixels, 'Value', 0);
-	set(handles.radio_microns, 'Value', 1);
+    set(handles.radio_pixels, 'Value', 0);
+    set(handles.radio_microns, 'Value', 1);
+
     plot_data(hObject, eventdata, handles);
 
 
@@ -507,25 +598,7 @@ function edit_calib_um_CreateFcn(hObject, eventdata, handles)
 
 
 function edit_calib_um_Callback(hObject, eventdata, handles)
-
-% --- Executes on button press in checkbox_coil_01.
-function checkbox_coil_01_Callback(hObject, eventdata, handles)
-
-% --- Executes on button press in checkbox_coil_03.
-function checkbox_coil_03_Callback(hObject, eventdata, handles)
-
-% --- Executes on button press in checkbox_coil_04.
-function checkbox_coil_04_Callback(hObject, eventdata, handles)
-
-% --- Executes on button press in checkbox_coil_05.
-function checkbox_coil_05_Callback(hObject, eventdata, handles)
-
-% --- Executes on button press in checkbox_coil_02.
-function checkbox_coil_02_Callback(hObject, eventdata, handles)
-
-% --- Executes on button press in checkbox_coil_06.
-function checkbox_coil_06_Callback(hObject, eventdata, handles)
-
+    plot_data(hObject, eventdata, handles);    
 
 % --- Executes on button press in pushbutton_remove_drift.
 function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
@@ -556,75 +629,45 @@ function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
     
     
-% --- Executes on button press in checkbox_relative.
-function checkbox_relative_Callback(hObject, eventdata, handles)
+% --- Executes on button press in radio_relative.
+function radio_relative_Callback(hObject, eventdata, handles)
+    set(handles.radio_relative, 'Value', 1);
+    set(handles.radio_arb_origin, 'Value', 0);
+    
     plot_data(hObject, eventdata, handles);
     drawnow;
 
-% --- Executes on button press in pushbutton_select_magfile.
-function pushbutton_select_magfile_Callback(hObject, eventdata, handles)
 
-	warning off MATLAB:deblank:NonStringInput
-
-    try
-        [fname, pname] = uigetfile('*.mat');
-    catch
-        logentry('No magnet file found. No magnet file loaded.');
-        return;
-    end
-    
-    if sum(length(fname), length(pname)) <= 1
-        logentry('No magnet file selected. No magnet file loaded.');
-        return;
-    end        
-    
-	filename = strcat(pname, fname);
-    logentry(['Setting Path to ' pname]);
-    cd(pname);
-
-    handles.mags = load_magnet_log(filename);
-	guidata(hObject, handles);
-    
-    logentry(['Loaded magnet file, ' fname]);
-
-    
-% --- Executes on button press in checkbox_attach_magnets.
-function checkbox_attach_magnets_Callback(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
-
-	if get(hObject, 'Value');
-        if ~isfield(handles, 'mags');
-            pushbutton_select_magfile_Callback(hObject, eventdata, handles)
-        end
-	
-        % easier time variables
-		beadtime = handles.table(:,TIME);
-		magtime  = handles.mags.time;
-		
-		% determine the minimum time recorded by either of these 
-		% files and use that as t_zero
-		handles.mintime = min([beadtime ; magtime]);
-		handles.maxtime = max([beadtime ; magtime]);
-		guidata(hObject, handles);
-        
-    end
 % --- Executes on button press in checkbox_frame_rate.
 function checkbox_frame_rate_Callback(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
 
+    video_tracking_constants;
+    table = handles.table;
+    
     if get(hObject, 'Value')      
-        set(handles.checkbox_frame_rate, 'Enable', 'off');
+        set(handles.edit_frame_rate, 'Enable', 'on');
+
+        table(:,TIME) = table(:,FRAME) / str2num(get(handles.edit_frame_rate, 'String'));
+        mintime = min(table(:,TIME));
+        maxtime = max(table(:,TIME));
+	
+        handles.table = table;
+        handles.maxtime = maxtime;
+        handles.mintime = mintime;
+        guidata(hObject, handles);
     else
+        set(handles.edit_frame_rate, 'Enable', 'off');
+
         handles.table(:,TIME) = handles.tstamp_times;
         handles.mintime = min(handles.table(:,TIME));
         handles.maxtime = max(handles.table(:,TIME));
         guidata(hObject, handles);
-	
-        plot_data(hObject, eventdata, handles);
-        drawnow;
     end
 
-    
+    plot_data(hObject, eventdata, handles);
+    drawnow;
+
+
 % --- Executes during object creation, after setting all properties.
 function edit_frame_rate_CreateFcn(hObject, eventdata, handles)
 	if ispc
@@ -635,7 +678,7 @@ function edit_frame_rate_CreateFcn(hObject, eventdata, handles)
 
 
 function edit_frame_rate_Callback(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    video_tracking_constants;
 
     table = handles.table;
 
@@ -652,15 +695,99 @@ function edit_frame_rate_Callback(hObject, eventdata, handles)
         plot_data(hObject, eventdata, handles);
         drawnow;
     end
+        
+
+% --- Executes on button press in radio_arb_origin.
+function radio_arb_origin_Callback(hObject, eventdata, handles)
+
+    set(handles.radio_relative, 'Value', 0);
+    set(handles.radio_arb_origin, 'Value', 1);
+
+    arb_origin = str2num(get(handles.edit_arb_origin, 'String'));
+
+    if length(arb_origin) ~= 2
+        logentry('Origin value is not valid.  Not plotting.')
+        set(handles.radio_arb_origin, 'Value', 0);
+    else
+        plot_data(hObject, eventdata, handles);
+    end
+
+
+
+
+function edit_arb_origin_Callback(hObject, eventdata, handles)
+    arb_origin = str2num(get(hObject, 'String'));
+
+    if length(arb_origin) ~= 2
+        logentry('Origin value is not valid.  Not plotting.')
+        set(handles.radio_arb_origin, 'Value', 0);
+    else
+        plot_data(hObject, eventdata, handles);
+    end
     
+
+% --- Executes during object creation, after setting all properties.
+function edit_arb_origin_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_arb_origin (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+
+% --- Executes on button press in radio_plotTrFr.
+function radio_plotTrFr_Callback(hObject, eventdata, handles)
+% Hint: get(hObject,'Value') returns toggle state of radio_plotTrFr
+    set(handles.radio_AUXoff, 'Value', 0);
+    set(handles.radio_plotradius, 'Value', 0);
+    set(handles.radio_plotTrFr, 'Value', 1);
+
+    plot_data(hObject, eventdata, handles);
+    drawnow;  
+
     
+% --- Executes on button press in radio_AUXoff.
+function radio_AUXoff_Callback(hObject, eventdata, handles)
+% hObject    handle to radio_AUXoff (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+    set(handles.radio_AUXoff, 'Value', 1);
+    set(handles.radio_plotradius, 'Value', 0);
+    set(handles.radio_plotTrFr, 'Value', 0);
+    
+    if ~get(hObject, 'Value')
+        set(handles.AUXfig, 'Visible', 'on');
+        set(handles.radio_AUXfig, 'Enable', 'on');      
+    else
+        set(handles.AUXfig, 'Visible', 'off');
+        set(handles.radio_AUXfig, 'Enable', 'off');
+    end
+
+    plot_data(hObject, eventdata, handles);
+    drawnow;  
+
+% --- Executes during object creation, after setting all properties.
+function radio_AUXoff_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to radio_AUXoff (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+
 % =========================================================================
 % Everything below this point are functions related to computation and data
-% handling/display, and not the gui (thought the handles structure is used).
+% handling/display, and not the gui (though the handles structure is used).
 % =========================================================================
 
 function plot_data(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    video_tracking_constants;
 
     if get(handles.radio_pixels, 'Value');
         calib_um = 1;
@@ -671,6 +798,7 @@ function plot_data(hObject, eventdata, handles)
     end
     
     beadID = handles.table(:,ID);
+    frame  = handles.table(:,FRAME);
     x      = handles.table(:,X) * calib_um;
     y      = handles.table(:,Y) * calib_um;
     t      = handles.table(:,TIME);
@@ -680,7 +808,7 @@ function plot_data(hObject, eventdata, handles)
     mintime = handles.mintime;
     maxtime = handles.maxtime;
     
-	k = find(beadID == currentBead);
+	k  = find(beadID == currentBead);
 	nk = find(beadID ~= currentBead);
     
     im = handles.im;
@@ -709,47 +837,59 @@ function plot_data(hObject, eventdata, handles)
     set(handles.XTfig, 'BackingStore', 'off');    
     drawnow;
     
-    if get(handles.checkbox_plotradius, 'Value')
-        figure(handles.RTfig);
-        if get(handles.checkbox_relative, 'Value')
+    arb_origin = str2num(get(handles.edit_arb_origin, 'String'));
+    calib_um = str2num(get(handles.edit_calib_um, 'String')); 
+
+    
+    if get(handles.radio_plotradius, 'Value')        
+
+        figure(handles.AUXfig);
+        
+        if get(handles.radio_relative, 'Value')
             xinit = x(k); xinit = xinit(1);
-            yinit = y(k); yinit = yinit(1);
-            r = magnitude(x(k) - xinit, y(k) - yinit);
-            plot(t(k) - mintime, r - r(1), '.');
-        elseif get(handles.checkbox_arb_origin, 'Value')
-            arb_origin = str2num(get(handles.edit_arb_origin, 'String'));
+            yinit = y(k); yinit = yinit(1);        
+        elseif get(handles.radio_arb_origin, 'Value')            
             xinit = arb_origin(1);
             yinit = arb_origin(2);
             
             % handle the case where 'microns' are selected
             if get(handles.radio_microns, 'Value');
-                calib_um = str2num(get(handles.edit_calib_um, 'String')); 
                 xinit = xinit * calib_um;
                 yinit = yinit * calib_um;                
-            end
-            
-            r = magnitude(x(k) - xinit, y(k) - yinit);
-            plot(t(k) - mintime, r, '.');                        
-        else
-            r = magnitude(x(k), y(k));
-            plot(t(k) - mintime, r - r(1), '.');
+            end                        
         end
+        
+        r = magnitude(x(k) - xinit, y(k) - yinit);
+
+        plot(t(k) - mintime, r, '.');
         xlabel('time (s)');
         ylabel(['radial ' ylabel_string]);
-        set(handles.RTfig, 'Units', 'Normalized');
-        set(handles.RTfig, 'Position', [0.51 0.525 0.4 0.4]);
-        set(handles.RTfig, 'DoubleBuffer', 'on');
-        set(handles.RTfig, 'BackingStore', 'off');    
+        set(handles.AUXfig, 'Units', 'Normalized');
+        set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
+        set(handles.AUXfig, 'DoubleBuffer', 'on');
+        set(handles.AUXfig, 'BackingStore', 'off');    
         drawnow;
     end
     
-    
+    if get(handles.radio_plotTrFr, 'Value')
+        figure(handles.AUXfig);
+        plot(frame, beadID, '.');
+        xlabel('frame number');
+        ylabel('Tracker ID');
+        set(handles.AUXfig, 'Units', 'Normalized');
+        set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
+        set(handles.AUXfig, 'DoubleBuffer', 'on');
+        set(handles.AUXfig, 'BackingStore', 'off');    
+        drawnow;
+    end
+        
     refresh(handles.XYfig);
     refresh(handles.XTfig);
 
     
 function delete_selected_dataset(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+
+    video_tracking_constants;
     
     table = handles.table;
 
@@ -787,13 +927,14 @@ function delete_selected_dataset(hObject, eventdata, handles)
     
     
 function delete_inside_boundingbox(hObject, eventdata, handles)
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    video_tracking_constants;
 
     if(get(handles.radio_XYfig, 'Value'))
         active_fig = handles.XYfig;
     elseif(get(handles.radio_XTfig, 'Value'))
         active_fig = handles.XTfig;
     end
+    
     figure(active_fig);
     
     table = handles.table;
@@ -805,6 +946,18 @@ function delete_inside_boundingbox(hObject, eventdata, handles)
     currentbead = get(handles.slider_BeadID, 'Value');
     
     [xm, ym] = ginput(2);
+    
+    if get(handles.radio_microns, 'Value')
+        calib_um = str2num(get(handles.edit_calib_um, 'String'));
+        
+        if(get(handles.radio_XYfig, 'Value'))
+            xm = xm / calib_um;
+            ym = ym / calib_um;
+        elseif(get(handles.radio_XTfig, 'Value'))
+            ym = ym / calib_um;
+        end
+        
+    end
     
     xlo = min(xm);
     xhi = max(xm);
@@ -818,13 +971,15 @@ function delete_inside_boundingbox(hObject, eventdata, handles)
                       (t > xlo & t < xhi) & (beadID == currentbead)));        
     end
     handles.table = table(k,:);
+    handles.tstamp_times = handles.tstamp_times(k);
     guidata(hObject, handles);
 
     plot_data(hObject, eventdata, handles);
 
     
-function delete_data_before_time(hObject, eventdata, handles);    
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+function delete_data_before_time(hObject, eventdata, handles); 
+
+    video_tracking_constants;
 
     if(get(handles.radio_XYfig, 'Value'))
         active_fig = handles.XTfig;        
@@ -862,7 +1017,7 @@ function delete_data_before_time(hObject, eventdata, handles);
    
     
 function delete_data_after_time(hObject, eventdata, handles);    
-    global TIME ID FRAME X Y Z ROLL PITCH YAW RADIAL;
+    video_tracking_constants;
 
     if(get(handles.radio_XYfig, 'Value'))
         active_fig = handles.XTfig;        
@@ -911,48 +1066,3 @@ function logentry(txt)
      fprintf('%s%s\n', headertext, txt);
 
    
-
-
-% --- Executes on button press in checkbox_arb_origin.
-function checkbox_arb_origin_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_arb_origin (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox_arb_origin
-    arb_origin = str2num(get(handles.edit_arb_origin, 'String'));
-
-    if length(arb_origin) ~= 2
-        logentry('Origin value is not valid.  Not plotting.')
-        set(handles.checkbox_arb_origin, 'Value', 0);
-    else
-        plot_data(hObject, eventdata, handles);
-    end
-
-
-
-
-function edit_arb_origin_Callback(hObject, eventdata, handles)
-    arb_origin = str2num(get(hObject, 'String'));
-
-    if length(arb_origin) ~= 2
-        logentry('Origin value is not valid.  Not plotting.')
-        set(handles.checkbox_arb_origin, 'Value', 0);
-    else
-        plot_data(hObject, eventdata, handles);
-    end
-    
-
-% --- Executes during object creation, after setting all properties.
-function edit_arb_origin_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_arb_origin (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
