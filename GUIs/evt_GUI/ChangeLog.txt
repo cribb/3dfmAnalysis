@@ -1,4 +1,7 @@
 2007-04-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: added axis labels to XY figure.
+
+2007-04-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: lots of changes.
 			- figures opened by evt_gui now close automatically upon exit.
 			- renamed RTfigure to AUXillary figure to contain non-imperative data, such as radial displacement or trackers vs frame#.

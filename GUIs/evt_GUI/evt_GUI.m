@@ -817,8 +817,10 @@ function plot_data(hObject, eventdata, handles)
     imagesc(1:648 * calib_um, 1:484 * calib_um, handles.im);
     colormap(gray);
     hold on;
-    plot(x(nk), y(nk), '.', x(k), y(k), 'r.'); 
+        plot(x(nk), y(nk), '.', x(k), y(k), 'r.'); 
     hold off;
+    xlabel(ylabel_string);
+    ylabel(ylabel_string);    
     axis([0 648 0 484] .* calib_um);
     set(handles.XYfig, 'Units', 'Normalized');
     set(handles.XYfig, 'Position', [0.1 0.05 0.4 0.4]);
@@ -828,7 +830,7 @@ function plot_data(hObject, eventdata, handles)
     
     figure(handles.XTfig);
     plot(t(k) - mintime, [x(k) y(k)], '.');
-    xlabel('time (s)');
+    xlabel('time [s]');
     ylabel(ylabel_string);
     legend('x', 'y');    
     set(handles.XTfig, 'Units', 'Normalized');
