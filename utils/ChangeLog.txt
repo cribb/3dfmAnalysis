@@ -1,3 +1,6 @@
+2007-05-02  Kalpit Desai <kvdesai@email.unc.edu>
+	* slopper.m: Minor changes and a bit cleaning up.
+
 2007-04-02  Kalpit Desai <kvdesai@email.unc.edu>
 	* slopper.m: Fixed a bug, now works for both, positive and negative slopes.
 2007-03-05  Kalpit Desai <kvdesai@email.unc.edu>

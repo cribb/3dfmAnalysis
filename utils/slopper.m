@@ -2,7 +2,19 @@ function [slope, err] = slopper(fnum,annotate,usedata)
 % 3DFM function
 % Computes slope (with uncertainty) for the data inside the box drawn.
 % Logscale and multiple lines on a single plot is allowed. The only lines 
-% that are visible are considered for computing the slope.
+% that are visible are considered for computing the slope. 
+% 
+% Usage:
+% [slope, err] = slopper(fnum,annotate,usedata)
+
+% fnum = Figure handle
+% annotate = switch (0 or 1). If 1, a line of computed slope and an
+% annotation text describing the fit slope and error will automatically
+% appear on the axis. Optional argument; by default 1.
+% usedata = switch (0 or 1). If 1, then the data-points that fall within the
+% dragged box will be used to compute the slope. If 0, then simply the
+% two diagonal vertices of the box drawn will be used to compute the slope.
+% Optional argument; by default 1.
 
 if nargin <3 | isempty(usedata), usedata = 1; end;
 if nargin <2 | isempty(annotate), annotate = 1; end;
@@ -52,14 +64,20 @@ else
     y = [p1(2),p2(2)];
 end
 
+% handle log scale
 axlim = get(ha,'xlim'); aylim = get(ha,'Ylim');
 if isequal(get(ha,'Xscale'),'log')
     x = log10(x);
-    axlim = log10(axlim);
-    aylim = log10(aylim);
+    rax = range(log10(axlim));    
+else
+    rax = range(axlim);
 end
+
 if isequal(get(ha,'Yscale'),'log')
     y = log10(y);
+    ray = range(log10(aylim));
+else
+    ray = range(aylim);
 end
 
 if usedata
@@ -86,15 +104,19 @@ if annotate
         xd(1) = apos(1); yd(1) = apos(2)+apos(4);
     end
     
-    xd(2) = xd(1)+ range(x)*apos(3)/range(axlim);
+    xd(2) = xd(1)+ range(x)*apos(3)/rax;
 %     xd = xd - min(xd) + range(xd)/2;
 
-    figslope = slope*(range(axlim)/apos(3))/(range(aylim)/apos(4));
+    figslope = slope*(rax/apos(3))/(ray/apos(4));
     yd(2) = yd(1) + figslope*(xd(2)-xd(1));
 %     yd = yd - min(yd) + range(yd)/2;
     annotation('Line',xd,yd,'Tag','slopper','LineWidth',2,'LineStyle','--');
-%     annotation('TextBox',[xd(2),yd(2),0.15,0.05],'LineStyle','none',...
-%         'string',[sprintf('%.2f',slope),' ','\pm',' ',sprintf('%.3f',err)]);
+
+    if usedata
+        annotstr = [sprintf('%.2f',slope),' ','\pm',' ',sprintf('%.3f',err)];
+    else
+        annotstr = [sprintf('%.2f',slope)];
+    end
     annotation('TextBox',[xd(2),yd(2),0.15,0.05],'LineStyle','none',...
-        'string',[sprintf('%.2f',slope)],'FontSize', 18,'FontWeight','Bold');
+        'string',annotstr,'FontName','Arial','FontSize',14);
 end
