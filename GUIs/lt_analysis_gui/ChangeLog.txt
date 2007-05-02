@@ -1,3 +1,7 @@
+2007-05-02 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_anlaysis_gui.m:
+	- Added a few modules for GPI analysis, computing diffusion coefficient etc.
+
 2007-03-05 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_anlaysis_gui.m:
 	- PSD plots in loglog scale not linearlized log

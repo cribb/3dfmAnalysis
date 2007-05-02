@@ -311,7 +311,10 @@ global g
 % Hints: contents = get(hObject,'String') returns menu_files contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from menu_files
 updatesignalmenu(handles);
-
+% export the tag of selected file to base workspace
+fid = get(hObject,'Value');
+tag = g.tag{1,fid};
+assignin('base','curtag',tag); disp(['Current Tag: ',tag]);
 % --- Executes on button press in button_tag.
 function button_tag_Callback(hObject, eventdata, handles)
 global g
@@ -989,16 +992,17 @@ for fi = 1:length(ids) %repeat for all files selected
         for c = 1:length(cols)
             [p f] = mypsd(sig(:,cols(c)+1),srate,psdres,handles.psdwin);
             figure(psdfignum + cols(c) -1);
-            warning off % No better way in matlab 6.5 to turn off 'log of zero' warning 
-%             plot(log10(f),log10(p),[smarker_now,'-',scolor_now]);
-            loglog(f,p,[smarker_now,'-',scolor_now]);
+            % do not plot the DC point (f=0), because it is not displayed on a
+            % loglog plot anyway (log(0) is undefined). Plotting the DC
+            % point makes the Xlim = [0, srate/2], while the Xlim
+            % displayed  Xlim is [psdres, srate/2]. The wrong display range especially confuses the slopper.
+            loglog(f(2:end),p(2:end),[smarker_now,'-',scolor_now]);
             if get(handles.check_cumdisp,'value')
                 dc = sqrt(cumsum(p)*mean(diff(f)));% sqrt of area under psd
                 figure(dvsffignum + cols(c)-1);
 %                 plot(log10(f),dc,[smarker_now,'-',scolor_now]);
                 semilogx(f,dc,[smarker_now,'-',scolor_now]);
             end
-            warning on
             if stack_mode % if we just stacked results of this box position, annotate
                 figure(psdfignum + cols(c) -1);
                 % first get the old legend strings
@@ -1006,7 +1010,7 @@ for fi = 1:length(ids) %repeat for all files selected
                 legstr = sprintf('t: %.1f to %.1f',xlims(1),xlims(2));
 %                 legstr = ['t:',num2str(xlims(1)),'-',num2str(xlims(2))];
                 legend([strs,legstr],'Location','Best');
-                set(gca,'Xscale','Log','Yscale','Log');
+                set(gca,'Xscale','Log','Yscale','Log'); axis tight;
                 pretty_plot;
                 hold off;
                 set(gcf,'Tag','boxstack');
@@ -1016,7 +1020,7 @@ for fi = 1:length(ids) %repeat for all files selected
                     [lh oh ph strs] = legend(gca);
                     legstr = sprintf('t: %.1f to %.1f',xlims(1),xlims(2));
                     legend([strs,legstr],'Location','Best');
-                    set(gca,'Xscale','Log','Yscale','Linear');
+                    set(gca,'Xscale','Log','Yscale','Linear');axis tight;
                     pretty_plot;
                     hold off;
                     set(gcf,'Tag','boxstack');
@@ -1079,6 +1083,25 @@ for fi = 1:length(ids) %repeat for all files selected
     end
     %%=====  COMPLETED PLOTTING MEAN-SQUARE-DISPLACEMENT (MSD)  =======    
 
+    %% A quick hack for computing Diffusion coefficient for GPI experiments
+    GPI_hack = 1;
+    if GPI_hack
+        %% Compute diffusion coefficient for 1 second span, or the width of the
+        %% box, whichever is smaller.
+        Tau = min(range(sig(:,1)),1);
+        for c = 1:length(cols)            
+            [msd, tau] = msdbase([sig(:,1), sig(:,cols(c)+1)],Tau);%
+            if cols(c) == 4 % R^2
+                DC(c) = msd*1E6/(4*tau);
+            elseif cols(c) == 5 % R^3
+                DC(c) = msd*1E6/(6*tau);
+            else
+                DC(c) = msd*1E6/(2*tau);
+            end
+        end    
+        disp(['Diffusion Coefficient: ',num2str(DC),' nm^2/Sec']);    
+    end
+    
     if stack_mode % then update the time domain figure that shows each box color coded
         if ~ishandle(handles.tstackfigid);
             % because the previous code only parses that data within the
@@ -1120,6 +1143,7 @@ for fi = 1:length(ids) %repeat for all files selected
         x = get(hstack,'Xdata'); y = get(hstack,'Ydata');
         ist = min(find(x >= xlims(1))); iend = max(find(x <= xlims(2)));
         plot(x(ist:iend),y(ist:iend),[smarker_now,'-',scolor_now]);
+        axis tight;
     end
     
     %%=========== COMPUTE AND PLOT SPECTROGRAM FOR THE FIRST FILE =========
@@ -1253,7 +1277,7 @@ if isempty(itracking)
 end
 lastpwd = pwd;
 tp = get(handles.button_add,'UserData');%target path
-cd(tp);
+% cd(tp);
 [filename, pathname] = uiputfile([fname(1:itracking+7),'.edited.mat'], 'Save Currently active file as');
 
 if isequal(filename,0)|isequal(pathname,0)
@@ -1265,7 +1289,7 @@ else
     save(fullfile(pathname,filename),'edited');
     prompt_user(['Edited file was saved at',pathname],handles);
 end
-cd(lastpwd);
+% cd(lastpwd);
 amibusy(0,handles);
 %%%$$$$$$$$$$$$$$$$  NON-CALLBACK ROUTINES     $$$$$$$$$$$$$$$$$$$$$$$$
 %-----------------------------------------------------------------------
