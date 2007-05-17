@@ -22,10 +22,10 @@ function varargout = percent_recovery(x)
             varargout{1} = pct_rec;
         case 2
             varargout{1} = pct_rec;
-            varargout{2} = xmax;
+            varargout{2} = max(x);
         case 3
             varargout{1} = pct_rec;
-            varargout{2} = xmax;
+            varargout{2} = max(x);
             varargout{3} = xrec;
     end    
     

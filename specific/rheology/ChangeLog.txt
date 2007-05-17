@@ -1,3 +1,6 @@
+2007-05-17  Jeremy Cribb <jcribb@email.unc.edu>
+	* percent_recovery.m: fixed bug (reference to a renamed variable ).
+
 2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* added (rheological) 'models' folder.
 	* jeffrey_step_fit.m: removed.  moved to models folder.
