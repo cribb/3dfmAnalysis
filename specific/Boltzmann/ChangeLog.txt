@@ -1,0 +1,2 @@
+2007-06-26	Kalpit Desai	<kvdesai@email.unc.edu>
+	* potwell.m: Added. Performs boltzmann probability analysis on a position trace. Constructs energy profile.
