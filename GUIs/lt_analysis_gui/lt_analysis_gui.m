@@ -22,7 +22,7 @@ function varargout = lt_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help lt_analysis_gui
 
-% Last Modified by GUIDE v2.5 23-Nov-2006 16:13:50
+% Last Modified by GUIDE v2.5 14-Jun-2007 15:52:43
 % % NOTES FOR PROGRAMMER: 
 %  - add/load button adds new files into the database. Doesn't replace any files. 
 %    if the requested file exists in the database already, then it skips loading that file and  warns user.
@@ -351,6 +351,7 @@ g.metadata{1,fileid} = userinput{2};
 updatefilemenu(handles); % do not replot the main figure, just change menu entries.
 
 % --- Executes on button press in button_cut.
+% OBSOLETE: This button was removed from the GUI on 06/13/07
 function button_cut_Callback(hObject, eventdata, handles)
 global g
 dbstop if error
@@ -676,8 +677,7 @@ end
 amibusy(0,handles);
 dbclear if error
 %-------------------------------------------------------------------------
-% --- Executes on selection change in check_highres. OBSOLETE
-% THIS MENU NO LONGER EXISTS IN THE GUI SINCE NOV 23, 2006
+% --- Executes on selection change in check_highres.
 function check_highres_Callback(hObject, eventdata, handles)
 hmf = get(handles.button_drawbox,'UserData');
 if isempty(hmf) | ~ishandle(hmf), return; end
@@ -1084,7 +1084,7 @@ for fi = 1:length(ids) %repeat for all files selected
     %%=====  COMPLETED PLOTTING MEAN-SQUARE-DISPLACEMENT (MSD)  =======    
 
     %% A quick hack for computing Diffusion coefficient for GPI experiments
-    GPI_hack = 1;
+    GPI_hack = 0;
     if GPI_hack
         %% Compute diffusion coefficient for 1 second span, or the width of the
         %% box, whichever is smaller.
@@ -1110,6 +1110,10 @@ for fi = 1:length(ids) %repeat for all files selected
             signame = handles.signames.intr{1,sigid};            
             fileid = get(handles.menu_files,'value');
             allvals = g.data{1,fileid}.(signame);
+            % Subtract out the background drift, if we are told to do so
+            if get(handles.check_subdrift,'Value')
+                allvals(:,2:end) = subtract_background_drift(allvals(:,1),allvals(:,2:end),handles,signame);
+            end
             allvals(:,1) = allvals(:,1) - allvals(1,1); %remove offset  from time
             % Now down sample for faster display
             downvals = allvals(1:100:end,:); clear allvals;
@@ -1136,7 +1140,7 @@ for fi = 1:length(ids) %repeat for all files selected
             plot(downvals(:,1), downvals(:,stackdim+1), ':k', 'tag', 'stack');
             xlabel('Time [s]'); ylabel(ylstr);
             % Now overlay magnets if user has told us to do so
-            overlaymag(handles,gcf,1);
+            overlaymag(handles,gcf);
         end
         figure(handles.tstackfigid); hold on;
         hstack = findobj(gcf,'type','Line','tag','stack'); %Handle to the data line
@@ -1197,7 +1201,7 @@ for fi = 1:length(ids) %repeat for all files selected
                 overy = (overy-min(overy)+min(logf));
                 plot(overt,overy,'.-k')
                 % Now overlay the magnet log if are told to do so
-                overlaymag(handles,gcf,1); % This causes the figure to hold  off
+                overlaymag(handles,gcf); % This causes the figure to hold  off
                 view(0,90); % Looking from top down - looks like colormap
             end
             xlabel('Time [S]'); ylabel('Log_{10} Frequency [Hz]');
@@ -1225,7 +1229,7 @@ for fi = 1:length(ids) %repeat for all files selected
 %             overy = (overy-min(overy)+min(energy));
 %             plot(overt,overy,'.-k')
 %             % Now overlay the magnet log if are told to do so
-%             overlaymag(handles,gcf,1); % This causes the figure to hold off
+%             overlaymag(handles,gcf); % This causes the figure to hold off
 %             hold off;           
 % %             legend('Energy','Bead diplacement','Magnets');
 %             xlabel('Time [S]'); ylabel('Energy');            
@@ -1256,7 +1260,39 @@ end
 % --- Executes on button press in button_backdoor.
 function button_backdoor_Callback(hObject, eventdata, handles)
 global g
-keyboard
+fid = get(handles.menu_files,'value');
+sigid = 1; signame = 'beadpos';
+if isfield(g.data{1,fid},'laser');
+    hmf = handles.mainfigids(sigid);
+    hma = findobj(hmf,'Type','Axes','Tag','');
+    hbox = findobj(hma,'Tag','Box');
+    if ~isempty(hbox)
+        b = get(hbox,'Userdata');
+        t_start = b.xlims(1); t_end = b.xlims(2);
+        % Now register the time-base for the figure (the displayed trace) with the
+        % the time-base of the associated raw signal.
+        hlines = findobj(hma,'Type','Line','Tag','data');
+        tfig = get(hlines(1),'Xdata');
+        t_offset = g.data{1,fid}.beadpos(1,1) - tfig(1,1);
+        t_start = t_start + t_offset; t_end = t_end + t_offset;
+        oldbp = g.data{1,fid}.beadpos;
+        %         find indices inside the selected box
+        inbox = find(oldbp(:,1) <= t_end & oldbp(:,1) >= t_start);
+        data = oldbp(inbox,:);
+    else
+        data = g.data{1,fid}.beadpos;
+    end
+else
+    data = g.data{1,fid}.beadpos;
+end
+
+% Subtract out the background drift, if we are told to do so
+if get(handles.check_subdrift,'Value')
+    data(:,2:end) = subtract_background_drift(data(:,1),data(:,2:end),handles,'beadpos');
+end
+
+pwell(data);
+% keyboard
 % --- Executes on button press in button_export.
 function button_export_Callback(hObject, eventdata, handles)
 global g
@@ -1410,7 +1446,7 @@ str = [num2str(figid),':',sigstr{sigid}];
 %-----------------------------------------------------------------------
 % --- Executes on button press in check_overlaymag.
 function check_overlaymag_Callback(hObject, eventdata, handles)
-overlaymag(handles,[],1);
+overlaymag(handles,[]);
 
 %-----------------------------------------------------------------------
 % --- Executes on button press in button_sound.
@@ -1442,8 +1478,8 @@ clear oldsig;
 % in particle tracker, then and then only, add only those abilities to this sound player.
 % Also, the particle tracker (cur ver 05.01) plays the position-error
 % signals (i.e. the bead position relative to laser), while we here have
-% positions relative to specimen. The closest we can get is by taking
-% first-differences. 
+% positions relative to specimen. The closest we can get is by filtering low frequencies (< 20 Hz).
+% Humans cannot hear frequencies below 20 Hz anyways.
 
 % On the other hand, if this is not a position signal, then play first
 % column of the matrix. (e.g. Q1 for QPD signals).
@@ -1464,17 +1500,18 @@ if range(diff(t)) > 1E-6
     newraw = interp1(sig(:,1)-sig(1,1), raw, t);
     clear raw; raw = newraw; clear newraw;
 end
-playsig = k*diff(raw);
+% Filter out frequencies < 20 Hz. This also takes care of drift
+[fnum fden] = butter(2, 20*2/srate,'high');
+playsig = k*filtfilt(fnum,fden,raw);
 plotsig = raw(1:100:end); % plot only every 100 th point
 plott = t(1:100:end);
-
 
 Nbits = 16; % Number of bits that P'tracker sound player seems to be using
 
 dbstop if error
 
 figure(handles.soundfigid); clf;
-plot(plott,plotsig); overlaymag(handles,handles.soundfigid,1);
+plot(plott,plotsig); overlaymag(handles,handles.soundfigid);
 pretty_plot; hold on;
 set(handles.soundfigid,'DoubleBuffer','On');
 ylims = get(gca,'Ylim');
@@ -1482,7 +1519,7 @@ hline1 = line([t(1), t(1)],ylims,'LineStyle',':','Color','m', 'LineWidth',2);
 
 figure(handles.specgramfigid(end)); 
 specgram(playsig,512,handles.srate); colormap gray;
-overlaymag(handles,handles.specgramfigid(end),1);
+overlaymag(handles,handles.specgramfigid(end));
 set(gcf,'DoubleBuffer','On');
 ylims = get(gca,'Ylim');
 hline2 = line([t(1), t(1)],ylims,'LineStyle',':','Color','m', 'LineWidth',2);
@@ -1505,23 +1542,9 @@ dbclear if error
 % make the matrices of signal values to be displayed and related annotations
 function [sigout, annots] = filldispsig(sigin,signame,handles)
 dbstop if error
-% % % first make the time abscissa with correct resolution
-% % 
-% % if res == 0;
-% %     temp(:,1) = sigin(:,1);
-% % else
-% %     temp(:,1) = [sigin(1,1):res:sigin(end,1)]';
-% % end
-% % 
-% % for k = 2:size(sigin,2)
-% %     if res == 0
-% %         temp(:,k) = sigin(:,k);
-% %     else
-% %         temp(:,k) = interp1(sigin(:,1),sigin(:,k),temp(:,1),'nearest');
-% %     end    
-% % end
 temp = sigin;
-% Remove offset from time
+% Remove offset from time for display on the figure. Never remove offset
+% from the raw data.
 temp(:,1) = temp(:,1) - temp(1,1);
 % Subtract out the background drift, if we are told to do so
 if get(handles.check_subdrift,'Value')
@@ -1559,14 +1582,14 @@ switch signame
                 promptuser('Error: Unrecognized signal type');                
         end
     case handles.signames.intr{3} % qpd signals
-        sigout(:,2:5) = temp;
+        sigout(:,2:5) = temp(:,2:5);
         annots.legstr = {'Q1','Q2','Q3','Q4'};
         annots.colorOrder = [0 0 1; 0 1 0; 1 0 0; 0 0 0];
         annots.y = 'Volts';
         annots.x = 'Seconds';
         annots.t = 'QPD Signals';        
     case handles.signames.intr{4} %channel 8 
-        sigout(:,2) = temp;
+        sigout(:,2) = temp(:,2);
         annots.legstr = {'Ch 8'};
         annots.colorOrder = [0 0 1];
         annots.y = 'Volts';
@@ -1683,7 +1706,7 @@ end
 
 % Now update the overlaid magnets/channel 8 trace if we are told to
 if isequal(lower(get(handles.check_overlaymag,'Enable')),'on')
-    overlaymag(handles,figid,1);
+    overlaymag(handles,figid);
 end
 % Now overlay the bad-time-interval flag if we are told to
 % if isequal(lower(get(handles.check_overlaydt,'Enable')),'on')
@@ -1735,12 +1758,9 @@ axis tight;
 % end
 
 %-----------------------------------------------------------------------
-function overlaymag(handles,figid,remtoff)
+function overlaymag(handles,figid)
 % Called by mainfigure update routine and spectrogram plotting routine.
 global g
-if nargin < 3  | isempty(remtoff)    
-    remtoff = 0; % Do not remove offset in time
-end
 if nargin < 2  | isempty(figid) 
     sigid = get(handles.menu_signal,'UserData');
     figid = handles.mainfigids(sigid);    
@@ -1755,17 +1775,13 @@ oldmag = findobj(figid,'Type','Line','Tag','Mag');
 delete(oldmag);
 hma = findobj(figid,'Type','Axes','Tag','');
 
-% WHY RESIZE AXIS?
-% axis tight; % Resize axes after deleting old magnet trace
-
 % replot the magnets only if the box is checked
 if get(handles.check_overlaymag,'value')
     fileid = get(handles.menu_files,'value');
     mags = g.data{fileid}.(handles.signames.intr{4});
     overt = mags(1:100:end,1);    
-    if (remtoff) overt = overt - overt(1); end
-    % Now adjust the range so that mags are visible in the current axis
-    
+    overt = overt - overt(1); 
+    % Now adjust the height so that mags are visible in the current axis    
     ylims = get(hma,'Ylim');   
     overy = mags(1:100:end,2)*0.25*range(ylims)/range(mags(:,2));
     % Now shift the magnet trace so that LOW state is always at bottom of
@@ -2108,3 +2124,90 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
+
+% --- Executes on button press in button_cropbox.
+function button_cropbox_Callback(hObject, eventdata, handles)
+global g
+dbstop if error
+
+hmf = get(handles.button_drawbox,'UserData');
+if isempty(hmf) | ~ishandle(hmf), 
+    disp('The time-domain figure doesn''t exits, first draw a figure');
+    return; 
+end
+
+hma = findobj(hmf,'Type','Axes','Tag','');
+hbox = findobj(hma,'Tag','Box');
+
+if isempty(hbox) | hbox == 0, 
+    disp('No box exists, first draw a box');return; 
+end
+b = get(hbox,'Userdata');
+t_start = b.xlims(1); t_end = b.xlims(2);
+
+% Now register the time-base for the figure (the displayed trace) with the 
+% the time-base of the associated raw signal.
+id = get(handles.menu_files,'Value');
+sigid = get(handles.menu_signal,'UserData');
+active_signame = handles.signames.intr{1,sigid};
+hlines = findobj(hma,'Type','Line','Tag','data');
+tfig = get(hlines(1),'Xdata');
+t_offset = g.data{1,id}.(active_signame)(1,1) - tfig(1,1);
+t_start = t_start + t_offset; t_end = t_end + t_offset;
+% Crop all the fields present in the current file
+for c = 1:length(handles.signames.intr)
+    signm = handles.signames.intr{c};
+    if (isfield(g.data{1,id}, signm))
+        sigold = g.data{1,id}.(signm);  
+%         find indices inside the selected box
+        inbox = find(sigold(:,1) <= t_end & sigold(:,1) >= t_start);
+        g.data{1,id}.(signm) = [];
+        g.data{1,id}.(signm) = sigold(inbox,:);
+        clear sigold;
+    end
+end
+updatemainfig(handles,'crop');
+dbclear if error
+
+% --- Executes on button press in button_exportbox.
+function button_exportbox_Callback(hObject, eventdata, handles)
+global g
+dbstop if error
+
+hmf = get(handles.button_drawbox,'UserData');
+if isempty(hmf) | ~ishandle(hmf), 
+    disp('The time-domain figure doesn''t exits, first draw a figure');
+    return; 
+end
+
+hma = findobj(hmf,'Type','Axes','Tag','');
+hbox = findobj(hma,'Tag','Box');
+
+if isempty(hbox) | hbox == 0, 
+    disp('No box exists, first draw a box');return; 
+end
+b = get(hbox,'Userdata');
+t_start = b.xlims(1); t_end = b.xlims(2);
+% Now register the time-base for the figure (the displayed trace) with the 
+% the time-base of the associated raw signal.
+id = get(handles.menu_files,'Value');
+sigid = get(handles.menu_signal,'UserData');
+active_signame = handles.signames.intr{1,sigid};
+hlines = findobj(hma,'Type','Line','Tag','data');
+tfig = get(hlines(1),'Xdata');
+t_offset = g.data{1,id}.(active_signame)(1,1) - tfig(1,1);
+t_start = t_start + t_offset; t_end = t_end + t_offset;
+% export all the fields present in the current file
+for c = 1:length(handles.signames.intr)
+    signm = handles.signames.intr{c};
+    if (isfield(g.data{1,id}, signm))
+        sig = g.data{1,id}.(signm);  
+%         find indices inside the selected box
+        inbox = find(sig(:,1) <= t_end & sig(:,1) >= t_start);
+        expbox.(signm) = sig(inbox,:);
+        clear sig;
+    end
+end
+assignin('base','expbox',expbox);
+prompt_user('Data within box was exported to base workspace as variable ''expbox''',handles);
+dbclear if error
