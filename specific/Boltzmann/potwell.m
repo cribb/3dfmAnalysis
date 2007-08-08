@@ -73,27 +73,27 @@ energy_z=-boltzmann_const*temperature*log(h_z);
         
 
 
-%         figure; 
-%         %subplot(1,columns,sp);
-%         bar(nonzero_x_disp,h_x);
-%         title('x displacement distribution');
-%         xlabel('x displacement (\mum)');
-%         ylabel('frequency (counts)');
-% 
-%         figure; 
-%         %subplot(1,columns,sp);
-%         bar(nonzero_y_disp,h_y);
-%         title('y displacement distribution');
-%         xlabel('y displacement (\mum)');
-%         ylabel('frequency (counts)');
-% 
-%         figure; 
-%         %subplot(1,columns,sp);
-%         bar(nonzero_z_disp,h_z);
-%         title('z displacement distribution');
-%         xlabel('z displacement (\mum)');
-%         ylabel('frequency (counts)');
-%     
+        figure; 
+        %subplot(1,columns,sp);
+        bar(nonzero_x_disp,h_x);
+        title('x displacement distribution');
+        xlabel('x displacement (\mum)');
+        ylabel('frequency (counts)');
+
+        figure; 
+        %subplot(1,columns,sp);
+        bar(nonzero_y_disp,h_y);
+        title('y displacement distribution');
+        xlabel('y displacement (\mum)');
+        ylabel('frequency (counts)');
+
+        figure; 
+        %subplot(1,columns,sp);
+        bar(nonzero_z_disp,h_z);
+        title('z displacement distribution');
+        xlabel('z displacement (\mum)');
+        ylabel('frequency (counts)');
+    
 		figure; 
 		%subplot(1,columns,sp);
 % 		plot(nonzero_x_disp,energy_x,'b',nonzero_x_disp,po_x,'r');
@@ -129,11 +129,11 @@ energy_z=-boltzmann_const*temperature*log(h_z);
 		xlabel('time (seconds)');
        
         
-%         grid on;figure;subplot(3,1,1),loglog(fx,px)
-%         title('X PSD')
-%         subplot(3,1,2),loglog(fy,py)
-%         title('Y PSD')
-%         ylabel('Power (\mum^2/Hz)')
-%         subplot(3,1,3),loglog(fz,pz)
-%         title('Z PSD')
-%         xlabel('log frequency (Hz)')
+        grid on;figure;subplot(3,1,1),loglog(fx,px)
+        title('X PSD')
+        subplot(3,1,2),loglog(fy,py)
+        title('Y PSD')
+        ylabel('Power (\mum^2/Hz)')
+        subplot(3,1,3),loglog(fz,pz)
+        title('Z PSD')
+        xlabel('log frequency (Hz)')
