@@ -1291,7 +1291,7 @@ if get(handles.check_subdrift,'Value')
     data(:,2:end) = subtract_background_drift(data(:,1),data(:,2:end),handles,'beadpos');
 end
 
-pwell(data);
+potwell(data);
 % keyboard
 % --- Executes on button press in button_export.
 function button_export_Callback(hObject, eventdata, handles)

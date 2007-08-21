@@ -1,3 +1,6 @@
+2007-08-20 Kalpit Desai <kvdesai@email.unc.edu>
+	* lt_anlaysis_gui.m: Corrected the function name pwell() to potwell().
+
 2007-05-02 Kalpit Desai <kvdesai@email.unc.edu>
 	* lt_anlaysis_gui.m:
 	- Added a few modules for GPI analysis, computing diffusion coefficient etc.
