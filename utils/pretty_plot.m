@@ -25,15 +25,18 @@ axes = get(fig, 'Children');
 
 for k = 1 : length(axes)
     
-	titl = get(axes(k), 'Title');
-	legd = legend;
-	xlab = get(axes(k), 'Xlabel');
-	ylab = get(axes(k), 'Ylabel');
-	
-	set(titl, 'FontSize', 16, 'FontWeight', 'Bold');
-	set(legd, 'FontSize', 14, 'FontWeight', 'Bold');
-	set(xlab, 'FontSize', 14, 'FontWeight', 'Bold');
-	set(ylab, 'FontSize', 14, 'FontWeight', 'Bold');
-	set(axes(k), 'FontSize', 14, 'FontWeight', 'Bold');
+    try
+        titl = get(axes(k), 'Title');
+        legd = legend;
+        xlab = get(axes(k), 'Xlabel');
+        ylab = get(axes(k), 'Ylabel');
+
+        set(titl, 'FontSize', 16, 'FontWeight', 'Bold');
+        set(legd, 'FontSize', 14, 'FontWeight', 'Bold');
+        set(xlab, 'FontSize', 14, 'FontWeight', 'Bold');
+        set(ylab, 'FontSize', 14, 'FontWeight', 'Bold');
+        set(axes(k), 'FontSize', 14, 'FontWeight', 'Bold');
+    end
+        
 	
 end
