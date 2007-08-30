@@ -1,3 +1,6 @@
+2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* raw_flipud.m: added.  vertically flips rawfile.
+
 2007-01-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* raw2avi.m: fixed typo.
 	* raw2img.m: outputted scaled image now defaults to unscaled image.
