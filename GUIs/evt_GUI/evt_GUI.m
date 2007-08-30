@@ -22,7 +22,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 05-Apr-2007 11:22:52
+% Last Modified by GUIDE v2.5 08-Aug-2007 16:23:03
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -168,7 +168,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     filename = get(handles.edit_infile, 'String');
     
-    if(length(filename) == 0)
+    if(isempty(filename))
 		[fname, pname] = uigetfile('*.mat');
         
         if sum(length(fname), length(pname)) <= 1
@@ -235,7 +235,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     % set the default output filename
     outfile = get(handles.edit_outfile, 'String');
-    if length(outfile) == 0
+    if isempty(outfile)
         outfile = [pname fname(1:end-3) 'evt.mat'];
         set(handles.edit_outfile, 'String', outfile);
     end
@@ -249,6 +249,10 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     x = table(:,X);
     y = table(:,Y);
 
+    % calculate mean square displacement data
+    calib_um = str2num(get(handles.edit_calib_um, 'String'));
+    [tau msd msdID] = evt_msd(table, [], calib_um);
+    
     % construct figure handles if they don't already exist
     if isfield(handles, 'XYfig')
         XYfig = figure(handles.XYfig);
@@ -308,6 +312,9 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     handles.mintime = mintime;
     handles.maxtime = maxtime;
     handles.tstamp_times = table(:,TIME);
+    handles.tau = tau;
+    handles.msd = msd;
+    handles.msdID = msdID;
     guidata(hObject, handles);
 
     plot_data(hObject, eventdata, handles);
@@ -333,6 +340,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     set(handles.radio_arb_origin                  , 'Enable', 'on');
     set(handles.edit_arb_origin                   , 'Enable', 'on');
     set(handles.radio_plotTrFr                    , 'Enable', 'on');
+    set(handles.radio_plotMSD                         , 'Enable', 'on');
     set(handles.radio_AUXoff                      , 'Enable', 'on');
     set(handles.radio_com                         , 'Enable', 'on');
     set(handles.radio_linear                      , 'Enable', 'on');
@@ -352,7 +360,7 @@ function pushbutton_savefile_Callback(hObject, eventdata, handles)
 
 	outfile = get(handles.edit_outfile, 'String');
     
-    if (length(outfile) == 0)
+    if (isempty(outfile))
         msgbox('No filename specified for output.', 'Error.');
         return;
     end
@@ -491,6 +499,7 @@ function radio_plotradius_Callback(hObject, eventdata, handles)
     set(handles.radio_AUXoff, 'Value', 0);
     set(handles.radio_plotradius, 'Value', 1);
     set(handles.radio_plotTrFr, 'Value', 0);
+    set(handles.radio_plotMSD, 'Value', 0);
     
     if get(hObject, 'Value')
         set(handles.AUXfig, 'Visible', 'on');
@@ -747,7 +756,8 @@ function radio_plotTrFr_Callback(hObject, eventdata, handles)
     set(handles.radio_AUXoff, 'Value', 0);
     set(handles.radio_plotradius, 'Value', 0);
     set(handles.radio_plotTrFr, 'Value', 1);
-
+    set(handles.radio_plotMSD, 'Value', 0);
+    
     plot_data(hObject, eventdata, handles);
     drawnow;  
 
@@ -761,7 +771,8 @@ function radio_AUXoff_Callback(hObject, eventdata, handles)
     set(handles.radio_AUXoff, 'Value', 1);
     set(handles.radio_plotradius, 'Value', 0);
     set(handles.radio_plotTrFr, 'Value', 0);
-    
+    set(handles.radio_plotMSD, 'Value', 0);
+        
     if ~get(hObject, 'Value')
         set(handles.AUXfig, 'Visible', 'on');
         set(handles.radio_AUXfig, 'Enable', 'on');      
@@ -803,6 +814,10 @@ function plot_data(hObject, eventdata, handles)
     y      = handles.table(:,Y) * calib_um;
     t      = handles.table(:,TIME);
     
+    tau    = handles.tau;
+    msd    = handles.msd;
+    msdID  = handles.msdID;
+    
     currentBead = get(handles.slider_BeadID, 'Value');
     
     mintime = handles.mintime;
@@ -810,6 +825,9 @@ function plot_data(hObject, eventdata, handles)
     
 	k  = find(beadID == currentBead);
 	nk = find(beadID ~= currentBead);
+    
+    q  = find(msdID  == currentBead);
+    nq = find(msdID  ~= currentBead);
     
     im = handles.im;
     
@@ -884,10 +902,20 @@ function plot_data(hObject, eventdata, handles)
         set(handles.AUXfig, 'BackingStore', 'off');    
         drawnow;
     end
-        
+       
+    if get(handles.radio_plotMSD, 'Value')
+        figure(handles.AUXfig);
+        plot(log10(tau(:,nq)), log10(msd(:,nq)), 'b.-', log10(tau(:,q)), log10(msd(:,q)), 'r.-');
+        xlabel('\tau [s]');
+        ylabel('MSD [m^2/s]');
+        set(handles.AUXfig, 'Units', 'Normalized');
+        set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
+        grid on;
+    end
+    
     refresh(handles.XYfig);
     refresh(handles.XTfig);
-
+    
     
 function delete_selected_dataset(hObject, eventdata, handles)
 
@@ -1068,3 +1096,33 @@ function logentry(txt)
      fprintf('%s%s\n', headertext, txt);
 
    
+
+
+% --- Executes on button press in radio_plotMSD.
+function radio_plotMSD_Callback(hObject, eventdata, handles)
+    set(handles.radio_AUXoff, 'Value', 0);
+    set(handles.radio_plotradius, 'Value', 0);
+    set(handles.radio_plotTrFr, 'Value', 0);
+    set(handles.radio_plotMSD, 'Value', 1);
+    
+    plot_data(hObject, eventdata, handles);
+
+
+function [tau, mymsd, beadID] = evt_msd(data, window, calib_um)
+
+    video_tracking_constants;
+
+    % for every bead
+    beadID = unique(data(:,ID))';
+    for bead_idx = beadID;
+
+        b = get_bead(data, bead_idx);    
+        framemax = max(data(:,FRAME));
+
+        % call up the MSD program to compute the MSD for each bead
+        [tau(:, bead_idx+1), mymsd(:, bead_idx+1)] = msd(b(:, TIME), b(:, X:Z)*calib_um*1e-6, window);
+        
+    end
+    
+return;
+

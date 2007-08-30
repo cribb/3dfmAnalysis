@@ -1,3 +1,7 @@
+2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: added MSD plotting functionality.
+	* evt_gui.fig: same. 
+	
 2007-04-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: added axis labels to XY figure.
 
