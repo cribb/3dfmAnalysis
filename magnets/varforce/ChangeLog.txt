@@ -1,3 +1,7 @@
+2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
+	- varforce_get_force.m: fixed typo.
+	- varforce_remove_buffer_points.m: fixed an edge condition (when number of buffer points becomes zero).
+
 2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
 	- varforce_to_do.txt: updated list.
 	- varforce_plot_sat_data: removed unnecessary plot.

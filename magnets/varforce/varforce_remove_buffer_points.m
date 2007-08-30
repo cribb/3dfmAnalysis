@@ -69,6 +69,9 @@ else
     newtable = table;
 
 end
+if exist('newtable') == 0
+    newtable = table;
+end
 
 tableout = newtable;
 
