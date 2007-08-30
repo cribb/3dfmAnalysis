@@ -1,3 +1,7 @@
+2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* forcecal2d.m: reported vector components rather than the force magnitude.
+	* forces2d.m: same.
+
 2006-08-08  Jeremy Cribb <jcribb@email.unc.edu>
 	* varforce: added this folder to replace varforcecal.
 	* varforcecal:  removed this folder.  shortened the name elsewhere, so it's probably best to do it here too before things get rolling.

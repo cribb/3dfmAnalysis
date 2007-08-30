@@ -76,44 +76,68 @@ function v = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granul
 	for k = 0 : get_beadmax(d)
 
         temp = get_bead(d, k);
-        
-        [newxy,force] = forces2d(temp(:,TIME), temp(:,X:Y), viscosity, bead_radius, window_size);
+
+        % NOTE: Can edit out calculation of "Force", as it's depricated by
+        % component calculations
+        [newxypos,force,fxy] = forces2d(temp(:,TIME), temp(:,X:Y), viscosity, bead_radius, window_size);
             
         % setup the output variables
-        if ~exist('finalxy');  
-            finalxy = newxy;
+        if ~exist('finalxypos');  
+            finalxypos = newxypos;
         else
-            finalxy = [finalxy ; newxy];
+            finalxypos = [finalxypos ; newxypos];
         end
+
+% Depricated by indep x and y calculations
+%         if ~exist('finalF');
+%             finalF = force;
+%         else
+%             finalF = [finalF ; force];
+%         end
         
-        if ~exist('finalF');
-            finalF = force;
+        if ~exist('finalFx');
+            finalFx = fxy(:,1);
         else
-            finalF = [finalF ; force];
-        end
-                
+            finalFx = [finalFx ; fxy(:,1)];            
+        end                
+        
+        if ~exist('finalFy');
+            finalFy = fxy(:,2);
+        else
+            finalFy = [finalFy ; fxy(:,2)];            
+        end                
     end
     
     %% Procedure for Binning of forces %%
-    [force_map, error_map] = bin2d( finalxy(:,1), finalxy(:,2), finalF, x_bins, y_bins);
+% Depricated by following two lines    [force_map, error_map]  = bin2d( finalxypos(:,1), finalxypos(:,2), finalF, x_bins, y_bins);
+    [Fx_map, xerror_map]    = bin2d( finalxypos(:,1), finalxypos(:,2), finalFx, x_bins, y_bins);
+    [Fy_map, yerror_map]    = bin2d( finalxypos(:,1), finalxypos(:,2), finalFy, x_bins, y_bins);
+    force_map = sqrt(Fx_map.^2 + Fy_map.^2);
+    error_map = sqrt(xerror_map.^2 + yerror_map.^2);
+    
     
     % output variables in SI units
     step     = granularity * calib_um * 1e-6;
 
     if strcmp(interp, 'on')
         v.force_map_interp = interp_forces2d(x_bins, y_bins, force_map);
+        v.Fx_map_interp    = interp_forces2d(x_bins, y_bins, Fx_map);
+        v.Fy_map_interp    = interp_forces2d(x_bins, y_bins, Fy_map);
     end
 
     x_bins = x_bins - poleloc(1);
     y_bins = y_bins - poleloc(2);
     
     % output variables to structure, v
-    v.force_map = force_map;
-    v.error_map = error_map;
-    v.x_bins = x_bins;
-    v.y_bins = y_bins;
-    v.step = step;
-    v.poleloc = poleloc;
+    v.force_map  = force_map;
+    v.Fx_map     = Fx_map;
+    v.Fy_map     = Fy_map;
+    v.error_map  = error_map;
+    v.x_bins     = x_bins;
+    v.y_bins     = y_bins;
+    v.step       = step;
+    v.poleloc    = poleloc;
+    v.forces_xy  = fxy; 
     
 %% PLOTTING CODE %%
 plot_forcecal2d(x_bins, y_bins, force_map, error_map, 'fe');

@@ -1,4 +1,4 @@
-function [newxy,F] = forces2d(t, xy, viscosity, bead_radius, window_size);
+function [newxy,Fmag,Fxy] = forces2d(t, xy, viscosity, bead_radius, window_size);
 % 3DFM function  
 % Magnetics 
 % last modified 07/31/06 
@@ -9,7 +9,8 @@ function [newxy,F] = forces2d(t, xy, viscosity, bead_radius, window_size);
 %  [newxy,F] = forces2d(t, xy, viscosity, bead_radius, window_size);
 %   
 %  where "newxy" are the x and y positions on the new grid
-%        "F" is the computed force in [N]
+%        "Fmag" is the computed force in [N]
+%        "Fxy"  are the force vectors [Fx Fy]
 %        "t" is a vector of timestamps in [s]
 %        "xy" is a matrix containing [x;y] positions in [m]
 %        "viscosity" of the Newtonian standard solution in [Pa s]
@@ -23,10 +24,11 @@ function [newxy,F] = forces2d(t, xy, viscosity, bead_radius, window_size);
 
         [vel_xy, newt, newxy] = windiff(xy, t, window_size);		
 
-        velmag = magnitude(vel_xy);
-        F = (6*pi) * viscosity * bead_radius * velmag;
+        Fxy = (6*pi) * viscosity * bead_radius * vel_xy;
+        Fmag = magnitude(Fxy);
     else
         newxy = [];
-        F = [];
+        Fmag = [];
+        Fxy = [];
     end
       
