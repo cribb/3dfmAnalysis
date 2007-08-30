@@ -1,3 +1,7 @@
+2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* stretched_exp_fit.m: added. performs fit for stretched exponential decay.
+	* stretched_exp_fun.m: added. contains fitting function for stretched exponential function.
+
 2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* jeffrey_step_fit.m: moved from parent folder.
 	* jeffrey_step_fun.m: moved from parent folder.
