@@ -1,3 +1,8 @@
+2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
+	- msd.m: fixed typo.
+	- plot_msd.m: added figure handling.
+	- video_msd.m: fixed typo.
+
 2007-06-12  Briana Carstens <blcarste@physics.unc.edu>
 	- msd.m: removed plotting code.  removed loading video code.  generalized to include simulated data.
 	- video_msd.m: added.  loads video data and uses new msd to compute msd curve.

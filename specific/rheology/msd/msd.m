@@ -1,4 +1,4 @@
-function [tau, msd] = msd_bc(t, data, window)
+function [tau, msd] = msd(t, data, window)
 % 3DFM function  
 % Rheology 
 % last modified 07/06/07 (blcarste)

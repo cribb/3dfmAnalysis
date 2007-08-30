@@ -48,25 +48,25 @@ for beadID = 0 : get_beadmax(v);
     framemax = max(b(:,FRAME));
     
     % call up the MSD program to compute the MSD for each bead
-    [tau(:, beadID+1), msd(:, beadID+1)] = msd_bc(b(:, TIME), b(:, X:Z), window);
+    [tau(:, beadID+1), mymsd(:, beadID+1)] = msd(b(:, TIME), b(:, X:Z), window);
 
 end;
 
 
 % trim the data by removing window sizes that returned no data
-sample_count = sum(~isnan(msd),2);
+sample_count = sum(~isnan(mymsd),2);
 idx = find(sample_count > 0);
 tau = tau(idx,:);
-msd = msd(idx,:);
+mymsd = mymsd(idx,:);
 sample_count = sample_count(idx);
 
 
 % output structure
 vmsd.tau = tau;
-vmsd.msd = msd;
+vmsd.msd = mymsd;
 vmsd.n = sample_count;
 
 % creation of the plot MSD vs. tau
-if (nargin < 6) | isempty(make_plot) | findstr(make_plot,'y')  plot_msd_bc(vmsd); end;
+if (nargin < 5) | isempty(make_plot) | findstr(make_plot,'y')  plot_msd(vmsd); end;
 
 

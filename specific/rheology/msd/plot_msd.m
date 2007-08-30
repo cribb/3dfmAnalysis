@@ -1,4 +1,4 @@
-function plot_msd(d)
+function plot_msd(d, h)
 % 3DFM function
 % Rheology
 % last modified 07/06/07 (blcarste)
@@ -10,8 +10,13 @@ function plot_msd(d)
 %
 % where "d" is the input structure and should contain the mean square displacement, the tau 
 %       value (window size), and the number of beads in a given window.
+%       "h" is the figure handle in which to put the plot.  If h is not
+%       used, a new figure is generated.
 %     
 
+if nargin < 2 || isempty(h)
+    h = figure;
+end
 
 % renaming input structure
 tau = d.tau;
@@ -39,7 +44,7 @@ ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
 
 
 % creating the plot
-    figure;
+    figure(h);
 	errorbar(mean_logtau, mean_logmsd, ste_logmsd, '.-');
 	xlabel('log_{10}(\tau) [s]');
 	ylabel('log_{10}(MSD) [m^2]');
