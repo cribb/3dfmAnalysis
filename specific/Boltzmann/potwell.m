@@ -5,28 +5,33 @@ temperature     = 298;
 rate = 10000;                        % decimated data sampled 1/10 normal
 psd_res = 1;
 window = 'blackman';
+BIN = 10E-3; % Bin size [um] for the histogram
+FIT_PARABOLA = 0;
 
 time = txyz(:,1);
 x = txyz(:,2);
 y = txyz(:,3);
 z = txyz(:,4);
 
-norm_x = x - mean(x);
-norm_y = y - mean(y);
-norm_z = z - mean(z);
+neutralize = 0;
+if neutralize
+    mod_x = x - mean(x);
+    mod_y = y - mean(y);
+    mod_z = z - mean(z);
+else
+    mod_x = x;
+    mod_y = y;
+    mod_z = z;
+end
+BIN = 10e-3; %10nm - bin size for the histogram 
 
-res = 10e-3; %10nm - bin size for the histogram 
+x_disp = min(mod_x):BIN:max(mod_x);
+y_disp = min(mod_y):BIN:max(mod_y);
+z_disp = min(mod_z):BIN:max(mod_z);
 
-x_disp = min(norm_x):res:max(norm_x);
-y_disp = min(norm_y):res:max(norm_y);
-z_disp = min(norm_z):res:max(norm_z);
-
-freq_counts_x = hist(norm_x,x_disp);
-freq_counts_y = hist(norm_y,y_disp);
-freq_counts_z = hist(norm_z,z_disp);
-
-%get rid of zeros (and anything after their indexed position)
- 
+freq_counts_x = hist(mod_x,x_disp);
+freq_counts_y = hist(mod_y,y_disp);
+freq_counts_z = hist(mod_z,z_disp);
 
 %find non-zero values
 
@@ -45,27 +50,31 @@ nonzero_z_disp = z_disp(nonzero_index_z);
 h_x = nonzero_x_bins;    
 h_y = nonzero_y_bins;
 h_z = nonzero_z_bins;
-%[10^-21 J] energy=-kb*T*log(freq_counts); %=> can't take log of zero
+%[10^-21 J] energy=-Kb*T*log(freq_counts); %=> can't take log of zero
 energy_x=-boltzmann_const*temperature*log(h_x);            
 energy_y=-boltzmann_const*temperature*log(h_y);
 energy_z=-boltzmann_const*temperature*log(h_z);
 
-% [p_x,sX] = polyfit(nonzero_x_disp,energy_x,2);
-% [p_y,sY] = polyfit(nonzero_y_disp,energy_y,2); 
-% [p_z,sZ] = polyfit(nonzero_z_disp,energy_z,2);
-
-% [po_x,deltaX] = polyval(p_x,nonzero_x_disp,sX);
-% [po_y,deltaY] = polyval(p_y,nonzero_y_disp,sY);
-% [po_z,deltaZ] = polyval(p_z,nonzero_z_disp,sZ);
-
-% j.k_x = p_x(1)*2;  
 
 
-% j.k_y = p_y(1)*2;
+if FIT_PARABOLA
+    [p_x,sX] = polyfit(nonzero_x_disp,energy_x,2);
+    [p_y,sY] = polyfit(nonzero_y_disp,energy_y,2);
+    [p_z,sZ] = polyfit(nonzero_z_disp,energy_z,2);
+
+    [po_x,deltaX] = polyval(p_x,nonzero_x_disp,sX);
+    [po_y,deltaY] = polyval(p_y,nonzero_y_disp,sY);
+    [po_z,deltaZ] = polyval(p_z,nonzero_z_disp,sZ);
+
+    j.k_x = p_x(1)*2;
 
 
-% j.k_z = p_z(1)*2
-%j.k_z_error = mean(deltaZ*2);
+    j.k_y = p_y(1)*2;
+
+
+    j.k_z = p_z(1)*2
+    j.k_z_error = mean(deltaZ*2);
+end
 
 [px,fx] = mypsd(x, rate, psd_res, window);
 [py,fy] = mypsd(y, rate, psd_res, window);
@@ -119,13 +128,13 @@ energy_z=-boltzmann_const*temperature*log(h_z);
 		ylabel('energy [10^{-21} J]');
 
 
-        figure;subplot(3,1,1),plot(time,norm_x);
-		title(['Neutralized X Displacement vs. time']);
-        subplot(3,1,2),plot(time,norm_y);
-		title(['Neutralized Y Displacement vs. time']);
+        figure;subplot(3,1,1),plot(time,mod_x);
+		title(['X Displacement vs. time']);
+        subplot(3,1,2),plot(time,mod_y);
+		title(['Y Displacement vs. time']);
 		ylabel('bead displacement (\mum)');
-        subplot(3,1,3),plot(time,norm_z);
-		title(['Neutralized Z Displacement vs. time']);
+        subplot(3,1,3),plot(time,mod_z);
+		title(['Z Displacement vs. time']);
 		xlabel('time (seconds)');
        
         
