@@ -32,7 +32,7 @@ function varargout = evt_GUI(varargin)
                        'gui_OutputFcn',  @evt_GUI_OutputFcn, ...
                        'gui_LayoutFcn',  [] , ...
                        'gui_Callback',   []);
-	if nargin & isstr(varargin{1})
+	if nargin && ischar(varargin{1})
         gui_State.gui_Callback = str2func(varargin{1});
 	end
 	
@@ -74,28 +74,25 @@ function varargout = evt_GUI_OutputFcn(hObject, eventdata, handles)
 
     
 % --- Executes on button press in pushbutton_close.
-function pushbutton_close_Callback(hObject, eventdata, handles)
+function pushbutton_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
     if isfield(handles, 'XYfig');
         try
             close(handles.XYfig);
+        catch
         end
     end
 
     if isfield(handles, 'XTfig');
         try
             close(handles.XTfig);
+        catch
         end
     end
 
     if isfield(handles, 'AUXfig');
         try
             close(handles.AUXfig);
-        end
-    end
-
-    if isfield(handles, 'TrFrfig');
-        try
-            close(handles.TrFrfig);
+        catch
         end
     end
 
@@ -229,7 +226,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     end
     
     % if the background MIP image exists, attach it to handles structure
-    if exist('im')
+    if exist('im', 'var')
         handles.im = im;
     end
     
@@ -246,11 +243,11 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     mintime = min(table(:,TIME));
     maxtime = max(table(:,TIME));
     beadID = table(:,ID);
-    x = table(:,X);
-    y = table(:,Y);
+    % x = table(:,X);
+    % y = table(:,Y);
 
     % calculate mean square displacement data
-    calib_um = str2num(get(handles.edit_calib_um, 'String'));
+    calib_um = str2double(get(handles.edit_calib_um, 'String'));
     [tau msd msdID] = evt_msd(table, [], calib_um);
     
     % construct figure handles if they don't already exist
@@ -365,9 +362,9 @@ function pushbutton_savefile_Callback(hObject, eventdata, handles)
         return;
     end
     
-    table = handles.table;
+    % table = handles.table;
     
-    table(:,TIME) = table(:,TIME);
+    % table(:,TIME) = table(:,TIME);
     tracking.spot3DSecUsecIndexFramenumXYZRPY = handles.table;
     save(outfile, 'tracking');
     logentry(['New tracking file, ' outfile ', saved...']);
@@ -460,7 +457,7 @@ function edit_BeadID_CreateFcn(hObject, eventdata, handles)
 
 
 function edit_BeadID_Callback(hObject, eventdata, handles)
-	set(handles.slider_BeadID, 'Value', str2num(get(handles.edit_BeadID, 'String')));
+	set(handles.slider_BeadID, 'Value', str2double(get(handles.edit_BeadID, 'String')));
 
     
 % --- Executes on button press in pushbutton_Select_Closest_dataset.
@@ -471,7 +468,7 @@ function pushbutton_Select_Closest_dataset_Callback(hObject, eventdata, handles)
 	[xm, ym] = ginput(1);
         
     if get(handles.radio_microns, 'Value')
-        calib_um = str2num(get(handles.edit_calib_um, 'String'));
+        calib_um = str2double(get(handles.edit_calib_um, 'String'));
         xm = xm / calib_um;
         ym = ym / calib_um;
     end        
@@ -656,7 +653,7 @@ function checkbox_frame_rate_Callback(hObject, eventdata, handles)
     if get(hObject, 'Value')      
         set(handles.edit_frame_rate, 'Enable', 'on');
 
-        table(:,TIME) = table(:,FRAME) / str2num(get(handles.edit_frame_rate, 'String'));
+        table(:,TIME) = table(:,FRAME) / str2double(get(handles.edit_frame_rate, 'String'));
         mintime = min(table(:,TIME));
         maxtime = max(table(:,TIME));
 	
@@ -692,7 +689,7 @@ function edit_frame_rate_Callback(hObject, eventdata, handles)
     table = handles.table;
 
     if get(handles.checkbox_frame_rate, 'Value');
-        table(:,TIME) = table(:,FRAME) / str2num(get(hObject, 'String'));
+        table(:,TIME) = table(:,FRAME) / str2double(get(hObject, 'String'));
         mintime = min(table(:,TIME));
         maxtime = max(table(:,TIME));
 	
@@ -712,7 +709,7 @@ function radio_arb_origin_Callback(hObject, eventdata, handles)
     set(handles.radio_relative, 'Value', 0);
     set(handles.radio_arb_origin, 'Value', 1);
 
-    arb_origin = str2num(get(handles.edit_arb_origin, 'String'));
+    arb_origin = str2num(get(handles.edit_arb_origin, 'String'));  %#ok<ST2NM>
 
     if length(arb_origin) ~= 2
         logentry('Origin value is not valid.  Not plotting.')
@@ -804,7 +801,7 @@ function plot_data(hObject, eventdata, handles)
         calib_um = 1;
         ylabel_string = 'displacement [pixels]';
     elseif get(handles.radio_microns, 'Value');
-        calib_um = str2num(get(handles.edit_calib_um, 'String')); 
+        calib_um = str2double(get(handles.edit_calib_um, 'String')); 
         ylabel_string = 'displacement [\mum]';
     end
     
@@ -821,7 +818,7 @@ function plot_data(hObject, eventdata, handles)
     currentBead = get(handles.slider_BeadID, 'Value');
     
     mintime = handles.mintime;
-    maxtime = handles.maxtime;
+    % maxtime = handles.maxtime;
     
 	k  = find(beadID == currentBead);
 	nk = find(beadID ~= currentBead);
@@ -829,7 +826,7 @@ function plot_data(hObject, eventdata, handles)
     q  = find(msdID  == currentBead);
     nq = find(msdID  ~= currentBead);
     
-    im = handles.im;
+    % im = handles.im;
     
     figure(handles.XYfig);   
     imagesc(1:648 * calib_um, 1:484 * calib_um, handles.im);
@@ -858,7 +855,7 @@ function plot_data(hObject, eventdata, handles)
     drawnow;
     
     arb_origin = str2num(get(handles.edit_arb_origin, 'String'));
-    calib_um = str2num(get(handles.edit_calib_um, 'String')); 
+    calib_um = str2double(get(handles.edit_calib_um, 'String')); 
 
     
     if get(handles.radio_plotradius, 'Value')        
@@ -978,7 +975,7 @@ function delete_inside_boundingbox(hObject, eventdata, handles)
     [xm, ym] = ginput(2);
     
     if get(handles.radio_microns, 'Value')
-        calib_um = str2num(get(handles.edit_calib_um, 'String'));
+        calib_um = str2double(get(handles.edit_calib_um, 'String'));
         
         if(get(handles.radio_XYfig, 'Value'))
             xm = xm / calib_um;
@@ -1007,7 +1004,7 @@ function delete_inside_boundingbox(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
 
     
-function delete_data_before_time(hObject, eventdata, handles); 
+function delete_data_before_time(hObject, eventdata, handles) 
 
     video_tracking_constants;
 
@@ -1019,7 +1016,7 @@ function delete_data_before_time(hObject, eventdata, handles);
     figure(active_fig);
 
     table = handles.table;
-    beadID = table(:,ID);
+    % beadID = table(:,ID);
 
     t = table(:,TIME) - handles.mintime;
     x = table(:,X);
@@ -1046,7 +1043,7 @@ function delete_data_before_time(hObject, eventdata, handles);
     plot_data(hObject, eventdata, handles);
    
     
-function delete_data_after_time(hObject, eventdata, handles);    
+function delete_data_after_time(hObject, eventdata, handles)
     video_tracking_constants;
 
     if(get(handles.radio_XYfig, 'Value'))
@@ -1057,11 +1054,11 @@ function delete_data_after_time(hObject, eventdata, handles);
     figure(active_fig);
 
     table = handles.table;
-    beadID = table(:,ID);
+    % beadID = table(:,ID);
 
     t = table(:,TIME) - handles.mintime;
-    x = table(:,X);
-    y = table(:,Y);
+    % x = table(:,X);
+    % y = table(:,Y);
     
     [tm, xm] = ginput(1);
     
@@ -1117,7 +1114,7 @@ function [tau, mymsd, beadID] = evt_msd(data, window, calib_um)
     for bead_idx = beadID;
 
         b = get_bead(data, bead_idx);    
-        framemax = max(data(:,FRAME));
+        % framemax = max(data(:,FRAME));
 
         % call up the MSD program to compute the MSD for each bead
         [tau(:, bead_idx+1), mymsd(:, bead_idx+1)] = msd(b(:, TIME), b(:, X:Z)*calib_um*1e-6, window);
