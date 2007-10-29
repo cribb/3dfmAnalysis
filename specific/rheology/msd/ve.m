@@ -19,9 +19,17 @@ function v = ve(d, bead_radius, freq_type);
 %  - This algorithm came from Mason 2000 Rheol Acta paper.
 %  
 
-if (nargin < 3) | isempty(freq_type)     freq_type = 'f';   end
-if (nargin < 2) | isempty(bead_radius)   bead_radius = 0.5e-6; end
-if (nargin < 1) | isempty(d)    error('no data struct found'); end
+if (nargin < 3) || isempty(freq_type)     
+    freq_type = 'f';   
+end
+
+if (nargin < 2) || isempty(bead_radius)
+    bead_radius = 0.5e-6; 
+end
+
+if (nargin < 1) || isempty(d)    
+    error('no data struct found'); 
+end
 
 k = 1.38e-23;
 T = 298;

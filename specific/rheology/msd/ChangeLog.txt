@@ -1,3 +1,7 @@
+2007-10-29  Jeremy Cribb <jcribb@email.unc.edu>
+	- sim_msd.m: made code friendlier.
+	- ve.m: made code friendlier.
+
 2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
 	- msd.m: fixed typo.
 	- plot_msd.m: added figure handling.

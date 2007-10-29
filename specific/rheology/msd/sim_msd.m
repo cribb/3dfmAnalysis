@@ -1,4 +1,4 @@
-function smsd = sim_msd_bc(numpaths, viscosity, bead_radius, sampling_rate, duration, temp, dim, window, make_plot)
+function smsd = sim_msd(numpaths, viscosity, bead_radius, sampling_rate, duration, temp, dim, window, make_plot)
 % 3DFM function
 % Rheology
 % last modified 07/06/07 (blcarste)
@@ -7,7 +7,7 @@ function smsd = sim_msd_bc(numpaths, viscosity, bead_radius, sampling_rate, dura
 % in a simulated Newtonian fluid for a temperature in Kelvin and allows for the option
 % of plotting MSD vs. window size (tau).
 %
-% [smsd] = sim_msd_bc(numpaths, viscosity, bead_radius, sampling_rate, duration, temp, dim, window, make_plot)
+% [smsd] = sim_msd(numpaths, viscosity, bead_radius, sampling_rate, duration, temp, dim, window, make_plot)
 %
 % where "numpaths" is the number of beads in the fluid
 %       "viscosity" is in [Pa sec]
@@ -33,14 +33,14 @@ function smsd = sim_msd_bc(numpaths, viscosity, bead_radius, sampling_rate, dura
 
 
 % initializing arguments
-if (nargin < 1) | isempty(numpaths) numpaths = 50; end;
-if (nargin < 2) | isempty(viscosity) viscosity = 0.00086; end;
-if (nargin < 3) | isempty(bead_radius) bead_radius = 0.5e-6; end;
-if (nargin < 4) | isempty(sampling_rate)  sampling_rate = 120; end;
-if (nargin < 5) | isempty(duration)  duration = 10; end;
-if (nargin < 6) | isempty(temp) temp= 298; end;
-if (nargin < 7) | isempty(dim) dim = 2; end;
-if (nargin < 8) | isempty(window)  window = [1 2 5 10 20 50 100 200 500 1000 1001];  end;
+if (nargin < 1) || isempty(numpaths) numpaths = 50; end;
+if (nargin < 2) || isempty(viscosity) viscosity = 0.00086; end;
+if (nargin < 3) || isempty(bead_radius) bead_radius = 0.5e-6; end;
+if (nargin < 4) || isempty(sampling_rate)  sampling_rate = 120; end;
+if (nargin < 5) || isempty(duration)  duration = 10; end;
+if (nargin < 6) || isempty(temp) temp= 298; end;
+if (nargin < 7) || isempty(dim) dim = 2; end;
+if (nargin < 8) || isempty(window)  window = [1 2 5 10 20 50 100 200 500 1000 1001];  end;
 
 
 t = [0 : 1/sampling_rate : duration - (1/sampling_rate)];
@@ -52,23 +52,23 @@ for k = 1 : numpaths;
     sim_disp = sim_newt_fluid(viscosity, bead_radius, sampling_rate, this_duration, temp, dim);
     
     % call up the MSD program to compute the MSD for each bead
-    [tau(:, k), msd(:, k)] = msd_bc(t, sim_disp, window);
+    [tau(:, k), mymsd(:, k)] = msd(t, sim_disp, window);
 
 end;
 
 % trim the data by removing window sizes that returned no data
-sample_count = sum(~isnan(msd),2);
+sample_count = sum(~isnan(mymsd),2);
 idx = find(sample_count > 0);
 tau = tau(idx,:);
-msd = msd(idx,:);
+mymsd = mymsd(idx,:);
 sample_count = sample_count(idx);
 
 % output structure
 smsd.tau = tau;
-smsd.msd = msd;
+smsd.msd = mymsd;
 smsd.n = sample_count;
 
 % creation of the plot MSD vs. tau
-if (nargin < 9) | isempty(make_plot) | findstr(make_plot,'y')  plot_msd_bc(smsd); end;
+if (nargin < 9) | isempty(make_plot) | findstr(make_plot,'y')  plot_msd(smsd); end;
 
 
