@@ -1,3 +1,6 @@
+2007-11-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* pole_locator.m: added. David Bober's code that locates "monopole" position.  Uses the last 40 positions of trackers in a video tracking dataset to compute the intersection of traces, with the ides that that intersection is the location of the "monopole" in 3dfm force calibrations.
+
 2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* forcecal2d.m: reported vector components rather than the force magnitude.
 	* forces2d.m: same.
