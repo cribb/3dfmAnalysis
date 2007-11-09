@@ -1,3 +1,10 @@
+2007-11-09  Jeremy Cribb <jcribb@email.unc.edu>
+	- msd.m: beautified code to comply with matlab 7.5's "advice".
+	- ve.m: added figure handling.
+	- plot_msd.m: added figure handling.
+	- plot_ve.m: added figure handling.
+	- video_msd.m: beautified code to comply with matlab 7.5's "advice".
+
 2007-10-29  Jeremy Cribb <jcribb@email.unc.edu>
 	- sim_msd.m: made code friendlier.
 	- ve.m: made code friendlier.

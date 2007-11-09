@@ -1,4 +1,4 @@
-function v = ve(d, bead_radius, freq_type);
+function v = ve(d, bead_radius, freq_type, plot_results);
 % 3DFM function  
 % Rheology 
 % last modified 01/25/07 (jcribb)
@@ -31,7 +31,7 @@ if (nargin < 1) || isempty(d)
     error('no data struct found'); 
 end
 
-k = 1.38e-23;
+k = 1.3806e-23;
 T = 298;
 
 msd = d.msd;
@@ -111,4 +111,8 @@ v.error.npp = (nanstd(npp') ./ sqrt(N'))';
 v.n = N;
 
 % plot output
-plot_ve(v, freq_type);
+if (nargin < 4) || isempty(plot_results) || strncmp(plot_results,'y',1)  
+    fig1 = figure; fig2 = figure;
+    plot_ve(v, freq_type, fig1, 'Gg');
+    plot_ve(v, freq_type, fig2, 'Nn');
+end;

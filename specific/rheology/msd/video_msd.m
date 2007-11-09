@@ -1,7 +1,7 @@
-function vmsd = video_msd_bc(files, window, frame_rate, calib_um, make_plot)
+function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot)
 % 3DFM function
 % Rheology
-% last modified 07/06/07 (blcarste)
+% last modified 11/06/07 (jcribb)
 %
 % This function computes the mean square displacements of an aggregate number of video 
 % tracked beads via the Stokes-Einstein relation and allows for the option of plotting
@@ -26,10 +26,21 @@ function vmsd = video_msd_bc(files, window, frame_rate, calib_um, make_plot)
 
 
 % initializing arguments
-if (nargin < 1) | isempty(files)  files = '*.mat'; end;
-if (nargin < 2) | isempty(window)  window = [1 2 5 10 20 50 100 200 500 1000 1001];  end;
-if (nargin < 3) | isempty(frame_rate)  frame_rate = []; end;
-if (nargin < 4) | isempty(calib_um)  calib_um = 0.152; end;
+if (nargin < 1) || isempty(files)  
+    files = '*.mat'; 
+end;
+
+if (nargin < 2) || isempty(window)  
+    window = [1 2 5 10 20 50 100 200 500 1000 1001];  
+end;
+
+if (nargin < 3) || isempty(frame_rate)  
+    frame_rate = []; 
+end;
+
+if (nargin < 4) || isempty(calib_um)  
+    calib_um = 0.152; 
+end;
 
 
 % load the constants that identify the output's column headers for the current
@@ -37,9 +48,16 @@ if (nargin < 4) | isempty(calib_um)  calib_um = 0.152; end;
 video_tracking_constants;
 
 
-% load video data
-v = load_video_tracking(files, frame_rate, 'm', calib_um, 'relative', 'yes', 'table');
+% determine whether or not we have to load these data from disk or not
+if ~isnumeric(files)
+    % load video data
+    v = load_video_tracking(files, frame_rate, 'pixels', 1, 'relative', 'yes', 'table');
+else
+    v = files;
+end
 
+% convert to meters
+v(:,X:Z) = v(:,X:Z) * calib_um * 1e-6;
 
 % for every bead
 for beadID = 0 : get_beadmax(v);
@@ -67,6 +85,8 @@ vmsd.msd = mymsd;
 vmsd.n = sample_count;
 
 % creation of the plot MSD vs. tau
-if (nargin < 5) | isempty(make_plot) | findstr(make_plot,'y')  plot_msd(vmsd); end;
+if (nargin < 5) || isempty(make_plot) || strncmp(make_plot,'y',1)  
+    plot_msd(vmsd, [], 'me'); 
+end;
 
 

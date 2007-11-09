@@ -1,7 +1,7 @@
 function [tau, msd] = msd(t, data, window)
 % 3DFM function  
 % Rheology 
-% last modified 07/06/07 (blcarste)
+% last modified 11/06/2007
 %  
 % This function computes the mean-square displacements (via the Stokes-
 % Einstein relation) for a single bead.
@@ -20,9 +20,17 @@ function [tau, msd] = msd(t, data, window)
 
 
 %initializing arguments
-if (nargin < 1) | isempty(t)  error('Input data needed.'); end;
-if (nargin < 2) | isempty(data)  error('Input data needed.'); end;
-if (nargin < 3) | isempty(window)  window = [1 2 5 10 20 50 100 200 500 1000 1001]; end;
+if (nargin < 1) || isempty(t)  
+    error('Input data needed.'); 
+end;
+
+if (nargin < 2) || isempty(data)  
+    error('Input data needed.');
+end;
+
+if (nargin < 3) || isempty(window)  
+    window = [1 2 5 10 20 50 100 200 500 1000 1001]; 
+end;
 
 
 
@@ -33,7 +41,9 @@ video_tracking_constants;
 
 % for every window size (or tau)
 warning('off', 'MATLAB:divideByZero');
+
     for w = 1:length(window)
+    
       % for x,y,z (k = 1,2,3) directions  
       for k = 1:cols(data)
   
@@ -46,9 +56,14 @@ warning('off', 'MATLAB:divideByZero');
         elseif k > 1
             r2 = r2 + ( B - A ).^2;
         end
+        
       end
       
         tau(w, :) = window(w) * mean(diff(t));
         msd(w, :) = mean(r2);
-    end   
+    end
+
 warning('on', 'MATLAB:divideByZero');
+
+
+

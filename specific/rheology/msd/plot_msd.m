@@ -1,4 +1,4 @@
-function plot_msd(d, h)
+function plot_msd(d, h, optstring)
 % 3DFM function
 % Rheology
 % last modified 07/06/07 (blcarste)
@@ -12,7 +12,13 @@ function plot_msd(d, h)
 %       value (window size), and the number of beads in a given window.
 %       "h" is the figure handle in which to put the plot.  If h is not
 %       used, a new figure is generated.
-%     
+%      "optstring" is a string containing 'a' to plot individual paths, 'm'
+%      to plot the mean msd function, and 'e' to include errorbars on mean.
+%
+
+if nargin < 3 || isempty(optstring)
+    optstring = 'me';
+end
 
 if nargin < 2 || isempty(h)
     h = figure;
@@ -42,12 +48,26 @@ mean_logmsd = nanmean(logmsd');
 ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
 ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
 
-
 % creating the plot
-    figure(h);
-	errorbar(mean_logtau, mean_logmsd, ste_logmsd, '.-');
-	xlabel('log_{10}(\tau) [s]');
-	ylabel('log_{10}(MSD) [m^2]');
-	grid on;
-	pretty_plot;
-    
+figure(h);
+
+if strcmpi(optstring, 'a')
+    plot(logtau, logmsd, 'b');
+elseif strcmpi(optstring, 'm')
+    plot(mean_logtau, mean_logmsd, 'k.-');
+elseif strcmpi(optstring, 'am')
+    plot(logtau, logmsd, 'b', mean_logtau, mean_logmsd, 'k.-');
+elseif strcmpi(optstring, 'me') || strcmpi(optstring, 'e')
+    errorbar(mean_logtau, mean_logmsd, ste_logmsd, 'k.-');
+elseif strcmpi(optstring, 'ame')
+    plot(logtau, logmsd, 'b-');
+    hold on;
+        errorbar(mean_logtau, mean_logmsd, ste_logmsd, 'k.-');
+    hold off;
+end
+
+xlabel('log_{10}(\tau) [s]');
+ylabel('log_{10}(MSD) [m^2]');
+grid on;
+pretty_plot;
+refresh(h);    
