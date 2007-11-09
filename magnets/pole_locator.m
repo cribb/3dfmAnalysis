@@ -1,14 +1,52 @@
-function outv = pole_locator(filename, MIPfile);
-%     Syntax:
-%     
-%         function outv = locator(filename, MIPfile);
+function outv = pole_locator(filename, MIPfile, plot_results, h);
+% 3DFM function  
+% Magnetics
+% last modified 11/09/07 
+%  
+% Locates poletip via intersection of tracker paths.
+%  
+%    outv = pole_locator(filename, MIPfile, plot_results, h);
 % 
-%     filename is the .evt file
-%     MIP is the MIP of the well
-%     
+%     'filename' is the .evt.mat file containing the bead tracks OR the tabulated
+%                output of load_video_tracking.
+%     'MIPfile' is the filename of the MIP image OR the image itself.
+%     'plot_results' is 'y' or 'n'
+%     'h' is the figure handle.
+%
 
-    video_tracking_constants;
-    
+if nargin < 4 || isempty(h)
+    h = figure;
+end
+
+if nargin < 3 || isempty(plot_results)
+    plot_results = 'y';
+end
+
+if nargin < 2 || isempty(MIPfile)
+    logentry('No MIP file defined.');  
+    MIPsuccess = 0;
+elseif isnumeric(MIPfile)
+    im = MIPfile;
+    MIPsuccess = 1;
+else
+    % try loading the MIP file
+    try 
+        im = imread(MIPfile, 'BMP');
+        logentry('Successfully loaded MIP image...');
+        MIPsuccess = 1;
+    catch
+        logentry('MIP file was not found.'); 
+        MIPsuccess = 0;
+    end
+end
+
+if nargin < 1 || isempty(filename)
+    logentry('No input file defined. Exiting now.');
+    outv = [];
+    return;
+end
+
+if ~isnumeric(filename)
     % load the datafile
     logentry('Loading dataset... ');
     try
@@ -18,15 +56,11 @@ function outv = pole_locator(filename, MIPfile);
         return;
     end
     logentry(['Dataset, ' filename ', successfully loaded...']);
-    
-    % try loading the MIP file
-    try 
-        im = imread(MIPfile, 'BMP');
-        logentry('Successfully loaded MIP image...');
-    catch
-        logentry('MIP file was not found.'); 
-    end
-    
+else
+    data = filename;
+end
+
+   video_tracking_constants; 
 
     % assign data variables
     table = sortrows(data,ID);
@@ -34,11 +68,17 @@ function outv = pole_locator(filename, MIPfile);
     x = table(:,X);
     y = table(:,Y);
     
-    % Display MIP
-    figure;
-    imagesc(1:648, 1:484, im);
-    colormap(gray(256));
-    hold on
+    % beginning of plot routine 
+    plot_results = strncmpi(plot_results, 'y', 1);
+    
+    if plot_results
+        % Display MIP
+        figure(h);
+        if MIPsuccess
+            imagesc(1:648, 1:484, im);
+            colormap(gray(256));
+        end        
+    end
     
     % Plot polynomial fits to bead trajectories
     % Loop over beads
@@ -54,7 +94,13 @@ function outv = pole_locator(filename, MIPfile);
                 fits(ii,1:2)=p;
                 x_fit=[1:600];
                 y_fit=polyval(p,x_fit);
-                plot(x(idx_min:idx_max),y(idx_min:idx_max),'r',x_fit,y_fit,'b')
+                
+                if plot_results
+                figure(h);
+                    hold on;
+                        plot(x(idx_min:idx_max),y(idx_min:idx_max),'r',x_fit,y_fit,'b')
+                    hold off;
+                end
            end
     end 
     min_dsum=10^8;
@@ -98,12 +144,18 @@ function outv = pole_locator(filename, MIPfile);
         end
     end
   end
-    x_final
-    y_final
-    plot(x_final,y_final,'w*')
-    
+  
+  logentry(['Pole is located at x=' num2str(x_final) ', y=' num2str(y_final) ' pixels.']);
+      
+    if plot_results
+        hold on;
+            plot(x_final,y_final,'w*')
+        hold off;
+    end
+
     outv = [x_final y_final];
-    
+
+  
 function logentry(txt)
     logtime = clock;
     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
