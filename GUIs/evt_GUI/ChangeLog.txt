@@ -1,3 +1,11 @@
+2007-11-15  Jeremy Cribb <jcribb@email.unc.edu>
+	evt_gui.m: 
+		- overhauled the auxilary plot interface.  
+		- can now plot individual MSD curves and/or the mean MSD.  
+    - can now plot viscoelastic profiles (G and eta, complex) as functions of frequency via the Generalized Stokes-Einstein Relation (GSER).
+    - added the pole_locating function for driven bead experiments.
+    - fixed bug that delayed updates to plots.  plots update as expected now.
+
 2007-10-09  Jeremy Cribb <jcribb@email.unc.edu>
 	evt_gui.m: made small adjustments at matlab's suggestion.  
 
