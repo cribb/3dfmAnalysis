@@ -100,9 +100,9 @@ switch my_pole_geometry
         poles_to_excite_pos = 1;
         poles_to_excite_neg = [3 4 5];
         dominant_coil = 1;
-    case 'oj-comb14'
-        poles_to_excite_pos = 1;
-        poles_to_excite_neg = [4];
+    case 'wakeforest612'
+        poles_to_excite_pos = [6 1 2];
+        poles_to_excite_neg = [3 4 5];
         dominant_coil = 1;
     case '3pole-246'
         poles_to_excite_pos = [2];

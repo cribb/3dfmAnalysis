@@ -1,3 +1,7 @@
+2008-01-07  Jeremy Cribb <jcribb@email.unc.edu>
+	- varforce_drive.m: added wake forest pole geometry.
+	- varforce_drive_gui.fig: same.
+	
 2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
 	- varforce_get_force.m: fixed typo.
 	- varforce_remove_buffer_points.m: fixed an edge condition (when number of buffer points becomes zero).
