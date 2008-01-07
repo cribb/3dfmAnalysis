@@ -156,7 +156,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     filename = get(handles.edit_infile, 'String');
     
     if(isempty(filename))
-		[fname, pname] = uigetfile('*.mat');
+		[fname, pname] = uigetfile({'*.mat';'*.csv';'*.*'});
         
         if sum(length(fname), length(pname)) <= 1
             logentry('No tracking file selected. No tracking file loaded.');
@@ -233,8 +233,6 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     mintime = min(table(:,TIME));
     maxtime = max(table(:,TIME));
     beadID = table(:,ID);
-    % x = table(:,X);
-    % y = table(:,Y);
 
     
     % construct figure handles if they don't already exist

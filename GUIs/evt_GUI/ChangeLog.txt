@@ -1,3 +1,6 @@
+2008-01-07  Jeremy Cribb <jcribb@email.unc.edu>
+	evt_gui.m: aesthetic changes to code layout.
+
 2007-11-15  Jeremy Cribb <jcribb@email.unc.edu>
 	evt_gui.m: 
 		- overhauled the auxilary plot interface.  
