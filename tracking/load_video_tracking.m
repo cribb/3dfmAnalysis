@@ -41,9 +41,38 @@ for fid = 1:length(filelist)
     
     file = filelist(fid).name;
     
-	% Load the tracking data after it has been converted to a .mat file
-    dd=load(file);
-    if strfind(file, '.evt.') & isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
+    % what if we want to use the csv file provided by video spot tracker?
+    % we have to make a decision here, and we'll base it on the filename
+    % extension
+    if strfind(file, '.csv') && isempty(strfind(file, '.mat'))
+        % assume csv file is the input and load accordingly
+        dd = csvread(file, 1, 0);
+    else
+        % Load the tracking data after it has been converted to a .mat file    
+        dd=load(file);
+    end
+
+
+    if strfind(file, '.csv') && isempty(strfind(file, '.mat'))
+        CSVFRAME = 1;
+        CSVID    = 2;
+        CSVX     = 3;
+        CSVY     = 4;
+        CSVZ     = 5;
+
+        data(:,TIME)  = zeros(rows(dd),1);
+        data(:,FRAME) = dd(:,CSVFRAME);
+        data(:,ID)    = dd(:,CSVID);
+        data(:,X)     = dd(:,CSVX);
+        data(:,Y)     = dd(:,CSVY);
+        data(:,Z)     = dd(:,CSVZ);
+        data(:,ROLL)  = zeros(rows(dd),1);
+        data(:,PITCH) = zeros(rows(dd),1);
+        data(:,YAW)   = zeros(rows(dd),1);
+
+        % no timestamps in this vrpn file format
+        tstamps = 'no';
+    elseif strfind(file, '.evt.') && isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
     
         % if there are timestamps, and evt_gui was used, then they are already attached
@@ -118,11 +147,11 @@ for fid = 1:length(filelist)
     % handle the physical units
     units{X} = xyzunits;  units{Y} = xyzunits;  units{Z} = xyzunits;
 	if strcmp(xyzunits,'m')
-		data(:,X:Z) = data(:,X:Z) * calib_um * 1e-6;  % convert video coords from pixels to meters
+		data(:,X:Z) = data(:,X:Z) .* calib_um * 1e-6;  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'um')
-		data(:,X:Z) = data(:,X:Z) * calib_um;  % convert video coords from pixels to meters
+		data(:,X:Z) = data(:,X:Z) .* calib_um;  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'nm')
-		data(:,X:Z) = data(:,X:Z) * calib_um * 1e3;  % convert video coords from pixels to nm
+		data(:,X:Z) = data(:,X:Z) .* calib_um * 1e3;  % convert video coords from pixels to nm
     else 
         units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
     end

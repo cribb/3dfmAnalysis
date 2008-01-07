@@ -1,3 +1,6 @@
+2008-01-07  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: now loads .csv files from video spot tracker.
+
 2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m: now the center of mass function places an 'S' and a 'E' on the center of mass plot to indicate start and end points for dataset.
 	* get_bead.m: added reference to bead ID rather than hard-coded column number.
