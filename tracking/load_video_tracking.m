@@ -44,7 +44,7 @@ for fid = 1:length(filelist)
     % what if we want to use the csv file provided by video spot tracker?
     % we have to make a decision here, and we'll base it on the filename
     % extension
-    if strfind(file, '.csv') && isempty(strfind(file, '.mat'))
+    if ~isempty(strfind(file, '.csv')) && isempty(strfind(file, '.mat'))
         % assume csv file is the input and load accordingly
         dd = csvread(file, 1, 0);
     else
@@ -53,7 +53,7 @@ for fid = 1:length(filelist)
     end
 
 
-    if strfind(file, '.csv') && isempty(strfind(file, '.mat'))
+    if ~isempty(strfind(file, '.csv')) && isempty(strfind(file, '.mat'))
         CSVFRAME = 1;
         CSVID    = 2;
         CSVX     = 3;
@@ -72,7 +72,7 @@ for fid = 1:length(filelist)
 
         % no timestamps in this vrpn file format
         tstamps = 'no';
-    elseif strfind(file, '.evt.') && isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
+    elseif ~isempty(strfind(file, '.evt.')) && isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
     
         % if there are timestamps, and evt_gui was used, then they are already attached

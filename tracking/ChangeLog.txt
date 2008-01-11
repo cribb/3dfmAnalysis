@@ -1,3 +1,6 @@
+2008-01-11  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: fixed logic error when loading .mat files.
+
 2008-01-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: now loads .csv files from video spot tracker.
 
