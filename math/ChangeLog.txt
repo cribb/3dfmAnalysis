@@ -1,3 +1,6 @@
+2008-01-24  Jeremy Cribb <jcribb@email.unc.edu>
+	* distance.m: submitting Lauren Hartle's new algorithm for this function.  vectorized and much faster.
+
 2006-08-28  Jeremy Cribb <jcribb@email.unc.edu>
 	* uncertainty_in_linefit.m: added.  reports error in slope and intercept for a linear fit.
 

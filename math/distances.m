@@ -21,15 +21,22 @@ function v = distances(data)
 %  
 
 	[rows cols] = size(data);
-    	
-	for m = 1 : rows
- 
-        for n = 0 : (rows-1)
-           
-            dists(m,n+1) = sqrt( (data(m,1)-data(n+1,1))^2 + (data(m,2)-data(n+1,2))^2 );
-            
-        end
-        
-	end
-
-	v = dists;
+    xmat = repmat(data(:,1),[1 rows]);
+    ymat = repmat(data(:,1),[1 rows]);
+    
+    dxsq = xmat - transpose(xmat);    
+    dysq = ymat - transpose(ymat);
+    
+    v = sqrt(dxsq.^2 + dysq.^2);
+%     	
+% 	for m = 1 : rows
+%  
+%         for n = 0 : (rows-1)
+%            
+%             dists(m,n+1) = sqrt( (data(m,1)-data(n+1,1))^2 + (data(m,2)-data(n+1,2))^2 );
+%             
+%         end
+%         
+% 	end
+% 
+% 	v = dists;
