@@ -1,3 +1,6 @@
+2008-02-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: empty trackers are now automatically removed from ID.
+
 2008-01-11  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: fixed logic error when loading .mat files.
 

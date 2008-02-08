@@ -1,4 +1,4 @@
-function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absolute_pos, tstamps, table);
+function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absolute_pos, tstamps, table)
 % 3DFM function
 % last modified 07/19/2005 ; jcribb
 %
@@ -25,12 +25,12 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absol
 video_tracking_constants;
 
 % handle the argument list
-if (nargin < 7 | isempty(table));          table = 'struct';          end;
-if (nargin < 6 | isempty(tstamps));        tstamps  = 'no';	          end;
-if (nargin < 5 | isempty(absolute_pos));   absolute_pos = 'relative'; end;
-if (nargin < 4 | isempty(calib_um));       calib_um = 1;              end;
-if (nargin < 3 | isempty(xyzunits));       xyzunits  = 'pixels';	  end;
-if (nargin < 2 | isempty(frame_rate));     frame_rate = 120;          end;
+if (nargin < 7 || isempty(table));          table = 'struct';          end;
+if (nargin < 6 || isempty(tstamps));        tstamps  = 'no';	          end;
+if (nargin < 5 || isempty(absolute_pos));   absolute_pos = 'relative'; end;
+if (nargin < 4 || isempty(calib_um));       calib_um = 1;              end;
+if (nargin < 3 || isempty(xyzunits));       xyzunits  = 'pixels';	  end;
+if (nargin < 2 || isempty(frame_rate));     frame_rate = 120;          end;
 
 filelist = dir(filemask);
 if length(filelist) < 1
@@ -234,13 +234,25 @@ for fid = 1:length(filelist)
     if exist('glommed_d')
         beadmax = max(glommed_d(:,ID));
         data(:,ID) = data(:,ID) + beadmax + 1;            
-        glommed_d = [glommed_d ; data];   
+        glommed_d = [glommed_d ; data];
     else
         glommed_d = data;
     end    
 end
 
 data = glommed_d;
+
+% remove any empty trackers by relabeling
+beadlist = unique(data(:,ID));
+if length(beadlist) == max(beadlist)+1
+%     logentry('No empty trackers, so no need to redefine tracker IDs.');
+else
+    logentry('Removing empty trackers, tracker IDs are redefined.');
+    for k = 1:length(beadlist)
+        idx = find(data(:,ID) == beadlist(k));
+        data(idx,ID) = k-1;
+    end
+end
 
 % now, settle our outputs, and move on....
 switch table
