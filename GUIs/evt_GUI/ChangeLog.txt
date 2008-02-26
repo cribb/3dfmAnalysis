@@ -1,4 +1,8 @@
 2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
+	- evt_gui.m: removed unused plot types.
+	- evt_gui.fig: same.
+
+2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
 	evt_gui.m: added plot types.
 	evt_gui.fig: same.
 	TODO.txt: added. 

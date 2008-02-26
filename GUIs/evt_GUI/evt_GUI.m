@@ -605,16 +605,7 @@ function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
 	guidata(hObject, handles);
 
     plot_data(hObject, eventdata, handles);
-    
-    
-% --- Executes on button press in radio_relative.
-function radio_relative_Callback(hObject, eventdata, handles)
-    set(handles.radio_relative, 'Value', 1);
-    set(handles.radio_arb_origin, 'Value', 0);
-    
-    plot_data(hObject, eventdata, handles);
-    drawnow;
-
+        
 
 % --- Executes on button press in checkbox_frame_rate.
 function checkbox_frame_rate_Callback(hObject, eventdata, handles)
@@ -674,8 +665,17 @@ function edit_frame_rate_Callback(hObject, eventdata, handles)
         plot_data(hObject, eventdata, handles);
         drawnow;
     end
-        
 
+    
+% --- Executes on button press in radio_relative.
+function radio_relative_Callback(hObject, eventdata, handles)
+    set(handles.radio_relative, 'Value', 1);
+    set(handles.radio_arb_origin, 'Value', 0);
+    
+    plot_data(hObject, eventdata, handles);
+    drawnow;
+
+    
 % --- Executes on button press in radio_arb_origin.
 function radio_arb_origin_Callback(hObject, eventdata, handles)
 
@@ -687,11 +687,10 @@ function radio_arb_origin_Callback(hObject, eventdata, handles)
     if length(arb_origin) ~= 2
         logentry('Origin value is not valid.  Not plotting.')
         set(handles.radio_arb_origin, 'Value', 0);
+        set(handles.radio_relative, 'Value', 1);
     else
         plot_data(hObject, eventdata, handles);
     end
-
-
 
 
 function edit_arb_origin_Callback(hObject, eventdata, handles)
@@ -781,16 +780,16 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
-        case 'displacement hist'
-            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
+%         case 'displacement hist'
+%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+%             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+%             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
+%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
         case 'MSD'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -802,13 +801,13 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
        case 'MSD histogram'
-            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_msdmean  ,  'Visible', 'on', 'Enable', 'on');
-            set(handles.checkbox_msdall   ,  'Visible', 'on', 'Enable', 'on');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_relative       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin     ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean     ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
        case 'temporal MSD'
@@ -1050,7 +1049,7 @@ function plot_data(hObject, eventdata, handles)
             set(AUXfig, 'Visible', 'on');
             clf(AUXfig);
             
-            [p, f, id] = mypsd([x(k) y(k)], 120, 1, 'rectangle');
+            [p, f, id] = mypsd([x(k)*1e-6 y(k)*1e-6], 120, 1, 'rectangle');
 
             loglog(f, p);
             xlabel('frequency [Hz]');
@@ -1069,13 +1068,13 @@ function plot_data(hObject, eventdata, handles)
             [p, f, id] = mypsd([x(k) y(k)], 120, 1, 'blackman');
 
             loglog(f, id);            
-        case 'displacement hist'
-            figure(handles.AUXfig);
-            set(AUXfig, 'Visible', 'on');
-            clf(AUXfig);
-            
-            [tau, bins, dist] = diffdist(t(k), [x(k) y(k)], []);
-            plot(dist(1,:,1), bins(1,:,1), '.');
+%         case 'displacement hist'
+%             figure(handles.AUXfig);
+%             set(AUXfig, 'Visible', 'on');
+%             clf(AUXfig);
+%             
+%             [tau, bins, dist] = diffdist(t(k), [x(k) y(k)], []);
+%             plot(dist(1,:,1), bins(1,:,1), '.');
             
         case 'MSD'
             figure(handles.AUXfig);
@@ -1107,10 +1106,11 @@ function plot_data(hObject, eventdata, handles)
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
 
-            v = msdhist(tau, msd);
+            numbins = 51;
             
-            plot(v, '.-');
-            
+            v = msdhist(mymsd, numbins);
+            plot_msdhist(v, AUXfig, 's');
+                       
         case 'temporal MSD'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
