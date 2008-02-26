@@ -1,4 +1,7 @@
 2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
+	- evt_gui.m: fixed slider bug when deleting 1 of remaining 2 tracks.
+
+2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
 	- evt_gui.m: removed unused plot types.
 	- evt_gui.fig: same.
 

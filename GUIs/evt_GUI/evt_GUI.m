@@ -991,8 +991,8 @@ function plot_data(hObject, eventdata, handles)
             frame_rate = str2num(get(handles.edit_frame_rate, 'String'));
             calib_um   = str2num(get(handles.edit_calib_um, 'String'));
             bead_diameter_um = str2num(get(handles.edit_bead_diameter_um, 'String'));
-            
-            mymsd = video_msd(data, [], frame_rate, calib_um, 'n');
+            win = [1 2 5 8 10 20 50 80 100 200 500 800 1000 2000 5000 8000 10000];
+            mymsd = video_msd(data, win, frame_rate, calib_um, 'n');            
             myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n');
             
             handles.mymsd = mymsd;
@@ -1188,9 +1188,14 @@ global hand
     	set(handles.slider_BeadID, 'Value', bead_to_remove-1);
         set(handles.edit_BeadID, 'String', num2str(bead_to_remove-1));        
     end
-
-    set(handles.slider_BeadID, 'Max', bead_max-1);
-    set(handles.slider_BeadID, 'SliderStep', [1/(bead_max-1) 1/(bead_max-1)]);
+    
+    if bead_max ~= 1
+        set(handles.slider_BeadID, 'Max', bead_max-1);
+        set(handles.slider_BeadID, 'SliderStep', [1/(bead_max-1) 1/(bead_max-1)]);
+    else
+        set(handles.slider_BeadID, 'Max', bead_max);
+        set(handles.slider_BeadID, 'SliderStep', [1/(bead_max) 1/(bead_max)]);
+    end
     
     handles.table = table;
 	guidata(hObject, handles);
