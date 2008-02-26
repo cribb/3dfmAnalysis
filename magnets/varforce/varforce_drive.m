@@ -16,7 +16,8 @@ function params_out = varforce_drive(params)
 %  .voltages            vector, [0 1 2 3 4 5]   pulse voltages in [V]
 %  .pulse_widths        vector, [1 1 1 1 1 1]   pulse widths in [sec]
 %  .degauss             {on} off                include degauss at 0 Volts?
-%
+%  .deg_tau             scaler, 0.0012          degauss decay constant
+%  .deg_freq            scaler, 10000           degauss frequency
 % Note: Required fields are marked with a star (*).
 %       Default values are enclosed in {braces}, or defined after the 
 %        specified datatype.
@@ -59,6 +60,16 @@ if ~isfield(params, 'pulse_widths')
     logentry('No pulse widths defined.  Defaulting to 1 [sec] width for each pulse.');
 end
 
+if ~isfield(params, 'deg_tau')
+    params.deg_tau = .0012;
+    logentry('No degauss time constant specified.  Defaulting to rapid degauss (tau=.0012).');
+end
+
+if ~isfield(params, 'deg_freq')
+    params.deg_freq = 10000;
+    logentry('No degauss frequency specified.  Defaulting to rapid degauss (f=10000).');
+end
+
 if ~isfield(params, 'degauss')
     params.degauss = 'on';
     logentry('No choice made for degauss.  Assuming you want to degauss.');
@@ -77,6 +88,8 @@ voltages          = params.voltages;
 pulse_widths      = params.pulse_widths;
 degauss           = params.degauss;
 deg_loc           = params.deg_loc;
+deg_tau           = params.deg_tau;
+deg_freq          = params.deg_freq;
     
 % check for equal vector lengths for voltages and pulse lengths
 if length(voltages) ~= length(pulse_widths)
@@ -145,14 +158,12 @@ events = cumsum(pulse_widths);
 
 % DEGAUSS CODE
 if findstr(degauss, 'on')
-    tau = 0.0012;
     max_voltage_amplitude = max(voltages); % V
     samp_freq = DAQ_sampling_rate;
-    sine_freq = 10000;
     idx=find(voltages == 0);
     degauss_duration = (pulse_widths(idx)/2); % seconds
     degt = [0 : 1/samp_freq : degauss_duration - 1/samp_freq];
-    degauss_vector = max_voltage_amplitude * exp(-degt/tau) .* cos(2*pi*sine_freq*degt);    
+    degauss_vector = max_voltage_amplitude * exp(-degt/deg_tau) .* cos(2*pi*deg_freq*degt);    
 % 
 %     figure(88); 
 %     plot(degt, degauss_vector);

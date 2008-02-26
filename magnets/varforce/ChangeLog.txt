@@ -1,3 +1,8 @@
+2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
+	 - varforce_drive.m: added code changes by david bober that includes degauss routines specific for the high-throughput magnetics system.
+	 - varforce_drive_gui.m: same.
+	 - varforce_drive.gui.fig: same.
+	 
 2008-01-07  Jeremy Cribb <jcribb@email.unc.edu>
 	- varforce_drive.m: added wake forest pole geometry.
 	- varforce_drive_gui.fig: same.

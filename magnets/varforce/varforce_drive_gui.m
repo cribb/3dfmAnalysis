@@ -34,7 +34,7 @@ function varargout = varforce_drive_gui(varargin)
 
 % Edit the above lbl_calib_visc to modify the response to help varforce_drive_gui
 
-% Last Modified by GUIDE v2.5 17-Aug-2006 17:43:28
+% Last Modified by GUIDE v2.5 10-Jul-2007 13:14:10
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -150,6 +150,23 @@ function listbox_pulsewidths_CreateFcn(hObject, eventdata, handles)
         set(hObject,'BackgroundColor','white');
     end
 
+function edit_deg_tau_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function edit_deg_tau_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function edit_deg_freq_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function edit_deg_freq_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
 % --- Executes on button press in pushbutton_start.
 function pushbutton_start_Callback(hObject, eventdata, handles)
 
@@ -169,9 +186,11 @@ function pushbutton_start_Callback(hObject, eventdata, handles)
    params.deg_loc = char(deg_loc(deg_loc_idx));
     
          if get(handles.checkbox_full_degauss, 'Value') 
-            params.voltages = [5 0];
-            params.pulse_widths = [0 .1];
             params.degauss = 'on';
+            params.deg_tau              = str2num(get(handles.edit_deg_tau, 'String'));
+            params.deg_freq             = str2num(get(handles.edit_deg_freq, 'String'));
+            params.voltages = [5 0];
+            params.pulse_widths = [0 10*params.deg_tau];
             params = varforce_drive(params);
             logentry('Full degauss done.');
         end 
@@ -182,6 +201,8 @@ function pushbutton_start_Callback(hObject, eventdata, handles)
     params.calibrator_viscosity = str2num(get(handles.edit_calibrator_viscosity, 'String'));
     params.bead_radius          = str2num(get(handles.edit_bead_radius, 'String'));  
     params.calibum              = str2num(get(handles.edit_calibum, 'String'));
+    params.deg_tau              = str2num(get(handles.edit_deg_tau, 'String'));
+    params.deg_freq             = str2num(get(handles.edit_deg_freq, 'String'));
 
     if get(handles.checkbox_degauss, 'Value');
         params.degauss = 'on';
@@ -231,7 +252,7 @@ function edit_pulsewidths_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-
+    
 % --- Executes on selection change in popupmenu_calibrators.
 function popupmenu_calibrators_Callback(hObject, eventdata, handles)
 
@@ -335,19 +356,18 @@ function checkbox_degauss_Callback(hObject, eventdata, handles)
 % % % % % % % % % % % % % % % % % % % % 
 function degauss_now_button_Callback(hObject, eventdata, handles)
 
-   deg_loc = get(handles.popupmenu_deg_loc, 'String');
-   deg_loc_idx = get(handles.popupmenu_deg_loc, 'Value'); 
-   params.deg_loc = char(deg_loc(deg_loc_idx));
-
+    params.deg_loc = char('beginning');
     params.myDAQid              = char('PCI-6713');
     params.DAQ_sampling_rate    = 100000;
     params.NRepeats             = 1; 
     pole_geometry               = get(handles.popupmenu_geometry, 'String');
     pole_geometry_idx           = get(handles.popupmenu_geometry, 'Value');
     params.my_pole_geometry     = char(pole_geometry(pole_geometry_idx));
-    params.voltages             = [5 0];
-    params.pulse_widths         = [0 .1];
     params.degauss              = 'on';
+    params.deg_tau              = str2num(get(handles.edit_deg_tau, 'String'));
+    params.deg_freq             = str2num(get(handles.edit_deg_freq, 'String'));
+    params.voltages             = [5 0];
+    params.pulse_widths         = [0 10*params.deg_tau];
     params.duration             = .1;
     params.calibrator_viscosity = [];
     params.bead_radius          = [];  
@@ -432,5 +452,8 @@ function popupmenu_deg_loc_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
 
 
