@@ -1,3 +1,12 @@
+2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
+	- diffdist.m: added. computes squared distances.
+	- msdhist.m: added.  computes histogram of squared displacements.
+	- msdt.m: added.  computes msd as a function of time, mainly by selective windowing of data.
+	- plot_msdhist.m: added. plotting code for msdhist.
+	- plot_msdt.m: added. plotting code for msdt.
+	- msd.m: added output of squared displacements.
+	- video_msd.m: adjusted for new squared displacement output.
+
 2007-11-09  Jeremy Cribb <jcribb@email.unc.edu>
 	- msd.m: beautified code to comply with matlab 7.5's "advice".
 	- ve.m: added figure handling.

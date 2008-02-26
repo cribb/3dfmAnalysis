@@ -59,15 +59,19 @@ end
 % convert to meters
 v(:,X:Z) = v(:,X:Z) * calib_um * 1e-6;
 
+
 % for every bead
-for beadID = 0 : get_beadmax(v);
+beadID = unique(v(:,ID))';
+myr2 = NaN * zeros(length(window), length(beadID), max(v(:,FRAME)+1));
+for k = 1 : length(beadID);
     
-    b = get_bead(v, beadID);    
+    b = get_bead(v, beadID(k));    
     framemax = max(b(:,FRAME));
     
     % call up the MSD program to compute the MSD for each bead
-    [tau(:, beadID+1), mymsd(:, beadID+1)] = msd(b(:, TIME), b(:, X:Z), window);
-
+    [tau(:, k), mymsd(:, k), r2] = msd(b(:, TIME), b(:, X:Z), window);
+    [ro, cl] = size(r2);
+    myr2(1:ro, k, 1:cl) = r2;
 end;
 
 
@@ -81,6 +85,7 @@ sample_count = sample_count(idx);
 
 % output structure
 vmsd.tau = tau;
+vmsd.r2 = myr2;
 vmsd.msd = mymsd;
 vmsd.n = sample_count;
 

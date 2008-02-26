@@ -1,4 +1,4 @@
-function [tau, msd, r2out] = msd(t, data, window)
+function [tau, mymsd, time] = msdt(t, data, tauwindow, dt)
 % 3DFM function  
 % Rheology 
 % last modified 11/06/2007
@@ -28,10 +28,14 @@ if (nargin < 2) || isempty(data)
     error('Input data needed.');
 end;
 
-if (nargin < 3) || isempty(window)  
-    window = [1 2 5 10 20 50 100 200 500 1000 1001]; 
+if (nargin < 3) || isempty(tauwindow)  
+    tauwindow = [1 2 5 10 20 50 100]; 
 end;
 
+if (nargin < 3) || isempty(dt)
+%     frame_rate = 120;
+    dt = 0:floor(t(end)); 
+end;
 
 
 % load in the constants that identify the output's column headers for the current
@@ -42,33 +46,28 @@ video_tracking_constants;
 % for every window size (or tau)
 warning('off', 'MATLAB:divideByZero');
 
-r2out = zeros(length(window), size(data,1)) * NaN;
-
-    for w = 1:length(window)
-    
-      % for x,y,z (k = 1,2,3) directions  
-      for k = 1:cols(data)
-  
-        % for all frames
-        A = data(1:end-window(w), k);
-        B = data(window(w)+1:end, k);
-    
-        if k == 1
-            r2 = ( B - A ).^2;
-        elseif k > 1
-            r2 = r2 + ( B - A ).^2;
-        end
+    for k = 1:length(dt)-1
+        idx = find(t > dt(k) & t < dt(k+1));
+        % call up the MSD program to compute the MSD for each bead
         
-      end
+        if ~isempty(t(idx))
+            neutdata = data(idx,:);
+            neutdata = neutdata - repmat(neutdata(1,:),size(neutdata,1),1);
+            [tau(:, k), mymsd(:, k)] = msd(t(idx), neutdata, tauwindow);
+        else
+            tau(:,k) = NaN;
+            mymsd(:,k) = NaN;
+        end
       
-        tau(w, :) = window(w) * mean(diff(t));
-        msd(w, :) = mean(r2);
-        r2out(w,1:length(r2)) = r2;
+%         tau(k, :) = tauwindow(k) * mean(diff(t));
+%         mymsd(k, :) = mean(r2);
+        time(k,:) = dt(k);
     end
 
 warning('on', 'MATLAB:divideByZero');
 
-return;
 
+% tau = 0;
+% mymsd = 0;
 
 
