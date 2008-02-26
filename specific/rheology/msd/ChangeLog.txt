@@ -1,4 +1,7 @@
 2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
+	- msdhist.m: now filters out empty msds for unavailable data in short tracks.
+
+2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
 	- msdhist.m: removed plotting code.
 	- plot_msdhist.m: removed computations.
 

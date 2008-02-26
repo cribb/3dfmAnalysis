@@ -57,15 +57,18 @@ mean_logmsd = nanmean(logmsd');
 
     
 % window, beadID, frame
-for k = 1:size(r2,1)
-    data = log10(r2(k, :, :));
+for w = 1:size(r2,1)
+    data = log10(r2(w, :, :));
     data = data(:);
     data = data(~isnan(data));
     data = data(~isinf(data));
 
 
-    [myhist(:,k), bins] = hist(data, num_bins);
+    [myhist(:,w), bins] = hist(data, num_bins);
 end
+
+idx = find(sum(abs(myhist),1) == 0);
+myhist(:,idx) = [];
 
 myhist = myhist ./ repmat(n', size(myhist,1),1);
 mytau = mean(tau,2);
