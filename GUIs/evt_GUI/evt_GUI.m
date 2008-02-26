@@ -761,6 +761,36 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
+        case 'PSD'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
+        case 'Integrated Disp'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
+        case 'displacement hist'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
         case 'MSD'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -771,6 +801,26 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
+       case 'MSD histogram'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.checkbox_msdall   ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
+       case 'temporal MSD'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
        case 'GSER'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -936,7 +986,7 @@ function plot_data(hObject, eventdata, handles)
     AUXfig = handles.AUXfig;         
     AUXtype = handles.AUXtype;
     
-    if strcmp(AUXtype, 'MSD') || strcmp(AUXtype, 'GSER')
+    if strcmp(AUXtype, 'MSD') || strcmp(AUXtype, 'GSER') || strcmp(AUXtype, 'MSD histogram')
         if handles.recomputeMSD            
             data = handles.table;
             frame_rate = str2num(get(handles.edit_frame_rate, 'String'));
@@ -995,7 +1045,37 @@ function plot_data(hObject, eventdata, handles)
             set(handles.AUXfig, 'DoubleBuffer', 'on');
             set(handles.AUXfig, 'BackingStore', 'off');    
             drawnow;
+        case 'PSD'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            clf(AUXfig);
             
+            [p, f, id] = mypsd([x(k) y(k)], 120, 1, 'rectangle');
+
+            loglog(f, p);
+            xlabel('frequency [Hz]');
+			ylabel('power [m^2/Hz]');
+
+            
+            set(handles.AUXfig, 'Units', 'Normalized');
+            set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
+            set(handles.AUXfig, 'DoubleBuffer', 'on');
+            set(handles.AUXfig, 'BackingStore', 'off');    
+        case 'Integrated Disp'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            clf(AUXfig);
+            
+            [p, f, id] = mypsd([x(k) y(k)], 120, 1, 'blackman');
+
+            loglog(f, id);            
+        case 'displacement hist'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            clf(AUXfig);
+            
+            [tau, bins, dist] = diffdist(t(k), [x(k) y(k)], []);
+            plot(dist(1,:,1), bins(1,:,1), '.');
             
         case 'MSD'
             figure(handles.AUXfig);
@@ -1023,7 +1103,22 @@ function plot_data(hObject, eventdata, handles)
             end
             
             grid on;
-        
+        case 'MSD histogram'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+
+            v = msdhist(tau, msd);
+            
+            plot(v, '.-');
+            
+        case 'temporal MSD'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            
+            [tau, m, time] = msdt(t(k), [x(k) y(k)], [], []);
+            
+            surf(m);
+            
         case 'GSER'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
@@ -1231,7 +1326,8 @@ function delete_data_after_time(hObject, eventdata, handles)
 
     hand = handles;
 
-    
+% function set_active_figure(hObject, eventdata, handles);
+
 function logentry(txt)
     logtime = clock;
     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...

@@ -1,0 +1,11 @@
+- add distance measuring functionality
+- add labels to psd plots and check units for accuracy
+- add resolution parameter to psd plots
+- add time step parameter to temporal_msd plots
+- optimize functionality by creating a beadID "index" object instead of "finding" the selected data via searches every time the selection changes.
+- add msd histogram plot type complete with necessary parameters
+- add window parameter to msd plots
+- add derivative plotting using brian eastwood's code.
+- grayed out fps should be updated via tstamps automatically
+- config buttons for plot_type
+- status line

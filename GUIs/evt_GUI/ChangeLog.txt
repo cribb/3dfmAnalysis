@@ -1,3 +1,8 @@
+2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
+	evt_gui.m: added plot types.
+	evt_gui.fig: same.
+	TODO.txt: added. 
+
 2008-01-07  Jeremy Cribb <jcribb@email.unc.edu>
 	evt_gui.m: aesthetic changes to code layout.
 
