@@ -1,4 +1,8 @@
 2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
+	- msdhist.m: removed plotting code.
+	- plot_msdhist.m: removed computations.
+
+2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
 	- diffdist.m: added. computes squared distances.
 	- msdhist.m: added.  computes histogram of squared displacements.
 	- msdt.m: added.  computes msd as a function of time, mainly by selective windowing of data.
