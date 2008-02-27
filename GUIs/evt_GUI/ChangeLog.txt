@@ -1,3 +1,8 @@
+2008-02-27  Jeremy Cribb <jcribb@email.unc.edu>
+	- evt_gui.m: fixed bug where frames per second was misreported.
+	- evt_gui.fig: same.
+	- TODO.txt: updated.
+	
 2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
 	- evt_gui.m: fixed slider bug when deleting 1 of remaining 2 tracks.
 

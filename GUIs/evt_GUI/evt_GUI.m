@@ -22,7 +22,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 08-Nov-2007 10:10:57
+% Last Modified by GUIDE v2.5 27-Feb-2008 10:26:10
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -86,7 +86,7 @@ function pushbutton_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
         end
     end
 
-	close(evt_gui);
+	close(evt_GUI);
 
     
 % --- Executes on button press in radio_selected_dataset.
@@ -180,7 +180,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     try
         d = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table');
     catch
-        msgbox('File Not Found!', 'Error.');
+        msgbox('File Not Loaded! Problem with load_video_tracking.', 'Error.');
         return;
     end
     set(handles.edit_infile, 'TooltipString', filename);
@@ -234,6 +234,11 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     maxtime = max(table(:,TIME));
     beadID = table(:,ID);
 
+    % update fps editbox so there is an indicator of real timesteps
+    idx = find(beadID == 0);
+    tsfps = round(1/mean(diff(table(idx,TIME))));
+    logentry(['Setting frame rate to ' num2str(tsfps) ' fps.']);
+    set(handles.edit_frame_rate, 'String', num2str(tsfps));
     
     % construct figure handles if they don't already exist
     if isfield(handles, 'XYfig')
@@ -326,6 +331,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     set(handles.text_calib_um                     , 'Enable', 'on');
     set(handles.pushbutton_export_all_beads       , 'Enable', 'on');
     set(handles.pushbutton_export_bead            , 'Enable', 'on');
+    set(handles.pushbutton_measure_distance       , 'Enable', 'on');
     
     plot_data(hObject, eventdata, handles);
     guidata(hObject, handles);
@@ -368,9 +374,9 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
     global hand;
     
     set(handles.radio_selected_dataset, 'Enable', 'Off');
-	set(handles.radio_boundingbox, 'Enable', 'Off');
+	set(handles.radio_boundingbox,      'Enable', 'Off');
     set(handles.radio_deletetimebefore, 'Enable', 'Off');
-    set(handles.radio_deletetimeafter, 'Enable', 'Off');
+    set(handles.radio_deletetimeafter,  'Enable', 'Off');
 	
 	if (get(handles.radio_selected_dataset, 'Value'))
         delete_selected_dataset(hObject, eventdata, handles);
@@ -474,6 +480,32 @@ function pushbutton_Select_Closest_dataset_Callback(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
     
 
+% --- Executes on button press in pushbutton_measure_distance.
+function pushbutton_measure_distance_Callback(hObject, eventdata, handles)
+    video_tracking_constants;
+
+    figure(handles.XYfig);
+	[xm, ym] = ginput(2);
+    li = line(xm,ym);
+    set(li, 'Color', 'k');
+    set(li, 'Marker', 'o');
+    set(li, 'MarkerSize', 8);
+    
+    if get(handles.radio_microns, 'Value')
+        calib_um = str2double(get(handles.edit_calib_um, 'String'));
+%         xm = xm / calib_um;
+%         ym = ym / calib_um;
+        units = 'um';
+    else
+        units = 'pixels';
+    end        
+        
+    dist = sqrt((xm(2) - xm(1)).^2 + (ym(2) - ym(1)).^2);
+    
+    diststr = [num2str(round(dist)) ' ' units];
+    set(handles.text_distance, 'String', diststr);
+
+
     
 % --- Executes on button press in pushbutton_select_drift_region.
 function pushbutton_select_drift_region_Callback(hObject, eventdata, handles)
@@ -550,6 +582,13 @@ function pushbutton_export_all_beads_Callback(hObject, eventdata, handles)
 function radio_pixels_Callback(hObject, eventdata, handles)
     set(handles.radio_pixels, 'Value', 1);
     set(handles.radio_microns, 'Value', 0);
+
+    diststr = get(text_distance, 'String');
+    
+    if findstr(diststr, 'um')
+    elseif findstr(diststr, 'pixels')
+    else
+    end
     
     plot_data(hObject, eventdata, handles);
 
@@ -1139,6 +1178,9 @@ function plot_data(hObject, eventdata, handles)
 
             handles.poleloc = pole_locator(handles.table, handles.im, 'y', AUXfig);
             guidata(hObject, handles);
+
+            poleloctxt = [num2str(handles.poleloc(1)) ', ' num2str(handles.poleloc(2))]
+            set(handles.edit_arb_origin, 'String', poleloctxt);
             
         case 'tracker avail'
             figure(handles.AUXfig);

@@ -1,5 +1,5 @@
-- add distance measuring functionality
-- add labels to psd plots and check units for accuracy
+(done) - add distance measuring functionality
+(done) - add labels to psd plots and check units for accuracy
 - add resolution parameter to psd plots
 - add time step parameter to temporal_msd plots
 - optimize functionality by creating a beadID "index" object instead of "finding" the selected data via searches every time the selection changes.
