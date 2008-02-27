@@ -1,3 +1,6 @@
+2008-02-27  Jeremy Cribb <jcribb@email.unc.edu>
+	- varforce_drive_gui.fig: recommitted bober's changes.  something woncky happened last time.
+
 2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
 	 - varforce_drive.m: added code changes by david bober that includes degauss routines specific for the high-throughput magnetics system.
 	 - varforce_drive_gui.m: same.
