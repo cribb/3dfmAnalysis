@@ -216,7 +216,7 @@ function pushbutton_start_Callback(hObject, eventdata, handles)
 
     if ~strcmp(params.myDAQid, 'daqtest')
         pause(params.duration);
-        zerodaq([0 0 0 0 0 0 0 0]);
+        zerodaq([0 0 0 0 0 0 0 0], myDAQid);
         logentry('DAC channels are zeroed.');
     end 
     logentry('DAC run is finished.');

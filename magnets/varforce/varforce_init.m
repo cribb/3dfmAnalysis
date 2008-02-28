@@ -67,7 +67,7 @@ function [table_out,  params] = varforce_init(params)
     % Define the zero location as the center of the circle that inscribes
     % the shape of the poletip.
     %%%%
-    poleloc     = poleloc     * calib_um * 1e-6;
+    poleloc     = poleloc * calib_um * 1e-6;
     params.poletip_radius = params.poletip_radius * calib_um * 1e-6;
     table(:,X) = table(:,X) - poleloc(1);
     table(:,Y) = table(:,Y) - poleloc(2);
@@ -97,13 +97,13 @@ function [table_out,  params] = varforce_init(params)
     table(BCidx,:) = [];
     
     %%%%
-    % setup pulse and sequence event times
+    % setup sequence and voltageID event times
     %%%%
     sequence_id    = [0:NRepeats];
     sequence_times = (sequence_id * sequence_width);
     pulse_times    = [0 cumsum(repmat(pulse_widths, 1, NRepeats))];
     pulse_times    = pulse_times(1:end-1);
-    pulse_voltage  = repmat(voltages, 1, NRepeats);
+    voltage_id     = repmat(0:length(voltages)-1, 1, NRepeats);
 
     %%%%
     % attach sequence ID's
@@ -115,11 +115,11 @@ function [table_out,  params] = varforce_init(params)
     end
 
     %%%%
-    % attach pulse voltages
+    % attach voltage IDs
     %%%%
     for k = 1:length(pulse_times)-1
         idx = find(rel_time >= pulse_times(k) & rel_time < pulse_times(k+1));
-        table(idx,VOLTS) = pulse_voltage(k);
+        table(idx,VOLTS) = voltage_id(k);
     end
     
     %%%%

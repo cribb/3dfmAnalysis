@@ -1,4 +1,8 @@
 2008-02-27  Jeremy Cribb <jcribb@email.unc.edu>
+	- varforce_drive_gui.m: updated call to zerodaq.
+	- varforce_init.m: same.
+
+2008-02-27  Jeremy Cribb <jcribb@email.unc.edu>
 	- varforce_drive_gui.fig: recommitted bober's changes.  something woncky happened last time.
 
 2008-02-26  Jeremy Cribb <jcribb@email.unc.edu>
