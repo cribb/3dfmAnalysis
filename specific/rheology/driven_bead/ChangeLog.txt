@@ -1,3 +1,8 @@
+2008-02-28  Jeremy Cribb <jcribb@email.unc.edu>
+	* noise_expt.m: updated call to zerodaq to accomdate new parameter.
+	* shear_wave_MCL_controller.m: same.
+	* shear_wave_MCL_oscillator.m: same.
+
 2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* shear_rate_max.m: added.  converts a bead velocity into a maximum shear rate, located at the beads surface, normal to the flow direction.
 

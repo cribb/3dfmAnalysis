@@ -27,7 +27,7 @@ Vrange = [-10 10];
 x = 5;
 y = 5;
 z = 5;
-zerodaq([x y z 0 0 0 0 0]);
+zerodaq([x y z 0 0 0 0 0], DAQid);
 
 % input('Adjust stage to the starting z-plane and press <ENTER>.');
 
@@ -46,6 +46,6 @@ DACoperator(signal, Nrepeat, DAQid, channels, DAQ_sampling_rate, Vrange);
 
 % pause(end_time+0.5);
 
-zerodaq([5 5 5 0 0 0 0 0]);
+zerodaq([5 5 5 0 0 0 0 0], DAQid);
 
 % daqreset;

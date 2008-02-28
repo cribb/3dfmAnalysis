@@ -55,14 +55,14 @@ z = zeros(size(x)) + offset_volts;
 signal = [x y z];
 
 % initialize stage to center
-zerodaq([offset_volts offset_volts offset_volts 0 0 0 0 0]);
+zerodaq([offset_volts offset_volts offset_volts 0 0 0 0 0], DAQid);
 
 % Start experiment.  Call DACoperator. Call pulnix software. etc..
 DACoperator(signal, Nrepeat, DAQid, channels, DAQ_sampling_rate, Vrange);
 
 pause(end_time+0.5);
 
-zerodaq([offset_volts offset_volts offset_volts 0 0 0 0 0]);
+zerodaq([offset_volts offset_volts offset_volts 0 0 0 0 0], DAQid);
 
 % daqreset;
 
