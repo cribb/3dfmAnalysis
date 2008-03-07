@@ -1,6 +1,6 @@
 function v = zerodaq(signal, DAQid)
 
-if narg < 2 || isempty(DAQid)
+if nargin < 2 || isempty(DAQid)
     logentry('No DAQ board defined. You must define a DAQ board.  Exiting now...');
     return;
 end;

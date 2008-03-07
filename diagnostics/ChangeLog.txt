@@ -1,3 +1,6 @@
+2008-03-07  Jeremy Cribb <jcribb@email.unc.edu>
+	* zerodaq.m: fixed typo (narg -> nargin)
+
 2008-02-28  Jeremy Cribb <jcribb@email.unc.edu>
 	* zerodaq.m: added DAQid as a parameter.
 
