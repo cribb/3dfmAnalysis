@@ -1,3 +1,6 @@
+2008-03-07  Jeremy Cribb <jcribb@email.unc.edu>
+	* varforce_drive_gui.m: fixed typo (myDAQid -> params.myDAQid)
+
 2008-02-27  Jeremy Cribb <jcribb@email.unc.edu>
 	- varforce_drive_gui.m: updated call to zerodaq.
 	- varforce_init.m: same.
