@@ -295,18 +295,12 @@ function pushbutton_compute_Callback(hObject, eventdata, handles)
     else
       logentry('no error tolerance specified. Varforce_run will default to .5');
     end  
-    
-    if isfield(handles, 'edit_buffer_points');
-        input_params.num_buffer_points = str2num(get(handles.edit_buffer_points, 'String'));
-    else
-      logentry('no buffer point number specified. Varforce_run will default to removing zero points');
-    end  
-    
+       
     if isfield(handles, 'checkbox_drift');
         if get(handles.checkbox_drift, 'Value') == 1;
-        input_params.drift_remove='on';
+            input_params.drift_remove='on';
         else
-        input_params.drift_remove='off';
+            input_params.drift_remove='off';
         end
     else
         logentry('no drift removal preference specified. Varforce_run will default to using drift removal');

@@ -1,3 +1,14 @@
+2008-03-17  Jeremy Cribb <jcribb@email.unc.edu>
+	* varforce_constants.m: Changed indexing of voltage to an index of voltageIDs.  This way one can have two regions in one sequence with the same voltage value.
+	* varforce_analysis_gui.m: same.
+	* varforce_compute_inst_force.m: same.
+	* varforce_compute_sat_force.m: same.
+	* varforce_drive_gui.m same.
+	* varforce_init.m: same.
+	* varforce_remove_buffer_points.m: same.
+	* varforce_remove_drift.m: same.
+	* varforce_run.m: same.
+
 2008-03-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* varforce_drive_gui.m: fixed typo (myDAQid -> params.myDAQid)
 

@@ -186,12 +186,12 @@ function pushbutton_start_Callback(hObject, eventdata, handles)
    params.deg_loc = char(deg_loc(deg_loc_idx));
     
          if get(handles.checkbox_full_degauss, 'Value') 
-            params.degauss = 'on';
-            params.deg_tau              = str2num(get(handles.edit_deg_tau, 'String'));
-            params.deg_freq             = str2num(get(handles.edit_deg_freq, 'String'));
-            params.voltages = [5 0];
+            params.degauss      = 'on';
+            params.deg_tau      = str2num(get(handles.edit_deg_tau, 'String'));
+            params.deg_freq     = str2num(get(handles.edit_deg_freq, 'String'));
+            params.voltages     = [5 0];
             params.pulse_widths = [0 10*params.deg_tau];
-            params = varforce_drive(params);
+            params              = varforce_drive(params);
             logentry('Full degauss done.');
         end 
      

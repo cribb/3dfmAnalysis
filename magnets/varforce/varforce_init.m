@@ -119,7 +119,7 @@ function [table_out,  params] = varforce_init(params)
     %%%%
     for k = 1:length(pulse_times)-1
         idx = find(rel_time >= pulse_times(k) & rel_time < pulse_times(k+1));
-        table(idx,VOLTS) = voltage_id(k);
+        table(idx,VID) = voltage_id(k);
     end
     
     %%%%
@@ -129,7 +129,7 @@ function [table_out,  params] = varforce_init(params)
         
         for k = unique(table(:,SEQ))'  % have to loop through each sequence
             
-            DEGidx = find(table(:,SEQ) == k & table(:,VOLTS) == 0); % reduce to zero voltage        \
+            DEGidx = find(table(:,SEQ) == k & table(:,VID) == 0); % reduce to zero voltage        \
             
             % you first have to check and see if we find any zero voltage
             % data.  This must be handled because the video spot tracker
@@ -154,7 +154,7 @@ function [table_out,  params] = varforce_init(params)
 %                 pause;
         end
     else
-        DEGidx = find(table(:,VOLTS) == 0);
+        DEGidx = find(table(:,VID) == 0);
         table(DEGidx,DEGAUSS) == 0;
     end
     
@@ -163,7 +163,7 @@ function [table_out,  params] = varforce_init(params)
     % of NaN.  They are irrelavent data that exist after the driving code
     % has completed.
     %%%%%
-    idx = ~isnan(table(:,VOLTS));
+    idx = ~isnan(table(:,VID));
     table = table(idx,:);
         
     %%%%

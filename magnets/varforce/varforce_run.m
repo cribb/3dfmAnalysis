@@ -102,7 +102,7 @@ end
 % allows drift removal while keeping record of drift information for
 % estimation of drift forces
 if find(voltages == 0) & findstr(drift_remove, 'on')
-    idx         = find(vid_table(:,VOLTS) == 0);
+    idx         = find(vid_table(:,VID) == 0);
     drift_table = vid_table(idx , :);
 else
     logentry('no drift data.');
