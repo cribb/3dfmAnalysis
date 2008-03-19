@@ -1,3 +1,11 @@
+2008-03-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* KV_step_fit.m: fixed typo in help comments.
+	* cross_model_fit.m: added.  performs fit for the Cross Model, a non-linear model for shear thinning/thickening in rheology.  
+	* cross_model_fun.m: added.  contains fitting function for Cross Model.
+	* powerlaw_model_fit.m: added.  performs fit for powerlaw model, a non-linear model for shear thinning/thickening in rheology.
+	* powerlaw_model_fun.m: added.  contains fitting function for powerlaw_model.
+	
+
 2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* stretched_exp_fit.m: added. performs fit for stretched exponential decay.
 	* stretched_exp_fun.m: added. contains fitting function for stretched exponential function.

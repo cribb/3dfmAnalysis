@@ -1,7 +1,7 @@
 function [K, D, R_square] = KV_step_fit(t, y, report)
 % 3DFM function  
 % Rheology
-% last modified 2007.03.19
+% last modified 2008.03.19
 %  
 % This function fits input data to a jeffrey rheological 
 % model's step response and provides fitting parameters
@@ -15,7 +15,7 @@ function [K, D, R_square] = KV_step_fit(t, y, report)
 %                 and tabular form.
 %        "K" is the spring constant in units of [N m^-1] 
 %        "D" is the damper parallel to the spring in [N s m^-1] 
-%        "R_square" is the a measure of fitness.
+%        "R_square" is a measure of fitness.
 %
 
 % XXX Add a fitness structure in the future that contains resdiual analysis
