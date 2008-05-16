@@ -1,0 +1,72 @@
+Notes about TA Instruments output text file format
+
+General Comments
+- Lines are tab delimited with several different section types
+  1. File Header section
+  2. Global procedure header
+  3. Specific procedure headers
+  4. Geometry
+  5. Rheometer Settings
+  6-n. Data Sections, with header-lines that match Specific procedure header field named, "Step name"
+- There exist some dashes in the parameter names.  These need to be replaced with '_' because the dashes drive matlab crazy (it thinks they are minus signs).
+
+  
+File Header Section  
+- There are three main header lines with no delimiters
+  1. Rheometer Company Identifier- "TA Instruments"
+  2. filename
+  3. date/time, format MM/DD/YYYY hh:mm:ss AP
+- For the remainder of the entire file, with the exception of labels for data sections, lines with no delimiters are just whitespace, with zero length.
+
+
+Global procedure Header
+- Probably very stable, with standard parameter-value pairs.
+- Starting this section is the parameter <Sample name>
+
+Specific procedure headers
+- Probably also very stable, with different sections for different test types.
+- very important label, "step name" matches header label in data sections.
+
+
+Geometry
+- contains stable parameter-value pair info on specific geometry used in the experiment.
+
+
+Rheometer Settings
+- also parameter-value pairs
+- there are sections within that contain data delimited by commas.  these "sub-sections" should be handled as such with the parent section defined in the line immediately prior to the sub-section.
+- Subsections can be readily identified as single-tab lines with the tab located at position 1.
+
+
+Data Sections
+- These sections contain the actual numerical data for the procedure.
+- Following a <Step name> is a column header line itself followed by a units line- Each section is identifiable by a zero-tab line with a string that matches a "step name" label from a previously defined specific procedure.
+- data are listed, tab-delimited, with no non-numeric characters.
+
+
+Notes about parsing design/algorithm
+- identify sections by "stable" initial field name.
+  - for the file header section, "TA Instruments"
+  - for the global procedure section, "Sample name" or "procedure name"
+  - Specific procedure- "step name"
+  - Geometry- "Geometry name"
+  - Rheometer Settings- "Sample compression"
+  - Data sections- <step name>
+- At a minimum you need to cut out the specific procedure parameters and associate them with the acquired data.
+- Secondarily, you need the extraneous metadata for logbook purposes.
+
+
+Proposed Matlab Structure
+  v.
+    file_header
+    global_protocol
+    geometry
+    rheometer
+    experiments.
+                <section_name>.
+                               metadata
+                               table_headers
+                               table_units
+                               table
+  
+
