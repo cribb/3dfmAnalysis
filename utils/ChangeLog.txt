@@ -1,3 +1,6 @@
+2008-05-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* count_dlim.m: added.  returns delimiter count per line.
+
 2007-08-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* pretty_plot.m: added exception handling to the changing of figure elements.
 
