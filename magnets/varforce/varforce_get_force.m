@@ -22,12 +22,12 @@ dVolts = abs(voltage - volts);
 dVolts = dVolts(find(dVolts > 0));
 smallest_dVolts = min(abs(dVolts));
 
-smallest_dVolts = 0.1;
+smallest_dVolts = 0.05;
 
 interp_volts(:,1) = min(volts) : smallest_dVolts : max(volts);
 interp_fit        = interp1(volts, fit, interp_volts);
 interp_fiterr     = interp1(volts, fit_err, interp_volts);
-
+% interp_fiterr     = zeros(size(interp_fiterr));
 
 idx = find(single(voltage) == single(interp_volts));
 

@@ -1,3 +1,12 @@
+2008-05-27  Jeremy Cribb <jcribb@email.unc.edu>
+	* varforce_compute_linefit_force.m: fixed a bug that assigned a VoltageID as a Voltage.
+	* varforce_compute_sat_data.m: cosmetic changes.
+	* varforce_plot_force_power_law.m: cosmetic changes.
+	* varforce_plot_sat_data.m: cosmetic changes.
+	* varforce_run.m: updated comments.
+	* varforce_drive.m: fixed typo in documentation.
+	* varforce_get_force.m: reduced stepsize for force interpolation.
+
 2008-03-17  Jeremy Cribb <jcribb@email.unc.edu>
 	* varforce_constants.m: Changed indexing of voltage to an index of voltageIDs.  This way one can have two regions in one sequence with the same voltage value.
 	* varforce_analysis_gui.m: same.

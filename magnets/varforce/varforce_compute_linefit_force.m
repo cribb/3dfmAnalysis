@@ -50,7 +50,7 @@ end
         
         for mySeq = unique(tablein(:,SEQ))' 
             
-            for myVoltage = unique(tablein(:,VID))'
+            for myVID = unique(tablein(:,VID))'
 
                 if ~exist('count')
                     count = 1;
@@ -58,7 +58,7 @@ end
                 
                 idx = find( tablein(:,ID) == trackers(myTracker) ...
                           & tablein(:,SEQ) == mySeq ...
-                          & tablein(:,VID) == myVoltage);
+                          & tablein(:,VID) == myVID);
 
                 if length(idx) > 1
                     
@@ -126,13 +126,14 @@ end
                     
                 end
                 
-                if ~isnan(xerrpct) & ~isnan(yerrpct)
+                if ~isnan(xerrpct) && ~isnan(yerrpct)
                     
-                    if xerrpct < error_tol & yerrpct < error_tol
+                    if (xerrpct < error_tol) && (yerrpct < error_tol)
                         
                         out.trackerid(count,1)   = myTracker;
                         out.seqid(count,1)       = mySeq;
-                        out.volts(count,1)       = myVoltage;
+                        % myVID
+                        out.volts(count,1)       = voltages(myVID+1);
                         out.xy(count,:)          = xy;
                         out.xyslope(count,:)     = [vxfit(1) vyfit(1)];
                         out.xyintercept(count,:) = [vxfit(2) vyfit(2)];

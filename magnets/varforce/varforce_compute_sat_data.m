@@ -1,4 +1,4 @@
-function logfits = varforce_compute_sat_data(forces, params);
+function logfits = varforce_compute_sat_data(forces, params)
 % 3DFM function  
 % Magnetics/varforce
 % last modified 08/01/06

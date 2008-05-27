@@ -1,4 +1,4 @@
-function varforce_plot_force_power_law(data, results);
+function varforce_plot_force_power_law(data, results)
 % 3DFM function  
 % Magnetics/varforce
 % last modified 08/01/06
@@ -38,7 +38,7 @@ function varforce_plot_force_power_law(data, results);
         % in case there is no data for a voltage entry, check for the
         % existence of point inside idx.  This prevents the appearance of
         % extraneous plots that contain no data.
-        if length(idx) > 0
+        if ~isempty(idx)
             
             this_r = logpos(idx); 
             this_force = logforce(idx); 

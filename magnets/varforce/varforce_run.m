@@ -102,6 +102,8 @@ end
 % allows drift removal while keeping record of drift information for
 % estimation of drift forces
 if find(voltages == 0) & findstr(drift_remove, 'on')
+    % referencing VID here is correct because we assume the drift removal period is 
+    % the zeroth voltage in each sequence
     idx         = find(vid_table(:,VID) == 0);
     drift_table = vid_table(idx , :);
 else

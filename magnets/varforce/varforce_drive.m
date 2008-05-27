@@ -185,7 +185,7 @@ for k = 1 : length(voltages)
         
         num_of_neg_poles = length(poles_to_excite_neg);
         
-        % when degause is enabled there is a pulse of zero volts for 1/2 time
+        % when degauss is enabled there is a pulse of zero volts for 1/2 time
         % set by user. Then degause vector is inserted and allowed to decay
         % for the remaining half of the 'zero' pulse. it has esentially no
         % effect after 8 milliseconds but this keeps the clock consistent

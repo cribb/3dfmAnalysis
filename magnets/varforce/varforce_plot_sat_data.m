@@ -1,4 +1,4 @@
-function varforce_plot_sat_data(ins);
+function varforce_plot_sat_data(ins)
 % 3DFM function  
 % Magnetics/varforce
 % last modified 08/01/06
@@ -35,7 +35,7 @@ errorL  = ins.force_errL;
 h = figure;
 figure(h);
 % plot((current), (forces * 1e12), '.-')
-errorbar(current, forces * 1e12, errorL * 1e12, errorH * 1e12, '.-');
+errorbar(current, forces * 1e12, errorL * 1e12, errorH * 1e12, '--');
 xlabel('Current [A]');
 ylabel('Force [pN]');
 legend(legend_entries);
