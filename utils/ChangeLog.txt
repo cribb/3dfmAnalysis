@@ -1,4 +1,7 @@
 2008-07-07  Jeremy Cribb <jcribb@email.unc.edu>
+	see previous entry.  forgot to add files before commit.  done here.
+
+2008-07-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore: added.  now cvs ignores .asv and .mat files (for this folder)
 	* select_data_in_box.m: added array indicies of selection as an output.
 	* pretty_plot.m: added argument handling and generated two pretty_plot types, one for 'screen' and one for nicely rendered 'eps' figures (for publication).
