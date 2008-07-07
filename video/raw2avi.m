@@ -1,7 +1,7 @@
 function v = raw2avi(rawfilein, stride, frame_rate, framesize_vector)
 % 3DFM function  
 % Video 
-% last modified 06.26.2006 (jcribb) 
+% last modified 07.07.2008 (jcribb) 
 %  
 % This function converts RAW files from the Pulnix camera
 % (via take, GLUItake, etc...) into an AVI file.
@@ -15,26 +15,30 @@ function v = raw2avi(rawfilein, stride, frame_rate, framesize_vector)
 %                           default [648 484]
 %   
 
-if nargin < 4 | isempty(framesize_vector)
+if nargin < 4 || isempty(framesize_vector)
+    xpos = 1;
+    ypos = 1;
     cols = 648;
     rows = 484;
     logentry('No frame size for raw file specified. Setting to default 648x484 pixels.');
 else
-    cols = framesize_vector(1);
-    rows = framesize_vector(2);
+    xpos = framesize_vector(1);
+    ypos = framesize_vector(2);
+    cols = framesize_vector(3);
+    rows = framesize_vector(4);
 end
 
-if nargin < 3 | isempty(frame_rate)
+if nargin < 3 || isempty(frame_rate)
     frame_rate = 30;
     logentry('No output AVI frame rate specified.  Setting to default 30 fps.');
 end
 
-if nargin < 2 | isempty(stride);
+if nargin < 2 || isempty(stride);
     stride = 4;
     logentry('No stride defined.  Using default stride of every 4 frame.');
 end
 
-if nargin < 1 | isempty(rawfilein);
+if nargin < 1 || isempty(rawfilein);
     error('No input rawfile defined.');
 end
 
@@ -64,7 +68,7 @@ for f = 1 : length(file)
     % initialize figure and set initial properties
 	fig = figure;
 	set(fig, 'visible','off' ...
-           , 'Position', [1 1 cols rows] ...
+           , 'Position', [xpos ypos cols rows] ...
            , 'DoubleBuffer','on' ...
            , 'Renderer','zbuffer' ...
            , 'Resize',  'on' ...
