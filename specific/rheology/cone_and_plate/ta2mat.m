@@ -176,8 +176,9 @@ end
 
 % Sections 6-n. Data Sections
 % Start by iterating through available Data Sections
-clear table;
+
 for k = 1:num_data_sections
+clear table;
 
     section_start = data_sections(k);
     
