@@ -1,7 +1,7 @@
-function [xout, yout] = select_data_in_box(fig);
+function [xout, yout, idx] = select_data_in_box(fig)
 
 
-	if nargin < 1 | isempty(fig)
+	if nargin < 1 || isempty(fig)
         fig = gcf;
 	end
 	
