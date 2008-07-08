@@ -11,7 +11,6 @@ if nargin < 2
     error('No data specified.');
 end
 
-h = figure; 
 set(h, 'Name', 'flow');
 loglog(srate, visc, 'o-','Color',[0.502 0.502 0.502]);
 xlabel('shear rate [1/s]');

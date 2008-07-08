@@ -12,6 +12,28 @@ if nargin < 2
     error('No data specified.');
 end
 
+% To avoid the warnings that matlab barks out regarding plotting negative
+% values in log space....
+idx1 = find(modulus(:,1) < 0);
+idx2 = find(modulus(:,2) < 0);
+idxa = find(modulus(:,1) < 0 & modulus(:,2) < 0);
+
+if ~isempty(idx1)
+    modulus(idx1,1)  = NaN;
+    logentry('Converted negative data to NaN.');
+end
+
+if ~isempty(idx2)
+    modulus(idx2,2)  = NaN;
+    logentry('Converted negative data to NaN.');
+end
+
+if ~isempty(idxa)
+    freq(idxa) = NaN;
+    logentry('Converted negative data to NaN.');
+end
+
+
 % Create axes
 axes('Parent',     h, ...
      'YScale',     'log', ...

@@ -1,3 +1,12 @@
+2008-07-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* plot_cap_creep.m: removed unnecessary call that plotted an empty figure.
+	* plot_cap_flow.m: same.
+	* plot_cap_fsweep.m: handles negative values before sent to loglog to avoid annoying warnings from matlab.
+	* plot_cap_nsweep.m: same.
+	* plot_cap_ssweep.m: same.
+	* taplot.m: removed debug output.
+	* ta2mat.m: cosmetic changes to comment.
+	
 2008-07-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore: added. this folder now ignores .asv and .mat files
 	* plot_cap_creep.m: added.  generates standard cone-and-plate (CAP) creep figure.

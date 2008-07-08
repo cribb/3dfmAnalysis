@@ -6,7 +6,6 @@ v = ta2mat(filename);
 fn = fieldnames(v.experiments);
 
 % figure out which 'experiments' have data 'tables'
-count = 1;
 for k = 1 : length(fn)
    
     if isfield(getfield(v.experiments, fn{k}), 'table');
@@ -15,7 +14,6 @@ for k = 1 : length(fn)
         st  = getfield(v.experiments, fn{k});
 
         exptype = lower(st.metadata.step_name);
-        blah{k} = exptype;
         
         if findstr(exptype, 'stress sweep');
             [stress, gp, gpp] = setup_plottype_ssweep(st);
@@ -34,7 +32,7 @@ for k = 1 : length(fn)
 
         if findstr(exptype, 'creep');
             [t,strain] = setup_plottype_creep(st);
-            plot_cap_flow(t, strain, [], mytitle);
+            plot_cap_creep(t, strain, [], mytitle);
         end
 
         if findstr(exptype, 'flow');
@@ -42,13 +40,9 @@ for k = 1 : length(fn)
             plot_cap_flow(shear_rate, visc, [], mytitle);
         end
 
-        if findstr(exptype, '');
-        end
     end
         
 end
-
-blah'
 
 return;
 
