@@ -1,3 +1,6 @@
+2008-07-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* mavg.m: added.  simple function that computes moving averages via convolution.
+
 2008-01-24  Jeremy Cribb <jcribb@email.unc.edu>
 	* distance.m: submitting Lauren Hartle's new algorithm for this function.  vectorized and much faster.
 
