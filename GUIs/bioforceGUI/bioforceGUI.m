@@ -22,7 +22,7 @@ function varargout = bioforceGUI(varargin)
 
 % Edit the above text to modify the response to help bioforceGUI
 
-% Last Modified by GUIDE v2.5 18-Jan-2007 14:09:58
+% Last Modified by GUIDE v2.5 28-Jun-2008 14:49:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -32,7 +32,7 @@ gui_State = struct('gui_Name',       mfilename, ...
                    'gui_OutputFcn',  @bioforceGUI_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
-if nargin & isstr(varargin{1})
+if nargin && isstr(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
 
@@ -88,13 +88,14 @@ function pushbutton_Select_Data_In_Box_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-    fig = get(handles.edit_ActiveFigure, 'String');
-    fig = str2num(fig);
+    fig = str2num(get(handles.edit_ActiveFigure, 'String')); %#ok<ST2NM>
     
-	[xout, yout] = select_data_in_box(fig);    
+	[xout, yout, idx, serh] = select_data_in_box(fig);    
     
     handles.x = xout;
     handles.y = yout;
+    handles.idx = idx;
+    handles.serh = serh;
     
     assignin('base', 'xout', xout);
     assignin('base', 'yout', yout);
@@ -261,3 +262,53 @@ function pushbutton_range_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
+% --- Executes on button press in pushbutton_delete_selection.
+function pushbutton_delete_selection_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_delete_selection (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    
+    if ~isempty(handles.serh)
+        serh = handles.serh;
+        
+        x = get(serh, 'XData');
+        y = get(serh, 'YData');
+        
+        idx = handles.idx;
+
+        x(idx) = [];
+        y(idx) = [];
+
+        set(serh, 'XData', x);
+        set(serh, 'YData', y);
+        
+        handles.x = [];
+        handles.y = [];
+        handles.idx = [];
+        guidata(hObject, handles);
+        
+        ax = get(serh, 'Parent');
+        fig = get(ax, 'Parent');
+        
+        refresh(fig);
+        
+        logentry('Removed selected data.');
+    else
+        logentry('No data deleted.');
+    end
+
+    
+function logentry(txt)
+
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'bioforcegui: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+
+     return;

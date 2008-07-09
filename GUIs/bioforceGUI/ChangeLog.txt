@@ -1,3 +1,8 @@
+2008-07-07  Jeremy Cribb <jcribb@email.unc.edu>
+	* .cvsignore: added.  ignores 'asv' files.
+	* bioforceGUI.fig: added delete button.
+	* bioforceGUI.m: added "delete selected data".
+
 2007-01-25  Jeremy Cribb <jcribb@email.unc.edu>
 	* bioforceGUI.m: now reports error in intercept too instead of just error in slope.
 
