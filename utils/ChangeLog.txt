@@ -1,3 +1,6 @@
+2008-07-09  Jeremy Cribb <jcribb@email.unc.edu>
+	- select_data_in_box.m: added series handle to output.
+
 2008-07-07  Jeremy Cribb <jcribb@email.unc.edu>
 	see previous entry.  forgot to add files before commit.  done here.
 
