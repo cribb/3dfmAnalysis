@@ -1,3 +1,9 @@
+2008-07-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* .cvsignore: added so that cvs ignores .asv files.
+	* plot2svg.m: from matlabcentral.  saves a figure as an svg (scalable vector graphics) file.
+	* cell2num.m: from matlabcentral.  function that converts an all numeric cell array to a double precision array.
+	* gridcolor.m: from matlabcentral.  hack that provides gridlines with different colors than black.
+	
 2007-11-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* circle.m:  external function that plots circles.
 
