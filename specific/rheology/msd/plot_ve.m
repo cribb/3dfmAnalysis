@@ -46,19 +46,19 @@ logmsd = log10(msd);
 loggp  = log10(gp);
 loggpp = log10(gpp);
 
-mean_logf  = nanmean(logf');
-mean_logw  = nanmean(logw');
-mean_loggp = nanmean(loggp');
-mean_loggpp= nanmean(loggpp');
-ste_loggp  = nanstd(logtau') ./ sqrt(N');
-ste_loggpp = nanstd(logmsd') ./ sqrt(N');
+mean_logf  = nanmean(logf,2);
+mean_logw  = nanmean(logw,2);
+mean_loggp = nanmean(loggp,2);
+mean_loggpp= nanmean(loggpp,2);
+ste_loggp  = nanstd(logtau,[],2) ./ sqrt(N);
+ste_loggpp = nanstd(logmsd,[],2) ./ sqrt(N);
 
 lognp = log10(np);
 lognpp= log10(npp);
-mean_lognp = nanmean(lognp');
-mean_lognpp= nanmean(lognpp');
-ste_lognp = nanstd(lognp') ./ sqrt(N');
-ste_lognpp= nanstd(lognpp') ./ sqrt(N');
+mean_lognp = nanmean(lognp,2);
+mean_lognpp= nanmean(lognpp,2);
+ste_lognp = nanstd(lognp,[],2) ./ sqrt(N);
+ste_lognpp= nanstd(lognpp,[],2) ./ sqrt(N);
 
 
 % select the desired depiction of frequency
