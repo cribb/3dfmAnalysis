@@ -1,3 +1,9 @@
+2008-09-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* carreau_model_fit.m: added.  performs fit for the Carreau-Yasuda model, a non-linear model for shear thinning/thickening in macroscale rheology.
+	* carreau_model_fun.m: added.  contains fitting function for Carreau-Yasuda model.
+	* cross_model_fit.m: adjusted options parameters for better fitting and removed log-space representation of function.
+	* cross_model_fun.m: removed log-space representation of function.
+	
 2008-03-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* KV_step_fit.m: fixed typo in help comments.
 	* cross_model_fit.m: added.  performs fit for the Cross Model, a non-linear model for shear thinning/thickening in rheology.  
