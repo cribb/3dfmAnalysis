@@ -1,4 +1,23 @@
-function v = plot_cap_fsweep(freq, modulus, h, mytitle, freqspec)
+function h = plot_cap_fsweep(freq, modulus, h, mytitle, freqspec)
+% 3DFM function  
+% Rheology/cone_and_plate 
+% last modified 16-09-2008 (jcribb)
+%  
+% Plots frequency sweep curves for cone and plate data.
+%  
+%  h = plot_cap_fsweep(freq, modulus, h, mytitle, freqspec)  
+%   
+%  where "h" is the input/output figure handle
+%  "freq" is a vector containing tested frequencies
+%  "modulus" is a matrix containing modulus values, G' and G'' columnwise
+%  in [Pa]
+%  "mytitle" is a string with title for figure
+%  "freqspec" is one of the following strings 'ff', 'fw', 'wf', 'ww' where
+%  the first letter indicates the units of frequency in the given data and
+%  the second letter indicates the desired units of frequency in the
+%  outputted figure.
+%
+
 if nargin < 5 || isempty('freqspec')
     freqspec = 'ff';
 end
@@ -63,12 +82,12 @@ switch freqspec
 end
 
 % Create multiple lines using matrix input to loglog
-G = loglog(freq, modulus,'Marker','diamond','Color',[0.502 0.502 0.502]);
-set(G(1), 'MarkerFaceColor',[0.502 0.502 0.502], ...
+G = loglog(freq, modulus,'Marker','diamond','Color','b');
+set(G(1), 'MarkerFaceColor','b', ...
           'DisplayName','G''');
-set(G(2), 'MarkerEdgeColor',[0.502 0.502 0.502], ...
+set(G(2), 'MarkerEdgeColor','b', ...
           'DisplayName','G''''');
-set(h, 'Name', 'fsweep');
+
 xlabel(freqlabel);
 ylabel('modulus, G'', G'''' [Pa]');
 legend('toggle');
@@ -76,7 +95,8 @@ title(mytitle);
 
 pretty_plot;
 
-v = 0;
+return;
+
 
 % Prints out a log message complete with timestamp.
 function logentry(txt)

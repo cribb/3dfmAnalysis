@@ -181,15 +181,22 @@ for k = 1:num_data_sections
 clear table;
 
     section_start = data_sections(k);
-    
+
     % determine this section's position in sections list
     p = strmatch(data_section_label{k}, slist, 'exact');
     fprintf('%s is protocol section #%i in the experimental data.\n', slist{p}, p);
 
+    myexp = getfield(exps, mlist{p}); %#ok<GFLD>
+    
+    if isfield(myexp, 'table')
+        logentry('Avoiding overwrite to datatable.  Breaking out.');
+        break;
+    end
+    
     try
         section_end   = data_sections(k+1)-1;
     catch
-        section_end   = last_line-2;
+        section_end   = last_line-1;
     end
 
     table_headers = outl{section_start+2};
@@ -204,11 +211,8 @@ clear table;
         end                                           
     end
 
-% %     if isfield(data_section, 'table')
-% %         break;
-% %     end
+
     
-    myexp = getfield(exps, mlist{p}); %#ok<GFLD>
     
     myexp.table_headers = table_headers;
     myexp.table_units   = table_units;

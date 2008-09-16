@@ -1,11 +1,31 @@
-function v = taplot(filename, mytitle)
+function figh = taplot(filename, mytitle)
+% 3DFM function  
+% Rheology/cone_and_plate 
+% last modified 16-09-2008 (jcribb)
+%  
+% Plots rheology curves for TA Instruments cone and plate data.  Uses
+% "plot_" functions for difference rheometry tests.
+%  
+%  figh = taplot(filename, mytitle)  
+%   
+% where "figh" is the output figure handle
+% "filename" can be an input ta2mat structure or the name of a text file 
+%            outputted from TA software package % (*.rsl.txt).
+%  "mytitle" is a string with title for figure.
+%
 
-v = ta2mat(filename);
 
-
+% check if the input is a filename or ta2mat data structure
+if isstruct(filename)
+    v = filename;
+else
+    v = ta2mat(filename);
+end
+    
 fn = fieldnames(v.experiments);
 
-% figure out which 'experiments' have data 'tables'
+% figure out which 'experiments' have data 'tables' and plot if data exists
+count = 1;
 for k = 1 : length(fn)
    
     if isfield(getfield(v.experiments, fn{k}), 'table');
@@ -16,30 +36,53 @@ for k = 1 : length(fn)
         exptype = lower(st.metadata.step_name);
         
         if findstr(exptype, 'stress sweep');
-            [stress, gp, gpp] = setup_plottype_ssweep(st);
-            plot_cap_ssweep(stress, [gp gpp], [], mytitle);
+            stress = st.table(:,getcol(st, 'stress'));
+            gp = st.table(:,getcol(st, 'G'''));
+            gpp= st.table(:,getcol(st, 'G'''''));
+            figh(count) = plot_cap_ssweep(stress, [gp gpp], [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'ssweep'));
         end
         
         if findstr(exptype, 'strain sweep');
-            [strain, gp, gpp] = setup_plottype_nsweep(st);
-            plot_cap_nsweep(strain, [gp gpp], [], mytitle);
+            strain = st.table(:,getcol(st, 'strain'));
+            gp = st.table(:,getcol(st, 'G'''));
+            gpp= st.table(:,getcol(st, 'G'''''));
+            figh(count) = plot_cap_nsweep(strain, [gp gpp], [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'nsweep'));
         end
         
         if findstr(exptype, 'frequency sweep');
-            [freq, gp, gpp, delta] = setup_plottype_fsweep(st);
-            plot_cap_fsweep(freq, [gp gpp], [], mytitle, 'ww');
-        end
-
-        if findstr(exptype, 'creep');
-            [t,strain] = setup_plottype_creep(st);
-            plot_cap_creep(t, strain, [], mytitle);
+            freq = st.table(:,getcol(st, 'freq'));
+            gp = st.table(:,getcol(st, 'G'''));
+            gpp= st.table(:,getcol(st, 'G'''''));
+            delta = st.table(:,getcol(st, 'delta'));            
+            figh(count) = plot_cap_fsweep(freq, [gp gpp], [], mytitle, 'ww');
+            set(figh(count), 'Name', figname(fn{k}, 'fsweep'));
         end
 
         if findstr(exptype, 'flow');
-            [shear_rate visc] = setup_plottype_flow(st);
-            plot_cap_flow(shear_rate, visc, [], mytitle);
+            shear_rate = st.table(:,getcol(st, 'rate'));
+            visc = st.table(:,getcol(st, 'visc'));            
+            figh(count) = plot_cap_flow(shear_rate, visc, [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'flow'));
         end
 
+        if findstr(exptype, 'creep');
+            t = st.table(:,getcol(st, 'time'));
+            strain = st.table(:,getcol(st, 'strain'));
+            stress = st.table(:,getcol(st, 'stress'));
+            figh(count) = plot_cap_creep(t, strain, [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'creep'));
+        end
+
+        if findstr(exptype, 'temperature');
+            temp = st.table(:,getcol(st, 'temp'));
+            visc = st.table(:,getcol(st, 'viscosity'));
+            srate = st.table(:,getcol(st, 'shear rate'));
+            figh(count) = plot_cap_temp(temp, visc, [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'temp'));
+        end
+        count = count + 1;        
     end
         
 end
@@ -47,78 +90,31 @@ end
 return;
 
 
-function [stress, gp, gpp] = setup_plottype_ssweep(st)
+function name = figname(fn, oldname)
+
+    numidx = regexp(fn, '[0-9]');
+    testnum = fn(numidx);
     
-    ANGFREQ = 1;
-    TEMPERATURE = 2;
-    TIME = 3;
-    OSCSTRESS = 4;
-    STRAIN = 5;
-    DELTA = 6;
-    GP = 7;
-    GPP = 8;
-
-    stress = st.table(:,OSCSTRESS);
-    gp = st.table(:,GP);
-    gpp= st.table(:,GPP);
-
-return;
-
-function [strain, gp, gpp] = setup_plottype_nsweep(st)
-    ANGFREQ = 1;
-    TEMPERATURE = 2;
-    TIME = 3;
-    OSCSTRESS = 4;
-    STRAIN = 5;
-    DELTA = 6;
-    GP = 7;
-    GPP = 8;
-
-    strain = st.table(:,STRAIN);
-    gp = st.table(:,GP);
-    gpp= st.table(:,GPP);
-return;
-
-function [freq, gp, gpp, delta] = setup_plottype_fsweep(st)
+    if isempty(testnum)
+        testnum='1'; 
+    end;
     
-    ANGFREQ = 1;
-    TEMPERATURE = 2;
-    TIME = 3;
-    OSCSTRESS = 4;
-    STRAIN = 5;
-    DELTA = 6;
-    GP = 7;
-    GPP = 8;
+    name = [oldname testnum];
 
-    freq = st.table(:,ANGFREQ);
-    gp = st.table(:,GP);
-    gpp= st.table(:,GPP);
-    delta = st.table(:,DELTA);
+    return;
     
-return
+function v = getcol(s, str)
 
-function [t,strain] = setup_plottype_creep(st)
-    
-    STRAIN = 1;
-    TIME = 2;
-    TEMPERATURE = 3;
+    dlim = sprintf('\t'); %the 'tab' is the delimiter here.
+    th = s.table_headers;
 
-    t = st.table(:,TIME);
-    strain = st.table(:,STRAIN);
+    p = regexp(th, str);
+    q = regexp(th, dlim);
 
-return;
+    if ~isempty(p)
+        v = find(p(1)<q,1);
+    else
+        v = [];
+    end
 
-function [shear_rate, visc] = setup_plottype_flow(st)
-
-    STRESS = 1;
-    SRATE = 2;
-    VISC = 3;
-    TIME = 4;
-    TEMPERATURE = 5;
-    NSTRES = 6;
-    
-    shear_rate = st.table(:,SRATE);
-    visc = st.table(:,VISC);
-    
-return
-    
+    return;

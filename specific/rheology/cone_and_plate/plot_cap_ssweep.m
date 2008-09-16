@@ -1,4 +1,18 @@
-function v = plot_cap_ssweep(stress, modulus, h, mytitle)
+function h = plot_cap_ssweep(stress, modulus, h, mytitle)
+% 3DFM function  
+% Rheology/cone_and_plate 
+% last modified 16-09-2008 (jcribb)
+%  
+% Plots stress sweep curves for cone and plate data.
+%  
+%  h = plot_cap_ssweep(strain, modulus, h, mytitle)  
+%   
+%  where "h" is the input/output figure handle
+%  "stress" is a vector containing tested stresses in [Pa]
+%  "modulus" is a matrix containing modulus values, G' and G'' columnwise
+%  in [Pa]
+%  "mytitle" is a string with title for figure
+%
 
 if nargin < 4 || isempty(mytitle)
     mytitle= '';
@@ -44,19 +58,20 @@ box('on');
 hold('all');
 
 % Create multiple lines using matrix input to loglog
-G = loglog(stress, modulus,'Marker','diamond','Color',[0.502 0.502 0.502]);
-set(G(1), 'MarkerFaceColor',[0.502 0.502 0.502], ...
+G = loglog(stress, modulus,'Marker','diamond','Color','b');
+set(G(1), 'MarkerFaceColor','b', ...
           'DisplayName','G''');
-set(G(2), 'MarkerEdgeColor',[0.502 0.502 0.502], ...
+set(G(2), 'MarkerEdgeColor','b', ...
           'DisplayName','G''''');
-set(h, 'Name', 'ssweep');
+
 xlabel('shear stress, \sigma [Pa]');
 ylabel('modulus, G'', G'''' [Pa]');
 legend('toggle');
 title(mytitle);
 pretty_plot;
 
-v = 0;
+return;
+
 
 % Prints out a log message complete with timestamp.
 function logentry(txt)
@@ -71,4 +86,5 @@ function logentry(txt)
      
      fprintf('%s%s\n', headertext, txt);
      
-    return
+return;
+

@@ -1,3 +1,17 @@
+2008-09-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* tareport.m: added. Generates an html report file(s) for rheology tests done on a particular sample.
+	* plot_cap_temp.m: added.  Plots temperature flow curves for cone and plate data.	
+	* taplot.m: 
+			- added documentation.  
+			- removed plotting code to individual subfunctions/files.  
+			- plots are given names for easy identification by window's titlebar.
+	* ta2mat.m: fixed bug that caused overwrites to the rheology data table.
+	* plot_cap_creep.m:  added documentation.  modified color scheme.  returns fig handle.
+	* plot_cap_flow.m: added documentation.  modified color scheme.  returns fig handle.
+	* plot_cap_fsweep.m: added documentation.  modified color scheme.  returns fig handle.
+	* plot_cap_nsweep.m: added documentation.  modified color scheme.  returns fig handle.
+	* plot_cap_ssweep.m: added documentation.  modified color scheme.  returns fig handle.
+
 2008-07-08  Jeremy Cribb <jcribb@email.unc.edu>
 	* plot_cap_creep.m: removed unnecessary call that plotted an empty figure.
 	* plot_cap_flow.m: same.
