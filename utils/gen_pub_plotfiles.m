@@ -1,3 +1,4 @@
+
 function gen_pub_plotfiles(outf, fig_or_figfile, type)
 % 3DFM function  
 % Utilities 
@@ -41,11 +42,20 @@ end
 h = figure(fig_or_figfile);
 pretty_plot(h, 'eps', mag);
 
+suffix = get(h, 'Name');
+
+if ~isempty(suffix)
+    outf = [outf '-' suffix];
+end
+
+
 set(h, 'PaperPositionMode', 'auto');
 saveas(h, outf, 'fig');
 print(h, '-r0', [outf '.eps'], '-depsc'); 
 print(h, '-r0', [outf '.png'], '-dpng'); 
-print(h, '-r0', [outf '.jpg'], '-djpg'); 
+% print(h, '-r0', [outf '.jpg'], '-djpg'); 
+plot2svg([outf '.svg'], h);
+close(h);
 
 return;
 
