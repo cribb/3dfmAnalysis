@@ -1,3 +1,7 @@
+2008-09-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* thinning_force.m: added.  Given a Cross or Carreau model fit, this function generates force requirements that provides (offline) what force is necessary to achieve a desired shear rate(s) for a set of input bead diameters.
+	* thinningexpt_reqs.m: added.  Uses above to generate figure and reports force requirmeents for a driven bead thinning experiment.
+
 2008-02-28  Jeremy Cribb <jcribb@email.unc.edu>
 	* noise_expt.m: updated call to zerodaq to accomdate new parameter.
 	* shear_wave_MCL_controller.m: same.
