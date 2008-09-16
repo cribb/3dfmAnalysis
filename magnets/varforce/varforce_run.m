@@ -75,6 +75,7 @@ drift_remove      = params.drift_remove;
 compute_inst      = params.compute_inst;
 compute_linefit   = params.compute_linefit;   
 degauss           = params.degauss;
+degauss_location  = params.deg_loc;
 NRepeats          = params.NRepeats;
 pulse_widths      = params.pulse_widths;
 voltages          = params.voltages;
@@ -101,7 +102,7 @@ end
 
 % allows drift removal while keeping record of drift information for
 % estimation of drift forces
-if find(voltages == 0) & findstr(drift_remove, 'on')
+if find(voltages == 0) && findstr(drift_remove, 'on')
     % referencing VID here is correct because we assume the drift removal period is 
     % the zeroth voltage in each sequence
     idx         = find(vid_table(:,VID) == 0);
@@ -156,7 +157,7 @@ if findstr(params.compute_linefit, 'on')
     v.forcecal.results  = logfits;
 
     % computes same info for remanence data removed earlier
-    if findstr(degauss, 'on')
+    if findstr(degauss, 'on') & findstr(degauss_location, 'middle');
         remanence = varforce_compute_linefit_force(rem_table, params);
         logfits = varforce_compute_sat_data(remanence, params);
         
@@ -164,7 +165,7 @@ if findstr(params.compute_linefit, 'on')
         v.remanence.results = logfits;
     end
     
-    if find(voltages == 0) & findstr(drift_remove, 'on')
+    if find(voltages == 0) && findstr(drift_remove, 'on')
         % using custom error tolerance here effectievly negates error filter 
         % for this data set.    
         drift   = varforce_compute_linefit_force(drift_table, params, 1e12);
@@ -217,7 +218,7 @@ function logentry(txt)
      
      
 % handles values inside the input parameters structure
-function input_params = check_input_params(input_params);
+function input_params = check_input_params(input_params)
 
     if ~isfield(input_params, 'metafile');    
         logentry('No metafile found.  Exiting now....');
