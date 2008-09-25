@@ -1,4 +1,4 @@
-function v = varforce_run(input_params);
+function v = varforce_run(input_params)
 % 3DFM function  
 % Magnetics/varforce
 % last modified 08/02/06 (jcribb)
@@ -102,7 +102,7 @@ end
 
 % allows drift removal while keeping record of drift information for
 % estimation of drift forces
-if find(voltages == 0) && findstr(drift_remove, 'on')
+if find(voltages == 0) & findstr(drift_remove, 'on')
     % referencing VID here is correct because we assume the drift removal period is 
     % the zeroth voltage in each sequence
     idx         = find(vid_table(:,VID) == 0);
@@ -164,8 +164,8 @@ if findstr(params.compute_linefit, 'on')
         v.remanence.data    = remanence;
         v.remanence.results = logfits;
     end
-    
-    if find(voltages == 0) && findstr(drift_remove, 'on')
+
+    if find(voltages == 0) & findstr(drift_remove, 'on')
         % using custom error tolerance here effectievly negates error filter 
         % for this data set.    
         drift   = varforce_compute_linefit_force(drift_table, params, 1e12);

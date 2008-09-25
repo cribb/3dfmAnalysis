@@ -1,3 +1,5 @@
+- add a function that allows one to merge (add) two calibrations that differ only in initial position and starting time.
+
 - fix radial distance measure so that pole tip radius is removed. currently only implemented in plotting code for varforce_compute_sat_data.
 
 - fix plotting code to make all plots include legends etc...

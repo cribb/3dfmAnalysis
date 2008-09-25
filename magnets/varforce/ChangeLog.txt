@@ -1,3 +1,8 @@
+2008-09-25  Jeremy Cribb <jcribb@email.unc.edu>
+	* varforce_init.m: fixed bug where last sequence was not being used at all.
+	* varforce_run.m: same.
+	* varforce_todo.m: updated.
+
 2008-09-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* varforce_run.m: fixed bug where degauss at beginning would return an empty set when trying to estimate remanance.  Now the code checks to see if the degauss location is at the middle or beginning of the zero-voltage region.
 

@@ -53,7 +53,7 @@ function [table_out,  params] = varforce_init(params)
     sequence_width = sum(pulse_widths);
 
     %%%%
-    % Load in that video file.
+    % Load in the video file.
     %%%%
     table = load_video_tracking(trackfile, [], 'm', calib_um, 'absolute', 'yes', 'table');
     
@@ -109,11 +109,17 @@ function [table_out,  params] = varforce_init(params)
     % attach sequence ID's
     %%%%
     rel_time = table(:,TIME) - min(table(:,TIME));
-    for k = [1 : NRepeats]
-        idx = find(rel_time >= sequence_times(k) & rel_time < sequence_times(k+1));
+    for k = [1 : NRepeats+1]
+        if k<(NRepeats+1)
+            idx = find(rel_time >= sequence_times(k) & rel_time < sequence_times(k+1));
+        elseif (k == (NRepeats+1))
+            idx = find(rel_time >= sequence_times(k));
+        end
+        
         table(idx,SEQ) = k-1;
     end
 
+    
     %%%%
     % attach voltage IDs
     %%%%
@@ -121,14 +127,20 @@ function [table_out,  params] = varforce_init(params)
         idx = find(rel_time >= pulse_times(k) & rel_time < pulse_times(k+1));
         table(idx,VID) = voltage_id(k);
     end
-    
+   
+
+% % % % %%%%
+% % % % % look for undefined sequences and remove
+% % % % %%%%
+% % % % nanidx = find(table(:,SEQ) ~= NaN);
+% % % % table = table(nanidx, :);
+
     %%%%
     % attach degauss label to each sequence
     %%%%
     if findstr(degauss, 'on')
-        
+        logentry('Handling degauss.');
         for k = unique(table(:,SEQ))'  % have to loop through each sequence
-            
             DEGidx = find(table(:,SEQ) == k & table(:,VID) == 0); % reduce to zero voltage        \
             
             % you first have to check and see if we find any zero voltage
@@ -136,7 +148,7 @@ function [table_out,  params] = varforce_init(params)
             % allows random access to tracking particles, i.e. trackers can
             % pop in and out of existence at any time during any pulse or
             % any sequence.
-            if length(DEGidx) > 0
+            if ~isempty(DEGidx)
                 if strcmp(deg_loc, 'middle')
                     start_of_degauss = floor(range(DEGidx)/2) + DEGidx(1);
                     table(DEGidx(1):start_of_degauss-1,DEGAUSS) = 0;                                
@@ -155,7 +167,7 @@ function [table_out,  params] = varforce_init(params)
         end
     else
         DEGidx = find(table(:,VID) == 0);
-        table(DEGidx,DEGAUSS) == 0;
+        table(DEGidx,DEGAUSS) = 0;
     end
     
     %%%%%
@@ -195,7 +207,7 @@ function logentry(txt)
 
     
 % returns the closest time to a mouseclick on a figure of video tracking
-function time_selected = get_sequence_break(table);
+function time_selected = get_sequence_break(table)
 
     varforce_constants;
     
