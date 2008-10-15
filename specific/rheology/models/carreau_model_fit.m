@@ -28,15 +28,15 @@ function [eta_zero, eta_inf, lambda, m, n, R_square, eta_apparent_fit] = carreau
                        'Diagnostics', 'on', ...
                        'TolFun', 1e-17, ...
                        'MaxIter', 500000, ...
-                       'TolX', 1e-9, ...
+                       'TolX', 1e-10, ...
                        'ShowStatusWindow', 'on');
 
 	% initial guess
     m        = 0.68;
     n        = 0.2;
-    lambda   = 20;
-    eta_zero = 10;
-    eta_inf  = 0.016;
+    lambda   = 0.5;
+    eta_zero = eta_apparent(1);
+    eta_inf  = eta_apparent(end);
     
 % % %     % normalize t and x
 % % %     t = t - min(t);    
@@ -44,7 +44,8 @@ function [eta_zero, eta_inf, lambda, m, n, R_square, eta_apparent_fit] = carreau
     
     init_cond = [m n lambda eta_zero eta_inf];
     
-	[fit, resnorm, residuals] = lsqcurvefit('carreau_model_fun', init_cond, gamma_dot, eta_apparent, [], [], options);
+% 	[fit, resnorm, residuals] = lsqcurvefit('carreau_model_fun', init_cond, gamma_dot, eta_apparent, [], [], options);
+	[fit, resnorm, residuals] = lsqnonlin('carreau_model_fun', init_cond, [0 -2 0 1e-4 1e-4], [Inf 2 Inf Inf Inf], options, gamma_dot, eta_apparent);
 
     % standard deviation of measurements == rms of the residuals
 	rms_residuals = rms(residuals);
@@ -62,8 +63,10 @@ function [eta_zero, eta_inf, lambda, m, n, R_square, eta_apparent_fit] = carreau
 	eta_inf  = fit(5);
     
     % go to town.  this is our fitting function
-    eta_apparent_fit = (eta_zero - eta_inf) .* ( (1+lambda*gamma_dot) .^ ((n-1)/m)) + eta_inf;
+    eta_apparent_fit = (eta_zero - eta_inf) .* ( (1+ (lambda*gamma_dot).^m) .^ ((n-1)/m)) + eta_inf;
 
+%     eta_apparent_fit = ((n-1)/m).*(log(eta_zero) + m.*log(lambda*gamma_dot));
+    
     if findstr(report, 'y')
         figure;
         loglog(gamma_dot, eta_apparent, '.', gamma_dot, eta_apparent_fit, 'r-');

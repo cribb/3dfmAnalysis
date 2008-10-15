@@ -1,4 +1,4 @@
-function x = carreau_model_fun(init_cond, gamma_dot, eta_apparent)
+function y = carreau_model_fun(init_cond, gamma_dot, eta_apparent)
 % 3DFM function  
 % Rheology
 % last modified 2008.03.19
@@ -22,7 +22,11 @@ function x = carreau_model_fun(init_cond, gamma_dot, eta_apparent)
     eta_inf  = init_cond(5);
 
     % go to town.  this is our fitting function
-    x = (eta_zero - eta_inf) .* ( (1+lambda*gamma_dot) .^ ((n-1)/m)) + eta_inf;
+    eta_apparent_fit = (eta_zero - eta_inf) .* ( (1+ (lambda*gamma_dot).^m) .^ ((n-1)/m)) + eta_inf;
     
+    weights = [1:length(eta_apparent)]';
+    y = (eta_apparent_fit - eta_apparent) ./ eta_apparent_fit;
+    
+%     x = ((n-1)/m).*(log(eta_zero) + m.*log(lambda*gamma_dot));
     
 
