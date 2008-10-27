@@ -1,3 +1,6 @@
+2008-10-27  Jeremy Cribb <jcribb@email.unc.edu>
+	- ve.m: updated documentation.
+
 2008-09-03  Jeremy Cribb <jcribb@email.unc.edu>
 	- ve.m: fixed calls to NaN functions.  Matlab 7+ has added matrix "awareness" for these functions.  The result was a bug where mean, std, etc... were not computed correctly without identifying the direction these operations should act on.  This update also allowed the code to look much cleaner because there was no need to transpose and re-transpose all of these values.
 	- plot_ve.m: same.

@@ -9,11 +9,12 @@ function v = ve(d, bead_radius, freq_type, plot_results);
 % error (contains standard error (stdev/sqrt(N) about the mean value, and N (the
 % number of trackers/beads in the dataset.
 %
-%  [v] = ve(d, bead_radius, freq_type);  
+%  [v] = ve(d, bead_radius, freq_type, plot_results);  
 %   
 %  where "d" is the output structure of msd.
 %        "bead_radius" is in [m].
 %        "freq_type" is 'f' for [Hz] or 'w' for [rad/s], default is [Hz]
+%        "plot_results" reports with a figure if 'y'. default is 'y'
 %  
 %  Notes:  
 %  - This algorithm came from Mason 2000 Rheol Acta paper.
