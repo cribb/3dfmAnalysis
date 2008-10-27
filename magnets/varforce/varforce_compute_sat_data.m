@@ -58,6 +58,11 @@ inter    = logfits.fit(:,2);
 % calculate voltage vs distance table
 rangepos  = range(radpos);
 legend_distances = [10 12 15:5:50] * 1e-6;
+% @TODO below are typical values for HTS experiments.  
+% These need to be incorporated as a choice when 
+% running this analysis.
+% legend_distances = [40:20:140] * 1e-6;
+
 distances = legend_distances + poletip_radius;
 
 es = abs(fiterror(:,1));

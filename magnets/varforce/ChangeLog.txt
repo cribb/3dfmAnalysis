@@ -1,3 +1,7 @@
+2008-10-27  Jeremy Cribb <jcribb@email.unc.edu>
+	* .cvsignore: added. set to ignore matlab's autosave files (*.asv)
+	* varforce_compute_sat_data.m: added comments.
+
 2008-09-25  Jeremy Cribb <jcribb@email.unc.edu>
 	* varforce_init.m: fixed bug where last sequence was not being used at all.
 	* varforce_run.m: same.
