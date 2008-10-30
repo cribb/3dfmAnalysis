@@ -1,3 +1,9 @@
+2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* sphere_flow.m: complete rework of this function.  has two modes.  will give you the shear around a sphere at a given angle and radius from the sphere.  will also generate a few eye-candy figures with vector fields and particle streams, etc.
+
+2008-10-27  Kris Ford <krisford@email.unc.edu>
+	* .cvsignore added
+
 2007-03-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* Changelog.txt: updated for last commit (forgot to save beforehand).
 
