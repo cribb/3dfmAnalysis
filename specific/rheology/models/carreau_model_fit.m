@@ -43,9 +43,11 @@ function [eta_zero, eta_inf, lambda, m, n, R_square, eta_apparent_fit] = carreau
 % % %     x = x - min(x);
     
     init_cond = [m n lambda eta_zero eta_inf];
+    lower_bounds = [0 -2 0 1e-4 1e-4];
+    upper_bounds = [Inf 0 Inf Inf Inf];
     
 % 	[fit, resnorm, residuals] = lsqcurvefit('carreau_model_fun', init_cond, gamma_dot, eta_apparent, [], [], options);
-	[fit, resnorm, residuals] = lsqnonlin('carreau_model_fun', init_cond, [0 -2 0 1e-4 1e-4], [Inf 2 Inf Inf Inf], options, gamma_dot, eta_apparent);
+	[fit, resnorm, residuals] = lsqnonlin('carreau_model_fun', init_cond, lower_bounds, upper_bounds, options, gamma_dot, eta_apparent);
 
     % standard deviation of measurements == rms of the residuals
 	rms_residuals = rms(residuals);

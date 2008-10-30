@@ -1,3 +1,11 @@
+2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* .cvsignore added by Kris Ford on 2008-10-28
+	* carreau_model_fit.m: explicity set upper and lower bounds.
+	* meter_fit.m: added. performs fit for the Meter model (stress dependence).
+	* meter_fun.m: added. fitting function for the Meter model (stress dependence).
+	* cross_model_fit.m: fixed bug in fitting equation.
+	* cross_model_fun.m: same.
+
 2008-10-15  Jeremy Cribb <jcribb@email.unc.edu>
 	- carreau_model_fit.m: fixed bug in fitting equation.
 	- carreau_model_fun.m: same.
