@@ -1,3 +1,6 @@
+2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* select_data_in_box.m: added awareness of several series rather than just selecting the first one.
+
 2008-09-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* gen_pub_plotfiles.m:  added svg output.
 
