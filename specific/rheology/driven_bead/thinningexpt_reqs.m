@@ -28,9 +28,16 @@ d = sort(d);
 
 [eta0, etainf, lambda, m, n, R_square, appviscfit] = carreau_model_fit(gammadot, appvisc, 'y');
 
+fprintf(' eta0=%12g2 \n eta_inf=%12g2 \n lambda=%12g2 \n m=%12g2 \n n=%12g2 \n R^2=%12g2 \n\n', eta0, etainf, lambda, m, n, R_square);
+
+report_string = { ['\eta_0 = ' num2str(eta0)], ...
+                  ['\eta_\infty = ' num2str(etainf)], ...
+                  ['\lambda = ' num2str(lambda)], ...
+                  ['m = ', num2str(m)], ...
+                  ['n = ', num2str(n)], ...
+                  ['R^2 = ', num2str(R_square)] };
+              
 F = thinning_force(gammadot, d./2, lambda, eta0, etainf, m, n);
-
-
 
 plotF = fliplr(F);
 
@@ -46,6 +53,13 @@ xlabel('strain rate [1/s]');
 ylabel('apparent viscosity, \eta_{app}');
 grid on;
 grid minor;
+    ax = gca;
+    xax = get(ax, 'XLim'); xmin = xax(1); xmax = xax(2);
+    yax = get(ax, 'YLim'); ymin = yax(1); ymax = yax(2);
+    xloc = xmin + 0.2*(xmax-xmin);
+    yloc = ymin + 0.2*(ymax-ymin);
+    text(xloc, yloc, report_string);
+pretty_plot;    
 
 figure(h);
 subplot(2,1,2);

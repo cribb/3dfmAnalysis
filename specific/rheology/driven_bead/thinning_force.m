@@ -76,9 +76,9 @@ A = repmat(A, length(gammadot), 1);
 
 switch model
     case 'cross'
-        eta = (eta0-etainf) .* (1+lambda.*gammadot).^-m + etainf;
+        eta = (eta0-etainf) ./ (1+(lambda.*gammadot).^m) + etainf;
     case 'carreau'
-        eta = (eta0-etainf) .* ((1+lambda.*gammadot).^((n-1)/m)) + etainf;
+        eta = (eta0-etainf) .* ((1+(lambda.*gammadot).^m).^((n-1)/m)) + etainf;
     otherwise
         % nothing should be here; this should never happen.
 end

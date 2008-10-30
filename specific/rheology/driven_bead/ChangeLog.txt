@@ -1,6 +1,11 @@
+2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* thinning_force_rod: added.  Given a Cross or Carreau model fit, this function generates force requirements that provides (offline) what force is necessary to achieve a desired shear rate(s) for a set of input ROD diameters.
+	* thinningexpt_reqs_rod.m:  added.  Uses above to generate figure and reports force requirmeents for a driven bead thinning experiment.
+	* thinning_force.m: added.  Fixed error in fitting function.
+	* thinningexpt_reqs.m: added.  same.
+	
 2008-10-27  Kris Ford <krisford@email.unc.edu>
 	* .cvsignore added.
-
 
 2008-09-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* thinning_force.m: added.  Given a Cross or Carreau model fit, this function generates force requirements that provides (offline) what force is necessary to achieve a desired shear rate(s) for a set of input bead diameters.
