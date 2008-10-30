@@ -1,4 +1,8 @@
-2008-10-27  Jeremy Cribb <jcribb@email.unc.edu>
+2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
+	- changelog.txt.  this file.  re-commiting with last commit's comments.
+
+2008-10-28  Jeremy Cribb <jcribb@email.unc.edu>
+	- .cvsignore: added. ignores .asv (matlab autosave)
 	- ve.m: updated documentation.
 
 2008-09-03  Jeremy Cribb <jcribb@email.unc.edu>
