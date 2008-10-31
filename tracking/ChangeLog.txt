@@ -1,3 +1,6 @@
+2008-10-31  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: added Ricky's function that selects and removes trackers that fit one or both of these conditions:  the number of tracked points is less than a defined number, or the tracked displacment does not exceed some defined minimum distance.
+
 2008-02-08  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: empty trackers are now automatically removed from ID.
 

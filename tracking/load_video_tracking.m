@@ -1,4 +1,6 @@
-function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absolute_pos, tstamps, table)
+function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
+                                  absolute_pos, tstamps, table,...
+                                  minFrames, minPixelRange)
 % 3DFM function
 % last modified 07/19/2005 ; jcribb
 %
@@ -6,7 +8,9 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absol
 % matlab workspace file (*.mat) format and prepares it for most 
 % data analysis functions.
 % 
-% d = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absolute_pos, tstamps, table);
+% function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
+%                                  absolute_pos, tstamps, table,...
+%                                  minFrames, minPixelRange)
 %
 % where "d" is the outputted data table
 %       "filemask" is the .mat filename(s) (i.e. wildcards ok)
@@ -16,6 +20,8 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absol
 %       "absolute_pos" is either 'relative' or 'absolute'
 %       "tstamps" is 'yes' when a timestamps file exists
 %       "table" is 'struct' or 'table', denoting the style of the output data
+%       "minFrames": tracker length threshold, default value 1 (to kill empty trackers)
+%       "minPixelRange": tracker range threshold in x OR y, default value 0
 %
 % Notes:
 % - This function is designed to work under default conditions with
@@ -25,11 +31,13 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um, absol
 video_tracking_constants;
 
 % handle the argument list
+if (nargin < 9 || isempty(minPixelRange));  minPixelRange = 0;         end;
+if (nargin < 8 || isempty(minFrames));      minFrames = 1;             end;
 if (nargin < 7 || isempty(table));          table = 'struct';          end;
-if (nargin < 6 || isempty(tstamps));        tstamps  = 'no';	          end;
+if (nargin < 6 || isempty(tstamps));        tstamps  = 'no';	       end;
 if (nargin < 5 || isempty(absolute_pos));   absolute_pos = 'relative'; end;
 if (nargin < 4 || isempty(calib_um));       calib_um = 1;              end;
-if (nargin < 3 || isempty(xyzunits));       xyzunits  = 'pixels';	  end;
+if (nargin < 3 || isempty(xyzunits));       xyzunits  = 'pixels';      end;
 if (nargin < 2 || isempty(frame_rate));     frame_rate = 120;          end;
 
 filelist = dir(filemask);
@@ -242,17 +250,8 @@ end
 
 data = glommed_d;
 
-% remove any empty trackers by relabeling
-beadlist = unique(data(:,ID));
-if length(beadlist) == max(beadlist)+1
-%     logentry('No empty trackers, so no need to redefine tracker IDs.');
-else
-    logentry('Removing empty trackers, tracker IDs are redefined.');
-    for k = 1:length(beadlist)
-        idx = find(data(:,ID) == beadlist(k));
-        data(idx,ID) = k-1;
-    end
-end
+%Prune data table of trackers that are too short, or don't move enough
+data = prune_data_table(data, minFrames, minPixelRange, xyzunits, calib_um);
 
 % now, settle our outputs, and move on....
 switch table
@@ -269,6 +268,76 @@ switch table
         if exist('PITCH');   v.pitch= data(:,PITCH);   end;
         if exist('YAW');     v.yaw  = data(:,YAW);     end;                    
 end
+
+function data = prune_data_table(data, minFrames, minPixelRange, xyzunits, calib_um)
+
+%Removes all data from trackers that have few than minFrames datapoints
+%less than minPixelRange in either x OR y.
+%
+%USAGE:
+%   function data = prune_data_table(data, minFrames, minPixelRange, units, calib_um)
+%
+%   where:
+%   'data' is the video table
+%   'minFrames' is the minimum number of frames required to keep a tracker
+%   'minPixelRange' is the minimum range a tracker must move in either x OR Y if it is to be kept
+%   'units' is either 'pixel' or 'um', reffering to the position columns in 'data'
+%   'calib_um' is the microns per pixel calibration of the image.
+%
+%   Note that x and y ranges are converted to pixels if and only if 'units'
+%   is 'um'. In this case, then 'calib_um' must be supplied.
+
+video_tracking_constants;
+
+beadlist = unique(data(:,ID));
+for i = 1:length(beadlist)                  %Loop over all beadIDs.
+    % Remove trackers that are too short in time
+    idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
+    if(length(idx) < minFrames)             %If this bead has too few datapoints
+        idx = find(data(:, ID) ~= beadlist(i)); %Get the rest of the data
+        data = data(idx, :);                    %Recreate data without this bead
+        continue                                %Move on to next bead now
+    end
+
+    % Remove trackers with too short a range in x OR y
+    xrange = max(data(idx, X)) - min(data(idx, X)); %Calculate xrange
+    yrange = max(data(idx, Y)) - min(data(idx, Y)); %Calculate yrange
+
+    %Handle unit conversion, if necessary.
+    if(nargin > 3)
+        if strcmp(xyzunits,'m')
+            calib = calib_um * 1e-6;  % convert calibration from um to meters
+        elseif strcmp(xyzunits,'um')
+            calib = calib_um;         % define calib as calib_um
+        elseif strcmp(xyzunits,'nm')
+            calib =  calib_um * 1e3;  % convert calib from um to nm
+        else 
+            calib = 1;
+        end  
+            xrange = xrange / calib;
+            yrange = yrange / calib;
+    end
+
+    %Delete this bead iff necesary
+    if(xrange<minPixelRange && yrange<minPixelRange) %If this bead has too few datapoints
+        idx  = find(data(:, ID) ~= beadlist(i));     %Get all data rows for this bead
+        data = data(idx, :);                         %Recreate data without this bead
+       continue                                     %Move on to next bead now
+    end
+end
+
+% Relabel trackers to have consecutive IDs
+beadlist = unique(data(:,ID));
+if length(beadlist) == max(beadlist)+1
+%     logentry('No empty trackers, so no need to redefine tracker IDs.');
+else
+    logentry('Removing empty trackers, tracker IDs are redefined.');
+    for k = 1:length(beadlist)
+        idx = find(data(:,ID) == beadlist(k));
+        data(idx,ID) = k-1;
+    end
+end
+
 
 % function for writing out stderr log messages
 function logentry(txt)
