@@ -10,7 +10,8 @@
 %      function named CALLBACK in evt_GUI.M with the given input arguments.
 %
 %      evt_GUI('Property','Value',...) creates a new evt_GUI or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
+%      existing singleton*.  Starting from the left, property value pairs
+%      are
 %      applied to the GUI before evt_GUI_OpeningFunction gets called.  An
 %      unrecognized property name or invalid value makes property application
 %      stop.  All inputs are passed to evt_GUI_OpeningFcn via varargin.
@@ -22,7 +23,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 27-Feb-2008 10:26:10
+% Last Modified by GUIDE v2.5 03-Nov-2008 09:58:01
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -177,8 +178,23 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 
     % load the datafile
     logentry('Loading dataset... ');
+    
+    % assign "filter by" values if they're selected
+    if get(handles.checkbox_minFrames, 'Value')
+        minFrames = str2num(get(handles.edit_minFrames, 'String'));
+    else
+        minFrames = 1;
+    end
+        
+    if get(handles.checkbox_minPixelRange, 'Value')
+        minPixelRange = str2num(get(handles.edit_minPixelRange, 'String'));
+    else
+        minPixelRange = 0;
+    end
+
+    
     try
-        d = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table');
+        d = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table', minFrames, minPixelRange);
     catch
         msgbox('File Not Loaded! Problem with load_video_tracking.', 'Error.');
         return;
@@ -1405,5 +1421,69 @@ function logentry(txt)
 %     end
 %     
 % return;
+
+
+% --- Executes on button press in checkbox_minFrames.
+function checkbox_minFrames_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_minFrames (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_minFrames
+
+
+
+function edit_minFrames_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_minFrames (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_minFrames as text
+%        str2double(get(hObject,'String')) returns contents of edit_minFrames as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_minFrames_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_minFrames (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in checkbox_minPixelRange.
+function checkbox_minPixelRange_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_minPixelRange (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_minPixelRange
+
+
+
+function edit_minPixelRange_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_minPixelRange (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_minPixelRange as text
+%        str2double(get(hObject,'String')) returns contents of edit_minPixelRange as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_minPixelRange_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_minPixelRange (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 

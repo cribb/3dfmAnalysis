@@ -1,3 +1,8 @@
+2008-11-03  Jeremy Cribb <jcribb@email.unc.edu>
+- evt_gui.fig: added pruning widgets for removing auto-tracker false-positives (identified by trackers that move less than minDistance OR less than some minimum number of tracking points).
+- evt_gui.m: same.
+- TODO.txt: added notes.
+
 2008-02-27  Jeremy Cribb <jcribb@email.unc.edu>
 	- evt_gui.m: fixed bug where frames per second was misreported.
 	- evt_gui.fig: same.
