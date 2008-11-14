@@ -1,3 +1,21 @@
+2008-11-14  Jeremy Cribb <jcribb@email.unc.edu>
+	* batch_load_video_tracking.m: modified documentation to better match Mathworks convention.
+	* erase_negatives_in_vrpn.m: same.
+	* filter_out_repeats_in_vrpn.m: same.
+	* get_bead.m: same.
+	* get_beadmax.m: same.
+	* load_lasertrap_tracking.m: same.
+	* load_laser_tracking.m: same.
+	* load_video_tracking.m: same.
+	* load_vrpn_tracking.m: same.
+	* load_xls_tracking.m: same.
+	* plot_vrpn_tracking.m: same.
+	* remove_drift.asv: same.
+	* remove_drift.m: same.
+	* tclip.m: same.
+	* tjoin.m: same.
+	* video_tracking_constants.m: same.
+
 2008-10-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: added Ricky's function that selects and removes trackers that fit one or both of these conditions:  the number of tracked points is less than a defined number, or the tracked displacment does not exceed some defined minimum distance.
 

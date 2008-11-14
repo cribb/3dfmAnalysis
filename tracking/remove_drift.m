@@ -1,4 +1,5 @@
 function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
+% REMOVE_DRIFT Subtracts drift from 3DFM video tracking data.
 %
 % [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
 % 

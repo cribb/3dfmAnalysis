@@ -1,7 +1,9 @@
 function clipped = tclip(d,ts,te,fields,fsave)
+% TCLIP Clips data according to given time limits
+%
 % 3DFM function  
-% GUI Analysis 
-% last modified 06/22/04 
+% Tracking 
+% last modified 2008.11.14 (jcribb)
 %  
 % This function clips the data according to given time limits in seconds
 % It also stores the information about the original dataset and limits

@@ -1,8 +1,10 @@
 function joined = tjoin(d1,d2,fields)
+% TJOIN Concatenates two laser tracked 3dfm datasets.
+% 
 % 3DFM function  
-% GUI Analysis 
-% last modified 05/11/04 
-%  
+% Tracking 
+% last modified 2008.11.14 (jcribb)
+%   
 % This function joins two datasets for the fields provided in arguement
 %  
 %  joined = tjoin(d1,d2,fields)

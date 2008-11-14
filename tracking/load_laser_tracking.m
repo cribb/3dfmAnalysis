@@ -1,7 +1,9 @@
-function out = load_laser_tracking(file, fields, flags);
-% 3DFM function
-% Last modified: 06/16/06 -kvdesai
-% Created: 10/12/05 - kvdesai
+function out = load_laser_tracking(file, fields, flags)
+% LOAD_LASER_TRACKING Loads into memory 3DFM laser tracking datasets.
+%
+% 3DFM function  
+% Tracking 
+% last modified 2008.11.14 (jcribb)
 % 
 % load_laser_tracking loads two types of laser tracking datasets
 % 1. Dataset of the format .vrpn.mat, produced by vrpnLogToMatlab program.
@@ -96,6 +98,7 @@ function out = load_laser_tracking(file, fields, flags);
 %                        .beadpos_offset = offset in the beadposition
 % NOTES: The elder brother of this function 'load_vrpn_tracking' may get
 % obsolete at some point. It is encouraged to use this function instead.
+
 global dd  % make the original dataset global to avert multiple copies
 
 %  the cell array containing names of the fields in original vrpn.mat file

@@ -1,8 +1,9 @@
-
-% 3DFM Analysis
-% Tracking
-% last modified 08/01/06
-%  
+% VIDEO_TRACKING_CONSTANTS generates COLUMN CONSTANTS for video tracking data
+%
+% 3DFM function  
+% Tracking 
+% last modified 2008.11.14 (jcribb)
+%   
 % script that creates column constants for video tracking data matrix.
 %
 

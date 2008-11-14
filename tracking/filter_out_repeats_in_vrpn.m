@@ -1,7 +1,9 @@
 function v = filter_out_repeats_in_vrpn(filemask)
+% FILTER_OUT_REPEATS_IN_VRPN Strips out repeat entries in vrpn.mat file.
+%
 % 3DFM function  
 % Tracking 
-% last modified 05/17/05 
+% last modified 2008.11.14 (jcribb)
 %  
 % This function strips out repeated entries in a vrpn.mat file  
 %  

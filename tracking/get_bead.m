@@ -1,7 +1,9 @@
 function v = get_bead(data, IDNum)
+% GET_BEAD Retrieve a tracker's data from a video_tracking structure.
+%
 % 3DFM function  
 % Tracking 
-% last modified 05/22/05
+% last modified 2008.11.14 (jcribb)
 %  
 % Extracts a bead's video tracking data from load_video_tracking.
 %  

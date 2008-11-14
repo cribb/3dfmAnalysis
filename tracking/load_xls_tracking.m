@@ -1,6 +1,9 @@
 function d = load_xls_tracking(file, frame_rate, upsampleHz, psd_res, window, xyzunits, calib_um);
-% 3DFM function
-% last modified 08/09/2003
+% LOAD_XLS_TRACKING Reads in a Video Tracking dataset saved as an Excel file.
+%
+% 3DFM function  
+% Tracking 
+% last modified 2008.11.14 (jcribb)
 %
 % This function reads in a Video Tracking dataset, saved as an Excel 
 % spreadsheet (*.xls), and converts it to the familiar 3dfm data structure.

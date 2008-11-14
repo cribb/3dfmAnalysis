@@ -1,4 +1,10 @@
-function v = load_lasertrap_tracking(filename, spring_constants);
+function v = load_lasertrap_tracking(filename, spring_constants)
+% LOAD_LASERTRAP_TRACKING Loads into memory 3DFM lasertrap tracking datasets.
+%
+% 3DFM function  
+% Tracking 
+% last modified 2008.11.14 (jcribb)
+% 
 
 d = load_vrpn_tracking(filename,'m','zero','yes');  %load in data set
 

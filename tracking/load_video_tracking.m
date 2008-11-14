@@ -1,9 +1,12 @@
 function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
                                   absolute_pos, tstamps, table,...
                                   minFrames, minPixelRange)
-% 3DFM function
-% last modified 07/19/2005 ; jcribb
+% LOAD_VIDEO_TRACKING Loads into memory 3DFM video tracking dataset(s).
 %
+% 3DFM function  
+% Tracking 
+% last modified 2008.11.14 (jcribb)
+% 
 % This function reads in a Video Tracking dataset, saved in the 
 % matlab workspace file (*.mat) format and prepares it for most 
 % data analysis functions.

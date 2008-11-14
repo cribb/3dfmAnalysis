@@ -1,7 +1,9 @@
-function d = batch_load_video_tracking(text, lens, multiplier, fr, rel);
+function d = batch_load_video_tracking(text, lens, multiplier, fr, rel)
+% BATCH_LOAD_VIDEO_TRACKING Load several video tracking datasets at once.
+%
 % 3DFM function  
-% Rheology 
-% created 12-7-2004 
+% Tracking 
+% last modified 2008.11.14 (jcribb)
 %  
 % batch_load_video_tracking
 % by DB Hill

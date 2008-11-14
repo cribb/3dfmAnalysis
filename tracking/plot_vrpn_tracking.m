@@ -1,6 +1,9 @@
 function plot_vrpn_tracking(d, plots)
-% 3DFM function
-% Last Modified on 05/20/04 kvdesai
+% PLOT_VRPN_TRACKING common plots for 3DFM data.
+%
+% 3DFM function  
+% Tracking 
+% last modified 2008.11.14 (jcribb)
 %
 % This function is a collection of common plots for the 3DFM.
 %
@@ -20,8 +23,7 @@ function plot_vrpn_tracking(d, plots)
 % 'v' for viscosity
 % 'e' to append the QPD error signals onto 'x' 'y' 'z'
 %
-% Changes:
-% 05/19/04 : replaced '.stage.' with '.stageCom.'
+
 
 if (nargin < 2)
     plots = 'l3pnxyze';

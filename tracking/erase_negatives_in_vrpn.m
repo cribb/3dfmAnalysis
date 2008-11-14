@@ -1,8 +1,9 @@
 function v = erase_negatives_in_vrpn(filemask)
-
+% ERASE_NEGATIVES_IN_VRPN Removes negative frame numbers in a vrpn.mat file.
+%
 % 3DFM function  
 % Tracking 
-% last modified 05/18/05 
+% last modified 2008.11.14 (jcribb)
 %  
 % This function strips out negative frame numbers in a vrpn.mat file  
 %  
