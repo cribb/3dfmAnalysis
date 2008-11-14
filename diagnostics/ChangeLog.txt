@@ -9,6 +9,7 @@
 	* noisechar.m: same
 	* stagenoisechar.m: same
 	* teststreaks.m: same
+	* .cvsignore: added
 
 2008-03-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* zerodaq.m: fixed typo (narg -> nargin)
