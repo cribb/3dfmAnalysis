@@ -1,7 +1,9 @@
 function varargout = mypsd(s, rate, res, window_type, style, obsoletearg)
+% MYPSD computes power spectral density for input
+%
 % 3DFM function  
 % DSP 
-% last modified 12/22/05 - kvdesai
+% last modified 11/14/08 (krisford)
 %  
 % This function computes the power spectral density for input.
 % Function signature:
@@ -33,13 +35,8 @@ function varargout = mypsd(s, rate, res, window_type, style, obsoletearg)
 %[p,f,id] = mypsd(signal, rate, ...);
 %                Calculates psd as well as accumulated displacement 
 %                and returns all: power-density(p), frequencies(f), accum. disp. (id)
-%%  Notes:  
-%  - Resolution cannot exceed 1/time-span
-%    
-%  ??/??/?? - created by gb.  
-%  05/06/04 - added documentation; jcribb/kvdesai
-%  05/07/04 - added integrated displacement option; kvdesai
-%  
+
+
 varargout = cell(nargout); %initialize outputs with empty cells
 
 % First make sure that the input signal is in format of columns

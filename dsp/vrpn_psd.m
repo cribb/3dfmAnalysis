@@ -1,7 +1,9 @@
 function v = vrpn_psd(d, psdres, window)
+% VRPN_PSD adds power spectral density structure to 3dfm tracking structure
+%
 % 3DFM function  
 % DSP 
-% last modified 05/07/04 - jcribb
+% last modified 11/14/08 (krisford)
 %  
 % This function adds the power spectral density (psd) structure
 % to the 3dfm tracking structure.
@@ -16,11 +18,8 @@ function v = vrpn_psd(d, psdres, window)
 %  - default psdres is the "best" resolution available to the routine
 %    based on the data given (1/end_time).
 %  - default window is 'rectangle'.
-%
-%  05/07/04 - created to replace now missing functionality of
-%             load_vrpn_tracking; jcribb
-%   
-%  
+
+
 
 % easier variables
 t = d.beadpos.time;

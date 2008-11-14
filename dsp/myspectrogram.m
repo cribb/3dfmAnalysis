@@ -1,7 +1,9 @@
 function varargout = myspectrogram(sig, rate, tres, window_type, clrmap)
+% MYSPECTROGRAM Computes spectrogram for the input signal
+%
 % 3DFM function  
 % DSP 
-% last modified 05/04/06 - kvdesai
+% last modified 11/14/08 (krisford)
 %  
 % This function computes the spectrogram for the input signal. Spectrogram is 
 % the magnitude of the short-term, time-localized Fourier transform of the signal.
@@ -29,11 +31,8 @@ function varargout = myspectrogram(sig, rate, tres, window_type, clrmap)
 %                Calculates spectrogram and plots it on semilogx surface.
 %         s = myspectrogram(signal, rate, ...);
 %   [s,f,t] = myspectrogram(signal, rate, ...);
-% 
-%  Notes:  
-%  - Resolution cannot exceed 1/duration
-%  - This function wraps the matlab inbuilt 'spectrogram' in easy-to-understand parameters  
-%  05/04/06 - created by kvdesai
+
+
 
 varargout = cell(nargout); %initialize outputs with empty cells
 if(nargin < 5 | isempty(clrmap))  	clrmap = gray; end

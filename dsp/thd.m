@@ -1,7 +1,9 @@
 function v = thd(peak, freqs, data)
+% THD Computes total harmonic distortion
+%
 % 3DFM function  
 % Utilities 
-% last modified 08/11/2003 
+% last modified 11/14/08 (Kris Ford) 
 %  
 % This function computes Total Harmonic Distortion.
 %  
@@ -10,13 +12,7 @@ function v = thd(peak, freqs, data)
 %  where:  peak is the "zeroth" peak (initial peak)
 %          freqs is a vector of frequencies 
 %		   data is a vector of data
-%  
-%  Notes:  
-%   
-%   
-%  08/11/03 - created.  
-%   
-%  
+  
 tolerance = 0.01;
 
 len = floor( max(freqs) / peak );
