@@ -1,6 +1,8 @@
 function v = laser_spring_constant(d, plots)
+% LASER_SPRING_CONSTANT computes spring constant (N/m) for 3DFM tracking laser in x, y, and z
+%
 % 3DFM function
-% last modified on 8/14/02
+% last modified on 11/14/08 (krisford)
 %
 % This function computes the spring constant in N/m for the
 % 3DFM tracking laser in x, y, & z from collected stage data.

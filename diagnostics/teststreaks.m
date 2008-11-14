@@ -1,4 +1,10 @@
 function data =  teststreaks(amp_um, f, Nseconds)
+% TESTSTREAKS Test streaks on camera by moving MCL stage in circles
+%
+% 3DFM function  
+% Diagnostics 
+% last modified 11/14/08 (krisford)
+%
 % A stand-alone function used to test streaks on camera by moving MCL stage
 % in circles. This lets us test various specifications and settings of the
 % camera.

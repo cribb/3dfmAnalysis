@@ -1,7 +1,9 @@
 function data =  noisechar(sampleRate, seconds, drive_stage)
+% NOISECHAR Configures I/O boards, channels, and voltage ranges
+%
 % 3DFM function  
 % Diagnostics 
-% last modified 05/07/04 
+% last modified 11/14/08 (krisford)
 %  
 % This function configures input/ouput boards, channels, and voltage ranges
 % It does NOT configure trigger types.
@@ -11,14 +13,6 @@ function data =  noisechar(sampleRate, seconds, drive_stage)
 %  where "sampleRate" is sampling_rate in [Hz]
 %        "seconds"  is duration of collection in [sec] 
 %        "drive_stage" is string containing stage_name
-%
-%  Notes:  
-%   
-%   
-%  ??/??/02 - created;
-%  05/07/04 - added documentation; jcribb  
-%   
-%  
 
 
 

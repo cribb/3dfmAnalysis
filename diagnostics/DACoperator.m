@@ -1,7 +1,9 @@
 function v = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange)
+% DACOPERATOR Sends input vector to specified channels on specified AO board
+%
 % 3DFM function  
 % DSP / DAQ 
-% last modified 08.10.2006 (jcribb)
+% last modified 11/14/08 (krisford)
 %
 % data = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange);  
 %
@@ -17,8 +19,7 @@ function v = DACoperator(inputs, Nrepeat, board, channels, srate, Vrange)
 % srate: Sample rate that the board should operate on [defaulted to 10000]
 % Vrange: 1 X 2 matrix for Voltage range setting for ALL channels on the specified board
 %           defaulted to [-10 10]
-% Created : 05/02/04  kvdesai, jcribb
-%
+
 
 %----check validity of arguments
 if (nargin < 1 | isempty(inputs)) 

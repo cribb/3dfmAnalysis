@@ -1,7 +1,9 @@
 function v = analyze_staircase(stagefile, videofile, videofps)
+% ANALYZE_STAIRCASE Analyzes "staircase" datasets
+%
 % 3DFM function  
 % Diagnostics 
-% last modified 05/07/04 
+% last modified 11/14/08 (krisford) 
 %  
 % This function analyzes "staircase" datasets, where a staircase shaped 
 % step-input is applied to one or more axes of the Mad City Labs stage.  
@@ -15,14 +17,7 @@ function v = analyze_staircase(stagefile, videofile, videofps)
 %  where "stagefile" is *.mcl.mat filename containing MCL and QPD data
 %        "videofile" is *.vrpn.mat filename containing tracked video data
 %		     "videofps"  is frames_per_second of camera
-%  
-%  Notes:  
-%   
-%   
-%  03/10/04 - created; jcribb
-%  05/07/04 - added documentation; jcribb
-%   
-%  
+
 
 
 % 	stage_file = 'staircase_workspace.mat';

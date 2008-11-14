@@ -1,7 +1,9 @@
 function data =  noisechar(sampleRate, seconds, channels, fit_Jacobian)
-% 3DFM function  
-% Diagnostics: Specifically for noise characterization on data acquisition board 
-% last modified 09/21/05 by kvdesai 
+% NOISECHAR Configures input/output boards, channels, and voltage ranges
+%
+% 3DFM Function 
+% Diagnostics
+% last modified 11/14/08 (krisford) 
 %  
 % This function configures input/ouput boards, channels, and voltage ranges
 % It does NOT configure trigger types.
@@ -15,10 +17,7 @@ function data =  noisechar(sampleRate, seconds, channels, fit_Jacobian)
 %        "fit_Jacobian" is a flag telling if we need to fit a Jacobian
 %            When selected, the QPD channels and Stage Channels should all be connected.
 % 
-%  Notes:  
-%      
-%  09/21/05 - created kvdesai;
-%  
+  
 dbstop if error
 if nargin < 4 | isempty(fit_Jacobian)  fit_Jacobian = 0; end
 if nargin < 3 | isempty(channels)  channels = [0:1:7]; end

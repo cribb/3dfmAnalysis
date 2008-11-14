@@ -1,7 +1,9 @@
 function log_drift(adc_collectSeconds, adc_sampleRate)
+% LOG_DRIFT collects and logs QPD and photodetector data
+%
 % 3DFM function  
 % Diagnostics 
-% last modified 05/07/04 
+% last modified 11/14/08 (krisford) 
 %  
 % This function collects and logs QPD and photodetector data for some 
 % number of seconds at some rate (samples per second). Saves data in 
@@ -11,13 +13,6 @@ function log_drift(adc_collectSeconds, adc_sampleRate)
 %   
 %  where "adc_collectSeconds" is duration of collection in [sec] 
 %        "adc_sampleRate" is sampling_rate in [Hz] 
-%  
-%  Notes:  
-%   
-%   
-%  ??/??/01 - created; jfisher
-%  05/07/04 - added documentation; jcribb  
-%   
 %  
 
 

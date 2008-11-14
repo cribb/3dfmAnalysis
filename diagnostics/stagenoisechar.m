@@ -1,6 +1,10 @@
 function data =  noisechar(seconds, drive, range)
-% A stand-alone function used to test the noise on MCL stage sensor outputs
-% Last modified by: kvdesai
+% NOISECHAR A stand-alone function used to test the noise on MCL stage sensor outputs
+%
+% 3DFM function  
+% Diagnostics 
+% last modified 11/14/08 (krisford)
+%
 % Usage:
 %   data =  noisechar(seconds, drive, range)
 %   Where,

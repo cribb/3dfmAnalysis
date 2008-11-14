@@ -3,7 +3,7 @@ function new_program = condition_waveform(program, duration, mcl_sampling_rate);
 %
 % 3DFM function  
 % Diagnostics 
-% last modified 11/14/08 
+% last modified 11/14/08 (krisford) 
 %  
 % This function conditions an input waveform, upsampling it to the
 % desired sampling rate, and generating the proper number of repeats to

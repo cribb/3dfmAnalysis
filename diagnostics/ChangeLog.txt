@@ -1,3 +1,15 @@
+2008-03-07  Kris Ford <krisford@email.unc.edu>
+	* ADCnoisechar.m: modified documentation to better match Mathworks convention
+	* analyze_staircase.m: same
+	* condition_waveform.m: same
+	* DACoperator.m: same
+	* laser_spring_constant.m: same
+	* log_drift.m: same
+	* log_drift_herc.m: same
+	* noisechar.m: same
+	* stagenoisechar.m: same
+	* teststreaks.m: same
+
 2008-03-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* zerodaq.m: fixed typo (narg -> nargin)
 
