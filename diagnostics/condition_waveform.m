@@ -1,7 +1,9 @@
 function new_program = condition_waveform(program, duration, mcl_sampling_rate);
+% CONDITION_WAVEFORM conditions input wave form, upsamples to desired sampling rate
+%
 % 3DFM function  
 % Diagnostics 
-% last modified 05/07/04 
+% last modified 11/14/08 
 %  
 % This function conditions an input waveform, upsampling it to the
 % desired sampling rate, and generating the proper number of repeats to
@@ -12,14 +14,6 @@ function new_program = condition_waveform(program, duration, mcl_sampling_rate);
 %  where "program" is [time,disp] matrix to be conditioned
 %        "duration" is the desired end-time for the output waveform in [sec]
 %        "mcl_sampling_rate" is desired Mad City Labs sampling rate
-%  
-%  Notes:  
-%   
-%   
-%  12/02/03 - created; jcribb
-%  05/07/04 - added documentation; jcribb
-%   
-%  
 
 
 % mcl_sampling_rate = 200; % Hz
