@@ -1,5 +1,5 @@
 function data =  noisechar(sampleRate, seconds, channels, fit_Jacobian)
-% NOISECHAR Configures input/output boards, channels, and voltage ranges
+% ADCNOISECHAR Configures input/output boards, channels, and voltage ranges
 %
 % 3DFM Function 
 % Diagnostics

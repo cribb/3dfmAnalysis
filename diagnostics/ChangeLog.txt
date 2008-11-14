@@ -10,6 +10,7 @@
 	* stagenoisechar.m: same
 	* teststreaks.m: same
 	* .cvsignore: added
+	* ADCnoisechar.m edited documentation added "ADC" to noisechar for help menu
 
 2008-03-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* zerodaq.m: fixed typo (narg -> nargin)
