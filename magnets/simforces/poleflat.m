@@ -1,7 +1,9 @@
 function p = poleflat(gap_distance)
-% 3DFM function  
-% Magnetics
-% last modified 12/01/04 
+% POLEFLAT Returns pole locations for pole-flat 3dfm pole geometry using gap_distance   
+%
+% 3DFM Function 
+% magnets/simforces
+% last modified 11/14/08 (krisford)
 %  
 % Returns pole locations for pole-flat 3dfm pole geometry with
 % gap_distance being the distance between the poletip and the flat
@@ -10,15 +12,8 @@ function p = poleflat(gap_distance)
 %  [p] = poleflat(gap_distance);  
 %   
 %  where "gap_distance" is in units of [meters] 
-%  
-%  Notes:  
-%   
-%  - Some parameters have been internalized and set to common values.
-%    These include flat_width (set to 8mm) and the ratio of the distance between
-%    the pole's monopole and the flat's monopoles (set to 2).
-%   
-%  12/01/04 - created; jcribb
-%   
+
+  
 
     flat_width = 0.008;               % standard flat-width in meters = 0.024m, but 
                                       % there's prob not anything exciting happening 

@@ -1,4 +1,10 @@
 function F = Bforce(f, Q)
+% BFORCE Returns list F of force vectors from a list of Q excitations for n-pole geometry matrix
+%
+% 3DFM Function 
+% magnets/simforces
+% last modified 11/14/08 (krisford)
+
 % F = Bforce(f, Q) -- Returns a list F of force vectors from a
 % list Q of excitations for an n-pole geometry matrix f, which
 % is structured as an (n x 3 x n) array where the middle index

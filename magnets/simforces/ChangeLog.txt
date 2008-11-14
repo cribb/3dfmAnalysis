@@ -1,3 +1,13 @@
+2008-11-08 Kris Ford (krisford@email.unc.edu>
+	* Bforce.m: modified documentation to better match Mathworks convention
+	* fmatrix.m: same
+	* gmatrix.m: same
+	* hexa.m: same
+	* hexaplane.m: same
+	* poleflat.m: same
+	* tetra.m: same
+	* trigplane.m: same
+
 2005-05-22  Jeremy Cribb <jcribb@email.unc.edu>
 	* hexaplane.m: added.  pole matrix for 6-poles-coplanar geometry.
 

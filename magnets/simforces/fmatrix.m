@@ -1,4 +1,10 @@
 function f = fmatrix(p, d)
+% FMATRIX Returns f matrix for a list of n pole position vectors
+%
+% 3DFM Function 
+% magnets/simforces
+% last modified 11/14/08 (krisford)
+%
 % f = fmatrix(p) -- returns the f matrix for a list
 % of n pole position vectors p, one vector per row.
 % If d is given, a TeX matrix-formatted string with
