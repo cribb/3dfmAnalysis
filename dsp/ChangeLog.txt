@@ -3,6 +3,7 @@
 	* mypsd.m: modified documentation to better match Mathworks convention
 	* myspectrogram.m: same
 	* thd.m: same
+	* vrpn_psd.m: same
 
 2006-08-25  Kalpit Desai <kvdesai@email.unc.edu>
 	* processpeak.m: More robust method of accurately locating the nearest point to the search frequency.
