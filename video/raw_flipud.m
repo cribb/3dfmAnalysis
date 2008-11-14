@@ -1,4 +1,10 @@
 function v = raw_flipud(rawfilein, rawfileout)
+% RAW_FLIPUD flips a Pulnix file in the up/down direction
+%
+% 3DFM function  
+% Video 
+% last modified 2008.11.14 (jcribb) 
+
 tic;
 
 % get input file information

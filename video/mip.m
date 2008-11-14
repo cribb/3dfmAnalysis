@@ -1,7 +1,9 @@
-function v = mip(files, start, stop, stride, mode);
+function v = mip(files, start, stop, stride, mode)
+% MIP Creates a time-lapse image from a RAW file and outputs to an image object.
+%
 % 3DFM function  
-% Image Analysis 
-% last modified 11/01/05
+% Video 
+% last modified 2008.11.14 (jcribb) 
 %  
 % This function returns the maximum or minimum intensity 
 % projection image for a movie (avi or raw), or a stack of images in

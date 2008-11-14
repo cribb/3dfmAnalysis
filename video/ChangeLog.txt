@@ -1,3 +1,22 @@
+2008-11-14  Jeremy Cribb <jcribb@email.unc.edu>
+	* .cvsignore: added.
+	* balance_pulnix_gains: modified documentation to better match Mathworks convention.
+	* clipraw.m: same.
+	* enhance_contrast.m: same.
+	* get_mips.m: same.
+	* imscalebar.m: same.
+	* make_pulnix_avi.m: same.
+	* mip.m: same.
+	* playback_data.m: same.
+	* raw2avi.m: same.
+	* raw2img.m: same.
+	* raw_balance_gain.m: same.
+	* raw_flipud.m: same.
+	* raw_mean_subtract.m: same.
+	* raw_swaplines.m: same.
+	* swaplines.m: same.
+	* video_psd.m: same.
+	
 2008-07-07  Jeremy Cribb <jcribb@email.unc.edu>
 	* raw2avi.m: added x and y offsets to crop (frame_size) vector.
 

@@ -1,4 +1,11 @@
 function v = enhance_contrast(rawfilein, rawfileout)
+% ENHANCE_CONTRAST standard enhance contrast routine for Pulnix RAW files
+%
+% 3DFM function  
+% Video 
+% last modified 2008.11.14 (jcribb)
+%
+
 tic;
 
 % get input file information

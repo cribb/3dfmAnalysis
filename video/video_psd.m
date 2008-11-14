@@ -1,7 +1,9 @@
 function v = video_psd(d, psdres, window)
+% VIDEO_PSD attaches PSD data to video tracking structure.
+%
 % 3DFM function  
-% video/DSP
-% last modified 04/03/06 - jcribb
+% Video 
+% last modified 2008.11.14 (jcribb) 
 %  
 % This function adds the power spectral density (psd) structure
 % to the 3dfm video tracking structure.  This means that the input data

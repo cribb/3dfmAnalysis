@@ -1,9 +1,11 @@
 function imscalebar(im, physlen, calib, units, location, color)
+% IMSCALEBAR Overlays a scale bar atop a figure.
+%
 % 3DFM function  
-% Video
-% last modified 09/04/05 (jcribb)
+% Video 
+% last modified 2008.11.14 (jcribb)
 % 
-% Run a 2D force calibration using data from EVT_GUI.
+% Puts a scale bar on a figure.
 % 
 % [no output] =  imscalebar(im, physlen, calib, units, location); 
 % 

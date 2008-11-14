@@ -1,7 +1,9 @@
 function v = make_pulnix_avi(directory, movfile)
+% MAKE_PULNIX_AVI (obsolete) concatenates RAW files into AVI.
+%
 % 3DFM function  
 % Video 
-% last modified 09/07/2004 
+% last modified 2008.11.14 (jcribb) 
 %  
 % This function convert a stack of RAW files from the Pulnix camera
 % (via take, GLUItake, etc...) to an AVI file.
@@ -12,12 +14,7 @@ function v = make_pulnix_avi(directory, movfile)
 %        "moviefile"  is the filename for the output AVI file.
 %        "frame_rate" is the frame_rate of the output AVI.
 %   
-%  ??/??/?? - created.  jcribb.
-%  09/07/04 - added documentation and removed a bug that only
-%             allowed one to capture 60 frames.  jcribb.
-%  
 
-% make pulnix avi
 
 cd(directory)
 files = dir('*.raw');

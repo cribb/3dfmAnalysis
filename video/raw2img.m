@@ -1,4 +1,6 @@
 function v = raw2img(varargin)
+% RAW2IMG Converts Pulnix RAW files to a "stack" of image files.
+%
 % 3DFM function  
 % Video 
 % last modified 09/22/2004 

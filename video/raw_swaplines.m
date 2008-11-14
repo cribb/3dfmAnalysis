@@ -1,4 +1,11 @@
 function v = raw_swaplines(rawfilein, rawfileout)
+% RAW_SWAPLINES Recovers scrambled lines incorrectly scanned by Pulnix and outputs RAW file.
+%
+% 3DFM function  
+% Video 
+% last modified 2008.11.14 (jcribb) 
+%
+
 tic;
 
 % get input file information

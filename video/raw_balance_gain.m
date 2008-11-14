@@ -1,4 +1,11 @@
 function v = raw_balance_gain(rawfilein, rawfileout)
+% RAW_BALANCE_GAIN balances gains for RAW file.
+%
+% 3DFM function  
+% Video 
+% last modified 2008.11.14 (jcribb) 
+
+
 tic;
 
 % get input file information

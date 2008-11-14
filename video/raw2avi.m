@@ -1,4 +1,6 @@
 function v = raw2avi(rawfilein, stride, frame_rate, framesize_vector)
+% RAW2AVI converts a Pulnix RAW file to an AVI file.
+%
 % 3DFM function  
 % Video 
 % last modified 07.07.2008 (jcribb) 

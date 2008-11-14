@@ -1,4 +1,11 @@
 function v = raw_mean_sub(rawfilein, rawfileout)
+% RAW_MEAN_SUB subtract the mean pixel values from a Pulnix RAW file.
+%
+% 3DFM function  
+% Video 
+% last modified 2008.11.14 (jcribb) 
+%
+
 % get input file information
 file = dir(rawfilein);
 

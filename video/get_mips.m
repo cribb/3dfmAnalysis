@@ -1,7 +1,9 @@
 function get_mips(rawfiles, stride, start, stop, type)
+% GET_MIPS Create and save intensity projections/time lapse images for RAW files
+%
 % 3DFM function  
-% Image Analysis 
-% last modified 01/26/05
+% Video 
+% last modified 2008.11.14 (jcribb)
 %  
 % This function computes and saves a Maximum or Minimum Intensity 
 % Projection image for any RAW file matching "rawfiles".

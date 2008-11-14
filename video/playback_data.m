@@ -1,7 +1,9 @@
 function playback_data(coords, fps, movfile)
+% PLAYBACK_DATA plots 2D/3D data at a given framerate and outputs to an AVI
+%
 % 3DFM function  
 % Video 
-% last modified 11/17/2004 
+% last modified 2008.11.14 (jcribb) 
 %  
 % This function will create an AVI file that plays back a 2D or 3D
 % dataset at a desired framerate.  There is no filtering or resampling
@@ -13,9 +15,6 @@ function playback_data(coords, fps, movfile)
 %        "fps"  is frames per second for the output AVI.
 %        "movfile" is the filename for the output AVI.
 %   
-%  11/17/04 - created; jcribb.
-%  
-%
 
 % coords should be an n x 2 or n x 3 matrix, oriented as [x y z]
 % all resampling, etc, is assumed to have been done before this

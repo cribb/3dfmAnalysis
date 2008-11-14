@@ -1,6 +1,9 @@
 function v = balance_pulnix_gains(im)
-% 3DFM function  
-% Image Analysis 12/07/04 
+% BALANCE_PULNIX_GAINS Equilibrates interlaced gains for images from Pulnix Camera
+%
+% 3DFM function 
+% Image Analysis 
+% last modified 2008.11.14 (jac)
 %  
 % This function attempts to equilibrate the gains between the 
 % two channels of the Pulnix PTM-6710 camera.  These channels are
@@ -15,8 +18,7 @@ function v = balance_pulnix_gains(im)
 %   
 %  where "im" is a matrix representing a Pulnix image.
 %   
-%  12/07/04 - created; jcribb.
-%   
+
 
 % im = imadjust(im, stretchlim(im), [0 1]); % contrast enhance first.
 im = double(im(:,:,1));
