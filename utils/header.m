@@ -1,7 +1,9 @@
 function header(type)
+% HEADER Generates template headertext for new functions in this package.
+%
 % 3DFM function
 % Utilities
-% last modified on 07/29/2003
+% last modified 2008.11.14 (jcribb)
 %
 % This function outputs the header for writing new matlab functions for
 % the 3DFM lab.

@@ -1,6 +1,9 @@
 function numerVec = parse_csv_int(str)
-% 3DFM Function
-% Utility
+% PARSE_CSV_INT Parses CSV file into matlab format arrays.
+%
+% 3DFM function
+% Utilities
+% last modified 2008.11.14 (jcribb)
 %
 % This function parses a string which contains positive integers separated by 
 % non-numeric characters (e.g. comma, white space, dot, minus sign etc).
@@ -11,8 +14,6 @@ function numerVec = parse_csv_int(str)
 % just after 2nd colon are considered to make the matlab format array e.g.
 % '1x 2 yz : x1y 3 c : 4 e' is parsed as [2:3:4]
 % 
-% Created: ??/??/2005     -kvdesai
-% Last Modified: 05/18/06 -kvdesai
 
 numerVec = [];
 digflags = isstrprop(str,'digit');

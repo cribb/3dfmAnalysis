@@ -1,4 +1,6 @@
 function make_3dfmAnalysis_docs(directory)
+% MAKE_3DFMANALYSIS_DOCS Generates a global 3dfmAnalysis help document.
+% 
 % 3DFM function  
 % Utilities 
 % last modified 03/12/2004
@@ -12,11 +14,7 @@ function make_3dfmAnalysis_docs(directory)
 %   
 %  where "files" is a filename or directory name (wildcards may be used) 
 %  
-%  Notes:  
-%   
-%  03/12/2004 - created; jcribb
-%   
-%  
+
 
 rootdocs = './docs';
 files = dir(directory);

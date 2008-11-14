@@ -1,3 +1,23 @@
+2008-11-14  Jeremy Cribb <jcribb@email.unc.edu>
+	* xlswrite.m: modified documentation to better match Mathworks convention.
+	* bin2d.m: same.
+	* clipper.m: same.
+	* cols.m: same.
+	* count_dlim: same.
+	* drawlines.m: same.
+	* figurelist.m: same.
+	* gen_pub_plotfiles.m: same.
+	* header.m: same.
+	* legend_reorder.m: same.
+	* make_3dfmAnalysis_docs.m: same.
+	* mat2txt.m: same.
+	* parse_csv_int.m: same.
+	* pretty_plot.m: same.
+	* rows.m: same.
+	* select_data_in_box.m: same.
+	* slopper.m: same.
+	* unixUTC.m: same. 
+	
 2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* select_data_in_box.m: added awareness of several series rather than just selecting the first one.
 

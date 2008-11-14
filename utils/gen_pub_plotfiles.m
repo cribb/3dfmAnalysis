@@ -1,8 +1,9 @@
-
 function gen_pub_plotfiles(outf, fig_or_figfile, type)
-% 3DFM function  
-% Utilities 
-% last modified 07-Jul-2008  (jcribb)
+% GEN_PUB_PLOTFILES Generates and saves figure into several image formats.
+%
+% 3DFM function
+% Utilities
+% last modified 2008.11.14 (jcribb)
 %  
 % Uses pretty_plot to generate several files for a given figure.  Pretty 
 % much a hack to save myself from repeatedly saving .eps, .png, .jpg, etc... 

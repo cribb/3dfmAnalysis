@@ -1,7 +1,9 @@
 function [newtime,newdata] = clipper(time, data, start, stop)
-% 3DFM function  
-% Utilities 
-% last modified 08/05/2003 
+% CLIPPER Clips a dataset to include only points between "start" and "stop"
+%
+% 3DFM function
+% Utilities
+% last modified 2008.11.14 (jcribb)
 %  
 % This function clips a dataset from start time to stop_time.  This
 % is useful as the user does not need array indices in order to clip 
@@ -14,7 +16,7 @@ function [newtime,newdata] = clipper(time, data, start, stop)
 %	       "start" is the start time of WANTED DATA in seconds
 %        "stop" is the stop time of WANTED DATA in seconds
 %  
-%  08/05/2003 - created; jcribb
+
 
 indices = find( (time > start) & (time < stop) );
 

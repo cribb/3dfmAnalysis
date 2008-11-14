@@ -1,5 +1,9 @@
 function [xout, yout, idx, serh] = select_data_in_box(fig)
-
+% SELECT_DATA_IN_BOX Given two corner locations, select only the data within.
+%
+% 3DFM function
+% Utilities
+% last modified 2008.11.14 (jcribb)
 
 	if nargin < 1 || isempty(fig)
         fig = gcf;

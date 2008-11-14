@@ -1,7 +1,9 @@
-function m=mat2txt(file);
-% 3DFM function  
-% Utilities 
-% last modified 05/07/2004
+function m=mat2txt(file)
+% MAT2TXT Outputs columnated 3DFM position from input 3DFM data structure.
+%
+% 3DFM function
+% Utilities
+% last modified 2008.11.14 (jcribb)
 %  
 % This function takes a 3dfm data structure (.mat file) and converts
 % the bead position in (x,y,z) to a three-column text file.

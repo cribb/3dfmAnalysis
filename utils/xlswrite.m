@@ -1,5 +1,5 @@
-function xlswrite(m,header,colnames,filename);
-% xlswrite     Easily create an Excel spreadsheet from MATLAB
+function xlswrite(m,header,colnames,filename)
+% XLSWRITE Easily create an Excel spreadsheet from MATLAB
 %
 %  xlswrite(m,header,colnames,filename) creates a Microsoft Excel spreadsheet using
 %  the MATLAB ActiveX interface.  Microsoft Excel is required.

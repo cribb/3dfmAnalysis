@@ -1,7 +1,9 @@
 function [im_mean, im_stderr] = bin2d(x, y, Fxy, x_bins, y_bins)
-% 3DFM function  
-% Utilities 
-% last modified 07/31/06 (jcribb)
+% BIN2D Arranges 2D data into a matrix, no interp, computes average and stderr.
+%
+% 3DFM function
+% Utilities
+% last modified 2008.11.14 (jcribb)
 %  
 % bin2d.m works like griddata for arranging 2D data into a matrix.  However, 
 % instead of just averaging the values in a selected bin, it reports the 

@@ -1,4 +1,10 @@
 function v = legend_reorder(figh, reorderseq)
+% LEGEND_REORDER Reorders legend entries by rearranging handle order.
+%
+% 3DFM function
+% Utilities
+% last modified 2008.11.14 (jcribb)
+%
 
 figure(figh);
 

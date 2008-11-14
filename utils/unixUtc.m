@@ -1,7 +1,9 @@
 function utc = unixUTC(time,fDLS)
+% UNIXUTC Converts time to Unix UTC format via specification.
+%
 % 3DFM function
 % Utilities
-% last modified 07/19/2005 ; jcribb
+% last modified 2008.11.14 (jcribb)
 %
 % unixUTC( [YEAR, MONTH, DAY, HOUR, MINUTE, SECOND], DLS) converts to unix-type 
 % timestamp (total number of seconds elapsed since 00:00:00 1970-01-01
@@ -23,6 +25,7 @@ function utc = unixUTC(time,fDLS)
 %  uct = unixUtc( [2004,6,15,12,28,2.40859], 'yes' )
 %  uct = 1087316882.4086
 % 
+
 if (nargin < 2 | isempty(fDLS))
     fDLS = 'yes';
 end

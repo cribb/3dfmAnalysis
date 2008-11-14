@@ -1,5 +1,10 @@
 function [slope, err] = slopper(fnum,annotate,usedata)
+% SLOPPER Computes slope with uncertainty.
+%
 % 3DFM function
+% Utilities
+% last modified 2008.11.14 (jcribb)
+%
 % Computes slope (with uncertainty) for the data inside the box drawn.
 % Logscale and multiple lines on a single plot is allowed. The only lines 
 % that are visible are considered for computing the slope. 

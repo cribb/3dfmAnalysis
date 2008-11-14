@@ -1,7 +1,9 @@
 function pretty_plot(fig, type, mag)
+% PRETTY_PLOT Changes proportional sizes of Fonts and axis data for screen or print output.
+%
 % 3DFM function
 % Utilities
-% last modified 07/25/05
+% last modified 2008.11.14 (jcribb)
 %
 % This function changes the font sizes and weights for any given figure
 % (or the current figure if no input parameter is used) so that when pasted 
@@ -11,11 +13,7 @@ function pretty_plot(fig, type, mag)
 %
 % where "fig" is the matlab figure number (can use gcf here if desired)
 %
-% 
-% 08/02/03 - created; jcribb
-% 01/03/05 - fixed case-sensitive typo; jcribb
-% 07/25/05 - added support for multiple axes in figure (e.g. yy-overlays)
-%
+
 if nargin < 3 || isempty(mag)
     mag = 1;
 end

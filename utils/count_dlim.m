@@ -1,4 +1,10 @@
 function [ndlim, len, outl] = count_dlim(ins, dlim)
+% COUNT_DLIM Returns the numbers of delimiters in input, line-by-line
+%
+% 3DFM function
+% Utilities
+% last modified 2008.11.14 (jcribb)
+%
 % count the number of delimiters (or other characters) found line-by-line in a text file
 
 if ~isempty(dir(ins))
