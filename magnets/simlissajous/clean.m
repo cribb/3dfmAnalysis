@@ -1,4 +1,11 @@
 function cleaned = clean(magnets)
+% CLEAN Extract out the overlapping excitations
+%
+% 3DFM function  
+% Magnets/simlissajous 
+% last modified 11/17/08 (krisford)
+
+
 %extract out the overlaping excitations
 if(~isfield(magnets,'sectime'))
     magnets.sectime = magnets.time(:,1) + magnets.time(:,2)*1e-6;

@@ -1,6 +1,10 @@
 function force = simlissajous(mags)
-%Simulates velocities visualization using Leandra's equations
-%Needs coil currents as input
+% SIMLISSAJOUS Simulates velocities visualization using Leandra's equations. Needs coil currents as input
+%
+% 3DFM function  
+% Magnets/simlissajous  
+% last modified 11/17/08 (krisford)
+
 TETRA = 0; %Switch to select which geometry to simulate
 HEXA = 1;
 THREEPOLE = 0;

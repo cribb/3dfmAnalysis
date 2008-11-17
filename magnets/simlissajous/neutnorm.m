@@ -1,7 +1,11 @@
 function norm = neutnorm(a,pairs, s)
-% 3DFM function Last modified 07/16/04 - kvdesai
+% NEUTNORM Performs neutralization and normalization (in that sequence) of the input magnet excitation vectors
+%
+% 3DFM function  
+% Magnets/simlissajous  
+% last modified 11/17/08 (krisford)
 % 
-% Performs neutralization and normalization (in that sequence) of the input magnet excitation vectors.
+% 
 % USAGE: res = neutnorm(a,pairs,s)
 % PARAMETER DESCRIPTION:
 % "a": matrix with dimensions (Nsample,Ncoil), each raw containing  a set of excitations
