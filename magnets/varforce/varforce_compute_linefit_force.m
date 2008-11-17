@@ -1,7 +1,9 @@
 function out = varforce_compute_linefit_force(varargin)
+% VARFORCE_COMPUTE_LINEFIT_FORCE Computes force experienced by each bead with line fit
+%
 % 3DFM function  
-% Magnetics
-% last modified 08/01/06 (jcribb)
+% magnets/varforce
+% last modified 11/17/08 (krisford)
 %  
 % Compute the force experienced by each bead by line-fitting displacements to
 % compute velocities for many pulses in many sequences.

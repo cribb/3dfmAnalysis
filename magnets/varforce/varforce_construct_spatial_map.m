@@ -1,7 +1,9 @@
 function v = varforce_construct_spatial_map(Ftablein, params)
+% VARFORCE_CONSTRUCT_SPATIAL_MAP instantaneous derivative method of determining force 
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 06/16/06 (jcribb)
+% last modified 11/17/08 (krisford)
 %
 % (NOT FULLY IMPLEMENTED)  instantaneous derivative method of determining force
 % 

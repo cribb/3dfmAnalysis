@@ -1,7 +1,9 @@
 function logfits = varforce_compute_sat_data(forces, params)
+% VARFORCE_COMPUTE_SAT_DATA Generates tables used to produce plots of loglog fit of force vs. distance and current vs. force
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06
+% last modified 11/17/08 (krisford)
 %
 % Computes generates tables later used to produce plots of the loglog fit 
 % of force vs distance and of current vs force.

@@ -1,7 +1,9 @@
-function     varargout = varforce_analysis_gui(varargin)  
+function     varargout = varforce_analysis_gui(varargin)
+% VARFORCE_ANALYSIS_GUI Analyzes and plots variable force calibration data from varforce 3dfm protocol 
+% 
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06 
+% last modified 11/17/08 (krisford) 
 %
 % loads the GUI that analyzes and plots the variable force calibration data
 % derived from the varforce experimental protocol for 3dfm (see

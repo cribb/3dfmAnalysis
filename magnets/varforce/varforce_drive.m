@@ -1,9 +1,9 @@
 function params_out = varforce_drive(params)
+% VARFORCE_DRIVE Drives variable force calibration protocol for 3dfm
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06 (jcribb)
-%
-% Drives the variable force calibration experimental protocol for 3dfm.
+% last modified 11/17/08 (krisford)
 %
 %   params_out = varforce_cal_drive(params)
 %

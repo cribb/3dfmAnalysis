@@ -1,7 +1,9 @@
 function Ftable = varforce_compute_inst_force(tablein, params)
+% VARFORCE_COMPUTE_INST_FORCE computes force using instantaneous velocity method 
+% 
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06 (jcribb)
+% last modified 11/17/08 (krisford)
 %
 % varforce_compute_inst_force computes force using instantaneous velocity 
 % method.  This essentially takes a windowed derivative of specified size

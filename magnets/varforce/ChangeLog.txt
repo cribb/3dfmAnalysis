@@ -1,3 +1,13 @@
+2008-03-07  Kris Ford <krisford@email.unc.edu>
+	* Added .mat files to cvsignore
+	* varforce_analysis_gui.m: modified documentation to better match Mathworks convention
+	* varforce_compute_inst_force.m: same
+	* varforce_compute_linefit_force.m: same
+	* varforce_compute_sat_data.m: same
+	* varforce_construct_spatial_map.m same
+	* varforce_drive.m: same
+
+
 2008-10-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore: added. set to ignore matlab's autosave files (*.asv)
 	* varforce_compute_sat_data.m: added comments.
