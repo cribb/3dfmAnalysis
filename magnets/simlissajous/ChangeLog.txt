@@ -1,3 +1,9 @@
+2008-03-07  Kris Ford <krisford@email.unc.edu>
+	* clean.m: modified documentation to better match Mathworks convention
+	* coils2poles.m: same
+	* neutnorm.m: same
+	* simlissajous.m: same
+
 2005-07-19  Kalpit Desai <kvdesai@email.unc.edu>
 	* simlissajous.m: added option (hard coded) for simulations with three pole co-planar geometry.
 2005-06-22  Kalpit Desai <kvdesai@email.unc.edu>
