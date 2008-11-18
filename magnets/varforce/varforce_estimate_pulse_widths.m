@@ -1,7 +1,9 @@
 function v = estimate_varforce_pulse_widths(voltages, viscosity, bead_radius, temp, maxforce, maxdist, noisefloor, snr)
+% ESTIMATE_VARFORCE_PULSE_WIDTHS "needs description"
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06 (jcribb)
+% last modified 11/17/08 (krisford)
 %
 %  <<not implemented yet>>
 %

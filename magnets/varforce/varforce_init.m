@@ -1,7 +1,9 @@
 function [table_out,  params] = varforce_init(params)
+% VARFORCE_INIT Initializes the varforce computations by loading metadata and tracking data
+%
 % 3DFM function   
 % Magnetics/varforce
-% last modified 08/01/06 (jcribb)
+% last modified 11/17/08 (krisford)
 %  
 % Initializes the varforce computations by loading the metadata and tracking data
 % attaching pulse voltages and sequence IDs to the video tracking matrix.  Degauss

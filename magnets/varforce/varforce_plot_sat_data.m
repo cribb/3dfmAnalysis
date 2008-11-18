@@ -1,7 +1,9 @@
 function varforce_plot_sat_data(ins)
+% VARFORCE_PLOT_SAT_DATA Plots current [A] vs force [pN] for multiple distance series 
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06
+% last modified 11/18/08 (krisford)
 %  
 % Plots current in [A] vs force in [pN] for multiple distance series.  This 
 % plot conveys information regarding the saturation of the bead and/or 

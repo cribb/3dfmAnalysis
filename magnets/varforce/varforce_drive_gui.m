@@ -1,13 +1,10 @@
 function varargout = varforce_drive_gui(varargin)
+% VARFORCE_DRIVE_GUI loads the GUI that drives the variable force calibration experimental protocol for 3dfm
+%
 % 3DFM function  
-% Magnetics/varforce
-% last modified 08/01/06 (jcribb)
-%
-% loads the GUI that drives the variable force calibration experimental 
-% protocol for 3dfm.
-%
-%   varforce_drive_gui; 
-%
+% Magnetics/varforce  
+% last modified 11/17/08 (krisford)
+
 
 
 

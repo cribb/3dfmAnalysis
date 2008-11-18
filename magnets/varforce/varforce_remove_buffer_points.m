@@ -1,7 +1,9 @@
 function tableout = varforce_remove_buffer_points(table, num_buffer_points)
+% VARFORCE_REMOVE_BUFFER_POINTS used in varforce technique for calibrating 3dfm
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/2006 
+% last modified 11/18/08 (krisford) 
 %  
 % Utility function used in varforce technique for calibrating 3dfm.
 % Removes the edge points between voltage shifts in an attempt to reduce

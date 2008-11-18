@@ -1,7 +1,9 @@
 function varforce_plot_drift_vectors(data)
+% VARFORCE_PLOT_DRIFT_VECTORS plots the x vs y drift velocities
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06
+% last modified 11/17/08 (krisford)
 %
 % varforce plotting function that plots the x vs y drift velocities
 % This provides information regarding the average magnitude and direction 

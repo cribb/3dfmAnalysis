@@ -1,7 +1,9 @@
 function [tableout, rem_Ftable] = varforce_handle_degauss(table, params);
+% VARFORCE_HANDLE_DEGAUSS estimates remanence force in pre-degauss regions to get velocity 
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06
+% last modified 11/17/08 (krisford)
 %  
 % finds zero volt regions in each sequence, estimates remanence force
 % in pre-degauss regions via a linear fit to get the velocity.  Remanence

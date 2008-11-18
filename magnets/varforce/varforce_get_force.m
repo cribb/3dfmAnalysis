@@ -1,7 +1,9 @@
 function [F,e] = varforce_get_force(calib, rad_pos, voltage)
+% VARFORCE_GET_FORCE takes varforce calib. file,rad. position,volt. and returns force
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/02/06 (jcribb)
+% last modified 11/17/08 (krisford)
 %  
 % varforce_getforce takes a varforce calibration file, a radial position and 
 % a voltage and returns the force +/- most likely error at that voltage and 

@@ -1,7 +1,9 @@
 function varforce_plot_force_distance(data, results)
+% VARFORCE_PLOT_FORCE_DISTANCE plots the powerlaw exponent value vs. input current 
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06
+% last modified 11/18/08 (krisford)
 %
 % varforce plotting function that plots the powerlaw exponent 
 % value vs. input current.  This checks for invariance of the 

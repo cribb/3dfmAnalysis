@@ -1,7 +1,9 @@
 function v = varforce_run(input_params)
+% VARFORCE_RUN provides sample function for running varforce calibration from the command line
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/02/06 (jcribb)
+% last modified 11/18/08 (krisford)
 %  
 % varforce_run provides a sample function for running the varforce
 % calibration from the command line.  It is also useful in testing varforce

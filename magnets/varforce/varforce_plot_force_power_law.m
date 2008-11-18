@@ -1,7 +1,9 @@
 function varforce_plot_force_power_law(data, results)
+% VARFORCE_PLOT_FORCE_POWER_LAW log(distance) vs log(force) and includes power law fit
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06
+% last modified 11/18/08 (krisford)
 %  
 % plots log(distance) vs log(force) and includes power law fit. These plots 
 % display the raw data with the fit to give an idea of the data's 

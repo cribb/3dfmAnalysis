@@ -1,7 +1,9 @@
 function [table_out, drift_vectors] = varforce_remove_drift(table, params)
+% VARFORCE_REMOVE_DRIFT finds zero volt regions in each sequence, estimates drift, and subtracts from sequence 
+%
 % 3DFM function  
 % Magnetics/varforce
-% last modified 08/01/06
+% last modified 11/18/08 (krisford) 
 %  
 % finds zero volt regions in each sequence, estimates drift, and subtracts 
 % it only from that sequence.  (uses remove_drift in 3dfmAnalysis).
