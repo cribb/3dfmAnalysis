@@ -6,6 +6,19 @@
 	* varforce_compute_sat_data.m: same
 	* varforce_construct_spatial_map.m same
 	* varforce_drive.m: same
+	* varforce_drive_gui.m: same
+	* estimate_varforce_pulse_widths: same
+	* varforce_get_force.m: same
+	* varforce_handle_degauss.m: same
+	* varforce_init.m: same
+	* varforce_plot_drift_vectors.m: same
+	* varforce_plot_force_distance.m: same
+	* varforce_plot_force_power_law.m: same
+	* varforce_plot_powerlaw_vs_current.m: same
+	* varforce_plot_sat_data.m: same
+	* varforce_remove_buffer_points.m: same
+	* varforce_remove_drift.m: same
+	* varforce_run.m: same
 
 
 2008-10-27  Jeremy Cribb <jcribb@email.unc.edu>
