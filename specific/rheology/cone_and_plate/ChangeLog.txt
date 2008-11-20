@@ -1,3 +1,19 @@
+2008-11-19  Kris Ford <krisford@email.unc.edu>
+	* cap_creep.m: modified documentation to better match Mathworks convention
+	* cap_plot.m: same
+	* cap_sweep.m: same
+	* cap_viscometry.m: same
+	* cap_yield.m: same
+	* plot_cap_ssweep.m: same
+	* plot_cap_temp.m: same
+	* plot_cap_creep.m: same
+	* plot_cap_flow.m: same
+	* plot_cap_fsweep.m: same
+	* plot_cap_nsweep.m: same
+	* ta2mat.m: same
+	* tareport.m: same
+	* taplot.m: same
+
 2008-09-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* tareport.m: added. Generates an html report file(s) for rheology tests done on a particular sample.
 	* plot_cap_temp.m: added.  Plots temperature flow curves for cone and plate data.	

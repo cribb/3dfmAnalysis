@@ -1,7 +1,9 @@
 function figh = taplot(filename, mytitle)
-% 3DFM function  
-% Rheology/cone_and_plate 
-% last modified 16-09-2008 (jcribb)
+% TAPLOT Plots rheology curves for TA Instruments cone and plate data 
+%
+% 3DFM function
+% specific/rheology/cone_and_plate
+% last modified 11/19/08 (krisford)
 %  
 % Plots rheology curves for TA Instruments cone and plate data.  Uses
 % "plot_" functions for difference rheometry tests.

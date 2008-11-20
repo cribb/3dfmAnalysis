@@ -1,9 +1,10 @@
 function h = plot_cap_fsweep(freq, modulus, h, mytitle, freqspec)
-% 3DFM function  
-% Rheology/cone_and_plate 
-% last modified 16-09-2008 (jcribb)
+% PLOT_CAP_FSWEEP Plots frequency sweep curves for cone and plate data
+%
+% 3DFM function
+% specific/rheology/cone_and_plate
+% last modified 11/19/08 (krisford)
 %  
-% Plots frequency sweep curves for cone and plate data.
 %  
 %  h = plot_cap_fsweep(freq, modulus, h, mytitle, freqspec)  
 %   

@@ -1,7 +1,9 @@
 function cap = tareport(filename, nametag)
-% 3DFM function  
-% Rheology/cone_and_plate 
-% last modified 16-09-2008 (jcribb)
+% TAREPORT Generates an html report file(s) for rheology tests done on a particular sample
+%
+% 3DFM function
+% specific/rheology/cone_and_plate
+% last modified 11/19/08 (krisford)
 %  
 % Generates an html report file(s) for rheology tests done on a particular sample.
 % Includes all TA txt files that match 'filename' and reports the results

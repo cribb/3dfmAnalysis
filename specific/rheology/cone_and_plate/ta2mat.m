@@ -1,7 +1,9 @@
 function v = ta2mat(filename)
-% 3DFM function  
-% Rheology/cone_and_plate 
-% last modified 06-May-2008 (jcribb)
+% TA2MAT converts textual export of rheology datasets from the Ares G2 cone-and-plate rheometer to a matlab structure
+%
+% 3DFM function
+% specific/rheology/cone_and_plate
+% last modified 11/19/08 (krisford)
 %  
 % This function works to convert the textual export of rheology datasets 
 % from the Ares G2 cone-and-plate (CAP) rheometer to a matlab structure.

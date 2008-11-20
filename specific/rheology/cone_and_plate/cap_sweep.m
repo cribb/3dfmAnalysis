@@ -1,7 +1,9 @@
 function v = cap_sweep(file)
-% 3DFM function  
-% Rheology::cone_and_plate
-% last modified 05/09/2005
+% CAP_SWEEP Converts exported SWEEP data from Bohlin Gemini cone-and-plate rheometer to a standard matlab structure/workspace
+%
+% 3DFM function
+% specific/rheology/cone_and_plate
+% last modified 11/19/08 (krisford)
 %  
 % Converts exported SWEEP data from Bohlin Gemini cone-and-plate 
 % rheometer to a standard matlab structure/workspace.  The output structure

@@ -1,7 +1,10 @@
 function v = cap_viscometry(file)
-% 3DFM function  
-% Rheology::cone_and_plate
-% last modified 05/09/2005
+% CAP_VISCOMETRY Converts exported VISCOMETRY data from Bohlin Gemini cone-and-plate rheometer to a standard matlab structure/workspace 
+%
+% 3DFM function
+% specific/rheology/cone_and_plate
+% last modified 11/19/08 (krisford)
+%
 %  
 % Converts exported VISCOMETRY data from Bohlin Gemini cone-and-plate 
 % rheometer to a standard matlab structure/workspace.  The output structure
@@ -12,10 +15,7 @@ function v = cap_viscometry(file)
 %   
 %  where "file" is a Excel (XLS) file constaining standard exported creep
 %  data from Bohlin rheometer.
-%   
-%  03/31/05 - created; jcribb.
-%  05/09/05 - added documentation.  
-%
+
 [data, headertext] = xlsread(file);
 
 % column headers are determined by the Bohlin/Malvern rheology Software

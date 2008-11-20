@@ -1,10 +1,10 @@
 function cap_plot(d, plottype)
-% 3DFM function  
-% Rheology::cone_and_plate
-% last modified 05/09/2005
+% CAP_PLOT Plots exported rheological data from Bohlin Gemini cone-and-plate rheometer
+%
+% 3DFM function
+% specific/rheology/cone_and_plate
+% last modified 11/19/08 (krisford)
 %  
-% Plots exported rheological data from Bohlin Gemini cone-and-plate 
-% rheometer.
 %  
 %  [outputs] = cap_plot(data, plottype);  
 %   
@@ -22,12 +22,7 @@ function cap_plot(d, plottype)
 %  directory.  The convention for the filenames requires the strings
 %  'creep', 'viscometry', 'amp', or 'freq' as a means to direct which
 %  plots and which conversions (.XLS -> .MAT) to make.
-%   
-%  03/31/05 - created; jcribb.
-%  05/09/05 - added documentation.  added right-facing triangle to 2nd
-%  point in plots (for determining which side of the data is the UP
-%  direction in UP-then-DOWN rheology scans.
-%  
+   
 
 
 if nargin < 2
