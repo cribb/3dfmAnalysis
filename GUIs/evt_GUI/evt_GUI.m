@@ -1,4 +1,10 @@
  function varargout = evt_GUI(varargin)
+% EXT_GUI creates a new evt_GUI or raises the existing singleton
+%
+% 3DFM function
+% GUIs/evt_GUI
+% last modified 11/20/08 (krisford)
+%
 % evt_GUI M-file for evt_GUI.fig
 %      evt_GUI, by itself, creates a new evt_GUI or raises the existing
 %      singleton*.
