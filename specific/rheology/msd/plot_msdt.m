@@ -1,9 +1,10 @@
 function v = plot_msdt(d, h, optstring)
+% PLOT_MSDT plots the graph of mean square displacement versus tau for an aggregate number of beads 
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 
-
-% % % % % 3DFM function
-% % % % % Rheology
-% % % % % last modified 07/06/07 (blcarste)
 % % % % %
 % % % % % This function plots the graph of mean square displacement versus tau for an aggregate number
 % % % % % of beads.

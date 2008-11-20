@@ -1,9 +1,10 @@
 function plot_ve(v, freq_type, h, optstring)
-% 3DFM function  
-% Rheology 
-% last modified 01/25/07 (jcribb)
+% PLOT_VE plots the viscoelastic moduli using the ve output structure 
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %  
-% plot_ve plots the viscoelastic moduli using the ve output structure.
 %
 %  plot_ve(v, freq_type);  
 %   

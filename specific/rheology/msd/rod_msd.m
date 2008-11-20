@@ -1,7 +1,9 @@
 function d = rod_msd(files, window, frame_rate, calib_um)
-% 3DFM function  
-% Rheology 
-% last modified 01/21/06 (jcribb)
+% ROD_MSD plots the graph of mean square displacement versus tau for an aggregate number of rod trackers 
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %  
 % This function computes the mean-square displacements (via 
 % the Stokes-Einstein relation) for an aggregate number of rod trackers.

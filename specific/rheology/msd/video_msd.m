@@ -1,7 +1,9 @@
 function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot)
+% VIDEO_MSD computes mean square displacements of an aggregate number of video tracked beads via the Stokes-Einstein relation 
+%
 % 3DFM function
-% Rheology
-% last modified 11/06/07 (jcribb)
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %
 % This function computes the mean square displacements of an aggregate number of video 
 % tracked beads via the Stokes-Einstein relation and allows for the option of plotting

@@ -1,7 +1,9 @@
 function ve = rod_ve(d, L, r);
-% 3DFM function  
-% Rheology 
-% last modified 10/06/05 (jcribb)
+% ROD_VE computes the viscoelastic moduli from mean-square displacement data 
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %  
 % rod_ve computes the viscoelastic moduli from mean-square displacement data.
 % The output structure of ve contains four members: raw (contains data for 

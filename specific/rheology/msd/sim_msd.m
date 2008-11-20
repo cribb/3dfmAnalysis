@@ -1,7 +1,9 @@
 function smsd = sim_msd(numpaths, viscosity, bead_radius, sampling_rate, duration, temp, dim, window, make_plot)
+% SIM_MSD computes the mean square displacements of an aggregate number of beads in a simulated Newtonian fluid for a temperature in K 
+%
 % 3DFM function
-% Rheology
-% last modified 07/06/07 (blcarste)
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %
 % This function computes the mean square displacements of an aggregate number of beads 
 % in a simulated Newtonian fluid for a temperature in Kelvin and allows for the option

@@ -10,6 +10,16 @@
 	* bead_dist.m: same
 	* laser_msd.m: same
 	* laser_msd_crossover.m: same
+	* plot_msdt.m: same
+	* plot_ve.m: same
+	* rod_coord_corr.m: same
+	* rod_msd.m: same
+	* rod_ve.m: same
+	* sim_msd.m: same
+	* ve.m: same
+	* video_msd.m: same
+	* plot_msd.m: same
+	* plot_msdhist.m: same
 
 2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
 	- changelog.txt.  this file.  re-commiting with last commit's comments.

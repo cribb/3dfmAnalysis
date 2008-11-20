@@ -1,7 +1,9 @@
 function v = ve(d, bead_radius, freq_type, plot_results);
-% 3DFM function  
-% Rheology 
-% last modified 01/25/07 (jcribb)
+% VE computes the viscoelastic moduli from mean-square displacement data 
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %  
 % ve computes the viscoelastic moduli from mean-square displacement data.
 % The output structure of ve contains four members: raw (contains data for 
