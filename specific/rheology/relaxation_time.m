@@ -1,9 +1,10 @@
 function [J,tau,R_square] = relaxation_time(t, xt, n, plot_results)
-% 3DFM function  
-% Rheology 
-% last modified 06/09/2005 
+% RELAXATION_TIME This function computes n relaxation time constants for vector x(t).   
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford) 
 %  
-% This function computes n relaxation time constants for vector x(t).
 %  
 %  [outputs] = relaxation_time(t, xt, n);  
 %   
@@ -21,8 +22,7 @@ function [J,tau,R_square] = relaxation_time(t, xt, n, plot_results)
 %  coefficients, J, is one) and final value is zero.  Scaling in this way
 %  does not affect the value of the relaxation times.
 %   
-%  06/09/05 - created.  
-%  
+
 
 if nargin < 4 | isempty(plot_results)
     logentry('Plotting results by default.');

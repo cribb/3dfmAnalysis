@@ -1,14 +1,11 @@
 function varargout = percent_recovery(x)
-% 3DFM function  
-% Rheology 
-% last modified 08/10/05 (jcribb)
+% PERCENT_RECOVERY This function computes the percent recovery of the vector, x.   
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford)
 %  
-% This function computes the percent recovery of the vector, x.
-%  
-%  [pct_rec, xmax, xrec] = percent_recovery(x);
-%   
-%  07/16/05 - created (jcribb) 
-% 
+
 
     x = x - x(1);
     

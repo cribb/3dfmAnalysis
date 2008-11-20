@@ -8,7 +8,12 @@
 	* diffusion_coefficient.m: same
 	* get_file_viscs.m: same
 	* get_moduli.m: same
-
+	* percent_recovery.m: same
+	* relaxation_time.m: same
+	* relaxtime_fun.m: same
+	* sucrose_viscosity.m: same
+	* visc_ps.m: same
+	
 2007-05-17  Jeremy Cribb <jcribb@email.unc.edu>
 	* percent_recovery.m: fixed bug (reference to a renamed variable ).
 

@@ -1,7 +1,9 @@
 function v = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units)
-% 3DFM function  
-% Rheology 
-% last modified 11/04/04 
+% SUCROSE_VISCOSITY Returns viscosity of sucrose solution with input of molar concentration (mol/L) and temperature (°C or K)
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford) 
 %  
 % This function returns the viscosity of a sucrose solution when given 
 % an input molar concentration of sucrose in mol/L and the solution's 
@@ -22,10 +24,7 @@ function v = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units)
 %  - The website where this model and equations were extracted can be found
 %    at: http://www.univ-reims.fr/Externes/AVH/MementoSugar/001.htm
 %    
-%  10/13/04 - created; jcribb  
-%  10/22/04 - changed the exceeded solubility condition to a warning instead of an error; jcribb
-%  11/04/04 - added a switch for entering temperature in units of Kelvin or Celsius.
-%
+
 
     if (temp_units == 'K')
         temperature = temperature - 273.15;

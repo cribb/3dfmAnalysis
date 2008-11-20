@@ -1,7 +1,9 @@
 function v = visc_ps(f, ps, a, cutoff)
+% VISC_PS computes the viscosity of a solution using the power spectrum of stage/bead translation from the 3DFM
+%
 % 3DFM function
-% Rheology
-% Last modified on 05/07/2004
+% specific/rheology
+% last modified 11/20/08 (krisford)
 %
 % This function computes the viscosity of a solution using the 
 % power spectrum of stage/bead translation from the 3DFM.

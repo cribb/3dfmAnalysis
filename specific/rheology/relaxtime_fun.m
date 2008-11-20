@@ -1,7 +1,9 @@
 function Jt = relaxtime_fun(x0, t)
-% 3DFM function  
-% Rheology 
-% last modified 06/09/05 
+% RELAXTIME_FUN This is the fitting function for the "relaxation_time" function   
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford) 
 %  
 % This is the fitting function for the "relaxation_time" function.  Try
 % "help relaxation_time" for more details.
@@ -14,8 +16,6 @@ function Jt = relaxtime_fun(x0, t)
 %
 %  Notes:     
 %  - You probably don't want this function.  It is used by "relaxation_time". 
-%   
-%  06/09/05 - created; jcribb.
 
 
 % set guesses for fitting parameters.  There are two types of 
