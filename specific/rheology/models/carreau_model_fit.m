@@ -1,5 +1,5 @@
 function [eta_zero, eta_inf, lambda, m, n, R_square, eta_apparent_fit] = carreau_model_fit(gamma_dot, eta_apparent, report)
-% CARREAU_MODEL_FITB fits input data to a Cross type rheological model that fits a material's apparent viscosity as a function of shear rate
+% CARREAU_MODEL_FIT fits input data to a Cross type rheological model that fits a material's apparent viscosity as a function of shear rate
 %
 % 3DFM function
 % specific\rheology\models
