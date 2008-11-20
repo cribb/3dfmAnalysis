@@ -1,3 +1,8 @@
+% SHEAR_WAVE_MCL_OSCILLATOR produces a .mat file containing input signals used to drive the magnets during a history dependence expt.  
+%
+% 3DFM function
+% specific/rheology/driven_bead
+% last modified 11/20/08 (krisford)
 % Driven rheology
 % 
 % This matlab script will construct and save a .mat file that contains the

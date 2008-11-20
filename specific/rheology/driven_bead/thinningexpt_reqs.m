@@ -1,7 +1,9 @@
 function F = thinningexpt_reqs(gammadot, appvisc, d, plot_title)
-% 3DFM function  
-% Rheology/DMBR
-% last modified 09-Sep-2008 (jcribb)
+% THINNINGEXPT_REQS Generates figure/calibration used to examine required forces needed to obtain max shear rates around an actuated sphere
+%
+% 3DFM function
+% specific/rheology/driven_bead
+% last modified 11/20/08 (krisford)
 %  
 % This function generates the figure/calibration that is used to examine 
 % the required forces 'F' needed to obtain maximum shear rates 'gammadot' 

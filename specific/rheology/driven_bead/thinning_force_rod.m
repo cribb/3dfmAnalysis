@@ -1,7 +1,9 @@
 function F = thinning_force_rod(gammadot, a, L, lambda, eta0, etainf, m, n)
-% 3DFM function  
-% Rheology/DMBR
-% last modified 09-Sep-2008 (jcribb)
+% THINNING_FORCE_ROD estimates the required forces 'F' needed to obtain max shear rates 'gammadot' around an actuated rod with radius 'a'  
+%
+% 3DFM function
+% specific/rheology/driven_bead
+% last modified 11/20/08 (krisford)
 %  
 % This function estimates the required forces 'F' needed to obtain maximum
 % shear rates 'gammadot' around an actuated sphere with radius 'a'.  The

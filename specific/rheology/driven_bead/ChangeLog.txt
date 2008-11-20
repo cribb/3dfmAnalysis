@@ -3,6 +3,14 @@
 	* noise_expt.m: modified documentation to better match Mathworks convention
 	* relaxation_time_expt.m: same
 	* shear_rate_max.m: same
+	* shear_wave_MCL_controller.m: same
+	* shear_wave_MCL_oscillator.m: same
+	* thinning_force.m: same
+	* thinningexpt_reqs.m: same
+	* thinningexpt_reqs_rod.m: same
+	* yield_stress_pulses_expt.m: same
+	* yield_stress_ramp_expt.m: same
+	* history_dependence_expt.m: same
 
 2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* thinning_force_rod: added.  Given a Cross or Carreau model fit, this function generates force requirements that provides (offline) what force is necessary to achieve a desired shear rate(s) for a set of input ROD diameters.
