@@ -1,9 +1,10 @@
 function eta_out = powerlaw_model_fun(init_cond, gamma_dot, eta_apparent)
-% 3DFM function  
-% Rheology
-% last modified 2008.03.19
+% POWERLAW_MODEL_FUN This is the fitting function for cross_model_fit
+%
+% 3DFM function
+% specific\rheology\models
+% last modified 11/20/08 (krisford)
 %  
-% This is the fitting function for cross_model_fit. 
 %  
 %  eta_out = powerlaw_model_fun(init_cond, gamma_dot, eta_apparent);
 %   

@@ -1,7 +1,9 @@
 function [K, n, R_square] = powerlaw_model_fit(gamma_dot, eta_apparent, report)
-% 3DFM function  
-% Rheology
-% last modified 2008.03.19
+% POWERLAW_MODEL_FIT Fits input data to a Cross type rheological model that fits material's apparent viscosity as a function of shear rate
+%
+% 3DFM function
+% specific\rheology\models
+% last modified 11/20/08 (krisford)
 %  
 % This function fits input data to a Cross type rheological model that fits
 % a materials apparent viscosity as a function of shear rate. The fitting parameters

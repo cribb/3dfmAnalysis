@@ -7,6 +7,14 @@
 	* carreau_model_fit.m: same
 	* carreau_model_fun.m: same
 	* cross_model_fit.m: same
+	* meter_fit.m: same
+	* meter_fun.m: same
+	* MM_step_fit.m: same
+	* MM_step_fun.m: same
+	* powerlaw_model_fit.m: same
+	* powerlaw_model_fun.m: same
+	* stretched_exp_fun.m: same
+	* stretched_exponential_fit.m: same
 	
 2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore added by Kris Ford on 2008-10-28

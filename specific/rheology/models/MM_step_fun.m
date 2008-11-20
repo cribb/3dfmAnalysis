@@ -1,9 +1,10 @@
 function x = MM_step_fun(x0, t, ct);
-% 3DFM function  
-% Rheology
-% last modified 26-Oct-2006 
+% MM_STEP_FUN This is the fitting function for MM_step_fit
+%
+% 3DFM function
+% specific\rheology\models
+% last modified 11/20/08 (krisford) 
 %  
-% This is the fitting function for MM_step_fit. 
 %  
 %  x = MM_step_fun(x0, t, ct); 
 %   

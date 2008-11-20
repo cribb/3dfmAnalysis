@@ -1,9 +1,10 @@
 function y = meter_model_fun(init_cond, sigma, eta_apparent)
-% 3DFM function  
-% Rheology
-% last modified 2008.03.19
+% METER_FUN This is the fitting function for cross_model_fit
+%
+% 3DFM function
+% specific\rheology\models
+% last modified 11/20/08 (krisford)
 %  
-% This is the fitting function for cross_model_fit. 
 %  
 %  x = carreau_model_fun(init_cond, gamma_dot, eta_apparent);
 %   

@@ -1,7 +1,9 @@
 function [eta_zero, eta_inf, alpha, sigma2, R_square, eta_apparent_fit] = meter_fit(sigma, eta_apparent, report)
-% 3DFM function  
-% Rheology
-% last modified 2008.03.19
+% METER_FIT Fits input data to a Cross type rheological model that fits material's apparent viscosity as a function of shear rate
+%
+% 3DFM function
+% specific\rheology\models
+% last modified 11/20/08 (krisford)
 %  
 % This function fits input data to a Cross type rheological model that fits
 % a materials apparent viscosity as a function of shear rate. The fitting parameters

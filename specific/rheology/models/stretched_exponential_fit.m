@@ -1,4 +1,9 @@
 function [x_zero, tau, h, R_square] = stretched_exponential_fit(t, x, report)
+% STRETCHED_EXPONENTIAL_FIT Fits input data to a Cross type rheological model that fits material's apparent viscosity as a function of shear rate
+%
+% 3DFM function
+% specific\rheology\models
+% last modified 11/20/08 (krisford)
 
     % set parameters for the options structure sent to lsqcurvefit.
 	options = optimset('MaxFunEvals', 30000*2, ...
