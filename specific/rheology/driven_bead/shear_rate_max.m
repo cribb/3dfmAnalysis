@@ -1,7 +1,9 @@
 function gamma_dot_max = shear_rate_max(vd, bead_radius)
-% 3DFM function  
-% Rheology 
-% last modified 19-Mar-2007
+% SHEAR_RATE_MAX Computes maximum shear rate experienced by a bead immersed in a fluid and subjected to an external force 
+%
+% 3DFM function
+% specific/rheology/driven_bead
+% last modified 11/20/08 (krisford)
 %  
 % Computes the maximum shear rate experienced by a bead immersed in a fluid 
 % and subjected to an external force.  The equations used to derive this

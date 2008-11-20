@@ -1,3 +1,9 @@
+% NOISE_EXPT Produces .mat file that contains input signals used to drive magnets for history dep. expt.
+%
+% 3DFM function
+% specific/rheology/driven_bead
+% last modified 11/20/08 (krisford)
+%
 % function v = shear_wave_MCL_controller(amplitude, freq, vel, testtype)
 % v = shear_wave_MCL_controller(amplitude, freq, vel, testtype)
 % testtype = 'vel' or 'freq'.. put in '[]' for parameters that are not relevant

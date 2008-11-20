@@ -1,3 +1,9 @@
+2008-11-19  Kris Ford <krisford@email.unc.edu>
+	*.cvsignore: add *.mat files to list of ignore files
+	* noise_expt.m: modified documentation to better match Mathworks convention
+	* relaxation_time_expt.m: same
+	* shear_rate_max.m: same
+
 2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* thinning_force_rod: added.  Given a Cross or Carreau model fit, this function generates force requirements that provides (offline) what force is necessary to achieve a desired shear rate(s) for a set of input ROD diameters.
 	* thinningexpt_reqs_rod.m:  added.  Uses above to generate figure and reports force requirmeents for a driven bead thinning experiment.

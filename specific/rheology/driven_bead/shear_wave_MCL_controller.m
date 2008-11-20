@@ -1,4 +1,10 @@
 function v = shear_wave_MCL_controller(amplitude, freq, vel, testtype)
+% SHEAR_WAVE_MCL_CONTROLLER produces a .mat file with the input signals used to drive the magnets during a history dep. expt.  
+%
+% 3DFM function
+% specific/rheology/driven_bead
+% last modified 11/20/08 (krisford)
+%
 % v = shear_wave_MCL_controller(amplitude, freq, vel, testtype)
 % testtype = 'vel' or 'freq'.. put in '[]' for parameters that are not relevant
 % for the testtype you want.

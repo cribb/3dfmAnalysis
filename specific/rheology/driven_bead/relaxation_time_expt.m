@@ -1,3 +1,9 @@
+% RELAXATION_TIME_EXPT Produces .mat file that contains input signals used to drive magnets for relax. time expt.
+%
+% 3DFM function
+% specific/rheology/driven_bead
+% last modified 11/20/08 (krisford)
+%
 % Driven rheology
 % 
 % This matlab script will construct and save a .mat file that contains the
