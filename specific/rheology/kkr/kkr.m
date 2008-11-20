@@ -1,7 +1,9 @@
 function v = kkr(file, bead_radius)
+% KKR computes the Kramers-Kronig Relation on the bead position vectors   
+%
 % 3DFM function
-% Rheology
-% Last modified on 05/29/2005
+% specific\rheology\kkr
+% last modified 11/20/08 (krisford)
 %
 % This function computes the Kramers-Kronig Relation on the bead position
 % vectors (normally the imaginary compliance for rheology datasets)
@@ -12,12 +14,7 @@ function v = kkr(file, bead_radius)
 % where:  file is the filename for 3dfm dataset (used by load_vrpn_tracking)
 %         bead radius is in meters
 %
-% 10/05/2002 - created; jcribb
-% 07/28/2003 - expanded help, updated to load_vrpn_tracking 
-%              (from load_matlab_tracking)
-% 05/07/2003 - updated to handle new version of load_vrpn_tracking; jcribb
-% 06/29/2005 - updated to handle 'f'ast or 's'low algorithm.
-%
+
 
 % First, we need to load our dataset.  Do this using load_vrpn_tracking,
 % then compute PSD with a rectangular window.

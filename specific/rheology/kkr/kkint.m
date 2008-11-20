@@ -1,7 +1,9 @@
 function y = kkint(zeta, omega, omega_table, app_table)
+% KKINT Called by quad to get a single value of the function we integrate for Kramers-Kronig   
+%
 % 3DFM function
-% Rheology
-% last modified 07/28/2003
+% specific\rheology\kkr
+% last modified 11/20/08 (krisford)
 %
 % This function is called by quad to get a single value of the function 
 % we integrate for Kramers-Kronig.
@@ -13,10 +15,6 @@ function y = kkint(zeta, omega, omega_table, app_table)
 % omega_table is the vector of values of omega for which app
 % 	has been tabulated. 
 % app_table is the tabulated values of app.
-%
-% ??/??/2002 - created by Gary Bishop
-% 07/28/2003 - updated help information; jcribb
-%
 %
 
 

@@ -1,7 +1,9 @@
 function varargout=sampleKKR(f, psd)
+% SAMPLEKKR averages a power spectrum so there's an equal number of points per decade of frequency   
+%
 % 3DFM function
-% Rheology
-% Last modified on 07/28/2003
+% specific\rheology\kkr
+% last modified 11/20/08 (krisford)
 %
 %		    sampleKKR(f, psd)
 %    psd  = sampleKKR(f, psd)

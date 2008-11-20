@@ -1,7 +1,9 @@
 function ap = evaluateKK(omega_table, app_table, algorithm)
-% 3DFM function  
-% Rheology 
-% last modified 10/20/2003 
+% EVALUATEKK computes storage modulus of viscoelastic fluid (Kramers-Kronig relation)   
+%
+% 3DFM function
+% specific\rheology\kkr
+% last modified 11/20/08 (krisford) 
 %  
 % This function computes the storage modulus of a viscoelastic
 % fluid, by means of the Kramers-Kronig relation.
@@ -16,11 +18,7 @@ function ap = evaluateKK(omega_table, app_table, algorithm)
 %   
 %  - Default algorithm is slow.
 %   
-%   
-%  ??/??/?? - created
-%  10/20/03 - added algorithm switch and help info.
-%   
-%  
+ 
 
 eta = 1e-5;
 

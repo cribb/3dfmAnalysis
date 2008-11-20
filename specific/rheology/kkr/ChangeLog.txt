@@ -1,3 +1,10 @@
+2008-11-20  Kris Ford <krisford@email.unc.edu>
+	* evaluateKK.m: modified documentation to better match Mathworks convention
+	* kkint.m: same
+	* kkr.m: same
+	* samplekkr.m: same
+	* app.m: same
+
 2006-10-26  Jeremy Cribb <jcribb@email.unc.edu>
   * app.m: moved from generic rheology folder.
 	* kkint.m: same.
