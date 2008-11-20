@@ -1,7 +1,9 @@
 function v = get_file_viscs(filepath, bead_radius);
-% 3DFM function  
-% Rheology 
-% last modified 05/07/04
+% GET_FILE_VISCS Computes viscosity from power spectra of bead positions for a list of 3dfm tracking datasets  
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford)
 %  
 % This function computes viscosity from power spectra of bead positions 
 % for a list of 3dfm tracking datasets.
@@ -13,17 +15,7 @@ function v = get_file_viscs(filepath, bead_radius);
 %        "bead_radius" is [something] in units of [units] 
 %		 etc...  
 %  
-%  Notes:  
-%   
-%  - Extra information goes here  
-%  - For a good example, look at load_vrpn_tracking 
-%   
-%   
-%  02/20/02 - created; jcribb
-%  05/07/04 - added documentation; jcribb
-%           - repaired function call for load_vrpn_tracking
-%   
-%  
+  
 
     files = dir(filelist);
     

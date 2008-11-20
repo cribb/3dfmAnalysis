@@ -1,7 +1,9 @@
 function v = get_viscs_txyz(txyz, bead_radius, sampling_rate, cutoff);
-% 3DFM function  
-% Rheology 
-% last modified 05/07/04 
+% GET_VISCS_TXYZ computes viscosity from [t x y z] coordinates passed to it (typically from load_video_tracking)  
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford) 
 %  
 % This function computes viscosity from [t x y z] coordinates passed to it
 % (more often than not from load_video_tracking).
@@ -13,13 +15,7 @@ function v = get_viscs_txyz(txyz, bead_radius, sampling_rate, cutoff);
 %        "frame_rate" is the rate of the camera 
 %        "cutoff" is the cutoff frequency for the psd-fit
 %  
-%  Notes:  
-%      
-%   
-%  01/06/04 - created from get_viscs; jcribb
-%  05/07/04 - updated documentation; jcribb
-%  
-%
+
 
 
     xyz = txyz(:,2:4);

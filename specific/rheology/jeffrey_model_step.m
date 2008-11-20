@@ -1,7 +1,9 @@
 function [t, ct] = jeffrey_model_step(K, D1, D2, t0, tend);
-% 3DFM function  
-% Rheology
-% last modified 26-Oct-2006 
+% JEFFREY_MODEL_STEP Returns a jeffrey rheological model step response for the provided parameters  
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford) 
 %  
 % This function returns a jeffrey rheological model step response for the
 % provided parameters. 

@@ -1,7 +1,9 @@
 function v = get_moduli(file)
-% 3DFM function  
-% Rheology 
-% last modified 10/20/2003 
+% GET_MODULI Computes viscoelastic moduli for 3dfm tracking files  
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford) 
 %  
 % This function computes viscoelastic moduli for 3dfm tracking files.
 %  
@@ -9,16 +11,7 @@ function v = get_moduli(file)
 %   
 %  where file is a filename that can include wildcards * or ? 
 %       
-%  
-%  Notes:  
-%   
-%   
-%   
-%  10/16/03 - created; jcribb
-%  10/18/03 - added multiple files option; jcribb
-%  10/20/03 - added help info; jcribb
-%  05/07/04 - modified for new load_vrpn_tracking function; jcribb
-%  
+ 
 
 tic;
 

@@ -1,7 +1,9 @@
 function v = get_vrpn_viscs(file, bead_radius, cutoff);
-% 3DFM function  
-% Rheology 
-% last modified 05/07/04 
+% GET_VRPN_VISCS computes viscosity from *.vrpn.mat file passed to it  
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford) 
 %  
 % This function computes viscosity from *.vrpn.mat file 
 % (3dfm data structure) passed to it.

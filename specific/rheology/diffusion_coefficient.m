@@ -1,7 +1,9 @@
 function v = diffusion_coefficient(data, sampling_rate)
-% 3DFM function  
-% Rheology 
-% last modified 05/07/04 
+% DIFFUSION_COEFFICIENT Computes a window-size dependent diffusion coefficient from a vector of displacements   
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford) 
 %  
 % This function computes a window-size dependent diffusion coefficient 
 % from a vector of displacements.
@@ -11,14 +13,7 @@ function v = diffusion_coefficient(data, sampling_rate)
 %  where "data" is a vector of displacements
 %        "sampling_rate" is the sampling rate of the data in [Hz]
 %  
-%  Notes:  
-%   
-%   
-%  05/07/03 - created; jcribb
-%  07/28/03 - added limited documentation; jcribb
-%  05/07/04 - expanded documentation; jcribb
-%     
-%  
+  
 
 
   % getting tau_zero

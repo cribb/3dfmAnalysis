@@ -1,22 +1,16 @@
 function v = calcD(d)
-% 3DFM function  
-% Rheology 
-% last modified 05/07/04 
+% CALCD This function computes the diffusion coefficient from 3dfm data structure  
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford) 
 %  
-% This function computes the diffusion coefficient from 3dfm 
-% data structure.
 %  
 %  v = get_viscs(d);
 %   
 %  where "d" can be a vector of motion, or a 3dfm data structure. 
 %  
-%  Notes:  
-%   
-%   
-%  05/07/03 - created; jcribb
-%  05/07/04 - added documentation; jcribb
-%     
-%  
+  
 
 
 if ~isnumeric(d)

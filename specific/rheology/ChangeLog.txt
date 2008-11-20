@@ -1,3 +1,14 @@
+2008-11-20  Kris Ford <krisford@email.unc.edu>
+	* get_video_viscs.m: modified documentation to better match Mathworks convention
+	* get_viscs.m: same
+	* get_viscs_txyz.m: same
+	* get_vrpn_viscs.m: same
+	* jeffrey_model_step.m: same
+	* calcD.m: same
+	* diffusion_coefficient.m: same
+	* get_file_viscs.m: same
+	* get_moduli.m: same
+
 2007-05-17  Jeremy Cribb <jcribb@email.unc.edu>
 	* percent_recovery.m: fixed bug (reference to a renamed variable ).
 

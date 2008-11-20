@@ -1,7 +1,9 @@
 function v = get_video_viscs(name, bead_radius_m, frame_rate, cutoff);
-% 3DFM function  
-% Rheology 
-% last modified 03/11/2004
+% GET_VIDEO_VISCS computes and reports viscosities on batches of beads  
+%
+% 3DFM function
+% specific/rheology
+% last modified 11/20/08 (krisford)
 %  
 % This function computes and reports viscosities on batches of beads.
 %  
@@ -12,13 +14,7 @@ function v = get_video_viscs(name, bead_radius_m, frame_rate, cutoff);
 %		 "frame_rate"    number of frames/second from the recording camera.
 %        "cutoff"        cutoff frequency for use in the linear fit (good guess is ~Nyquist/2).
 %
-%
-%  Notes:  
-%   
-%  ??/??/?? - created by jcribb.  
-%  03/11/04 - reworked to include multiple files
-%   
-%  
+  
     video_tracking_constants;
 
     files = dir(name);
