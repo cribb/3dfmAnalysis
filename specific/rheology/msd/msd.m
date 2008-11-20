@@ -1,10 +1,10 @@
 function [tau, msd, r2out] = msd(t, data, window)
-% 3DFM function  
-% Rheology 
-% last modified 11/06/2007
+% MSD computes the mean-square displacements (via the Stokes-Einstein relation) for a single bead
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %  
-% This function computes the mean-square displacements (via the Stokes-
-% Einstein relation) for a single bead.
 %  
 % [tau, msd] = msd(t, data, window);   
 %

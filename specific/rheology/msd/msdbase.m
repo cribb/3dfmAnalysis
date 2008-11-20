@@ -1,7 +1,9 @@
 function varargout = msdbase(tpos, tau)
-% 3DFM function  
-% Rheology 
-% last modified 07/31/06 -kvdesai
+% MSDBASE Computes mean-square displacements for varying window-length from given time vs position data
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %  
 % Computes mean-square displacements for varying window-length (Tau)
 % from given time vs position data.

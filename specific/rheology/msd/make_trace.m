@@ -1,10 +1,9 @@
-% 3DFM function  
-% Rheology 
-% make_trace DBH
-% created 6-1-2004 
+% MAKE_TRACE This function makes xy trace plots of bead diffusion data sets
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %  
-% This function makes xy trace plots of bead diffusion data sets
-% 
 
 clear all
 close all

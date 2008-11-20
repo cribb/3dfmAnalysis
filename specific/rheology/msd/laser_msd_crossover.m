@@ -1,7 +1,9 @@
 function v = laser_msd_crossover(filemask, window)
-% 3DFM function  
-% Rheology 
-% Created July 31, 2006 (kvdesai)
+% LASER_MSD_CROSSOVER computes mean-square displacements (via Stokes-Einstein relation) for an aggregate number of beads tracked by laser
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %  
 % This function computes the mean-square displacements (via the 
 % Stokes-Einstein relation) for an aggregate number of beads tracked by laser.

@@ -1,7 +1,9 @@
 function v = msdhist(d, num_bins)
+% MSDHIST This function plots the graph of mean square displacement vs. tau for an aggregate number of beads
+%
 % 3DFM function
-% Rheology
-% last modified 02/24/08
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %
 % This function plots the graph of mean square displacement versus tau for an aggregate number
 % of beads.

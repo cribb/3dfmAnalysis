@@ -1,7 +1,9 @@
 function v = laser_msd(filemask, window, dim)
-% 3DFM function  
-% Rheology 
-% last modified 07/31/06 (kvdesai)
+% LASER_MSD computes mean-square displacements (via Stokes-Einstein relation) for an aggregate number of beads tracked by laser
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %  
 % This function computes the mean-square displacements (via the 
 % Stokes-Einstein relation) for an aggregate number of beads tracked by laser.

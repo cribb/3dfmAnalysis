@@ -1,12 +1,10 @@
 function d = msd2pt(filename,win);
-
-% 3DFM function  
-% Rheology 
-% msd2pt DBH
-% created 6-1-2004 
+% MSD2PT calculates the two particle correlation function
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %  
-% calculates the two particle correlation function
-% modified 11-16-2004 to actually do some stuff
 %
 % function d = msd2pt(filename);
 %   filename is a *.dat file that has previously been created from
@@ -18,7 +16,6 @@ function d = msd2pt(filename,win);
 %           dr_cross == the time averaged cross terms of each dr term, x.x
 %           and y.y
 
-% say a prayer, this is going to be good
 
 %filename = 'data_txy.dat'
 M = load(filename);

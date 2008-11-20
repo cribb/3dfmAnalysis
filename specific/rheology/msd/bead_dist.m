@@ -1,8 +1,9 @@
 function Bdist = bead_dist(M);
-% 3DFM function  
-% Rheology 
-% bead_dist.m
-% DBH 6-11-2004
+% BEAD_DIST finds the distances between each bead in a given sample and evolves the distance in time
+%
+% 3DFM function
+% specific\rheology\msd
+% last modified 11/20/08 (krisford)
 %
 % This program finds the distances between each bead in a given sample
 % and evolves the distance in time

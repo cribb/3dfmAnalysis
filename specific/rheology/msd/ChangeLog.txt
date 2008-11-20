@@ -1,3 +1,16 @@
+2008-11-20  Kris Ford <krisford@email.unc.edu>
+	* .cvsignore: added .mat files
+	* make_trace.m: modified documentation to better match Mathworks convention
+	* msd.m: same
+	* msd2pt.m: same
+	* msdbase.m: same
+	* msdhist.m: same
+	* msdt.m: same
+	* batch_enhance_contrast.m: same
+	* bead_dist.m: same
+	* laser_msd.m: same
+	* laser_msd_crossover.m: same
+
 2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
 	- changelog.txt.  this file.  re-commiting with last commit's comments.
 
