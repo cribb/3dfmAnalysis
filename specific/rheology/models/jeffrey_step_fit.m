@@ -1,7 +1,9 @@
 function [K, D1, D2, R_square] = jeffrey_step_fit(t, y, report)
-% 3DFM function  
-% Rheology
-% last modified 26-Oct-2006 
+% JEFFREY_STEP_FIT fits input data to a jeffrey rheological model's step response, provides fitting parameters and R^2 fitness value
+%
+% 3DFM function
+% specific\rheology\models
+% last modified 11/20/08 (krisford) 
 %  
 % This function fits input data to a jeffrey rheological 
 % model's step response and provides fitting parameters

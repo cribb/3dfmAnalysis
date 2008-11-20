@@ -1,3 +1,13 @@
+2008-11-20  Kris Ford <krisford@email.unc.edu>
+	* .cvsignore: added .mat files
+	* jeffrey_step_fit.m: modified documentation to better match Mathworks convention
+	* jeffrey_step_fun.m: same
+	* KV_step_fit.m: same
+	* KV_step_fun.m: same
+	* carreau_model_fit.m: same
+	* carreau_model_fun.m: same
+	* cross_model_fit.m: same
+	
 2008-10-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore added by Kris Ford on 2008-10-28
 	* carreau_model_fit.m: explicity set upper and lower bounds.
