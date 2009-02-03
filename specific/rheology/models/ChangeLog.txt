@@ -1,3 +1,9 @@
+2009-02-03  Jeremy Cribb <jcribb@email.unc.edu>
+	* carreau_chhabra_fit.m: added.  fits shear thinning data to carreau-like model used by Chhabra in 2001
+	* carreau_chhabra_fun.m: added.  fitting equation for carreau_chhabra_fit.m
+	* carreau_model_fit.m:  fixed bounds on fitting parameters.  Works MUCH better.
+	* jeffrey_step_fun.m: cosmetic changes to better conform to mlint's suggestions.
+	
 2008-11-20  Kris Ford <krisford@email.unc.edu>
 	* .cvsignore: added .mat files
 	* jeffrey_step_fit.m: modified documentation to better match Mathworks convention

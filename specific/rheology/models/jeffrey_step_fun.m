@@ -1,4 +1,4 @@
-function x = jeffrey_step_fun(x0, t, ct);
+function x = jeffrey_step_fun(x0, t, ct)
 % JEFFREY_STEP_FUN This is the fitting function for jeffrey_step_fit   
 %
 % 3DFM function
