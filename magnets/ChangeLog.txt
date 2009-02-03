@@ -1,3 +1,6 @@
+2009-02-03  Jeremy Cribb <jcribb@email.unc.edu>
+	* bead_suscept.m: now calculates the standard error and adds to output structure.
+
 2008-09-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore: added.
 	* wfpoles_forces.m: added.  summarizes force calibration as a function of input voltage for wake-forest pole geometry.

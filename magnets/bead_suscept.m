@@ -52,6 +52,7 @@ function v = bead_suscept(files, viscosity, bead_radius, calib_um, gradofBsquare
         mforce(k+1) = mean(force);
         sforce(k+1) = std(force);
         mvel(k+1) = mean(velocity);
+        err(k+1) = stderr(velocity);
         outchi(k+1) = chi;
 
     end        
@@ -68,7 +69,9 @@ function v = bead_suscept(files, viscosity, bead_radius, calib_um, gradofBsquare
     v.mean_forces = mforce';
     v.std_forces = sforce';
     v.mean_velocity = mvel';
+    v.standard.error = err';
     v.chi = outchi';
     v.N = N;
+    
     
     
