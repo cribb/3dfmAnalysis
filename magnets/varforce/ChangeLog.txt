@@ -1,3 +1,7 @@
+2009-02-25  Jeremy Cribb <jcribb@email.unc.edu>
+	* varforce_todo.txt: updated list.
+	* varforce_get_force: reduced step size for voltage interpolation.
+
 2008-03-07  Kris Ford <krisford@email.unc.edu>
 	* Added .mat files to cvsignore
 	* varforce_analysis_gui.m: modified documentation to better match Mathworks convention
@@ -19,7 +23,6 @@
 	* varforce_remove_buffer_points.m: same
 	* varforce_remove_drift.m: same
 	* varforce_run.m: same
-
 
 2008-10-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore: added. set to ignore matlab's autosave files (*.asv)

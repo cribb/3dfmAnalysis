@@ -1,4 +1,4 @@
-- add a function that allows one to merge (add) two calibrations that differ only in initial position and starting time.
+- add a function that allows one to merge (add) two calibrations that differ only in initial position and starting time.  the best way to do this would probably be to load the files and align them all at once - everything else should fall into place with a simple merge.
 
 - fix radial distance measure so that pole tip radius is removed. currently only implemented in plotting code for varforce_compute_sat_data.
 
