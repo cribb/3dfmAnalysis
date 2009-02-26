@@ -1,4 +1,4 @@
-function v = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units)
+function [v,rho] = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units)
 % SUCROSE_VISCOSITY Returns viscosity of sucrose solution with input of molar concentration (mol/L) and temperature (°C or K)
 %
 % 3DFM function

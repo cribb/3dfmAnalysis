@@ -1,3 +1,7 @@
+2009-02-26  Jeremy Cribb <jcribb@email.unc.edu>
+	* added dmbr folder
+	* sucrose_viscosity.m: added solution density as an output.
+	
 2008-11-20  Kris Ford <krisford@email.unc.edu>
 	* get_video_viscs.m: modified documentation to better match Mathworks convention
 	* get_viscs.m: same
