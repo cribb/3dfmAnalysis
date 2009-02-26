@@ -1,0 +1,95 @@
+In dmbr_summaraize_data,
+ - Need to reduce the inputs into a parameters structure... probably called "report_params"
+ - components of report_params: nametag, scale, tau, capfile?
+ - need to redo the loading protocol:  if vfd contains, evt file, vfcfile, and breakpoint, then load and process and report.  If dmbr file, load structure, then run report (can be called from GUI)
+ - Generic approach:
+    1. Load
+    2. MAYBE_process- interactive with GUI, automatic (by script).
+    3. Report- interactive (GUI figures, automatic (XML,HTML).
+
+  - need to leave room to generalize for high throughput system (need cell coordinates)
+  - Figure plotting should be handled through "plot_" functions
+  - Figure saving should stay here as part of the report.
+  - Computation should be computed through dmbr, not in reporting function.
+  - Thoughts:  
+    - need to inplement decision handling regarding plot types
+    - need metalavel html files that link to data-level html files
+    - need database generation of datasets and pages ____.
+
+Loading the data:
+  - the input filename could be:
+      1. a "root" filename lacking extensions.
+      2. vfd file that could:
+	  a. contain references to other files.
+	  b. or not.  others would need to be detected.
+      3. dmbr file that should:
+	  a. contain all raw data and any processed data.
+	  b. contains metadata structure regarding those computations.
+ 
+Once files are loaded, parameters need processing.
+
+Parameter groups:
+  - VFD parameters
+  - Plotting parameters
+  - DMBR paramters
+  - Report parameters
+
+Maybe, processing the data
+
+available plots			required metadata		required data vectors
+- displacement			(b)eadid, (s)eqid, (v)oltid	(t,x,y)
+- displacement/force		(b,s,v)				(t,x,y, F)
+- velocity			(b,s,v)				(t,x,y)
+- maximum shear rate		(b,s,v) & (a)			(t,x-dot,y-dot)
+- Weissenburg #			(b,s,v) & (a,tau)		(t,x-dot,y-dot)
+- compliance			(b,s,v)	& (a,F)  FITS		(t,x-dot,y-dot)
+- instantaneous velocity	(b,s,v)	& (a,F)			(t,x-dot,y-dot)
+- strain thickening		(b,s,v)	& (a,F)			(t,x,x-dot,y-dot)
+- inst visc vs max shear rate	(b,s,v)	& (a,F)  FITS		(t,x-dot,y-dot)
+- inst visc vs weis num		(b,s,v) & (a,F,tau)		(t,x-dot,y-dot)
+- yield stress
+
+- rename "inst visc vs max shear" with "shear thinning"
+- what about G? G', G'', look into Cox-Merz Rule
+
+During ___		Fits (types)		Force {on/off}
+- Compliance Space	Newtonian  [default]	(on)
+			Maxwell 		(on/off) (maybe, doesn't really make sense in real situations)
+			Kelvin-Voight 		(on/off)
+			Jeffrey 		(on/off)
+			Stretched Exponential 	(on/off)  (probably more off than on)
+			Ke Model ???
+			Relaxation Times 	(off)  (1-4 modes)
+- Shear thinning space	Cross  (on)
+			Carreau (on)
+			Carreau/Yasuda (on)
+- Yield stress space	Meter			(on)
+
+Fit Structure- There must be commonality between fits structure but needs to be mutable because of fit types
+  - Common: fit parameters as outputs, residuals, R^2
+  - Diff: Output fit parameters change from fit-type to fit-type
+  - possible structure definition:
+      fit.
+         .type
+	 .param.
+	       ."eta0" etc...
+	 .residuals
+	 .R2
+
+Parameter needs (by fit type)
+
+Fit Type		Input			Output
+
+    
+Fit type		input			output
+Newtonian
+Maxwell
+Kelvin-Voight
+Jeffrey
+Stretched Exponential
+Relaxation times
+Hookean?
+Cross
+Yasuda
+Meter
+Ellis

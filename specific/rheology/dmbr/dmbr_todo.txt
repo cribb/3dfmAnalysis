@@ -1,0 +1,4 @@
+- compliance curves do not decrease during zero-current phase when only zero-current phase is plotted.
+- stack button does not work.
+- widgets are not colored correctly in linux
+
