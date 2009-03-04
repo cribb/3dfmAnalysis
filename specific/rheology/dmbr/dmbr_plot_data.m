@@ -194,16 +194,18 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
 
         case 'inst. viscosity vs. max shear rate'
             subplot(1,1,1);
-
-            
-            plot(max_shear_rate, visc, '.');
+            plot(max_shear_rate(:,3), visc, '.');
+            hold on;
+                text(max_shear_rate(1,3), visc(1,1), 'S', 'FontWeight', 'Demi');
+                text(max_shear_rate(end,3), visc(end,1), 'E', 'FontWeight', 'Demi');
+            hold off;
             
             if isfield(dmbr_struct, 'cap')
                hold on;
                plot(cap_srate, cap_viscPa, 'k-');
                hold off;
             end
-            
+                        
             xlabel([logstring1 'maximum shear rate [1/s]' logstring2]);
             ylabel([logstring1 'inst. viscosity [Pa s]' logstring2]);
             
