@@ -22,7 +22,7 @@ function v = distances(data)
 
 	[rows cols] = size(data);
     xmat = repmat(data(:,1),[1 rows]);
-    ymat = repmat(data(:,1),[1 rows]);
+    ymat = repmat(data(:,2),[1 rows]);
     
     dxsq = xmat - transpose(xmat);    
     dysq = ymat - transpose(ymat);

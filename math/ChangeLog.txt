@@ -1,3 +1,6 @@
+2009-04-24  Jeremy Cribb <jcribb@email.unc.edu>
+	* distances.m: fixed bug where x-values were used twice instead of x & y
+
 2008-09-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* stderr.m: added.  couldn't find a stderr function, it's easy enough to make one, and makes the code (and intent) easier to read.
 
