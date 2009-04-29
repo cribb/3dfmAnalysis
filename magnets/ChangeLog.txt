@@ -1,3 +1,6 @@
+2009-04-29  Jeremy Cribb <jcribb@email.unc.edu>
+	* gen_vfd_list.m: added.  generates a list of vfd files complete with metadata, recursively searching through directories.  Writes out to a csv file.
+
 2009-02-03  Jeremy Cribb <jcribb@email.unc.edu>
 	* bead_suscept.m: fixed stupid typo.
 
