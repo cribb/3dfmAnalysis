@@ -1,3 +1,7 @@
+2009-04-29  Jeremy Cribb <jcribb@email.unc.edu>
+	* rdir.m: added.  recursive directory utility. obtained from matlabcentral.
+	* rdirExec.m: added.  recursive directory utility with execution.obtained from matlabcentral.
+
 2008-10-14  Jeremy Cribb <jcribb@email.unc.edu>
 	* plotxx.m: added.  obtained from http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=317
 
