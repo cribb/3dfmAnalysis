@@ -1,3 +1,7 @@
+2009-04-29  Jeremy Cribb <jcribb@email.unc.edu>
+	* relaxation_time.m: initial guesses are now smarter.
+	* relaxtime_fun.m: same.
+	
 2009-02-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* added dmbr folder
 	* sucrose_viscosity.m: added solution density as an output.
