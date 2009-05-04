@@ -1,4 +1,7 @@
 2009-05-04  Jeremy Cribb <jcribb@email.unc.edu>
+	* dmbr_plot_data.m: switched to plotting as a position of strain rather than a radial distance.
+
+2009-05-04  Jeremy Cribb <jcribb@email.unc.edu>
 	* dmbr_relaxation_time.m: added handling of edge case to avoid error.
 	* dmbr_run.m: changed default analyses.
 	* dmbr_analysis_gui.fig: prettified gui for linux.

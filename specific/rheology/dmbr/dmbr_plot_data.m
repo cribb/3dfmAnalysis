@@ -188,8 +188,8 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
             
         case 'strain thickening'
             subplot(1,1,1);
-            plot(xyr, visc, '.');            
-            xlabel([logstring1 'radial displacement [\mum]' logstring2]);
+            plot(3*xyr/(2*params.bead_radius), visc, '.');            
+            xlabel([logstring1 'max strain' logstring2]);
             ylabel([logstring1 'viscosity, \eta [Pa s]' logstring2]);
 
         case 'inst. viscosity vs. max shear rate'
