@@ -32,13 +32,6 @@ if (nargin < 3) || isempty(window)
     window = [1 2 5 10 20 50 100 200 500 1000 1001]; 
 end;
 
-
-
-% load in the constants that identify the output's column headers for the current
-% version of the vrpn-to-matlab program.
-video_tracking_constants;
-
-
 % for every window size (or tau)
 warning('off', 'MATLAB:divideByZero');
 
@@ -54,9 +47,11 @@ r2out = zeros(length(window), size(data,1)) * NaN;
         B = data(window(w)+1:end, k);
     
         if k == 1
-            r2 = ( B - A ).^2;
+            r = (B - A);
+            r2 = r.^2;
+            var_r = sum((mean(r) - r).^2) / size(r,1);
         elseif k > 1
-            r2 = r2 + ( B - A ).^2;
+            r2 = r2 + r.^2;
         end
         
       end

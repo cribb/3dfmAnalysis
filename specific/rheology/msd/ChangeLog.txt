@@ -1,3 +1,6 @@
+2009-05-04  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: slight cosmetic changes in algotrithm for better readibility and possible export of r2 values.
+
 2008-11-20  Kris Ford <krisford@email.unc.edu>
 	* .cvsignore: added .mat files
 	* make_trace.m: modified documentation to better match Mathworks convention
