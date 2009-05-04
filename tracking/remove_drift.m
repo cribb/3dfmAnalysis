@@ -17,6 +17,11 @@ function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
         error('No data found.'); 
     end;
     
+%     if nargin < 5 | isempty(plotOption); 
+%         type = 'y'; 
+%         logentry('No plot option specified.  Choosing to plot drift vectors.');
+%     end;
+    
     if nargin < 4 | isempty(type); 
         type = 'linear'; 
         logentry('No drift type specified.  Choosing linear method.');
@@ -40,7 +45,9 @@ function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
         case 'linear'
             [v,q] = linear(data, drift_start_time, drift_end_time);
         case 'center-of-mass'
-            [v,q] = center_of_mass(data, drift_start_time, drift_end_time);            
+            [v,q] = center_of_mass(data, drift_start_time, drift_end_time); 
+        case 'linearMean'
+            [v,q] = linearMean(data, drift_start_time, drift_end_time);
         otherwise
             [v,q] = linear(data, drift_start_time, drift_end_time);
             logentry('Specified type is undefined.  Switching to linear method.');
@@ -187,7 +194,7 @@ function [v,q] = center_of_mass(data, drift_start_time, drift_end_time);
     
     return;
 
-function [v,drift_vectors] = linear(data, drift_start_time, drift_end_time);
+function [v,drift_vectors] = linear(data, drift_start_time, drift_end_time)
 
     global TIME ID FRAME X Y Z ROLL PITCH YAW;   
 
@@ -242,6 +249,244 @@ function [v,drift_vectors] = linear(data, drift_start_time, drift_end_time);
     end
     
     return;
+
+
+function [v,drift_vectors] = linearMean(data, drift_start_time, drift_end_time)
+
+    global TIME ID FRAME X Y Z ROLL PITCH YAW;   
+
+    beadlist = unique(data(:,ID))';
+    for k = 1:length(beadlist)
+
+        bead = get_bead(data, beadlist(k));
+
+        t = bead(:,TIME);
+        t0 = t(1);
+        t = t - t0;
+            
+        idx = find(t >= (drift_start_time - t0) & t <= (drift_end_time - t0));
+                
+        if ( length(idx) > 2 )                        
+            fitx   = polyfit(t(idx), bead(idx,X), 1);
+            fity   = polyfit(t(idx), bead(idx,Y), 1);
+            fitz   = polyfit(t(idx), bead(idx,Z), 1);
+        
+            drift_velocities(k,:) = [fitx(1) fity(1) fitz(1)];
+            drift_offsets(k,:) = [fitx(2) fity(2) fitz(2)];
+        else
+            logentry('deleted tracker');
+        end
+    end
+    
+    mean_drift_velocity = mean(drift_velocities, 1);
+    
+    logentry(['Removed linear drift velocity of' ...
+               ' x=' num2str(mean_drift_velocity(1)) ...
+              ', y=' num2str(mean_drift_velocity(2)) ...
+              ', z=' num2str(mean_drift_velocity(3)) '.']);
+        
+        
+    for k = 1:length(beadlist)
+        
+        bead = get_bead(data, beadlist(k));
+
+        t = bead(:,TIME);
+        t0 = t(1);
+        t = t - t0;
+            
+        idx = find(t >= (drift_start_time - t0) & t <= (drift_end_time - t0));
+
+        if ( length(idx) > 2 )
+            beadx   = bead(:,X) - polyval([mean_drift_velocity(1) 0], t)+drift_offsets(k,1);
+            beady   = bead(:,Y) - polyval([mean_drift_velocity(2) 0], t)+drift_offsets(k,2);
+            beadz   = bead(:,Z) - polyval([mean_drift_velocity(3) 0], t)+drift_offsets(k,3);
+        
+            tmp = bead;
+            tmp(:,X) = beadx;
+            tmp(:,Y) = beady;
+            tmp(:,Z) = beadz;
+
+            if ~exist('newdata')                
+                newdata = tmp;
+            else
+                newdata = [newdata ; tmp];
+            end          
+        end
+    end
+
+    if exist('newdata')
+        v = newdata;
+        drift_vectors = mean_drift_velocity;
+    else
+        v = data;
+        drift_vectors = [NaN NaN NaN];
+        logentry('No drift removed.  Returning raw data.');
+    end
+    
+    return;
+
+% function [newdata, meanDriftVelocities] = linearMean_driftSub(data, drift_start_time, drift_end_time, fitOptions)
+% 
+% % This function is a slightly modified form of Jeremy's 'remove_drift'.  It
+% % performs a linear drift subtraction for each track in 'data'.  'data'
+% % should be a structure array with fields 'x', 'y', (in pixels) and 't' (in sec)
+% % for each track.
+% %
+% % Output: newdata is a structure with fields 'x', 'y', and 't' (where x and
+% % y have now been drift subtracted and are in microns) and 'driftVectors',
+% % the vectors from the linear fits to the original x and y vs time data.
+% % The 'newdata' fields no longer contain data outside the input time
+% % interval.
+% 
+%     global TIME ID FRAME X Y Z ROLL PITCH YAW;   
+% 
+%     pixelsPerMicron = 4.211;
+%     numTracks = length(data);
+% 
+% % get length of longest track for loop to find mean drift vector
+% longestTrack = 0;
+% for j = 1:numTracks
+%     t = data(j).t;
+%     if length(t) > longestTrack    
+%         longestTrack = length(t);
+%         t_longest = data(j).t - data(j).t(1); % use later to plot mean drift vectors
+%     end
+% end
+% 
+% % initialize structure fields to hold values from all drift vectors, 1 col per track
+% allDriftVectors.xDrift = ones(longestTrack, numTracks)*NaN;
+% allDriftVectors.yDrift = ones(longestTrack, numTracks)*NaN;
+% 
+% for k = 1:numTracks
+% 
+%     t = data(k).t;
+%     t = t - t(1);   % change time so that all tracks start at t=0
+%     
+%     x = data(k).x/pixelsPerMicron;
+%     y = data(k).y/pixelsPerMicron;
+%     
+%     % get indices within the input time interval
+%     idx = find(t >= drift_start_time & t <= drift_end_time);
+% 
+%     % do fits of x and y vs. t to first order poly
+%     if ( length(idx) > 2 )            
+%         
+%         fitx = polyfit(t(idx), x(idx), 1);
+%         xDrift = polyval(fitx, t);
+% 
+%         fity = polyfit(t(idx), y(idx), 1);
+%         yDrift = polyval(fity, t);
+% 
+%         
+%         % shift drift vectors so they all start at x,y = 0
+%         xDrift = xDrift - xDrift(1);
+%         yDrift = yDrift - yDrift(1);
+%         
+%         newdata(k).driftVectors = [xDrift yDrift];
+% 
+%         allDriftVectors.xDrift(1:length(xDrift), k) = xDrift;
+%         allDriftVectors.yDrift(1:length(yDrift), k) = yDrift;
+%         
+%         % plot each tracks drift vectors if plotOption = 'y'
+%         if strcmp(plotOption, 'y')
+%             xDriftVectorFigNum = 17;
+%             figure(xDriftVectorFigNum);
+% 
+%             hold all;
+%             plot(t(idx), xDrift, '--')
+%             
+%             yDriftVectorFigNum = 18;
+%             figure(yDriftVectorFigNum);
+% 
+%             hold all;
+%             plot(t(idx), yDrift, '--')
+%         end
+%         
+%     else
+%         
+%         newdata(k).driftVectors = [ones(length(t), 1) ones(length(t), 1)]*NaN;
+%        
+%     end
+% 
+%         
+% end
+% 
+% if strcmp(plotOption, 'y')
+%     figure(xDriftVectorFigNum);
+%     xlabel('Time (s)')
+%     ylabel('X Drift Vectors (\mu m)')
+%     pretty_plot;
+% 
+%     figure(yDriftVectorFigNum);
+%     xlabel('Time (s)')
+%     ylabel('Y Drift Vectors (\mu m)')
+%     pretty_plot;
+% end
+% 
+% % calculate mean drift vectors and standard errors over all tracks
+% xDriftMean = nanmean(allDriftVectors.xDrift, 2);
+% yDriftMean = nanmean(allDriftVectors.yDrift, 2);
+% 
+% xDriftStd = nanstd(allDriftVectors.xDrift, 0, 2);
+% yDriftStd = nanstd(allDriftVectors.yDrift, 0, 2);
+% 
+% numXPts = sum(~isnan(allDriftVectors.xDrift), 2);
+% numYPts = sum(~isnan(allDriftVectors.yDrift), 2);
+% 
+% xDriftStdError = xDriftStd./sqrt(numXPts);
+% yDriftStdError = yDriftStd./sqrt(numYPts);
+% 
+% 
+% % we'll only fit the mean drift vectors up to the point of 'minNumTracks'
+% % this finds the indices where this is true
+% minNumTracks = 7;
+% minID = find(numXPts >= minNumTracks);
+% 
+% % do a linear fit to the means to get final drift vector to subtract
+% % build the fit so it has to pass through origin
+% g = fittype('v*time','indep','time', 'coeff', 'v');
+% options = fitoptions(g);
+% options.StartPoint = 5;     % choose 5 um/s as starting point for 'a'
+% 
+% [xFit,xGoodness] = fit(t_longest(minID), xDriftMean(minID), g, options);
+% xDriftMeanFit = xFit(t_longest);
+% 
+% [yFit,yGoodness] = fit(t_longest(minID), yDriftMean(minID), g, options);
+% yDriftMeanFit = yFit(t_longest);
+% 
+% 
+% % plot mean drift vector fits
+% if strcmp(plotOption, 'y')
+%     
+%     figure(xDriftVectorFigNum);
+%     hold on;
+%     errorbar(t_longest, xDriftMean, xDriftStdError, 'k.--', 'MarkerSize', 16)
+%     plot(t_longest, xDriftMeanFit, 'r-', 'LineWidth', 2)
+%     
+%     figure(yDriftVectorFigNum);
+%     hold on;
+%     errorbar(t_longest, yDriftMean, yDriftStdError, 'k.--', 'MarkerSize', 16)
+%     plot(t_longest, yDriftMeanFit, 'r-', 'LineWidth', 2)
+% end
+% 
+% % now subtract mean drift vector fits from each track
+% for i = 1:numTracks
+%     
+%     % get indices within the input time interval
+%     t = data(i).t;
+%     idx = find(t >= drift_start_time & t <= drift_end_time);
+% 
+%     newdata(i).x = data(i).x(idx) - xDriftMeanFit(idx);
+%     newdata(i).y = data(i).y(idx) - yDriftMeanFit(idx);
+%     
+%     newdata(i).t = data(i).t(idx);
+%  
+% end
+%                    
+% % report drift mean velocities from each fit
+% meanDriftVelocities = [xFit.v yFit.v]
+%     
+
 
 function logentry(txt)
     logtime = clock;

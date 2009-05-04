@@ -1,3 +1,6 @@
+2008-05-04  Jeremy Cribb <jcribb@email.unc.edu>
+	* remove_drift.m: added "linear drift vector" mode of subtraction via Adam Shields and Briana Carstens.
+
 2008-11-14  Jeremy Cribb <jcribb@email.unc.edu>
 	* batch_load_video_tracking.m: modified documentation to better match Mathworks convention.
 	* erase_negatives_in_vrpn.m: same.
