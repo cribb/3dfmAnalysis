@@ -1,3 +1,7 @@
+2009-05-04  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.fig: added linear mean drift subtraction.
+	* evt_gui.m: same.
+
 2008-11-19  Kris Ford <krisford@email.unc.edu>
 	* evt_GUI.m: modified documentation to better match Mathworks convention
 

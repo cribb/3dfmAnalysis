@@ -29,7 +29,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 03-Nov-2008 09:58:01
+% Last Modified by GUIDE v2.5 16-Mar-2009 12:13:49
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -345,6 +345,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     set(handles.edit_arb_origin                   , 'Enable', 'on');
     set(handles.radio_com                         , 'Enable', 'on');
     set(handles.radio_linear                      , 'Enable', 'on');
+    set(handles.radio_linearmean                  , 'Enable', 'on');
     set(handles.pushbutton_select_drift_region    , 'Enable', 'on');
     set(handles.pushbutton_remove_drift           , 'Enable', 'on');
     set(handles.radio_pixels                      , 'Enable', 'on');
@@ -552,12 +553,20 @@ function pushbutton_select_drift_region_Callback(hObject, eventdata, handles)
 function radio_com_Callback(hObject, eventdata, handles)
 	set(handles.radio_com, 'Value', 1);
 	set(handles.radio_linear, 'Value', 0);
-
+    set(handles.radio_linearmean, 'Value', 0);
 
 % --- Executes on button press in radio_linear.
 function radio_linear_Callback(hObject, eventdata, handles)
 	set(handles.radio_com, 'Value', 0);
 	set(handles.radio_linear, 'Value', 1);
+    set(handles.radio_linearmean, 'Value', 0);
+
+    % --- Executes on button press in radio_linearmean.
+function radio_linearmean_Callback(hObject, eventdata, handles)
+	set(handles.radio_com, 'Value', 0);
+	set(handles.radio_linear, 'Value', 0);
+    set(handles.radio_linearmean, 'Value', 1);
+
 
 
 % --- Executes on button press in pushbutton_export_bead.
@@ -659,6 +668,9 @@ function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
     elseif get(handles.radio_com, 'Value')
         logentry('Removing Drift via center-of-mass method.');
         [v,q] = remove_drift(handles.table, start_time, end_time, 'center-of-mass');
+    elseif get(handles.radio_linearmean, 'Value')
+        logentry('Removing Drift via linear mean method.');
+        [v,q] = remove_drift(handles.table, start_time, end_time, 'linearMean');
     end
     
     handles.table = v;
