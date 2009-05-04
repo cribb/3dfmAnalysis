@@ -25,7 +25,7 @@ function y = carreau_model_fun(init_cond, gamma_dot, eta_apparent)
     % go to town.  this is our fitting function
     eta_apparent_fit = (eta_zero - eta_inf) .* ( (1+ (lambda*gamma_dot).^m) .^ ((n-1)/m)) + eta_inf;
     
-    weights = [1:length(eta_apparent)]';
+    % weights = [1:length(eta_apparent)]';
     y = (eta_apparent_fit - eta_apparent) ./ eta_apparent_fit;
     
 %     x = ((n-1)/m).*(log(eta_zero) + m.*log(lambda*gamma_dot));

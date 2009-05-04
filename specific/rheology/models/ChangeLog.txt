@@ -1,3 +1,6 @@
+2009-05-04  Jeremy Cribb <jcribb@email.unc.edu>
+	* carreau_model_fun.m: removed unneeded computation.
+
 2009-02-03  Jeremy Cribb <jcribb@email.unc.edu>
 	* carreau_chhabra_fit.m: added.  fits shear thinning data to carreau-like model used by Chhabra in 2001
 	* carreau_chhabra_fun.m: added.  fitting equation for carreau_chhabra_fit.m
