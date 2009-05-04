@@ -98,7 +98,7 @@ sequences = unique(rheo_table(:,SEQ))';
 voltages  = unique(rheo_table(:,VOLTS))';
 
 % seed some matrices
-offsetcols = [TIME X Y Z ROLL PITCH YAW J SX SY SJ DX DY DJ SDX SDY SDJ];
+offsetcols = [TIME X Y Z ROLL PITCH YAW J];
 v.offsets = zeros(length(beads), length(sequences), length(offsetcols))*NaN;
 rheo_table(:,[J:SDJ]) = 0;
 
@@ -133,13 +133,13 @@ for k = 1:length(beads)
             v.seqID(count,:)  = sequences(m);   
             v.volts(count,:)  = voltages(n);
 
-%             if voltages(n) == 0
-%                 % compute percent recovery
-%                 v.recovery(count,:) = dmbr_percent_recovery(rheo_table(idx,:));
-% 
-%                 % compute the relaxation times for the zero voltage regions
-%                 v.taus(count,:) = dmbr_relaxation_time(rheo_table(idx,:), params);
-%             end
+            if voltages(n) == 0
+                % compute percent recovery
+                v.recovery(count,:) = dmbr_percent_recovery(rheo_table(idx,:));
+
+                % compute the relaxation times for the zero voltage regions
+                v.taus(count,:) = dmbr_relaxation_time(rheo_table(idx,:), params);
+            end
 
             if ~isempty(idx)
                 rheo_table(idx,:) = dmbr_compute_derivative(rheo_table(idx,:), scale);

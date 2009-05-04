@@ -31,11 +31,11 @@ function out = dmbr_relaxation_time(rheo_table, params)
 
 return; 
 
-%%%%
-%% extraneous functions
-%%%%
+% %%%
+% extraneous functions
+% %%%
 
-%% Prints out a log message complete with timestamp.
+% % Prints out a log message complete with timestamp.
 function logentry(txt)
     logtime = clock;
     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...

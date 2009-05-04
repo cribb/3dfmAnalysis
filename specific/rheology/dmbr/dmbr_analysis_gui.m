@@ -35,7 +35,7 @@ function  varargout = dmbr_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help dmbr_analysis_gui
 
-% Last Modified by GUIDE v2.5 20-Oct-2008 10:54:58
+% Last Modified by GUIDE v2.5 29-Apr-2009 04:10:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -170,6 +170,124 @@ function edit_scale_CreateFcn(hObject, eventdata, handles)
         set(hObject,'BackgroundColor','white');
     end
       
+function pushbutton_metafile_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+    
+    
+function pushbutton_trackerfile_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+    
+    
+function pushbutton_calibfile_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+    
+function buffer_point_text_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+
+function pole_location_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+
+function text19_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+
+function text17_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+
+function text18_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function uipanel5_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function radio_use_avg_force_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function radio_use_disp_force_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_export_to_ws_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_plot_mean_creep_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_delete_selected_time_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_attach_CAP_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_fit_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_fit_all_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_plot_thinning_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_quickfit_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_compute_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_close_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+function pushbutton_savefile_CreateFcn(hObject, eventdata, handles)
+    if isunix
+        set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
+    end
+
+
 function edit_poletip_radius_Callback(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
 
 
@@ -933,34 +1051,11 @@ function pushbutton_attach_CAP_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-	warning off MATLAB:deblank:NonStringInput
 
-    try
-        [fname, pname] = uigetfile('*.mat');
-    catch
-        logentry('No metadata file found. No metadata file loaded.');
-        return;
-    end
-    
-    if sum(length(fname), length(pname)) <= 1
-        logentry('No metadata file selected. No metadata file loaded.');
-        return;
-    end
-    
-    filename = strcat(pname, fname);
-    
-    c = load(filename);
-    
-    if isfield(c.experiments, 'stepped_flow_step')
-        cap.srate = c.experiments.stepped_flow_step.table(:,2);
-        cap.viscPa = c.experiments.stepped_flow_step.table(:,3);
-    elseif isfield(c.experiments, 'steady_state_flow_step')    
-        cap.srate = c.experiments.steady_state_flow_step.table(:,2);
-        cap.viscPa = c.experiments.steady_state_flow_step.table(:,3);
-    end
-    
-    handles.v.cap = cap;
-    guidata(hObject, handles);
-    
 
-    
+
+
+
+
+
+
