@@ -98,27 +98,22 @@ sequences = unique(rheo_table(:,SEQ))';
 voltages  = unique(rheo_table(:,VOLTS))';
 
 % seed some matrices
-offsetcols = [TIME X Y Z ROLL PITCH YAW J];
-v.offsets = zeros(length(beads), length(sequences), length(offsetcols))*NaN;
+% offsetcols = [TIME X Y Z ROLL PITCH YAW J];
+% v.offsets = zeros(length(beads), length(sequences), length(offsetcols))*NaN;
 rheo_table(:,[J:SDJ]) = 0;
 
 count = 1;
 for k = 1:length(beads)
-
+    idxB = find(rheo_table(:,ID) == beads(k));
+    
     for m = 1:length(sequences)
         
         idx = find(rheo_table(:,ID) == beads(k) & rheo_table(:, SEQ) == sequences(m));
 
+        
         % compute compliance
         rheo_table(idx,:) = dmbr_compute_compliance(rheo_table(idx,:), params);
 
-        % at the sequence level, compute but do not remove offset position/time
-%       rheo_table(idx,:) = dmbr_zero_sequences(rheo_table(idx,:), params);
-        if ~isempty(idx)
-            v.offsets(k, m, :) = rheo_table(idx(1), offsetcols);
-        else
-            v.offsets(k, m, :) = NaN;
-        end
         
         for n = 1:length(voltages)
 
@@ -161,7 +156,22 @@ for k = 1:length(beads)
 
             count = count + 1;
         end
+        
+        %  at the sequence level, compute but do not remove offset position/time
+        if ~isfield(v, 'offsets')
+            nxt = 1;
+        else
+            nxt = size(v.offsets, 1) + 1;
+        end
+        
+        if ~isempty(idx)
+            v.offsets(nxt, :) = rheo_table(idx(1), :);
+        end
+        
     end
+
+    v.mean_curves = dmbr_compute_mean_curves(rheo_table, v.offsets);
+
 end
 
 

@@ -1,3 +1,14 @@
+2009-05-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* .cvsignore: added.  
+	* dmbr_mean_creep_curves.m: removed.  obsolete.
+	* dmbr_compute_mean_curves.m: added.  computes all significant mean values for dmbr datasets.
+	* dmbr_plot_data.m: updated to include mean figures and plotting "stacked" sequences.
+	* dmbr_analysis_gui.fig: same.
+	* dmbr_analysis_gui.m: same.
+	* dmbr_report.m: cosmetic changes only.  will soon update this substantially.
+	* dmbr_run.m: computes offsets for each sequence/voltage.
+	
+	
 2009-05-04  Jeremy Cribb <jcribb@email.unc.edu>
 	* dmbr_plot_data.m: switched to plotting as a position of strain rather than a radial distance.
 

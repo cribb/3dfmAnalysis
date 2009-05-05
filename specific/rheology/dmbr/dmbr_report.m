@@ -29,8 +29,8 @@ close all;
 metadatafile = [filename_root, '.vfd.mat'];
 m = load(metadatafile);
 
-a = m.bead_radius;
-pulses = m.pulse_widths;
+a        = m.bead_radius;
+pulses   = m.pulse_widths;
 voltages = m.voltages;
 calib_um = m.calibum;
 

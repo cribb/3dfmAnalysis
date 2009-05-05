@@ -8,11 +8,19 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
     dmbr_constants;        
     
     figure_handle = plot_opts.figure_handle;
+    meantable = dmbr_struct.mean_curves;
     
-    table = dmbr_filter_table(dmbr_struct.raw.rheo_table, ...
-                                 selection.beadID, ...
-                                 selection.seqID, ...
-                                 selection.voltage);
+    if plot_opts.plot_mean
+        table = meantable;
+        logentry('Plotting mean.');  
+    else
+        table = dmbr_struct.raw.rheo_table;
+    end
+    
+    table = dmbr_filter_table(table, ...
+                              selection.beadID, ...
+                              selection.seqID, ...
+                              selection.voltage);
     
     if isempty(table)
         clf(figure_handle);
@@ -20,12 +28,37 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
         text(0.445,0.5, 'No Data.');
         return;
     end
+
+
+
+    if plot_opts.stack && ~plot_opts.plot_mean
+        offsets = dmbr_struct.offsets;
+        cols = [TIME X Y Z ROLL PITCH YAW J SX SY SJ DX DY DJ SDX SDY SDJ];
+    
+        for b = unique(table(:,ID))'
+            for s = unique(table(:,SEQ))'
+
+                idx = find(table(:,ID) == b & ...
+                           table(:,SEQ) == s );
+                oidx = find(offsets(:,ID) == b & ...
+                            offsets(:,SEQ) == s );
+                
+                foo = table(idx,cols);
+                bar = repmat(offsets(oidx,cols), rows(foo), 1);
+                table(idx,cols) = foo - bar;
+
+            end            
+        end
         
-    seq = table(:,SEQ);
+        logentry('Plotting without offsets');
+    end
+    
+    t     = table(:,TIME);
+    seq   = table(:,SEQ);
     force = table(:,FORCE);
+    
 
-    t = table(:,TIME);
-
+    
     % Process options to determine what to load
     if plot_opts.plot_smoothed    
         x = table(:,SX);
@@ -34,6 +67,12 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
        dx = table(:,SDX);
        dy = table(:,SDY);        
        dj = table(:,SDJ);
+%        mx = meantable(:,SX);
+%        my = meantable(:,SY);
+%        mj = meantable(:,SJ);
+%        mdx = meantable(:,SDX);
+%        mdy = meantable(:,SDY);
+%        mdj = meantable(:,SDJ);
     else
         x = table(:,X);
         y = table(:,Y);
@@ -41,6 +80,12 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
        dx = table(:,DX);
        dy = table(:,DY);        
        dj = table(:,DJ);
+%        mx = meantable(:,X);
+%        my = meantable(:,Y);
+%        mj = meantable(:,J);
+%        mdx = meantable(:,DX);
+%        mdy = meantable(:,DY);
+%        mdj = meantable(:,DJ);
     end
     
 
@@ -50,33 +95,49 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
     y = y - y(1);    
     r = magnitude(x,y);
     dr = magnitude(dx, dy);
+%     mr = magnitude(mx, my);
+%     mdr= magnitude(mdx, mdy);
     
     if plot_opts.plotx;
-          xdata  =  x;
-         dxdata  = dx;       
+          xdata  =   x;
+         dxdata  =  dx;       
+%          mxdata  =  mx;
+%         mdxdata  = mdx;
     else
          xdata = zeros(length(x),1)*NaN;
         dxdata = zeros(length(x),1)*NaN;
+%         mxdata = zeros(length(mx),1)*NaN;
+%        mdxdata = zeros(length(mx),1)*NaN;
     end
 
     if plot_opts.ploty;
          ydata =  y;
         dydata = dy;
+%         mydata = my;
+%        mdydata = mdy;
     else
          ydata = zeros(length(y),1)*NaN;
         dydata = zeros(length(y),1)*NaN;
+%         mydata = zeros(length(my),1)*NaN;
+%        mdydata = zeros(length(my),1)*NaN;
     end
 
     if plot_opts.plotr;
          rdata =  r;
         drdata = dr;
+%         mrdata = mr;
+%        mdrdata = mdr;
     else
         rdata  = zeros(length(r),1)*NaN;
         drdata = zeros(length(r),1)*NaN;
+%         mrdata = zeros(length(mr),1)*NaN;
+%        mdrdata = zeros(length(mr),1)*NaN;
     end    
 
          xyr      = [  xdata,   ydata,   rdata];    
         dxyrdt    = [ dxdata,  dydata,  drdata];
+%         mxyr      = [ mxdata,  mydata,  mrdata];
+%         mdxyrdt   = [mdxdata, mdydata, mdrdata];
 
     % computing the maximum shear rate experienced at the bead's surface
     max_shear_rate = shear_rate_max(dxyrdt, params.bead_radius * 1e-6);
@@ -92,37 +153,35 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
 
     % computing the instantaneous viscosity as a function of compliance
     visc = 1 ./ dj;
-
     
     % get things into nice plottable and mentally stable units
     xyr    = xyr     * 1e6;  % m -> um
     force  = force   * 1e12; % N -> pN
-    dxyrdt = dxyrdt  * 1e6;   % m -> um           
-        
-                %     % VERY BAD.... injecting cone and plate data for DNA here...
-                %     CAPpath = '\\nsrg-cs.cs.unc.edu\cribb\data\DNA\rheology\cone and plate\2006.11.20_AR-G2\';
-                %     CAPfile = 'lambda_dna_shear_flow_data.csv';
-                %     CAPdata = csvread([CAPpath CAPfile]);
-                %     CAP_shear_rate = CAPdata(:,1);
-                %     CAP_visc       = CAPdata(:,2);
+    dxyrdt = dxyrdt  * 1e6;  % m -> um           
+%     mxyr   = mxyr    * 1e6;  % m -> um           
+%     mdxyrdt= mdxyrdt * 1e6;  % m -> um           
     
     % handle the log/lin space choice
     if plot_opts.logspace;
         warning off MATLAB:log:logOfZero;
-            t = log10(t);
-            xyr = log10(xyr);
+                 t = log10(t);
+               xyr = log10(xyr);
             dxyrdt = log10(dxyrdt);
-            force = log10(force);
-            max_shear_rate = log10(max_shear_rate);
-            Wi = log10(Wi); 
-            j = log10(j);
-            visc = log10(visc);
+%               mxyr = log10(mxyr);
+%            mdxyrdr = log10(mdxyrdt);
+             force = log10(force);
+    max_shear_rate = log10(max_shear_rate);
+                Wi = log10(Wi); 
+                 j = log10(j);
+              visc = log10(visc);
+            dxyrdt = log10(dxyrdt);
+                dj = log10(dj);
+
             if isfield(dmbr_struct, 'cap')
                cap_srate = log10(cap_srate);
                cap_viscPa= log10(cap_viscPa);
             end
-            dxyrdt    = log10(dxyrdt);
-            dj   = log10(dj);
+            
         warning on MATLAB:log:logOfZero;
 
         logstring1 = 'log_{10}( ';
@@ -224,3 +283,21 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
 
     v = 0;
     
+%%%%%%%%%%%%%%%%
+% SUBFUNCTIONS %
+%%%%%%%%%%%%%%%%
+
+%% Prints out a log message complete with timestamp.
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'dmbr_plot_data: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+
+     return;

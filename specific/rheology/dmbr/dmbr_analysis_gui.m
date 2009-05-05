@@ -35,7 +35,7 @@ function  varargout = dmbr_analysis_gui(varargin)
 
 % Edit the above text to modify the response to help dmbr_analysis_gui
 
-% Last Modified by GUIDE v2.5 29-Apr-2009 04:10:55
+% Last Modified by GUIDE v2.5 05-May-2009 14:04:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -237,7 +237,7 @@ function pushbutton_export_to_ws_CreateFcn(hObject, eventdata, handles)
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_plot_mean_creep_CreateFcn(hObject, eventdata, handles)
+function checkbox_plot_mean_creep_CreateFcn(hObject, eventdata, handles)
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
@@ -692,38 +692,10 @@ function listbox_voltages_Callback(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
     
     
-% --- Executes on button press in pushbutton_plot_mean_creep.
-function pushbutton_plot_mean_creep_Callback(hObject, eventdata, handles)
+% --- Executes on button press in checkbox_plot_mean_creep.
+function checkbox_plot_mean_creep_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles); 
 
-    dmbr_constants;
-
-    table = handles.rheo_table;
-    
-    % filter out all but current bead
-    filtered_table = dmbr_filter_table();
-%     beadID = str2double(get(handles.edit_BeadID, 'String'));
-%     idx = find(table(:,ID) == beadID);
-%     filtered_table = table(idx,:);
-    
-    v = dmbr_mean_creep_curve(filtered_table, 3);
-
-    
-    handles.meanJfig = figure;
-    plot(v.t, v.j, '.');
-    xlabel('time [s]');
-    ylabel('compliance, J {Pa^{-1}]');
-    title('Mean Compliance');
-    drawnow;
-    
-    handles.meandispfig = figure;
-    plot(v.t, v.x*1e6, '.');
-    xlabel('time [s]');
-    ylabel('displacement [\mum]');
-    title('Mean displacement');
-    drawnow;
-    
-    guidata(hObject, handles);
-    
     
 % --- Executes on button press in checkbox_beadfilt.
 function checkbox_beadfilt_Callback(hObject, eventdata, handles)
@@ -990,7 +962,7 @@ function plot_data(hObject, eventdata, handles)
     plot_opts.plotr = get(handles.checkbox_plotr, 'Value');
     plot_opts.logspace = get(handles.radio_logspace, 'Value');
     plot_opts.stack = get(handles.checkbox_seqstack, 'Value');
-
+    plot_opts.plot_mean = get(handles.checkbox_plot_mean_creep, 'Value');
     plot_opts.plot_type = handles.plot_type;
 
     dmbr_plot_data(handles.v, handles.params, selection, plot_opts);
@@ -1021,12 +993,7 @@ function logentry(txt)
 
 % --- Executes on button press in checkbox_seqstack.
 function checkbox_seqstack_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_seqstack (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox_seqstack
-
+    plot_data(hObject, eventdata, handles);
 
 
 
