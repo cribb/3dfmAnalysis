@@ -1,3 +1,6 @@
+2009-05-07 Stephen Norris <srnorris@email.unc.edu>
+	* .dmbr_todo.txt: added Jeffrey fit viscosity comment 
+
 2009-05-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore: added.  
 	* dmbr_mean_creep_curves.m: removed.  obsolete.
