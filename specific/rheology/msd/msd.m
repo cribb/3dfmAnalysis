@@ -46,10 +46,11 @@ r2out = zeros(length(window), size(data,1)) * NaN;
         A = data(1:end-window(w), k);
         B = data(window(w)+1:end, k);
     
+        r = (B - A);
+        % var_r = sum((mean(r) - r).^2) / size(r,1);
+        
         if k == 1
-            r = (B - A);
             r2 = r.^2;
-            var_r = sum((mean(r) - r).^2) / size(r,1);
         elseif k > 1
             r2 = r2 + r.^2;
         end

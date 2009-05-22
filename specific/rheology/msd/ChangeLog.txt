@@ -1,5 +1,8 @@
+2009-05-22  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: fixed bug that was doubling MSD of x instead of looking at both x and y.
+
 2009-05-04  Jeremy Cribb <jcribb@email.unc.edu>
-	* msd.m: slight cosmetic changes in algotrithm for better readibility and possible export of r2 values.
+	* msd.m: slight cosmetic changes in algorithm for better readibility and possible export of r2 values.
 
 2008-11-20  Kris Ford <krisford@email.unc.edu>
 	* .cvsignore: added .mat files
