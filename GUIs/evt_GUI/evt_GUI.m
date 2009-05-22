@@ -1169,6 +1169,9 @@ function plot_data(hObject, eventdata, handles)
                 figure(AUXfig);
                 hold on;
                     plot(log10(tau(:,q)), log10(msd(:,q)), 'r.-');
+                    [rows,cols] = size(tau);
+                    legend({num2str([0:cols-1]')});
+                    legend off
                 hold off;
             elseif plot_mean
                 plot_msd(mymsd, AUXfig, 'me');                

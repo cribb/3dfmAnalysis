@@ -1,3 +1,6 @@
+2009-05-22  Ricky Spero <rspero@physics.unc.edu>
+	* evt_gui.m: added bead IDs to individual MSD series on MSD plot. Can be seen by opening plot tools.
+
 2009-05-04  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.fig: added linear mean drift subtraction.
 	* evt_gui.m: same.
