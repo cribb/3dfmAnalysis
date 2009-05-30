@@ -1,3 +1,6 @@
+2009-05-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* sawalk.m: constructs a self avoiding walk.
+
 2009-04-24  Jeremy Cribb <jcribb@email.unc.edu>
 	* distances.m: fixed bug where x-values were used twice instead of x & y
 
