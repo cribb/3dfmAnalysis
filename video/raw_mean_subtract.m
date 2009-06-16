@@ -9,17 +9,20 @@ function v = raw_mean_sub(rawfilein, rawfileout)
 % get input file information
 file = dir(rawfilein);
 
+% set up text-box for 'remaining time' display
+[timefig,timetext] = init_timerfig;
+
 % setup the input file
 fid = fopen(rawfilein);
 fod = fopen(rawfileout,'w');
 
 % construct mean image projection
-mean_im = mip(rawfilein, [], [], 1, 'mean');
+mean_im = mip(rawfilein, 1, 500, 1, 'mean');
 mean_im = double(mean_im) / max(max(mean_im));
 
 % process each frame by mean
 % frame properties
-file = rawfilein;
+% file = rawfilein;
 rows = 484;
 cols = 648;
 color_depth = 1; % bytes
@@ -45,7 +48,7 @@ for k=start:stride:stop
     im = double(im) / max(max(im));
     
     % subtract off mean image.
-    im = im - mean_im;
+    im = im - mean_im';
     
     % add minimum as offset and renormalize
     im = im + abs(min(min(im)));

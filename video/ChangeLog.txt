@@ -1,3 +1,7 @@
+2009-06-15  Jeremy Cribb <jcribb@email.unc.edu>
+	* get_mips.m: added mean projection to possibilities in parameter list.
+	* raw_mean_subtract.m: fixed transpose bug for subtraction.
+
 2008-11-14  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore: added.
 	* balance_pulnix_gains: modified documentation to better match Mathworks convention.

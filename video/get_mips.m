@@ -22,7 +22,7 @@ if nargin < 3 | isempty(start);     start = 1;           end;
 if nargin < 2 | isempty(stride);    stride = 8;          end;
 if nargin < 1 | isempty(rawfiles);  rawfiles = '*.raw';  end;
 
-if ~strcmp(type, 'min') & ~strcmp(type, 'max')
+if ~strcmp(type, 'min') && ~strcmp(type, 'max') && ~strcmp(type, 'mean')
     warning('MIP type unknown, defaulting to minimum.');
     type = 'min';
 end
