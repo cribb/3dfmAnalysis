@@ -1,3 +1,6 @@
+2009-06-16  Stephen Norris <srnorrisunc@gmail.com>
+	* relaxation_time.m: removed offset such that minimum of dependent variable is zero.
+
 2009-04-29  Jeremy Cribb <jcribb@email.unc.edu>
 	* relaxation_time.m: initial guesses are now smarter.
 	* relaxtime_fun.m: same.

@@ -23,7 +23,6 @@ function [J,tau,R_square] = relaxation_time(t, xt, n, plot_results)
 %  does not affect the value of the relaxation times.
 %   
 
-
 if nargin < 4 | isempty(plot_results)
     logentry('Plotting results by default.');
     plot_results = 'on';
@@ -47,6 +46,7 @@ elseif (length(xt)<10) && xt(1) < xt(end)
 end
 
 xt = xt / max(xt);
+xt = xt - min(xt);
 t = t - min(t);
 
 % design the fitting routine

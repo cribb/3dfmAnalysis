@@ -133,7 +133,7 @@ for k = 1:length(beads)
                 v.recovery(count,:) = dmbr_percent_recovery(rheo_table(idx,:));
 
                 % compute the relaxation times for the zero voltage regions
-                v.taus(count,:) = dmbr_relaxation_time(rheo_table(idx,:), params);
+%                 v.taus(count,:) = dmbr_relaxation_time(rheo_table(idx,:), params);
             end
 
             if ~isempty(idx)
@@ -170,7 +170,7 @@ for k = 1:length(beads)
         
     end
 
-    v.mean_curves = dmbr_compute_mean_curves(rheo_table, v.offsets);
+%     v.mean_curves = dmbr_compute_mean_curves(rheo_table, v.offsets);
 
 end
 

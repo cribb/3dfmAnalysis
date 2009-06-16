@@ -8,7 +8,12 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
     dmbr_constants;        
     
     figure_handle = plot_opts.figure_handle;
-    meantable = dmbr_struct.mean_curves;
+
+    try
+        meantable = dmbr_struct.mean_curves;
+    catch
+        meantable = NaN;
+    end
     
     if plot_opts.plot_mean
         table = meantable;
