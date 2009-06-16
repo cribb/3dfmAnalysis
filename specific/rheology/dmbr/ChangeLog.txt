@@ -1,3 +1,8 @@
+2009-06-16 Stephen Norris <srnorris@email.unc.edu>
+	* dmbr_run.m: fixed error for mean curve plotting.
+	* dmbr_plot_data: same.
+	* Note: These files were actually altered in last commit, but because commit happened recursively, these comments didn't make it in (as they were not made yet).
+
 2009-05-07 Stephen Norris <srnorris@email.unc.edu>
 	* .dmbr_todo.txt: added Jeffrey fit viscosity comment 
 
