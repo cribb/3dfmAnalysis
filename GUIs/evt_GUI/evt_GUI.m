@@ -1064,7 +1064,8 @@ function plot_data(hObject, eventdata, handles)
             frame_rate = str2num(get(handles.edit_frame_rate, 'String'));
             calib_um   = str2num(get(handles.edit_calib_um, 'String'));
             bead_diameter_um = str2num(get(handles.edit_bead_diameter_um, 'String'));
-            win = [1 2 5 8 10 20 50 80 100 200 500 800 1000 2000 5000 8000 10000];
+            %win = [1 2 5 8 10 20 50 80 100 200 500 800 1000 2000 5000 8000 10000];
+            win = [1 2 5 8 10 20 50 80 100 200:10:800];
             mymsd = video_msd(data, win, frame_rate, calib_um, 'n');            
             myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n');
             

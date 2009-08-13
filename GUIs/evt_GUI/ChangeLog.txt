@@ -1,3 +1,6 @@
+2009-08-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: changed default window sizes to a set of values used more often in the lab vis a vis Ricky.
+
 2009-05-22  Ricky Spero <rspero@physics.unc.edu>
 	* evt_gui.m: added bead IDs to individual MSD series on MSD plot. Can be seen by opening plot tools.
 
