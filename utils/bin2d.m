@@ -1,4 +1,4 @@
-function [im_mean, im_stderr] = bin2d(x, y, Fxy, x_bins, y_bins)
+function [im_mean, im_stderr, im_count] = bin2d(x, y, Fxy, x_bins, y_bins)
 % BIN2D Arranges 2D data into a matrix, no interp, computes average and stderr.
 %
 % 3DFM function
@@ -37,9 +37,10 @@ Ly = length(y_bins);
             % we have to divide by length(idx) so if there's no data in
             % this particular bin, just set that bin to NaN to avoid pesky
             % divide by zero errors.
+            im_count(m,k) = length(idx);
             if length(idx) > 0
                 im_mean(m,k) = mean(Fxy(idx));
-                im_stderr(m,k) = std(Fxy(idx))/sqrt(length(idx));        
+                im_stderr(m,k) = std(Fxy(idx))/sqrt(length(idx));
             else
                 im_mean(m,k) = NaN;
                 im_stderr(m,k) = NaN;

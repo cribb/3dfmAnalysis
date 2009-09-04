@@ -1,3 +1,6 @@
+2008-09-04  Ricky Spero <rspero@physics.unc.edu>
+	* bin2d.m: added output that provides count.
+
 2008-11-14  Jeremy Cribb <jcribb@email.unc.edu>
 	* xlswrite.m: modified documentation to better match Mathworks convention.
 	* bin2d.m: same.
