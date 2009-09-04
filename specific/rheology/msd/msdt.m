@@ -1,18 +1,19 @@
-function [tau, mymsd, time] = msdt(t, data, tauwindow, dt)
+function [tau, mymsd, time, xout, yout] = msdt(t, data, tauwindow, dt)
 % MSDT computes the mean-square displacements (via the Stokes-Einstein relation) for a single bead
 %
 % 3DFM function
 % specific\rheology\msd
-% last modified 11/20/08 (krisford)
+% last modified 08/12/09 (rspero)
 %  
 % This function computes the mean-square displacements (via the Stokes-
 % Einstein relation) for a single bead.
 %  
-% [tau, msd] = msd(t, data, window);   
+% [tau, mymsd, time, , xout, yout] = msdt(t, data, tauwindow, dt, plot)   
 %
 % where "t" is the time
-%       "data" is the input matrix of data
-%       "window" is a vector containing window sizes of tau when computing MSD. 
+%       "data" is the matrix of data with x, y, z columns of position
+%       "tauwindow" is a vector containing window sizes of tau when computing MSD
+%       "dt" is the vector of starting times at which to evaluate msd
 %
 % Notes: - No arguments will run a 2D msd on all .mat files in the current
 %          directory and use default window sizes.
@@ -44,32 +45,51 @@ end;
 % version of the vrpn-to-matlab program.
 video_tracking_constants;
 
+%Pre-allocate
+tau   = NaN(length(tauwindow), length(dt)-1);
+mymsd = tau;
 
 % for every window size (or tau)
 warning('off', 'MATLAB:divideByZero');
 
+    %Loop over time intervals
     for k = 1:length(dt)-1
+        %Find all datapoints within this time interval
         idx = find(t > dt(k) & t < dt(k+1));
         % call up the MSD program to compute the MSD for each bead
         
+        %If we have data on this bead in this time interval
         if ~isempty(t(idx))
+            %Extract datapoints within this time interval
             neutdata = data(idx,:);
+            xout(1:length(idx),k) = neutdata(:,1);
+            yout(1:length(idx),k) = neutdata(:,2);
+            
+            %Set position at first time point to zero
             neutdata = neutdata - repmat(neutdata(1,:),size(neutdata,1),1);
-            [tau(:, k), mymsd(:, k)] = msd(t(idx), neutdata, tauwindow);
+            %Find MSD for this time interval
+            [tau(:, k), mymsd(:, k), r2] = msd(t(idx), neutdata, tauwindow);
         else
             tau(:,k) = NaN;
             mymsd(:,k) = NaN;
         end
       
-%         tau(k, :) = tauwindow(k) * mean(diff(t));
-%         mymsd(k, :) = mean(r2);
-        time(k,:) = dt(k);
+%        tau(k, :) = tauwindow(k) * mean(diff(t));
+%        mymsd(k, :) = nanmean(r2,2);
+        time(:,k) = repmat(dt(k), [length(tauwindow),1]);
     end
 
 warning('on', 'MATLAB:divideByZero');
 
-
-% tau = 0;
-% mymsd = 0;
-
-
+%surf(im_mean)
+xout(xout==0) = NaN;
+yout(yout==0) = NaN;
+% [rows, cols] = size(xout);
+% 
+% D = mymsd ./(4*tau);
+% Davg = nanmean(D);
+%Plot Davg vs. Time
+% figure;
+% plot(time(1,:),Davg)
+% xlabel('time');
+% ylabel('D_{eff}');

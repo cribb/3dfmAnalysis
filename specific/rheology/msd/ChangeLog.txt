@@ -1,3 +1,6 @@
+2009-09-04 Ricky Spero <rspero@physics.unc.edu>
+	* msdt.m Numerous minor modifications. Commented code, added x and y outputs for greater flexibility in usage.
+
 2009-05-22  Jeremy Cribb <jcribb@email.unc.edu>
 	* msd.m: fixed bug that was doubling MSD of x instead of looking at both x and y.
 
