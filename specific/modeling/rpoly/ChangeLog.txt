@@ -1,0 +1,19 @@
+2009-09-28  Jeremy Cribb <jcribb@email.unc.edu>
+	* .cvsignore:  added. set to ignore *.asv files
+	* ChangeLog.txt:  added.  this file.
+	* multi_jobs_dna.bash:  added.  bash script that submits job to the BASS for a DNA solution.
+	* multi_jobs_guar.bash:  added.  bash script that submits job to the BASS for a Guar solution.
+	* multi_jobs_ha.bash:  added.  bash script that submits job to the BASS for a HA solution.
+	* multi_jobs_pgm.bash:  added.  bash script that submits job to the BASS for a PGM solution.
+	* RP_bass_dna1p4mgmL.m:  added.  matlab script that runs BASS-friendly simulation for a DNA solution.
+	* RP_bass_guar1p5pct.m:  added.  matlab script that runs BASS-friendly simulation for a Guar solution.
+	* RP_bass_ha20mgmL.m:  added.  matlab script that runs BASS-friendly simulation for a HA solution.
+	* RP_bass_pgm4pct.m:  added.  matlab script that runs BASS-friendly simulation for a PGM solution.
+	* RP_checkparams.m:  added.  checks input parameters.
+	* RP_continue_sim.m:  added.  creates input structure for a continuing RP simulations by removing old data, keeping input parameters, and extracting new initial values for the modeling.
+	* RP_force_on_a_bead_surface.m:  added.  computes the force on a bead's surface exerted by a material that follows the ROLIE-POLY constitutive law.
+	* RP_multisim.m:  added.  main function for running simulations.  can run single-threaded or multi-threaded on multi-processor computers (even the BASS).
+	* RP_munge_bass_sims.m:  added.  when multiple runs are generated on the same material with one variable parameter, this function combines them all into a sane structure.
+	* RP_plot.m:  added.  plots results from the ROLIE-POLY simulation.
+	
+	
