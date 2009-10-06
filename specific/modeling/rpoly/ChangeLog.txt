@@ -1,4 +1,8 @@
 2009-10-06  Jeremy Cribb <jcribb@email.unc.edu>
+	* multi_jobs_pmval_01.bash. added. a RP parameter validation run.
+	* RP_bass_pmval_01.m. added. same.
+
+2009-10-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* RP_multisim.m: removed last points for pos and vel to fix off-by-one error.
 	* RP_plot: added section that removes last points in pos and vel (if they exist) so that plotting works.
 	* RP_munge_bass_sims.m: fixed function so saving outfile now works.
