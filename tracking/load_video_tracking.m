@@ -1,6 +1,6 @@
 function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
                                   absolute_pos, tstamps, table,...
-                                  minFrames, minPixelRange)
+                                  minFrames, minPixelRange, tCrop, xyCrop)
 % LOAD_VIDEO_TRACKING Loads into memory 3DFM video tracking dataset(s).
 %
 % 3DFM function  
@@ -13,7 +13,7 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
 % 
 % function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
 %                                  absolute_pos, tstamps, table,...
-%                                  minFrames, minPixelRange)
+%                                  minFrames, minPixelRange, tCrop, xyCrop)
 %
 % where "d" is the outputted data table
 %       "filemask" is the .mat filename(s) (i.e. wildcards ok)
@@ -25,6 +25,10 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
 %       "table" is 'struct' or 'table', denoting the style of the output data
 %       "minFrames": tracker length threshold, default value 1 (to kill empty trackers)
 %       "minPixelRange": tracker range threshold in x OR y, default value 0
+%       "tCrop" is time in frames to crop the start and end of each tracker.
+%       "xyCrop" is trench at the field of view's edge where data will be
+%           deleted.
+%       
 %
 % Notes:
 % - This function is designed to work under default conditions with
@@ -34,6 +38,8 @@ function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
 video_tracking_constants;
 
 % handle the argument list
+if (nargin < 11 || isempty(xyCrop));        xyCrop = 0;                end;
+if (nargin < 10 || isempty(tCrop));         tCrop = 0;                 end;
 if (nargin < 9 || isempty(minPixelRange));  minPixelRange = 0;         end;
 if (nargin < 8 || isempty(minFrames));      minFrames = 1;             end;
 if (nargin < 7 || isempty(table));          table = 'struct';          end;
@@ -254,7 +260,7 @@ end
 data = glommed_d;
 
 %Prune data table of trackers that are too short, or don't move enough
-data = prune_data_table(data, minFrames, minPixelRange, xyzunits, calib_um);
+data = prune_data_table(data, minFrames, minPixelRange, xyzunits, calib_um, tCrop, xyCrop);
 
 % now, settle our outputs, and move on....
 switch table
@@ -272,13 +278,15 @@ switch table
         if exist('YAW');     v.yaw  = data(:,YAW);     end;                    
 end
 
-function data = prune_data_table(data, minFrames, minPixelRange, xyzunits, calib_um)
+function data = prune_data_table(data, minFrames, minPixelRange, xyzunits, calib_um, tCrop, xyCrop)
 
-%Removes all data from trackers that have few than minFrames datapoints
+%Filters data from trackers that have few than minFrames datapoints
 %less than minPixelRange in either x OR y.
+%from the edge of each tracker in time by tCrop
+%from the edge of the field of view by xyCrop
 %
 %USAGE:
-%   function data = prune_data_table(data, minFrames, minPixelRange, units, calib_um)
+%   function data = prune_data_table(data, minFrames, minPixelRange, units, calib_um, tCrop, xyCrop)
 %
 %   where:
 %   'data' is the video table
@@ -292,20 +300,45 @@ function data = prune_data_table(data, minFrames, minPixelRange, xyzunits, calib
 
 video_tracking_constants;
 
+%Perform xyCrop
+minX = min(data(:,X)); maxX = max(data(:,X));
+minY = min(data(:,Y)); maxY = max(data(:,Y));
+xIDX = find(data(:,X) < (minX+xyCrop));
+yIDX = find(data(:,Y) < (minX+xyCrop));
+DeleteRowsIDX = unique([xIDX; yIDX]);
+data(DeleteRowsIDX,:) = [];
+
 beadlist = unique(data(:,ID));
 for i = 1:length(beadlist)                  %Loop over all beadIDs.
-    % Remove trackers that are too short in time
     idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
-    if(length(idx) < minFrames)             %If this bead has too few datapoints
+    numFrames = length(idx);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %Remove the frames before and after tCrop
+    if(numFrames <= 2*tCrop)
+        data(idx,:) = [];
+        continue
+    elseif(tCrop >= 1)
+        firstFrames = 1:tCrop;
+        lastFrames  = ceil(1+numFrames-tCrop):numFrames;
+        data(idx([firstFrames lastFrames]),:) = [];         %Delete these rows
+        % Update rows index
+        idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
+        numFrames = length(idx);
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+    % Remove trackers that are too short in time
+    if(numFrames < minFrames)             %If this bead has too few datapoints
         idx = find(data(:, ID) ~= beadlist(i)); %Get the rest of the data
         data = data(idx, :);                    %Recreate data without this bead
         continue                                %Move on to next bead now
     end
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Remove trackers with too short a range in x OR y
     xrange = max(data(idx, X)) - min(data(idx, X)); %Calculate xrange
     yrange = max(data(idx, Y)) - min(data(idx, Y)); %Calculate yrange
-
     %Handle unit conversion, if necessary.
     if(nargin > 3)
         if strcmp(xyzunits,'m')
@@ -320,7 +353,6 @@ for i = 1:length(beadlist)                  %Loop over all beadIDs.
             xrange = xrange / calib;
             yrange = yrange / calib;
     end
-
     %Delete this bead iff necesary
     if(xrange<minPixelRange && yrange<minPixelRange) %If this bead has too few datapoints
         idx  = find(data(:, ID) ~= beadlist(i));     %Get all data rows for this bead

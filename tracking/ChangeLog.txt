@@ -1,3 +1,6 @@
+2009-10-06  rspero@physics.unc.edu
+	* Added data filters to load_video_tracking to delete based on minPixelRange, minFrames, tCrop, and xyCrop
+
 2008-05-04  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m: added "linear drift vector" mode of subtraction via Adam Shields and Briana Carstens.
 
