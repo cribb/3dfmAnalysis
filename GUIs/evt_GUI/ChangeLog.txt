@@ -1,3 +1,7 @@
+2009-10-06  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: added new filter interface for Ricky's new code.
+	* evt_gui.fig: same.
+
 2009-08-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: changed default window sizes to a set of values used more often in the lab vis a vis Ricky.
 
