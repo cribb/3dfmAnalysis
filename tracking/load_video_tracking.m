@@ -303,9 +303,9 @@ video_tracking_constants;
 %Perform xyCrop
 minX = min(data(:,X)); maxX = max(data(:,X));
 minY = min(data(:,Y)); maxY = max(data(:,Y));
-xIDX = find(data(:,X) < (minX+xyCrop));
-yIDX = find(data(:,Y) < (minX+xyCrop));
-DeleteRowsIDX = unique([xIDX; yIDX]);
+xIDXmin = find(data(:,X) < (minX+xyCrop)); xIDXmax = find(data(:,X) > (maxX-xyCrop));
+yIDXmin = find(data(:,Y) < (minY+xyCrop)); yIDXmax = find(data(:,Y) > (maxY-xyCrop));
+DeleteRowsIDX = unique([xIDXmin; yIDXmin; xIDXmax; yIDXmax]);
 data(DeleteRowsIDX,:) = [];
 
 beadlist = unique(data(:,ID));
