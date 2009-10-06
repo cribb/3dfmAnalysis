@@ -1,3 +1,8 @@
+2009-10-06  Jeremy Cribb <jcribb@email.unc.edu>
+	* RP_multisim.m: removed last points for pos and vel to fix off-by-one error.
+	* RP_plot: added section that removes last points in pos and vel (if they exist) so that plotting works.
+	* RP_munge_bass_sims.m: fixed function so saving outfile now works.
+
 2009-09-28  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore:  added. set to ignore *.asv files
 	* ChangeLog.txt:  added.  this file.

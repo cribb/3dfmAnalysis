@@ -20,7 +20,7 @@ function sim_out = RP_munge_bass_sims(infile, outfile)
 %                   modeling data.
 %         "infile"  is the input filemask with '*' wildcard placed where the
 %                   iterated numbers exist in the input filenames.
-%         "outfile" is the output filename where the collected data are saved                  saved.
+%         "outfile" is the output filename where the collected data are saved.
 %                   (not mandatory)
 %
 
@@ -49,16 +49,12 @@ for k = 1:length(filelist)
             oldfield = getfield(sim_out, fields{m});
 
             sim_out = setfield(sim_out, fields{m}, cat(dim,oldfield,foo));
-        end
-        
-        if exist(outfile)
-            try
-                save(outfile, '-STRUCT', 'sim_out');
-            catch
-                warning('File not saved.  Something wrong with filename?');
-            end
-        end
-        
+        end               
     end
 end
 
+    if exist('outfile')
+        save(outfile, '-STRUCT', 'sim_out');
+    end
+    
+return;

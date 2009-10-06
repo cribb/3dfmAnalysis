@@ -117,13 +117,9 @@ switch parallelize
                 stress = cell2mat(stored_stress);
 end
 
-% time = time(:,1:end-1)';
-% pos  = pos(:,1:end-1)';
-% vel  = vel(:,1:end-1)';
-
 time = time';
-pos  = pos';
-vel  = vel';
+pos  = pos(:,1:end-1)';
+vel  = vel(:,1:end-1)';
    
 sim_out = RP_params;
 sim_out.time = time;
