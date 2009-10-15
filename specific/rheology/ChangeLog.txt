@@ -1,3 +1,6 @@
+2009-10-15  Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_newt_fluid_evt.m: added.  creates an evt file from brownian simulations.
+
 2009-06-16  Stephen Norris <srnorrisunc@gmail.com>
 	* relaxation_time.m: removed offset such that minimum of dependent variable is zero.
 
