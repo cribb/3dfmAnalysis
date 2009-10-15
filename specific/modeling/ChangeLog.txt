@@ -1,3 +1,6 @@
+2009-10-15  Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_newt_fluid.m: added "numpaths" option to simulate more than one path at a time.
+
 2009-09-28  Jeremy Cribb <jcribb@email.unc.edu>
 	* rpoly (folder).  added.
 

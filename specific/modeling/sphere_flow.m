@@ -34,7 +34,9 @@ function [vel,h] = sphere_flow(vd, a, X, Y)
     vr = -vd * cos(theta) .* (1 - (3*a)./(2*r) + (a.^3)./(2*r.^3));
 	vtheta = vd * sin(theta) .* (1 - (3*a)./(4*r) - (a.^3)./(4*r.^3));
     
-    
+    gammadot = vd * sqrt( cos(theta).^2 .* (r.^-1 - (3/4)*a*r.^-2 - (1/4) * a^3*r.^-4).^2 ...
+                        + sin(theta).^2 .* ((3/2)*a*r.^-2 - (3/2)*a^3*r.^-4).^2 );
+                    
     VX = vr .* cos(theta) - vtheta .* sin(theta);
     VY = vr .* sin(theta) + vtheta .* cos(theta);
     
@@ -62,6 +64,7 @@ function [vel,h] = sphere_flow(vd, a, X, Y)
     vel.y = Y;
     vel.vx= VX;
     vel.vy= VY;
+    vel.gammadot = gammadot;
     
 %     vel.VX = VX;
 %     vel.VY = VY;
