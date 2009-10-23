@@ -1,9 +1,9 @@
-function [tau, mymsd, time, xout, yout] = msdt(t, data, tauwindow, dt)
+function [tau, mymsd, time, xout, yout, zout] = msdt(t, data, tauwindow, dt)
 % MSDT computes the mean-square displacements (via the Stokes-Einstein relation) for a single bead
 %
 % 3DFM function
 % specific\rheology\msd
-% last modified 08/12/09 (rspero)
+% last modified 09/05/09 (rspero) to handle 1, 2, and 3D
 %  
 % This function computes the mean-square displacements (via the Stokes-
 % Einstein relation) for a single bead.
@@ -49,6 +49,12 @@ video_tracking_constants;
 tau   = NaN(length(tauwindow), length(dt)-1);
 mymsd = tau;
 
+%handle multiple dimensions
+[datalength, numDimensions] = size(data);
+if(numDimensions < 3)
+    data(:,numDimensions+1:3) = NaN;
+end
+
 % for every window size (or tau)
 warning('off', 'MATLAB:divideByZero');
 
@@ -64,6 +70,7 @@ warning('off', 'MATLAB:divideByZero');
             neutdata = data(idx,:);
             xout(1:length(idx),k) = neutdata(:,1);
             yout(1:length(idx),k) = neutdata(:,2);
+            zout(1:length(idx),k) = neutdata(:,3);
             
             %Set position at first time point to zero
             neutdata = neutdata - repmat(neutdata(1,:),size(neutdata,1),1);
@@ -84,6 +91,8 @@ warning('on', 'MATLAB:divideByZero');
 %surf(im_mean)
 xout(xout==0) = NaN;
 yout(yout==0) = NaN;
+zout(zout==0) = NaN;
+
 % [rows, cols] = size(xout);
 % 
 % D = mymsd ./(4*tau);
