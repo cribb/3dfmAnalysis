@@ -32,12 +32,14 @@ function [K, D1, D2, R_square] = jeffrey_step_fit(t, y, report)
                        'TolFun', 1e-13, ...
                        'MaxIter', 2000, ...
                        'ShowStatusWindow', 'off');
-
+ K= 0.7;
+ D1 =0.07;
+ D2 = 15;
 	% initial guess
-    K  = 0.01;
-    D1 = 0.5;
-    D2 = 2;
-    
+%     K  = 0.01;
+%     D1 = 0.5;
+%     D2 = 2;
+%     
     % normalize t and y
     t = t - min(t);    
 %     y = y - min(y);
