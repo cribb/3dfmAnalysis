@@ -1,3 +1,6 @@
+2010-09-07  Jeremy Cribb <jcribb@email.unc.edu>
+	* direct_moduli.m: added.  Code from 2009 paper, Phys Rev E, Waigh, "Direct Conversion of rheological compliance measurements into storage and loss moduli"
+
 2009-10-15  Jeremy Cribb <jcribb@email.unc.edu>
 	* sim_newt_fluid_evt.m: added.  creates an evt file from brownian simulations.
 
