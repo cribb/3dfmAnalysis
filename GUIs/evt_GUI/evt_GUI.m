@@ -1,9 +1,9 @@
  function varargout = evt_GUI(varargin)
-% EXT_GUI creates a new evt_GUI or raises the existing singleton
+% EVT_GUI creates a new evt_GUI or raises the existing singleton
 %
 % 3DFM function
 % GUIs/evt_GUI
-% last modified 11/20/08 (krisford)
+% last modified 08/26/10
 %
 % evt_GUI M-file for evt_GUI.fig
 %      evt_GUI, by itself, creates a new evt_GUI or raises the existing
@@ -29,7 +29,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 06-Oct-2009 13:49:11
+% Last Modified by GUIDE v2.5 31-Aug-2010 11:06:05
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -227,26 +227,32 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         im = imread(MIPfile, 'BMP');
         logentry('Successfully loaded MIP image...');
     catch
-        logentry('MIP file was not found.  Trying to load first frame...');
+        try 
+            MIPfile = [filenameroot, '.vrpn.composite.tif'];
+            im = imread(MIPfile, 'tif');
+            logentry('Successfully loaded MIP image...');
+        catch        
+            logentry('MIP file was not found.  Trying to load first frame...');
 
-        % or, try loading the first frame        
-        try
-            fimfile = [filenameroot, '0001.bmp'];
-            im = imread(fimfile, 'BMP');
-            logentry('Successfully loaded first frame image...');            
-        catch
-            logentry('first frame image was not found. Trying to extract first frame...');
-            
-            % last chance.... try extracting first frame
+            % or, try loading the first frame        
             try
-                rawfile = [filenameroot '.RAW'];
-                im = raw2img(rawfile, 'BMP', 1, 1);
-                logentry('Successfully extracted first frame image...');
+                fimfile = [filenameroot, '0001.bmp'];
+                im = imread(fimfile, 'BMP');
+                logentry('Successfully loaded first frame image...');            
             catch
-                logentry('Could not extract image; RAW file not found.  Giving up...');
-                im = 0;
-            end
-        end        
+                logentry('first frame image was not found. Trying to extract first frame...');
+
+                % last chance.... try extracting first frame
+                try
+                    rawfile = [filenameroot '.RAW'];
+                    im = raw2img(rawfile, 'BMP', 1, 1);
+                    logentry('Successfully extracted first frame image...');
+                catch
+                    logentry('Could not extract image; RAW file not found.  Giving up...');
+                    im = 0;
+                end
+            end        
+        end
     end
     
     % if the background MIP image exists, attach it to handles structure
@@ -346,6 +352,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     set(handles.pushbutton_Select_Closest_dataset , 'Enable', 'on');
     set(handles.radio_XYfig                       , 'Enable', 'on');
     set(handles.radio_XTfig                       , 'Enable', 'on');
+    set(handles.checkbox_neutoffsets              , 'Enable', 'on');
     set(handles.radio_selected_dataset            , 'Enable', 'on');
     set(handles.radio_boundingbox                 , 'Enable', 'on');
     set(handles.radio_deletetimebefore            , 'Enable', 'on');
@@ -833,6 +840,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
         case 'radial vector'
@@ -843,6 +851,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
         case 'PSD'
@@ -853,6 +862,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
         case 'Integrated Disp'
@@ -863,6 +873,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
 %         case 'displacement hist'
@@ -881,6 +892,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_msdall   ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.pushbutton_msdselect,  'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
@@ -891,6 +903,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
@@ -901,6 +914,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
@@ -911,6 +925,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_eta      ,  'Visible', 'on', 'Enable', 'on');
             set(handles.edit_bead_diameter_um,  'Visible', 'on', 'Enable', 'on');
@@ -921,6 +936,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
@@ -931,6 +947,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
@@ -1054,7 +1071,11 @@ function plot_data(hObject, eventdata, handles)
     drawnow;
     
     figure(handles.XTfig);
-    plot(t(k) - mintime, [x(k) y(k)], '.');
+    if get(handles.checkbox_neutoffsets, 'Value')
+        plot(t(k) - mintime, [x(k)-x(k(1)) y(k)-y(k(1))], '.');        
+    else
+        plot(t(k) - mintime, [x(k) y(k)], '.');
+    end
     xlabel('time [s]');
     ylabel(ylabel_string);
     legend('x', 'y');    
@@ -1077,9 +1098,10 @@ function plot_data(hObject, eventdata, handles)
             calib_um   = str2num(get(handles.edit_calib_um, 'String'));
             bead_diameter_um = str2num(get(handles.edit_bead_diameter_um, 'String'));
             %win = [1 2 5 8 10 20 50 80 100 200 500 800 1000 2000 5000 8000 10000];
-            win = [1 2 5 8 10 20 50 80 100 200:10:800];
+            %win = [1:2:30 35:5:100 200:30:1000 2000:50:10000];
+            win = [1:30 35:5:300 325:25:600 650:50:6600];
             mymsd = video_msd(data, win, frame_rate, calib_um, 'n');            
-            myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n');
+            myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n', 1);
             
             handles.mymsd = mymsd;
             handles.myve  = myve;
@@ -1512,4 +1534,45 @@ function edit_xyCrop_CreateFcn(hObject, eventdata, handles)
         set(hObject,'BackgroundColor','white');
     end
 
+
+% --- Executes on button press in pushbutton_msdselect.
+function pushbutton_msdselect_Callback(hObject, eventdata, handles)
+    video_tracking_constants;
+
+    figure(handles.AUXfig);
+	[xm, ym] = ginput(1);
+        
+    if get(handles.radio_microns, 'Value')
+        calib_um = str2double(get(handles.edit_calib_um, 'String'));
+        xm = xm / calib_um;
+        ym = ym / calib_um;
+    end        
+        
+    mymsd = handles.mymsd;
+
+        
+%     beadID = handles.table(:,ID);    
+%     x = handles.table(:,X);
+%     y = handles.table(:,Y);
+%     
+%     xval = repmat(xm, length(x), 1);
+%     yval = repmat(ym, length(y), 1);
+% 
+%     dist = sqrt((x - xval).^2 + (y - yval).^2);
+% 
+%     bead_to_select = beadID(find(dist == min(dist)));
+%     
+%     set(handles.slider_BeadID, 'Value', bead_to_select);
+%     set(handles.edit_BeadID, 'String', num2str(bead_to_select));
     
+    plot_data(hObject, eventdata, handles);
+
+
+% --- Executes on button press in checkbox_neutoffsets.
+function checkbox_neutoffsets_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_neutoffsets (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_neutoffsets
+    plot_data(hObject, eventdata, handles);

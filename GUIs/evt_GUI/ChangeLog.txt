@@ -1,3 +1,12 @@
+2010-09-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_gui.m: 
+		- MIPs as 'tif' files are supported.  
+		- added support for selecting individual msd paths.  Doesn't function yet, but doesn't screw anything else up either.
+		- added the ability to 'neutralize offsets' in [x y] vs. t plot.
+		- changed default windowsize vector
+		- updated calls to 'msd' and 've' to utilize new data handling methods 'winedge' and 'nmin'
+	* evt_gui.fig: same.
+	
 2009-10-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: added new filter interface for Ricky's new code.
 	* evt_gui.fig: same.
