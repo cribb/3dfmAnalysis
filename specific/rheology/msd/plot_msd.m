@@ -12,7 +12,7 @@ function plot_msd(d, h, optstring)
 %       value (window size), and the number of beads in a given window.
 %       "h" is the figure handle in which to put the plot.  If h is not
 %       used, a new figure is generated.
-%      "optstring" is a string containing 'a' to plot individual paths, 'm'
+%      "optstring" is a string containing 'a' to plot all individual paths, 'm'
 %      to plot the mean msd function, and 'e' to include errorbars on mean.
 %
 

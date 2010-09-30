@@ -1,4 +1,4 @@
-function v = ve(d, bead_radius, freq_type, plot_results);
+function v = ve(d, bead_radius, freq_type, plot_results, nmin)
 % VE computes the viscoelastic moduli from mean-square displacement data 
 %
 % 3DFM function
@@ -22,7 +22,11 @@ function v = ve(d, bead_radius, freq_type, plot_results);
 %  - This algorithm came from Mason 2000 Rheol Acta paper.
 %  
 
-if (nargin < 3) || isempty(freq_type)     
+if (nargin < 5) || isempty(nmin)     
+    nmin = 1;   
+end
+
+if (nargin < 3) || isempty(freq_type)
     freq_type = 'f';   
 end
 
@@ -39,7 +43,17 @@ T = 298;
 
 msd = d.msd;
 tau = d.tau;
-N = d.n(1:end-1); % corresponds to the number of trackers at each tau
+  N = d.n; % corresponds to the number of trackers at each tau
+
+%   pause;
+  
+idx = find(N >= nmin);
+tau = tau(idx,:);
+msd = msd(idx,:);
+  N = N(idx,:);
+
+tau = nanmean(tau,2);
+msd = nanmean(msd,2);
 
 % [dydx, newx, newy] = windiff(y, x, window_size)
 % [alpha, logtau, logmsd] = windiff(log10(msd), log10(tau), 1);
@@ -55,6 +69,7 @@ MYgamma = gamma(1 + alpha);
 % to delete the last row of f, tau, and msd values computed.
 msd = msd(1:end-1,:);
 tau = tau(1:end-1,:);
+  N =   N(1:end-1,:);
 
 % get frequencies all worked out from timing (tau)
 f = 1 ./ tau;
@@ -67,6 +82,7 @@ gpp= gstar .* sin(pi/2 .* alpha);
 nstar = gstar .* tau;
 np = gpp .* tau;
 npp= gp  .* tau;
+
 
 %
 % setup very detailed output structure

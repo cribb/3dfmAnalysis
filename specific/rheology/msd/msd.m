@@ -1,4 +1,4 @@
-function [tau, msd, r2out] = msd(t, data, window)
+function varargout = msd(t, data, window, winedge)
 % MSD computes the mean-square displacements (via the Stokes-Einstein relation) for a single bead
 %
 % 3DFM function
@@ -17,7 +17,7 @@ function [tau, msd, r2out] = msd(t, data, window)
 %        - Use empty matrices to substitute default values.
 %        - default window = [1 2 5 10 20 50 100 200 500 1000]
 %
-
+% [tau, msd, r2out] = msd
 
 %initializing arguments
 if (nargin < 1) || isempty(t)  
@@ -32,19 +32,30 @@ if (nargin < 3) || isempty(window)
     window = [1 2 5 10 20 50 100 200 500 1000 1001]; 
 end;
 
+if nargin < 4 || isempty(winedge)
+    winedge = 1;
+end
+
 % for every window size (or tau)
 warning('off', 'MATLAB:divideByZero');
 
-r2out = zeros(length(window), size(data,1)) * NaN;
+% preinitialize all output variables to maintain sizein == sizeout
+% r2out = zeros(length(window), size(data,1)) * NaN;
+tau = NaN * zeros(length(window),1);
+msd = tau;
 
-    for w = 1:length(window)
+    numpoints = size(data,1);
+    
+    mywin = window( window < numpoints/winedge );    
+    
+    for w = 1:length(mywin)
     
       % for x,y,z (k = 1,2,3) directions  
       for k = 1:cols(data)
   
         % for all frames
-        A = data(1:end-window(w), k);
-        B = data(window(w)+1:end, k);
+        A = data(1:end-mywin(w), k);
+        B = data(mywin(w)+1:end, k);
     
         r = (B - A);
         % var_r = sum((mean(r) - r).^2) / size(r,1);
@@ -57,11 +68,15 @@ r2out = zeros(length(window), size(data,1)) * NaN;
         
       end
       
-        tau(w, :) = window(w) * mean(diff(t));
+        tau(w, :) = mywin(w) * mean(diff(t));
         msd(w, :) = mean(r2);
-        r2out(w,1:length(r2)) = r2;
+%         r2out(w,1:length(r2)) = r2;
     end
 
+    varargout{1} = tau;
+    varargout{2} = msd;
+%     varargout{3} = r2out;
+    
 warning('on', 'MATLAB:divideByZero');
 
 return;

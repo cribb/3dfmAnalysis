@@ -1,3 +1,10 @@
+2010-09-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m:  added the 'winedge' functionality that limits each path to window sizes that are some factor smaller than the path length.  The default size is '1' that replicates previous behavior.  To restrict a path's windows to 80% of the path-length, set to '0.8'.
+	* plot_msd.m: clarified documentation.
+	* sim_msd.m: modified call to 'sim_newt_fluid' for the new 'numpaths' argument.
+	* ve.m: added an argument that eliminates data points that have less than a desired population size.
+	* video_msd.m: added usage of 'winedge' from msd.m and 'nmin' from ve.m.
+
 2009-09-04 Ricky Spero <rspero@physics.unc.edu>
 	* msdt.m Numerous minor modifications. Commented code, added x and y outputs for greater flexibility in usage.
 

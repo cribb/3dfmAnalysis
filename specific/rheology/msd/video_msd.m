@@ -1,4 +1,4 @@
-function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot)
+function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, winedge)
 % VIDEO_MSD computes mean square displacements of an aggregate number of video tracked beads via the Stokes-Einstein relation 
 %
 % 3DFM function
@@ -44,6 +44,9 @@ if (nargin < 4) || isempty(calib_um)
     calib_um = 0.152; 
 end;
 
+if nargin < 6 || isempty(winedge)
+    winedge = 1;
+end
 
 % load the constants that identify the output's column headers for the current
 % version of the vrpn-to-matlab program.
@@ -64,16 +67,21 @@ v(:,X:Z) = v(:,X:Z) * calib_um * 1e-6;
 
 % for every bead
 beadID = unique(v(:,ID))';
-myr2 = NaN * zeros(length(window), length(beadID), max(v(:,FRAME)+1));
+tau = NaN * ones(length(window), length(beadID));
+mymsd = NaN * ones(length(window), length(beadID));
+
+% myr2 = NaN * zeros(length(window), length(beadID), max(v(:,FRAME)+1));
+
 for k = 1 : length(beadID);
     
     b = get_bead(v, beadID(k));    
-    framemax = max(b(:,FRAME));
     
     % call up the MSD program to compute the MSD for each bead
-    [tau(:, k), mymsd(:, k), r2] = msd(b(:, TIME), b(:, X:Z), window);
-    [ro, cl] = size(r2);
-    myr2(1:ro, k, 1:cl) = r2;
+    [foo bar] = msd(b(:, TIME), b(:, X:Y), window, winedge);
+    tau(:, k) = foo; 
+    mymsd(:, k) = bar;
+%     [ro, cl] = size(r2);
+%     myr2(1:ro, k, 1:cl) = r2;
 end;
 
 
@@ -87,7 +95,7 @@ sample_count = sample_count(idx);
 
 % output structure
 vmsd.tau = tau;
-vmsd.r2 = myr2;
+% vmsd.r2 = myr2;
 vmsd.msd = mymsd;
 vmsd.n = sample_count;
 

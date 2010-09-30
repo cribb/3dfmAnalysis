@@ -51,7 +51,7 @@ t = [0 : 1/sampling_rate : duration - (1/sampling_rate)];
 for k = 1 : numpaths;
     
     this_duration = ceil(duration) * abs(randn)/2;
-    sim_disp = sim_newt_fluid(viscosity, bead_radius, sampling_rate, this_duration, temp, dim);
+    sim_disp = sim_newt_fluid(viscosity, bead_radius, sampling_rate, this_duration, temp, dim, 1);
     
     % call up the MSD program to compute the MSD for each bead
     [tau(:, k), mymsd(:, k)] = msd(t, sim_disp, window);
