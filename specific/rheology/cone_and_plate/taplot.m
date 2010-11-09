@@ -37,7 +37,7 @@ for k = 1 : length(fn)
 
         exptype = lower(st.metadata.step_name);
         
-        if findstr(exptype, 'stress sweep');
+        if findstr(exptype, 'stress sweep')
             stress = st.table(:,getcol(st, 'stress'));
             gp = st.table(:,getcol(st, 'G'''));
             gpp= st.table(:,getcol(st, 'G'''''));
@@ -45,7 +45,7 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'ssweep'));
         end
         
-        if findstr(exptype, 'strain sweep');
+        if findstr(exptype, 'strain sweep')
             strain = st.table(:,getcol(st, 'strain'));
             gp = st.table(:,getcol(st, 'G'''));
             gpp= st.table(:,getcol(st, 'G'''''));
@@ -53,7 +53,7 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'nsweep'));
         end
         
-        if findstr(exptype, 'frequency sweep');
+        if findstr(exptype, 'frequency sweep')
             freq = st.table(:,getcol(st, 'freq'));
             gp = st.table(:,getcol(st, 'G'''));
             gpp= st.table(:,getcol(st, 'G'''''));
@@ -62,14 +62,14 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'fsweep'));
         end
 
-        if findstr(exptype, 'flow');
+        if findstr(exptype, 'flow')
             shear_rate = st.table(:,getcol(st, 'rate'));
             visc = st.table(:,getcol(st, 'visc'));            
             figh(count) = plot_cap_flow(shear_rate, visc, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'flow'));
         end
 
-        if findstr(exptype, 'creep');
+        if findstr(exptype, 'creep')
             t = st.table(:,getcol(st, 'time'));
             strain = st.table(:,getcol(st, 'strain'));
             stress = st.table(:,getcol(st, 'stress'));
@@ -77,13 +77,37 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'creep'));
         end
 
-        if findstr(exptype, 'temperature');
+        if findstr(exptype, 'temperature')
             temp = st.table(:,getcol(st, 'temp'));
             visc = st.table(:,getcol(st, 'viscosity'));
             srate = st.table(:,getcol(st, 'shear rate'));
             figh(count) = plot_cap_temp(temp, visc, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'temp'));
         end
+        
+        if findstr(exptype, 'peak hold')
+            time = st.table(:,getcol(st, 'time'));
+            visc = st.table(:,getcol(st, 'viscosity'));            
+            strain = st.table(:,getcol(st, 'strain'));            
+
+            figh(count) = plot_cap_peakhold(strain, visc, [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'peakstrain'));
+
+%             figh(count) = plot_cap_peakhold(time, visc, [], mytitle);
+%             set(figh(count), 'Name', figname(fn{k}, 'peakhold'));
+        end                        
+            
+        if isempty(findstr(exptype, 'stress sweep')) && ...
+           isempty(findstr(exptype, 'strain sweep')) && ...
+           isempty(findstr(exptype, 'frequency sweep')) && ...
+           isempty(findstr(exptype, 'flow')) && ...
+           isempty(findstr(exptype, 'creep')) && ...
+           isempty(findstr(exptype, 'temperature')) && ...
+           isempty(findstr(exptype, 'peak hold'))
+           
+           figh(count) = NaN;
+        end
+
         count = count + 1;        
     end
         

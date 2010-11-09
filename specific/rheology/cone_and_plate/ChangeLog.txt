@@ -1,3 +1,7 @@
+2010-11-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* plot_cap_peakhold.m: added.  handles plots for the "peak hold" test type.
+        * taplot.m: added the "peak hold" test type.
+
 2008-11-19  Kris Ford <krisford@email.unc.edu>
 	* cap_creep.m: modified documentation to better match Mathworks convention
 	* cap_plot.m: same
