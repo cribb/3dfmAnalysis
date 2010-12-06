@@ -196,6 +196,7 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
         logstring2 = '';
     end
     
+    
 
     figure(plot_opts.figure_handle);
 
@@ -280,6 +281,24 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
             plot(Wi, visc, '.');
             xlabel([logstring1 'Weissenburg Number' logstring2]);
             ylabel([logstring1 'inst. viscosity [Pa s]' logstring2]);
+            
+        case 'storage and loss moduli'
+            
+            %% These two lines are variable, user defined by compliance data
+        J0=j(1);
+        eta=.721;   
+        %%
+    
+        GData=dmbr_direct_moduli(t,j,J0,eta,1000,'n');
+            % Plot the moduli    
+        subplot(1,1,1);
+        loglog(GData(:,1),GData(:,2),'b.-');
+        hold on
+        loglog(GData(:,1),GData(:,3),'r.-');
+        legend('G''','G''''','Location','NorthWest');
+        xlabel('\omega [s^{-1}]');
+        ylabel('Moduli [Pa]');
+        hold off
             
     end
     
