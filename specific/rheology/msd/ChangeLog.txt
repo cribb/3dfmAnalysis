@@ -1,4 +1,8 @@
 2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: removed cvs diff text.
+	* ve.m: same.
+
+2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* msd.m:  now tallies the number of estimates per tau and provides as output.  Used to compute weighted statistics.
 	* video_msd.m: now computes weighted statistics so that the mean and error for the MSD are better influenced by the number of individual bead measures. 
 	* plot_msd.m: also updated for new statistics measures and tweaked plots.

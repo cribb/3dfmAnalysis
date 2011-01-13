@@ -40,7 +40,6 @@ end
 
 msd = d.msd;
 tau = d.tau;
-
   N = d.n; % corresponds to the number of trackers at each tau
 counts = d.ns; % corresponds to the number of estimates for each bead at each tau
 
@@ -108,19 +107,6 @@ v.n = N;
 % assignin('base', 'msdjac', d);
 % assignin('base', 'vejac', v);
 
-  N = d.n; % corresponds to the number of trackers at each tau
-
-%   pause;
-  
-idx = find(N >= nmin);
-tau = tau(idx,:);
-msd = msd(idx,:);
-  N = N(idx,:);
-
-tau = nanmean(tau,2);
-msd = nanmean(msd,2);
-
-
 % plot output
 if (nargin < 4) || isempty(plot_results) || strncmp(plot_results,'y',1)  
     fig1 = figure; fig2 = figure;
@@ -152,15 +138,9 @@ MYgamma = gamma(1 + abs(alpha));
 
 % because of the first-difference equation used to compute alpha, we have
 % to delete the last row of f, tau, and msd values computed.
-
 % msd = msd(1:end-1,:);
 % tau = tau(1:end-1,:);
 %   N =   N(1:end-1,:);
-
-msd = msd(1:end-1,:);
-tau = tau(1:end-1,:);
-  N =   N(1:end-1,:);
-
 
 % get frequencies all worked out from timing (tau)
 f = 1 ./ tau;
