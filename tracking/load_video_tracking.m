@@ -292,7 +292,7 @@ function data = prune_data_table(data, minFrames, minPixelRange, xyzunits, calib
 %   'data' is the video table
 %   'minFrames' is the minimum number of frames required to keep a tracker
 %   'minPixelRange' is the minimum range a tracker must move in either x OR Y if it is to be kept
-%   'units' is either 'pixel' or 'um', reffering to the position columns in 'data'
+%   'units' is either 'pixel' or 'um', refering to the position columns in 'data'
 %   'calib_um' is the microns per pixel calibration of the image.
 %
 %   Note that x and y ranges are converted to pixels if and only if 'units'

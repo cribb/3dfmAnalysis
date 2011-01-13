@@ -1,3 +1,6 @@
+2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: corrected typo in documentation.
+
 2010-09-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m: replaced center-of-mass algorithm with one that doesn't care about trackers popping in and out of existence.  It estimates the center-of-mass velocity for adjacent frames that have consistent trackers.  Still only works for samples with linear drift.
 
