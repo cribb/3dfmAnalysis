@@ -1,3 +1,7 @@
+2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* plot2svg/plot2svg.m: quieted the annoying announcement string that printed everytime this function ran.
+	* plot2svg/plot2svg_2d.m: same.
+
 2009-04-29  Jeremy Cribb <jcribb@email.unc.edu>
 	* rdir.m: added.  recursive directory utility. obtained from matlabcentral.
 	* rdirExec.m: added.  recursive directory utility with execution.obtained from matlabcentral.

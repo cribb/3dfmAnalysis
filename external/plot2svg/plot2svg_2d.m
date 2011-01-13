@@ -32,7 +32,7 @@ progversion='09-Dec-2005';
 if nargout==1
     varargout={0};
 end
-disp(['   Matlab to SVG converter version ' progversion ', Juerg Schwizer (converter@juergschwizer.de).'])
+% disp(['   Matlab to SVG converter version ' progversion ', Juerg Schwizer (converter@juergschwizer.de).'])
 matversion=version;
 if str2num(matversion(1))<6 % Check for matlab version and print warning if matlab version lower than version 6.0 (R.12)
     disp('   Warning: Future versions may no more support older versions than MATLAB R12.')
