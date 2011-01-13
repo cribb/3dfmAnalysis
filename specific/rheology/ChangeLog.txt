@@ -1,5 +1,8 @@
+2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_mucus_rheo_run.m: added.  panoptes rheology analysis code in its early stages.  specific for mucus samples.  This may be moved or refactored later. 
+
 2010-09-07  Jeremy Cribb <jcribb@email.unc.edu>
-	* direct_moduli.m: added.  Code from 2009 paper, Phys Rev E, Waigh, "Direct Conversion of rheological compliance measurements into storage and loss moduli"
+	* direct_moduli.m: added.  Code from 2009 paper, Phys Rev E, Waigh, "Direct Conversion of rheological compliance measurements into storage and loss moduli"
 
 2009-10-15  Jeremy Cribb <jcribb@email.unc.edu>
 	* sim_newt_fluid_evt.m: added.  creates an evt file from brownian simulations.
