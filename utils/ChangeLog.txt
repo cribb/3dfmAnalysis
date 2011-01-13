@@ -1,3 +1,7 @@
+2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* gen_pub_plotfiles.m: updated calls for saving output files.
+	* pretty_plot.m: commented out reported text for unknown condition.
+
 2008-09-04  Ricky Spero <rspero@physics.unc.edu>
 	* bin2d.m: added output that provides count.
 

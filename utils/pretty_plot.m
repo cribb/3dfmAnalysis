@@ -58,7 +58,7 @@ function plot_figure_for_screen(fig)
             set(ylab, 'FontSize', 14, 'FontWeight', 'Bold');
             set(axes(k), 'FontSize', 14, 'FontWeight', 'Bold');
         catch
-            logentry('something weird happened when setting figure properties.');
+%             logentry('something weird happened when setting figure properties.');
         end        
     end
     
@@ -101,7 +101,7 @@ function plot_figure_for_eps(fig, mag)
             set(  ylab, 'FontSize',    fnt_sz, 'FontWeight', 'Normal');
             set( ax(k), 'FontSize', ax_fnt_sz, 'FontWeight', 'Normal');
         catch
-            logentry('something weird happened when setting figure properties.');
+%            logentry('something weird happened when setting figure properties.');
         end        
         
         axis_children = get(ax, 'Children');
