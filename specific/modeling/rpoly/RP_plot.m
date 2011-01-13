@@ -44,26 +44,30 @@ termvisc = viscosity(end,:);
     
     subplot(2,2,1)
     loglog(time,pos*1e6)
-    title('bead. RP. acceleration.')
+%     title('bead. RP. acceleration.')
+    title('RP bead');
     xlabel('time, t [s]');
     ylabel('displacement, x [\mum]');
     
     
     subplot(2,2,2)
     loglog(time,vel*1e6)
-    title('bead. RP. acceleration.')
+%     title('bead. RP. acceleration.')
+    title('RP bead');
     ylabel('velocity, v [\mum/s]');
     xlabel('time, t [s]');
     
     subplot(2,2,3)
     loglog(time,compliance)
-    title('bead. RP. acceleration.')
+%    title('bead. RP. acceleration.')
+    title('RP bead');
     xlabel('time, t [s]');
     ylabel('compliance, J [Pa^{-1}]');
         
     subplot(2,2,4)
     loglog(time,viscosity)
-    title('bead. RP. acceleration.')
+%    title('bead. RP. acceleration.')
+    title('RP bead');
     xlabel('time, t [s]');
     ylabel('viscosity, \eta [Pa s]');
     

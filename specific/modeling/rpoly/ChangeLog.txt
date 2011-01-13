@@ -1,3 +1,6 @@
+2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* RP_plot.m: tweaked plotting parameters.
+	
 2009-10-06  Jeremy Cribb <jcribb@email.unc.edu>
 	* multi_jobs_pmval_01.bash. added. a RP parameter validation run.
 	* RP_bass_pmval_01.m. added. same.
