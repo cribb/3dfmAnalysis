@@ -1,3 +1,7 @@
+2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* carreau_model_fit.m:  tweaked parameters for fit.
+	* new_carreau_fit.m:  added.  uses matlab's new fitting code.  Intend to retrofit other fitting functions and will use this as the template.
+
 2009-05-04  Jeremy Cribb <jcribb@email.unc.edu>
 	* carreau_model_fun.m: removed unneeded computation.
 
