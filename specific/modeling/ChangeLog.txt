@@ -1,3 +1,6 @@
+2011-01-13   Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_boltzmann_solid.m: added. simulates a bead "diffusing" in a solid material with defined modulus.
+
 2010-09-01   Jeremy Cribb <jcribb@email.unc.edu>
 	* sim_newt_fluid.m:  added "numpaths" option to simulate more than one path at a time.  Added 'seed' parameter for random number generator so that paths could be replicated, if desired.
 
