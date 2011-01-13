@@ -1,3 +1,10 @@
+2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m:  now tallies the number of estimates per tau and provides as output.  Used to compute weighted statistics.
+	* video_msd.m: now computes weighted statistics so that the mean and error for the MSD are better influenced by the number of individual bead measures. 
+	* plot_msd.m: also updated for new statistics measures and tweaked plots.
+	* ve.m: changed to use the mean MSD as an imput instead of the individual MSD curves for each bead.  Takes advantage of weighted statistics to minimize bias/error.  Estimates error differently, now propagates max.min MSDs through the GSER function.
+	* plot_ve.m: alse uses new stats measures and tweaked plots.
+	
 2010-09-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* msd.m:  added the 'winedge' functionality that limits each path to window sizes that are some factor smaller than the path length.  The default size is '1' that replicates previous behavior.  To restrict a path's windows to 80% of the path-length, set to '0.8'.
 	* plot_msd.m: clarified documentation.

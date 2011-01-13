@@ -38,11 +38,76 @@ if (nargin < 1) || isempty(d)
     error('no data struct found'); 
 end
 
-k = 1.3806e-23;
-T = 298;
-
 msd = d.msd;
 tau = d.tau;
+
+  N = d.n; % corresponds to the number of trackers at each tau
+counts = d.ns; % corresponds to the number of estimates for each bead at each tau
+
+%   pause;
+  
+% idx = find(N >= nmin);
+% tau = tau(idx,:);
+% msd = msd(idx,:);
+%   N = N(idx,:);
+
+meantau = nanmean(tau,2);
+% meanmsd = nanmean(msd,2);
+
+% meantau = trimmean(tau, 15, 2);
+% meanmsd = trimmean(msd, 15, 2);
+
+logtau = log10(tau);
+logmsd = log10(msd);
+
+numbeads = size(logmsd,2);
+
+% weighted mean for logmsd
+weights = counts ./ repmat(nansum(counts,2), 1, size(counts,2));
+
+mean_logtau = nanmean(logtau');
+mean_logmsd = nansum(weights .* logmsd, 2);
+
+meanmsd = 10 .^ (mean_logmsd);
+
+% computing error for logmsd
+Vishmat = nansum(weights .* (repmat(mean_logmsd, 1, numbeads) - logmsd).^2, 2);
+msderr =  sqrt(Vishmat ./ N);
+
+
+% errmsd = nanstd(msd, [], 2) ./ sqrt(N);
+% 
+% errhmsd = meanmsd + errmsd;
+% errlmsd = meanmsd - errmsd;
+
+errhmsd = 10 .^ (mean_logmsd + msderr);
+errlmsd = 10 .^ (mean_logmsd - msderr);
+
+
+mygser  = gser(meantau, meanmsd, N, bead_radius);
+maxgser = gser(meantau, errhmsd, N, bead_radius);
+mingser = gser(meantau, errlmsd, N, bead_radius);
+
+v = mygser;
+
+v.error.f = abs(mygser.f - mingser.f);
+v.error.w = abs(mygser.w - mingser.f);
+v.error.tau = abs(mygser.tau - mingser.tau);
+v.error.msd = abs(mygser.msd - mingser.msd);
+v.error.alpha = abs(mygser.alpha - mingser.alpha);
+v.error.gamma = abs(mygser.gamma - mingser.gamma);
+v.error.gstar = abs(mygser.gstar - mingser.gstar);
+v.error.gp = abs(mygser.gp - mingser.gp);
+v.error.gpp = abs(mygser.gpp - mingser.gpp);
+v.error.nstar = abs(mygser.nstar - mingser.nstar);
+v.error.np = abs(mygser.np - mingser.np);
+v.error.npp = abs(mygser.npp - mingser.npp);
+
+v.n = N;
+
+% assignin('base', 'msdjac', d);
+% assignin('base', 'vejac', v);
+
   N = d.n; % corresponds to the number of trackers at each tau
 
 %   pause;
@@ -55,21 +120,47 @@ msd = msd(idx,:);
 tau = nanmean(tau,2);
 msd = nanmean(msd,2);
 
+
+% plot output
+if (nargin < 4) || isempty(plot_results) || strncmp(plot_results,'y',1)  
+    fig1 = figure; fig2 = figure;
+    plot_ve(v, freq_type, fig1, 'Gg');
+    plot_ve(v, freq_type, fig2, 'Nn');
+end;
+
+return;
+
+function v = gser(tau, msd, N, bead_radius)
 % [dydx, newx, newy] = windiff(y, x, window_size)
 % [alpha, logtau, logmsd] = windiff(log10(msd), log10(tau), 1);
+
+k = 1.3806e-23;
+T = 298;
+
 A = tau(1:end-1,:);
 B = tau(2:end,:);
 C = msd(1:end-1,:);
 D = msd(2:end,:);
-alpha = log10(D./C)./log10(B./A);
-MYgamma = gamma(1 + alpha);
+
+% alpha = log10(D./C)./log10(B./A);
+
+timeblur_decade_fraction = .3;
+[alpha, tau_evenspace, msd_evenspace] = getMSDSlope(msd, tau, timeblur_decade_fraction);
+
+MYgamma = gamma(1 + abs(alpha));
 % gamma = 0.457*(1+alpha).^2-1.36*(1+alpha)+1.9;
 
 % because of the first-difference equation used to compute alpha, we have
 % to delete the last row of f, tau, and msd values computed.
+
+% msd = msd(1:end-1,:);
+% tau = tau(1:end-1,:);
+%   N =   N(1:end-1,:);
+
 msd = msd(1:end-1,:);
 tau = tau(1:end-1,:);
   N =   N(1:end-1,:);
+
 
 % get frequencies all worked out from timing (tau)
 f = 1 ./ tau;
@@ -88,50 +179,17 @@ npp= gp  .* tau;
 % setup very detailed output structure
 %
 
-v.raw.f = f;
-v.raw.w = w;
-v.raw.tau = tau;
-v.raw.msd = msd;
-v.raw.alpha = alpha;
-v.raw.gamma = MYgamma;
-v.raw.gstar = gstar;
-v.raw.gp = gp;
-v.raw.gpp = gpp;
-v.raw.nstar = nstar;
-v.raw.np = np;
-v.raw.npp = npp;
+v.f = f;
+v.w = w;
+v.tau = tau;
+v.msd = msd;
+v.alpha = alpha;
+v.gamma = MYgamma;
+v.gstar = gstar;
+v.gp = gp;
+v.gpp = gpp;
+v.nstar = nstar;
+v.np = np;
+v.npp = npp;
 
-v.mean.f = nanmean(f,2);
-v.mean.w = nanmean(w,2);
-v.mean.tau = nanmean(tau,2);
-v.mean.msd = nanmean(msd,2);
-v.mean.alpha = nanmean(alpha,2);
-v.mean.gamma = nanmean(MYgamma,2);
-v.mean.gstar = nanmean(gstar,2);
-v.mean.gp = nanmean(gp,2);
-v.mean.gpp = nanmean(gpp,2);
-v.mean.nstar = nanmean(nstar,2);
-v.mean.np = nanmean(np,2);
-v.mean.npp = nanmean(npp,2);
-
-v.error.f = (nanstd(f,[],2) ./ sqrt(N));
-v.error.w = (nanstd(w,[],2) ./ sqrt(N));
-v.error.tau = (nanstd(tau,[],2) ./ sqrt(N));
-v.error.msd = (nanstd(msd,[],2) ./ sqrt(N));
-v.error.alpha = (nanstd(alpha,[],2) ./ sqrt(N));
-v.error.gamma = (nanstd(MYgamma,[],2) ./ sqrt(N));
-v.error.gstar = (nanstd(gstar,[],2) ./ sqrt(N));
-v.error.gp = (nanstd(gp,[],2) ./ sqrt(N));
-v.error.gpp = (nanstd(gpp,[],2) ./ sqrt(N));
-v.error.nstar = (nanstd(nstar,[],2) ./ sqrt(N));
-v.error.np = (nanstd(np,[],2) ./ sqrt(N));
-v.error.npp = (nanstd(npp,[],2) ./ sqrt(N));
-
-v.n = N;
-
-% plot output
-if (nargin < 4) || isempty(plot_results) || strncmp(plot_results,'y',1)  
-    fig1 = figure; fig2 = figure;
-    plot_ve(v, freq_type, fig1, 'Gg');
-    plot_ve(v, freq_type, fig2, 'Nn');
-end;
+return;

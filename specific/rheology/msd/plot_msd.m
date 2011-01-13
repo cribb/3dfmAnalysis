@@ -27,6 +27,7 @@ end
 % renaming input structure
 tau = d.tau;
 msd = d.msd;
+counts = d.ns;
 
 if isfield(d, 'n');
     sample_count = d.n;
@@ -36,17 +37,28 @@ else
     sample_count = sample_count(idx);
 end
 
+clip = find(sum(~isnan(counts),2) <= 1);
+tau(clip,:) = [];
+msd(clip,:) = [];
+counts(clip,:) = [];
+sample_count(clip,:) = [];
 
 % setting up axis transforms for the figure plotted below.  You cannot plot
 % errorbars on a loglog plot, it seems, so we have to set it up here.
 logtau = log10(tau);
 logmsd = log10(msd);
 
-mean_logtau = nanmean(logtau');
-mean_logmsd = nanmean(logmsd');
+numbeads = size(logmsd,2);
 
-ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
-ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
+% weighted mean for logmsd
+weights = counts ./ repmat(nansum(counts,2), 1, size(counts,2));
+
+mean_logtau = nanmean(logtau');
+mean_logmsd = nansum(weights .* logmsd, 2);
+
+% computing error for logmsd
+Vishmat = nansum(weights .* (repmat(mean_logmsd, 1, numbeads) - logmsd).^2, 2);
+msderr =  sqrt(Vishmat ./ sample_count);
 
 % creating the plot
 figure(h);
@@ -58,11 +70,11 @@ elseif strcmpi(optstring, 'm')
 elseif strcmpi(optstring, 'am')
     plot(logtau, logmsd, 'b', mean_logtau, mean_logmsd, 'k.-');
 elseif strcmpi(optstring, 'me') || strcmpi(optstring, 'e')
-    errorbar(mean_logtau, mean_logmsd, ste_logmsd, 'k.-');
+    errorbar(mean_logtau, mean_logmsd, msderr, 'k.-');
 elseif strcmpi(optstring, 'ame')
     plot(logtau, logmsd, 'b-');
     hold on;
-        errorbar(mean_logtau, mean_logmsd, ste_logmsd, 'k.-');
+        errorbar(mean_logtau, mean_logmsd, msderr, 'k.-');
     hold off;
 end
 
@@ -71,3 +83,5 @@ ylabel('log_{10}(MSD) [m^2]');
 grid on;
 pretty_plot;
 refresh(h);    
+
+return;

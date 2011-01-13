@@ -41,6 +41,12 @@ warning('off', 'MATLAB:divideByZero');
 
 % preinitialize all output variables to maintain sizein == sizeout
 % r2out = zeros(length(window), size(data,1)) * NaN;
+tau   = NaN(length(window),1);
+msd   = NaN(length(window),1);
+count = NaN(length(window),1);
+
+% preinitialize all output variables to maintain sizein == sizeout
+% r2out = zeros(length(window), size(data,1)) * NaN;
 tau = NaN * zeros(length(window),1);
 msd = tau;
 
@@ -62,17 +68,29 @@ msd = tau;
         
         if k == 1
             r2 = r.^2;
+            n = size(B,1);
         elseif k > 1
             r2 = r2 + r.^2;
+            n = n + size(B,1);
         end
         
       end
       
+
+        tau(w, :)   = mywin(w) * mean(diff(t));        
+        msd(w, :)   = mean(r2);
+        count(w, :) = n;        
+        r2out(w,1:length(r2)) = r2;
         tau(w, :) = mywin(w) * mean(diff(t));
         msd(w, :) = mean(r2);
 %         r2out(w,1:length(r2)) = r2;
     end
 
+    varargout{1} = tau;
+    varargout{2} = msd;
+    varargout{3} = count;
+    varargout{4} = r2out;
+    
     varargout{1} = tau;
     varargout{2} = msd;
 %     varargout{3} = r2out;
