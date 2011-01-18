@@ -28,7 +28,8 @@ function v = dmbr_compute_compliance(rheo_table, params)
     
     % compute the x and y compliances and plant into output data table.
     rheo_table(:,J) = 6 * pi * a * sqrt(x.^2 + y.^2) ./ F;
-
+    %rheo_table(:,J) = 2 * pi * a * (4/9) * sqrt(x.^2 + y.^2) ./ F;
+    
     % adjust the zero voltage values and plant into output data table.  If 
     % there is no data during the zero voltage region, i.e. all elements of
     % idx1 are zero, then set the recovery compliance to NaN.
