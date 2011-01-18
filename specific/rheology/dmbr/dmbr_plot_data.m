@@ -284,12 +284,8 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
             
         case 'storage and loss moduli'
             
-            %% These two lines are variable, user defined by compliance data
-        J0=j(1);
-        eta=.721;   
-        %%
     
-        GData=dmbr_direct_moduli(t,j,J0,eta,1000,'n');
+        GData=dmbr_direct_moduli(t,j,1000,'n');
             % Plot the moduli    
         subplot(1,1,1);
         loglog(GData(:,1),GData(:,2),'b.-');

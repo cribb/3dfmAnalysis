@@ -1,7 +1,10 @@
+2011-01-18 Thomas Sayre-McCord <thomassm@email.unc.edu>
+	* dmbr_compute_compliance: added a method of computing compliance that models a bead of radius a half submerged in the cell. (Currently commented out in favor of old method)
+
 2010-11-04 Thomas Sayre-McCord <thomassm@email.unc.edu>
-    * dmbr_direct_moduli: added. computes storage and loss moduli from compliance data, same as direct_moduli
-    * dmbr_analysis_gui: added 'storage and loss moduli' to plotting browser drop down menu
-    * dmbr_plot_data: added 'storage and loss moduli' as a case, uses dmbr_direct_moduli to compute starge and loss moduli, then plots them.
+    	* dmbr_direct_moduli: added. computes storage and loss moduli from compliance data, same as direct_moduli
+    	* dmbr_analysis_gui: added 'storage and loss moduli' to plotting browser drop down menu
+    	* dmbr_plot_data: added 'storage and loss moduli' as a case, uses dmbr_direct_moduli to compute starge and loss moduli, then plots them.
 
 2009-06-16 Stephen Norris <srnorris@email.unc.edu>
 	* dmbr_run.m: fixed error for mean curve plotting.
