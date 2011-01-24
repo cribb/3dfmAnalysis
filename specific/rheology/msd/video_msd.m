@@ -125,6 +125,7 @@ vmsd.tau = tau;
 % vmsd.r2 = myr2;
 vmsd.msd = mymsd;
 vmsd.n = sample_count;
+vmsd.ns = counts;
 
 % creation of the plot MSD vs. tau
 if (nargin < 5) || isempty(make_plot) || strncmp(make_plot,'y',1)  
