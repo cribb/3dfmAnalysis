@@ -1,3 +1,9 @@
+2011-01-27   Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_video_diff_expt.m:  added.  simulates a time series of beads diffusing in a Newtonian fluid.  Respects size of beginning frame in that the user defines a range of pixels.  Also allows for a constant drift in x,y.
+	* sim_video_diff_solid_expt.m: added. same except for Boltzmann solid.
+	* example_video_diff_simulation.m: added. example/test run for the diffusion simulations.
+	* sim_boltzmann_solid.m:  updated documentation.
+
 2011-01-13   Jeremy Cribb <jcribb@email.unc.edu>
 	* sim_boltzmann_solid.m: added. simulates a bead "diffusing" in a solid material with defined modulus.
 

@@ -1,18 +1,16 @@
 function x = sim_boltzmann_solid(modulus, bead_radius, sampling_rate, duration, temp, dim)
 % 3DFM function  
 % Rheology 
-% last modified 10/10/2010 (jcribb)
+% last modified 01/27/2011 (jcribb)
 %  
-% This function outputs the stochastic displacement over time for a bead in
-% a Newtonian fluid for a temperature in Kelvin. The viscosity of the fluid, 
+% This function outputs the stochastic displacements over time for a bead in
+% a boltzmann solid for a temperature in Kelvin. The modulus of the fluid, 
 % the radius of the bead, the sampling_rate, and the duration of the data 
-% collection are all needed for the approximation.  To get a theoretical power 
-% spectrum for the same fluid (where sampling_rate -> inf and duration -> inf) look
-% at sim_newt_ps.
+% collection are all needed for the approximation.  
 %  
-%  [displacement] = sim_newt_fluid(viscosity, bead_radius, sampling_rate, duration, temp, dim);  
+%  [displacement] = sim_boltzmann_solid(modulus, bead_radius, sampling_rate, duration, temp, dim)  
 %   
-%  where "viscosity" is in [Pa sec] 
+%  where "modulus" is in [Pa] 
 %        "bead_radius" is in [m] 
 %		 "sampling_rate" is in [Hz] 
 %        "duration" is in [s]
