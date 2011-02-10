@@ -12,7 +12,10 @@ function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, winedg
 % [vmsd] = video_msd(files, window, frame_rate, calib_um, make_plot)
 %
 % where "files" is the filename containing the video tracking data (wildcards ok).
-%       "window" is a vector containing window sizes of tau when computing MSD. 
+%       "window" is a scalar denoting the number of window sizes desired from 
+%                the minimum and maximum available (with repeats filtered out), 
+%                or is a vector containing the exact window sizes of tau when 
+%                computing the MSD. 
 %       "frame_rate" is the video tracking frame rate in [frames / second].
 %       "calib_um" is the microns per pixel conversion unit
 %       "make_plot" gives the option of producing a plot of MSD versus tau.
@@ -21,7 +24,7 @@ function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, winedg
 %          directory and use default window sizes.
 %        - Use empty matrices to substitute default values.
 %        - default files = '*.mat'
-%        - default window = [1 2 5 10 20 50 100 200 500 1000]
+%        - default window = 50
 %        - default calib_um = 0.152 microns/pixel
 %        - default make_plot = yes
 %
@@ -33,7 +36,7 @@ if (nargin < 1) || isempty(files)
 end;
 
 if (nargin < 2) || isempty(window)  
-    window = [1 2 5 10 20 50 100 200 500 1000 1001];  
+    window = 50;  
 end;
 
 if (nargin < 3) || isempty(frame_rate)  
@@ -59,6 +62,11 @@ if ~isnumeric(files)
     v = load_video_tracking(files, frame_rate, 'pixels', 1, 'relative', 'yes', 'table');
 else
     v = files;
+end
+
+% handle windows vector, if a scalar, create evenly spaced windows
+if length(window) == 1
+    window = unique(floor(logspace(0,round(log10(max(v(:,FRAME)))), window)));
 end
 
 % convert to meters

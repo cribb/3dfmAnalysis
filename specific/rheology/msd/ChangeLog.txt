@@ -1,3 +1,6 @@
+2011-02-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* video_msd.m:  modified the scheme for determining tau windows.  The window input parameter, when a scalar denotes the number of window sizes desired from the minimum and maximum available (with repeats filtered out).  When 'window' is a vector, the old default behavior takes over, where the vector contains the exact window sizes of tau when computing the MSD. 
+
 2011-01.13  Jeremy Cribb <jcribb@email.unc.edu>
 	* getMSDslope.m: added.  souped up way of computing alpha values that uses brian eastwoods edge_detector_1d code.  Originally Ricky Spero's code, I've tweaked it and added it here. Computing the GSER (ve.m) now uses this method.
 
