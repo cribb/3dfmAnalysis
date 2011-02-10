@@ -1,4 +1,9 @@
 2010-02-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.fig:  added in text box where user enters the number of time scales, ntau, for MSD/GSER plots. 
+	* evt_GUI.m: uses ntau to automatically generate an MSD or GSER plot with evenly spaced time scales that extend from the minimum tau to maximum tau.  The number 'ntau' is not strictly obeyed, i.e. repeated taus are filtered out.
+	* TODO: updated.
+
+2010-02-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m: the windows for MSD and GSER plots are now equally spaced for the loglog representation.
 
 2010-09-30  Jeremy Cribb <jcribb@email.unc.edu>

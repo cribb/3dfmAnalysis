@@ -29,7 +29,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 29-Oct-2010 15:34:43
+% Last Modified by GUIDE v2.5 10-Feb-2011 11:41:25
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -940,16 +940,18 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
 
     switch handles.AUXtype
         case 'OFF'
-            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_relative       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin     ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean     ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_bead_diameter   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            
         case 'radial vector'
             set(handles.radio_relative    ,  'Visible', 'on', 'Enable', 'on');
             set(handles.radio_arb_origin  ,  'Visible', 'on', 'Enable', 'on');
@@ -958,9 +960,11 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+
         case 'PSD'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -969,9 +973,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
         case 'Integrated Disp'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -980,9 +985,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
 %         case 'displacement hist'
 %             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
 %             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -999,66 +1005,72 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_msdall   ,  'Visible', 'on', 'Enable', 'on');
-            set(handles.pushbutton_msdselect,  'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_numtaus         ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.edit_numtaus         ,  'Visible', 'on', 'Enable', 'on');
        case 'MSD histogram'
             set(handles.radio_relative       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall      ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
        case 'temporal MSD'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
        case 'GSER'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_eta      ,  'Visible', 'on', 'Enable', 'on');
             set(handles.edit_bead_diameter_um,  'Visible', 'on', 'Enable', 'on');
             set(handles.text_bead_diameter,  'Visible', 'on', 'Enable', 'on');
+            set(handles.text_numtaus         ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.edit_numtaus         ,  'Visible', 'on', 'Enable', 'on');
         case 'pole locator'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
         case 'tracker avail'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.pushbutton_msdselect,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
     end
     
     plot_data(hObject, eventdata, handles);
@@ -1215,9 +1227,9 @@ function plot_data(hObject, eventdata, handles)
             frame_rate = str2num(get(handles.edit_frame_rate, 'String'));
             calib_um   = str2num(get(handles.edit_calib_um, 'String'));
             bead_diameter_um = str2num(get(handles.edit_bead_diameter_um, 'String'));
-            %win = [1 2 5 8 10 20 50 80 100 200 500 800 1000 2000 5000 8000 10000];
-            %win = [1:2:30 35:5:100 200:30:1000 2000:50:10000];
-            win = unique(floor(logspace(0,5,50)));
+            numtaus = round(str2num(get(handles.edit_numtaus, 'String')));
+            win = unique(floor(logspace(0,log10(max(frame)),numtaus)));
+%             win = unique(floor(logspace(0,5,50)));
             mymsd = video_msd(data, win, frame_rate, calib_um, 'n');            
             myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n', 1);
             
@@ -1666,58 +1678,37 @@ function edit_xyCrop_CreateFcn(hObject, eventdata, handles)
     end
 
 
-% --- Executes on button press in pushbutton_msdselect.
-function pushbutton_msdselect_Callback(hObject, eventdata, handles)
-    plot_data(hObject, eventdata, handles);
-
-
 % --- Executes on button press in checkbox_neutoffsets.
 function checkbox_neutoffsets_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_neutoffsets (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox_neutoffsets
     plot_data(hObject, eventdata, handles);
 
 
 % --- Executes on button press in checkbox_overlayxy.
 function checkbox_overlayxy_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_overlayxy (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox_overlayxy
     plot_data(hObject, eventdata, handles);
 
 
 % --- Executes on button press in checkbox_LumiCrop.
 function checkbox_LumiCrop_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_LumiCrop (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox_LumiCrop
-
 
 
 function edit_LumiCrop_Callback(hObject, eventdata, handles)
-% hObject    handle to edit_LumiCrop (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit_LumiCrop as text
-%        str2double(get(hObject,'String')) returns contents of edit_LumiCrop as a double
 
 
 % --- Executes during object creation, after setting all properties.
 function edit_LumiCrop_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_LumiCrop (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+function edit_numtaus_Callback(hObject, eventdata, handles)
+    handles.recomputeMSD = 1;    
+    plot_data(hObject, eventdata, handles);    
+    guidata(hObject, handles);
+    
+    
+% --- Executes during object creation, after setting all properties.
+function edit_numtaus_CreateFcn(hObject, eventdata, handles)
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
