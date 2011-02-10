@@ -1,3 +1,6 @@
+2010-02-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m: the windows for MSD and GSER plots are now equally spaced for the loglog representation.
+
 2010-09-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.m: 
 		- MIPs as 'tif' files are supported.  
