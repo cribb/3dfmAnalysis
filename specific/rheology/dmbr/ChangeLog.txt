@@ -1,5 +1,8 @@
+2011-10-25 Thomas Sayre-McCord <thomassm@email.unc.edu>
+	* dmbr_fit.m: added power law fitting to fit options
+
 2011-01-18 Thomas Sayre-McCord <thomassm@email.unc.edu>
-	* dmbr_compute_compliance: added a method of computing compliance that models a bead of radius a half submerged in the cell. (Currently commented out in favor of old method)
+	* dmbr_compute_compliance: added a method of computing compliance that models a bead of radius a as half submerged in the cell. (Currently commented out in favor of old method)
 
 2010-11-04 Thomas Sayre-McCord <thomassm@email.unc.edu>
     	* dmbr_direct_moduli: added. computes storage and loss moduli from compliance data, same as direct_moduli
