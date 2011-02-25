@@ -1,6 +1,6 @@
 2011-10-25 Thomas Sayre-McCord <thomassm@email.unc.edu>
 	* dmbr_fit.m: added power law fitting to fit options
-    * dmbr_analysis_gui.fig: added "Power Law" as an option in fitting popdown menu
+    	* dmbr_analysis_gui.fig: added "Power Law" as an option in fitting popdown menu
 
 2011-01-18 Thomas Sayre-McCord <thomassm@email.unc.edu>
 	* dmbr_compute_compliance: added a method of computing compliance that models a bead of radius a as half submerged in the cell. (Currently commented out in favor of old method)
