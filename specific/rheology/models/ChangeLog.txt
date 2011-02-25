@@ -1,3 +1,6 @@
+2011-02-25 Thomas Sayre-McCord <thomassm@email.unc.edu>
+	* power_law_fitting.m: added. Fits creep data to a power law using linear regression of logarithmic values
+
 2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* carreau_model_fit.m:  tweaked parameters for fit.
 	* new_carreau_fit.m:  added.  uses matlab's new fitting code.  Intend to retrofit other fitting functions and will use this as the template.
