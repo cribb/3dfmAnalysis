@@ -44,15 +44,7 @@ function [G, eta, ct_fit, R_square] = dmbr_fit(rheo_table, fit_type)
             case 'Ke model #1'
                 [G_ke, eta_ke] = ke_fun_fit(t, x, f);
             case 'Power Law'
-                p = polyfit(log(t),log(ct),1);
-                r = corrcoef(log(t),log(ct));
-                R_square = r(2)^2;
-                Azero = exp(p(2));
-                alpha = p(1);
-                Gzero = (2*pi).^alpha./(Azero.*gamma(1+alpha));
-                ct_fit = Azero.*t.^alpha;
-                G = Gzero;
-                eta = NaN;
+                [A0,alpha,G0,R_square] = power_law_fitting(t,ct,table(:,FORCE));
                 
                 
             otherwise
