@@ -12,9 +12,15 @@ end;
     channels = [0:length(signal)-1];
     
     if length(signal) < 1
-        signal = zeros(1, nDACout);
+        signal = zeros(6, nDACout);
 		channels = [0:nDACout-1]';
-	end
+    end
+    
+    if size(signal,1) == 1
+        % PCI-6713 wants at least 6 signal values for "putdata" rather we
+        % should use "putvalue"
+        signal = repmat(signal, 6, 1);
+    end
 
     DACoperator(signal, Nrepeat, DAQid, channels, DAQ_sampling_rate, Vrange);
 

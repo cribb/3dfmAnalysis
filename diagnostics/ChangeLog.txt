@@ -1,3 +1,7 @@
+2011-03-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* DACoperator.m: updated code for Matlab 2010b.  Not certain this will work with earlier versions.
+	* zerodaq.m: same.
+
 2008-03-07  Kris Ford <krisford@email.unc.edu>
 	* ADCnoisechar.m: modified documentation to better match Mathworks convention
 	* analyze_staircase.m: same

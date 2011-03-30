@@ -150,7 +150,7 @@ end
 daqreset; 
 
 % setup the output
-AO = analogoutput('nidaq', AOid);
+AO = analogoutput('nidaq', ['Dev' num2str(AOid)]);
 Ochan = addchannel(AO, channels); 
 set(Ochan, 'OutputRange', Vrange);  
 set(AO, 'SampleRate', srate);
