@@ -1,0 +1,11 @@
+2011-04-13  Jeremy Cribb <jcribb@email.unc.edu>
+
+	* pan_mucus_rheo_run.m: added.  moved from 3dfmAnalysis/specific/rheology.  This is panoptes rheology analysis code in its early stages.  specific for mucus samples.
+
+
+2011-04-13  Jeremy Cribb <jcribb@email.unc.edu>
+
+	* Initial Version of 'Panoptes' subfolder.
+
+
+
