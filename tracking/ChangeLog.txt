@@ -1,3 +1,6 @@
+2011-04-14  Jeremy Cribb <jcribb@email.unc.edu>
+	* SetFPSandMinFrames.m:  added.  Ricky's function for automatically setting the frames per second and tracker filtering for video tracking datasets.
+
 2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: corrected typo in documentation.
 
