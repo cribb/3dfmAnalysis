@@ -16,8 +16,8 @@ if nargin < 3 || isempty(minFrames)
     minFrames = 30;
 end
 
-if nargin < 2 || isempty(framerate)
-    framerate = 54;
+if nargin < 2 || isempty(frameRate)
+    frameRate = 54;
 end
 
 if nargin < 1 || isempty(filemask)
@@ -30,7 +30,7 @@ calibum = 0.152;
 plotMean = 1; %Set to 1 to plot means; set to 0 to plot each tracker
 
 % attach timescales and handle filtering 
-files = SetFPSandMinFrames(filemask, frameRate, minFrames, minPixels, tcrop, xycrop)
+files = SetFPSandMinFrames(filemask, frameRate, minFrames, minPixels, tcrop, xycrop);
 
 %% Find all the .vrpn files and extract well number from filename
 % files = dir('*vrpn.evt.mat');
