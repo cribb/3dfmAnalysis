@@ -1,3 +1,6 @@
+2011-04-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* CellProcessingScript.m:  Adds both plots to the output and saves the figures as Matlab .fig files as well as .png files.
+
 2011-04-14  Jeremy Cribb <jcribb@email.unc.edu>
 	* CellProcessingScript.m:  added.  Processes Cell Diffusion experiments for Panoptes.
 

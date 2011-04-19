@@ -27,7 +27,7 @@ end
 window =  [1:10 20:20:100 100:30:250 300];
 calibum = 0.152;
 
-plotMean = 1; %Set to 1 to plot means; set to 0 to plot each tracker
+plotMean = 0; %Set to 1 to plot means; set to 0 to plot each tracker
 
 % attach timescales and handle filtering 
 files = SetFPSandMinFrames(filemask, frameRate, minFrames, minPixels, tcrop, xycrop);
@@ -77,15 +77,31 @@ for i = 1:length(wellList)
     % Get standard error
     [numTau, numTrackers] = size(msd);
     msdErr  = nanstd(msd,0,2) ./ sqrt(numTrackers);
-    if (plotMean)
-        errorbar(tau,msdMean,msdErr, 'Color', colors(i,:));
-    elseif(~plotMean)
-        plot(tau,msd, 'Color', colors(i,:));
-    end
+
+    %if (plotMean)
+    h1 = figure;
+    errorbar(tau,msdMean,msdErr, 'Color', colors(i,:));
+    set(gca, 'XScale', 'Log', 'YScale', 'Log');
+    xlabel('\tau (s)');
+    ylabel('<r^2> (\mum^2)')
+    box on
+    legend(num2str(wellList), 'Location', 'NorthWest');
+    hold off
+
+    %elseif(~plotMean)
+    h2 = figure;
+    plot(tau,msd, 'Color', colors(i,:));
+    set(gca, 'XScale', 'Log', 'YScale', 'Log');
+    xlabel('\tau (s)');
+    ylabel('<r^2> (\mum^2)')
+    box on
+    legend(num2str(wellList), 'Location', 'NorthWest');
+    hold off
+    %end
+    
+    saveas(h1,  ['Well_' num2str(wellList(i)) '_mean.fig'], 'fig');
+    saveas(h1,  ['Well_' num2str(wellList(i)) '_mean.png'], 'png');    
+    saveas(h2,  ['Well_' num2str(wellList(i)) '_indiv.fig'], 'fig');
+    saveas(h2,  ['Well_' num2str(wellList(i)) '_indiv.png'], 'png');
+
 end
-set(gca, 'XScale', 'Log', 'YScale', 'Log');
-xlabel('\tau (s)');
-ylabel('<r^2> (\mum^2)')
-box on
-legend(num2str(wellList), 'Location', 'NorthWest');
-hold off
