@@ -78,6 +78,11 @@ elseif strcmpi(optstring, 'ame')
     hold off;
 end
 
+ch = get(gca, 'Children');
+for k = 1:length(ch)
+    set(ch(k), 'DisplayName', num2str(length(ch)-k));
+end
+
 xlabel('log_{10}(\tau) [s]');
 ylabel('log_{10}(MSD) [m^2]');
 grid on;

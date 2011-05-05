@@ -1,3 +1,6 @@
+2011-05-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* plot_msd.m:  added trackerID values to 'DisplayName' for each MSD curve.  Identifies each MSD curve for better traceback along analysis pipeline.
+
 2011-02-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* video_msd.m:  modified the scheme for determining tau windows.  The window input parameter, when a scalar denotes the number of window sizes desired from the minimum and maximum available (with repeats filtered out).  When 'window' is a vector, the old default behavior takes over, where the vector contains the exact window sizes of tau when computing the MSD. 
 
