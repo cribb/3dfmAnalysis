@@ -267,6 +267,8 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     % if the background MIP image exists, attach it to handles structure
     if exist('im', 'var')
         handles.im = im;
+    else
+        handles.im = [];
     end
     
     if exist('MIPexists', 'var') && get(handles.checkbox_LumiCrop, 'Value')
@@ -1221,7 +1223,10 @@ function plot_data(hObject, eventdata, handles)
     AUXfig = handles.AUXfig;         
     AUXtype = handles.AUXtype;
     
-    if strcmp(AUXtype, 'MSD') || strcmp(AUXtype, 'GSER') || strcmp(AUXtype, 'MSD histogram')
+    if strcmp(AUXtype, 'MSD')  || ...
+       strcmp(AUXtype, 'GSER') || ...
+       strcmp(AUXtype, 'Diffusivity') || ...
+       strcmp(AUXtype, 'MSD histogram')
         if handles.recomputeMSD % && get(handles.checkbox_msdmean, 'Value')
             data = handles.table;
             frame_rate = str2num(get(handles.edit_frame_rate, 'String'));
@@ -1232,7 +1237,7 @@ function plot_data(hObject, eventdata, handles)
 %             win = unique(floor(logspace(0,5,50)));
             mymsd = video_msd(data, win, frame_rate, calib_um, 'n');            
             myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n', 1);
-            
+            myD = mymsd.msd ./ (4 .* mymsd.tau);
             handles.mymsd = mymsd;
             handles.myve  = myve;
             handles.recomputeMSD = 0;
@@ -1359,6 +1364,19 @@ function plot_data(hObject, eventdata, handles)
             [tau, m, time] = msdt(t(k), [x(k) y(k)], [], []);
             
             surf(m);
+            
+        case 'Diffusivity'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            
+            plot(log10(mymsd.tau), log10(myD), 'b');
+            hold on;
+                plot(mean(log10(mymsd.tau)), mean(log10(myD)), 'k');
+            hold off;
+            xlabel('\tau [s]');
+            ylabel('Diffusivity [m^2/s]');
+            grid on;
+            pretty_plot;
             
         case 'GSER'
             figure(handles.AUXfig);

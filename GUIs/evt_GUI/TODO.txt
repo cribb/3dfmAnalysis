@@ -10,3 +10,4 @@
 - config buttons for plot_type
 - status line
 - extract "pruning" functions from evt_gui... extract "pruning" functions from load_video_tracking... place into "prune_video_tracking" function.
+- add max pixel range filter
