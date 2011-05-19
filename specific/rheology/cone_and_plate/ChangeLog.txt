@@ -1,3 +1,11 @@
+2011-05-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* get_TA_col: added.  function that identifies the column ID in the TA datatable.
+	* plot_cap_overshoot.m: added.  plots overshoot experimental data for CAP.
+	* tareport.m: modified to use get_TA_col instead of subfunction.
+	* taplot.m: same.
+	* ta2mat.m: add exception handling for text to structure conversion.
+	* plot_cap_peakhold.m: corrected label for x-axis from 'strain' to 'time'
+	
 2010-11-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* plot_cap_peakhold.m: added.  handles plots for the "peak hold" test type.
         * taplot.m: added the "peak hold" test type.

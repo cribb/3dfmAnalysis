@@ -38,64 +38,63 @@ for k = 1 : length(fn)
         exptype = lower(st.metadata.step_name);
         
         if findstr(exptype, 'stress sweep')
-            stress = st.table(:,getcol(st, 'stress'));
-            gp = st.table(:,getcol(st, 'G'''));
-            gpp= st.table(:,getcol(st, 'G'''''));
+            stress = st.table(:,get_TA_col(st, 'stress', 'Pa'));
+            gp = st.table(:,get_TA_col(st, 'G''', 'Pa'));
+            gpp= st.table(:,get_TA_col(st, 'G''''', 'Pa'));
             figh(count) = plot_cap_ssweep(stress, [gp gpp], [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'ssweep'));
         end
         
         if findstr(exptype, 'strain sweep')
-            strain = st.table(:,getcol(st, 'strain'));
-            gp = st.table(:,getcol(st, 'G'''));
-            gpp= st.table(:,getcol(st, 'G'''''));
+            strain = st.table(:,get_TA_col(st, 'strain', ''));
+            gp = st.table(:,get_TA_col(st, 'G''', 'Pa'));
+            gpp= st.table(:,get_TA_col(st, 'G''''', 'Pa'));
             figh(count) = plot_cap_nsweep(strain, [gp gpp], [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'nsweep'));
         end
         
         if findstr(exptype, 'frequency sweep')
-            freq = st.table(:,getcol(st, 'freq'));
-            gp = st.table(:,getcol(st, 'G'''));
-            gpp= st.table(:,getcol(st, 'G'''''));
-            delta = st.table(:,getcol(st, 'delta'));            
-            figh(count) = plot_cap_fsweep(freq, [gp gpp], [], mytitle, 'ww');
+            freq = st.table(:,get_TA_col(st, 'frequency', 'Hz'));
+            gp = st.table(:,get_TA_col(st, 'G''', 'Pa'));
+            gpp= st.table(:,get_TA_col(st, 'G''''', 'Pa'));
+            delta = st.table(:,get_TA_col(st, 'delta', ''));            
+            figh(count) = plot_cap_fsweep(freq, [gp gpp], [], mytitle, 'ff');
             set(figh(count), 'Name', figname(fn{k}, 'fsweep'));
         end
 
         if findstr(exptype, 'flow')
-            shear_rate = st.table(:,getcol(st, 'rate'));
-            visc = st.table(:,getcol(st, 'visc'));            
+            shear_rate = st.table(:,get_TA_col(st, 'rate', '1/s'));
+            visc = st.table(:,get_TA_col(st, 'visc', 'Pa.s'));            
             figh(count) = plot_cap_flow(shear_rate, visc, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'flow'));
         end
 
         if findstr(exptype, 'creep')
-            t = st.table(:,getcol(st, 'time'));
-            strain = st.table(:,getcol(st, 'strain'));
-            stress = st.table(:,getcol(st, 'stress'));
+            t = st.table(:,get_TA_col(st, 'time', 's'));
+            strain = st.table(:,get_TA_col(st, 'strain', ''));
+            stress = st.table(:,get_TA_col(st, 'stress', 'Pa'));
             figh(count) = plot_cap_creep(t, strain, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'creep'));
         end
 
         if findstr(exptype, 'temperature')
-            temp = st.table(:,getcol(st, 'temp'));
-            visc = st.table(:,getcol(st, 'viscosity'));
-            srate = st.table(:,getcol(st, 'shear rate'));
+            temp = st.table(:,get_TA_col(st, 'temp', '°C'));
+            visc = st.table(:,get_TA_col(st, 'viscosity', 'Pa.s'));
+            srate = st.table(:,get_TA_col(st, 'shear rate', '1/s'));
             figh(count) = plot_cap_temp(temp, visc, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'temp'));
         end
         
         if findstr(exptype, 'peak hold')
-            time = st.table(:,getcol(st, 'time'));
-            visc = st.table(:,getcol(st, 'viscosity'));            
-            strain = st.table(:,getcol(st, 'strain'));            
-
-            figh(count) = plot_cap_peakhold(strain, visc, [], mytitle);
+            time = st.table(:,get_TA_col(st, 'time', 's'));
+            visc = st.table(:,get_TA_col(st, 'viscosity', 'Pa.s'));            
+            strain = st.table(:,get_TA_col(st, 'strain', ''));            
+            strainrate = strrep(st.metadata.controlled_variable, 'shear rate ', '');
+            figh(count) = plot_cap_peakhold(time, visc, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'peakstrain'));
-
-%             figh(count) = plot_cap_peakhold(time, visc, [], mytitle);
-%             set(figh(count), 'Name', figname(fn{k}, 'peakhold'));
-        end                        
+            ser = get(gca, 'Children');
+            set(ser, 'DisplayName', strainrate);
+        end           
             
         if isempty(findstr(exptype, 'stress sweep')) && ...
            isempty(findstr(exptype, 'strain sweep')) && ...
@@ -103,8 +102,7 @@ for k = 1 : length(fn)
            isempty(findstr(exptype, 'flow')) && ...
            isempty(findstr(exptype, 'creep')) && ...
            isempty(findstr(exptype, 'temperature')) && ...
-           isempty(findstr(exptype, 'peak hold'))
-           
+           isempty(findstr(exptype, 'peak hold'))           
            figh(count) = NaN;
         end
 
@@ -112,6 +110,10 @@ for k = 1 : length(fn)
     end
         
 end
+
+% if ~exist('exptype')
+%    figh(count) = NaN;
+% end
 
 return;
 
@@ -128,19 +130,4 @@ function name = figname(fn, oldname)
     name = [oldname testnum];
 
     return;
-    
-function v = getcol(s, str)
-
-    dlim = sprintf('\t'); %the 'tab' is the delimiter here.
-    th = s.table_headers;
-
-    p = regexp(th, str);
-    q = regexp(th, dlim);
-
-    if ~isempty(p)
-        v = find(p(1)<q,1);
-    else
-        v = [];
-    end
-
-    return;
+        

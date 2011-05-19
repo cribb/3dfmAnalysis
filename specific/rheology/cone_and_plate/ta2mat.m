@@ -192,7 +192,12 @@ for f = 1:numfiles
         p = strmatch(data_section_label{k}, slist, 'exact');
         fprintf('%s is protocol section #%i in the experimental data.\n', slist{p}, p);
 
-        myexp = getfield(exps, mlist{p}); %#ok<GFLD>
+        try
+            myexp = getfield(exps, mlist{p}); %#ok<GFLD>
+        catch
+            logentry('Data section label was rewritten.  Do not know how to handle it.  Breaking out.');
+            break;
+        end
 
         if isfield(myexp, 'table')
             logentry('Avoiding overwrite to datatable.  Breaking out.');
