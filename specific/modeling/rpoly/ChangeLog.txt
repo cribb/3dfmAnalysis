@@ -1,3 +1,6 @@
+2011-05-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* RP_plot.m: forced orientation of inputs to column vectors to avoid size mismatch.
+
 2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* RP_plot.m: tweaked plotting parameters.
 	

@@ -14,9 +14,9 @@ function out = RP_plot(sim)
 %
 
 % extract vectors from sim structure
-time = sim.time;
-pos = sim.pos;
-vel = sim.vel;
+time = sim.time(:);
+pos = sim.pos(:);
+vel = sim.vel(:);
 
 len = [length(time), length(pos), length(vel)];
 minlen = min(len);
