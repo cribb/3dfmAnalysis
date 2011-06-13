@@ -1,6 +1,7 @@
 2011-06-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.fig:  added msd2pt and GSER2pt figures.
 	* evt_GUI.m: same.
+	* evt_run_microrheology2P.m:  added.  wraps external 2pt microrheology code so that evt_GUI can use it.
 
 2011-05-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_gui.fig:  added Diffusivity as a option on the AUXfig.
