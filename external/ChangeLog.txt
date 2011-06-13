@@ -1,3 +1,6 @@
+2011-06-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* twopoint:  added.  author-sanctioned two-point microrheology code from Maria Kilfoil's web page that implements Crocker's 2pt algorithm.
+
 2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* plot2svg/plot2svg.m: quieted the annoying announcement string that printed everytime this function ran.
 	* plot2svg/plot2svg_2d.m: same.
