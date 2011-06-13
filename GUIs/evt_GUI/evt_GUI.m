@@ -29,7 +29,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 10-Feb-2011 11:41:25
+% Last Modified by GUIDE v2.5 14-Apr-2011 19:26:22
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -53,6 +53,7 @@
 
 function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
+    
 	% Choose default command line output for evt_GUI
 	handles.output = hObject;
 	
@@ -66,6 +67,7 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % --- Outputs from this function are returned to the command line.
 function varargout = evt_GUI_OutputFcn(hObject, eventdata, handles)
 	
+
 	% Get default command line output from handles structure
 	varargout{1} = handles.output;
 
@@ -953,6 +955,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_bead_diameter   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
             
         case 'radial vector'
             set(handles.radio_relative    ,  'Visible', 'on', 'Enable', 'on');
@@ -966,6 +970,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
 
         case 'PSD'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
@@ -979,6 +985,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
         case 'Integrated Disp'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -991,6 +999,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
 %         case 'displacement hist'
 %             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
 %             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1013,6 +1023,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'on', 'Enable', 'on');
             set(handles.edit_numtaus         ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
        case 'MSD histogram'
             set(handles.radio_relative       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin     ,  'Visible', 'off', 'Enable', 'off');
@@ -1025,6 +1037,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
        case 'temporal MSD'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1037,6 +1051,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
        case 'GSER'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1049,6 +1065,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_bead_diameter,  'Visible', 'on', 'Enable', 'on');
             set(handles.text_numtaus         ,  'Visible', 'on', 'Enable', 'on');
             set(handles.edit_numtaus         ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
         case 'pole locator'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1061,6 +1079,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
         case 'tracker avail'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1073,6 +1093,36 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+        case '2pt MSD'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_bead_diameter_um,  'Visible', 'on', 'Enable', 'on');
+            set(handles.text_bead_diameter,  'Visible', 'on', 'Enable', 'on');
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'on', 'Enable', 'on');
+            set(handles.text_temp           , 'Visible', 'on', 'Enable', 'on');
+        case '2pt GSER'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G       ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.checkbox_eta      ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.edit_bead_diameter_um,  'Visible', 'on', 'Enable', 'on');
+            set(handles.text_bead_diameter,  'Visible', 'on', 'Enable', 'on');
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'on', 'Enable', 'on');
+            set(handles.text_temp           , 'Visible', 'on', 'Enable', 'on');
     end
     
     plot_data(hObject, eventdata, handles);
@@ -1135,6 +1185,7 @@ end
 
 function plot_data(hObject, eventdata, handles)
     video_tracking_constants;
+    COMPUTED = 0;
 
     if get(handles.radio_pixels, 'Value');
         calib_um = 1;
@@ -1414,12 +1465,98 @@ function plot_data(hObject, eventdata, handles)
             set(handles.AUXfig, 'DoubleBuffer', 'on');
             set(handles.AUXfig, 'BackingStore', 'off');    
             drawnow;
+            
+        case '2pt MSD'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            
+            if COMPUTED == 0
+                MICRONS = get(handles.radio_microns, 'Value');
+                if MICRONS == 0
+                    calib = get(handles.edit_calib_um, 'String');
+                    calib = str2double(calib);
+                    x = x*calib;
+                    y = y*calib;
+                end
+                homefolder = 'D:\3dfmAnalysis\external\twopoint\';
+                 filename = get(handles.edit_outfile, 'String');
+                slash = strfind(filename,'\');
+                basepath = filename(1:slash(end));
+                fps = get(handles.edit_frame_rate, 'String');
+                fps = str2double(fps);
+                timestep = 1/fps;
+                beaddiam = get(handles.edit_bead_diameter_um, 'String');
+                beaddiam = str2double(beaddiam);
+                beadradius = beaddiam/2;
+                imagediag = 90;
+                temp = get(handles.edit_temp, 'String');
+                temp = str2double(temp);
+                [omega,Gp,Gpp,MSD] = evt_run_microrheology2P(homefolder,basepath,beadID,frame,x,y,timestep,beadradius,imagediag,temp);
+                COMPUTED = 1;
+            end
+            
+            plot_msd_2pt(MSD,AUXfig,'m');
+            
+        case '2pt GSER'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            
+            if COMPUTED == 0
+                MICRONS = get(handles.radio_microns, 'Value');
+                if MICRONS == 0
+                    calib = get(handles.edit_calib_um, 'String');
+                    calib = str2double(calib);
+                    x = x*calib;
+                    y = y*calib;
+                end
+                homefolder = 'D:\3dfmAnalysis\GUIs\evt_GUI\microrheology\';
+                filename = get(handles.edit_outfile, 'String');
+                slash = strfind(filename,'\');
+                basepath = filename(1:slash(end));
+                fps = get(handles.edit_frame_rate, 'String');
+                fps = str2double(fps);
+                timestep = 1/fps;
+                beaddiam = get(handles.edit_bead_diameter_um, 'String');
+                beaddiam = str2double(beaddiam);
+                beadradius = beaddiam/2;
+                imagediag = 90;
+                temp = get(handles.edit_temp, 'String');
+                temp = str2double(temp);
+                [omega,Gp,Gpp,MSD] = evt_run_microrheology2P(homefolder,basepath,beadID,frame,x,y,timestep,beadradius,imagediag,temp);
+                COMPUTED = 1;
+            end
+            
+            f = omega/(2*pi);
+            np = Gpp./omega;
+            npp = Gp./omega;
+            tau = MSD(:,1,1);
+            
+            myve.w      = omega;
+            myve.f      = f;
+            myve.np     = np;
+            myve.npp    = npp;
+            myve.tau    = tau;
+            myve.gp     = Gp;
+            myve.gpp    = Gpp;
+            
+%             plotG   = get(handles.checkbox_G, 'Value');
+%             ploteta = get(handles.checkbox_eta, 'Value');
+            plotG = 1;
+            ploteta = 1;
+            if (plotG && ploteta)
+                plot_ve_2pt(myve, 'f', AUXfig, 'GgNn');
+            elseif plotG
+                plot_ve_2pt(myve, 'f', AUXfig, 'Gg');
+            elseif ploteta
+                plot_ve_2pt(myve, 'f', AUXfig, 'Nn');
+            end
     end
-       
+ %      hihi;
+ if COMPUTED ~= 1
     refresh(handles.XYfig);
     refresh(handles.XTfig);
     refresh(handles.AUXfig);
-    
+ end
     
 
     
@@ -1730,3 +1867,49 @@ function edit_numtaus_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
+
+
+
+function edit_temp_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_temp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_temp as text
+%        str2double(get(hObject,'String')) returns contents of edit_temp as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_temp_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_temp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_filename_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_filename (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_filename as text
+%        str2double(get(hObject,'String')) returns contents of edit_filename as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_filename_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_filename (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
