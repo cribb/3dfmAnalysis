@@ -1,3 +1,7 @@
+2011-06-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* plot_msd_2pt.m:  added on behalf of Thomas Sayre_McCord.  plots the 2pt MSD as a function of time scale.
+	* plot_ve_2pt.m:  added on behalf of Thomas Sayre_McCord.  plots the 2pt Generalized stokes-einstein relation as a function of frequency.
+
 2011-05-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* plot_msd.m:  added trackerID values to 'DisplayName' for each MSD curve.  Identifies each MSD curve for better traceback along analysis pipeline.
 
