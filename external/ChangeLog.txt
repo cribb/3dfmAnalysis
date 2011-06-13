@@ -1,4 +1,7 @@
 2011-06-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* edge_detector_1d:  added Brian Eastwoods edge_detector_1d code to 3dfmAnalysis for 2 reasons.  One: I need to slightly modify it.  Two:  It will make everything in 3dfmAnalysis work without a separate checkout of edge_detector_1d.
+
+2011-06-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* twopoint:  added.  author-sanctioned two-point microrheology code from Maria Kilfoil's web page that implements Crocker's 2pt algorithm.
 
 2011-01-13  Jeremy Cribb <jcribb@email.unc.edu>

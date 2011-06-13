@@ -1,0 +1,3 @@
+2011-06-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* edge_detector_1d:  added Brian Eastwoods edge_detector_1d code to 3dfmAnalysis.
+
