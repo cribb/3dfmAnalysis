@@ -1,4 +1,6 @@
-2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
+2011-06-28  Robert Judith <rjudith@email.unc.edu>
+	* rcCalc folder.  Added.  Computes radius of curvature.
 
+2004-05-18  Jeremy Cribb <jcribb@email.unc.edu>
 	* Initial Version
-	* 20011-06-28 Added rcCalc
+
