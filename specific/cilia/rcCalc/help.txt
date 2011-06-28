@@ -1,0 +1,5 @@
+This fucntion takes an image as its input, and helps the user calculate the 
+radius of curvature and lengs of different elements in the image.
+It has three Main components. "rcmain.m" which is the main file. "setscale.m" 
+which calculates scale of the image from a reference, and "rccalc.m" which
+calculates the radius of curvature and length from 3 points. Image files must be in the rcCalc folder.
