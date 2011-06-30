@@ -1,3 +1,10 @@
+2011-06-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* carreau_chhabra_fit.m:  removed 'ShowStatusWindow' parameter.  It was deprecated in a previous version of Matlab and now throws errors.
+	* cross_model_fit.m: same.
+	* KV_step_fit.m: same.
+	* MM_step_fit.m: same.
+	* jeffrey_step_fit.m: same.
+
 2011-02-25 Thomas Sayre-McCord <thomassm@email.unc.edu>
 	* power_law_fitting.m: added. Fits creep data to a power law using linear regression of logarithmic values
 
