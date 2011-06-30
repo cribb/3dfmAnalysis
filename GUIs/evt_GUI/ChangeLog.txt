@@ -1,3 +1,6 @@
+2011-06-30  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m:  removed dummy variable references, i.e. the squiggle "~", because lots of users don't have matlab with a late enough release version to use that feature.
+
 2011-06-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.fig:  added msd2pt and GSER2pt figures.
 	* evt_GUI.m: same.

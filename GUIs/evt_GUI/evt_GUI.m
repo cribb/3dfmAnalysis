@@ -277,7 +277,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         desired_lum = str2num(get(handles.edit_LumiCrop, 'String'));
         threshmult = 1.0;
         
-        [d,~,~] = filter_bead_aggregates(d, im, desired_lum, threshmult);
+        [d,dummyvar1,dummyvar2] = filter_bead_aggregates(d, im, desired_lum, threshmult);
     elseif get(handles.checkbox_LumiCrop, 'Value')
         logentry('Cannot filter based on luminance because there no MIP exists');
     end
