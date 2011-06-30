@@ -226,6 +226,12 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         msgbox('File Not Loaded! Problem with load_video_tracking.', 'Error.');
         return;
     end
+    
+    if isempty(d)
+        msgbox('No data exists in this fileset!');
+        return;
+    end
+    
     set(handles.edit_infile, 'TooltipString', filename);
     set(handles.edit_infile, 'String', '');
     logentry(['Dataset, ' filename ', successfully loaded...']);
@@ -286,6 +292,10 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     if isempty(outfile)
         outfile = [pname fname(1:end-3) 'evt.mat'];
         set(handles.edit_outfile, 'String', outfile);
+%         outfile = [filenameroot '.evt.mat'];
+%         outfile = strrep(outfile, '*', '');
+%         outfile = strrep(outfile, '?', '');
+
     end
     set(handles.edit_outfile, 'TooltipString', outfile);
 
@@ -1274,23 +1284,24 @@ function plot_data(hObject, eventdata, handles)
     AUXfig = handles.AUXfig;         
     AUXtype = handles.AUXtype;
     
+    data = handles.table;
+    frame_rate = str2num(get(handles.edit_frame_rate, 'String'));
+    calib_um   = str2num(get(handles.edit_calib_um, 'String'));
+    bead_diameter_um = str2num(get(handles.edit_bead_diameter_um, 'String'));
+    numtaus = round(str2num(get(handles.edit_numtaus, 'String')));
+    win = unique(floor(logspace(0,log10(max(frame)),numtaus)));
+
     if strcmp(AUXtype, 'MSD')  || ...
        strcmp(AUXtype, 'GSER') || ...
        strcmp(AUXtype, 'Diffusivity') || ...
        strcmp(AUXtype, 'MSD histogram')
         if handles.recomputeMSD % && get(handles.checkbox_msdmean, 'Value')
-            data = handles.table;
-            frame_rate = str2num(get(handles.edit_frame_rate, 'String'));
-            calib_um   = str2num(get(handles.edit_calib_um, 'String'));
-            bead_diameter_um = str2num(get(handles.edit_bead_diameter_um, 'String'));
-            numtaus = round(str2num(get(handles.edit_numtaus, 'String')));
-            win = unique(floor(logspace(0,log10(max(frame)),numtaus)));
-%             win = unique(floor(logspace(0,5,50)));
             mymsd = video_msd(data, win, frame_rate, calib_um, 'n');            
             myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n', 1);
             myD = mymsd.msd ./ (4 .* mymsd.tau);
             handles.mymsd = mymsd;
             handles.myve  = myve;
+            handles.myD   = myD;
             handles.recomputeMSD = 0;
             guidata(hObject, handles);
         end
@@ -1298,6 +1309,7 @@ function plot_data(hObject, eventdata, handles)
         msdID   = unique(handles.table(:,ID))';    
         mymsd   = handles.mymsd;
         myve    = handles.myve;
+        myD     = handles.myD;
         tau = mymsd.tau;
         msd = mymsd.msd;
         
@@ -1343,7 +1355,7 @@ function plot_data(hObject, eventdata, handles)
             set(AUXfig, 'Visible', 'on');
             clf(AUXfig);
             
-            [p, f, id] = mypsd([x(k)*1e-6 y(k)*1e-6], 120, 1, 'rectangle');
+            [p, f, id] = mypsd([x(k) y(k)]*1e-6, frame_rate, 10/frame_rate, 'rectangle');
 
             loglog(f, p);
             xlabel('frequency [Hz]');
@@ -1359,9 +1371,9 @@ function plot_data(hObject, eventdata, handles)
             set(AUXfig, 'Visible', 'on');
             clf(AUXfig);
             
-            [p, f, id] = mypsd([x(k) y(k)], 120, 0.01, 'blackman');
+            [p, f, id] = mypsd([x(k) y(k)], frame_rate, 10/frame_rate, 'blackman');
 
-            loglog(f, id);            
+            plot(f, id, '.');            
 %         case 'displacement hist'
 %             figure(handles.AUXfig);
 %             set(AUXfig, 'Visible', 'on');
@@ -1420,10 +1432,8 @@ function plot_data(hObject, eventdata, handles)
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
             
-            plot(log10(mymsd.tau), log10(myD), 'b');
-            hold on;
-                plot(mean(log10(mymsd.tau)), mean(log10(myD)), 'k');
-            hold off;
+            plot(     log10(mymsd.tau),       log10(myD) , 'b', ...
+                 mean(log10(mymsd.tau),2), mean(log10(myD),2), 'k');
             xlabel('\tau [s]');
             ylabel('Diffusivity [m^2/s]');
             grid on;
