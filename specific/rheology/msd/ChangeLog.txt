@@ -1,3 +1,9 @@
+2011-07-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* msdstat.m:  added.  handles computing statistics on msd datasets.
+	* video_msd.m:  added back in the option to record each squared displacment.
+	* plot_msd.m:  now uses msdstat instead of computing stats on its own.  added 'u' as a plotting option to plot MSD in microns^2 instead of meters^2
+	* ve.m:  removed some old commented out code.
+
 2011-06-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* plot_msd_2pt.m:  added on behalf of Thomas Sayre_McCord.  plots the 2pt MSD as a function of time scale.
 	* plot_ve_2pt.m:  added on behalf of Thomas Sayre_McCord.  plots the 2pt Generalized stokes-einstein relation as a function of frequency.

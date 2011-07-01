@@ -13,7 +13,8 @@ function plot_msd(d, h, optstring)
 %       "h" is the figure handle in which to put the plot.  If h is not
 %       used, a new figure is generated.
 %      "optstring" is a string containing 'a' to plot all individual paths, 'm'
-%      to plot the mean msd function, and 'e' to include errorbars on mean.
+%      to plot the mean msd function, and 'e' to include errorbars on mean,
+%      'u' to plot msd in units of um^2
 %
 
 if nargin < 3 || isempty(optstring)
@@ -24,57 +25,29 @@ if nargin < 2 || isempty(h)
     h = figure;
 end
 
-% renaming input structure
-tau = d.tau;
-msd = d.msd;
-counts = d.ns;
-
-if isfield(d, 'n');
-    sample_count = d.n;
-else
-    sample_count = sum(~isnan(msd),2);
-    idx = find(sample_count > 0);
-    sample_count = sample_count(idx);
-end
-
-clip = find(sum(~isnan(counts),2) <= 1);
-tau(clip,:) = [];
-msd(clip,:) = [];
-counts(clip,:) = [];
-sample_count(clip,:) = [];
-
-% setting up axis transforms for the figure plotted below.  You cannot plot
-% errorbars on a loglog plot, it seems, so we have to set it up here.
-logtau = log10(tau);
-logmsd = log10(msd);
-
-numbeads = size(logmsd,2);
-
-% weighted mean for logmsd
-weights = counts ./ repmat(nansum(counts,2), 1, size(counts,2));
-
-mean_logtau = nanmean(logtau');
-mean_logmsd = nansum(weights .* logmsd, 2);
-
-% computing error for logmsd
-Vishmat = nansum(weights .* (repmat(mean_logmsd, 1, numbeads) - logmsd).^2, 2);
-msderr =  sqrt(Vishmat ./ sample_count);
+% calculate statistical measures for msd and plant into data structure
+d = msdstat(d);
 
 % creating the plot
 figure(h);
 
+if strcmpi(optstring, 'u')
+    d.mean_logmsd = d.mean_logmsd + 12;
+    d.msd = d.msd * 1e12;
+end
+
 if strcmpi(optstring, 'a')
-    plot(logtau, logmsd, 'b');
+    plot(d.logtau, d.logmsd, 'b');
 elseif strcmpi(optstring, 'm')
-    plot(mean_logtau, mean_logmsd, 'k.-');
+    plot(d.mean_logtau, d.mean_logmsd, 'k.-');
 elseif strcmpi(optstring, 'am')
-    plot(logtau, logmsd, 'b', mean_logtau, mean_logmsd, 'k.-');
+    plot(d.logtau, d.logmsd, 'b', d.mean_logtau, d.mean_logmsd, 'k.-');
 elseif strcmpi(optstring, 'me') || strcmpi(optstring, 'e')
-    errorbar(mean_logtau, mean_logmsd, msderr, 'k.-');
+    errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, 'k.-');
 elseif strcmpi(optstring, 'ame')
-    plot(logtau, logmsd, 'b-');
+    plot(log10(d.tau), log10(d.msd), 'b-');
     hold on;
-        errorbar(mean_logtau, mean_logmsd, msderr, 'k.-');
+        errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, 'k.-');
     hold off;
 end
 
@@ -84,7 +57,11 @@ for k = 1:length(ch)
 end
 
 xlabel('log_{10}(\tau) [s]');
-ylabel('log_{10}(MSD) [m^2]');
+if strcmpi(optstring,'u')
+    ylabel('log_{10}(MSD) [\mum^2]');
+else
+    ylabel('log_{10}(MSD) [m^2]');
+end
 grid on;
 pretty_plot;
 refresh(h);    
