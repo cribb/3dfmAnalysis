@@ -40,8 +40,14 @@ switch type
         mag = 1;
 end
 
-h = figure(fig_or_figfile);
-pretty_plot(h, 'eps', mag);
+try
+    h = figure(fig_or_figfile);
+catch
+    disp('No figure handle to grab.');
+    return;
+end
+
+%pretty_plot(h, 'eps', mag);
 
 suffix = get(h, 'Name');
 
