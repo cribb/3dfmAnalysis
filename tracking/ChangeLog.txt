@@ -1,3 +1,8 @@
+2011-07-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m:  removed code for filtering tracking data.
+	* filter_video_tracking.m:  added.  new function responsible for filtering tracking data.
+	* SetFPSandMinFrames.m:  updated to use new "filter_video_tracking" function.
+
 2011-04-14  Jeremy Cribb <jcribb@email.unc.edu>
 	* SetFPSandMinFrames.m:  fixed bug where saving directory list corrupted output.
 

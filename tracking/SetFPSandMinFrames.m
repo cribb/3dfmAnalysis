@@ -16,8 +16,15 @@ count = 1;
 for i = 1:length(files)
     filename = files(i).name;
     
+    filt.min_frames = minFrames;
+    filt.min_pixels = minPixels;
+    filt.tcrop     = tcrop; 
+    filt.xycrop    = xycrop;
+    
     fprintf('Loading %g of %g \n', i, length(files));
-    d = load_video_tracking(filename, frameRate, [], [], 'absolute', 'no', 'table', minFrames, minPixels, tcrop, xycrop);
+    
+    d = load_video_tracking(filename, frameRate, [], [], 'absolute', 'no', 'table');
+    d = filter_video_tracking(d, filt);
     
     if(~isempty(d))
         tracking.spot3DSecUsecIndexFramenumXYZRPY = d;
