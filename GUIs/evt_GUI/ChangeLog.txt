@@ -1,3 +1,6 @@
+2011-07-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m: updated to use new "filter_video_tracking" function.
+
 2011-06-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m: minor optimizations to plotting code.
 	* evt_GUI.fig: same.

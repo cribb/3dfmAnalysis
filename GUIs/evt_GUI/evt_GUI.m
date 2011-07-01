@@ -196,32 +196,33 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     % assign "filter by" values if they're selected
     if get(handles.checkbox_minFrames, 'Value')
-        minFrames = str2num(get(handles.edit_minFrames, 'String'));
+        handles.filt.min_frames = str2num(get(handles.edit_minFrames, 'String'));
     else
-        minFrames = 1;
+        handles.filt.min_frames = 1;
     end
         
     if get(handles.checkbox_minPixelRange, 'Value')
-        minPixelRange = str2num(get(handles.edit_minPixelRange, 'String'));
+        handles.filt.min_pixels = str2num(get(handles.edit_minPixelRange, 'String'));
     else
-        minPixelRange = 0;
+        handles.filt.min_pixels = 0;
     end
 
     if get(handles.checkbox_tCrop, 'Value')
-        tCrop = str2num(get(handles.edit_tCrop, 'String'));
+        handles.filt.tCrop = str2num(get(handles.edit_tCrop, 'String'));
     else
-        tCrop = 0;
+        handles.filt.tCrop = 0;
     end
     
     if get(handles.checkbox_xyCrop, 'Value')
-        xyCrop = str2num(get(handles.edit_xyCrop, 'String'));
+        handles.filt.xyCrop = str2num(get(handles.edit_xyCrop, 'String'));
     else
-        xyCrop = 0;
+        handles.filt.xyCrop = 0;
     end
     
     
     try
-        d = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table', minFrames, minPixelRange, tCrop, xyCrop);
+        d = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table');
+        d = filter_video_tracking(d, handles.filt);
     catch
         msgbox('File Not Loaded! Problem with load_video_tracking.', 'Error.');
         return;
