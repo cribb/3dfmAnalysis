@@ -38,7 +38,7 @@ for k = 1 : length(fn)
         exptype = lower(st.metadata.step_name);
         
         if findstr(exptype, 'stress sweep')
-            stress = st.table(:,get_TA_col(st, 'stress', 'Pa'));
+            stress = st.table(:,get_TA_col(st, 'osc. stress', 'Pa'));
             gp = st.table(:,get_TA_col(st, 'G''', 'Pa'));
             gpp= st.table(:,get_TA_col(st, 'G''''', 'Pa'));
             figh(count) = plot_cap_ssweep(stress, [gp gpp], [], mytitle);
@@ -63,8 +63,8 @@ for k = 1 : length(fn)
         end
 
         if findstr(exptype, 'flow')
-            shear_rate = st.table(:,get_TA_col(st, 'rate', '1/s'));
-            visc = st.table(:,get_TA_col(st, 'visc', 'Pa.s'));            
+            shear_rate = st.table(:,get_TA_col(st, 'shear rate', '1/s'));
+            visc = st.table(:,get_TA_col(st, 'viscosity', 'Pa.s'));            
             figh(count) = plot_cap_flow(shear_rate, visc, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'flow'));
         end
@@ -96,13 +96,24 @@ for k = 1 : length(fn)
             set(ser, 'DisplayName', strainrate);
         end           
             
+        if findstr(exptype, 'stress relaxation')
+            time = st.table(:,get_TA_col(st, 'time', 's'));
+            Gt = st.table(:,get_TA_col(st, 'modulus G(t)', 'Pa'));            
+            strain = st.table(:,get_TA_col(st, 'strain', ''));            
+            figh(count) = plot_cap_relax(time, Gt, [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'relax'));
+            ser = get(gca, 'Children');
+%             set(ser, 'DisplayName', strain);
+        end
+        
         if isempty(findstr(exptype, 'stress sweep')) && ...
            isempty(findstr(exptype, 'strain sweep')) && ...
            isempty(findstr(exptype, 'frequency sweep')) && ...
            isempty(findstr(exptype, 'flow')) && ...
            isempty(findstr(exptype, 'creep')) && ...
            isempty(findstr(exptype, 'temperature')) && ...
-           isempty(findstr(exptype, 'peak hold'))           
+           isempty(findstr(exptype, 'peak hold')) && ... 
+           isempty(findstr(exptype, 'relax'))
            figh(count) = NaN;
         end
 

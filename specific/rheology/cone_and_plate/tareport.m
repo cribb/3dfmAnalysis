@@ -163,12 +163,23 @@ for k = 1 : length(fn)
         if findstr(exptype, 'peak hold');
             tempimg = [outf '-peakstrain' testnum '.svg'];
             appval = st.metadata.controlled_variable;
-            fprintf(fid, '    <b> stress: </b> %s ºC<br/> \n', appval);            
+            fprintf(fid, '    <b> stress: </b> %s Pa<br/> \n', appval);            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
             fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', tempimg);
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
 
+        if findstr(exptype, 'relaxation');
+            tempimg = [outf '-relax' testnum '.svg'];
+%             appval = st.metadata.controlled_variable;
+%             samp = st.table(:,get_TA_col(st, 'stress'));
+%             namp = st.table(:,get_TA_col(st, 'strain'));       
+            fprintf(fid, '    <b> strain: </b> %s <br/> \n', appval);            
+            fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
+            fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', tempimg);
+            fprintf(fid, '  </td>\n </tr>\n\n');
+        end
+        
         count = count + 1;        
     end
         

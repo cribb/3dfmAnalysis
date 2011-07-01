@@ -1,3 +1,8 @@
+2011-07-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* plot_cap_relax.m:  added.  handles plotting stress relaxation experiments on the CAP.
+	* taplot.m:  updated column ID's to match exactly the ID's used by TA's software.
+	* tareport.m: same.
+
 2011-05-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* get_TA_col: added.  function that identifies the column ID in the TA datatable.
 	* plot_cap_overshoot.m: added.  plots overshoot experimental data for CAP.
