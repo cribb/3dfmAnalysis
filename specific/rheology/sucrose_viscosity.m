@@ -49,9 +49,6 @@ function [v,rho] = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units
     % number of computations as the convergence routine in
     % 'solution_density' needs only be ran once.
     sol = sucrose_solubility(sucrose_conc_percent, temperature);
-    if sucrose_conc_percent > sol
-        warning('The input sucrose concentration exceeds sucrose solubility at the input temperature.');
-    end;
     
     A = sucrose_conc_percent / (1900 - 18 * sucrose_conc_percent);
 	B = (30 - temperature) / (91 + temperature);
@@ -61,7 +58,11 @@ function [v,rho] = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units
 	v = 10^( (22.46*A) - 0.114 + ( B * ( 1.1 + 43.1 * C ))); % returns in mPa sec.
 
     v = v/1000; % converts to Pa sec (the SI unit)
-	
+
+    if sucrose_conc_percent > sol
+        warning('The input sucrose concentration exceeds sucrose solubility at the input temperature. Setting NaN.');
+        v = NaN;
+    end;
     
 % The solution_density function determines the sucrose concentration in
 % percent and the solution density in kg/m^3.  The model used to do this

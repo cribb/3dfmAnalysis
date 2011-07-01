@@ -1,3 +1,6 @@
+2011-07-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* sucrose_viscosity.m: now reports a viscosity of "NaN" for solution concentrations that exceed solubility limites for sucrose.
+	
 2011-04-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_mucus_rheo_run.m: removed.  moved to 3dfmAnalysis/panoptes.
 
