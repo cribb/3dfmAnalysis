@@ -1,4 +1,7 @@
 2011-07-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* CellProcessingScript.m:  added Anya's edit for correctly parsing new "_tracked" filenames.
+
+2011-07-01  Jeremy Cribb <jcribb@email.unc.edu>
 	* CellProcessingScript.m:  Now uses the newer method for determining which window sizes to use when calculating the MSD on input data.
 
 2011-04-19  Jeremy Cribb <jcribb@email.unc.edu>

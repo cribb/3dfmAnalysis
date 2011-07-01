@@ -42,7 +42,7 @@ numFiles = length(files);
 wellID = nan(numFiles,1);
 for i = 1:numFiles
     thisStr = filenames(i,wellNumIDX(i):end);
-    dotIDX = findstr(thisStr, '.');
+    dotIDX = findstr(thisStr, '_');
     thisStr = thisStr(1:dotIDX(1)-1);
     wellID(i) = str2num(thisStr);
 end
@@ -109,3 +109,5 @@ for i = 1:length(wellList)
     
 
 end
+
+% exit;
