@@ -24,7 +24,7 @@ if nargin < 1 || isempty(filemask)
     filemask = '*.vrpn.mat';
 end
 
-window =  [1:10 20:20:100 100:30:250 300];
+window =  35;
 calibum = 0.152;
 
 plotMean = 0; %Set to 1 to plot means; set to 0 to plot each tracker
@@ -78,6 +78,8 @@ for i = 1:length(wellList)
     [numTau, numTrackers] = size(msd);
     msdErr  = nanstd(msd,0,2) ./ sqrt(numTrackers);
 
+%     panoptes_publish_CellExpt(filemask, frameRate, minFrames, minPixels, tcrop, xycrop);
+    
     %if (plotMean)
     h1 = figure;
     errorbar(tau,msdMean,msdErr, 'Color', colors(i,:));
@@ -103,5 +105,7 @@ for i = 1:length(wellList)
     saveas(h1,  ['Well_' num2str(wellList(i)) '_mean.png'], 'png');    
     saveas(h2,  ['Well_' num2str(wellList(i)) '_indiv.fig'], 'fig');
     saveas(h2,  ['Well_' num2str(wellList(i)) '_indiv.png'], 'png');
+    
+    
 
 end
