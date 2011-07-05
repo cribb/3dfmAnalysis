@@ -98,8 +98,8 @@ for k = 1 : length(fn)
         
         if findstr(exptype, 'stress sweep');
             ssweepimg = [outf '-ssweep' testnum '.svg'];
-            sfreq = mean(st.table(:,get_TA_col(st, 'freq')));
-            temp = mean(st.table(:,get_TA_col(st, 'temp')));
+            sfreq = mean(st.table(:,get_TA_col(st, 'ang. frequency')));
+            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
             fprintf(fid, '    <b> angular frequency: </b> %s rad/s (%s Hz) <br/> \n',num2str(sfreq),num2str(sfreq/(2*pi)));
             fprintf(fid, '    <b> temperature: </b> %s ºC <br/> \n', num2str(temp));
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
@@ -107,22 +107,22 @@ for k = 1 : length(fn)
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
         
-        if findstr(exptype, 'strain sweep');
+        if findstr(exptype, 'strain sweep')
             nsweepimg = [outf '-nsweep' testnum '.svg'];
-            sfreq = mean(st.table(:,get_TA_col(st, 'freq')));
-            temp = mean(st.table(:,get_TA_col(st, 'temp')));
+            sfreq = mean(st.table(:,get_TA_col(st, 'ang. frequency')));
+            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
             fprintf(fid, '    <b> angular frequency: </b> %s rad/s (%s Hz) <br/> \n',num2str(sfreq),num2str(sfreq/(2*pi)));
-            fprintf(fid, '    <b> temperature: </b> %s ºC<br/> \n', num2str(3));
+            fprintf(fid, '    <b> temperature: </b> %s ºC<br/> \n', num2str(temp));
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
             fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', nsweepimg);
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
         
-        if findstr(exptype, 'frequency sweep');
+        if findstr(exptype, 'frequency sweep')
             freqimg = [outf '-fsweep' testnum '.svg'];
-            samp = st.table(:,get_TA_col(st, 'stress'));
+            samp = st.table(:,get_TA_col(st, 'osc. stress'));
             namp = st.table(:,get_TA_col(st, 'strain'));       
-            temp = mean(st.table(:,get_TA_col(st, 'temp')));
+            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
             fprintf(fid, '    <b> Stress amplitude: </b> %s +- %s Pa <br/> \n',num2str(mean(samp)),num2str(stderr(samp)));
             fprintf(fid, '    <b> Strain amplitude: </b> %s +- %s  <br/> \n',num2str(mean(namp)),num2str(stderr(namp)));
             fprintf(fid, '    <b> temperature: </b> %s ºC<br/> \n', num2str(temp));
@@ -131,9 +131,9 @@ for k = 1 : length(fn)
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
 
-        if findstr(exptype, 'creep');
+        if findstr(exptype, 'creep')
             appval = st.metadata.applied_value;
-            temp = mean(st.table(:,get_TA_col(st, 'temp')));
+            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
             creepimg = [outf '-creep' testnum '.svg'];
             fprintf(fid, '    <b> Applied Value: </b> %s <br/> \n',appval);
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));
@@ -142,10 +142,21 @@ for k = 1 : length(fn)
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
 
+        if findstr(exptype, 'recovery')
+            appval = st.metadata.applied_value;
+            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            creepimg = [outf '-recov' testnum '.svg'];
+            fprintf(fid, '    <b> Applied Value: </b> %s <br/> \n',appval);
+            fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));
+            fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
+            fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', creepimg);
+            fprintf(fid, '  </td>\n </tr>\n\n');
+        end
+        
         if findstr(exptype, 'flow');
             flowimg = [outf '-flow' testnum '.svg'];
-            temp = mean(st.table(:,get_TA_col(st, 'temp')));
-            fprintf(fid, '    <b> temperature: </b> %s ºC<br/> \n', num2str(temp));            
+            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
             fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', flowimg);
             fprintf(fid, '  </td>\n </tr>\n\n');
@@ -154,7 +165,7 @@ for k = 1 : length(fn)
         if findstr(exptype, 'temperature');
             tempimg = [outf '-temp' testnum '.svg'];
             appval = st.metadata.controlled_variable;
-            fprintf(fid, '    <b> stress: </b> %s ºC<br/> \n', appval);            
+            fprintf(fid, '     %s \n', appval);            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
             fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', tempimg);
             fprintf(fid, '  </td>\n </tr>\n\n');
@@ -163,7 +174,9 @@ for k = 1 : length(fn)
         if findstr(exptype, 'peak hold');
             tempimg = [outf '-peakstrain' testnum '.svg'];
             appval = st.metadata.controlled_variable;
-            fprintf(fid, '    <b> stress: </b> %s Pa<br/> \n', appval);            
+            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            fprintf(fid, '    %s \n', appval);            
+            fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
             fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', tempimg);
             fprintf(fid, '  </td>\n </tr>\n\n');
@@ -171,10 +184,10 @@ for k = 1 : length(fn)
 
         if findstr(exptype, 'relaxation');
             tempimg = [outf '-relax' testnum '.svg'];
-%             appval = st.metadata.controlled_variable;
-%             samp = st.table(:,get_TA_col(st, 'stress'));
-%             namp = st.table(:,get_TA_col(st, 'strain'));       
+            appval = st.metadata.applied_value;
+            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
             fprintf(fid, '    <b> strain: </b> %s <br/> \n', appval);            
+            fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
             fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', tempimg);
             fprintf(fid, '  </td>\n </tr>\n\n');

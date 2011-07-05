@@ -72,11 +72,19 @@ for k = 1 : length(fn)
         if findstr(exptype, 'creep')
             t = st.table(:,get_TA_col(st, 'time', 's'));
             strain = st.table(:,get_TA_col(st, 'strain', ''));
-            stress = st.table(:,get_TA_col(st, 'stress', 'Pa'));
+            stress = st.table(:,get_TA_col(st, 'shear stress', 'Pa'));
             figh(count) = plot_cap_creep(t, strain, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'creep'));
         end
-
+        
+        if findstr(exptype, 'recovery')
+            t = st.table(:,get_TA_col(st, 'time', 's'));
+            strain = st.table(:,get_TA_col(st, 'strain', ''));
+            stress = st.table(:,get_TA_col(st, 'shear stress', 'Pa'));
+            figh(count) = plot_cap_creep(t, strain, [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'recov'));
+        end
+        
         if findstr(exptype, 'temperature')
             temp = st.table(:,get_TA_col(st, 'temp', '°C'));
             visc = st.table(:,get_TA_col(st, 'viscosity', 'Pa.s'));
@@ -111,6 +119,7 @@ for k = 1 : length(fn)
            isempty(findstr(exptype, 'frequency sweep')) && ...
            isempty(findstr(exptype, 'flow')) && ...
            isempty(findstr(exptype, 'creep')) && ...
+           isempty(findstr(exptype, 'recov')) && ...
            isempty(findstr(exptype, 'temperature')) && ...
            isempty(findstr(exptype, 'peak hold')) && ... 
            isempty(findstr(exptype, 'relax'))

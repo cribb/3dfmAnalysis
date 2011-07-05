@@ -39,4 +39,7 @@ function outs = get_TA_col(s, str, unt)
         outs = find(strcmp(str, list(:,1)) & strcmp(unt, list(:,2)) );
     end
 
+        % to account for the case (that actually happens with TA datafiles)
+        % where a column is repeated.
+        outs = outs(1);
     return;
