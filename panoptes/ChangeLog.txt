@@ -1,3 +1,6 @@
+2011-07-12  Jeremy Cribb <jcribb@email.unc.edu>
+	* CellProcessingScript.m:  fixed bug where new window size definition screws up the plotting parameters.
+
 2011-07-06  Anya Derbakova <anya@cs.unc.edu>
         * pan_CellProcessingScript:  added. Runs CellProcessingScript.m and exits Matlab.
 

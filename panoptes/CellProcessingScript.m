@@ -44,12 +44,19 @@ for i = 1:numFiles
     thisStr = filenames(i,wellNumIDX(i):end);
     dotIDX = findstr(thisStr, '_');
     thisStr = thisStr(1:dotIDX(1)-1);
-    wellID(i) = str2num(thisStr);
+    wellID(i) = str2double(thisStr);
 end
 
 %% Calculate MSD for each tracking file and store in its own structure
 wellList = unique(wellID);
-d = [length(window) 0]; %init size of msd. Need this to avoid problems with number of rows across videos
+
+if length(window) == 1
+    winlen = window;
+elseif length(window) > 1
+    winlen = length(window);
+end
+
+d = [winlen 0]; %init size of msd. Need this to avoid problems with number of rows across videos
 for i = 1:numFiles
     thisMSD = video_msd(cell2mat(filenamesCell(i)), window, [], calibum, 'no');
     DATA(i).well = wellID(i);
@@ -78,8 +85,6 @@ for i = 1:length(wellList)
     [numTau, numTrackers] = size(msd);
     msdErr  = nanstd(msd,0,2) ./ sqrt(numTrackers);
 
-%     panoptes_publish_CellExpt(filemask, frameRate, minFrames, minPixels, tcrop, xycrop);
-    
     %if (plotMean)
     h1 = figure;
     errorbar(tau,msdMean,msdErr, 'Color', colors(i,:));
@@ -106,8 +111,8 @@ for i = 1:length(wellList)
     saveas(h2,  ['Well_' num2str(wellList(i)) '_indiv.fig'], 'fig');
     saveas(h2,  ['Well_' num2str(wellList(i)) '_indiv.png'], 'png');
     
-    
+%     close(h1);
+%     close(h2);
 
 end
 
-% exit;
