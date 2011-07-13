@@ -1,3 +1,6 @@
+2011-07-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* save_evtfile.m:  added. It saves tracking files in evt "edited video tracking" format.
+
 2009-06-15  Jeremy Cribb <jcribb@email.unc.edu>
 	* get_mips.m: added mean projection to possibilities in parameter list.
 	* raw_mean_subtract.m: fixed transpose bug for subtraction.
