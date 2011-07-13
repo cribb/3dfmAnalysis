@@ -99,25 +99,18 @@ for k = 1 : length(beadID);
     
     % call up the MSD kernel-function to compute the MSD for each bead    
     [tau_ msd_ nbead r2] = msd(b(:, TIME), b(:, X:Y), window, winedge);
-    tau(:, k) = tau_; 
-    mymsd(:, k) = msd_;
-    counts(:, k) = nbead;
+    
+    tau(:,k) = tau_; 
+    mymsd(:,k) = msd_;
+    counts(:,k) = nbead;
     [ro, cl] = size(r2);
     myr2(1:ro, k, 1:cl) = r2;
-
-%     [foo bar] = msd(b(:, TIME), b(:, X:Y), window, winedge);
-%     tau(:, k) = foo; 
-%     mymsd(:, k) = bar;
-%     [ro, cl] = size(r2);
-%     myr2(1:ro, k, 1:cl) = r2;
 
 end;
 
 
 % trim the data by removing window sizes that returned no data
 sample_count = sum(~isnan(mymsd),2);
-
-
 
 idx = find(sample_count > 0);
 tau = tau(idx,:);
@@ -128,8 +121,8 @@ sample_count = sample_count(idx);
 
 % output structure
 vmsd.tau = tau;
-vmsd.r2 = myr2;
 vmsd.msd = mymsd;
+vmsd.r2 = myr2;
 vmsd.n = sample_count;
 vmsd.ns = counts;
 

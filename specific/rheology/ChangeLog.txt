@@ -1,3 +1,7 @@
+2011-07-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* save_msdfile.m: added.  saves mean squared displacement calculations to matlab structure defined in "video_msd.m"
+	* save_gserfile.m:  added.  saves generalized stokes-einstein relation calculations to matlab structure defined in 've.m'	
+
 2011-07-01  Jeremy Cribb <jcribb@email.unc.edu>
 	* sucrose_viscosity.m: now reports a viscosity of "NaN" for solution concentrations that exceed solubility limites for sucrose.
 	
