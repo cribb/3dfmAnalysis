@@ -21,19 +21,14 @@ for i = 1:length(files)
     filt.tcrop     = tcrop; 
     filt.xycrop    = xycrop;
     
-    fprintf('Loading %g of %g \n', i, length(files));
+    logentry(['Loading ' num2str(i) ' of ' num2str(length(files)) '.'] );
     
     d = load_video_tracking(filename, frameRate, [], [], 'absolute', 'no', 'table');
     d = filter_video_tracking(d, filt);
     
-    if(~isempty(d))
-        tracking.spot3DSecUsecIndexFramenumXYZRPY = d;
+    if ~isempty(d)
 
-        fprintf('\t%g trackers in %s. \n', length(unique(d(:,ID))), filename);
-
-        append = 'evt.mat';
-        outfile = [filename(1:end-3) append];
-        save(outfile, 'tracking');
+        outfile = save_evtfile(filename, d);
                
         if count <= 1
             outfilelist = dir(outfile);
@@ -43,10 +38,28 @@ for i = 1:length(files)
             
         count = count + 1;
     else
-        fprintf('No trackers. No .evt.mat created.');
+        logentry('No trackers. No .evt.mat created. \n');
+        
     end
-    fprintf('\n');
+    
+    if ~exist('outfilelist','var');
+        outfilelist = [];
+    end
     
     
 end
 
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'SetFPSandMinFrames: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+     return;

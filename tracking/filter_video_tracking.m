@@ -58,7 +58,9 @@ if (nargin < 2) || isempty(filt)
 end
 
 if (nargin < 1) || isempty(data); 
-    error('No data inputs set.');
+    logentry('No data inputs set. Exiting filter_video_tracking now.');
+    outs = [];
+    return;
 end
 
 
