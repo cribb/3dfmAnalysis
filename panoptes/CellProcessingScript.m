@@ -34,6 +34,12 @@ files = SetFPSandMinFrames(filemask, frameRate, minFrames, minPixels, tcrop, xyc
 
 %% Find all the .vrpn files and extract well number from filename
 % files = dir('*vrpn.evt.mat');
+
+if isempty(files)
+    logentry('No data available.');
+    return;
+end
+
 filenamesCell = {files.name}';
 wellNumIDX = 5+cell2mat(strfind(filenamesCell, '_well'));
 filenames = strvcat(filenamesCell);
@@ -116,3 +122,17 @@ for i = 1:length(wellList)
 
 end
 
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'CellProcessingScript: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+     return;
