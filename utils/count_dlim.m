@@ -5,7 +5,8 @@ function [ndlim, len, outl] = count_dlim(ins, dlim, cmnt_str)
 % Utilities
 % last modified 2008.11.14 (jcribb)
 %
-% count the number of delimiters (or other characters) found line-by-line in a text file
+% count the number of delimiters (or other characters) found line-by-line 
+% in a text file.  
 
 if nargin < 3
     cmnt_str = [];

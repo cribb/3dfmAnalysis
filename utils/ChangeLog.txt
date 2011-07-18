@@ -1,3 +1,7 @@
+2011-07-18  Jeremy Cribb <jcribb@email.unc.edu>
+	* count_dlim.m:  edited documentation.
+	* gen_pub_plotfiles.m:  no longer closes the figure/handle it was given once it's through with it.
+
 2011-07-01 Jeremy Cribb <jcribb@email.unc.edu>
 	* count_dlim.m: now accepts a "comment identifying" string, which tells it to ignore the remainder of the line.
 	* gen_pub_plotfiles.m:  handles an error when an incorrect figure handle is used.

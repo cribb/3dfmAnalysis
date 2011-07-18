@@ -58,11 +58,11 @@ end
 
 set(h, 'PaperPositionMode', 'auto');
 saveas(h, [outf '.fig'], 'fig');
-print(h, '-r0', [outf '.eps'], '-depsc'); 
+% print(h, '-r0', [outf '.eps'], '-depsc'); 
 print(h, '-r0', [outf '.png'], '-dpng'); 
 % print(h, '-r0', [outf '.jpg'], '-djpg'); 
 plot2svg_2d([outf '.svg'], h);
-close(h);
+% close(h);
 
 return;
 
