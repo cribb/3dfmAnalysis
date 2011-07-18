@@ -1,3 +1,6 @@
+2011-07-18  Jeremy Cribb <jcribb@email.unc.edu>
+	* .csvignore:  added.  tells cvs to ignore .asv files.
+
 2011-07-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* CellProcessingScript.m:  now fails nicely when no data are found.  Also added more standardized logging output.
 
