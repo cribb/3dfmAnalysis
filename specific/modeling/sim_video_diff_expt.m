@@ -79,9 +79,8 @@ simout(:,X:Y) = simout(:,X:Y) / (calib_um/1e6);  % puts into pixels
 % simout = simout(idx,:);
 
 if exist('filename', 'var') && ~isempty(filename)
-    tracking.spot3DSecUsecIndexFramenumXYZRPY = simout;
-    save([filename '.evt.mat'], 'tracking');
-    csvwrite([filename '.csv'], simout);
+    save_evtfile(filename, simout, 'pixels', 1);
+%     csvwrite([filename '.csv'], simout);
     logentry(['Saved data to file: ' filename]);
 end
 
