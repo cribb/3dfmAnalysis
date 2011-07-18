@@ -32,7 +32,8 @@ outf = strrep(outf, ' ', '_');
 
 
 for k = 1:length(figs)
-    gen_pub_plotfiles(outf, figs(k), 'normal')
+    gen_pub_plotfiles(outf, figs(k), 'normal');
+    close(figs(k));
 end
 
 fn = fieldnames(cap.experiments);

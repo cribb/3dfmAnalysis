@@ -1,3 +1,6 @@
+2011-07-18  Jeremy Cribb <jcribb@email.unc.edu>
+	* tareport.m:  now handles closing its own figures instead of letting 'gen_plot_pubfiles' do it.
+
 2011-07-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* get_TA_col.m: In case the input table has a repeated column (which happens, believe it or not), get_TA_col now limits output to the first, single column.
 	* taplot.m: updated to include exact column headings.
