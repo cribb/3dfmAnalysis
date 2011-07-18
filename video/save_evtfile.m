@@ -1,12 +1,26 @@
-function outfile = save_evtfile(filename, data)
+function outfile = save_evtfile(filename, data, xyzunits, calib_um)
 
     video_tracking_constants;
 
+	if strcmp(xyzunits,'m')
+		data(:,X:Z) = data(:,X:Z) ./ calib_um * 1e6;  % convert video coords from pixels to meters
+    elseif strcmp(xyzunits,'um')
+		data(:,X:Z) = data(:,X:Z) ./ calib_um;  % convert video coords from pixels to meters
+    elseif strcmp(xyzunits,'nm')
+		data(:,X:Z) = data(:,X:Z) ./ calib_um * 1e-3;  % convert video coords from pixels to nm
+    elseif strcmp(xyzunits, 'pixels')
+        % do nothing
+    else
+        units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
+    end
+        
     tracking.spot3DSecUsecIndexFramenumXYZRPY = data;
     
     logentry(['Saving ' num2str(length(unique(data(:,ID)))) ' trackers in ' filename]);
     
-    outfile = [filename(1:end-3) 'evt.mat'];
+    filename = strrep(filename, '.evt', '');
+    filename = strrep(filename, '.mat', '');
+    outfile = [filename '.evt.mat'];
     save(outfile, 'tracking');   
     
 return;
