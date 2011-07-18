@@ -39,7 +39,17 @@ if (nargin < 4 || isempty(calib_um));       calib_um = 1;              end;
 if (nargin < 3 || isempty(xyzunits));       xyzunits  = 'pixels';      end;
 if (nargin < 2 || isempty(frame_rate));     frame_rate = 120;          end;
 
-filelist = dir(filemask);
+
+if isstruct(filemask)
+    filelist = filemask;
+elseif iscell(filemask)
+    for k = 1:length(filemask)
+        filelist(k) = dir(filemask{k});
+    end    
+else
+    filelist = dir(filemask);
+end
+
 if length(filelist) < 1
     error(['No files found matching ' filemask '.']);
 end

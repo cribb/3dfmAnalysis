@@ -1,3 +1,6 @@
+2011-07-18  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: can now handle input filenames as the type of structure array outputted by matlab's 'dir'.	
+
 2011-07-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* filter_video_tracking.m:  added more standardized message logging.
 	* SetFPSandMinFrames.m: now uses 'save_evtfile' function.  added more standardized message logging.
