@@ -172,7 +172,9 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     filename = get(handles.edit_infile, 'String');
     
     if(isempty(filename))
-		[fname, pname] = uigetfile({'*.mat';'*.csv';'*.*'});
+		[fname, pname, fidx] = uigetfile({'*.mat';'*.csv';'*.*'}, ...
+                        'Select File(s) to Open', ...
+                        'MultiSelect', 'on');
         
         if sum(length(fname), length(pname)) <= 1
             logentry('No tracking file selected. No tracking file loaded.');
@@ -180,9 +182,16 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         end        
         
 		filename = strcat(pname, fname);
+        
         logentry(['Setting Path to: ' pname]);
         cd(pname);
-		set(handles.edit_infile,'String', filename);
+        
+        if length(filename) > 1
+            set(handles.edit_infile,'String', 'Multiple Files loaded.');
+        else
+            set(handles.edit_infile,'String', filename);
+        end
+        
         set(handles.edit_outfile, 'String', '');
     end   
 
@@ -208,34 +217,42 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     end
 
     if get(handles.checkbox_tCrop, 'Value')
-        handles.filt.tCrop = str2num(get(handles.edit_tCrop, 'String'));
+        handles.filt.tcrop = str2num(get(handles.edit_tCrop, 'String'));
     else
-        handles.filt.tCrop = 0;
+        handles.filt.tcrop = 0;
     end
     
     if get(handles.checkbox_xyCrop, 'Value')
-        handles.filt.xyCrop = str2num(get(handles.edit_xyCrop, 'String'));
+        handles.filt.xycrop = str2num(get(handles.edit_xyCrop, 'String'));
     else
-        handles.filt.xyCrop = 0;
+        handles.filt.xycrop = 0;
     end
     
     
-    try
+%     try
         d = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table');
         d = filter_video_tracking(d, handles.filt);
-    catch
-        msgbox('File Not Loaded! Problem with load_video_tracking.', 'Error.');
-        return;
-    end
+%     catch
+%         msgbox('File Not Loaded! Problem with load_video_tracking.', 'Error.');
+%         return;
+%     end
     
     if isempty(d)
         msgbox('No data exists in this fileset!');
         return;
     end
     
-    set(handles.edit_infile, 'TooltipString', filename);
+    if length(filename) > 1
+        set(handles.edit_infile, 'TooltipString', 'Multiple files loaded.');
+    else
+        set(handles.edit_infile, 'TooltipString', filename);
+    end
     set(handles.edit_infile, 'String', '');
-    logentry(['Dataset, ' filename ', successfully loaded...']);
+    if length(filename) > 1
+        logentry('Multiple datasets successfully loaded...');
+    else
+        logentry(['Dataset, ' filename ', successfully loaded...']);
+    end
     
     % try loading the MIP file
     try 
@@ -291,15 +308,21 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     % set the default output filename
     outfile = get(handles.edit_outfile, 'String');
     if isempty(outfile)
-        outfile = [pname fname(1:end-3) 'evt.mat'];
+        if length(filename) > 1
+            outfile = [pname 'multiple_files.' 'evt.mat'];
+        else
+            outfile = [pname fname(1:end-3) 'evt.mat'];
+        end
+        
         set(handles.edit_outfile, 'String', outfile);
-%         outfile = [filenameroot '.evt.mat'];
-%         outfile = strrep(outfile, '*', '');
-%         outfile = strrep(outfile, '?', '');
-
     end
-    set(handles.edit_outfile, 'TooltipString', outfile);
-
+    
+    if length(filename) > 1
+        set(handles.edit_outfile, 'TooltipString', 'Multiple files loaded.');
+    else
+        set(handles.edit_outfile, 'TooltipString', outfile);
+    end
+    
     % assign data variables
     table = d;
     mintime = min(table(:,TIME));
