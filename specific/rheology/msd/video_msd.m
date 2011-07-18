@@ -59,18 +59,17 @@ video_tracking_constants;
 % determine whether or not we have to load these data from disk or not
 if ~isnumeric(files)
     % load video data
-    v = load_video_tracking(files, frame_rate, 'pixels', 1, 'relative', 'yes', 'table');
+    v = load_video_tracking(files, frame_rate, 'm', calib_um, 'relative', 'yes', 'table');
 else
+    % in this case, we assume that the incoming units are "correct" (use same scale)
     v = files;
+    
 end
 
 % handle windows vector, if a scalar, create evenly spaced windows
 if length(window) == 1
     window = unique(floor(logspace(0,round(log10(max(v(:,FRAME)))), window)));
 end
-
-% convert to meters
-v(:,X:Z) = v(:,X:Z) * calib_um * 1e-6;
 
 
 % for every bead

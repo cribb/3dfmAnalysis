@@ -1,4 +1,4 @@
-function plot_msd(d, h, optstring)
+function h = plot_msd(d, h, optstring)
 % PLOT_MSD plots the graph of mean square displacement versus tau for an aggregate number of beads 
 %
 % 3DFM function

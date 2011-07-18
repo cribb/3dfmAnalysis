@@ -1,4 +1,4 @@
-function plot_ve(v, freq_type, h, optstring)
+function h = plot_ve(v, freq_type, h, optstring)
 % PLOT_VE plots the viscoelastic moduli using the ve output structure 
 %
 % 3DFM function
@@ -148,7 +148,7 @@ end
 
   xlabel(freq_label);
   ylabel(y_label);
-  h = legend(leg, 0);
+  legend(leg, 0);
   grid on;
   pretty_plot;
 % % 	
