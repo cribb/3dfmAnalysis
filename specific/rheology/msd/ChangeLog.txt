@@ -1,3 +1,6 @@
+2011-07-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* video_msd.m:  assumes numeric input (in place of file names) has units of pixels (the same as if the file were loaded) and uses the calib_um accordingly.
+
 2011-07-18  Jeremy Cribb <jcribb@email.unc.edu>
 	* plot_msd.m: now returns the figure handle created/used when plotting the msd.
 	* plot_ve.m: same.
