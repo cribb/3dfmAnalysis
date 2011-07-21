@@ -1,3 +1,6 @@
+2011-07-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m: handles units for MSD appropriately with new video_MSD function.
+
 2011-07-18  Jeremy Cribb <jcribb@email.unc.edu>
 	* .cvsignore: added.  instructs CVS to ignore .asv files.
 	* evt_GUI.m:  can now load several specific and selected files at once.  not heavily tested yet, but seems to function as expected.

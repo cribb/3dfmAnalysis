@@ -1320,8 +1320,10 @@ function plot_data(hObject, eventdata, handles)
        strcmp(AUXtype, 'Diffusivity') || ...
        strcmp(AUXtype, 'MSD histogram')
         if handles.recomputeMSD % && get(handles.checkbox_msdmean, 'Value')
-            mymsd = video_msd(data, win, frame_rate, calib_um, 'n');            
-            myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n', 1);
+            data_in_correct_units = data;
+            data_in_correct_units(:,X:Z) = data(:,X:Z) * calib_um * 1e-6;
+            mymsd = video_msd(data_in_correct_units, win, frame_rate, calib_um, 'n');            
+            myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n');
             myD = mymsd.msd ./ (4 .* mymsd.tau);
             handles.mymsd = mymsd;
             handles.myve  = myve;
