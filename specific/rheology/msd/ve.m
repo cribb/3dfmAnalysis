@@ -1,4 +1,4 @@
-function v = ve(d, bead_radius, freq_type, plot_results, nmin)
+function v = ve(d, bead_radius, freq_type, plot_results)
 % VE computes the viscoelastic moduli from mean-square displacement data 
 %
 % 3DFM function
@@ -22,10 +22,6 @@ function v = ve(d, bead_radius, freq_type, plot_results, nmin)
 %  - This algorithm came from Mason 2000 Rheol Acta paper.
 %  
 
-if (nargin < 5) || isempty(nmin)     
-    nmin = 1;   
-end
-
 if (nargin < 3) || isempty(freq_type)
     freq_type = 'f';   
 end
@@ -42,13 +38,6 @@ msd = d.msd;
 tau = d.tau;
   N = d.n; % corresponds to the number of trackers at each tau
 counts = d.ns; % corresponds to the number of estimates for each bead at each tau
-
-%   pause;
-  
-% idx = find(N >= nmin);
-% tau = tau(idx,:);
-% msd = msd(idx,:);
-%   N = N(idx,:);
 
 meantau = nanmean(tau,2);
 % meanmsd = nanmean(msd,2);
@@ -73,11 +62,6 @@ meanmsd = 10 .^ (mean_logmsd);
 Vishmat = nansum(weights .* (repmat(mean_logmsd, 1, numbeads) - logmsd).^2, 2);
 msderr =  sqrt(Vishmat ./ N);
 
-
-% errmsd = nanstd(msd, [], 2) ./ sqrt(N);
-% 
-% errhmsd = meanmsd + errmsd;
-% errlmsd = meanmsd - errmsd;
 
 errhmsd = 10 .^ (mean_logmsd + msderr);
 errlmsd = 10 .^ (mean_logmsd - msderr);
@@ -104,9 +88,6 @@ v.error.npp = abs(mygser.npp - mingser.npp);
 
 v.n = N;
 
-% assignin('base', 'msdjac', d);
-% assignin('base', 'vejac', v);
-
 % plot output
 if (nargin < 4) || isempty(plot_results) || strncmp(plot_results,'y',1)  
     fig1 = figure; fig2 = figure;
@@ -115,6 +96,8 @@ if (nargin < 4) || isempty(plot_results) || strncmp(plot_results,'y',1)
 end;
 
 return;
+
+
 
 function v = gser(tau, msd, N, bead_radius)
     k = 1.3806e-23;

@@ -61,9 +61,10 @@ if ~isnumeric(files)
     % load video data
     v = load_video_tracking(files, frame_rate, 'm', calib_um, 'relative', 'yes', 'table');
 else
-    % in this case, we assume that the incoming units are "pixels" (use same scale)
+    % in this case, we assume that the incoming units are in their intended
+    % form
     v = files;
-    v(:,X:Z) = v(:,X:Z) * calib_um * 1e-6;
+    % v(:,X:Z) = v(:,X:Z) * calib_um * 1e-6;
 end
 
 % handle windows vector, if a scalar, create evenly spaced windows

@@ -1,3 +1,7 @@
+2011-07-20  Jeremy Cribb <jcribb@email.unc.edu>
+	* video_msd.m:  uses numeric input (in place of file names) regardless of input units and ignores the conversion with calib_um. 
+	* ve.m: removed old commented code.  removed a parameter that is no longer needed.
+
 2011-07-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* video_msd.m:  assumes numeric input (in place of file names) has units of pixels (the same as if the file were loaded) and uses the calib_um accordingly.
 
