@@ -1,3 +1,6 @@
+2011-07-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: can now input a vector as the calibum parameter for converting pixels to microns.  An error is thrown if the number of input files does not equal the number of calibum values.  If one calibum value is used, it becomes tiled for all input files (it assumes every file uses same calibration value).
+
 2011-07-18  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m: can now handle input filenames as the type of structure array outputted by matlab's 'dir'.	
 

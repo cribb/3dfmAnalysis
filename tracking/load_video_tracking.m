@@ -54,6 +54,12 @@ if length(filelist) < 1
     error(['No files found matching ' filemask '.']);
 end
 
+if ( length(filelist) ~= length(calib_um) ) && ( length(calib_um) == 1 )
+    calib_um = repmat(calib_um, length(filelist), 1);
+elseif ( length(filelist) ~= length(calib_um) )
+    error('Mismatch between the number of files in inputted list and number of defined calib_um');
+end
+
 for fid = 1:length(filelist)
     
     file = filelist(fid).name;
@@ -177,11 +183,11 @@ for fid = 1:length(filelist)
     % handle the physical units
     units{X} = xyzunits;  units{Y} = xyzunits;  units{Z} = xyzunits;
 	if strcmp(xyzunits,'m')
-		data(:,X:Z) = data(:,X:Z) .* calib_um * 1e-6;  % convert video coords from pixels to meters
+		data(:,X:Z) = data(:,X:Z) .* calib_um(fid) * 1e-6;  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'um')
-		data(:,X:Z) = data(:,X:Z) .* calib_um;  % convert video coords from pixels to meters
+		data(:,X:Z) = data(:,X:Z) .* calib_um(fid);  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'nm')
-		data(:,X:Z) = data(:,X:Z) .* calib_um * 1e3;  % convert video coords from pixels to nm
+		data(:,X:Z) = data(:,X:Z) .* calib_um(fid) * 1e3;  % convert video coords from pixels to nm
     else 
         units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
     end
