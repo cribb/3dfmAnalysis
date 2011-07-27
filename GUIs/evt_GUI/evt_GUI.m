@@ -29,7 +29,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 14-Apr-2011 19:26:22
+% Last Modified by GUIDE v2.5 27-Jul-2011 12:14:58
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -101,15 +101,25 @@ function pushbutton_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 % --- Executes on button press in radio_selected_dataset.
 function radio_selected_dataset_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Value', 1);
-	set(handles.radio_boundingbox, 'Value', 0);
+	set(handles.radio_insideboundingbox, 'Value', 0);
+    set(handles.radio_outsideboundingbox, 'Value', 0);
 	set(handles.radio_deletetimebefore, 'Value', 0);
 	set(handles.radio_deletetimeafter, 'Value', 0);
-
     
-% --- Executes on button press in radio_boundingbox.
-function radio_boundingbox_Callback(hObject, eventdata, handles)
+% --- Executes on button press in radio_insideboundingbox.
+function radio_insideboundingbox_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Value', 0);
-	set(handles.radio_boundingbox, 'Value', 1);
+	set(handles.radio_insideboundingbox, 'Value', 1);
+    set(handles.radio_outsideboundingbox, 'Value', 0);
+	set(handles.radio_deletetimebefore, 'Value', 0);
+	set(handles.radio_deletetimeafter, 'Value', 0);
+    
+
+% --- Executes on button press in radio_insideboundingbox.
+function radio_outsideboundingbox_Callback(hObject, eventdata, handles)
+	set(handles.radio_selected_dataset, 'Value', 0);
+	set(handles.radio_insideboundingbox, 'Value', 0);
+    set(handles.radio_outsideboundingbox, 'Value', 1);
 	set(handles.radio_deletetimebefore, 'Value', 0);
 	set(handles.radio_deletetimeafter, 'Value', 0);
     
@@ -117,7 +127,8 @@ function radio_boundingbox_Callback(hObject, eventdata, handles)
 % --- Executes on button press in radio_deletetimebefore.
 function radio_deletetimebefore_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Value', 0);
-	set(handles.radio_boundingbox, 'Value', 0);
+	set(handles.radio_insideboundingbox, 'Value', 0);
+    set(handles.radio_outsideboundingbox, 'Value', 0);
 	set(handles.radio_deletetimebefore, 'Value', 1);
 	set(handles.radio_deletetimeafter, 'Value', 0);
 
@@ -125,7 +136,8 @@ function radio_deletetimebefore_Callback(hObject, eventdata, handles)
 % --- Executes on button press in radio_deletetimebefore.
 function radio_deletetimeafter_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Value', 0);
-	set(handles.radio_boundingbox, 'Value', 0);
+	set(handles.radio_insideboundingbox, 'Value', 0);
+    set(handles.radio_outsideboundingbox, 'Value', 0);
 	set(handles.radio_deletetimebefore, 'Value', 0);
 	set(handles.radio_deletetimeafter, 'Value', 1);
     
@@ -186,7 +198,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         logentry(['Setting Path to: ' pname]);
         cd(pname);
         
-        if length(filename) > 1
+        if iscell(filename) 
             set(handles.edit_infile,'String', 'Multiple Files loaded.');
         else
             set(handles.edit_infile,'String', filename);
@@ -242,13 +254,15 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         return;
     end
     
-    if length(filename) > 1
+    if iscell(filename)
         set(handles.edit_infile, 'TooltipString', 'Multiple files loaded.');
     else
         set(handles.edit_infile, 'TooltipString', filename);
     end
+    
     set(handles.edit_infile, 'String', '');
-    if length(filename) > 1
+    
+    if iscell(filename)
         logentry('Multiple datasets successfully loaded...');
     else
         logentry(['Dataset, ' filename ', successfully loaded...']);
@@ -308,7 +322,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     % set the default output filename
     outfile = get(handles.edit_outfile, 'String');
     if isempty(outfile)
-        if length(filename) > 1
+        if iscell(filename) > 1
             outfile = [pname 'multiple_files.' 'evt.mat'];
         else
             outfile = [pname fname(1:end-3) 'evt.mat'];
@@ -317,7 +331,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         set(handles.edit_outfile, 'String', outfile);
     end
     
-    if length(filename) > 1
+    if iscell(filename) > 1
         set(handles.edit_outfile, 'TooltipString', 'Multiple files loaded.');
     else
         set(handles.edit_outfile, 'TooltipString', outfile);
@@ -411,7 +425,8 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     set(handles.checkbox_neutoffsets                , 'Enable', 'on');
     set(handles.checkbox_overlayxy                  , 'Enable', 'on');
     set(handles.radio_selected_dataset              , 'Enable', 'on');
-    set(handles.radio_boundingbox                   , 'Enable', 'on');
+    set(handles.radio_insideboundingbox             , 'Enable', 'on');
+    set(handles.radio_outsideboundingbox            , 'Enable', 'on');
     set(handles.radio_deletetimebefore              , 'Enable', 'on');
     set(handles.radio_deletetimeafter               , 'Enable', 'on');
     set(handles.pushbutton_Edit_Data                , 'Enable', 'on');
@@ -479,10 +494,11 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
     
     global hand;
     
-    set(handles.radio_selected_dataset, 'Enable', 'Off');
-	set(handles.radio_boundingbox,      'Enable', 'Off');
-    set(handles.radio_deletetimebefore, 'Enable', 'Off');
-    set(handles.radio_deletetimeafter,  'Enable', 'Off');
+    set(handles.radio_selected_dataset,   'Enable', 'Off');
+	set(handles.radio_insideboundingbox,  'Enable', 'Off');
+	set(handles.radio_outsideboundingbox, 'Enable', 'Off');
+    set(handles.radio_deletetimebefore,   'Enable', 'Off');
+    set(handles.radio_deletetimeafter,    'Enable', 'Off');
     
 	
 	if (get(handles.radio_selected_dataset, 'Value'))
@@ -496,7 +512,7 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
         set(handles.radio_XYfig, 'Enable', 'on');
         set(handles.radio_AUXfig,'Enable', 'on');        
         
-    elseif (get(handles.radio_boundingbox, 'Value'))
+    elseif (get(handles.radio_insideboundingbox, 'Value'))
         set(handles.radio_XTfig, 'Enable', 'off');
         set(handles.radio_XYfig, 'Enable', 'off');
         set(handles.radio_AUXfig,'Enable', 'off');
@@ -505,7 +521,18 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
         
         set(handles.radio_XTfig, 'Enable', 'on');
         set(handles.radio_XYfig, 'Enable', 'on');
-        set(handles.radio_AUXfig,'Enable', 'on');        
+        set(handles.radio_AUXfig,'Enable', 'on');       
+        
+    elseif (get(handles.radio_outsideboundingbox, 'Value'))
+        set(handles.radio_XTfig, 'Enable', 'off');
+        set(handles.radio_XYfig, 'Enable', 'off');
+        set(handles.radio_AUXfig,'Enable', 'off');
+        
+        delete_outside_boundingbox(hObject, eventdata, handles);
+        
+        set(handles.radio_XTfig, 'Enable', 'on');
+        set(handles.radio_XYfig, 'Enable', 'on');
+        set(handles.radio_AUXfig,'Enable', 'on');  
         
     elseif (get(handles.radio_deletetimebefore, 'Value'))
         set(handles.radio_XTfig, 'Value', 1, 'Enable', 'off');
@@ -517,6 +544,7 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
         set(handles.radio_XTfig, 'Enable', 'on');
         set(handles.radio_XYfig, 'Enable', 'on');
         set(handles.radio_AUXfig, 'Enable', 'on');
+        
     elseif (get(handles.radio_deletetimeafter, 'Value'))
         set(handles.radio_XTfig, 'Value', 1, 'Enable', 'off');
         set(handles.radio_XYfig, 'Value', 0, 'Enable', 'off');
@@ -535,10 +563,11 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
 
     handles = hand;
     
-	set(handles.radio_selected_dataset, 'Enable', 'On');
-	set(handles.radio_boundingbox, 'Enable', 'On');
-    set(handles.radio_deletetimebefore, 'Enable', 'On');
-    set(handles.radio_deletetimeafter, 'Enable', 'On');
+	set(handles.radio_selected_dataset,   'Enable', 'On');
+	set(handles.radio_insideboundingbox,  'Enable', 'On');
+	set(handles.radio_outsideboundingbox, 'Enable', 'On');
+    set(handles.radio_deletetimebefore,   'Enable', 'On');
+    set(handles.radio_deletetimeafter,    'Enable', 'On');
     
     handles.recomputeMSD = 1;
     
@@ -1696,6 +1725,72 @@ function delete_inside_boundingbox(hObject, eventdata, handles)
 
     hand = handles;
 
+function delete_outside_boundingbox(hObject, eventdata, handles)
+    global hand;
+    
+    video_tracking_constants;
+
+    if(get(handles.radio_XYfig, 'Value'))
+        active_fig = handles.XYfig;
+    elseif(get(handles.radio_XTfig, 'Value'))
+        active_fig = handles.XTfig;
+    else
+        logentry('Deleting data from the AUXplot is not allowed.');
+        return;
+    end
+    
+    figure(active_fig);
+    
+    table = handles.table;
+    
+    beadID = table(:,ID);
+    t = table(:,TIME) - handles.mintime;
+    x = table(:,X);
+    y = table(:,Y);
+    currentbead = get(handles.slider_BeadID, 'Value');
+    
+    [xm, ym] = ginput(2);
+    
+    if get(handles.radio_microns, 'Value')
+        calib_um = str2double(get(handles.edit_calib_um, 'String'));
+        
+        if(get(handles.radio_XYfig, 'Value'))
+            xm = xm / calib_um;
+            ym = ym / calib_um;
+        elseif(get(handles.radio_XTfig, 'Value'))
+            ym = ym / calib_um;
+        end
+        
+    end
+    
+    xlo = min(xm);
+    xhi = max(xm);
+    ylo = min(ym);
+    yhi = max(ym);
+    
+    if get(handles.radio_XYfig, 'Value')
+        k = find( (x > xlo & x < xhi & y > ylo & y < yhi ));
+
+        handles.table = table(k,:);
+        handles.tstamp_times = handles.tstamp_times(k);
+
+    elseif get(handles.radio_XTfig, 'Value')
+        k = find( ~( ( (x > ylo & x < yhi) | (y > ylo & y < yhi) ) & ...
+                       (t > xlo & t < xhi) ) & beadID == currentbead );
+
+        table(k,:) = [];
+        handles.tstamp_times(k) = [];
+        handles.table = table;
+
+    elseif get(handles.radio_AUXfig, 'Value')
+        logentry('Deleting data from AUX plot is not allowed.');
+    end
+%     handles.table = table(k,:);
+%     handles.tstamp_times = handles.tstamp_times(k);
+    guidata(hObject, handles);
+
+    hand = handles;
+
     
 function delete_data_before_time(hObject, eventdata, handles) 
 
@@ -1792,26 +1887,7 @@ function logentry(txt)
      headertext = [logtimetext 'evt_gui: '];
      
      fprintf('%s%s\n', headertext, txt);
-
    
-% function [tau, mymsd, beadID] = evt_msd(data, window, calib_um)
-% 
-%     video_tracking_constants;
-% 
-%     % for every bead
-%     beadID = unique(data(:,ID))';
-%     for bead_idx = beadID;
-% 
-%         b = get_bead(data, bead_idx);    
-%         % framemax = max(data(:,FRAME));
-% 
-%         % call up the MSD program to compute the MSD for each bead
-%         [tau(:, bead_idx+1), mymsd(:, bead_idx+1)] = msd(b(:, TIME), b(:, X:Z)*calib_um*1e-6, window);
-%         
-%     end
-%     
-% return;
-
 
 % --- Executes on button press in checkbox_minFrames.
 function checkbox_minFrames_Callback(hObject, eventdata, handles)
@@ -1949,3 +2025,94 @@ function edit_filename_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% % % --- Executes on button press in pushbutton_select_chosen_trackers.
+% % function pushbutton_select_chosen_trackers_Callback(hObject, eventdata, handles)
+% % % hObject    handle to pushbutton_select_chosen_trackers (see GCBO)
+% % % eventdata  reserved - to be defined in a future version of MATLAB
+% % % handles    structure with handles and user data (see GUIDATA)
+% %     video_tracking_constants;
+% %     
+% %     if(get(handles.radio_XYfig, 'Value'))
+% %         active_fig = handles.XYfig;
+% %     elseif(get(handles.radio_XTfig, 'Value'))
+% %         active_fig = handles.XYfig;
+% %     elseif(get(handles.radio_AUXfig, 'Value'))
+% %         active_fig = handles.XYfig;
+% %     end
+% % 
+% %     if get(handles.radio_XYfig, 'Value') || get(handles.radio_XTfig, 'Value')
+% %         
+% %         if get(handles.radio_XTfig, 'Value')
+% %             logentry('Selecting closest dataset for XT plot does not make sense.  Resetting to XYplot');
+% %             set(handles.radio_XTfig, 'Value', 0);
+% %             set(handles.radio_XYfig, 'Value', 1);
+% %         end
+% %         
+% %         figure(handles.XYfig);
+% %         [xm, ym] = ginput(1);
+% % 
+% %         if get(handles.radio_microns, 'Value')
+% %             calib_um = str2double(get(handles.edit_calib_um, 'String'));
+% %             xm = xm / calib_um;
+% %             ym = ym / calib_um;
+% %         end        
+% % 
+% %         beadID = handles.table(:,ID);    
+% %         x = handles.table(:,X);
+% %         y = handles.table(:,Y);
+% % 
+% %         xval = repmat(xm, length(x), 1);
+% %         yval = repmat(ym, length(y), 1);
+% % 
+% %         dist = sqrt((x - xval).^2 + (y - yval).^2);
+% % 
+% %         bead_to_select = beadID(find(dist == min(dist)));
+% % 
+% %         set(handles.slider_BeadID, 'Value', round(bead_to_select));
+% %         set(handles.edit_BeadID, 'String', round(num2str(bead_to_select)));
+% %     end
+% %     
+% %     if get(handles.radio_AUXfig, 'Value')
+% %         
+% %         AUXplottypes = get(handles.popup_AUXplot, 'String');
+% %         AUXplotvalue = get(handles.popup_AUXplot, 'Value');
+% %         
+% %         myAUXplottype = AUXplottypes{AUXplotvalue};
+% %         
+% %         switch myAUXplottype
+% %             case 'MSD'
+% %                 figure(handles.AUXfig);
+% %                 
+% %                 mymsd = handles.mymsd;
+% % 
+% %                 [xm, ym] = ginput(1);
+% % 
+% %                 
+% %                 xval = repmat(xm, size(mymsd.tau));
+% %                 yval = repmat(ym, size(mymsd.msd));
+% %         
+% %                 beadID = handles.table(:,ID);    
+% %                 x = log10(mymsd.tau);
+% %                 y = log10(mymsd.msd);
+% % 
+% %                 dist = sqrt((x - xval).^2 + (y - yval).^2);
+% % 
+% %                 [mindist, bead_to_select] = min(min(dist));
+% % 
+% %                 bead_to_select = round(bead_to_select);
+% %                 
+% %                 set(handles.slider_BeadID, 'Value', bead_to_select-1);
+% %                 set(handles.edit_BeadID, 'Value', bead_to_select-1);
+% %                        
+% %             otherwise
+% %                 logentry('Select closest dataset not yet written for AUXplot type you chose');                
+% %                 return;
+% %         end
+% %     end
+% %     
+% %     
+% %     plot_data(hObject, eventdata, handles);
+
+
