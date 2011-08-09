@@ -1,3 +1,6 @@
+2011-08-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_wellpass.m:  re-ordered outputs to follow the function names convention of "well" then "pass".
+	
 2011-07-22  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_cell2well.m:  added.  converts the spreadsheet "cell" coordinate to a well ID.
 	* pan_wellpass.m:  added.  extracts the pass and well IDs from a filename.
