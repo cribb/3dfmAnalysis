@@ -9,6 +9,10 @@ if nargin < 2 || isempty(flag)
     dim = 1;
 end
 
+if (length(size(X)) == 2)  && (size(X,1) == 1)
+    X = X(:);
+end
+
     v = std(X, flag, dim) ./ sqrt(size(X,dim));
 
 return;

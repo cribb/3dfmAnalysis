@@ -1,3 +1,6 @@
+2011-08-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* stderr.m:  now checks size and reorients input vector if needed.
+
 2009-05-30  Jeremy Cribb <jcribb@email.unc.edu>
 	* sawalk.m: constructs a self avoiding walk.
 
