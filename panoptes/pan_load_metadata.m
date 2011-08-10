@@ -42,7 +42,7 @@ end
 
 % Read in the well layout file, if we have one
 if ~isempty(outs.files.layout)
-    outs.plate = pan_well_layout_to_struct( outs.files.layout.name , plate_type );
+    outs.plate = pan_read_well_layout( outs.files.layout.name , plate_type );
 end
 
 % read in the mcu parameters
