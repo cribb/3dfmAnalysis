@@ -47,8 +47,8 @@ fid = fopen(outfile, 'w');
 %%%%  Calculate the MSD for different cell types
 
 % myparam = 'metadata.plate.solution.molar_concentration';
-myparam = 'metadata.plate.well_map';
-% myparam = 'metadata.plate.cell.name';
+% myparam = 'metadata.plate.well_map';
+myparam = 'metadata.plate.cell.name';
 
 % compute the MSD for each condition defined by 'myparam'
 [msds molar_conc] = pan_combine_data(metadata, myparam);

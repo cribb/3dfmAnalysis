@@ -1,4 +1,7 @@
 2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_publish_CellExpt.m:  corrected report output.
+
+2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_gen_filelist.m:  added.  generates a list of filenames that match the wells,passes parameters given to it.
 	* pan_MCU2um.m:  added.  converts MCU parameter to microns.
 	* pan_process_CellExpt.m:  fixed typo to function call.
