@@ -103,7 +103,7 @@ for fid = 1:length(filelist)
         % no timestamps in this vrpn file format
         tstamps = 'no';
     elseif isempty(fieldnames(dd))
-        logentry(['No data found in this file: ' file '.']);
+        logentry(['No data found in *' file '*.']);
         if ~exist('glommed_d', 'var')            
             glommed_d = [];
         end
@@ -211,6 +211,8 @@ for fid = 1:length(filelist)
         end
     end
 
+    logentry(['Loaded *' filelist(fid).name '* which contains ' num2str(max(data(:,ID))) ' initial trackers.']);
+    
     % now do all of the bead specific things
     for k = 0 : max(trackerID)    
                     
@@ -267,10 +269,12 @@ for fid = 1:length(filelist)
     % we don't want to repeat any beadIDs as we concatenate the
     % datasets from each filename in the stack.  To avoid this, we add
     % the max(beadID) to the newdata's beadID and then we concatenate.
-    if exist('glommed_d','var')
-        beadmax = max(glommed_d(:,ID));
-        data(:,ID) = data(:,ID) + beadmax + 1;            
-        glommed_d = [glommed_d ; data];
+    if exist('glommed_d','var')        
+        if ~isempty(glommed_d)
+            beadmax = max(glommed_d(:,ID));
+            data(:,ID) = data(:,ID) + beadmax + 1;            
+            glommed_d = [glommed_d ; data];
+        end
     else
         glommed_d = data;
     end    
