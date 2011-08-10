@@ -1,3 +1,6 @@
+2011-08-10   Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_video_diff_expt.m:  added documentation.  tweaked default values a few input parameters.
+
 2011-07-18   Jeremy Cribb <jcribb@email.unc.edu>
 	* sim_video_diff_expt.m:  now uses 'save_evtfile.m'
 

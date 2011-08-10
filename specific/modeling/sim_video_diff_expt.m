@@ -1,4 +1,35 @@
 function varargout = sim_video_diff_expt(filename, in_struct)
+% SIM_VIDEO_DIFF_EXPT simulates a bead diffusion experiment for a Newtonian fluid
+%
+% 3DFM function
+% specific/modeling
+% last modified 2011.07.22 (jcribb)
+%
+% This function simulates a bead diffusion experiment for a Newtonian
+% fluid.  
+%
+% [sim, out_struct] = sim_video_diff_expt(filename, in_struct)
+%
+% where "filename" is the filename where the simulation will be saved 
+%                  (uses evt_GUI 'evt' format) 
+%       "in_struct" is a structure that specifies the paramters for the
+%                   simulation.  Its fields include:
+%
+%         in_struct.seed = seed value to give to random number generator.
+%                          If this value is absent, the generator uses the 
+%                          system time as the seed.
+%         in_struct.numpaths = number of bead paths.  Default: 10.
+%         in_struct.viscosity = solution viscosity in [Pa s].  Default: 0.023 (2 M sucrose).
+%         in_struct.bead_radius = bead radius in [m].  Default: 0.5e-6. 
+%         in_struct.frame_rate = frame rate of camera in [fps].  Default: 30.
+%         in_struct.duration = duration of video in [s].  Default: 60.
+%         in_struct.tempK = temperature of fluid in [K].  Default: 300.
+%         in_struct.field_width = width of video frame in [px].  Default: 648.
+%         in_struct.field_height = height of video frame in [px].  Default: 484.
+%         in_struct.calib_um = conversion unit in [microns/pixel].  Default: 0.152.
+%         in_struct.xdrift_vel = x-drift in [meters/frame].  Default: 0.
+%         in_struct.ydrift_vel = y-drift in [meters/frame].  Default: 0.
+%
 
 video_tracking_constants; 
 
@@ -13,7 +44,7 @@ end
 
 in_struct = param_check(in_struct);
 
-    seed         = in_struct.seed;
+    seed         = in_struct.seed;           %#ok<NASGU>
     numpaths     = in_struct.numpaths;
     viscosity    = in_struct.viscosity;      % [Pa s]
     bead_radius  = in_struct.bead_radius;    % [m]
@@ -33,10 +64,10 @@ simout = [];
 
     
     % time vector
-    t = (1/frame_rate) * [1:(frame_rate*duration)]' - (1/frame_rate); 
+    t = (1/frame_rate) * [1:(frame_rate*duration)]' - (1/frame_rate);  %#ok<NBRAK>
     
     % vector of frame ID's
-    fr = [1:(frame_rate*duration)]';
+    fr = [1:(frame_rate*duration)]'; %#ok<NBRAK>
     
     % xy tracker locations with zero offset
     xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
@@ -106,7 +137,7 @@ function out = param_check(in)
     end
     
     if ~isfield(in, 'viscosity') || isempty(in.viscosity)
-        in.viscosity = 0.01;     % [Pa s]
+        in.viscosity = 0.023;     % [Pa s]
     end
     
     if ~isfield(in, 'bead_radius') || isempty(in.bead_radius)
@@ -134,7 +165,7 @@ function out = param_check(in)
     end
 
     if ~isfield(in, 'calib_um') || isempty(in.calib_um)
-        in.calib_um = 0.179;      % [um/pixel]
+        in.calib_um = 0.152;      % [um/pixel]
     end
 
     if ~isfield(in, 'xdrift_vel') || isempty(in.xdrift_vel)
