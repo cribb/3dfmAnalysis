@@ -28,7 +28,8 @@ if nargin < 2 || isempty(fig_or_figfile)
 end
 
 if nargin < 1 || isempty(outf)
-    error('need a root filename for which to save the data.');
+    logentry('Error: Need a root filename for which to save the data. Exiting now.');
+    return;
 end
 
 switch type
@@ -66,3 +67,17 @@ plot2svg_2d([outf '.svg'], h);
 
 return;
 
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'gen_pub_plotfiles: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+     return;    
