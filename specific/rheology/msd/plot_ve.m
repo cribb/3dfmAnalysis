@@ -24,7 +24,13 @@ if nargin < 2 || isempty(freq_type)
     freq_type = 'f';
 end
 
-
+if nargin < 1 || isempty(v.tau)
+    logentry('No data to plot.  Exiting now.');
+    close(h);
+    h = [];
+    return;
+end
+    
 % pull out the variables we need for the plot from the ve data structure.
 f   = v.f;
 w   = v.w;
@@ -164,3 +170,17 @@ end
 % % 	pretty_plot;
 % %     
     
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'plot_ve: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+     return;    

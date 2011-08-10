@@ -1,3 +1,12 @@
+2011-08-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* getMSDslope.m:  now handles empty case for input parameters.
+	* msd.m: removed 'winedge' parameter.  now keeps squared displacements "r^2" only the function is asked to output it.
+	* plot_msd.m: now handles empty case for input parameters.  changed coloring and linewidth of the mean to make it easier to see amongst individual measurments.
+	* msdstat.m: now handles empty case for input parameters.  added logentry capability.
+	* plot_ve.m: same.
+	* ve.m: same.
+	* video_msd.m: same.  also handles squared displacments only when asked.	
+
 2011-07-20  Jeremy Cribb <jcribb@email.unc.edu>
 	* video_msd.m:  uses numeric input (in place of file names) regardless of input units and ignores the conversion with calib_um. 
 	* ve.m: removed old commented code.  removed a parameter that is no longer needed.

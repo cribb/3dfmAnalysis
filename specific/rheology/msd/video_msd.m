@@ -1,4 +1,4 @@
-function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, winedge)
+function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, calc_r2)
 % VIDEO_MSD computes mean square displacements of an aggregate number of video tracked beads via the Stokes-Einstein relation 
 %
 % 3DFM function
@@ -29,10 +29,31 @@ function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, winedg
 %        - default make_plot = yes
 %
 
-
 % initializing arguments
+if nargin < 6 || isempty(calc_r2)
+    calc_r2 = 0;
+elseif strfind(calc_r2, 'y')
+    calc_r2 = 1;
+end
+
 if (nargin < 1) || isempty(files)  
-    files = '*.mat'; 
+    logentry('No files defined. Exiting now.')
+    
+    if length(window) > 1
+        empty_set = NaN(size(window));
+    elseif length(window) == 1
+        empty_set = NaN(window,1);
+    end
+    
+    vmsd.tau = empty_set;
+    vmsd.msd = empty_set;
+    if calc_r2
+        vmsd.r2 = [];
+    end
+    vmsd.n = empty_set;
+    vmsd.ns = empty_set;
+
+    return;
 end;
 
 if (nargin < 2) || isempty(window)  
@@ -47,9 +68,7 @@ if (nargin < 4) || isempty(calib_um)
     calib_um = 0.152; 
 end;
 
-if nargin < 6 || isempty(winedge)
-    winedge = 1;
-end
+
 
 % load the constants that identify the output's column headers for the current
 % version of the vrpn-to-matlab program.
@@ -76,16 +95,13 @@ end
 % for every bead
 beadID = unique(v(:,ID))';
 
-tau = NaN(length(window), length(beadID));
-mymsd = NaN(length(window), length(beadID));
+tau    = NaN(length(window), length(beadID));
+mymsd  = NaN(length(window), length(beadID));
 counts = NaN(length(window), length(beadID));
-% myr2 = NaN * zeros(length(window), length(beadID), max(v(:,FRAME)+1));
 
-tau = NaN * ones(length(window), length(beadID));
-mymsd = NaN * ones(length(window), length(beadID));
-
-% myr2 = NaN * zeros(length(window), length(beadID), max(v(:,FRAME)+1));
-
+if calc_r2
+    myr2   = NaN(length(window), length(beadID), max(v(:,FRAME)+1));
+end;
 
 for k = 1 : length(beadID);
     TIME   = 1; 
@@ -98,13 +114,20 @@ for k = 1 : length(beadID);
     b = get_bead(v, beadID(k));    
     
     % call up the MSD kernel-function to compute the MSD for each bead    
-    [tau_ msd_ nbead r2] = msd(b(:, TIME), b(:, X:Y), window, winedge);
+    if calc_r2
+        [tau_ msd_ nbead r2] = msd(b(:, TIME), b(:, X:Y), window);
+    else
+        [tau_ msd_ nbead]    = msd(b(:, TIME), b(:, X:Y), window);
+    end
     
     tau(:,k) = tau_; 
     mymsd(:,k) = msd_;
     counts(:,k) = nbead;
-    [ro, cl] = size(r2);
-    myr2(1:ro, k, 1:cl) = r2;
+    
+    if calc_r2
+        [ro, cl] = size(r2);
+        myr2(1:ro, k, 1:cl) = r2;
+    end    
 
 end;
 
@@ -122,7 +145,9 @@ sample_count = sample_count(idx);
 % output structure
 vmsd.tau = tau;
 vmsd.msd = mymsd;
-vmsd.r2 = myr2;
+if calc_r2
+    vmsd.r2 = myr2;
+end
 vmsd.n = sample_count;
 vmsd.ns = counts;
 
@@ -134,3 +159,17 @@ end;
 return;
 
 
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'video_msd: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+     return;    

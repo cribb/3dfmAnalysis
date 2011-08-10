@@ -25,6 +25,13 @@ if nargin < 2 || isempty(h)
     h = figure;
 end
 
+if nargin < 1 || isempty(d.tau)
+    logentry('No data to plot.  Exiting now.');
+    close(h);
+    h = [];
+    return;
+end
+
 % calculate statistical measures for msd and plant into data structure
 d = msdstat(d);
 
@@ -43,11 +50,11 @@ elseif strcmpi(optstring, 'm')
 elseif strcmpi(optstring, 'am')
     plot(d.logtau, d.logmsd, 'b', d.mean_logtau, d.mean_logmsd, 'k.-');
 elseif strcmpi(optstring, 'me') || strcmpi(optstring, 'e')
-    errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, 'k.-');
+    errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, '.-', 'Color', 'cyan', 'LineWidth', 2);
 elseif strcmpi(optstring, 'ame')
     plot(log10(d.tau), log10(d.msd), 'b-');
     hold on;
-        errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, 'k.-');
+        errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, '.-', 'Color', 'cyan', 'LineWidth', 2);
     hold off;
 end
 
@@ -67,3 +74,19 @@ pretty_plot;
 refresh(h);    
 
 return;
+
+
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'plot_msd: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+     return;    

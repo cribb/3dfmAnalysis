@@ -1,4 +1,4 @@
-function varargout = msd(t, data, window, winedge)
+function varargout = msd(t, data, window)
 % MSD computes the mean-square displacements (via the Stokes-Einstein relation) for a single bead
 %
 % 3DFM function
@@ -32,22 +32,34 @@ if (nargin < 3) || isempty(window)
     window = [1 2 5 10 20 50 100 200 500 1000 1001]; 
 end;
 
-if nargin < 4 || isempty(winedge)
-    winedge = 1;
-end
+% if nargin < 4 || isempty(winedge)
+%     winedge = 1;
+% end
 
 % for every window size (or tau)
 warning('off', 'MATLAB:divideByZero');
 
 % preinitialize all output variables to maintain sizein == sizeout
-% r2out = zeros(length(window), size(data,1)) * NaN;
 tau   = NaN(length(window),1);
 msd   = NaN(length(window),1);
 count = NaN(length(window),1);
+if nargout == 4
+    r2out = NaN(length(window),1);
+end
 
     numpoints = size(data,1);
     
-    mywin = window( window < numpoints/winedge );    
+%     if numpoints == 1
+%         logentry('Insufficient points to compute any MSD value');
+%         varargout{1} = tau;
+%         varargout{2} = msd;
+%         varargout{3} = count;
+%         varargout{4} = r2out;        
+%         return;
+%     end
+    
+%     mywin = window( window < numpoints/winedge );    
+    mywin = window;    
     
     for w = 1:length(mywin)
     
@@ -74,13 +86,17 @@ count = NaN(length(window),1);
         tau(w, :)   = mywin(w) * mean(diff(t));        
         msd(w, :)   = mean(r2);
         count(w, :) = n;        
-        r2out(w,1:length(r2)) = r2;
+        if nargout == 4
+            r2out(w,1:length(r2)) = r2;
+        end
     end
 
     varargout{1} = tau;
     varargout{2} = msd;
     varargout{3} = count;
-    varargout{4} = r2out;
+    if nargout == 4
+        varargout{4} = r2out;
+    end
     
 warning('on', 'MATLAB:divideByZero');
 
@@ -88,3 +104,17 @@ return;
 
 
 
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'msd: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+     return;  

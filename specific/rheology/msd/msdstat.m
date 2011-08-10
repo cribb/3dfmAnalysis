@@ -1,5 +1,16 @@
 function msdout = msdstat(msdin)
 
+if nargin < 1 || isempty(msdin.tau)
+    logentry('Error:  No data to perform statistics on.  Exiting now.');
+    
+    msdout = msdin;
+    msdout.mean_logtau = NaN;
+    msdout.mean_logmsd = NaN;
+    msdout.msderr = NaN;
+    
+    return;
+end
+
 % renaming input structure
 tau    = msdin.tau;
 msd    = msdin.msd;
@@ -43,3 +54,20 @@ msdout.mean_logtau = mean_logtau;
 msdout.mean_logmsd = mean_logmsd;
 msdout.msderr = msderr;
 
+return;
+
+
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'msdstat: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+     return;

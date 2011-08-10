@@ -30,8 +30,23 @@ if (nargin < 2) || isempty(bead_radius)
     bead_radius = 0.5e-6; 
 end
 
-if (nargin < 1) || isempty(d)    
-    error('no data struct found'); 
+if (nargin < 1) || isempty(d.tau)    
+    logentry('Error: no input data found.  Exiting now.'); 
+
+    v.f = [];
+    v.w = [];
+    v.tau = [];
+    v.msd = [];
+    v.alpha = [];
+    v.gamma = [];
+    v.gstar = [];
+    v.gp = [];
+    v.gpp = [];
+    v.nstar = [];
+    v.np = [];
+    v.npp = [];
+    
+    return;
 end
 
 msd = d.msd;
@@ -153,3 +168,18 @@ function v = gser(tau, msd, N, bead_radius)
     v.npp = npp;
 
 return;
+
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 've: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+     return;    

@@ -10,6 +10,14 @@ tau_interp_step = min(diff(tau_exponents))/2;
 max_tau         = max(tau_exponents);
 tau_evenspace   = (min_tau : tau_interp_step : max_tau)';
 
+% handle case where empty dataset is sent
+if (isnan(min_tau) && isnan(max_tau)) || isempty(tau)
+    alpha = NaN;
+    tau_evenspace = NaN;
+    msd_evenspace = NaN;
+    return;
+end
+
 %Interpolate MSD to get evenly spaced MSD data
 warning('OFF', 'MATLAB:interp1:NaNinY');
 msd_evenspace = interp1(tau_exponents,...
@@ -75,3 +83,5 @@ if(0)
     ylabel('msd')
     hold off
 end
+
+return;
