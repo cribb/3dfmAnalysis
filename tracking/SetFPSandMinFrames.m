@@ -28,7 +28,7 @@ for i = 1:length(files)
     
     if ~isempty(d)
 
-        outfile = save_evtfile(filename, d);
+        outfile = save_evtfile(filename, d, 'pixels');
                
         if count <= 1
             outfilelist = dir(outfile);

@@ -1,4 +1,7 @@
 2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* SetFPSandMinFrames.m:  added scaling parameter.
+
+2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* load_video_tracking.m:  added logentries for empty files.  Handles empty cases better.
 
 2011-07-21  Jeremy Cribb <jcribb@email.unc.edu>
