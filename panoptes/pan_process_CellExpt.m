@@ -9,7 +9,7 @@ end
 
 
 metadata = pan_load_metadata(filepath, '96well');
-dataout  = panoptes_report(metadata);
+dataout  = pan_publish_CellExpt(metadata);
 
 
 if exityn == 'y'
