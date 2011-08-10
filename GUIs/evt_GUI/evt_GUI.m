@@ -29,7 +29,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 27-Jul-2011 12:14:58
+% Last Modified by GUIDE v2.5 27-Jul-2011 14:19:07
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -1102,6 +1102,34 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+       case 'Diffusivity @ a tau'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+       case 'Diffusivity vs. tau'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
        case 'temporal MSD'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1158,7 +1186,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-        case '2pt MSD'
+        case '2pt MSD ~~not implemented yet~~'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
@@ -1172,7 +1200,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'on', 'Enable', 'on');
             set(handles.text_temp           , 'Visible', 'on', 'Enable', 'on');
-        case '2pt GSER'
+        case '2pt MSD ~~not implemented yet~~'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
@@ -1346,7 +1374,7 @@ function plot_data(hObject, eventdata, handles)
 
     if strcmp(AUXtype, 'MSD')  || ...
        strcmp(AUXtype, 'GSER') || ...
-       strcmp(AUXtype, 'Diffusivity') || ...
+       strcmp(AUXtype, 'Diffusivity vs. tau') || ...
        strcmp(AUXtype, 'MSD histogram')
         if handles.recomputeMSD % && get(handles.checkbox_msdmean, 'Value')
             data_in_correct_units = data;
@@ -1483,7 +1511,7 @@ function plot_data(hObject, eventdata, handles)
             
             surf(m);
             
-        case 'Diffusivity'
+        case 'Diffusivity vs. tau'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
             
@@ -1493,6 +1521,11 @@ function plot_data(hObject, eventdata, handles)
             ylabel('Diffusivity [m^2/s]');
             grid on;
             pretty_plot;
+            
+        case 'Diffusivity @ a tau'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            
             
         case 'GSER'
             figure(handles.AUXfig);
@@ -2027,92 +2060,26 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% % % --- Executes on button press in pushbutton_select_chosen_trackers.
-% % function pushbutton_select_chosen_trackers_Callback(hObject, eventdata, handles)
-% % % hObject    handle to pushbutton_select_chosen_trackers (see GCBO)
-% % % eventdata  reserved - to be defined in a future version of MATLAB
-% % % handles    structure with handles and user data (see GUIDATA)
-% %     video_tracking_constants;
-% %     
-% %     if(get(handles.radio_XYfig, 'Value'))
-% %         active_fig = handles.XYfig;
-% %     elseif(get(handles.radio_XTfig, 'Value'))
-% %         active_fig = handles.XYfig;
-% %     elseif(get(handles.radio_AUXfig, 'Value'))
-% %         active_fig = handles.XYfig;
-% %     end
-% % 
-% %     if get(handles.radio_XYfig, 'Value') || get(handles.radio_XTfig, 'Value')
-% %         
-% %         if get(handles.radio_XTfig, 'Value')
-% %             logentry('Selecting closest dataset for XT plot does not make sense.  Resetting to XYplot');
-% %             set(handles.radio_XTfig, 'Value', 0);
-% %             set(handles.radio_XYfig, 'Value', 1);
-% %         end
-% %         
-% %         figure(handles.XYfig);
-% %         [xm, ym] = ginput(1);
-% % 
-% %         if get(handles.radio_microns, 'Value')
-% %             calib_um = str2double(get(handles.edit_calib_um, 'String'));
-% %             xm = xm / calib_um;
-% %             ym = ym / calib_um;
-% %         end        
-% % 
-% %         beadID = handles.table(:,ID);    
-% %         x = handles.table(:,X);
-% %         y = handles.table(:,Y);
-% % 
-% %         xval = repmat(xm, length(x), 1);
-% %         yval = repmat(ym, length(y), 1);
-% % 
-% %         dist = sqrt((x - xval).^2 + (y - yval).^2);
-% % 
-% %         bead_to_select = beadID(find(dist == min(dist)));
-% % 
-% %         set(handles.slider_BeadID, 'Value', round(bead_to_select));
-% %         set(handles.edit_BeadID, 'String', round(num2str(bead_to_select)));
-% %     end
-% %     
-% %     if get(handles.radio_AUXfig, 'Value')
-% %         
-% %         AUXplottypes = get(handles.popup_AUXplot, 'String');
-% %         AUXplotvalue = get(handles.popup_AUXplot, 'Value');
-% %         
-% %         myAUXplottype = AUXplottypes{AUXplotvalue};
-% %         
-% %         switch myAUXplottype
-% %             case 'MSD'
-% %                 figure(handles.AUXfig);
-% %                 
-% %                 mymsd = handles.mymsd;
-% % 
-% %                 [xm, ym] = ginput(1);
-% % 
-% %                 
-% %                 xval = repmat(xm, size(mymsd.tau));
-% %                 yval = repmat(ym, size(mymsd.msd));
-% %         
-% %                 beadID = handles.table(:,ID);    
-% %                 x = log10(mymsd.tau);
-% %                 y = log10(mymsd.msd);
-% % 
-% %                 dist = sqrt((x - xval).^2 + (y - yval).^2);
-% % 
-% %                 [mindist, bead_to_select] = min(min(dist));
-% % 
-% %                 bead_to_select = round(bead_to_select);
-% %                 
-% %                 set(handles.slider_BeadID, 'Value', bead_to_select-1);
-% %                 set(handles.edit_BeadID, 'Value', bead_to_select-1);
-% %                        
-% %             otherwise
-% %                 logentry('Select closest dataset not yet written for AUXplot type you chose');                
-% %                 return;
-% %         end
-% %     end
-% %     
-% %     
-% %     plot_data(hObject, eventdata, handles);
 
 
+% --- Executes on selection change in popupmenu2.
+function popupmenu2_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

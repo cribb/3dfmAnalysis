@@ -1,3 +1,7 @@
+2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m:  fixed interface bug regarding the new "diffusivity" plot.
+	* evt_GUI.fig: same.
+
 2011-07-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.fig:  added 'delete outside bounding box' function (crop).
 	* evt_GUI.m:   same.  also corrected bug where multiple files were reported when only loading one file.
