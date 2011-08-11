@@ -38,6 +38,7 @@ end
 % read in the "wells.txt" file that contains the instrument configuration
 if ~isempty(outs.files.wells)
     outs.instr = pan_read_wells_txtfile( outs.files.wells.name );
+    outs.instr.fps_bright = 1e6 ./ (outs.instr.OnTime_bright + outs.instr.OffTime);
 end
 
 % Read in the well layout file, if we have one

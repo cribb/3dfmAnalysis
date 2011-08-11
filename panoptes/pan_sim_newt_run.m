@@ -53,7 +53,7 @@ for w = 1:length(wells)
     
     for p = 1:length(passes)
         
-        filename = [fileroot '_pass' num2str(passes(p)) '_well' num2str(wells(w)) '_TRACKED.vrpn.mat'];
+        filename = [fileroot '_video' '_pass' num2str(passes(p)) '_well' num2str(wells(w)) '_TRACKED.vrpn.mat'];
             
         mystruct.numpaths  = simstruct.numpaths(w);
         mystruct.viscosity = simstruct.viscosity(w);

@@ -1,3 +1,10 @@
+2011-08-11  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_load_metadata.m: now calculates frame rate from data saved in 'ExperimentConfig' file.
+	* pan_analyze_CellExpt.m:  updated to generate evt (filtered) files if necessary.
+	* pan_process_CellExpt.m:  same.
+	* pan_publish_CellExpt.m:  corrected reference to 'duration' of experiment to 'seconds', the way it's referenced in the 'ExperimentConfig' file.
+	* pan_sim_newt_run.m:  saves files in default 'vrpn.mat' format instead of 'evt' format.
+
 2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_publish_CellExpt.m:  corrected report output.
 

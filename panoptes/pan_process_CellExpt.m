@@ -7,8 +7,10 @@ if nargin < 2 || isempty(exityn)
     exityn = 'n';
 end
 
+cd(filepath);
 
 metadata = pan_load_metadata(filepath, '96well');
+dataout  = pan_analyze_CellExpt(filepath);
 dataout  = pan_publish_CellExpt(metadata);
 
 

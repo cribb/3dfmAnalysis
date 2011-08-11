@@ -21,7 +21,7 @@ function pan = pan_publish_CellExpt(metadata)
 
 nametag = metadata.instr.experiment;
 outf = metadata.instr.experiment;
-duration = metadata.instr.duration;
+duration = metadata.instr.seconds;
 fps_bright = metadata.instr.fps_bright;
 autofocus = metadata.instr.auto_focus;
 
