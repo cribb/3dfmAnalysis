@@ -45,23 +45,39 @@ function outs = filter_video_tracking(data, filt)
 %   Note that x and y ranges are converted to pixels if and only if 'units'
 %   is 'um'. In this case, then 'calib_um' must be supplied.
    
-video_tracking_constants;
+    video_tracking_constants;
 
-%  Handle inputs
-if (nargin < 2) || isempty(filt)
-    filt.min_frames = 0;
-    filt.min_pixels = 0;
-    filt.tcrop      = 0;
-    filt.xycrop     = 0;
-    filt.xyzunits   = 'pixels';
-    filt.calib_um   = 1;
-end
+    %  Handle inputs
+    if (nargin < 2) || isempty(filt)
+        filt.min_frames = 0;
+        filt.min_pixels = 0;
+        filt.tcrop      = 0;
+        filt.xycrop     = 0;
+        filt.xyzunits   = 'pixels';
+        filt.calib_um   = 1;
+    end
 
-if (nargin < 1) || isempty(data); 
-    logentry('No data inputs set. Exiting filter_video_tracking now.');
-    outs = [];
-    return;
-end
+    if (nargin < 1) || isempty(data); 
+        logentry('No data inputs set. Exiting filter_video_tracking now.');
+        outs = [];
+        return;
+    end
+
+    % convert everything to pixel units
+    if isempty(data)
+        logentry('Saving empty dataset.');
+        data = ones(0,10);    
+    elseif strcmp(filt.xyzunits,'m')
+        data(:,X:Z) = data(:,X:Z) ./ filt.calib_um * 1e6;  % convert video coords from pixels to meters
+    elseif strcmp(filt.xyzunits,'um')
+        data(:,X:Z) = data(:,X:Z) ./ filt.calib_um;  % convert video coords from pixels to meters
+    elseif strcmp(filt.xyzunits,'nm')
+        data(:,X:Z) = data(:,X:Z) ./ filt.calib_um * 1e-3;  % convert video coords from pixels to nm
+    elseif strcmp(filt.xyzunits, 'pixels')
+        % do nothing
+    else
+        units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
+    end
 
 
     %  Handle filters
@@ -97,6 +113,22 @@ end
         end
     end
 
+    % convert everything back to original units
+    if isempty(data)
+        logentry('Saving empty dataset.');
+        data = ones(0,10);    
+    elseif strcmp(filt.xyzunits,'m')
+        data(:,X:Z) = data(:,X:Z) .* filt.calib_um * 1e-6;  % convert video coords from pixels to meters
+    elseif strcmp(filt.xyzunits,'um')
+        data(:,X:Z) = data(:,X:Z) .* filt.calib_um;  % convert video coords from pixels to meters
+    elseif strcmp(filt.xyzunits,'nm')
+        data(:,X:Z) = data(:,X:Z) .* filt.calib_um * 1e3;  % convert video coords from pixels to nm
+    elseif strcmp(filt.xyzunits, 'pixels')
+        % do nothing
+    else
+        units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
+    end
+    
     outs = data;
 
 return;

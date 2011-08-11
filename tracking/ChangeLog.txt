@@ -1,3 +1,7 @@
+2011-08-11  Jeremy Cribb <jcribb@email.unc.edu>
+	* filter_video_tracking.m:  fixed bug where length scales weren't converted properly for the cropXY filter type.
+	* load_video_tracking.m:   updated documentation.
+	
 2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* SetFPSandMinFrames.m:  added scaling parameter.
 
