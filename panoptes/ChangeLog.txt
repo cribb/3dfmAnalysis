@@ -1,4 +1,7 @@
 2011-08-11  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_clean_path.m:  added.  cleans a data path of files created by panoptes analysis code.  useful for testing code on a dataset after making changes.
+
+2011-08-11  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_load_metadata.m: now calculates frame rate from data saved in 'ExperimentConfig' file.
 	* pan_analyze_CellExpt.m:  updated to generate evt (filtered) files if necessary.
 	* pan_process_CellExpt.m:  same.
