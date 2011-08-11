@@ -1,4 +1,7 @@
 2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m: fixed default values for filtering data.
+
+2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m:  fixed interface bug regarding the new "diffusivity" plot.
 	* evt_GUI.fig: same.
 

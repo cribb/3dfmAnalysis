@@ -237,8 +237,11 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     if get(handles.checkbox_xyCrop, 'Value')
         handles.filt.xycrop = str2num(get(handles.edit_xyCrop, 'String'));
     else
-        handles.filt.xycrop = 0;
+        handles.filt.xycrop = 1;
     end
+    
+    handles.filt.xyzunits = 'pixels';
+    handles.filt.calib_um = 1;
     
     
 %     try
@@ -376,17 +379,17 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     % set default figure parameters
     set(XYfig, 'Units', 'Normalized');
-    set(XYfig, 'Position', [0.1 0.05 0.4 0.4]);
+    set(XYfig, 'Position', [0.1 0.005 0.05 0.05]);
     set(XYfig, 'DoubleBuffer', 'on');
     set(XYfig, 'BackingStore', 'off');
     
     set(XTfig, 'Units', 'Normalized');
-    set(XTfig, 'Position', [0.51 0.05 0.4 0.4]);
+    set(XTfig, 'Position', [0.2 0.005 0.05 0.05]);
     set(XTfig, 'DoubleBuffer', 'on');
     set(XTfig, 'BackingStore', 'off');   
     
     set(AUXfig, 'Units', 'Normalized');
-    set(AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
+    set(AUXfig, 'Position', [0.2 0.525 0.05 0.05]);
     set(AUXfig, 'DoubleBuffer', 'on');
     set(AUXfig, 'BackingStore', 'off');  
 
