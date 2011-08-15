@@ -34,7 +34,7 @@ for k = 1:length(WELLSlocs)
     end
 end
 
-outs.well_list = str2num(cell2mat(outl(beg_of_wells:end)));
+outs.well_list = str2num(char(outl(beg_of_wells:end)));
 outs.well_list = outs.well_list(:)';
 
 % eliminate "wells" section of the wells.txt file
