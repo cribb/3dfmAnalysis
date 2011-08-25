@@ -1,3 +1,6 @@
+2011-08-25   Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_video_diff_expt.m:  switched from initial evt format to vrpn.mat format to better simiulate initial conditions.
+
 2011-08-10   Jeremy Cribb <jcribb@email.unc.edu>
 	* sim_video_diff_expt.m:  added documentation.  tweaked default values a few input parameters.
 
