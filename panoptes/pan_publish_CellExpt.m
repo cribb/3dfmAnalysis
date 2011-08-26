@@ -1,11 +1,11 @@
 function pan = pan_publish_CellExpt(metadata)
-% PANOPTES_PUBLISH_CELLEXPT Generates an html report file(s) for tests for Panoptes Cell Experiment
+% PAN_PUBLISH_CELLEXPT  Generates an html report for the Panoptes Cell Experiment
 %
-% 3DFM function
+% CISMM function
 % Panoptes
 % last modified 2011.08.10
 %  
-% Generates an html report file(s) for tests perfomed on Panoptes using the
+% Generates a report for tests perfomed on Panoptes using the
 % "Beads diffusing on Cells" paradigm.
 %
 % Generates and reports the results in a root html file with figures saved 

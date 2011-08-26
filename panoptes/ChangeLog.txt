@@ -1,4 +1,7 @@
 2011-08-26  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_publish_CellExpt.m:  updated documentation.
+
+2011-08-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* TODO.txt:  added.  keeping up with bugs and feature requests.  This project isn't patched into redmine.
 
 2011-08-15  Jeremy Cribb <jcribb@email.unc.edu>
