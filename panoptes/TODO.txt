@@ -1,0 +1,4 @@
+- FEATURE REQUEST: add more stragetically placed logentries so that when metadata files like well layout do not match the wells.txt data that information is presented instead of saying "data not found or not sized right, etc.."
+- MAJOR BUG: fix bug where empty dataset labels the bar graph incorrectly, e.g. skov gets called noise, noise gets called igrov, etc...
+- FEATURE REQUEST: add heatmap to published report.
+
