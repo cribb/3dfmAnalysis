@@ -1,3 +1,6 @@
+2011-09-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* convert_vidtable_to_beadstruct.m:  added.  converts a load_video_tracking 'table' type output to a bead struct array that other folks find useful (same format as that outputted by "export all beads" functionality in evt_GUI.
+
 2011-08-11  Jeremy Cribb <jcribb@email.unc.edu>
 	* filter_video_tracking.m:  fixed bug where length scales weren't converted properly for the cropXY filter type.
 	* load_video_tracking.m:   updated documentation.
