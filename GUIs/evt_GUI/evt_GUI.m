@@ -789,18 +789,20 @@ function pushbutton_export_bead_Callback(hObject, eventdata, handles)
 function pushbutton_export_all_beads_Callback(hObject, eventdata, handles)
     video_tracking_constants;
     
-    beadID = handles.table(:,ID);
-
-    for k = 0:max(beadID)
+%     beadID = handles.table(:,ID);
+% 
+%     for k = 0:max(beadID)
+%     
+%         idx = find(beadID == k);
+% 
+%         bead(k+1).t      = handles.table(idx,TIME) - min(handles.table(:,TIME));
+%         bead(k+1).x      = handles.table(idx,X);
+%         bead(k+1).y      = handles.table(idx,Y);
+%         bead(k+1).yaw    = handles.table(idx,YAW);
+%         
+%     end
     
-        idx = find(beadID == k);
-
-        bead(k+1).t      = handles.table(idx,TIME) - min(handles.table(:,TIME));
-        bead(k+1).x      = handles.table(idx,X);
-        bead(k+1).y      = handles.table(idx,Y);
-        bead(k+1).yaw    = handles.table(idx,YAW);
-        
-    end
+    bead = convert_vidtable_to_beadstruct(handles.table);
     
     assignin('base', 'beads', bead);
     
