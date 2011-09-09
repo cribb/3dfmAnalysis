@@ -52,7 +52,7 @@ if (nargin < 1) || isempty(files)
     end
     vmsd.n = empty_set;
     vmsd.ns = empty_set;
-
+    vmsd.window = empty_set;
     return;
 end;
 
@@ -135,11 +135,11 @@ end;
 % trim the data by removing window sizes that returned no data
 sample_count = sum(~isnan(mymsd),2);
 
-idx = find(sample_count > 0);
-tau = tau(idx,:);
-mymsd = mymsd(idx,:);
-counts = counts(idx,:);
-sample_count = sample_count(idx);
+% idx = find(sample_count > 0);
+% tau = tau(idx,:);
+% mymsd = mymsd(idx,:);
+% counts = counts(idx,:);
+% sample_count = sample_count(idx);
 
 
 % output structure
@@ -150,6 +150,7 @@ if calc_r2
 end
 vmsd.n = sample_count;
 vmsd.ns = counts;
+vmsd.window = window;
 
 % creation of the plot MSD vs. tau
 if (nargin < 5) || isempty(make_plot) || strncmp(make_plot,'y',1)  

@@ -4,9 +4,9 @@ if nargin < 1 || isempty(msdin.tau)
     logentry('Error:  No data to perform statistics on.  Exiting now.');
     
     msdout = msdin;
-    msdout.mean_logtau = NaN;
-    msdout.mean_logmsd = NaN;
-    msdout.msderr = NaN;
+    msdout.mean_logtau = NaN(size(msdin.window));
+    msdout.mean_logmsd = NaN(size(msdin.window));
+    msdout.msderr = NaN(size(msdin.window));
     
     return;
 end
@@ -31,6 +31,16 @@ msd(clip,:) = [];
 counts(clip,:) = [];
 sample_count(clip,:) = [];
 
+if isempty(tau) && isempty(msd) && isempty(counts) && isempty(sample_count)
+    msdout = msdin;
+    msdout.mean_logtau = NaN(size(msdin.window));
+    msdout.mean_logmsd = NaN(size(msdin.window));
+    msdout.msderr = NaN(size(msdin.window));
+    
+    return;
+end
+
+
 % setting up axis transforms for the figure plotted below.  You cannot plot
 % errorbars on a loglog plot, it seems, so we have to set it up here.
 logtau = log10(tau);
@@ -44,15 +54,41 @@ weights = counts ./ repmat(nansum(counts,2), 1, size(counts,2));
 mean_logtau = nanmean(logtau,2);
 mean_logmsd = nansum(weights .* logmsd, 2);
 
+% if the mean_logmsd is exactly equal to zero, then assume that every entry
+% in that row for logmsd (computed just above) was zero and the 'nansum' was then zero
+mean_logmsd( mean_logmsd == 0) = NaN;
+
 % computing error for logmsd
 Vishmat = nansum(weights .* (repmat(mean_logmsd, 1, numbeads) - logmsd).^2, 2);
 msderr =  sqrt(Vishmat ./ sample_count);
 
 % generating output structure
 msdout = msdin;
-msdout.mean_logtau = mean_logtau;
-msdout.mean_logmsd = mean_logmsd;
-msdout.msderr = msderr;
+
+% hacked the outputs to ensure a NaN vector when no data exist.  Probably
+% should be figured out more fundamentally than this, that is, as an
+% automatic output generated during the original computations and
+% variable/parameter value checks.
+msdout.logtau = logtau;
+msdout.logmsd = logmsd;
+
+if isempty(mean_logtau)
+    msdout.mean_logtau = NaN(size(msdin.tau,1),1);
+else
+    msdout.mean_logtau = mean_logtau;
+end
+
+if isempty(mean_logmsd)
+    msdout.mean_logmsd = NaN(size(msdin.msd,1),1);
+else
+    msdout.mean_logmsd = mean_logmsd;
+end
+
+if isempty(msderr)
+    msdout.msderr = NaN(size(msderr,1),1);
+else    
+    msdout.msderr = msderr;
+end
 
 return;
 
