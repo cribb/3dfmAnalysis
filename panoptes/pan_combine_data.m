@@ -13,7 +13,9 @@ logentry(['Aggregating across ' filtparam_name]);
 
 % other parameter settings
 plate_type = '96well';
-window = 35;
+
+window = metadata.window;
+
 freqtype = 'f';
 
 if isnumeric(filtparam)

@@ -1,3 +1,9 @@
+2011-09-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_analyze_CellExpt.m:  removed 'window' definition.
+	* pan_combine_data.m:  same.
+	* pan_load_metadata.m:  cosmetic changes to code/commenting.
+	* pan_process_CellExpt.m:  added 'window' definition to metadata structure.
+
 2011-08-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_publish_CellExpt.m:  updated documentation.
 

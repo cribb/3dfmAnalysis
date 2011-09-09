@@ -6,7 +6,6 @@ if ~exist('mode', 'var'), mode = []; end;
     
 % other parameter settings
 plate_type = '96well';
-window = 35;
 freqtype = 'f';
 
 [filepath, filt, mode] = check_params(filepath, filt, mode);
@@ -20,6 +19,7 @@ logentry('Loaded metadata');
         outs = [];
         return;
     end
+
     
 % if there are no 'evt' files then no filtering/editing has happened so
 % we'll filter now according to the values set in the filt structure

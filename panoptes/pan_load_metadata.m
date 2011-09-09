@@ -1,68 +1,68 @@
 function outs = pan_load_metadata(filepath, plate_type)
 
-if nargin < 2 || isempty(plate_type)
-    plate_type = '96well';
-end
+    if nargin < 2 || isempty(plate_type)
+        plate_type = '96well';
+    end
 
-if nargin < 1 || isempty('filepath')
-    filepath = '.';
-end
+    if nargin < 1 || isempty('filepath')
+        filepath = '.';
+    end
 
-cd(filepath);
+    cd(filepath);
 
-filelist = dir(filepath);
+    filelist = dir(filepath);
 
-% dictionary for loading appropriate files
-outs.files.wells     = dir('*ExperimentConfig*.txt');
-outs.files.layout    = dir('*WELL_LAYOUT*.csv');
-outs.files.MCUparams = dir('*MCUparams*.txt');
+    % dictionary for loading appropriate files
+    outs.files.wells     = dir('*ExperimentConfig*.txt');
+    outs.files.layout    = dir('*WELL_LAYOUT*.csv');
+    outs.files.MCUparams = dir('*MCUparams*.txt');
 
-% other file lists
-outs.files.video    = dir('*video*.vrpn.mat');
-outs.files.tracking = dir('*_TRACKED.vrpn.mat');
-outs.files.evt      = dir('*.vrpn.evt.mat');
+    % other file lists
+    outs.files.video    = dir('*video*.vrpn.mat');
+    outs.files.tracking = dir('*_TRACKED.vrpn.mat');
+    outs.files.evt      = dir('*.vrpn.evt.mat');
 
-outs = check_file_inputs(outs);
+    outs = check_file_inputs(outs);
 
-% if isempty(outs.files)
-%     % insufficient metadata
-%     return;
-% end
+    % if isempty(outs.files)
+    %     % insufficient metadata
+    %     return;
+    % end
 
-% read in the intrument's parameters
-if ~isfield(outs, 'files')
-    logentry('No metadata found.');
-    return;
-end
+    % read in the intrument's parameters
+    if ~isfield(outs, 'files')
+        logentry('No metadata found.');
+        return;
+    end
 
-% read in the "wells.txt" file that contains the instrument configuration
-if ~isempty(outs.files.wells)
-    outs.instr = pan_read_wells_txtfile( outs.files.wells.name );
-    outs.instr.fps_bright = 1e6 ./ (outs.instr.OnTime_bright + outs.instr.OffTime);
-end
+    % read in the "wells.txt" file that contains the instrument configuration
+    if ~isempty(outs.files.wells)
+        outs.instr = pan_read_wells_txtfile( outs.files.wells.name );
+        outs.instr.fps_bright = 1e6 ./ (outs.instr.OnTime_bright + outs.instr.OffTime);
+    end
 
-% Read in the well layout file, if we have one
-if ~isempty(outs.files.layout)
-    outs.plate = pan_read_well_layout( outs.files.layout.name , plate_type );
-end
+    % Read in the well layout file, if we have one
+    if ~isempty(outs.files.layout)
+        outs.plate = pan_read_well_layout( outs.files.layout.name , plate_type );
+    end
 
-% read in the mcu parameters
-if ~isempty(outs.files.MCUparams)
-    outs.mcuparams = pan_read_MCUparamsfile( outs.files.MCUparams.name );
-end
+    % read in the mcu parameters
+    if ~isempty(outs.files.MCUparams)
+        outs.mcuparams = pan_read_MCUparamsfile( outs.files.MCUparams.name );
+    end
 
 
-if ~isempty(outs.files.tracking)
-    tmp = outs.files.tracking;
-elseif ~isempty(outs.files.evt)
-    tmp = outs.files.evt;
-end
+    if ~isempty(outs.files.tracking)
+        tmp = outs.files.tracking;
+    elseif ~isempty(outs.files.evt)
+        tmp = outs.files.evt;
+    end
 
-    
-for k = 1:length(tmp)
-    [well_(k) pass_(k)] = pan_wellpass(tmp(k).name);
-end
-    
+
+    for k = 1:length(tmp)
+        [well_(k) pass_(k)] = pan_wellpass(tmp(k).name);
+    end
+
     outs.well_list = unique(well_)';
     outs.pass_list = unique(pass_)';    
     
