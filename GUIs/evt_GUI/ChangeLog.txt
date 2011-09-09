@@ -1,3 +1,6 @@
+2011-09-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m:  fixed bug that crashed evt_GUI when multiple files were loaded.
+
 2011-09-08  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m: updated to use 'convert_vidtable_to_beadstruct' function
 

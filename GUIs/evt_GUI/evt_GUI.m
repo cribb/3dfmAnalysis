@@ -325,7 +325,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     % set the default output filename
     outfile = get(handles.edit_outfile, 'String');
     if isempty(outfile)
-        if iscell(filename) > 1
+        if iscell(filename)
             outfile = [pname 'multiple_files.' 'evt.mat'];
         else
             outfile = [pname fname(1:end-3) 'evt.mat'];
@@ -334,7 +334,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         set(handles.edit_outfile, 'String', outfile);
     end
     
-    if iscell(filename) > 1
+    if iscell(filename)
         set(handles.edit_outfile, 'TooltipString', 'Multiple files loaded.');
     else
         set(handles.edit_outfile, 'TooltipString', outfile);
