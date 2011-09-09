@@ -4,6 +4,8 @@ if nargin < 1 || isempty(msdin.tau)
     logentry('Error:  No data to perform statistics on.  Exiting now.');
     
     msdout = msdin;
+    msdout.logtau = NaN(size(msdin.window));
+    msdout.logmsd = NaN(size(msdin.window));
     msdout.mean_logtau = NaN(size(msdin.window));
     msdout.mean_logmsd = NaN(size(msdin.window));
     msdout.msderr = NaN(size(msdin.window));
@@ -33,10 +35,11 @@ sample_count(clip,:) = [];
 
 if isempty(tau) && isempty(msd) && isempty(counts) && isempty(sample_count)
     msdout = msdin;
+    msdout.logtau = NaN(size(msdin.window));
+    msdout.logmsd = NaN(size(msdin.window));
     msdout.mean_logtau = NaN(size(msdin.window));
     msdout.mean_logmsd = NaN(size(msdin.window));
     msdout.msderr = NaN(size(msdin.window));
-    
     return;
 end
 

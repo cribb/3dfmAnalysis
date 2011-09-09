@@ -1,4 +1,7 @@
 2011-09-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* msdstat.m: fixed bug in msdstat structure.
+
+2011-09-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* msdstat.m:  better handling of "empty set" cases.
 	* video_msd.m:  added 'window' to output msd structure.  better handling of "empty set" cases.
 
