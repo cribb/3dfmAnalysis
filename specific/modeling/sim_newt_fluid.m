@@ -1,5 +1,5 @@
 function x = sim_newt_fluid(viscosity, bead_radius, sampling_rate, duration, temp, dim, numpaths, seed)
-% 3DFM function  
+% 3DFMAnalysis function  
 % Rheology 
 % last modified 04/24/2006 (jcribb)
 %  
