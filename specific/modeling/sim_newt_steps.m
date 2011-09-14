@@ -1,4 +1,4 @@
-function x = sim_newt_fluid(viscosity, bead_radius, sampling_rate, duration, temp, dim, numpaths, seed)
+function v = sim_newt_steps(viscosity, bead_radius, sampling_rate, duration, temp, dim, numpaths, seed)
 % 3DFM function  
 % Rheology 
 % last modified 04/24/2006 (jcribb)
@@ -27,8 +27,22 @@ function x = sim_newt_fluid(viscosity, bead_radius, sampling_rate, duration, tem
 %  - For results that truly approximate the bulk response of the material,
 %  you need lots of repeats and averaging.
 %   
+    if nargin < 8 || isempty(seed)        
+        % randomize state of random number generator
+        rand('state',sum(100000*clock));
+    else
+        rand('state', seed);
+    end
 
-    sim_newt_steps(viscosity, bead_radius, sampling_rate, duration, temp, dim, numpaths, seed)
 
-    x =  cumsum(v);
+    time_step = 1 / sampling_rate;    
+    k = 1.3806e-23;   % boltzmann's constant
+
+    
+    gamma = 6 * pi * viscosity * bead_radius;        
+    D = k * temp / gamma;
+    A = sqrt(2 * D * time_step);
+
+    v = A * randn(sampling_rate * duration, dim, numpaths);
+
     
