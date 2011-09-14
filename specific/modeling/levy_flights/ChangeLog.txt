@@ -1,0 +1,12 @@
+2011-09-14   Jeremy Cribb <jcribb@email.unc.edu>
+	* vortex_vectors.m:  added.  Generates VX and VY, the x and y components of a vector field containing vortices at locations vls and vly.
+	* VortexStream.m:  added.  Example method for modeling a vector field containing one vortex.  
+	* VorticesStream.m:  added.  Generates vortical flow profiles for a number of vortices in a vector field.  Example code that uses VorticesStresm can be found at end of documentation. 
+	* simple_levy_motion.m:  added.  generates particle paths for beads that diffuse within an vector field containing a number of vortices.  Uses 'vortex_vectors'.
+	* run_varr.m:  added.  expands upon 'simple_levy_motion' to include ligands as the diffusing particles, as well as receptors.  Mature version of this will include collision detection for ligands (particles) to receptors.
+
+2011-09-14   Jeremy Cribb <jcribb@email.unc.edu>
+	* Initial Version
+
+
+
