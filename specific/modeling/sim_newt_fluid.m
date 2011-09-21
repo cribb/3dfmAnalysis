@@ -28,7 +28,11 @@ function x = sim_newt_fluid(viscosity, bead_radius, sampling_rate, duration, tem
 %  you need lots of repeats and averaging.
 %   
 
-    sim_newt_steps(viscosity, bead_radius, sampling_rate, duration, temp, dim, numpaths, seed)
+if nargin < 8
+    seed = [];
+end
+
+    v = sim_newt_steps(viscosity, bead_radius, sampling_rate, duration, temp, dim, numpaths, seed);
 
     x =  cumsum(v);
     
