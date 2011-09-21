@@ -1,3 +1,11 @@
+2011-09-21   Jeremy Cribb <jcribb@email.unc.edu>
+	* simple_levy_motion.m:  changed default input parameters to make more physical sense.  Corrected scaling for 'gamma' values.
+	* vortex_vectors.m: updated documentation.
+	* VorticesStream.m: fixed bug where 'gamma' values were not tiled correctly.
+	
+2011-09-14   Jeremy Cribb <jcribb@email.unc.edu>
+	* streamparticlesARS.m: added.  Adam Shields's version of matlab's streamparticles function that includes a 'save' option for generating movie files.
+
 2011-09-14   Jeremy Cribb <jcribb@email.unc.edu>
 	* vortex_vectors.m:  added.  Generates VX and VY, the x and y components of a vector field containing vortices at locations vls and vly.
 	* VortexStream.m:  added.  Example method for modeling a vector field containing one vortex.  

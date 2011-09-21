@@ -54,6 +54,10 @@ if nargin < 6 || isempty(save_option)
     save_option = 'no';
 end
 
+if length(gamma) == 1
+    gamma = repmat(gamma,size(vlx));
+end
+
 vlx = vlx(:);
 vly = vly(:);
 gamma = gamma(:);
@@ -80,14 +84,13 @@ end
 
 bufx = ranx / 10; % a 10% buffer added to the boundary around the furthest points of interest
 bufy = rany / 10;
-gridx = ranx / 100;
-gridy = rany / 100;
+gridx = ranx / 100; %257;
+gridy = rany / 100; %257;
 
 x_ = (minx - bufx) : gridx : (maxx+bufx);
 y_ = (miny - bufy) : gridy : (maxy+bufy);
 
 [x,y] = meshgrid(x_, y_);
-
 [vx,vy] = vortex_vectors(x,y,vlx,vly,gamma,vortex_type);
 
 h = figure;

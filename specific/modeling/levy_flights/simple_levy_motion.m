@@ -6,23 +6,23 @@ clear all;
 % %%%%%%%%%%
 vortex_type = 'irrotational';
 
-vn = 3;       % number of vortices on a side
-vs = 10;      % vortex spacing:  microns between vortices
+vn = 5;       % number of vortices on a side
+vs = 1e-6;      % vortex spacing:  meters between vortices
 
-ln = vn;      % number of tracers on a side
-ls = vs;      % tracer spacing
+tn = vn;      % number of tracers on a side
+ts = vs;      % tracer spacing
 
 % generate matrices that contain the 'vortex locations' (vl)
 [vlx,vly] = meshgrid([0:vs:vn*vs-vs],[0:vs:vn*vs-vs]);
 vl = [vlx(:) vly(:)];
 
-gm = 1;  % power for each vortex
+gm = 2e-11;  % power for each vortex
 
 % tile gamma value out to the appropriate number of vortices
 gamma = gm .* ones(size(vlx)); 
 
 % Generate receptor and tracer locations (rtl).
-[rtlx,rtly] = meshgrid([0:ls:ln*ls-ls]-ls/2,[0:ls:ln*ls-ls]);
+[rtlx,rtly] = meshgrid([0:ts:tn*ts-ts]-ts/3,[0:ts:tn*ts-ts]);
 
 % Right now tracers and receptors hide in the tracer variable.  Reduce the
 % number of each by half and pull them into their own matrices.
@@ -74,14 +74,15 @@ figure(h);
 % %%%%%%%
 % construct a number of diffusing bead traces 
 numpaths = length(tlx);  % equal to the number of tracers we're tracking
-viscosity = 0.001;       % [Pa s]
-lig_radius = 250e-9;     % [m]
-sampling_rate = 30;
+viscosity = 0.001002;       % [Pa s]
+lig_radius = 500e-9;     % [m]
+sampling_rate = 1000;
 time_step = 1/sampling_rate;       % [frames/sec]
-duration = 100;        % [sec]
+duration = 10;        % [sec]
 tempK = 300;           % [K]
 dim = 2;
 nPoints = duration .* sampling_rate;
+time = [0:time_step:duration-time_step];
 
 p = sim_newt_steps(viscosity, lig_radius, sampling_rate, duration, tempK, dim, numpaths);
 
@@ -114,8 +115,8 @@ for t = 2:nPoints
     end
     
     % add to the previous value the vortical flow vector and the diffusion
-    newposx(t,:) = newposx(t-1,:) + (vel_tlx .* time_step) + dxdiff(t);
-    newposy(t,:) = newposy(t-1,:) + (vel_tly .* time_step) + dydiff(t);    
+    newposx(t,:) = newposx(t-1,:) + (vel_tlx .* time_step);% + dxdiff(t,:);
+    newposy(t,:) = newposy(t-1,:) + (vel_tly .* time_step);% + dydiff(t,:);    
 end
 
 figure(h);

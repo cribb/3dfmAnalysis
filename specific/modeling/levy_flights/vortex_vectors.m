@@ -18,6 +18,8 @@ function [vx,vy] = vortex_vectors(x,y,vlx,vly,gamma,vortex_type)
 %   
 %  where "vx"  x-component of velocity vector field in [units]
 %        "vy"  y-component of velocity vector field in [units]
+%         "x"  x locations for vector field
+%         "y"  y locations for vector field
 %		 "vlx" x-locations for all defined vortices in [units]
 %        "vly" y-locations for all defined vortices in [units]
 %        "gamma"  circulation strength in [units] 
