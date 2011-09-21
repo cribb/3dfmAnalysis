@@ -1,3 +1,6 @@
+2011-09-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_MCU2um.m:  updated to reflect new fitting parameters for new varioptic.
+
 2011-09-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_analyze_CellExpt.m:  removed 'window' definition.
 	* pan_combine_data.m:  same.

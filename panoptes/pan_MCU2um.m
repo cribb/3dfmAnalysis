@@ -2,10 +2,10 @@ function calibum = pan_MCU2um(MCUparam)
 % PAN_MCU2UM  Converts Panoptes's MCU parameter to microns per pixel
 %
 
-    % Rescaled MCU parameter to distance mapping (062011 by Anya)
-    calibum = (0.0009192384 * MCUparam + 0.1338995737);        
-    
-    idx = find(MCUparam < 31 & MCUparam > 76);
+    % Rescaled MCU parameter to distance mapping 
+%   calibum = (0.0009192384 * MCUparam + 0.1338995737);     % (range from 31 to 76) (062011 by Jeremy)
+    calibum = (0.0012402498 * MCUparam + 0.1089275278);       % (range from 46 to 96) (091911 by Jeremy)
+    idx = find(MCUparam < 46 & MCUparam > 96);
     if ~isempty(idx)
         logentry('The input MCU parameter is out of range.  Setting to NaN');
         calibum(idx) = NaN;
