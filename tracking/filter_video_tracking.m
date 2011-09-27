@@ -12,7 +12,7 @@ function outs = filter_video_tracking(data, filt)
 % where 
 %       "data" 
 %       "filt"
-%	    "minFrames" 
+%	    "min_frames" 
 %       "minPixels" 
 %       "maxPixelRange" 
 %       "tcrop" 
@@ -84,20 +84,28 @@ function outs = filter_video_tracking(data, filt)
 
     % 'minframes' the minimum number of frames required to keep a tracker
     if isfield(filt, 'min_frames')
-        data = filter_min_frames(data, filt.min_frames);
+        if filt.min_frames > 0
+            data = filter_min_frames(data, filt.min_frames);
+        end
     end
 
-    if isfield(filt, 'min_pixels');
-        % going to assume pixels
-        data = filter_min_pixel_range(data, filt.min_pixels);
+    if isfield(filt, 'min_pixels')
+        if filt.min_pixels > 0
+            % going to assume pixels
+            data = filter_min_pixel_range(data, filt.min_pixels);
+        end
     end
 
-    if isfield(filt, 'tcrop');
-        data = filter_tcrop(data, filt.tcrop);    
+    if isfield(filt, 'tcrop')
+        if filt.tcrop > 0
+            data = filter_tcrop(data, filt.tcrop);    
+        end
     end
 
-    if isfield(filt, 'xycrop');
-        data = filter_xycrop(data, filt.xycrop);
+    if isfield(filt, 'xycrop')
+        if filt.xycrop > 0
+            data = filter_xycrop(data, filt.xycrop);
+        end
     end
 
 
