@@ -219,7 +219,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     if get(handles.checkbox_minFrames, 'Value')
         handles.filt.min_frames = str2num(get(handles.edit_minFrames, 'String'));
     else
-        handles.filt.min_frames = 1;
+        handles.filt.min_frames = 0;
     end
         
     if get(handles.checkbox_minPixelRange, 'Value')
@@ -237,7 +237,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     if get(handles.checkbox_xyCrop, 'Value')
         handles.filt.xycrop = str2num(get(handles.edit_xyCrop, 'String'));
     else
-        handles.filt.xycrop = 1;
+        handles.filt.xycrop = 0;
     end
     
     handles.filt.xyzunits = 'pixels';
