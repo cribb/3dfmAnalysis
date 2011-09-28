@@ -1,3 +1,8 @@
+2011-09-28  Jerome Carpenter <romec@unc.edu>
+	* mk_video_struct.m:  added.  makes a video struct that contains information about resolution, fps and pixel to micron conversions  
+	* vel_field.m: added. takes an "evt" file or a data table and partitions it spatially into a user defined number of x and y bins. it then calculates an average velocity for each bin with eac htracker equally weighted. 	
+	* plot_vel_field.m: added. Takes the output of vel_field and plots a quiver plot with a velocity vector for each partitioned region
+
 2011-08-11  Jeremy Cribb <jcribb@email.unc.edu>
 	* save_vrpnmatfile.m:  added.  saves tracking data in the original format outputted by vrpnlog2matlab.
 
