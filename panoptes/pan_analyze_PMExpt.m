@@ -1,4 +1,4 @@
-function outs = pan_analyze_CellExpt(filepath)
+function outs = pan_analyze_PMExpt(filepath)
 
 if ~exist('filepath', 'var'), filepath= []; end;
 if ~exist('filt', 'var'), filt = []; end;
@@ -46,8 +46,11 @@ for k = 1:length(filelist)
     
     logentry(['Loading ' filelist(k).name]);
     
+    filt.min_frames  = 30;
+    filt.min_pixels  = 1;
     filt.xyzunits   = 'm';
     filt.calib_um   = mycalibum;
+    
 
     d = load_video_tracking(filelist(k).name, ...
                             metadata.instr.fps_bright, ...

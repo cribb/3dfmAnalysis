@@ -1,3 +1,11 @@
+2011-10-05  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_analyze_CellExpt.m:  renamed 'filemask' variable to 'filepath'
+	* pan_process_CellExpt.m:  cosmetic changes to code.
+	* pan_sim_newt_run.m:  set default 'microns to pixel' conversion to 0.171 um/pixel, equivalent to a (current) varioptic setting of 50.
+	* pan_analyze_PMExpt.m:  added.  contains analysis protocol for Passive Microrheology Experiment type
+	* pan_process_PMExpt.m:  added.  Analyses, reports, and publishes results for the "Passive Microrheology Experiment" specified for Panoptes..	
+	* pan_publish_PMExpt.m:  added.  Publishes results for "Passive Microrheology Experiment".
+
 2011-09-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_MCU2um.m:  updated to reflect new fitting parameters for new varioptic.
 

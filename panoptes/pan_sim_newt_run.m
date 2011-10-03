@@ -23,7 +23,7 @@ if nargin < 4 || isempty(simstruct)
     simstruct.tempK = 300;                 % [K]
     simstruct.field_width = 648;           % [pixels]
     simstruct.field_height = 488;          % [pixels]
-    simstruct.calib_um = 0.177;            % [um/pixel];
+    simstruct.calib_um = 0.171;            % [um/pixel];
     simstruct.xdrift_vel = 0;              % [m/frame];
     simstruct.ydrift_vel = 0;              % [m/frame];
 end
