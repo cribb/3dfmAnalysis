@@ -1,19 +1,19 @@
-function pan = pan_publish_PMExpt(metadata)
-% PAN_PUBLISH_CELLEXPT  Generates an html report for the Panoptes Cell Experiment
+function pan = pan_publish_PMExpt(metadata, filt)
+% PAN_PUBLISH_PMEXPT  Generates an html report for the Panoptes PM Experiment
 %
 % CISMM function
 % Panoptes
 % last modified 2011.08.10
 %  
 % Generates a report for tests perfomed on Panoptes using the
-% "Beads diffusing on Cells" paradigm.
+% "Mucus (passive) microrheology" paradigm.
 %
 % Generates and reports the results in a root html file with figures saved 
 % in several formats (.fig for matlab manipulation, .png as raster image 
 % for quick insertion into reports, and .svg as vectorized image for ease 
 % of making publication quality images).
 % 
-%  pan = panoptes_publish_CellExpt(metadata) 
+%  pan = panoptes_publish_PMExpt(metadata) 
 %   
 %  "metadata" is the matlab structure that describes a Panoptes experiment
 %  design, outputted by 'pan_load_metadata'
@@ -25,14 +25,7 @@ duration = metadata.instr.seconds;
 fps_bright = metadata.instr.fps_bright;
 autofocus = metadata.instr.auto_focus;
 
-filt.min_frames = 30;
-filt.min_pixels = 1;
-filt.max_pixels = Inf;
-filt.tcrop      = 0;
-filt.xycrop     = 0;
-filt.xyzunits   = 'pixels';
-% filt.calib_um   = 1;
-    
+
 if autofocus
     autofocus_yn = 'Yes.';
 else
@@ -46,7 +39,7 @@ fid = fopen(outfile, 'w');
 
 %%%%
 % compute the MSD for each WELL (for the heatmap)
-spec_tau = 1;
+spec_tau = 10;
 [wellmsds wellID] = pan_combine_data(metadata, 'metadata.plate.well_map');
 all_welltaus = [wellmsds.mean_logtau];
 all_wellmsds = [wellmsds.mean_logmsd];
@@ -57,25 +50,31 @@ log_spec_welltau = log10(spec_tau);
 mywelltau = 10.^all_welltaus(minloc(1),:);
 mywellmsd = all_wellmsds(minloc(1),:);
 heatmap_msds(1, str2num(char(wellID)) ) = mywellmsd;
-heatmat_msds = reshape(heatmap_msds, 12, 8)';
+heatmap_msds = reshape(heatmap_msds, 12, 8)';
 
 % Heat map
 heatmapfig = figure; 
-imagesc(1:12, 1:8, log10(sqrt(10.^heatmat_msds)*1e6)); 
+imagesc(1:12, 1:8, heatmap_msds); 
 colormap(hot);
 colorbar;
+set(heatmapfig, 'Units', 'Pixels');
+set(heatmapfig, 'Position', [300 300 800 600]);
 set(gca, 'XTick', [1:12]');
 set(gca, 'XTickLabel', [1:12]');
 set(gca, 'XAxisLocation', 'top');
 set(gca, 'YTick', [1:8]');
 set(gca, 'YTickLabel', {'A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'});
-title('RMS displacement (in log_{10} \mum)');
+title('MS displacement (in log_{10} m^2)');
+    alpha = ones(8,12);
+    alpha(isnan(heatmap_msds)) = 0.5;
+    im = get(gca, 'Children');
+    set(im, 'AlphaData', alpha);
 pretty_plot;
-heatmapfile = [metadata.instr.experiment '_molar_concentration_ALL' '.heatmap'];
+heatmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
 gen_pub_plotfiles(heatmapfile, heatmapfig, 'normal');
 close(heatmapfig);
 
-%%%%  Calculate the MSD for different cell types
+%%%%  Calculate the MSD for different wells/conditions
 % myparam = 'metadata.plate.solution.molar_concentration';
 % myparam = 'metadata.plate.solution.mass_concentration';
 myparam = 'metadata.plate.well_map';
@@ -90,7 +89,7 @@ all_msds = [msds.mean_logmsd];
 all_errs = [msds.msderr];
 
 % create plot with bar graph at a given tau
-spec_tau = 1;
+spec_tau = 10;
 log_spec_tau = log10(spec_tau);
 [minval, minloc] = min( sqrt((all_taus - log_spec_tau).^2) );
 mytau = 10.^all_taus(minloc(1),:);
@@ -115,14 +114,14 @@ myerr = all_errs(minloc(1),:);
 
 
 % One-dimensional bar chart
-RMS_disp = sqrt(10 .^ mymsd)*1e6;
-RMS_disp_err = sqrt(10.^(mymsd+myerr)-10.^(mymsd)) *1e6;
+MSD = (10 .^ mymsd)*1e6;
+MSD_err = (10.^(mymsd+myerr)-10.^(mymsd)) *1e6;
 barfig = figure;
-barwitherr( RMS_disp_err, RMS_disp );
+barwitherr( MSD_err, MSD );
 set(gca,'XTickLabel',molar_conc)
-xlabel('cell type');
-ylabel('RMS displacment [\mum]');
-barfile = [metadata.instr.experiment '_molar_concentration_ALL' '.bar'];
+xlabel('Well ID');
+ylabel('MSD [m^2]');
+barfile = [metadata.instr.experiment '_well_ALL' '.bar'];
 gen_pub_plotfiles(barfile, barfig, 'normal');
 close(barfig);
 
@@ -132,14 +131,15 @@ errorbar(all_taus, all_msds, all_errs, 'LineWidth', 2)
 xlabel('time scale, \tau [s]');
 ylabel('<r^2> [m^2]');
 legend(molar_conc, 'Location', 'SouthEast');
-aggMSDfile = [metadata.instr.experiment '_molar_concentration_ALL' '.aggmsd'];
+aggMSDfile = [metadata.instr.experiment '_well_ALL' '.aggmsd'];
 gen_pub_plotfiles(aggMSDfile, aggMSDfig, 'normal');
 close(aggMSDfig);
 
 % create plots for each parameter value
 for k = 1:length(molar_conc)    
-    MSDfile{k} = [metadata.instr.experiment '_molar_concentration_' molar_conc{k} '.msd'];
+    MSDfile{k} = [metadata.instr.experiment '_well_' molar_conc{k} '.msd'];
     MSDfig  = plot_msd(msds(k), [], 'ame');
+    set(gca, 'YLim', [-16 -12]);
     figure(MSDfig);
     gen_pub_plotfiles(MSDfile{k}, MSDfig, 'normal'); 
     close(MSDfig);    
@@ -152,7 +152,7 @@ fprintf(fid, '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ');
 fprintf(fid, '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> \n');
 fprintf(fid, '<html lang="en-US" xml:lang="en-US" xmlns="http://www.w3.org/1999/xhtml">\n\n');
 fprintf(fid, '<head> \n');
-fprintf(fid, '<title> PanopticNerve, Cell Mechanics Experiment: %s </title>\n', nametag);
+fprintf(fid, '<title> PanopticNerve, Passive Microrheology Experiment: %s </title>\n', nametag);
 fprintf(fid, '</head>\n\n');
 fprintf(fid, '<body>\n\n');
 
@@ -182,11 +182,19 @@ fprintf(fid, '<hr/> \n\n');
 %
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Data Filters </h3> \n');
-fprintf(fid, '   <b>Min. number of frames per tracker:</b> %i [frames]<br/> \n', filt.min_frames);
-fprintf(fid, '   <b>Min. number of pixels per tracker:</b> %i [pixels]<br/> \n', filt.min_pixels);
-fprintf(fid, '   <b>Max. number of pixels per tracker:</b> %i [pixels]<br/> \n', filt.max_pixels);
+fprintf(fid, '   <b>Min. frames per tracker:</b> %i [frames]<br/> \n', filt.min_frames);
+fprintf(fid, '   <b>Min. pixels per tracker:</b> %i [pixels]<br/> \n', filt.min_pixels);
+fprintf(fid, '   <b>Max. pixels per tracker:</b> %i [pixels]<br/> \n', filt.max_pixels);
 fprintf(fid, '   <b>Number of first and Last frames cropped from each tracker:</b> %i [frames] <br/>\n', filt.tcrop);
 fprintf(fid, '   <b>Number of pixels cropped around frame border:</b> %i [pixels] <br/> \n', filt.xycrop);
+fprintf(fid, '   <b>Camera dead spots removed [X Y width height]: <br/>\n');
+for k = 1:size(filt.dead_spots,1)
+fprintf(fid, '\t &nbsp;&nbsp;&nbsp; [%i %i %i %i] [pixels]<br/> \n', filt.dead_spots(k,1), ...
+                                                                     filt.dead_spots(k,2), ...
+                                                                     filt.dead_spots(k,3), ...
+                                                                     filt.dead_spots(k,4));
+end
+fprintf(fid, '   <b>Drift subtraction method:</b> %s <br/> \n', filt.drift_method);
 fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
 
@@ -195,7 +203,8 @@ fprintf(fid, '<hr/> \n\n');
 %
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Heatmap (RMS displacement) </h3> \n');
-fprintf(fid, '   <iframe src="%s.png" width="400" height="300" border="0"></iframe> <br/> \n', heatmapfile);
+% fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
+fprintf(fid, '   <iframe src="%s.png" width="800" height="600" border="0"></iframe> <br/> \n', heatmapfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 
@@ -232,7 +241,7 @@ fprintf(fid, '</p> \n\n');
 % % % Report Summary figure.  Bar chart with error.  (Maybe ANOVA eventually?)
 %
 fprintf(fid, '<p> \n');
-fprintf(fid, '   <b> Summary: Cell Types </b> <br/> \n');
+fprintf(fid, '   <b> Summary: Mucus Viscosity </b> <br/> \n');
 fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', barfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');

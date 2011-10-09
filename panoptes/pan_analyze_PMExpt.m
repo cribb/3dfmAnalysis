@@ -1,4 +1,4 @@
-function outs = pan_analyze_PMExpt(filepath)
+function outs = pan_analyze_PMExpt(filepath, filt)
 
 if ~exist('filepath', 'var'), filepath= []; end;
 if ~exist('filt', 'var'), filt = []; end;
@@ -44,10 +44,8 @@ for k = 1:length(filelist)
 
     bead_radius = str2double(metadata.plate.bead.diameter(mywell)) .* 1e-6 ./ 2;
     
-    logentry(['Loading ' filelist(k).name]);
+%     logentry(['Loading ' filelist(k).name]);
     
-    filt.min_frames  = 30;
-    filt.min_pixels  = 1;
     filt.xyzunits   = 'm';
     filt.calib_um   = mycalibum;
     
@@ -56,7 +54,12 @@ for k = 1:length(filelist)
                             metadata.instr.fps_bright, ...
                             'm', mycalibum, ...
                             'absolute', 'no', 'table');
-    d = filter_video_tracking(d, filt);
+                       
+    % only have to filter if we need to process .vrpn.mat to .vrpn.evt.mat
+    if length(metadata.files.evt) ~= length(metadata.files.tracking)
+        d = filter_video_tracking(d, filt);
+    end
+    
     
 %     mymsd = video_msd(d, window, metadata.instr.fps_bright, mycalibum, 'no');        
 %     myve  = ve(mymsd, bead_radius, freqtype, 'no');
@@ -118,7 +121,7 @@ function logentry(txt)
                    num2str(logtime(4),        '%02i') ':' ...
                    num2str(logtime(5),        '%02i') ':' ...
                    num2str(round(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext 'pan_analyze_CellExpt: '];
+     headertext = [logtimetext 'pan_analyze_PMExpt: '];
      
      fprintf('%s%s\n', headertext, txt);
      

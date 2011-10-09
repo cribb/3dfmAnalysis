@@ -1,3 +1,9 @@
+2011-10-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_analyze_PMExpt.m:  removed filter specs to pan_process_PMExpt.m
+	* pan_process_PMExpt.m:  added filter specs and set new filters.
+	* pan_publish_PMExpt.m:   updated output to html reporting code.
+	* pan_publish_CellExpt.m:  Cosmetic changes to text.
+
 2011-10-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_analyze_CellExpt.m:  renamed 'filemask' variable to 'filepath'
 	* pan_process_CellExpt.m:  cosmetic changes to code.
