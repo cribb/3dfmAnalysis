@@ -12,35 +12,39 @@ function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
     video_tracking_constants;  
 
     % handle the argument list
-    if ~exist('data');
-        error('No data found.'); 
+    if nargin < 1 
+        data = [];
     end;
     
+    if isempty(data); 
+        logentry('No data found. Exiting function.'); 
+        v = data;
+        q = [];
+        return;
+    end;
+
+    if nargin < 2 || isempty(drift_start_time); 
+        drift_start_time = min(data(:,TIME)); 
+%         logentry('No start_time specified.  Choosing first time in dataset.');
+    end;
+    
+    if nargin < 3 || isempty(drift_end_time); 
+        drift_end_time = max(data(:,TIME)); 
+%         logentry('No end_time specified.  Choosing last time in dataset.');
+    end;
+
+    if nargin < 4 || isempty(type); 
+        type = 'linear'; 
+        logentry('No drift type specified.  Choosing linear method.');
+    end;
+
 %     if nargin < 5 | isempty(plotOption); 
 %         type = 'y'; 
 %         logentry('No plot option specified.  Choosing to plot drift vectors.');
 %     end;
     
-    if nargin < 4 | isempty(type); 
-        type = 'linear'; 
-        logentry('No drift type specified.  Choosing linear method.');
-    end;
-
-    if nargin < 3 | isempty(drift_end_time); 
-        drift_end_time = max(data(:,TIME)); 
-        logentry('No end_time specified.  Choosing last time in dataset.');
-    end;
-
-    if nargin < 2 | isempty(drift_start_time); 
-        drift_start_time = min(data(:,TIME)); 
-        logentry('No start_time specified.  Choosing first time in dataset.');
-    end;
     
-    if nargin < 1 | isempty(data); 
-        error('No data found. Exiting function.'); 
-    end;
-
-	switch type
+    switch type
         case 'linear'
             [v,q] = linear(data, drift_start_time, drift_end_time);
         case 'center-of-mass'
@@ -61,144 +65,100 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
 % sudden existence of new trackers.  This may cause sudden 'jumps' in the 
 % center-of-mass, so a polyfit of the center-of-mass should be used.
 
-    video_tracking_constants;   
+        video_tracking_constants;   
 
-    order = 1;
+        % clip data to desired time points
+    %     t_idx = find( v(:,TIME) >= drift_start_time & v(:,TIME) <= drift_end_time);
+    %     v = v(t_idx,:);
+
+        % DRIFT SUBTRACTION
+
+    firstframe = min(v(:,FRAME));
+    lastframe  = max(v(:,FRAME));
+
+    id_list = unique(v(:,ID));
+
+    % % % % % % % % % % % % % % figh = figure; 
+    % % % % % % % % % % % % % % subplot(2,3,1); 
+    % % % % % % % % % % % % % % plot(v(:,X), v(:,Y), '.');
+    % % % % % % % % % % % % % % xlabel('x [px]');
+    % % % % % % % % % % % % % % ylabel('y [px]');
+    % % % % % % % % % % % % % % axis([0 648 0 484]);
+
+    % Identify the first and last "frames of existence" for every tracker and
+    % place the list as 'frameone' and 'frameend' variables
+    for k = 1:length(id_list); 
+        q = v(  v(:,ID) == id_list(k) , FRAME); 
+        frameone(1,k) = q(1,1); 
+        frameend(1,k) = q(end,1); 
+    end;
+
+    % 'C=setdiff(A,B)' returns for C the values in A that are not in B.  Here we use
+    % setdiff to identify the frames where no "popping in and out of existence"
+    % occurs.
+    C = setdiff([firstframe:lastframe]', [frameone frameend]');
+
+
+    % Next we want to identify regions of stable tracking in the set of frames,
+    % i.e. those regions in the dataset where we can find chunks of contiguous 
+    % frames
+    dC = diff(C);
+    contig_list = C(dC == 1);
+
+    % Algorithm:  Iterate through frames where stable bead IDs and 1-frame 
+    % jumps are guaranteed.  At each frame, compute the center of mass for x 
+    % and y at each frame.  From the two positions, compute the x and y 
+    % velocities as a forward difference.  NOTE: Must retain the frame 
+    % identification for each estimate in order to re-attach the computation 
+    % to the global clock.
+    count = 1;
+    for k = 1:length(contig_list)
+        thisFRAME = contig_list(k);
+
+        idx1 = find(v(:,FRAME) == thisFRAME);
+        idx2 = find(v(:,FRAME) == thisFRAME+1);
+        table1 = v(idx1,:);
+        table2 = v(idx2,:);
+
+        mean1 = mean(table1(:,X:Y),1);
+        mean2 = mean(table2(:,X:Y),1);
+
+        comv = mean2 - mean1;
+
+        outv(k,:) = [thisFRAME comv];
+    end
+
+    if firstframe < min(contig_list)
+        firstframe = min(contig_list);
+    end
+
+    if lastframe > max(contig_list)
+        lastframe = max(contig_list);
+    end
+
+    mean_com_vel_x = nanmean(outv(:,2));
+    mean_com_vel_y = nanmean(outv(:,3));
+
+    % subtract out drift vector from each tracker
+     for k = 1:length(id_list)
+        idx = (  v(:,ID) == id_list(k)  );
+        tmp = v(idx,:);
+
+        dt = diff(tmp(:,FRAME));  % labeled as 'dt' here for 'velocity' sake, but actually it's 'dFRAME'
+
+        driftx = cumsum(mean_com_vel_x * [0; dt]);
+        drifty = cumsum(mean_com_vel_y * [0; dt]);
+
+
+        v(idx,X) = tmp(:,X) - driftx;
+        v(idx,Y) = tmp(:,Y) - drifty;    
+
+    %     figure; 
+    %     plot(tmp(:,TIME), tmp(:,X:Y), 'or', v(idx,TIME), v(idx,X:Y), '.b');
+     end
     
-    % clip data to desired time points
-%     t_idx = find( v(:,TIME) >= drift_start_time & v(:,TIME) <= drift_end_time);
-%     v = v(t_idx,:);
-    
-    % DRIFT SUBTRACTION
-
-firstframe = min(v(:,FRAME));
-lastframe  = max(v(:,FRAME));
-
-id_list = unique(v(:,ID));
-
-% figure; 
-% subplot(2,2,1); 
-% plot(v(:,X), v(:,Y), '.');
-% xlabel('x [px]');
-% ylabel('y [px]');
-% axis([0 648 0 484]);
-
-% Identify the first and last "frames of existence" for every tracker and
-% place the list as 'frameone' and 'frameend' variables
-for k = 1:length(id_list); 
-    q = v(  v(:,ID) == id_list(k) , FRAME); 
-    frameone(1,k) = q(1,1); 
-    frameend(1,k) = q(end,1); 
-end;
-
-% 'C=setdiff(A,B)' returns for C the values in A that are not in B.  Here we use
-% setdiff to identify the frames where no "popping in and out of existence"
-% occurs.
-C = setdiff([firstframe:lastframe]', [frameone frameend]');
-
-
-% Next we want to identify regions of stable tracking in the set of frames,
-% i.e. those regions in the dataset where we can find chunks of contiguous 
-% frames
-dC = diff(C);
-contig_list = C(dC == 1);
-
-% Algorithm:  Iterate through frames where stable bead IDs and 1-frame 
-% jumps are guaranteed.  At each frame, compute the center of mass for x 
-% and y at each frame.  From the two positions, compute the x and y 
-% velocities as a forward difference.  NOTE: Must retain the frame 
-% identification for each estimate in order to re-attach the computation 
-% to the global clock.
-count = 1;
-for k = 1:length(contig_list)
-    thisFRAME = contig_list(k);
-    
-    idx1 = find(v(:,FRAME) == thisFRAME);
-    idx2 = find(v(:,FRAME) == thisFRAME+1);
-    table1 = v(idx1,:);
-    table2 = v(idx2,:);
-    
-    mean1 = mean(table1(:,X:Y),1);
-    mean2 = mean(table2(:,X:Y),1);
-    
-    comv = mean2 - mean1;
-    
-    outv(k,:) = [thisFRAME comv];
-end
-
-if firstframe < min(contig_list)
-    firstframe = min(contig_list);
-end
-
-if lastframe > max(contig_list)
-    lastframe = max(contig_list);
-end
-
-iframes = [firstframe:lastframe]';
-
-
-% Interpolate velocities for frames which have no data
-ivel = interp1(outv(:,1), outv(:,2:3), iframes);
-
-% "integrate" to displacement function by cumulatively adding all velocities
-disp = cumsum(ivel);
-
-% fit the displacement functions 
-xfit = polyfit(iframes, disp(:,1), 1);
-yfit = polyfit(iframes, disp(:,2), 1);
-
-% % plot out and report on some of the resulting data
-% subplot(2,2,2); 
-% plot(iframes, ivel, '.');
-% title('CoM vel. est.');
-% xlabel('frame #');
-% ylabel('vel [px/fr]');
-% 
-% subplot(2,2,3); 
-% plot(iframes, disp, '.');
-% title('CoM disp. est.');
-% xlabel('frame #');
-% ylabel('disp [px]');
-
-meanv = mean(ivel,1);
-errv = stderr(ivel,1);
-
-
-% % % % % should we subtract out drift?
-% % % % subplot(2,2,4);
-% % % % [mytau, mymsd] = msd(iframes/sim.frame_rate, disp, win);
-% % % % plot(log10(mytau), log10(mymsd), '.-');
-% % % % xlabel('tau [s]');
-% % % % ylabel('MSD [px^2/s]');
-% % % % grid on;
-% % % % 
-% % % % rawmsd = video_msd(v, win, sim.frame_rate, sim.calib_um, 'no');
-% % % % rawve = ve(rawmsd, sim.bead_radius,'f','no');
-
-% subtract out drift vector from each tracker
- for k = 1:length(id_list)
-    idx = (  v(:,ID) == id_list(k)  );
-    tmp = v(idx,:);
-    
-    driftx = polyval(xfit, tmp(:, FRAME)) - polyval(xfit, tmp(1, FRAME));% - tmp(1,FRAME);
-    drifty = polyval(yfit, tmp(:, FRAME)) - polyval(yfit, tmp(1, FRAME));% - tmp(1,FRAME);
-    
-    v(idx,X) = tmp(:,X) - driftx;
-    v(idx,Y) = tmp(:,Y) - drifty;
-    
-%     subplot(2,2,4); 
-%     plot(tmp(:,FRAME), tmp(:,X), '.', tmp(:,FRAME), driftx+tmp(1,X), 'r', ...
-%          tmp(:,FRAME), tmp(:,Y), '.', tmp(:,FRAME), drifty+tmp(1,Y), 'r');
-%     title('Single Path with Drift');
-%     xlabel('time [s]');
-%     ylabel('Position [px]');
- end
-
-%   subplot(2,2,1); hold on; plot(v(:,X), v(:,Y), '.r'); hold off;
-    
-%     v = data;
     q = 0;    
-    
+
     return;
 
 function [v,drift_vectors] = linear(data, drift_start_time, drift_end_time)

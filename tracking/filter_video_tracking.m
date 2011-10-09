@@ -55,6 +55,8 @@ function outs = filter_video_tracking(data, filt)
         filt.xycrop     = 0;
         filt.xyzunits   = 'pixels';
         filt.calib_um   = 1;
+        filt.drift_method = 'n';
+        filt.dead_spots = [];
     end
 
     if (nargin < 1) || isempty(data); 
@@ -81,7 +83,13 @@ function outs = filter_video_tracking(data, filt)
 
 
     %  Handle filters
-
+    
+    if isfield(filt, 'tcrop')
+        if filt.tcrop > 0
+            data = filter_tcrop(data, filt.tcrop);    
+        end
+    end
+    
     % 'minframes' the minimum number of frames required to keep a tracker
     if isfield(filt, 'min_frames')
         if filt.min_frames > 0
@@ -96,18 +104,24 @@ function outs = filter_video_tracking(data, filt)
         end
     end
 
-    if isfield(filt, 'tcrop')
-        if filt.tcrop > 0
-            data = filter_tcrop(data, filt.tcrop);    
-        end
-    end
-
     if isfield(filt, 'xycrop')
         if filt.xycrop > 0
             data = filter_xycrop(data, filt.xycrop);
         end
     end
 
+    if isfield(filt, 'dead_spots')
+        if ~isempty(filt.dead_spots);
+            data = filter_dead_spots(data, filt.dead_spots);
+        end
+    end
+    
+    if isfield(filt, 'drift_method')
+        if ~strcmp(filt.drift_method, 'none')
+            data = filter_subtract_drift(data, filt.drift_method);
+        end
+    end
+    
 
     % Relabel trackers to have consecutive IDs
     beadlist = unique(data(:,ID));
@@ -258,6 +272,47 @@ function data = filter_xycrop(data, xycrop)
 
     return;
 
+    
+% perform "dead spot" crop
+function data = filter_dead_spots(data, dead_spots)
+% each row in 'dead_spots' corresponds to a dead spot with values equal to
+% [top_left_X top_left_Y width height]
+
+    video_tracking_constants;
+    
+    for k = 1:size(dead_spots,1)
+        Xtl = dead_spots(k, 1);
+        Ytl = dead_spots(k, 2);
+        wid = dead_spots(k, 3);
+        ht  = dead_spots(k, 4);
+        
+        % find those data that exist within our 'dead zone'
+        idx = find(data(:,X) >  Xtl         & ...
+                   data(:,X) < (Xtl + wid)  & ...
+                   data(:,Y) >  Ytl         & ...
+                   data(:,Y) < (Ytl + ht) );
+               
+        % extract out the unique trackerIDs
+        IDs_to_delete = unique( data(idx,ID) );
+        
+        % the response to those trackers here is to delete the entire
+        % tracker.  one could imagine deleting points at and after the time
+        % where the boundary is crossed.
+        if ~isempty(IDs_to_delete)
+            for m = 1:length(IDs_to_delete)
+                IDidx = find( data(:,ID) == IDs_to_delete(m) );
+                data(IDidx, :) = [];               
+            end
+        end
+    end
+    
+    return;
+
+function data = filter_subtract_drift(data, drift_method)
+    drift_start_time = [];
+    drift_end_time = [];    
+    [data,q] = remove_drift(data, drift_start_time, drift_end_time, drift_method);
+return;
 
 % function for writing out stderr log messages
 function logentry(txt)

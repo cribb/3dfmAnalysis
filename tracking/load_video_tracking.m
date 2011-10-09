@@ -212,6 +212,10 @@ for fid = 1:length(filelist)
 
     logentry(['Loaded *' filelist(fid).name '* which contains ' num2str(max(data(:,ID))) ' initial trackers.']);
     
+    if fid == 1
+        glommed_d = zeros(0,size(data,2));
+    end
+    
     % now do all of the bead specific things
     for k = 0 : max(trackerID)    
                     
@@ -268,15 +272,13 @@ for fid = 1:length(filelist)
     % we don't want to repeat any beadIDs as we concatenate the
     % datasets from each filename in the stack.  To avoid this, we add
     % the max(beadID) to the newdata's beadID and then we concatenate.
-    if exist('glommed_d','var')        
-        if ~isempty(glommed_d)
-            beadmax = max(glommed_d(:,ID));
-            data(:,ID) = data(:,ID) + beadmax + 1;            
-            glommed_d = [glommed_d ; data];
-        end
-    else
-        glommed_d = data;
-    end    
+    beadmax = max(glommed_d(:,ID));
+    if isempty(beadmax)
+        beadmax = 0;
+    end
+    data(:,ID) = data(:,ID) + beadmax + 1;            
+    glommed_d = [glommed_d ; data];
+   
 end
 
 data = glommed_d;
