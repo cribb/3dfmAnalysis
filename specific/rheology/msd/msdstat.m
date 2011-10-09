@@ -52,7 +52,8 @@ logmsd = log10(msd);
 numbeads = size(logmsd,2);
 
 % weighted mean for logmsd
-weights = counts ./ repmat(nansum(counts,2), 1, size(counts,2));
+baseline = repmat(nansum(counts,2), 1, size(counts,2));
+weights = counts ./ baseline;
 
 mean_logtau = nanmean(logtau,2);
 mean_logmsd = nansum(weights .* logmsd, 2);
