@@ -52,11 +52,13 @@ mywellmsd = all_wellmsds(minloc(1),:);
 heatmap_msds(1, str2num(char(wellID)) ) = mywellmsd;
 heatmap_msds = reshape(heatmap_msds, 12, 8)';
 
+visc = (2 * 1.3806e-23 * 300 * spec_tau) ./ (3 * pi * 0.5e-6 * 10.^heatmap_msds);
 % Heat map
 heatmapfig = figure; 
-imagesc(1:12, 1:8, heatmap_msds); 
-colormap(hot);
-colorbar;
+% imagesc(1:12, 1:8, heatmap_msds); 
+imagesc(1:12, 1:8, log10(visc)); 
+colormap((hot));
+cb = colorbar;
 set(heatmapfig, 'Units', 'Pixels');
 set(heatmapfig, 'Position', [300 300 800 600]);
 set(gca, 'XTick', [1:12]');
@@ -64,7 +66,10 @@ set(gca, 'XTickLabel', [1:12]');
 set(gca, 'XAxisLocation', 'top');
 set(gca, 'YTick', [1:8]');
 set(gca, 'YTickLabel', {'A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'});
-title('MS displacement (in log_{10} m^2)');
+cbticks = get(cb, 'YTick')';
+cbtick_labels = cellstr([repmat('10^{', size(cbticks)) num2str(cbticks) repmat('}', size(cbticks))]);
+set(cb, 'YTickLabel', cbtick_labels);
+title('Viscosity (in log_{10} Pa s})');
     alpha = ones(8,12);
     alpha(isnan(heatmap_msds)) = 0.5;
     im = get(gca, 'Children');
@@ -114,13 +119,14 @@ myerr = all_errs(minloc(1),:);
 
 
 % One-dimensional bar chart
-MSD = (10 .^ mymsd)*1e6;
-MSD_err = (10.^(mymsd+myerr)-10.^(mymsd)) *1e6;
+MSD = (10 .^ mymsd);
+MSD_err = (10.^(mymsd+myerr)-10.^(mymsd));
 barfig = figure;
 barwitherr( MSD_err, MSD );
+set(gca, 'XTick', 1:length(molar_conc));
 set(gca,'XTickLabel',molar_conc)
 xlabel('Well ID');
-ylabel('MSD [m^2]');
+ylabel('MSD [m^2] at \tau=10 [s]');
 barfile = [metadata.instr.experiment '_well_ALL' '.bar'];
 gen_pub_plotfiles(barfile, barfig, 'normal');
 close(barfig);
@@ -202,7 +208,7 @@ fprintf(fid, '<hr/> \n\n');
 % Plate-wide heat-map
 %
 fprintf(fid, '<p> \n');
-fprintf(fid, '   <h3> Heatmap (RMS displacement) </h3> \n');
+fprintf(fid, '   <h3> Heatmap (Viscosity at 10 [s] time scale) </h3> \n');
 % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
 fprintf(fid, '   <iframe src="%s.png" width="800" height="600" border="0"></iframe> <br/> \n', heatmapfile);
 fprintf(fid, '   <br/> \n\n');
@@ -241,7 +247,7 @@ fprintf(fid, '</p> \n\n');
 % % % Report Summary figure.  Bar chart with error.  (Maybe ANOVA eventually?)
 %
 fprintf(fid, '<p> \n');
-fprintf(fid, '   <b> Summary: Mucus Viscosity </b> <br/> \n');
+fprintf(fid, '   <b> Summary: Mean Squared Displacements at 10 [s] timescale </b> <br/> \n');
 fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', barfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');

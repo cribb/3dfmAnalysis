@@ -1,3 +1,6 @@
+2011-10-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_publish_PM.m: Switched to viscosity as reported value instead of RMS displacement.
+
 2011-10-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_analyze_PMExpt.m:  removed filter specs to pan_process_PMExpt.m
 	* pan_process_PMExpt.m:  added filter specs and set new filters.
