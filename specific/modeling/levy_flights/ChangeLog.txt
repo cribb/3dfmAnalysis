@@ -1,4 +1,7 @@
-2011-09-21   Jeremy Cribb <jcribb@email.unc.edu>
+2011-10-25  Sarita Prakash <saritap23@gmail.com>
+	* simple_levy_motion.m:  fixed bug in determination of velocity vector.  The same velocity vector was added at each time step instead of being updated according to the tracer position at each time step.
+
+2011-09-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* simple_levy_motion.m:  changed default input parameters to make more physical sense.  Corrected scaling for 'gamma' values.
 	* vortex_vectors.m: updated documentation.
 	* VorticesStream.m: fixed bug where 'gamma' values were not tiled correctly.

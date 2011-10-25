@@ -6,7 +6,7 @@ clear all;
 % %%%%%%%%%%
 vortex_type = 'irrotational';
 
-vn = 5;       % number of vortices on a side
+vn = 1;       % number of vortices on a side
 vs = 1e-6;      % vortex spacing:  meters between vortices
 
 tn = vn;      % number of tracers on a side
@@ -63,7 +63,7 @@ figure(h);
     hold on;
         plot(  vlx(:), vly(:), 'bo', ...
                tlx(:), tly(:), 'g.');
-    hold off;   
+    xxxx    hold off;   
     axis([minx-bufx, maxx+bufx, miny-bufy, maxy+bufy]);
     axis square;
     grid off;
