@@ -374,22 +374,21 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     if ~isfield(handles, 'AUXtype')
         handles.AUXtype = 'OFF';
-    end
-    
-    
+    end    
+
     % set default figure parameters
     set(XYfig, 'Units', 'Normalized');
-    set(XYfig, 'Position', [0.1 0.005 0.05 0.05]);
+    set(XYfig, 'Position', [0.1 0.05 0.4 0.4]);    
     set(XYfig, 'DoubleBuffer', 'on');
     set(XYfig, 'BackingStore', 'off');
     
     set(XTfig, 'Units', 'Normalized');
-    set(XTfig, 'Position', [0.2 0.005 0.05 0.05]);
+    set(XTfig, 'Position', [0.51 0.05 0.4 0.4]);
     set(XTfig, 'DoubleBuffer', 'on');
     set(XTfig, 'BackingStore', 'off');   
     
     set(AUXfig, 'Units', 'Normalized');
-    set(AUXfig, 'Position', [0.2 0.525 0.05 0.05]);
+    set(AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
     set(AUXfig, 'DoubleBuffer', 'on');
     set(AUXfig, 'BackingStore', 'off');  
 
