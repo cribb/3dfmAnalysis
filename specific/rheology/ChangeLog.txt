@@ -1,3 +1,6 @@
+2011-10-27  Jeremy Cribb <jcribb@email.unc.edu>
+	* bead_dilution.m:  added.  computes dilution factor that is necessary to give an average bead-to-bead distance given as input.
+
 2011-08-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* save_msdfile.m:  added switch for ignoring squared-displacements, if desired.
 

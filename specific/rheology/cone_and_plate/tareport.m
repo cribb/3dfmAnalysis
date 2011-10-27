@@ -98,29 +98,33 @@ for k = 1 : length(fn)
         fprintf(fid, ' <tr>\n  <td align="left" width="200">\n    <b> %s </b> <br/> \n', st.metadata.step_name);
         
         if findstr(exptype, 'stress sweep');
-            ssweepimg = [outf '-ssweep' testnum '.svg'];
+            ssweepimg = [outf '-ssweep' testnum];
             sfreq = mean(st.table(:,get_TA_col(st, 'ang. frequency')));
             temp = mean(st.table(:,get_TA_col(st, 'temperature')));
             fprintf(fid, '    <b> angular frequency: </b> %s rad/s (%s Hz) <br/> \n',num2str(sfreq),num2str(sfreq/(2*pi)));
             fprintf(fid, '    <b> temperature: </b> %s ºC <br/> \n', num2str(temp));
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
-            fprintf(fid, '    <iframe src="%s" width="400" height="300" border="0"></iframe> \n', ssweepimg);
+            fprintf(fid, '    <a href="%s">', [ssweepimg '.fig']);
+            fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [ssweepimg '.svg']);
+            fprintf(fid, '    </a>');
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
         
         if findstr(exptype, 'strain sweep')
-            nsweepimg = [outf '-nsweep' testnum '.svg'];
+            nsweepimg = [outf '-nsweep' testnum];
             sfreq = mean(st.table(:,get_TA_col(st, 'ang. frequency')));
             temp = mean(st.table(:,get_TA_col(st, 'temperature')));
             fprintf(fid, '    <b> angular frequency: </b> %s rad/s (%s Hz) <br/> \n',num2str(sfreq),num2str(sfreq/(2*pi)));
             fprintf(fid, '    <b> temperature: </b> %s ºC<br/> \n', num2str(temp));
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
-            fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', nsweepimg);
+            fprintf(fid, '    <a href="%s">', [nsweepimg '.fig']);
+            fprintf(fid, '      <img src="%s" width="400" height="300"></img> \n', [nsweepimg '.svg']);
+            fprintf(fid, '    </a>');
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
         
         if findstr(exptype, 'frequency sweep')
-            freqimg = [outf '-fsweep' testnum '.svg'];
+            freqimg = [outf '-fsweep' testnum];
             samp = st.table(:,get_TA_col(st, 'osc. stress'));
             namp = st.table(:,get_TA_col(st, 'strain'));       
             temp = mean(st.table(:,get_TA_col(st, 'temperature')));
@@ -128,69 +132,83 @@ for k = 1 : length(fn)
             fprintf(fid, '    <b> Strain amplitude: </b> %s +- %s  <br/> \n',num2str(mean(namp)),num2str(stderr(namp)));
             fprintf(fid, '    <b> temperature: </b> %s ºC<br/> \n', num2str(temp));
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
-            fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', freqimg);
+            fprintf(fid, '    <a href="%s">', [freqimg '.fig']);
+            fprintf(fid, '      <img src="%s" width="400" height="300"></img> \n', [freqimg '.svg']);
+            fprintf(fid, '    </a>');            
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
 
         if findstr(exptype, 'creep')
             appval = st.metadata.applied_value;
             temp = mean(st.table(:,get_TA_col(st, 'temperature')));
-            creepimg = [outf '-creep' testnum '.svg'];
+            creepimg = [outf '-creep' testnum];
             fprintf(fid, '    <b> Applied Value: </b> %s <br/> \n',appval);
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
-            fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', creepimg);
+            fprintf(fid, '    <a href="%s">', [creepimg '.fig']);
+            fprintf(fid, '     <img src="%s" width="400" height="300"></img> \n', [creepimg '.svg']);
+            fprintf(fid, '    </a>');
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
 
         if findstr(exptype, 'recovery')
             appval = st.metadata.applied_value;
             temp = mean(st.table(:,get_TA_col(st, 'temperature')));
-            creepimg = [outf '-recov' testnum '.svg'];
+            creepimg = [outf '-recov' testnum];
             fprintf(fid, '    <b> Applied Value: </b> %s <br/> \n',appval);
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
-            fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', creepimg);
+            fprintf(fid, '    <a href="%s">', [creepimg '.fig']);
+            fprintf(fid, '     <img src="%s" width="400" height="300"></img> \n', [creepimg '.svg']);
+            fprintf(fid, '    </a>');
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
         
         if findstr(exptype, 'flow');
-            flowimg = [outf '-flow' testnum '.svg'];
+            flowimg = [outf '-flow' testnum];
             temp = mean(st.table(:,get_TA_col(st, 'temperature')));
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
-            fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', flowimg);
+            fprintf(fid, '    <a href="%s">', [flowimg '.fig']);
+            fprintf(fid, '     <img src="%s" width="400" height="300"></img> \n', [flowimg '.svg']);
+            fprintf(fid, '    </a>');
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
         
         if findstr(exptype, 'temperature');
-            tempimg = [outf '-temp' testnum '.svg'];
+            tempimg = [outf '-temp' testnum];
             appval = st.metadata.controlled_variable;
             fprintf(fid, '     %s \n', appval);            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
-            fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', tempimg);
+            fprintf(fid, '    <a href="%s">', [tempimg '.fig']);
+            fprintf(fid, '     <img src="%s" width="400" height="300"></img> \n', [tempimg '.svg']);
+            fprintf(fid, '    </a>');
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
 
         if findstr(exptype, 'peak hold');
-            tempimg = [outf '-peakstrain' testnum '.svg'];
+            tempimg = [outf '-peakstrain' testnum];
             appval = st.metadata.controlled_variable;
             temp = mean(st.table(:,get_TA_col(st, 'temperature')));
             fprintf(fid, '    %s \n', appval);            
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
-            fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', tempimg);
+            fprintf(fid, '    <a href="%s">', [tempimg '.fig']);
+            fprintf(fid, '     <img src="%s" width="400" height="300"></img> \n', [tempimg '.svg']);
+            fprintf(fid, '    </a>');
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
 
         if findstr(exptype, 'relaxation');
-            tempimg = [outf '-relax' testnum '.svg'];
+            tempimg = [outf '-relax' testnum];
             appval = st.metadata.applied_value;
             temp = mean(st.table(:,get_TA_col(st, 'temperature')));
             fprintf(fid, '    <b> strain: </b> %s <br/> \n', appval);            
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
-            fprintf(fid, '     <iframe src="%s" width="400" height="300"></iframe> \n', tempimg);
+            fprintf(fid, '    <a href="%s">', [tempimg '.fig']);
+            fprintf(fid, '     <img src="%s" width="400" height="300"></img> \n', [tempimg '.svg']);
+            fprintf(fid, '    </a>');
             fprintf(fid, '  </td>\n </tr>\n\n');
         end
         
