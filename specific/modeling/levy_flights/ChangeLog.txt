@@ -1,3 +1,7 @@
+2011-11-09  Jeremy Cribb <jcribb@email.unc.edu>
+	* simple_levy_motion.m: changed to a function with limited input parameters.  now uses randomized locations for vortices and tracer starting positions.
+	* vortex_vectors.m: updated comments.
+
 2011-10-25  Sarita Prakash <saritap23@gmail.com>
 	* simple_levy_motion.m:  fixed bug in determination of velocity vector.  The same velocity vector was added at each time step instead of being updated according to the tracer position at each time step.
 

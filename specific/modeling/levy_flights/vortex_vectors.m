@@ -30,8 +30,8 @@ vx = zeros(size(x));
 vy = zeros(size(x));
 vel = zeros(size(x));
 
-% plot out original vector field
-for i = 1:length(gamma(:))
+% add up vector contribution from each vortex
+for i = 1:length(vlx(:))
     r1 = sqrt((x - vlx(i)).^2 + (y - vly(i)).^2);
     theta = atan2((x-vlx(i)), (y-vly(i))) + pi/2;
     
