@@ -1727,7 +1727,7 @@ function delete_inside_boundingbox(hObject, eventdata, handles)
     t = table(:,TIME) - handles.mintime;
     x = table(:,X);
     y = table(:,Y);
-    currentbead = get(handles.slider_BeadID, 'Value');
+    currentbead = round(get(handles.slider_BeadID, 'Value'));
     
     [xm, ym] = ginput(2);
     
