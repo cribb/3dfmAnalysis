@@ -1,3 +1,7 @@
+2012-03-31  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: added option for calculating step-size distributions.
+	* video_msd.m: now accommodates new options for msd.m 
+
 2011-10-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* msdstat.m: implemented new 'baseline' variable
 

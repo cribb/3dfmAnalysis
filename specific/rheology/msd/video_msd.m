@@ -1,4 +1,4 @@
-function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, calc_r2)
+function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, xtra_output)
 % VIDEO_MSD computes mean square displacements of an aggregate number of video tracked beads via the Stokes-Einstein relation 
 %
 % 3DFM function
@@ -19,6 +19,8 @@ function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, calc_r
 %       "frame_rate" is the video tracking frame rate in [frames / second].
 %       "calib_um" is the microns per pixel conversion unit
 %       "make_plot" gives the option of producing a plot of MSD versus tau.
+%       "xtra_output" is 'r2' to output r-squared values, or 'r' to output
+%                     sign-preserved displacements.
 %
 % Notes: - No arguments will run a 2D MSD on all .mat files in the current
 %          directory and use default window sizes.
@@ -30,10 +32,17 @@ function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, calc_r
 %
 
 % initializing arguments
-if nargin < 6 || isempty(calc_r2)
+if nargin < 6 || isempty(xtra_output) || ~isempty(strfind(xtra_output, 'n'))
     calc_r2 = 0;
-elseif strfind(calc_r2, 'y')
+    calc_r = 0;
+elseif strfind(xtra_output, 'r2')
     calc_r2 = 1;
+    calc_r = 0;
+elseif strfind(xtra_output, 'r')
+    calc_r = 1;
+    calc_r2 = 0;
+else
+    error('xtra_output not defined correctly');
 end
 
 if (nargin < 1) || isempty(files)  
@@ -49,6 +58,9 @@ if (nargin < 1) || isempty(files)
     vmsd.msd = empty_set;
     if calc_r2
         vmsd.r2 = [];
+    end
+    if calc_r
+        vmsd.r = [];
     end
     vmsd.n = empty_set;
     vmsd.ns = empty_set;
@@ -99,10 +111,13 @@ tau    = NaN(length(window), length(beadID));
 mymsd  = NaN(length(window), length(beadID));
 counts = NaN(length(window), length(beadID));
 
-if calc_r2
-    myr2   = NaN(length(window), length(beadID), max(v(:,FRAME)+1));
-end;
-
+        if calc_r2
+            myr2   = NaN(max(v(:,FRAME)+1), length(window), length(beadID));
+        elseif calc_r
+            % the 2 here refers to the number of coordinates,being just X and Y
+            myr    = NaN(max(v(:,FRAME)+1), 2, length(window), length(beadID));   
+        end;
+                
 for k = 1 : length(beadID);
     TIME   = 1; 
     ID     = 2; 
@@ -114,8 +129,8 @@ for k = 1 : length(beadID);
     b = get_bead(v, beadID(k));    
     
     % call up the MSD kernel-function to compute the MSD for each bead    
-    if calc_r2
-        [tau_ msd_ nbead r2] = msd(b(:, TIME), b(:, X:Y), window);
+    if calc_r2 || calc_r
+        [tau_ msd_ nbead r]  = msd(b(:, TIME), b(:, X:Y), window);
     else
         [tau_ msd_ nbead]    = msd(b(:, TIME), b(:, X:Y), window);
     end
@@ -124,11 +139,16 @@ for k = 1 : length(beadID);
     mymsd(:,k) = msd_;
     counts(:,k) = nbead;
     
-    if calc_r2
-        [ro, cl] = size(r2);
-        myr2(1:ro, k, 1:cl) = r2;
+    if calc_r
+        [ntimes, ncoords, nwindows] = size(r);
+        myr(1:ntimes, 1:ncoords, 1:nwindows, k) = r;
+        q = myr(1:ntimes, 1:ncoords, 1:nwindows, k);
     end    
-
+    
+    if calc_r2
+        myr2 = r.^2;
+        myr2 = squeeze(sum(myr2,2));
+    end
 end;
 
 
@@ -145,7 +165,9 @@ sample_count = sum(~isnan(mymsd),2);
 % output structure
 vmsd.tau = tau;
 vmsd.msd = mymsd;
-if calc_r2
+if calc_r
+    vmsd.r = myr;
+elseif calc_r2
     vmsd.r2 = myr2;
 end
 vmsd.n = sample_count;

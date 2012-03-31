@@ -32,10 +32,6 @@ if (nargin < 3) || isempty(window)
     window = [1 2 5 10 20 50 100 200 500 1000 1001]; 
 end;
 
-% if nargin < 4 || isempty(winedge)
-%     winedge = 1;
-% end
-
 % for every window size (or tau)
 warning('off', 'MATLAB:divideByZero');
 
@@ -49,26 +45,26 @@ end
 
     numpoints = size(data,1);
     
-%     if numpoints == 1
-%         logentry('Insufficient points to compute any MSD value');
-%         varargout{1} = tau;
-%         varargout{2} = msd;
-%         varargout{3} = count;
-%         varargout{4} = r2out;        
-%         return;
-%     end
-    
-%     mywin = window( window < numpoints/winedge );    
-    mywin = window;    
-    
-    for w = 1:length(mywin)
+    if numpoints == 1
+        logentry('Insufficient points to compute any MSD value');
+        varargout{1} = tau;
+        varargout{2} = msd;
+        varargout{3} = count;
+        if nargout == 4
+            varargout{4} = r2out;        
+        end
+        return;
+    end
+         Rout = NaN(size(data,1),size(data,2),length(window));
+         
+    for w = 1:length(window)
     
       % for x,y,z (k = 1,2,3) directions  
       for k = 1:cols(data)
   
         % for all frames
-        A = data(1:end-mywin(w), k);
-        B = data(mywin(w)+1:end, k);
+        A = data(1:end-window(w), k);
+        B = data(window(w)+1:end, k);
     
         r = (B - A);
         % var_r = sum((mean(r) - r).^2) / size(r,1);
@@ -81,21 +77,22 @@ end
             n = n + size(B,1);
         end
         
+        if nargout == 4
+            Rout(1:size(r,1),k,w) = r;
+        end
       end
       
-        tau(w, :)   = mywin(w) * mean(diff(t));        
+        tau(w, :)   = window(w) * mean(diff(t));        
         msd(w, :)   = mean(r2);
         count(w, :) = n;        
-        if nargout == 4
-            r2out(w,1:length(r2)) = r2;
-        end
+
     end
 
     varargout{1} = tau;
     varargout{2} = msd;
     varargout{3} = count;
     if nargout == 4
-        varargout{4} = r2out;
+        varargout{4} = Rout;
     end
     
 warning('on', 'MATLAB:divideByZero');
