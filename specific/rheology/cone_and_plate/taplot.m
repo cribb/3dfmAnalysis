@@ -53,7 +53,7 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'nsweep'));
         end
         
-        if findstr(exptype, 'frequency sweep')
+        if findstr(exptype, 'frequency sweep') | findstr(exptype, 'tts')
             freq = st.table(:,get_TA_col(st, 'frequency', 'Hz'));
             gp = st.table(:,get_TA_col(st, 'G''', 'Pa'));
             gpp= st.table(:,get_TA_col(st, 'G''''', 'Pa'));
@@ -122,8 +122,10 @@ for k = 1 : length(fn)
            isempty(findstr(exptype, 'recov')) && ...
            isempty(findstr(exptype, 'temperature')) && ...
            isempty(findstr(exptype, 'peak hold')) && ... 
-           isempty(findstr(exptype, 'relax'))
-           figh(count) = NaN;
+           isempty(findstr(exptype, 'relax')) && ...
+           isempty(findstr(exptype, 'TTS'))
+       
+                figh(count) = NaN;
         end
 
         count = count + 1;        

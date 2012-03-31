@@ -218,6 +218,8 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
             plot(t, force, '.')
             xlabel([logstring1 'time [s]' logstring2]);
             ylabel([logstring1 'force [pN]' logstring2])
+            
+            fprintf('average force= %g\n', mean(force)');
         
         case 'velocity'
             subplot(1,1,1);

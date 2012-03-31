@@ -1,3 +1,6 @@
+2012-03-31  Jeremy Cribb <jcribb@email.unc.edu>
+	* save_msdfile.m: now accommodates the msd's flag for outputting the step sizes for particles.
+
 2011-10-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* bead_dilution.m:  added.  computes dilution factor that is necessary to give an average bead-to-bead distance given as input.
 
