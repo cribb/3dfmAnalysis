@@ -140,7 +140,11 @@ switch my_pole_geometry
     case '4pole-4512'
         poles_to_excite_pos = [4 5];
         poles_to_excite_neg = [1 2];        
-        dominant_coil = 4;          
+        dominant_coil = 4;       
+    case 'SAP'
+        poles_to_excite_pos = [1];
+        poles_to_excite_neg = [];        
+        dominant_coil = 1;               
     otherwise
         error(['Pole geometry ' my_pole_geometry ' not recognized.']);
 end

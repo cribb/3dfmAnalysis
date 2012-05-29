@@ -1,3 +1,7 @@
+2012-05-29  Jeremy Cribb <jcribb@email.unc.edu>
+	* varforce_drive.m: added coil geometry for surface-attached posts project for Briana Fiser.
+	* varforce_drive_gui.fig: same.
+
 2009-02-25  Jeremy Cribb <jcribb@email.unc.edu>
 	* varforce_todo.txt: updated list.
 	* varforce_get_force: reduced step size for voltage interpolation.
