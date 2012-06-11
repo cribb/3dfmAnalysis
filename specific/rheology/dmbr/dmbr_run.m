@@ -59,7 +59,7 @@ params = load(metafile);
 fnames = fieldnames(input_params);
 for k = 1:length(fnames); 
     params = setfield(params, fnames{k}, getfield(input_params, fnames{k})); 
-end;
+end
 
 % dmbr_init: initializes and loads experimental parameters and video
 % tracked data.  May require user interaction to define breakpoint between 
@@ -121,8 +121,8 @@ for k = 1:length(beads)
                        rheo_table(:,SEQ)   == sequences(m)  & ...
                        rheo_table(:,VOLTS) == voltages(n)   );
                    
-%            fprintf('beadID: %g, unique_beads: %g, seqID: %g, voltage: %13.2g length(idx): %g\n', ...
-%                     beads(k), length(unique(rheo_table(:,ID))), sequences(m), voltages(n), length(idx));
+           fprintf('beadID: %g, unique_beads: %g, seqID: %g, voltage: %g length(idx): %g\n', ...
+                    beads(k), length(unique(rheo_table(:,ID))), sequences(m), voltages(n), length(idx));
 
             v.beadID(count,:) = beads(k);
             v.seqID(count,:)  = sequences(m);   
@@ -133,29 +133,33 @@ for k = 1:length(beads)
                 v.recovery(count,:) = dmbr_percent_recovery(rheo_table(idx,:));
 
                 % compute the relaxation times for the zero voltage regions
-%                 v.taus(count,:) = dmbr_relaxation_time(rheo_table(idx,:), params);
+                v.taus(count,:) = dmbr_relaxation_time(rheo_table(idx,:), params);
             end
 
             if ~isempty(idx)
                 rheo_table(idx,:) = dmbr_compute_derivative(rheo_table(idx,:), scale);
             end
 
-            % fit the data to a model type
-%             [v.G(count,:), v.eta(count,:), ct, v.Rsquare(count,:)] = dmbr_fit(rheo_table(idx,:), params.fit_type)
+            if voltages(n) ~= 0
+                % fit the data to a model type
+                 [v.G(count,:), v.eta(count,:), ct, v.Rsquare(count,:)] = dmbr_fit(rheo_table(idx,:), params.fit_type);
 
-%             [G_, eta_, ct, Rsquare_] = dmbr_fit(rheo_table(idx,:), params.fit_type);
-%             v.G(count,:) = G_;
-%             v.eta(count,:) = eta_;
-%             v.Rsquare(count,:) = Rsquare_;
+    %             [G_, eta_, ct, Rsquare_] = dmbr_fit(rheo_table(idx,:), params.fit_type);
+    %             v.G(count,:) = G_;
+    %             v.eta(count,:) = eta_;
+    %             v.Rsquare(count,:) = Rsquare_;
+
+                % compute maximum shear rate
+                [v.vd(count,:), v.max_shear(count,:)] = dmbr_max_shear(rheo_table(idx,:), params);
+
+                % compute Weissenburg Numbers
+                v.Wi(count,:) = v.max_shear(count,:) * tau;
+            end
             
-            % compute maximum shear rate
-            [v.vd(count,:), v.max_shear(count,:)] = dmbr_max_shear(rheo_table(idx,:), params);
 
-            % compute Weissenburg Numbers
-            v.Wi(count,:) = v.max_shear(count,:) * tau;
-
-            count = count + 1;
         end
+        
+        count = count + 1;
         
         %  at the sequence level, compute but do not remove offset position/time
         if ~isfield(v, 'offsets')

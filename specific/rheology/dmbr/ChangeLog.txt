@@ -1,3 +1,8 @@
+2012-6-11 Christian Stith <chstith@ncsu.edu>
+	* dmbr_relaxation_time.m: removed problematic whitespace
+	* dmbr_run.m: reimplemented fit function, moved counter to correct position
+	* dmbr_report_cell_expt.m:  added.  used dmbr_report to create a new reporting function specifically for the cell pulling experiment as specified by Luke.
+	
 2011-10-25 Thomas Sayre-McCord <thomassm@email.unc.edu>
 	* dmbr_fit.m: added power law fitting to fit options
     	* dmbr_analysis_gui.fig: added "Power Law" as an option in fitting popdown menu
