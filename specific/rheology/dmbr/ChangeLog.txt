@@ -1,3 +1,7 @@
+2012-06-13 Christian Stith <chstith@ncsu.edu>
+	* dmbr_compute_compliance.m: adapted compliance calculation to approximate compliance for zero-force period
+	* dmbr_report_cell_expt.m: added excel output functionality, corrected displacement output
+
 2012-6-11 Christian Stith <chstith@ncsu.edu>
 	* dmbr_relaxation_time.m: removed problematic whitespace
 	* dmbr_run.m: reimplemented fit function, moved counter to correct position

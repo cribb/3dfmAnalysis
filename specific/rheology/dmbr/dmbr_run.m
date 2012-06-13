@@ -143,7 +143,8 @@ for k = 1:length(beads)
             if voltages(n) ~= 0
                 % fit the data to a model type
                  [v.G(count,:), v.eta(count,:), ct, v.Rsquare(count,:)] = dmbr_fit(rheo_table(idx,:), params.fit_type);
-
+                 fprintf('eta value: ');
+                 fprintf('%f\n', v.eta(count,:));
     %             [G_, eta_, ct, Rsquare_] = dmbr_fit(rheo_table(idx,:), params.fit_type);
     %             v.G(count,:) = G_;
     %             v.eta(count,:) = eta_;

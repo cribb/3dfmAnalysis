@@ -1,10 +1,7 @@
-function rheo = dmbr_report(filename, report_params)
+function rheo = dmbr_report_cell_expt(filename, report_params)
 %
 %
 % filename = vfd file from dmbr experiment
-%
-%
-%
 %
 %
 %
@@ -37,7 +34,8 @@ voltages = m.voltages;
 calib_um = m.calibum;
 
 % load tracking data
-trackingfile = [filename_root, '.raw.vrpn.evt.mat'];
+%trackingfile = [filename_root, '.raw.vrpn.evt.mat'];
+trackingfile = [filename_root, '.vrpn.evt.mat'];
 
 try 
     d = load(trackingfile);
@@ -102,27 +100,18 @@ for b = 1 : length(beads)
         x = ftable(:,X);
         x = x - x(1);
         
+        y = ftable(:, Y);
+        y = y - y(1);
+        
+        radial = magnitude(x, y);
+        
         Jx = ftable(:,J);
 
         
-        % filtering displacement via moving average kernel of width, wn
         idx = find(ftable(:,VOLTS) > 0);
         t_on = ftable(idx,TIME);
         x_on = ftable(idx,X);
         Jx_on = ftable(idx,J);   
-
-% % % % % %         wn = m.wn;
-% % % % % %         window_size = m.window_size;
-% % % % % %         
-% % % % % %         filtx_on = conv(x_on(:,1), ones(wn,1).*1/wn);
-% % % % % %         filtJx_on = conv(Jx_on(:,1), ones(wn,1).*1/wn);
-% % % % % %         
-% % % % % %         % computing the velocity as the windowed-derivative of displacement
-% % % % % %         [dxdt, newt, newx] = windiff(filtx_on(wn:end-(wn-1),:), t_on(wn/2:end-(wn/2)), window_size);
-% % % % % %         
-% % % % % %         % computing the instantaneous viscosity as a function of compliance
-% % % % % %         [dJxdt, newt, newc] = windiff(filtJx_on(wn:end-(wn-1),:), t_on(wn/2:end-(wn/2)), window_size);
-% % % % % %         visc = 1 ./ dJxdt;
 
         
 
@@ -133,10 +122,12 @@ for b = 1 : length(beads)
 %         if ~exist('xetaFig');  xetaFig = figure; end
 %         if ~exist('xetaFig2'); xetaFig2 = figure; end
 
+
+
         % displacement vs. time plot
         figure(txFig);
         hold on;
-        plot(t,x*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
+        plot(t,radial*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
         title(['bead displacement vs. time, bead ' num2str(beads(b))]);
         xlabel('time [s]');
         ylabel('displacement [\mum]');
@@ -146,7 +137,7 @@ for b = 1 : length(beads)
         
         figure(txFig2); 
         hold on;
-        plot(t,x*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
+        plot(t,radial*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
         title(['bead displacement vs. time, bead ' num2str(beads(b))]);
         xlabel('time [s]');
         ylabel('displacement [\mum]');
@@ -175,26 +166,6 @@ for b = 1 : length(beads)
         hold off;
         drawnow;
 
-% % % %         % strain thickening (viscosity vs. displacement) plot
-% % % %         figure(xetaFig);
-% % % %         hold on;
-% % % %         plot((newx-newx(1))*1e6,visc, '.', 'Color', [s/(length(seqs)+1) 0 s/(length(seqs)+1)]);
-% % % %         title(['Strain Thickening, bead ' num2str(beads(b))]);
-% % % %         xlabel('displacement [\mum]');
-% % % %         ylabel('viscosity, \eta [Pa s]');
-% % % %         pretty_plot;
-% % % %         hold off;
-% % % %         drawnow; 
-% % % %         
-% % % %         figure(xetaFig2);
-% % % %         hold on;
-% % % %         plot((newx-newx(1))*1e6,visc, '.', 'Color', [s/(length(seqs)+1) 0 s/(length(seqs)+1)]);
-% % % %         title(['Strain Thickening, bead ' num2str(beads(b))]);
-% % % %         xlabel('displacement [\mum]');
-% % % %         ylabel('viscosity, \eta [Pa s]');
-% % % %         pretty_plot;
-% % % %         hold off;
-% % % %         drawnow;
     end
   
         txFigfilename   = [filename_root '.txFig.bead'  num2str(beads(b)) '.png'];
@@ -221,10 +192,6 @@ for b = 1 : length(beads)
 %         close(xetaFig2);
 end
 
-
-% calculating moving average and window size in frames and seconds
-% wn_seconds = wn/120;
-% window_size_seconds = window_size/120;
 
 % report
 outfile = [filename_root '.html'];
@@ -264,21 +231,6 @@ fprintf(fid, '<b>Scale</b><br/>\n');
 fprintf(fid, '<table border="2" cellpadding="6"> \n');
 fprintf(fid, '<tr> \n');
 fprintf(fid, '<td align="center"> %12.2f </td> \n', input_params.scale);
-%{
-fprintf(fid, '   <td> </td> \n');
-fprintf(fid, '   <td align="center"><b>Frames</b> </td> \n');
-fprintf(fid, '   <td align="center"><b>Seconds</b> </td> \n');
-fprintf(fid, '</tr> \n');
-fprintf(fid, '<tr> \n');
-fprintf(fid, '   <td align="left"><b>Moving Average</b> </td> \n');
-% fprintf(fid, '   <td align="center"> %i \n', wn);
-% fprintf(fid, '   <td align="center"> %12.3g \n', wn_seconds); 
-fprintf(fid, '</tr> \n');
-fprintf(fid, '<tr> \n');
-fprintf(fid, '   <td align="left"><b>Window Size</b> </td> \n');
-% fprintf(fid, '   <td align="center"> %i \n', window_size);
-% fprintf(fid, '   <td align="center"> %12.3g \n', window_size_seconds);
-%}
 fprintf(fid, '</tr> \n');
 fprintf(fid, '</table> \n\n'); 
 
@@ -290,9 +242,9 @@ fprintf(fid, '<table border="2" cellpadding="6"> \n');
 fprintf(fid, '<tr> \n');
 fprintf(fid, '   <td align="center"><b>Tracker ID</b> </td> \n');
 fprintf(fid, '   <td align="center"><b>Sequence #</b> </td> \n');
-fprintf(fid, '   <td align="center"><b>Shear Rate (1/s)</b> </td> \n');
-fprintf(fid, '   <td align="center"><b>Weissenburg #</b> </td> \n');
-fprintf(fid, '   <td align="center"><b>Eta_ss (Pa s)</b> </td> \n');
+fprintf(fid, '   <td align="center"><b>G</b> </td> \n');
+fprintf(fid, '   <td align="center"><b>Eta1</b> </td> \n');
+fprintf(fid, '   <td align="center"><b>Eta2</b> </td> \n');
 fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
 fprintf(fid, '</tr> \n\n');
 
@@ -302,12 +254,18 @@ for b = 1 : length(beads)
         fprintf(fid, '<tr> \n');
         fprintf(fid, '<td align="center"> %i </td> \n', beads(b));  
         fprintf(fid, '<td align="center"> %i </td> \n', seqs(s));          
-        % shear_rate for this bead/sequence
-        fprintf(fid, '<td align="center"> %12.2f </td> \n', rheo.max_shear(idx));
-        % Weissenberg_number for this bead/sequence
-        fprintf(fid, '<td align="center"> %12.2f </td> \n', rheo.Wi(idx));
-        % steady state viscosity for Jeffey model
-        fprintf(fid, '<td align="center"> %12.2f </td> \n', rheo.eta(idx,end));
+%        % shear_rate for this bead/sequence
+%        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.max_shear(idx));
+        % G for this bead sequence
+        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.G(idx));
+%        % Weissenberg_number for this bead/sequence
+%        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.Wi(idx));
+        % eta1 for this bead/sequence
+        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx));
+%        % steady state viscosity for Jeffey model
+%        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx,end));
+        % eta2 for this bead/sequence
+        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx,2));
         % R^2
         fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
         fprintf(fid, '</tr> \n');
@@ -316,6 +274,8 @@ end
 fprintf(fid, '</table> \n\n');
         
 fprintf(fid, '<br/> \n\n');
+
+
 
 % Plots
 for b = 1:length(beads)
@@ -340,6 +300,56 @@ fprintf(fid, '<img src= %s width=520 height=400 border=2> \n', poleimage);
 
 
 fclose(fid);
+
+
+
+% Printing to Excel Spreadsheet%%%%%%%%%%%%%%%%%
+
+xlfilename = 'stithc-test.xlsx';
+
+data = cell(length(beads),4*length(seqs));
+videocolumn = cell(length(beads), 1);
+beadcolumn = cell(length(beads), 1);
+voltagecolumn = cell(length(beads), 1);
+%macros = cell(1, 4*length(seqs)+2);
+%macros(1, 3) = cellstr('TEST');
+for b = 1:length(beads)
+    videocolumn(b, 1) = cellstr(filename_root);
+    beadcolumn(b, 1) = cellstr(num2str(b));
+    voltagecolumn(b, 1) = cellstr(num2str(voltages(1)));
+end
+
+for b = 1 : length(beads)
+    for s = 1 : length(seqs)
+        idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
+        data(b, (4*s-3)) = cellstr(num2str(rheo.G(idx)));
+        data(b, (4*s-2)) = cellstr(num2str(rheo.eta(idx, 1)));
+        data(b, (4*s-1)) = cellstr(num2str(rheo.eta(idx, 2)));
+        data(b, (4*s)) = cellstr(num2str(rheo.Rsquare(idx)));
+    end
+end
+
+results = [videocolumn, beadcolumn, voltagecolumn, data];
+header = cell(2, length(seqs)*4+3);
+header(2, 1) = cellstr('video file');
+header(2, 2) = cellstr('bead id');
+header(2, 3) = cellstr('voltage');
+for b = 1:length(seqs)
+    header(1, 4*b) = cellstr(['Pull', num2str(b)]);
+    header(2, 4*b) = cellstr('G');
+    header(2, 4*b+1) = cellstr('eta1');
+    header(2, 4*b+2) = cellstr('eta2');
+    header(2, 4*b+3) = cellstr('R^2');
+end
+if ~exist(xlfilename, 'file')
+   results = vertcat(header, results);
+   xlswrite(xlfilename, results);
+else
+    xlswrite(xlfilename, header);
+    xlsappend(xlfilename, results);
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 return;
 
