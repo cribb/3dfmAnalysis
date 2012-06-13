@@ -1,3 +1,6 @@
+2012-06-13 Christian Stith <chstith@ncsu.edu>
+	* xlsappend.m: added. appends information to the end of an excel spreadsheet.
+
 2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* barwitherr.m: added.  generates bar plots *with* errorbars.
 	* cprintf.m: added.  generates color-definable text output to stdout, stderr.
