@@ -1,3 +1,6 @@
+2012-06-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* dmbr_plot_data.m: displacement plots now show a title with average displacement of last ten data points.
+
 2012-06-13 Christian Stith <chstith@ncsu.edu>
 	* dmbr_compute_compliance.m: adapted compliance calculation to approximate compliance for zero-force period
 	* dmbr_report_cell_expt.m: added excel output functionality, corrected displacement output
