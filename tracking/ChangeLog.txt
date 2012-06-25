@@ -1,3 +1,6 @@
+2012-06-25  Jeremy Cribb <jcribb@email.unc.edu>
+	* load_video_tracking.m: changed default behavior when the input data doesn't match any known input.
+
 2011-10-09  Jeremy Cribb <jcribb@email.unc.edu>
 	* filter_video_tracking.m:  implemented 'dead_spots' and 'remove_drift' filters.
 	* load_video_tracking.m:  fixed bug where an empty 'first file' in a list would abandon any data loaded from subsequent files in the list.

@@ -176,7 +176,9 @@ for fid = 1:length(filelist)
         error(['CONGRATULATIONS! You have stumbled upon an OLD video-tracking VRPN format. ' ...
               '\nYou will have to edit load_video_tracking and include a filter for this format.']);
     else
-        error('I do not know how to handle this video VRPN file (weird fieldnames).');
+      dd.tracking.spot3DSecUsecIndexFramenumXYZRPY = zeros(1,10);
+      data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
+%       error('I do not know how to handle this video VRPN file (weird fieldnames).');
     end
         
     % handle the physical units
