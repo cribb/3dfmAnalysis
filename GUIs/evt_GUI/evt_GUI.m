@@ -29,7 +29,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 27-Jul-2011 14:19:07
+% Last Modified by GUIDE v2.5 20-Jun-2012 11:19:04
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -1092,6 +1092,43 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'on', 'Enable', 'on');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
+        case 'alpha vs tau'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
+        case 'alpha histogram'
+            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
+            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'on', 'Enable', 'on');
+            set(handles.text_chosentau       , 'Visible', 'on', 'Enable', 'on');
+            set(handles.text_chosentau_value , 'Visible', 'on', 'Enable', 'on');
        case 'MSD histogram'
             set(handles.radio_relative       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin     ,  'Visible', 'off', 'Enable', 'off');
@@ -1106,6 +1143,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
        case 'Diffusivity @ a tau'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1120,6 +1160,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
        case 'Diffusivity vs. tau'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1134,6 +1177,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
        case 'temporal MSD'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1148,6 +1194,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
        case 'GSER'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1162,6 +1211,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'on', 'Enable', 'on');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
         case 'pole locator'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1176,6 +1228,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
         case 'tracker avail'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1190,6 +1245,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
         case '2pt MSD ~~not implemented yet~~'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1204,20 +1262,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'on', 'Enable', 'on');
             set(handles.text_temp           , 'Visible', 'on', 'Enable', 'on');
-        case '2pt MSD ~~not implemented yet~~'
-            set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'on', 'Enable', 'on');
-            set(handles.checkbox_eta      ,  'Visible', 'on', 'Enable', 'on');
-            set(handles.edit_bead_diameter_um,  'Visible', 'on', 'Enable', 'on');
-            set(handles.text_bead_diameter,  'Visible', 'on', 'Enable', 'on');
-            set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.edit_temp           , 'Visible', 'on', 'Enable', 'on');
-            set(handles.text_temp           , 'Visible', 'on', 'Enable', 'on');
+            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
+            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
     end
     
     plot_data(hObject, eventdata, handles);
@@ -1378,6 +1425,8 @@ function plot_data(hObject, eventdata, handles)
 
     if strcmp(AUXtype, 'MSD')  || ...
        strcmp(AUXtype, 'GSER') || ...
+       strcmp(AUXtype, 'alpha vs tau') || ...
+       strcmp(AUXtype, 'alpha histogram') || ...
        strcmp(AUXtype, 'Diffusivity vs. tau') || ...
        strcmp(AUXtype, 'MSD histogram')
         if handles.recomputeMSD % && get(handles.checkbox_msdmean, 'Value')
@@ -1498,6 +1547,28 @@ function plot_data(hObject, eventdata, handles)
             end
             
             grid on;
+            
+        case 'alpha vs tau'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            plot_alphavstau(myve, AUXfig);
+            
+        case 'alpha histogram'
+            mytauidx = str2num(get(handles.edit_chosentau, 'String'));
+            
+            A = mymsd.tau(1:end-1,:);
+            B = mymsd.tau(2:end,:);
+            C = mymsd.msd(1:end-1,:);
+            D = mymsd.msd(2:end,:);
+
+            alpha = log10(D./C)./log10(B./A);
+            
+            myalpha = alpha(mytauidx, :);
+            set(handles.text_chosentau_value, 'String', num2str(mean(mymsd.tau(mytauidx,:))));
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            plot_alphadist(myalpha, AUXfig);
+            
         case 'MSD histogram'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
@@ -2083,6 +2154,23 @@ function popupmenu2_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_chosentau_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
+
+% --- Executes during object creation, after setting all properties.
+function edit_chosentau_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_chosentau (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');

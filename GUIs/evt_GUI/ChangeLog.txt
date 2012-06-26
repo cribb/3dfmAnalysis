@@ -1,3 +1,7 @@
+2012-06-26  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m:  added plotting option that displays MSD slope as a function of tau and the distribution of slopes at a given tau.
+	* evt_GUI.fig: same.
+
 2012-03-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m: updated to include new parameter for 'msd' that can output step-size distributions if desired.
 
