@@ -1,3 +1,8 @@
+2012-06-26  Jeremy Cribb <jcribb@email.unc.edu>
+	* ve.m: now includes raw data in ve output structure.
+	* plot_alphadist.m: added.  plots alpha distribution for an input tau.
+	* plot_alphavstau.m: added.  plots alpha (slope of msd) as a function of tau.
+
 2012-03-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* msd.m: added option for calculating step-size distributions.
 	* video_msd.m: now accommodates new options for msd.m 

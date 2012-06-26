@@ -101,6 +101,8 @@ v.error.nstar = abs(mygser.nstar - mingser.nstar);
 v.error.np = abs(mygser.np - mingser.np);
 v.error.npp = abs(mygser.npp - mingser.npp);
 
+v.raw = d;
+
 v.n = N;
 
 % plot output
@@ -118,12 +120,12 @@ function v = gser(tau, msd, N, bead_radius)
     k = 1.3806e-23;
     T = 298;
 
-    A = tau(1:end-1,:);
-    B = tau(2:end,:);
-    C = msd(1:end-1,:);
-    D = msd(2:end,:);
+%     A = tau(1:end-1,:);
+%     B = tau(2:end,:);
+%     C = msd(1:end-1,:);
+%     D = msd(2:end,:);
 
-    % alpha = log10(D./C)./log10(B./A);
+%     alpha = log10(D./C)./log10(B./A);
 
     timeblur_decade_fraction = .3;
     [alpha, tau_evenspace, msd_evenspace] = getMSDSlope(msd, tau, timeblur_decade_fraction);
