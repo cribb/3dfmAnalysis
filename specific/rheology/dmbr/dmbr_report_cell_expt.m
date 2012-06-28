@@ -1,30 +1,73 @@
-function rheo = dmbr_report_cell_expt(filename, report_params)
+function rheo = dmbr_report_cell_expt(filename, excel_name, figfolder, headerheight, seq_array, report_params)
 %
+% Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
+% dmbr_report_cell_expt.m
+% Generates an in-depth analysis and visual HTML and Excel reports of 3DFM
+% data. Requires a metadata file as well as a data file to run. Also
+% requires a poleloc.txt file in the same directory, containing x, y
+% coordinates of the location of the pole tip. [Example: "134, 219"]
+% Can be run in conjunction with other similar files through
+% dmbr_multi_file_report.
 %
-% filename = vfd file from dmbr experiment
-%
-%
-%
-%
-%
-%
-%
+% Required Parameters:
+%   filename: the name of the file to be analyzed
+% Optional Parameters:
+%   excel_name: the name of the analysis being created
+%   figfolder: the name of the folder for storing images
+%   headerheight: the height of the header at the top of the Excel
+%       spreadsheet that will be written to
+%   seq_array: the array of selected sequences
+%   report_params: report parameters (see dmbr_check_input_params)
+% Returns:
+%   A two-cell array. Cell 1 contains an array (bxs) detailing the number of beads
+%   in the file, the maximum number of sequences in the file, the number of
+%   beads used, and the maximum number of sequences used. Cell 2 contains
+%   a logical array (inseqs) detaling the usage of individual sequences
+%   found in the file.
+% 
+% Command Line Syntax:
+%   dmbr_report_cell_expt(<File_Name_No_Extension>)
+% Example:
+%   dmbr_report_cell_expt('vid15_Panc1_Control')
 %
 
 dmbr_constants;                                               
 
+%%%%%%%%%%%% parameter check %%%%%%%%%%%%
+[pathname, filename_root, ext, versn] = fileparts(filename);
+
+if(nargin < 2)
+    excel_name = filename_root;
+end
+if(nargin < 3)
+    figfolder = [excel_name '_html_images'];
+end
+if(nargin < 4)
+    headerheight = 0;
+end
+
+
+   
+
 
 % Three phases: 1) Load the data, 2) Maybe process the data, 3) Report the results
 
-
 % general
-% pathname = pwd;
-[pathname, filename_root, ext, versn] = fileparts(filename);
+% navigate to directory of file
+if(~isempty(pathname))
+    cd(pathname);
+end;
+
 close all;
 
 % load metadata
-        %metadatafile = [filename_root, '.vfd.mat'];
 metadatafile = strcat(filename_root,  '.vfd.mat');
+if strcmp('.vfd.mat', metadatafile)==1 || ~exist(metadatafile);%, 'file')
+    fprintf('***The file ');
+    fprintf(metadatafile);
+    fprintf(' was not found. This file will be skipped.\n');
+    return
+end
 m = load(metadatafile);
 
 
@@ -34,18 +77,23 @@ voltages = m.voltages;
 calib_um = m.calibum;
 
 % load tracking data
-%trackingfile = [filename_root, '.raw.vrpn.evt.mat'];
-trackingfile = [filename_root, '.vrpn.evt.mat'];
-
+trackingfile = [filename_root, '.raw.vrpn.evt.mat'];
+% try multiple file extensions
 try 
     d = load(trackingfile);
 catch
-    trackingfile = [filename_root, '.raw.vrpn.mat'];
+    trackingfile = [filename_root, '.avi.vrpn.evt.mat']
     try
         d = load(trackingfile);
     catch
-        warning('Tracking file not found');
-        beadmax = NaN;
+        trackingfile = [filename_root, '.vrpn.evt.mat']
+        try
+            d = load(trackingfile);
+        catch
+            warning('Tracking file not found');
+            return;
+            beadmax = NaN;
+        end
     end
 end
 
@@ -59,8 +107,11 @@ c = load(calibfile);
 
 % load poleloc file
 filelist2 = dir('poleloc.txt');
-polelocfile = filelist2.name;
-
+try
+    polelocfile = filelist2.name;
+catch
+    warning ('Poleloc file not found');
+end
 try
     p = load(polelocfile);
 catch
@@ -84,28 +135,90 @@ rheo_table = rheo.raw.rheo_table;
 beads  = unique(rheo_table(:,ID))';
 seqs   = unique(rheo_table(:,SEQ))';
 
-for b = 1 : length(beads)    
+
+
+% create plot folder
+if ~exist(figfolder, 'dir')
+        mkdir(figfolder);
+end
+figfolder = [figfolder filesep];
+
+% Loop start variables
+
+lastradial = 0; % stores radial displacement of last pull
+lastcompliance = 0; % stores compliance of last pull
+delay = 0; % the time delay at beginning of data file
+maxseqs = 0; % the maximum number of sequences plotted
+plots(length(beads)) = 0; % logical array, true if bead is used
+
+% Parse out identifying file number from file name
+vidID = ['vid' num2str(sscanf(filename_root, 'vid%f'))];
+% Stores the number of sequences used on each bead
+inseqs = zeros(length(beads),1);
+
+for b = 1 : length(beads)
+    
+    % Assume bead is needed
+    plots(b) = 1;
+    
     for s = 1 : length(seqs)
+        % Sequence index
+        index = length(seqs)*(b-1) + s;
+        % Check if sequence/bead is not needed (box not checked in Sequence Selector) (See dmbr_adjust_report)
+        if(nargin>4 && index <= length(seq_array) && ~seq_array{index})
+            if s==1
+                plots(b) = 0;
+            end
+            break;
+        end
+        
         clear filtx_on;
         
         ftable = dmbr_filter_table(rheo_table, beads(b), seqs(s), []);
         
+        % break if no data
         if size(ftable,1) <= 0
             break;
         end
+        % update max sequences
+        if(s > maxseqs)
+            maxseqs = s;
+        end
+        % update individual sequence
+        inseqs(b) = s;
         
-        t = ftable(:,TIME);
-        t = t - t(1);
+        tcont = ftable(:,TIME);
+        t = tcont - tcont(1);
+
+        %subtract delay
+        if s==1
+            delay = tcont(1) - t(1);
+        end
+        tcont = tcont - delay;
         
-        x = ftable(:,X);
-        x = x - x(1);
+        x1 = ftable(:,X);
+        x = x1 - x1(1);
         
-        y = ftable(:, Y);
-        y = y - y(1);
+        y1 = ftable(:, Y);
+        y = y1 - y1(1);
         
+        % calculate displacement from x and y
+        radialdiff = magnitude(x, y);
         radial = magnitude(x, y);
+        if s==1
+            lastradial = 0 - radial(1);
+        end
+        radial = radial + lastradial;
+        lastradial = radial(end);
         
+        % compliance
         Jx = ftable(:,J);
+        Jxdiff = Jx - Jx(1);
+        if s==1
+            lastcompliance = 0 - Jx(1);
+        end
+        Jx = Jx + lastcompliance;
+        lastcompliance = Jx(end);
 
         
         idx = find(ftable(:,VOLTS) > 0);
@@ -117,18 +230,20 @@ for b = 1 : length(beads)
 
         if ~exist('txFig');    txFig   = figure; end
         if ~exist('txFig2');   txFig2  = figure; end
-        if ~exist('tJxFig');   tJxFig  = figure; end
+        if ~exist('txcFig');   txcFig  = figure; end
+        if ~exist('txcFig2');  txcFig2  = figure; end
+
+        if ~exist('tJxFig');   tJxFig  = figure; end        
         if ~exist('tJxFig2');  tJxFig2 = figure; end
-%         if ~exist('xetaFig');  xetaFig = figure; end
-%         if ~exist('xetaFig2'); xetaFig2 = figure; end
+        if ~exist('tJxcFig');  tJxcFig  = figure; end
+        if ~exist('tJxcFig2'); tJxcFig2  = figure; end
 
-
-
-        % displacement vs. time plot
+        
+        % displacement vs. time plot: stacked
         figure(txFig);
         hold on;
-        plot(t,radial*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
-        title(['bead displacement vs. time, bead ' num2str(beads(b))]);
+        plot(t,radialdiff*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
+        title([vidID ': Radial displacement stack, bead ' num2str(beads(b))]);
         xlabel('time [s]');
         ylabel('displacement [\mum]');
         pretty_plot;
@@ -137,19 +252,46 @@ for b = 1 : length(beads)
         
         figure(txFig2); 
         hold on;
-        plot(t,radial*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
-        title(['bead displacement vs. time, bead ' num2str(beads(b))]);
+        plot(t,radialdiff*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
+        title([vidID ': Radial displacement stack, bead ' num2str(beads(b))]);
         xlabel('time [s]');
         ylabel('displacement [\mum]');
         pretty_plot;
         hold off;
         drawnow;
         
-        % compliance vs. time plot
+        % displacement vs. time plot: cumulative
+        figure(txcFig);
+        hold on;
+        set(gcf, 'Position', [300, 300, 1000, 400]);
+        % scale all cumulative plots by the maximum number of sequences in
+        % their bead
+        xlim([0 length(seqs)*sum(pulses)]);
+        plot(tcont,radial*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
+        title([vidID ': Radial displacement, bead ' num2str(beads(b))]);
+        xlabel('time [s]');
+        ylabel('displacement [\mum]');
+        pretty_plot;
+        hold off;
+        drawnow;
+       
+        figure(txcFig2); 
+        hold on;
+        plot(tcont,radial*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
+        title([vidID ': Radial displacement, bead ' num2str(beads(b))]);
+        xlabel('time [s]');
+        ylabel('displacement [\mum]');
+        pretty_plot;
+        hold off;
+        drawnow;
+        xlim('auto');
+
+
+        % compliance vs. time plot: stacked
         figure(tJxFig); 
         hold on;
-        plot(t,Jx, 'Color', [s/(length(seqs)+1) 0 0]);
-        title(['Compliance vs. time, bead ' num2str(beads(b))]);
+        plot(t,Jxdiff, 'Color', [s/(length(seqs)+1) 0 0]);
+        title([vidID ': Compliance stack, bead ' num2str(beads(b))]);
         xlabel('time [s]');
         ylabel('compliance [Pa^{-1}]');
         pretty_plot;
@@ -158,198 +300,306 @@ for b = 1 : length(beads)
 
         figure(tJxFig2); 
         hold on;
-        plot(t,Jx, 'Color', [s/(length(seqs)+1) 0 0]);
-        title(['Compliance vs. time, bead ' num2str(beads(b))]);
+        plot(t,Jxdiff, 'Color', [s/(length(seqs)+1) 0 0]);
+        title([vidID ': Compliance stack, bead ' num2str(beads(b))]);
         xlabel('time [s]');
         ylabel('compliance [Pa^{-1}]');
         pretty_plot;
         hold off;
         drawnow;
-
-    end
-  
-        txFigfilename   = [filename_root '.txFig.bead'  num2str(beads(b)) '.png'];
-        txFigfilename2  = [filename_root '.txFig.bead'  num2str(beads(b)) '.fig'];
-        tJxFigfilename  = [filename_root '.tJxFig.bead' num2str(beads(b)) '.png'];
-        tJxFigfilename2  = [filename_root '.tJxFig.bead' num2str(beads(b)) '.fig'];
-        xetaFigfilename = [filename_root '.xetaFig.bead'  num2str(beads(b)) '.png'];
-        xetaFigfilename2 = [filename_root '.xetaFig.bead'  num2str(beads(b)) '.fig'];
-
-        saveas(  txFig,  txFigfilename, 'png');
-        saveas( tJxFig, tJxFigfilename, 'png');
-%         saveas(xetaFig,xetaFigfilename, 'png');
         
+        % compliance vs. time plot: cumulative
+        figure(tJxcFig); 
+        hold on;
+        set(gcf, 'Position', [300, 300, 1000, 400]);
+        % scale all cumulative plots by the maximum number of sequences in
+        % their bead
+        xlim([0 length(seqs)*sum(pulses)]);
+        plot(tcont,Jx, 'Color', [s/(length(seqs)+1) 0 0]);
+        title([vidID ': Compliance, bead ' num2str(beads(b))]);
+        xlabel('time [s]');
+        ylabel('compliance [Pa^{-1}]');
+        pretty_plot;
+        hold off;
+        drawnow;
+        
+        figure(tJxcFig2); 
+        hold on;
+        plot(tcont,Jx, 'Color', [s/(length(seqs)+1) 0 0]);
+        title([vidID ': Compliance, bead ' num2str(beads(b))]);
+        xlabel('time [s]');
+        ylabel('compliance [Pa^{-1}]');
+        pretty_plot;
+        hold off;
+        drawnow;
+        xlim('auto');
+        
+
+    end    
+    
+    % save and close all figures
+    
+    if(plots(b))
+        
+        txFigfilename   = [figfolder filename_root '.txFig.bead'  num2str(beads(b)) '.png'];
+        txFigfilename2  = [figfolder filename_root '.txFig.bead'  num2str(beads(b)) '.fig'];
+        txcFigfilename  = [figfolder filename_root '.txcFig.bead'  num2str(beads(b)) '.png'];
+        txcFigfilename2  = [figfolder filename_root '.txcFig.bead'  num2str(beads(b)) '.fig'];
+
+        tJxFigfilename  = [figfolder filename_root '.tJxFig.bead' num2str(beads(b)) '.png'];
+        tJxFigfilename2  = [figfolder filename_root '.tJxFig.bead' num2str(beads(b)) '.fig'];
+        tJxcFigfilename  = [figfolder filename_root '.tJxcFig.bead' num2str(beads(b)) '.png'];
+        tJxcFigfilename2  = [figfolder filename_root '.tJxcFig.bead' num2str(beads(b)) '.fig'];
+
+        exportfig(txFig, txFigfilename, 'Format', 'png', 'height', 4.5, 'Color', 'cmyk', 'fontmode', 'fixed', 'fontsize', 13);
+        exportfig(txcFig, txcFigfilename, 'Format', 'png', 'height', 4.5, 'Color', 'cmyk', 'fontmode', 'fixed', 'fontsize', 13);
+        exportfig(tJxFig, tJxFigfilename, 'Format', 'png', 'height', 4.5, 'Color', 'cmyk', 'fontmode', 'fixed', 'fontsize', 13);
+        exportfig(tJxcFig, tJxcFigfilename, 'Format', 'png', 'height', 4.5, 'Color', 'cmyk', 'fontmode', 'fixed', 'fontsize', 13);
+
         saveas(  txFig2,  txFigfilename2, 'fig');
+        saveas(  txcFig2,  txcFigfilename2, 'fig');
         saveas( tJxFig2, tJxFigfilename2, 'fig');
-%         saveas(xetaFig2, xetaFigfilename2, 'fig');
-                
+        saveas( tJxcFig2, tJxcFigfilename2, 'fig');
+
         close(txFig);
         close(tJxFig);
-%         close(xetaFig);
-
+        close(txcFig);
+        close(tJxcFig);
         close(txFig2);
         close(tJxFig2);
-%         close(xetaFig2);
+        close(txcFig2);
+        close(tJxcFig2);
+    
+    end
+
 end
 
 
 % report
-outfile = [filename_root '.html'];
-
-fid = fopen(outfile, 'w');
+outfile = [excel_name '.html'];
+% append information
+fid = fopen(outfile, 'a+');
 
 % html code
 
-nametag = 'REPLACE WITH INPUT';
-fprintf(fid, '<html>\n');
-fprintf(fid, ' <p><b>Sample Name:</b>  %s <br/>\n', nametag);
-fprintf(fid, ' <b>Path:</b>  %s </p>\n', pathname);
+nametag = filename_root;
+% HTML section header
+fprintf(fid, '<hr>\n');
+fprintf(fid, '<a name="%s"><b>Sample Name:</b>%s</a><br/>', filename_root, nametag);
+fprintf(fid, ' <b>Path:</b>  %s <br/>\n', pathname);
+fprintf(fid, '<a href="#Contents">Back to Top</a></p>\n');
 
-fprintf(fid, '<br/>');
-
-% Table 1: Identifying information
-fprintf(fid, '<b>General Parameters</b><br/>\n');
-fprintf(fid, '<table border="2" cellpadding="6"> \n');
-fprintf(fid, '<tr> \n');
-fprintf(fid, ' <td align="left"><b>File:</b>	%s </td> \n', filename_root);
-fprintf(fid, ' <td align="left"><b>Pulse Voltages (V):</b>	[%s] </td> \n', num2str(voltages));
-fprintf(fid, '</tr> \n');
-fprintf(fid, '<tr> \n');
-fprintf(fid, ' <td align="left" width=250><b>Bead Diameter (um):</b>	%g </td> \n', a*2);
-fprintf(fid, ' <td align="left"><b>Pulse Widths (s):</b>	[%s]</td> \n', num2str(pulses));
-fprintf(fid, '</tr> \n');
-fprintf(fid, '<tr> \n');
-fprintf(fid, ' <td align="left"><b>Number of Trackers:</b>	%i </td> \n', beadmax);
-fprintf(fid, ' <td></td> \n');
-fprintf(fid, '</tr> \n');
-fprintf(fid, '</table> \n'); 
-
-fprintf(fid, '<br/>');
-
-% Table 2: Moving average and Window size in frames and seconds
-fprintf(fid, '<b>Scale</b><br/>\n');
-fprintf(fid, '<table border="2" cellpadding="6"> \n');
-fprintf(fid, '<tr> \n');
-fprintf(fid, '<td align="center"> %12.2f </td> \n', input_params.scale);
-fprintf(fid, '</tr> \n');
-fprintf(fid, '</table> \n\n'); 
-
-fprintf(fid, '<br/>');
-
-% Table 3: Shear rates and Weissenburg numbers for each bead/sequence pair
-fprintf(fid, '<b>Summary of Results</b><br/>\n');
-fprintf(fid, '<table border="2" cellpadding="6"> \n');
-fprintf(fid, '<tr> \n');
-fprintf(fid, '   <td align="center"><b>Tracker ID</b> </td> \n');
-fprintf(fid, '   <td align="center"><b>Sequence #</b> </td> \n');
-fprintf(fid, '   <td align="center"><b>G</b> </td> \n');
-fprintf(fid, '   <td align="center"><b>Eta1</b> </td> \n');
-fprintf(fid, '   <td align="center"><b>Eta2</b> </td> \n');
-fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
-fprintf(fid, '</tr> \n\n');
-
-for b = 1 : length(beads)    
-    for s = 1 : length(seqs)
-        idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
-        fprintf(fid, '<tr> \n');
-        fprintf(fid, '<td align="center"> %i </td> \n', beads(b));  
-        fprintf(fid, '<td align="center"> %i </td> \n', seqs(s));          
-%        % shear_rate for this bead/sequence
-%        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.max_shear(idx));
-        % G for this bead sequence
-        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.G(idx));
-%        % Weissenberg_number for this bead/sequence
-%        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.Wi(idx));
-        % eta1 for this bead/sequence
-        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx));
-%        % steady state viscosity for Jeffey model
-%        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx,end));
-        % eta2 for this bead/sequence
-        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx,2));
-        % R^2
-        fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
-        fprintf(fid, '</tr> \n');
-    end
-end
-fprintf(fid, '</table> \n\n');
-        
-fprintf(fid, '<br/> \n\n');
-
-
-
-% Plots
-for b = 1:length(beads)
-    txFigfilename   = [filename_root '.txFig.bead'  num2str(beads(b)) '.png'];
-    tJxFigfilename  = [filename_root '.tJxFig.bead' num2str(beads(b)) '.png'];
-%    xetaFigfilename = [filename_root '.xetaFig.bead'  num2str(beads(b)) '.png'];
-
-    fprintf(fid, '<img src= %s width=520 height=400 border=2 > \n', txFigfilename);
-    fprintf(fid, '<br/> \n');
-    fprintf(fid, '<img src= %s width=520 height=400 border=2 > \n', tJxFigfilename);
-    fprintf(fid, '<br/> \n');
-%    fprintf(fid, '<img src= %s width=520 height=400 border=2 > \n', xetaFigfilename);
-%    fprintf(fid, '<br/> \n');
-end
-
-fprintf(fid, '<br/> \n\n');
-
-% Image of pole tip
-fprintf(fid, ' <p><b>Pole tip image</b><br/>\n');
-poleimage = [filename_root, '.MIP.bmp'];
-fprintf(fid, '<img src= %s width=520 height=400 border=2> \n', poleimage);
-
-
-fclose(fid);
-
-
-
-% Printing to Excel Spreadsheet%%%%%%%%%%%%%%%%%
-
-xlfilename = 'stithc-test.xlsx';
-
-data = cell(length(beads),4*length(seqs));
-videocolumn = cell(length(beads), 1);
-beadcolumn = cell(length(beads), 1);
-voltagecolumn = cell(length(beads), 1);
-%macros = cell(1, 4*length(seqs)+2);
-%macros(1, 3) = cellstr('TEST');
-for b = 1:length(beads)
-    videocolumn(b, 1) = cellstr(filename_root);
-    beadcolumn(b, 1) = cellstr(num2str(b));
-    voltagecolumn(b, 1) = cellstr(num2str(voltages(1)));
-end
-
-for b = 1 : length(beads)
-    for s = 1 : length(seqs)
-        idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
-        data(b, (4*s-3)) = cellstr(num2str(rheo.G(idx)));
-        data(b, (4*s-2)) = cellstr(num2str(rheo.eta(idx, 1)));
-        data(b, (4*s-1)) = cellstr(num2str(rheo.eta(idx, 2)));
-        data(b, (4*s)) = cellstr(num2str(rheo.Rsquare(idx)));
+% check to see if file is used, if so, write reports
+info = 0;
+for b=1:length(beads)
+    if(plots(b))
+        info = 1;
     end
 end
 
-results = [videocolumn, beadcolumn, voltagecolumn, data];
-header = cell(2, length(seqs)*4+3);
-header(2, 1) = cellstr('video file');
-header(2, 2) = cellstr('bead id');
-header(2, 3) = cellstr('voltage');
-for b = 1:length(seqs)
-    header(1, 4*b) = cellstr(['Pull', num2str(b)]);
-    header(2, 4*b) = cellstr('G');
-    header(2, 4*b+1) = cellstr('eta1');
-    header(2, 4*b+2) = cellstr('eta2');
-    header(2, 4*b+3) = cellstr('R^2');
-end
-if ~exist(xlfilename, 'file')
-   results = vertcat(header, results);
-   xlswrite(xlfilename, results);
+rowsused = 0;
+
+if info
+
+    fprintf(fid, '<br/>');
+
+    % Table 1: Identifying information
+    fprintf(fid, '<b>General Parameters</b><br/>\n');
+    fprintf(fid, '<table border="2" cellpadding="6"> \n');
+    fprintf(fid, '<tr> \n');
+    fprintf(fid, ' <td align="left"><b>File:</b>	%s </td> \n', filename_root);
+    fprintf(fid, ' <td align="left"><b>Pulse Voltages (V):</b>	[%s] </td> \n', num2str(voltages));
+    fprintf(fid, '</tr> \n');
+    fprintf(fid, '<tr> \n');
+    fprintf(fid, ' <td align="left" width=250><b>Bead Diameter (um):</b>	%g </td> \n', a*2);
+    fprintf(fid, ' <td align="left"><b>Pulse Widths (s):</b>	[%s]</td> \n', num2str(pulses));
+    fprintf(fid, '</tr> \n');
+    fprintf(fid, '<tr> \n');
+    fprintf(fid, ' <td align="left"><b>Number of Trackers:</b>	%i </td> \n', beadmax);
+    fprintf(fid, ' <td></td> \n');
+    fprintf(fid, '</tr> \n');
+    fprintf(fid, '</table> \n'); 
+
+    fprintf(fid, '<br/>');
+
+    % Table 2: Moving average and Window size in frames and seconds
+    fprintf(fid, '<b>Scale</b><br/>\n');
+    fprintf(fid, '<table border="2" cellpadding="6"> \n');
+    fprintf(fid, '<tr> \n');
+    fprintf(fid, '<td align="center"> %12.2f </td> \n', input_params.scale);
+    fprintf(fid, '</tr> \n');
+    fprintf(fid, '</table> \n\n'); 
+
+    fprintf(fid, '<br/>');
+
+    % Table 3: G, R^2, and eta1 & eta2 for each bead/sequence
+
+    fprintf(fid, '<table border="2" cellpadding="6"> \n');
+    fprintf(fid, '<tr> \n');
+    fprintf(fid, '<td><b>Summary<br/>of Results</b></td> \n');
+    for s = 1 : maxseqs
+        fprintf(fid, '   <td align="center" colspan="4"><b>Sequence #%d</b> </td> \n', s);
+    end
+    fprintf(fid, '</tr> \n');
+    fprintf(fid, '   <td align="center"><b>Tracker ID</b> </td> \n');
+    for s = 1 : maxseqs
+        fprintf(fid, '   <td align="center"><b>G</b> </td> \n');
+        fprintf(fid, '   <td align="center"><b>Eta1</b> </td> \n');
+        fprintf(fid, '   <td align="center"><b>Eta2</b> </td> \n');
+        fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
+    end
+    fprintf(fid, '</tr> \n\n');
+
+    printed = 1;
+    for b = 1 : length(beads)    
+        if(printed) fprintf(fid, '<tr> \n'); end
+        if(plots(b))
+            fprintf(fid, '<td align="center"> %i </td> \n', b);  
+        end
+        printed = 0;
+        for s = 1 : maxseqs
+            index = length(seqs)*(b-1) + s;
+            idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
+            if(nargin>4 && index > length(seq_array))
+                break;
+            end
+            if(nargin>4 && (~seq_array{index}))  || isnan(rheo.G(idx))
+                break;
+            end
+            printed = 1;
+            % G for this bead sequence
+            fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.G(idx));
+            % eta1 for this bead/sequence
+            fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx, 1));
+            % eta2 for this bead/sequence
+            fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx, 2));
+            % R^2
+            fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
+        end
+        if(printed) fprintf(fid, '</tr> \n'); end
+    end
+    fprintf(fid, '</table> \n\n');
+
+    fprintf(fid, '<br/> \n\n');
+
+
+
+    % Plots
+    for b = 1:length(beads)
+        if(~plots(b))
+            continue;
+        end
+        txFigfilename   = [figfolder filename_root '.txFig.bead'  num2str(beads(b)) '.png'];
+        txcFigfilename   = [figfolder filename_root '.txcFig.bead'  num2str(beads(b)) '.png'];
+        tJxFigfilename  = [figfolder filename_root '.tJxFig.bead' num2str(beads(b)) '.png'];
+        tJxcFigfilename   = [figfolder filename_root '.tJxcFig.bead'  num2str(beads(b)) '.png'];
+
+        fprintf(fid, '<img src= "%s" border=2 > \t', txFigfilename);
+        fprintf(fid, '<img src= "%s" border=2 > \t', txcFigfilename);
+        fprintf(fid, '<br/> \n');
+        fprintf(fid, '<img src= "%s" border=2 > \t', tJxFigfilename);
+        fprintf(fid, '<img src= "%s" border=2 > \n', tJxcFigfilename);
+        fprintf(fid, '<br/> \n');
+
+    end
+
+    fprintf(fid, '<br/> \n\n');
+
+    % Image of pole tip
+    fprintf(fid, ' <p><b>Pole tip image</b><br/>\n');
+    poleimage = [filename_root, '.MIP.bmp'];
+    fprintf(fid, '<img src= "%s" width=520 height=400 border=2> \n', poleimage);
+    
+    fclose(fid);
+
+
+%%%%%%%%%%%%%%%%% Printing to Excel Spreadsheet %%%%%%%%%%%%%%%%%
+
+% data matrix
+    data = cell(length(beads),4*maxseqs);
+    % initial columns
+    numcol = 4;
+    videocolumn = cell(length(beads), 1);
+    beadcolumn = cell(length(beads), 1);
+    voltagecolumn = cell(length(beads), 1);
+    sequencecolumn = cell(length(beads), 1);
+
+
+    % fill initial columns
+    for b = 1:length(beads)
+        videocolumn(b, 1) = cellstr(filename_root);
+        beadcolumn(b, 1) = cellstr(num2str(b));
+        voltagecolumn(b, 1) = cellstr(num2str(voltages(1)));
+        sequencecolumn(b, 1) = cellstr(num2str(inseqs(b)));
+    end
+    % fill data
+    for b = 1 : length(beads)
+        for s = 1 : length(seqs)
+            index = length(seqs)*(b-1) + s;
+            idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
+            
+            if(nargin>4 && index > length(seq_array))
+                break;
+            end
+            if(nargin>4 && ~seq_array{index}) || isnan(rheo.G(idx))
+                break;
+            end
+
+            data(b, (4*s-numcol+1)) = cellstr(num2str(rheo.G(idx)));
+            data(b, (4*s-numcol+2)) = cellstr(num2str(rheo.eta(idx, 1)));
+            data(b, (4*s-numcol+3)) = cellstr(num2str(rheo.eta(idx, 2)));
+            data(b, (4*s-numcol+4)) = cellstr(num2str(rheo.Rsquare(idx)));
+        end
+    end
+
+    % concatenate tables
+    results = [videocolumn, beadcolumn, voltagecolumn, sequencecolumn, data];
+    % create data header
+    header = cell(2, maxseqs*4+numcol);
+    header(2, 1) = cellstr('video file');
+    header(2, 2) = cellstr('bead id');
+    header(2, 3) = cellstr('voltage');
+    header(2, 4) = cellstr('sequences');
+    for b = 1:maxseqs
+        header(1, 4*b+numcol-3) = cellstr(['Pull', num2str(b)]);
+        header(2, 4*b+numcol-3) = cellstr('G');
+        header(2, 4*b+numcol-2) = cellstr('eta1');
+        header(2, 4*b+numcol-1) = cellstr('eta2');
+        header(2, 4*b+numcol-0) = cellstr('R^2');
+    end
+    
+    % Delete empty rows
+    rowsused = 0;
+    for b=1:length(beads)
+        rowsused = rowsused + 1;
+        if(~plots(b))
+            results(rowsused,:) = [];
+            rowsused = rowsused - 1;
+        end
+    end
+    
+    xlfilename = strcat(excel_name, '.xlsx');
+
+    if ~exist(xlfilename, 'file')
+        results = vertcat(header, results);
+        xlswrite(xlfilename, results);
+    else
+        xlswrite(xlfilename, header, 1, ['A' num2str(headerheight)]);
+        xlsappend(xlfilename, results);
+    end
+    
 else
-    xlswrite(xlfilename, header);
-    xlsappend(xlfilename, results);
+    fclose(fid);
 end
+
+% Return results
+bxs = [length(beads), length(seqs), rowsused, maxseqs];
+temp{1} = bxs;
+temp{2} = inseqs;
+rheo = temp;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 return;
 
+end
