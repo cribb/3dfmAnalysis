@@ -1,10 +1,10 @@
-2012-06-13  Jeremy Cribb <jcribb@email.unc.edu>
-	* dmbr_plot_data.m: displacement plots now show a title with average displacement of last ten data points.
-
-2012-06-13 Christian Stith <chstith@ncsu.edu>
+2012-06-28 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report: added. allows for multiple files and directories to be run through dmbr_report_cell_expt, creating a single large report.
 	* dmbr_adjust_report.m: added. allows for selection of individual sequences for inclusion in report.
 	* dmbr_report_cell_expt.m: added comments. improved functionality and allowed for interaction with dmbr_multi_file_report and dmbr_adjust_report.
+
+2012-06-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* dmbr_plot_data.m: displacement plots now show a title with average displacement of last ten data points.
 
 2012-06-13 Christian Stith <chstith@ncsu.edu>
 	* dmbr_compute_compliance.m: adapted compliance calculation to approximate compliance for zero-force period
