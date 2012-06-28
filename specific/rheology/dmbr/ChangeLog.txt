@@ -1,4 +1,8 @@
 2012-06-28 Christian Stith <chstith@ncsu.edu>
+	* dmbr_multi_file_report: fixed GUI filename bugs.
+	* dmbr_adjust_report.m: fixed Excel sidebar printout bug.
+
+2012-06-28 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report: added. allows for multiple files and directories to be run through dmbr_report_cell_expt, creating a single large report.
 	* dmbr_adjust_report.m: added. allows for selection of individual sequences for inclusion in report.
 	* dmbr_report_cell_expt.m: added comments. improved functionality and allowed for interaction with dmbr_multi_file_report and dmbr_adjust_report.

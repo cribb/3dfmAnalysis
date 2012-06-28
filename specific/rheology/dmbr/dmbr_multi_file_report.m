@@ -146,7 +146,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
         bxs = temp{1};
        
         start = length(inseqs);
-        inseqs = vertcat(inseqs, temp{2})
+        inseqs = vertcat(inseqs, temp{2});
         if(nargin>1)
             seq_array(1:(bxs(1,1)*bxs(1,2))) = [];
         end
@@ -239,7 +239,9 @@ function excel_analysis(inseqs, bxs, xlfilename, header)
     % Write results
     xlfilename = strcat(xlfilename, '.xlsx');
     range = strcat(column, num2str(header+1));
-    xlswrite(xlfilename, sidebar, 1, range);
+    if(~isempty(sidebar))
+        xlswrite(xlfilename, sidebar, 1, range);
+    end
     range = strcat('A', num2str(bxs(1,1)+header+3));
     xlswrite(xlfilename, footer, 1, range);
     
@@ -344,7 +346,7 @@ function num = writeheader(files, filepath)
         topheader = vertcat(topheader, top);
         fclose(fid);
     end
-    topheader = vertcat(topheader, cell(3, numcols-1));
+    topheader = vertcat(topheader, cell(3, 2*numcols-1));
     topheader(end-2:end,:) = cellstr(' ');
     xlswrite(filepath, topheader);
     num = size(topheader,1);

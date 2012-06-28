@@ -25,7 +25,7 @@ web([name '.html'], '-browser');
 %open([name '.xlsx']);
 
 % Create GUI figure
-h.f = figure('units','pixels','position',[200,200,600,550], 'toolbar','none','menu','none', 'Name', ['Sequence Selector: ' name]);
+h.f = figure('units','pixels','position',[200,200,700,550], 'toolbar','none','menu','none', 'Name', ['Sequence Selector: ' name]);
 
 % Open sequence data file
 infile = [name '.seqdat.txt'];
@@ -68,7 +68,11 @@ while(ischar(tline))
     % iterate counter
     elements = elements + 1;
     % Filename display
-    h.l(elements) = uicontrol('Parent', h.panel, 'HorizontalAlignment', 'left', 'BackgroundColor', [0.22333, 0.87, 0.11],'Style', 'text', 'String', fname, 'Position', [20, -elements*30, 1200, 15]);
+    
+    [path fname_root ext] = fileparts(fname);
+    vidID = ['vid' num2str(sscanf(fname_root, 'vid%f')) '       (' fname ')'];
+    
+    h.l(elements) = uicontrol('Parent', h.panel, 'HorizontalAlignment', 'left', 'BackgroundColor', [0.22333, 0.87, 0.11],'Style', 'text', 'String', vidID, 'Position', [20, -elements*30, 1200, 15]);
     
     % Checkbox initialization & display
     for b=1:numbeads
