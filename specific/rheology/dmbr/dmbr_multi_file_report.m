@@ -39,7 +39,8 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
     topdir = char(dirs(1,:));
     topdir = strcat(topdir, filesep);
     pathname = topdir;
-    xlfilename = [pathname filesep excel_name '.xlsx'];
+    
+    xlfilename = [topdir excel_name '.xlsx'];
     
     filelist = char(filelist);
     files = cell(size(filelist, 1), 1);
@@ -104,14 +105,15 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
             save(m.metafile, '-struct', 'm');
         end
     end
-
+    
+    cd(topdir);
     if exist(xlfilename, 'file')
         delete(xlfilename);
     end
-    cd(topdir);
-    sizeheader = writeheader(files, xlfilename);
+
+    sizeheader = writeheader(files, xlfilename, topdir);
         
-    htmlfile = [pathname filesep excel_name '.html'];
+    htmlfile = [topdir excel_name '.html'];
     if exist(htmlfile)
         delete(htmlfile);
     end
@@ -123,8 +125,8 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
         fprintf(fid, '<a href="#%s">%s</a><br/>\n', filename_root, filename_root);
     end
     fclose(fid);
-    xlfilename = [pathname filesep excel_name];
-    topdir = strcat(topdir, excel_name, '_html_images');
+    xlfilename = [topdir excel_name];
+
 
     % beads in files, sequences availiable in Selector
     checkbxs = [0, 0];
@@ -139,9 +141,9 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
     for b=1:(size(files,1))
         % analyze all data
         if(nargin<2)
-            temp = dmbr_report_cell_expt(strtrim(files(b,:)), xlfilename, topdir, sizeheader);
+            temp = dmbr_report_cell_expt(strtrim(files(b,:)), [topdir excel_name], topdir, sizeheader);
         else
-            temp = dmbr_report_cell_expt(strtrim(files(b,:)), xlfilename, topdir, sizeheader, seq_array);
+            temp = dmbr_report_cell_expt(strtrim(files(b,:)), [topdir excel_name], topdir, sizeheader, seq_array);
         end
         bxs = temp{1};
        
@@ -192,7 +194,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
     fclose('all');
     
     out = htmlfile;
-    dmbr_adjust_report(excel_name);
+    dmbr_adjust_report(excel_name, topdir);
     
     return
 end
@@ -300,7 +302,7 @@ function r = dir_parse(folder)
     
 end
 
-function num = writeheader(files, filepath)
+function num = writeheader(files, filepath, topdir)
 % Writes the Excel top header, using data from any
 % 'expdata.txt' files found. Data must fit specified
 % formatting.
@@ -346,6 +348,7 @@ function num = writeheader(files, filepath)
         topheader = vertcat(topheader, top);
         fclose(fid);
     end
+    cd(topdir);
     topheader = vertcat(topheader, cell(3, 2*numcols-1));
     topheader(end-2:end,:) = cellstr(' ');
     xlswrite(filepath, topheader);

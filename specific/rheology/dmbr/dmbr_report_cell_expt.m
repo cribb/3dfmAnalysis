@@ -35,6 +35,7 @@ dmbr_constants;
 
 %%%%%%%%%%%% parameter check %%%%%%%%%%%%
 [pathname, filename_root, ext, versn] = fileparts(filename);
+[junk, excel_root, ext] = fileparts(excel_name);
 
 if(nargin < 2)
     excel_name = filename_root;
@@ -42,6 +43,8 @@ end
 if(nargin < 3)
     figfolder = [excel_name '_html_images'];
 end
+topdir = figfolder;
+figfolder = strcat(figfolder, excel_root, '_html_images');
 if(nargin < 4)
     headerheight = 0;
 end
@@ -579,7 +582,7 @@ if info
     end
     
     xlfilename = strcat(excel_name, '.xlsx');
-
+    cd(topdir);
     if ~exist(xlfilename, 'file')
         results = vertcat(header, results);
         xlswrite(xlfilename, results);

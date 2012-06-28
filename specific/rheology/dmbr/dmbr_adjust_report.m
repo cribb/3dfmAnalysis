@@ -1,4 +1,4 @@
-function dmbr_adjust_report(name)
+function dmbr_adjust_report(name, topdir)
 %
 % Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
 % dmbr_report_cell_expt.m
@@ -19,7 +19,9 @@ function dmbr_adjust_report(name)
 %   dmbr_multi_file_report('DataAnalysis')
 %
 
-
+if(nargin>1)
+    cd(topdir);
+end
 % Open the HTML file for viewing
 web([name '.html'], '-browser');
 %open([name '.xlsx']);
