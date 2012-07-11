@@ -19,7 +19,8 @@ function varargout = varforce_drive_gui(varargin)
 %      function named CALLBACK in VARFORCE_DRIVE_GUI.M with the given input arguments.
 %
 %      VARFORCE_DRIVE_GUI('Property','Value',...) creates a new VARFORCE_DRIVE_GUI or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
+%      existing singleton*.  Starting from the left, property value pairs
+%      are
 %      applied to the GUI before varforce_drive_gui_OpeningFunction gets called.  An
 %      unrecognized property name or invalid value makes property application
 %      stop.  All inputs are passed to varforce_drive_gui_OpeningFcn via varargin.
@@ -31,7 +32,7 @@ function varargout = varforce_drive_gui(varargin)
 
 % Edit the above lbl_calib_visc to modify the response to help varforce_drive_gui
 
-% Last Modified by GUIDE v2.5 10-Jul-2007 13:14:10
+% Last Modified by GUIDE v2.5 11-Jul-2012 18:22:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -178,19 +179,19 @@ function pushbutton_start_Callback(hObject, eventdata, handles)
     pole_geometry_idx = get(handles.popupmenu_geometry, 'Value');
     params.my_pole_geometry = char(pole_geometry(pole_geometry_idx));
     
-   deg_loc = get(handles.popupmenu_deg_loc, 'String');
-   deg_loc_idx = get(handles.popupmenu_deg_loc, 'Value'); 
-   params.deg_loc = char(deg_loc(deg_loc_idx));
+    deg_loc = get(handles.popupmenu_deg_loc, 'String');
+    deg_loc_idx = get(handles.popupmenu_deg_loc, 'Value'); 
+    params.deg_loc = char(deg_loc(deg_loc_idx));
     
-         if get(handles.checkbox_full_degauss, 'Value') 
-            params.degauss      = 'on';
-            params.deg_tau      = str2num(get(handles.edit_deg_tau, 'String'));
-            params.deg_freq     = str2num(get(handles.edit_deg_freq, 'String'));
-            params.voltages     = [5 0];
-            params.pulse_widths = [0 10*params.deg_tau];
-            params              = varforce_drive(params);
-            logentry('Full degauss done.');
-        end 
+     if get(handles.checkbox_full_degauss, 'Value') 
+        params.degauss      = 'on';
+        params.deg_tau      = str2num(get(handles.edit_deg_tau, 'String'));
+        params.deg_freq     = str2num(get(handles.edit_deg_freq, 'String'));
+        params.voltages     = [5 0];
+        params.pulse_widths = [0 10*params.deg_tau];
+        params              = varforce_drive(params);
+        logentry('Full degauss done.');
+    end 
      
     params.voltages             = str2num(get(handles.edit_voltages, 'String'));
     params.pulse_widths         = str2num(get(handles.edit_pulsewidths, 'String'));
@@ -200,6 +201,7 @@ function pushbutton_start_Callback(hObject, eventdata, handles)
     params.calibum              = str2num(get(handles.edit_calibum, 'String'));
     params.deg_tau              = str2num(get(handles.edit_deg_tau, 'String'));
     params.deg_freq             = str2num(get(handles.edit_deg_freq, 'String'));
+    params.fps                  = str2num(get(handles.fps_edit, 'String'));
 
     if get(handles.checkbox_degauss, 'Value');
         params.degauss = 'on';
@@ -369,6 +371,7 @@ function degauss_now_button_Callback(hObject, eventdata, handles)
     params.calibrator_viscosity = [];
     params.bead_radius          = [];  
     params.calibum              = [];
+    params.fps                  = str2num(get(handles.fps_edit, 'String'));
     
     logentry('Starting Degauss run...');  
     params = varforce_drive(params);
@@ -450,7 +453,23 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+function edit_fps_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_fps (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_fps as text
+%        str2double(get(hObject,'String')) returns contents of edit_fps as a double
 
 
+% --- Executes during object creation, after setting all properties.
+function edit_fps_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_fps (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
-
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

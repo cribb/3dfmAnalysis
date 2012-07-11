@@ -1,3 +1,9 @@
+2012-07-11  Christian Stith <chstith@ncsu.edu>
+	* vfd_fps: added. updates old .vfd.mat files to include fps field.
+	* varforce_drive_gui.m: updated GUI to include frames per second input.
+	* varforce_drive_gui.fig: same.
+	* varforce_drive.m: added fps storage and implementation.
+
 2012-05-29  Jeremy Cribb <jcribb@email.unc.edu>
 	* varforce_drive.m: added coil geometry for surface-attached posts project for Briana Fiser.
 	* varforce_drive_gui.fig: same.

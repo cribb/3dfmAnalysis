@@ -9,15 +9,16 @@ function params_out = varforce_drive(params)
 %
 % where params is an input structure with the following fields:
 % 
-%  .myDAQid               string, 'daqtest'       specifies DAQ board
+%  .myDAQid             string, 'daqtest'       specifies DAQ board
 %  .DAQ_sampling_rate   int, 100000             sampling rate in [Hz]
-%  .NRepeats             int, 0                  number of input signal repeats
-%  .my_pole_geometry       string, 'pole4-flat'    specifies 3dfm pole geometry
+%  .NRepeats            int, 0                  number of input signal repeats
+%  .my_pole_geometry    string, 'pole4-flat'    specifies 3dfm pole geometry
 %  .voltages            vector, [0 1 2 3 4 5]   pulse voltages in [V]
 %  .pulse_widths        vector, [1 1 1 1 1 1]   pulse widths in [sec]
 %  .degauss             {on} off                include degauss at 0 Volts?
 %  .deg_tau             scaler, 0.0012          degauss decay constant
 %  .deg_freq            scaler, 10000           degauss frequency
+%  .fps                 int, 120                frames per second
 % Note: Required fields are marked with a star (*).
 %       Default values are enclosed in {braces}, or defined after the 
 %        specified datatype.
@@ -79,6 +80,11 @@ if ~isfield(params, 'deg_loc')
     params.deg_loc = 'middle';
     logentry('No choice made for degauss location.  Assuming you want it in the middle of the zero pulse.');
 end
+
+if ~isfield(params, 'fps')
+    params.fps = 120;
+    logentry('No choice made for frames per second.  Assuming you want rate of 120 fps.');
+end
     
 myDAQid           = params.myDAQid;
 DAQ_sampling_rate = params.DAQ_sampling_rate;
@@ -90,7 +96,8 @@ degauss           = params.degauss;
 deg_loc           = params.deg_loc;
 deg_tau           = params.deg_tau;
 deg_freq          = params.deg_freq;
-    
+fps               = params.fps;
+
 % check for equal vector lengths for voltages and pulse lengths
 if length(voltages) ~= length(pulse_widths)
     error('voltage and pulse_widths are not same length.');
