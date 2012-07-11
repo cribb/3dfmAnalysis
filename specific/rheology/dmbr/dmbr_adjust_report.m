@@ -1,7 +1,7 @@
 function dmbr_adjust_report(name, topdir)
 %
 % Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
-% dmbr_report_cell_expt.m
+% dmbr_adjust_report.m
 % Auto-generates a GUI, Sequence Selector, that allows users to
 % select/deselect individual sequences from a previous
 % dmbr_multi_file_report for inclusion in a new, smaller one. Once the user
@@ -27,7 +27,7 @@ web([name '.html'], '-browser');
 %open([name '.xlsx']);
 
 % Create GUI figure
-h.f = figure('units','pixels','position',[200,200,700,550], 'toolbar','none','menu','none', 'Name', ['Sequence Selector: ' name]);
+h.f = figure('units','pixels','position',[200,200,730,550], 'toolbar','none','menu','none', 'Name', ['Sequence Selector: ' name]);
 
 % Open sequence data file
 infile = [name '.seqdat.txt'];
@@ -72,7 +72,7 @@ while(ischar(tline))
     % Filename display
     
     [path fname_root ext] = fileparts(fname);
-    vidID = ['vid' num2str(sscanf(fname_root, 'vid%f')) '       (' fname ')'];
+    vidID = ['vid' num2str(sscanf(fname_root, 'vid%f')) ' | (' strtrim(fname) ')'];
     
     h.l(elements) = uicontrol('Parent', h.panel, 'HorizontalAlignment', 'left', 'BackgroundColor', [0.22333, 0.87, 0.11],'Style', 'text', 'String', vidID, 'Position', [20, -elements*30, 1200, 15]);
     

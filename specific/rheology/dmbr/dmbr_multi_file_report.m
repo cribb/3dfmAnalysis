@@ -27,7 +27,13 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
     else
         filelist = file_array;
     end
-       
+    
+    
+    plot_selection = report_gui();
+    if plot_selection(1) == -1
+        return;
+    end
+    
     filelist = char(filelist);
     filelist = sortn(filelist);
     dirs = cell(size(filelist));
@@ -68,20 +74,20 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
     files = char(files);
     files = unique(files, 'rows');
     files = char(sortn(files));
-    if length(files)==0
+    if isempty(files)
         fprintf('No files selected. Program terminated.\n');
         return;
     end
     
-
+    
     counter = 1;
+
     while counter <= size(files,1);
         % check all files for breakpoints data
         [pathname, filename_root, ext, versn] = fileparts(files(counter,:));
         cd(pathname);
-        metadatafile = strcat(filename_root, '.vfd.mat')
-        videofile = strcat(filename_root, '.raw.vrpn.evt.mat');
-        videofile2 = strcat(filename_root, '.vrpn.evt.mat');
+        metadatafile = strcat(filename_root, '.vfd.mat');
+        trackfile = tracking_check(filename_root);
         if ~exist(metadatafile, 'file')
             fprintf('***The file ');
             fprintf('%s', metadatafile);
@@ -89,9 +95,9 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
             % delete file from list
             files(counter,:) = [];
             continue;
-        elseif ~exist(videofile, 'file') && ~exist(videofile2, 'file')
-            fprintf('***The file ');
-            fprintf('%s', videofile2);
+        elseif strcmp(trackfile, 'NULL')
+            fprintf('***The tracking file for ');
+            fprintf('%s', filename_root);
             fprintf(' was not found. This file will be skipped.\n');
             % delete file from list
             files(counter,:) = [];
@@ -100,25 +106,39 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
             counter = counter + 1;
         end
         m = load(metadatafile);
-        if ~isfield(m, 'time_selected')
-            [dummy, m] = dmbr_init(m);
-            save(m.metafile, '-struct', 'm');
+        m.trackfile = trackfile;
+        m.poleloc = 'poleloc.txt';
+        if ~isfield(m, 'time_selected')     
+            %%%%
+            % identify location of a break between sequences by clicking on plot
+            %%%%
+            video_tracking_constants;
+            table = load_video_tracking(m.trackfile, m.fps, 'm', m.calibum, 'relative', 'yes', 'table');
+            table(:,X) = table(:,X) - m.poleloc(1);
+            table(:,Y) = table(:,Y) - m.poleloc(2);
+            table(:,TIME) = table(:,TIME) - min(table(:,TIME));
+            m.time_selected = get_sequence_break(table);
         end
+        save(metadatafile, '-struct', 'm');
+
     end
     
     cd(topdir);
-    if exist(xlfilename, 'file')
-        delete(xlfilename);
+    
+    sizeheader = 0;
+    if(plot_selection(4, 1))
+        if exist(xlfilename, 'file')
+            delete(xlfilename);
+        end
+        sizeheader = writeheader(files, xlfilename, topdir);
     end
-
-    sizeheader = writeheader(files, xlfilename, topdir);
         
     htmlfile = [topdir excel_name '.html'];
     if exist(htmlfile)
         delete(htmlfile);
     end
     fid = fopen(htmlfile, 'w');
-    fprintf(fid, '<html>\n')    
+    fprintf(fid, '<html>\n');
     fprintf(fid, '<a name="Contents"><b>Contents:</b></a>\n<br/>');
     for b=1: size(files, 1);
         [pathname, filename_root, ext] = fileparts(files(b,:));
@@ -141,9 +161,9 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
     for b=1:(size(files,1))
         % analyze all data
         if(nargin<2)
-            temp = dmbr_report_cell_expt(strtrim(files(b,:)), [topdir excel_name], topdir, sizeheader);
+            temp = dmbr_report_cell_expt(strtrim(files(b,:)), [topdir excel_name], topdir, sizeheader, plot_selection);
         else
-            temp = dmbr_report_cell_expt(strtrim(files(b,:)), [topdir excel_name], topdir, sizeheader, seq_array);
+            temp = dmbr_report_cell_expt(strtrim(files(b,:)), [topdir excel_name], topdir, sizeheader, plot_selection, seq_array);
         end
         bxs = temp{1};
        
@@ -170,7 +190,10 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
         end
     end
     
-    excel_analysis(inseqs, reportbxs, xlfilename, sizeheader);
+    if(plot_selection(4, 1))
+        excel_analysis(inseqs, reportbxs, xlfilename, sizeheader);
+    end
+
     fid = fopen(htmlfile, 'a+');
     
     
@@ -263,19 +286,18 @@ end
 function f = full_list(filegetter)
 % Primes the dir_parse function by taking a mixed list of files and
 % folders, and calling the dir_parse function on all folders.
-    filelist = char(filegetter);
-    files = cell(size(filelist, 1), 1);
-    for b = 1:size(filelist,1)
-        files(b) = cellstr(filelist(b,:));
-        filelist(b,:);
-    end
-    
-    for b = 1:size(files)
+
+
+    files = filegetter';
+    b = 1;
+    while(b <= length(files))
         if isdir(char(files(b)))
             temp = files(b);
             files(b) = [];
             files = vertcat(files, dir_parse(temp));
+            b = b-1;
         end
+        b = b+1;
     end
     f = files;
 end
@@ -289,14 +311,18 @@ function r = dir_parse(folder)
     d = d(1,3:end);
     d = d';
     
-    for b=1:size(d)
-        d(b) = strcat(folder, filesep, char(d(b)))
+    b = 1;
+    while(b <= length(d))
+        d(b) = strcat(folder, filesep, char(d(b)));
         
         if isdir(char(d(b)))
             temp = d(b);
             d(b) = [];
-            d = vertcat(d, dir_parse(temp));
+            height = length(d);
+            d = vertcat(dir_parse(temp), d);
+            b = b + (length(d) - height) - 1;
         end
+        b = b+1;
     end
     r = d;
     
@@ -354,3 +380,116 @@ function num = writeheader(files, filepath, topdir)
     xlswrite(filepath, topheader);
     num = size(topheader,1);
 end
+
+
+function selection = report_gui()
+%
+% Displays a checkbox GUI that allows the user to select analysis
+% parameters, including displacement, compliance, compliance fit, Excel
+% generation, and FPS addition. Easily expandable. Returns an ordered array
+% of the user's choices.
+%
+
+selection = [];
+
+% Create GUI figure
+h.f = figure('units','pixels','position',[400,400,350,200], 'toolbar','none','menu','none', 'Name', 'Plot Selector');
+
+% Divider line
+h.panel=uipanel(h.f, 'Units', 'pixels', 'Position',[0 105 1260 1]);
+
+% Checkboxes
+h.c(6) = uicontrol('style', 'edit', 'units','pixels', 'position', [85, 47, 50, 20]);
+h.c(5) = uicontrol('Value', 0, 'style','checkbox','units','pixels', 'position', [15, 50, 65, 15], 'string', 'Set FPS:');
+h.c(4) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 75, 200, 15], 'string', 'Generate Excel Spreadsheet');
+h.c(3) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 120, 150, 15], 'string', 'Plot Compliance Fit');
+h.c(2) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 145, 150, 15], 'string', 'Plot Compliance');
+h.c(1) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 170, 150, 15], 'string', 'Plot Displacement');
+
+% Create Compute and Cancel pushbuttons 
+h.submit = uicontrol('style','pushbutton','units','pixels', 'position',[15,15,70,20],'string','Compute','callback',@p_call);
+h.cancel = uicontrol('style','pushbutton','units','pixels', 'position',[100,15,70,20],'string','Cancel','callback',@p_cancel);
+
+uiwait(h.f);
+
+    % Compute callback
+    function p_call(varargin)
+        checked = get(h.c,'Value');
+        checked{6} = str2num(get(h.c(6), 'String'));
+        close(h.f);
+        selection = cell2mat(checked);
+    end
+
+    % Cancel callback
+    function p_cancel(varargin)
+        checked = get(h.c,'Value');
+        selection = cell2mat(checked);
+        close(h.f);
+        selection(1) = -1;
+    end
+end
+
+
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'dmbr_init: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+    return
+end
+
+
+% returns the closest time to a mouseclick on a figure of video tracking
+function time_selected = get_sequence_break(table)
+
+    varforce_constants;
+
+        h = figure;
+        set(h, 'Units', 'Normalized');
+        hpos = get(h, 'Position');
+        set(h, 'Position', [0.4 0.55 hpos(3:4)]);        
+        plot(table(:,TIME), magnitude(table(:,X:Y)), '.');
+        title('Use figure toolbox, press key, and click mouse on break-point.');
+        drawnow;
+        pause;
+
+    logentry('Click once on the figure to identify a break between pulse sequences.');
+    [tm,xm] = ginput(1);
+
+        close(h);
+        drawnow;
+
+    t = table(:,TIME);
+    x = table(:,X);
+
+    tval = repmat(tm, length(t), 1);
+    xval = repmat(xm, length(x), 1);
+
+    dist = sqrt((t - tval).^2 + (x - xval).^2);
+
+    time_selected = t(find(dist == min(dist)));
+
+    return;
+
+end
+
+function fname = tracking_check(filename_root)
+    fname = strcat(filename_root, '.raw.vrpn.evt.mat');
+    if exist(fname, 'file')
+        return;
+    end
+    fname = strcat(filename_root, '.avi.vrpn.mat');
+    if exist(fname, 'file')
+        return;
+    end
+    fname = 'NULL';
+    return;
+end
+

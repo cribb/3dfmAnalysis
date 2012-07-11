@@ -43,6 +43,7 @@ function [table_out,  params] = dmbr_init(params)
     trackfile    = params.trackfile;
     deg_loc      = params.deg_loc;    
     poleloc      = params.poleloc;
+    fps          = params.fps;
     
     if isfield(params, 'degauss');
         degauss = params.degauss;
@@ -56,7 +57,7 @@ function [table_out,  params] = dmbr_init(params)
     %%%%
     % Load in that video file.
     %%%%
-    table = load_video_tracking(trackfile, [], 'm', calib_um, 'absolute', 'yes', 'table');
+    table = load_video_tracking(trackfile, fps, 'm', calib_um, 'absolute', 'yes', 'table');
     
     %%%%
     % Set the initial value for the additional columns to NaN.  This allows

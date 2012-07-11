@@ -1,3 +1,9 @@
+2012-07-11 Christian Stith <chstith@ncsu.edu>
+	* dmbr_adjust_report.m: cleaned up GUI appearance.
+	* dmbr_init.m: added fps functionality.
+	* dmbr_multi_file_report.m: added plot selection gui & functionality. improved initial breakpoint setting algorithm.
+	* dmbr_report_cell_expt.m: added Jeffrey plot model option. added plot selection functionality. improved plotting procedures.
+
 2012-06-28 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report: Fixed multi-directory analysis bug.
 	* dmbr_adjust_report.m: "
