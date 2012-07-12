@@ -28,6 +28,10 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
         filelist = file_array;
     end
     
+    if isempty(filelist)
+        fprintf('No files selected. Program terminated.\n');
+        return;
+    end
     
     plot_selection = report_gui();
     if plot_selection(1) == -1
@@ -86,6 +90,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
         % check all files for breakpoints data
         [pathname, filename_root, ext, versn] = fileparts(files(counter,:));
         cd(pathname);
+        filename_root = strtrim(filename_root);
         metadatafile = strcat(filename_root, '.vfd.mat');
         trackfile = tracking_check(filename_root);
         if ~exist(metadatafile, 'file')
@@ -480,15 +485,26 @@ function time_selected = get_sequence_break(table)
 
 end
 
+% finds a matching tracking file in the current directory
+
 function fname = tracking_check(filename_root)
-    fname = strcat(filename_root, '.raw.vrpn.evt.mat');
-    if exist(fname, 'file')
-        return;
+    fname_array = [...
+        cellstr('.raw.vrpn.evt.mat')...
+        cellstr('.raw.vrpn.mat'),...
+        cellstr('.avi.vrpn.evt.mat'),...
+        cellstr('.avt.vrpn.mat'),...
+        cellstr('.vrpn.evt.mat'),...
+        cellstr('.vrpn.mat')...
+    ];
+        
+    for i=1:length(fname_array)
+        filen = strcat(filename_root, fname_array{i});
+        if exist(filen, 'file')
+            fname = filen;
+            return;
+        end
     end
-    fname = strcat(filename_root, '.avi.vrpn.mat');
-    if exist(fname, 'file')
-        return;
-    end
+    warning('Tracking file not found');
     fname = 'NULL';
     return;
 end

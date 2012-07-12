@@ -1,3 +1,7 @@
+2012-07-12 Christian Stith <chstith@ncsu.edu>
+	* dmbr_multi_file_report.m: added general trackingfile finder function.
+	* dmbr_report_cell_expt.m: added general trackingfile finder function. improved Jeffrey plotting.
+
 2012-07-11 Christian Stith <chstith@ncsu.edu>
 	* dmbr_adjust_report.m: cleaned up GUI appearance.
 	* dmbr_init.m: added fps functionality.

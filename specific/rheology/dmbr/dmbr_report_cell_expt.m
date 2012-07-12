@@ -95,25 +95,13 @@ voltages = m.voltages;
 calib_um = m.calibum;
 
 % load tracking data
-trackingfile = [filename_root, '.raw.vrpn.evt.mat'];
-% try multiple file extensions
-try 
-    d = load(trackingfile);
-catch
-    trackingfile = [filename_root, '.avi.vrpn.mat']
-    try
-        d = load(trackingfile);
-    catch
-        trackingfile = [filename_root, '.vrpn.evt.mat']
-        try
-            d = load(trackingfile);
-        catch
-            warning('Tracking file not found');
-            return;
-            beadmax = NaN;
-        end
-    end
+trackingfile = tracking_check(filename_root);
+if isempty(trackingfile)
+    return;
 end
+% try multiple file extensions
+
+d = load(trackingfile);
 
 d = load_video_tracking(trackingfile, m.fps, 'pixels', calib_um, 'absolute', 'yes', 'table');
 beadmax = get_beadmax(d);
@@ -193,8 +181,8 @@ for b = 1 : length(beads)
     
     ti1 = 0;
     ti2 = pulses(1);
-    fitc = 0;
     gaps = [0, 0; 0, 0; 0, 0];
+    fitc = 0;
     xstart = 0;
     ystart = 0;
     Jstart = 0;
@@ -395,7 +383,7 @@ for b = 1 : length(beads)
             if ~exist('tJxcfFig');  tJxcfFig  = figure; end
             if ~exist('tJxcfFig2'); tJxcfFig2  = figure; end
             
-            Jx = vertcat(gaps(3,1), Jx);
+            Jx = vertcat(gaps(2,1), Jx);
             tcont = vertcat(gaps(3,2), tcont);
             
             idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(1));
@@ -406,8 +394,8 @@ for b = 1 : length(beads)
             ti1 = ti1 + sum(pulses);
             ti2 = ti2 + sum(pulses);
             fit = fit + fitc;
-           % fit = vertcat(gaps(3,1), fit);
-            fitc = fit(end);
+%            fit = vertcat(gaps(3,1), fit);
+            gaps(3, 1) = fit(end);
             
             figure(tJxcfFig);
             hold on;
@@ -438,7 +426,10 @@ for b = 1 : length(beads)
             drawnow;
             
             gaps(3, 1:2) = [fit(end), tcont(end)];
+            fitc = gaps(3, 1);
+            gaps(2, 1) = Jx(end);
             tcont(1) = [];
+            fit(1) = [];
             Jx(1) = [];
         end
         
@@ -759,4 +750,28 @@ rheo = temp;
 
 return;
 
+end
+
+% finds a matching tracking file in the current directory
+
+function fname = tracking_check(filename_root)
+    fname_array = [...
+        cellstr('.raw.vrpn.evt.mat')...
+        cellstr('.raw.vrpn.mat'),...
+        cellstr('.avi.vrpn.evt.mat'),...
+        cellstr('.avt.vrpn.mat'),...
+        cellstr('.vrpn.evt.mat'),...
+        cellstr('.vrpn.mat')...
+    ];
+        
+    for i=1:length(fname_array)
+        filen = strcat(filename_root, fname_array{i});
+        if exist(filen, 'file')
+            fname = filen;
+            return;
+        end
+    end
+    warning('Tracking file not found');
+    fname = 'NULL';
+    return;
 end
