@@ -1,3 +1,6 @@
+2012-07-12  Christian Stith <chstith@ncsu.edu>
+	* crop.m: added. automatically crops marginal whitespace from images. modified to include new directory parameter. from http://www.mathworks.com/matlabcentral/fileexchange/20427-crop-whitespace-from-an-image
+	
 2012-06-20  Christian Stith <chstith@ncsu.edu>
 	* exportfig.m: added. improved consistency of exported matlab figures. from http://www.mathworks.com/company/newsletters/digest/june00/export/index.html
 	* sortn.m: added. improved textual sorting algorithm that rationally sorts mixed alpha-numeric strings. from http://www.mathworks.com/matlabcentral/fileexchange/8399-sortn-sort-textual-lists (added recommended 'i' fix)
