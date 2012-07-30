@@ -86,13 +86,13 @@ function [table_out,  params] = dmbr_init(params)
     % before requiring user interatction to locate sequence break
     %%%%
     if isfield(params, 'time_selected')
-        time_selected = params.time_selected;
+        time_selected = params.time_selected(1);
     else        
         %%%%
         % identify location of a break between sequences by clicking on plot
         %%%%
         time_selected = get_sequence_break(table);  
-        params.time_selected = time_selected;
+        params.time_selected = time_selected(1);
     end
         
     %%%%
@@ -246,6 +246,7 @@ function time_selected = get_sequence_break(table)
 
     dist = sqrt((t - tval).^2 + (x - xval).^2);
 
-    time_selected = t(find(dist == min(dist)));
+    parse = t(find(dist == min(dist)));
+    time_selected = parse(1);
     
     return;

@@ -84,10 +84,6 @@ if strcmp('.vfd.mat', metadatafile)==1 || ~exist(metadatafile);%, 'file')
     return
 end
 
-if(plot_select(5))
-    vfd_fps(plot_select(6), metadatafile);
-end
-
 m = load(metadatafile);
 a        = m.bead_radius;
 pulses   = m.pulse_widths;
@@ -643,7 +639,7 @@ if info
     % Image of pole tip
     poleimage = [filename_root, '.MIP.bmp'];
     if(exist(poleimage, 'file'))
-        copyfile(poleimage,[figures filesep poleimage]);
+        copyfile(poleimage,[topdir figures filesep poleimage]);
     end
     % Video screenshot
     vidID = ['vid' num2str(sscanf(filename_root, 'vid%f'))];
@@ -759,7 +755,7 @@ function fname = tracking_check(filename_root)
         cellstr('.raw.vrpn.evt.mat')...
         cellstr('.raw.vrpn.mat'),...
         cellstr('.avi.vrpn.evt.mat'),...
-        cellstr('.avt.vrpn.mat'),...
+        cellstr('.avi.vrpn.mat'),...
         cellstr('.vrpn.evt.mat'),...
         cellstr('.vrpn.mat')...
     ];

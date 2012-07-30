@@ -33,6 +33,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
         return;
     end
     
+    
     plot_selection = report_gui();
     if plot_selection(1) == -1
         return;
@@ -88,6 +89,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
 
     while counter <= size(files,1);
         % check all files for breakpoints data
+
         [pathname, filename_root, ext, versn] = fileparts(files(counter,:));
         cd(pathname);
         filename_root = strtrim(filename_root);
@@ -110,10 +112,15 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
         else
             counter = counter + 1;
         end
+
         m = load(metadatafile);
         m.trackfile = trackfile;
         m.poleloc = 'poleloc.txt';
-        if ~isfield(m, 'time_selected')     
+        if(plot_selection(5))
+            %vfd_fps(plot_selection(6), metadatafile);
+            m.fps = plot_selection(6);
+        end
+        if ~isfield(m, 'time_selected')
             %%%%
             % identify location of a break between sequences by clicking on plot
             %%%%
@@ -207,6 +214,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
 
     fclose(fid);
     
+%    cd(topir);
     outfile = [excel_name '.seqdat.txt'];
     if(exist(outfile))
         delete outfile;
@@ -492,7 +500,7 @@ function fname = tracking_check(filename_root)
         cellstr('.raw.vrpn.evt.mat')...
         cellstr('.raw.vrpn.mat'),...
         cellstr('.avi.vrpn.evt.mat'),...
-        cellstr('.avt.vrpn.mat'),...
+        cellstr('.avi.vrpn.mat'),...
         cellstr('.vrpn.evt.mat'),...
         cellstr('.vrpn.mat')...
     ];

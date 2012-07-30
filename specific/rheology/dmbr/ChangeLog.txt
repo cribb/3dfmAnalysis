@@ -1,3 +1,8 @@
+2012-30-12 Christian Stith <chstith@ncsu.edu>
+	* dmbr_multi_file_report.m: removed directory bug. needs work.
+	* dmbr_report_cell_expt.m: removed vfd_fps call. needs work.
+	* dmbr_init.m: adjusted fps access to include index.
+
 2012-07-12 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report.m: added general trackingfile finder function.
 	* dmbr_report_cell_expt.m: added general trackingfile finder function. improved Jeffrey plotting.
