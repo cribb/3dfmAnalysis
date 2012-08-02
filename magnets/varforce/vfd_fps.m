@@ -2,7 +2,7 @@
 % vfd_fps.m
 % 
 % Updates .vfd.mat files to include an fps field that stores the value in
-% myfps. Will overwrite fps if stored already. Runs on the entire current
+% myfps. Will not overwrite fps if stored already. Runs on the entire current
 % directory, or on vfdfilein alone if given. Returns the number of files
 % adjusted.
 %
@@ -23,13 +23,17 @@ function outs = vfd_fps(myfps, vfdfilein)
 
         for i=1:numel(flist)
             params = open(flist{i});
-            params.fps = myfps;
+            if(~isfield(params, 'fps'))
+                params.fps = myfps;
+            end
             save(flist{i}, '-struct', 'params');
         end
         outs = numel(flist);
     else
         params = open(vfdfilein);
-        params.fps = myfps;
+        if(~isfield(params, 'fps'))
+            params.fps = myfps;
+        end
         save(vfdfilein, '-struct', 'params');
         outs = 1;
     end

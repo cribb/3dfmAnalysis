@@ -1,3 +1,8 @@
+2012-08-12  Christian Stith <chstith@ncsu.edu>
+	* vfd_fps: updated to not overwrite existing fps values.
+	* varforce_drive_gui_beta.fig: added. updated version of vfd GUI. now includes test options.
+	* varforce_drive_gui_beta.m: added. same.
+
 2012-07-11  Christian Stith <chstith@ncsu.edu>
 	* vfd_fps: added. updates old .vfd.mat files to include fps field.
 	* varforce_drive_gui.m: updated GUI to include frames per second input.
