@@ -69,27 +69,45 @@ while(ischar(tline))
 
     % iterate counter
     elements = elements + 1;
+    pre_elements = elements;
     % Filename display
     
-    [path fname_root ext] = fileparts(fname);
+    [junk fname_root ~] = fileparts(fname);
     vidID = ['vid' num2str(sscanf(fname_root, 'vid%f')) ' | (' strtrim(fname) ')'];
     
-    h.l(elements) = uicontrol('Parent', h.panel, 'HorizontalAlignment', 'left', 'BackgroundColor', [0.22333, 0.87, 0.11],'Style', 'text', 'String', vidID, 'Position', [20, -elements*30, 1200, 15]);
     
     % Checkbox initialization & display
+    empty_file = 1;
     for b=1:numbeads
-	elements = elements + 1;
-    field = ['Bead ' num2str(b) ' Sequences: '];
-    h.l(elements) = uicontrol('Parent', h.panel, 'HorizontalAlignment', 'left', 'BackgroundColor', 'yellow', 'Style', 'text', 'String', field, 'Position', [40,-30*elements, 105,15]);
+    	elements = elements + 1;
+        field = ['Bead ' num2str(b) ' Sequences: '];
+        empty_bead = 1;
         for c=1:seqs
             checkelements = checkelements + 1;
             if(c<=checks(b))
                 h.c(checkelements) = uicontrol('Parent', h.panel, 'Value', 1, 'style','checkbox','units','pixels', 'position',[150+50*(c-1), -30*elements,45,15],'string',num2str(c));
+                empty_bead = 0;
+                empty_file = 0;
             else
                 h.c(checkelements) = uicontrol('Value', 0, 'style','checkbox','units','pixels', 'position',[-50,-50,45,15]);
             end                
         end
+        if(empty_bead)
+            elements = elements - 1;
+        else
+            h.l(elements) = uicontrol('Parent', h.panel, 'HorizontalAlignment', 'left', 'BackgroundColor', 'yellow', 'Style', 'text', 'String', field, 'Position', [40,-30*elements, 105,15]);
+        end
+        
     end
+    
+    if(empty_file)
+        elements = elements-1;
+    else
+        h.l(elements) = uicontrol('Parent', h.panel, 'HorizontalAlignment', 'left', 'BackgroundColor', [0.22333, 0.87, 0.11],'Style', 'text', 'String', vidID, 'Position', [20, -pre_elements*30, 1200, 15]);
+    end
+
+    
+    
     tline = fgetl(fid);
     tline2 = fgetl(fid); 
 end
@@ -119,7 +137,7 @@ h.cancel = uicontrol('style','pushbutton','units','pixels', 'position',[15,45,70
     function p_call(varargin)
         checked = get(h.c,'Value');
         m = cell2mat(checked);
-        if isempty(find(m))
+        if isempty(find(m, 1))
             msgbox('Please select at least one sequence.');
             return;
         end
@@ -131,14 +149,16 @@ h.cancel = uicontrol('style','pushbutton','units','pixels', 'position',[15,45,70
             end
             filename = temp{1};
         end
-        close(h.f);
+        close(gcf);
+        pause(0.1);
         % Compute new report, with new filename
         dmbr_multi_file_report(filename, checked, filearray);
     end
 
     % Cancel callback
     function p_cancel(varargin)
-        close(h.f);
+        close(gcf);
+        pause(0.1);
     end
 
     % Slider callback

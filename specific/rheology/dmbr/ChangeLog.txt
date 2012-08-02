@@ -1,4 +1,11 @@
-2012-30-12 Christian Stith <chstith@ncsu.edu>
+2012-08-12 Christian Stith <chstith@ncsu.edu>
+	* dmbr_adjust_report.m: updated to remove deselected files and beads. improved figure closing.
+	* dmbr_analysis_gui.fig: added Power Law (Fabry) model.
+	* dmbr_fit.m: added Power Law (Fabry) model.
+	* dmbr_multi_file_report.m: improved file sorting and main directory tracking. generalized excel analysis output format. added Power Law (Fabry) Model.
+	* dmbr_report_cell_expt.m: generalized fit type and excel output. Added Power Law (Fabry) model.
+
+2012-07-30 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report.m: removed directory bug. needs work.
 	* dmbr_report_cell_expt.m: removed vfd_fps call. needs work.
 	* dmbr_init.m: adjusted fps access to include index.

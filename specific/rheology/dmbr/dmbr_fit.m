@@ -48,8 +48,12 @@ function [G, eta, ct_fit, R_square] = dmbr_fit(rheo_table, fit_type)
                 G = G0;
                 eta = NaN;
                 ct_fit = A0*t.^alpha;
-                
-                
+            case 'Power Law (Fabry)'
+                [J0,beta,R_square] = power_law_fitting_fabry(t,ct);
+                G = 1/J0;
+                eta = beta; %DANGEROUS. NOT ETA.
+                ct_fit = J0*t.^beta;
+                                
             otherwise
                 ct_fit = NaN;
                 G = NaN;

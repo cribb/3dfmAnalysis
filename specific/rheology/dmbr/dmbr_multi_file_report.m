@@ -28,34 +28,28 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
         filelist = file_array;
     end
     
-    if isempty(filelist)
+    if (isempty(filelist))
         fprintf('No files selected. Program terminated.\n');
         return;
+    elseif (~iscell(filelist))
+        fprintf('Program canceled.\n');
+        return;
     end
+
+        
     
-    
+    % Give options to user via checkboxes
     plot_selection = report_gui();
-    if plot_selection(1) == -1
+    if (isempty(plot_selection) || plot_selection{1} == -1)
+        fprintf('Program canceled.\n');
         return;
     end
     
-    filelist = char(filelist);
-    filelist = sortn(filelist);
-    dirs = cell(size(filelist));
-
-    for b=1:(size(filelist))
-        [fpath, junk, junk] = fileparts(char((filelist(1))));
-        dirs(b,:) = cellstr(fpath);
-    end
-    topdir = char(dirs(1,:));
-    topdir = strcat(topdir, filesep);
-    pathname = topdir;
-    
-    xlfilename = [topdir excel_name '.xlsx'];
     
     filelist = char(filelist);
     files = cell(size(filelist, 1), 1);
-        
+    
+    %remove all non-relevant files
     count = 0;
     for b = 1:size(filelist,1)
         fname = filelist(b,:);
@@ -74,7 +68,6 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
  
         end
     end
-
     
     files = char(files);
     files = unique(files, 'rows');
@@ -84,9 +77,17 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
         return;
     end
     
+    %parse out first directory
+    [main_directory, ~, ~] = fileparts(char(files(1,:)));
+    main_directory = strcat(main_directory, filesep);
     
+    xlfilename = [main_directory excel_name '.xlsx'];
+        
+%verify all files    
     counter = 1;
-
+    if(plot_selection{7,1})
+        logentry('Checking for breakpoints.');
+    end
     while counter <= size(files,1);
         % check all files for breakpoints data
 
@@ -113,39 +114,63 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
             counter = counter + 1;
         end
 
-        m = load(metadatafile);
-        m.trackfile = trackfile;
-        m.poleloc = 'poleloc.txt';
-        if(plot_selection(5))
-            %vfd_fps(plot_selection(6), metadatafile);
-            m.fps = plot_selection(6);
+        if(plot_selection{7,1})
+            m = load(metadatafile);
+            m.trackfile = trackfile;
+            m.poleloc = 'poleloc.txt';
+            if(plot_selection{5} && ~isfield(m, 'fps'))
+                m.fps = plot_selection{6};
+            end
+            time_selected = NaN;
+            if ~isfield(m, 'time_selected')
+                %%%%
+                % identify location of a break between sequences by clicking on plot
+                %%%%
+                video_tracking_constants;
+                table = load_video_tracking(m.trackfile, m.fps, 'm', m.calibum, 'absolute', 'yes', 'table');
+                poleloc = m.poleloc * m.calibum * 1e-6;
+                table(:,X) = table(:,X) - poleloc(1);
+                table(:,Y) = table(:,Y) - poleloc(2);
+                table(:,TIME) = table(:,TIME) - min(table(:,TIME));
+                time_selected = get_sequence_break(table);
+            else
+                time_selected = m.time_selected;
+            end
+            
+            if(isnan(time_selected))
+                counter = counter-1;
+                files(counter,:) = [];
+                logentry([filename_root ' removed from analysis.']);
+            else
+                m.time_selected = time_selected;
+                logentry([filename_root ' contains sequence breakpoint.']);
+            end            
+            save(metadatafile, '-struct', 'm');
         end
-        if ~isfield(m, 'time_selected')
-            %%%%
-            % identify location of a break between sequences by clicking on plot
-            %%%%
-            video_tracking_constants;
-            table = load_video_tracking(m.trackfile, m.fps, 'm', m.calibum, 'relative', 'yes', 'table');
-            table(:,X) = table(:,X) - m.poleloc(1);
-            table(:,Y) = table(:,Y) - m.poleloc(2);
-            table(:,TIME) = table(:,TIME) - min(table(:,TIME));
-            m.time_selected = get_sequence_break(table);
-        end
-        save(metadatafile, '-struct', 'm');
+    end
 
+    if(size(files, 1)==0)
+        fprintf('No files selected. Program terminated.\n');
+        return;
     end
     
-    cd(topdir);
+    fprintf('Files to be analyzed:\n');
+    for i=1:size(files, 1)
+        [~, filename_root, ~] = fileparts(files(i,:));
+        fprintf([filename_root '\n']);
+    end
     
-    sizeheader = 0;
-    if(plot_selection(4, 1))
+    cd(main_directory);
+    
+    sizeheader = 1;
+    if(plot_selection{4, 1})
         if exist(xlfilename, 'file')
             delete(xlfilename);
         end
-        sizeheader = writeheader(files, xlfilename, topdir);
+        sizeheader = writeheader(files, xlfilename, main_directory);
     end
         
-    htmlfile = [topdir excel_name '.html'];
+    htmlfile = [main_directory excel_name '.html'];
     if exist(htmlfile)
         delete(htmlfile);
     end
@@ -153,12 +178,11 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
     fprintf(fid, '<html>\n');
     fprintf(fid, '<a name="Contents"><b>Contents:</b></a>\n<br/>');
     for b=1: size(files, 1);
-        [pathname, filename_root, ext] = fileparts(files(b,:));
+        [~, filename_root, ~] = fileparts(files(b,:));
         fprintf(fid, '<a href="#%s">%s</a><br/>\n', filename_root, filename_root);
     end
     fclose(fid);
-    xlfilename = [topdir excel_name];
-
+    xlfilename = [main_directory excel_name];
 
     % beads in files, sequences availiable in Selector
     checkbxs = [0, 0];
@@ -167,15 +191,14 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
     % all individual sequences 
     inseqs = [];
     
-    
     adjust = cell(size(files,1), 3);
     
     for b=1:(size(files,1))
         % analyze all data
         if(nargin<2)
-            temp = dmbr_report_cell_expt(strtrim(files(b,:)), [topdir excel_name], topdir, sizeheader, plot_selection);
+            temp = dmbr_report_cell_expt(strtrim(files(b,:)), [main_directory excel_name], main_directory, sizeheader, plot_selection);
         else
-            temp = dmbr_report_cell_expt(strtrim(files(b,:)), [topdir excel_name], topdir, sizeheader, plot_selection, seq_array);
+            temp = dmbr_report_cell_expt(strtrim(files(b,:)), [main_directory excel_name], main_directory, sizeheader, plot_selection, seq_array);
         end
         bxs = temp{1};
        
@@ -202,8 +225,8 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
         end
     end
     
-    if(plot_selection(4, 1))
-        excel_analysis(inseqs, reportbxs, xlfilename, sizeheader);
+    if(plot_selection{4, 1})
+        excel_analysis(inseqs, reportbxs, xlfilename, sizeheader, plot_selection{7, 1});
     end
 
     fid = fopen(htmlfile, 'a+');
@@ -216,13 +239,12 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
     
 %    cd(topir);
     outfile = [excel_name '.seqdat.txt'];
-    if(exist(outfile))
+    if(exist(outfile, 'file'))
         delete outfile;
     end
     fid = fopen(outfile, 'w');
 %    fprintf(fid, '%d\n', checkbxs(1, 2));
     for w=1:size(adjust, 1)
-        str = '';
         str = repmat(' %d', 1, adjust{w,2}+2);
         str = strcat('%s\n', str, '\n');
         fprintf(fid, str, adjust{w,1:adjust{w,2}+3});
@@ -230,16 +252,24 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
     fclose('all');
     
     out = htmlfile;
-    dmbr_adjust_report(excel_name, topdir);
+    dmbr_adjust_report(excel_name, main_directory);
     
     return
 end
 
 
-function excel_analysis(inseqs, bxs, xlfilename, header)
+function excel_analysis(inseqs, bxs, xlfilename, header, fit_type)
 % Creates and writes the excel analysis footer/sidebar, including averages,
 % counts, SEMs, std devs, and G ratios.
-
+    numvars = 0;
+    if(strcmp(fit_type, 'Jeffrey'))
+        numvars = 4;
+    elseif(strcmp(fit_type, 'Power Law (Fabry)'))
+        numvars = 3;
+    else
+        return;
+    end
+            
     numcols = 4;
     % G ratio sidebar
     sidebar = cell(bxs(1,1)+1, bxs(1,2)-1);
@@ -249,19 +279,19 @@ function excel_analysis(inseqs, bxs, xlfilename, header)
     first = excel_column(numcols+1);
     for b=1:bxs(1,1)
         for c=2:(inseqs(b))
-            column = excel_column(numcols+4*(c-1)+1);
+            column = excel_column(numcols+numvars*(c-1)+1);
             sidebar(b+1,c-1) = cellstr(strcat('=', column, num2str(header+(b)+1), '/', first, num2str(header+(b)+1)));
         end
     end
     
     % Footer
-    footer = cell(4, numcols+5*bxs(1,2));
+    footer = cell(4, numcols+(numvars+1)*bxs(1,2));
     footer(1, 1) = cellstr('average:');
     footer(2, 1) = cellstr('count:');
     footer(3, 1) = cellstr('deviation:');
     footer(4, 1) = cellstr('SEM:');
     for b=(numcols+1):length(footer)
-        if(b==(numcols+1)+4*bxs(1,2))
+        if(b==(numcols+1)+numvars*bxs(1,2))
             continue;
         end
         column = excel_column(b);
@@ -271,7 +301,7 @@ function excel_analysis(inseqs, bxs, xlfilename, header)
         footer(4, b) = cellstr(strcat('=', column, num2str(bxs(1, 1)+header+5), '/SQRT(', column, num2str(bxs(1, 1)+header+4), ')'));
     end
     
-    column = excel_column(4*(bxs(1,2))+2+numcols);
+    column = excel_column(numvars*(bxs(1,2))+2+numcols);
     
     
     % Write results
@@ -358,7 +388,6 @@ function num = writeheader(files, filepath, topdir)
     
     files = cellstr(files);
     for b=1:size(files,1)
-        files(b)
         [fpath, fname, dext] = fileparts(char(files(b)));
         fpath = strcat(fpath, filesep, 'expdata.txt');
         files(b) = cellstr(fpath);
@@ -398,12 +427,14 @@ end
 function selection = report_gui()
 %
 % Displays a checkbox GUI that allows the user to select analysis
-% parameters, including displacement, compliance, compliance fit, Excel
+% parameters, including plot type, displacement, compliance, compliance fit, Excel
 % generation, and FPS addition. Easily expandable. Returns an ordered array
 % of the user's choices.
 %
 
 selection = [];
+
+chosen_plot = cellstr('Jeffrey');
 
 % Create GUI figure
 h.f = figure('units','pixels','position',[400,400,350,200], 'toolbar','none','menu','none', 'Name', 'Plot Selector');
@@ -412,6 +443,7 @@ h.f = figure('units','pixels','position',[400,400,350,200], 'toolbar','none','me
 h.panel=uipanel(h.f, 'Units', 'pixels', 'Position',[0 105 1260 1]);
 
 % Checkboxes
+h.c(7) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [190, 140, 150, 15], 'string', 'Check for Breakpoints');
 h.c(6) = uicontrol('style', 'edit', 'units','pixels', 'position', [85, 47, 50, 20]);
 h.c(5) = uicontrol('Value', 0, 'style','checkbox','units','pixels', 'position', [15, 50, 65, 15], 'string', 'Set FPS:');
 h.c(4) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 75, 200, 15], 'string', 'Generate Excel Spreadsheet');
@@ -419,26 +451,39 @@ h.c(3) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', 
 h.c(2) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 145, 150, 15], 'string', 'Plot Compliance');
 h.c(1) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 170, 150, 15], 'string', 'Plot Displacement');
 
+h.plot(1) = uicontrol( 'style', 'popupmenu', 'String', {'Jeffrey', 'Power Law (Fabry)'},... 'Newtonian', 'Maxwell', 'Kelvin-Voight', 'Stretched Exponential', 'KE model #1', 'Power Law',
+                    'position', [190, 170, 150, 15], 'callback', @plot_call);
+
 % Create Compute and Cancel pushbuttons 
 h.submit = uicontrol('style','pushbutton','units','pixels', 'position',[15,15,70,20],'string','Compute','callback',@p_call);
 h.cancel = uicontrol('style','pushbutton','units','pixels', 'position',[100,15,70,20],'string','Cancel','callback',@p_cancel);
 
 uiwait(h.f);
 
+    %%%%%
+    function plot_call(varargin)
+        contents = get(h.plot,'String');
+        index = get(h.plot, 'Value');
+        chosen_plot = contents(index);
+    %%%%%
+    end
     % Compute callback
     function p_call(varargin)
         checked = get(h.c,'Value');
         checked{6} = str2num(get(h.c(6), 'String'));
-        close(h.f);
-        selection = cell2mat(checked);
+        checked{8} = chosen_plot;
+        selection = checked;
+        close(gcf);
+        pause(0.1);
+        return;
     end
 
     % Cancel callback
     function p_cancel(varargin)
-        checked = get(h.c,'Value');
-        selection = cell2mat(checked);
-        close(h.f);
-        selection(1) = -1;
+        selection{1} = -1;
+        close(gcf);
+        pause(0.1);
+        return;
     end
 end
 
@@ -451,7 +496,7 @@ function logentry(txt)
                    num2str(logtime(4),        '%02i') ':' ...
                    num2str(logtime(5),        '%02i') ':' ...
                    num2str(round(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext 'dmbr_init: '];
+     headertext = [logtimetext 'dmbr_multi_file_report: '];
      
      fprintf('%s%s\n', headertext, txt);
      
@@ -464,16 +509,35 @@ function time_selected = get_sequence_break(table)
 
     varforce_constants;
 
-        h = figure;
-        set(h, 'Units', 'Normalized');
-        hpos = get(h, 'Position');
-        set(h, 'Position', [0.4 0.55 hpos(3:4)]);        
-        plot(table(:,TIME), magnitude(table(:,X:Y)), '.');
-        title('Use figure toolbox, press key, and click mouse on break-point.');
-        drawnow;
-        pause;
+    h = figure;
+    
+    set(h, 'Units', 'Normalized');
+    hpos = get(h, 'Position');
+    set(h, 'Position', [0.4 0.55 hpos(3:4)]);
 
+    x = table(:,X);
+    y = table(:, Y);       
+    radial = magnitude(x, y);
+
+
+    plot(table(:,TIME), -radial, '.');
+    set(gca,'YTick',[]);
+ 
+    title({'Use figure toolbox, press key, and click mouse on break-point.';'Data is right-side-up. Press 0 to skip this file.'});
+    
+    pause;
+    p = get(h, 'currentcharacter');
+    if(strcmp(p, '0') || strcmp(p, 'numpad0'))
+        check = questdlg('Are you sure you want to remove this file from the analysis?', 'Remove File');
+        if(strcmp(check, 'Yes'))
+            time_selected = NaN;
+            close(h);
+            return;
+        end
+    end
+    
     logentry('Click once on the figure to identify a break between pulse sequences.');
+    
     [tm,xm] = ginput(1);
 
         close(h);
@@ -488,10 +552,15 @@ function time_selected = get_sequence_break(table)
     dist = sqrt((t - tval).^2 + (x - xval).^2);
 
     time_selected = t(find(dist == min(dist)));
+    
+    
+
+    
 
     return;
 
 end
+
 
 % finds a matching tracking file in the current directory
 

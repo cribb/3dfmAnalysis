@@ -1,4 +1,4 @@
-function rheo = dmbr_report_cell_expt(filename, excel_name, figfolder, headerheight, plot_select, seq_array, report_params)
+function rheo = dmbr_report_cell_expt(filename, excel_name, main_directory, headerheight, plot_select, seq_array, report_params)
 %
 % Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
 % dmbr_report_cell_expt.m
@@ -40,22 +40,30 @@ if(nargin < 2)
     excel_name = filename_root;
 end
 
-[junk, excel_root, ext] = fileparts(excel_name);
-topdir = figfolder;
-figfolder = strcat(figfolder, excel_root, '_html_images');
-figures = [excel_root '_html_images'];
-
 if(nargin < 3)
     figfolder = [excel_name '_html_images'];
+    main_directory = [pwd filesep];
 end
+
+[~, excel_root, ~] = fileparts(excel_name);
+figfolder = strcat(main_directory, excel_root, '_html_images');
+local_figures = [excel_root '_html_images'];
+
+
 if(nargin < 4)
-    headerheight = 0;
+    headerheight = 1;
 end
 if(nargin < 5)
-    plot_select(1:6) = 1;
-    plot_select(3) = 0;
-    plot_select(5) = 0;
+    plot_select = cell(8,1);
+    plot_select(1:8,1) = {1};
+    plot_select(3,1) = {0};
+    plot_select(5,1) = {0};
+    plot_select(8,1) = cellstr('Power Law (Fabry)');
 end
+fit_type = plot_select{8};
+fit_type = fit_type{:};
+
+plot_select = cell2mat(plot_select(1:6,1));
 
 specific_seqs = 0;
 if(nargin > 5)
@@ -130,7 +138,7 @@ input_params.calibfile = calibfile;
 input_params.poleloc = p;
 input_params.force_type = 'disp';
 input_params.tau = 6.25;
-input_params.fit_type = 'Jeffrey';
+input_params.fit_type = fit_type;
 input_params.scale = 0.5;
 
 
@@ -183,6 +191,7 @@ for b = 1 : length(beads)
     ystart = 0;
     Jstart = 0;
     Jlast = 0;
+    
     for s = 1 : length(seqs)
         % Sequence index
         index = length(seqs)*(b-1) + s;
@@ -383,10 +392,18 @@ for b = 1 : length(beads)
             tcont = vertcat(gaps(3,2), tcont);
             
             idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(1));
-            G = rheo.G(idx);
-            eta1 = rheo.eta(idx, 1);
-            eta2 = rheo.eta(idx, 2);
-            fit = (1/G + (tcont-ti1)/eta2 - 1/G*exp(-G*(tcont-ti1)/eta1)).*(heavi(tcont,ti1)') - (1/G + (tcont-ti2)/eta2 - 1/G*exp(-G*(tcont-ti2)/eta1)).*(heavi(tcont,ti2)');
+            switch fit_type
+                case 'Jeffrey'
+                    G = rheo.G(idx);
+                    eta1 = rheo.eta(idx, 1);
+                    eta2 = rheo.eta(idx, 2);
+                    fit = (1/G + (tcont-ti1)/eta2 - 1/G*exp(-G*(tcont-ti1)/eta1)).*(heavi(tcont,ti1)') - (1/G + (tcont-ti2)/eta2 - 1/G*exp(-G*(tcont-ti2)/eta1)).*(heavi(tcont,ti2)');
+                case 'Power Law (Fabry)'
+                    G = rheo.G(idx);
+                    beta = rheo.eta(idx);
+                    fit = ((1/G).*(tcont-ti1).^beta).*(heavi(tcont, ti1)') - ((1/G).*(tcont-ti2).^beta).*(heavi(tcont, ti2)');
+            end
+            
             ti1 = ti1 + sum(pulses);
             ti2 = ti2 + sum(pulses);
             fit = fit + fitc;
@@ -399,10 +416,11 @@ for b = 1 : length(beads)
             % scale all cumulative plots by the maximum number of sequences in
             % their bead
             xlim([0 length(seqs)*sum(pulses)]);
-            plot(tcont,fit, 'Color', [0 0 s/(length(seqs)+1)]);
+            plot(tcont, fit, 'Color', [0 0 s/(length(seqs)+1)]);
             xlim([0 length(seqs)*sum(pulses)]);
             plot(tcont,Jx, 'Color', [s/(length(seqs)+1) 0 0]);
-            title([vidID ': Compliance of Jeffrey model, bead ' num2str(beads(b))]);
+%            plot(dt, bobbafit+5, 'Color', [0 0 0]);
+            title([vidID ': Compliance of ' fit_type ' model, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('compliance [Pa^{-1}]');
             pretty_plot;
@@ -510,6 +528,7 @@ rowsused = 0;
 
 if info
 
+    
     fprintf(fid, '<br/>');
 
     % Table 1: Identifying information
@@ -549,48 +568,94 @@ if info
         fprintf(fid, '<table border="2" cellpadding="6"> \n');
         fprintf(fid, '<tr> \n');
         fprintf(fid, '<td><b>Summary<br/>of Results</b></td> \n');
-        for s = 1 : maxseqs
-            fprintf(fid, '   <td align="center" colspan="4"><b>Sequence #%d</b> </td> \n', s);
-        end
-        fprintf(fid, '</tr> \n');
-        fprintf(fid, '   <td align="center"><b>Tracker ID</b> </td> \n');
-        for s = 1 : maxseqs
-            fprintf(fid, '   <td align="center"><b>G</b> </td> \n');
-            fprintf(fid, '   <td align="center"><b>Eta1</b> </td> \n');
-            fprintf(fid, '   <td align="center"><b>Eta2</b> </td> \n');
-            fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
-        end
-        fprintf(fid, '</tr> \n\n');
-
-        printed = 1;
-        for b = 1 : length(beads)    
-            if(printed) fprintf(fid, '<tr> \n'); end
-            if(plots(b))
-                fprintf(fid, '<td align="center"> %i </td> \n', b);  
-            end
-            printed = 0;
-            for s = 1 : maxseqs
-                index = length(seqs)*(b-1) + s;
-                idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
-                if(specific_seqs && index > length(seq_array))
-                    break;
+        switch fit_type
+            case 'Power Law (Fabry)'
+                numvars = 3;
+                for s = 1 : maxseqs
+                    fprintf(fid, '   <td align="center" colspan="3"><b>Sequence #%d</b> </td> \n', s);
                 end
-                if(specific_seqs && (~seq_array{index}))  || isnan(rheo.G(idx))
-                    break;
-                end
-                printed = 1;
-                % G for this bead sequence
-                fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.G(idx));
-                % eta1 for this bead/sequence
-                fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx, 1));
-                % eta2 for this bead/sequence
-                fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx, 2));
-                % R^2
-                fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
-            end
-            if(printed)
                 fprintf(fid, '</tr> \n');
-            end
+                fprintf(fid, '   <td align="center"><b>Tracker ID</b> </td> \n');
+                for s = 1 : maxseqs
+                    fprintf(fid, '   <td align="center"><b>G</b> </td> \n');
+                    fprintf(fid, '   <td align="center"><b>beta</b> </td> \n');
+                    fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
+                end
+                fprintf(fid, '</tr> \n\n');
+
+                printed = 1;
+                for b = 1 : length(beads)    
+                    if(printed) fprintf(fid, '<tr> \n'); end
+                    if(plots(b))
+                        fprintf(fid, '<td align="center"> %i </td> \n', b);  
+                    end
+                    printed = 0;
+                    for s = 1 : maxseqs
+                        index = length(seqs)*(b-1) + s;
+                        idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
+                        if(specific_seqs && index > length(seq_array))
+                            break;
+                        end
+                        if(specific_seqs && (~seq_array{index}))  || isnan(rheo.G(idx))
+                            break;
+                        end
+                        printed = 1;
+                        % G for this bead sequence
+                        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.G(idx));
+                        % beta for this bead/sequence
+                        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx));
+                        % R^2
+                        fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
+                    end
+                    if(printed)
+                        fprintf(fid, '</tr> \n');
+                    end
+                end
+            case 'Jeffrey'
+                numvars = 4;
+                for s = 1 : maxseqs
+                    fprintf(fid, '   <td align="center" colspan="4"><b>Sequence #%d</b> </td> \n', s);
+                end
+                fprintf(fid, '</tr> \n');
+                fprintf(fid, '   <td align="center"><b>Tracker ID</b> </td> \n');
+                for s = 1 : maxseqs
+                    fprintf(fid, '   <td align="center"><b>G</b> </td> \n');
+                    fprintf(fid, '   <td align="center"><b>eta1</b> </td> \n');
+                    fprintf(fid, '   <td align="center"><b>eta2</b> </td> \n');
+                    fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
+                end
+                fprintf(fid, '</tr> \n\n');
+
+                printed = 1;
+                for b = 1 : length(beads)    
+                    if(printed) fprintf(fid, '<tr> \n'); end
+                    if(plots(b))
+                        fprintf(fid, '<td align="center"> %i </td> \n', b);  
+                    end
+                    printed = 0;
+                    for s = 1 : maxseqs
+                        index = length(seqs)*(b-1) + s;
+                        idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
+                        if(specific_seqs && index > length(seq_array))
+                            break;
+                        end
+                        if(specific_seqs && (~seq_array{index}))  || isnan(rheo.G(idx))
+                            break;
+                        end
+                        printed = 1;
+                        % G for this bead sequence
+                        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.G(idx));
+                        % eta1 for this bead/sequence
+                        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx, 1));
+                        % eta2 for this bead/sequence
+                        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx, 2));
+                        % R^2
+                        fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
+                    end
+                    if(printed)
+                        fprintf(fid, '</tr> \n');
+                    end
+                end
         end
         fprintf(fid, '</table> \n\n');
 
@@ -603,11 +668,11 @@ if info
         if(~plots(b))
             continue;
         end
-        txFigfilename   = [figures filesep filename_root '.txFig.bead'  num2str(beads(b)) '.png'];
-        txcFigfilename   = [figures filesep filename_root '.txcFig.bead'  num2str(beads(b)) '.png'];
-        tJxFigfilename  = [figures filesep filename_root '.tJxFig.bead' num2str(beads(b)) '.png'];
-        tJxcFigfilename   = [figures filesep filename_root '.tJxcFig.bead'  num2str(beads(b)) '.png'];
-        tJxcfFigfilename = [figures filesep filename_root '.tJxcfFig.bead' num2str(beads(b)) '.png']; 
+        txFigfilename   = [local_figures filesep filename_root '.txFig.bead'  num2str(beads(b)) '.png'];
+        txcFigfilename   = [local_figures filesep filename_root '.txcFig.bead'  num2str(beads(b)) '.png'];
+        tJxFigfilename  = [local_figures filesep filename_root '.tJxFig.bead' num2str(beads(b)) '.png'];
+        tJxcFigfilename   = [local_figures filesep filename_root '.tJxcFig.bead'  num2str(beads(b)) '.png'];
+        tJxcfFigfilename = [local_figures filesep filename_root '.tJxcfFig.bead' num2str(beads(b)) '.png']; 
         
         if(plot_select(1, 1))
             fprintf(fid, '<img src= "%s" border=2 > \t', txFigfilename);
@@ -639,16 +704,16 @@ if info
     % Image of pole tip
     poleimage = [filename_root, '.MIP.bmp'];
     if(exist(poleimage, 'file'))
-        copyfile(poleimage,[topdir figures filesep poleimage]);
+        copyfile(poleimage,[figfolder filesep poleimage]);
     end
     % Video screenshot
     vidID = ['vid' num2str(sscanf(filename_root, 'vid%f'))];
     scrnshot = [vidID, '.png'];
     if(exist(scrnshot, 'file'))
-        crop(scrnshot, 1, [topdir figures], 0);
+        crop(scrnshot, 1, [figfolder], 0);
     end
-    scrnshot = [topdir figures filesep vidID '_crop.png'];
-    cd(topdir);
+    scrnshot = [figfolder filesep vidID '_crop.png'];
+    cd(main_directory);
     
     fprintf(fid, '<img src= "%s" width=520 height=400 border=2> \n', poleimage);
     fprintf(fid, '<img src= "%s" width=520 height=400 border=2> \n', scrnshot);
@@ -659,7 +724,6 @@ if info
 %%%%%%%%%%%%%%%%% Printing to Excel Spreadsheet %%%%%%%%%%%%%%%%%
     if(plot_select(4, 1))
     % data matrix
-        data = cell(length(beads),4*maxseqs);
         % initial columns
         numcol = 4;
         videocolumn = cell(length(beads), 1);
@@ -667,50 +731,80 @@ if info
         voltagecolumn = cell(length(beads), 1);
         sequencecolumn = cell(length(beads), 1);
 
-
-        % fill initial columns
         for b = 1:length(beads)
             videocolumn(b, 1) = cellstr(filename_root);
             beadcolumn(b, 1) = cellstr(num2str(b));
             voltagecolumn(b, 1) = cellstr(num2str(voltages(1)));
             sequencecolumn(b, 1) = cellstr(num2str(inseqs(b)));
         end
-        % fill data
-        for b = 1 : length(beads)
-            for s = 1 : length(seqs)
-                index = length(seqs)*(b-1) + s;
-                idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
-
-                if(specific_seqs && index > length(seq_array))
-                    break;
+        data = 0;
+        header = 0; 
+        
+        if strcmp(fit_type, 'Jeffrey');
+            numvars = 4;
+            data = cell(length(beads),numvars*maxseqs);
+            header = cell(2, maxseqs*numvars+numcol);
+            % fill data
+            for b = 1 : length(beads)
+                for s = 1 : length(seqs)
+                    index = length(seqs)*(b-1) + s;
+                    idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
+                    if(specific_seqs && index > length(seq_array))
+                        break;
+                    end
+                    if(specific_seqs && ~seq_array{index}) || isnan(rheo.G(idx))
+                        break;
+                    end
+                    data(b, (4*s-numvars+1)) = cellstr(num2str(rheo.G(idx)));
+                    data(b, (4*s-numvars+2)) = cellstr(num2str(rheo.eta(idx, 1)));
+                    data(b, (4*s-numvars+3)) = cellstr(num2str(rheo.eta(idx, 2)));
+                    data(b, (4*s-numvars+4)) = cellstr(num2str(rheo.Rsquare(idx)));
                 end
-                if(specific_seqs && ~seq_array{index}) || isnan(rheo.G(idx))
-                    break;
+            end
+            % create data header
+            for b = 1:maxseqs
+                header(1, 4*b+numvars-3) = cellstr(['Pull', num2str(b)]);
+                header(2, 4*b+numvars-3) = cellstr('G');
+                header(2, 4*b+numvars-2) = cellstr('eta1');
+                header(2, 4*b+numvars-1) = cellstr('eta2');
+                header(2, 4*b+numvars-0) = cellstr('R^2');
+            end
+            
+        elseif strcmp(fit_type, 'Power Law (Fabry)')
+            numvars = 3;
+            data = cell(length(beads),numvars*maxseqs);
+            header = cell(2, maxseqs*numvars+numcol);
+            % fill data
+            for b = 1 : length(beads)
+                for s = 1 : length(seqs)
+                    index = length(seqs)*(b-1) + s;
+                    idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
+                    if(specific_seqs && index > length(seq_array))
+                        break;
+                    end
+                    if(specific_seqs && ~seq_array{index}) || isnan(rheo.G(idx))
+                        break;
+                    end
+                    data(b, (numvars*s-numcol+2)) = cellstr(num2str(rheo.G(idx)));
+                    data(b, (numvars*s-numcol+3)) = cellstr(num2str(rheo.eta(idx)));
+                    data(b, (numvars*s-numcol+4)) = cellstr(num2str(rheo.Rsquare(idx)));
                 end
-
-                data(b, (4*s-numcol+1)) = cellstr(num2str(rheo.G(idx)));
-                data(b, (4*s-numcol+2)) = cellstr(num2str(rheo.eta(idx, 1)));
-                data(b, (4*s-numcol+3)) = cellstr(num2str(rheo.eta(idx, 2)));
-                data(b, (4*s-numcol+4)) = cellstr(num2str(rheo.Rsquare(idx)));
+            end
+            % create data header
+            for b = 1:maxseqs
+                header(1, numvars*b+numcol-2) = cellstr(['Pull', num2str(b)]);
+                header(2, numvars*b+numcol-2) = cellstr('G');
+                header(2, numvars*b+numcol-1) = cellstr('beta');
+                header(2, numvars*b+numcol-0) = cellstr('R^2');
             end
         end
-
-        % concatenate tables
-        results = [videocolumn, beadcolumn, voltagecolumn, sequencecolumn, data];
-        % create data header
-        header = cell(2, maxseqs*4+numcol);
+        
         header(2, 1) = cellstr('video file');
         header(2, 2) = cellstr('bead id');
         header(2, 3) = cellstr('voltage');
-        header(2, 4) = cellstr('sequences');
-        for b = 1:maxseqs
-            header(1, 4*b+numcol-3) = cellstr(['Pull', num2str(b)]);
-            header(2, 4*b+numcol-3) = cellstr('G');
-            header(2, 4*b+numcol-2) = cellstr('eta1');
-            header(2, 4*b+numcol-1) = cellstr('eta2');
-            header(2, 4*b+numcol-0) = cellstr('R^2');
-        end
-
+        header(2, 4) = cellstr('sequences');        
+        % concatenate tables
+        results = [videocolumn, beadcolumn, voltagecolumn, sequencecolumn, data];
         % Delete empty rows
         rowsused = 0;
         for b=1:length(beads)
@@ -722,7 +816,7 @@ if info
         end
 
         xlfilename = strcat(excel_name, '.xlsx');
-        cd(topdir);
+        cd(main_directory);
         if ~exist(xlfilename, 'file')
             results = vertcat(header, results);
             xlswrite(xlfilename, results);
