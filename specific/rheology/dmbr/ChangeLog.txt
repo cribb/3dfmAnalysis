@@ -1,4 +1,7 @@
 2012-08-12 Christian Stith <chstith@ncsu.edu>
+	* dmbr_multi_file_report.m: added filtering functionality to initial file selection process.
+
+2012-08-12 Christian Stith <chstith@ncsu.edu>
 	* dmbr_adjust_report.m: updated to remove deselected files and beads. improved figure closing.
 	* dmbr_analysis_gui.fig: added Power Law (Fabry) model.
 	* dmbr_fit.m: added Power Law (Fabry) model.

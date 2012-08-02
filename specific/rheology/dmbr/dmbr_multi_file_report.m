@@ -1,4 +1,4 @@
-function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
+function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_ext)
 %
 % Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
 % dmbr_multi_file_report.m
@@ -22,8 +22,12 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array)
 %   dmbr_multi_file_report('DataAnalysis')
 %
 
-    if(nargin<2)
-        filelist = full_list(uipickfiles());
+
+    if nargin<2
+        filelist = full_list(uipickfiles('FilterSpec', '*.vfd.mat'));
+    elseif(nargin<3)
+        filter_ext = seq_array;
+        filelist = full_list(uipickfiles('FilterSpec', filter_ext));
     else
         filelist = file_array;
     end
