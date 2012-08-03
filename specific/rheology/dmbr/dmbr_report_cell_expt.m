@@ -178,7 +178,18 @@ vidID = ['vid' num2str(sscanf(filename_root, 'vid%f'))];
 % Stores the number of sequences used on each bead
 inseqs = zeros(length(beads),1);
 
+
+
 for b = 1 : length(beads)
+    
+    colorindex = length(seqs)*(b-1)+1;
+    pcolor = length(seqs)+1;
+    if(specific_seqs)
+        temp_c = find(cell2mat(seq_array(colorindex:end))==0, 1, 'first');
+        if ~isnan(temp_c)
+            pcolor = min(pcolor, temp_c);
+        end
+    end
     
     % Assume bead is needed
     plots(b) = 1;
@@ -193,6 +204,17 @@ for b = 1 : length(beads)
     Jlast = 0;
     
     for s = 1 : length(seqs)
+        
+        plot_color = 0;
+        switch pcolor
+            case 1
+                plot_color = 0;
+            case 2
+                plot_color = 1;
+            otherwise
+                plot_color = (s-1)/(pcolor-2);
+        end
+        
         % Sequence index
         index = length(seqs)*(b-1) + s;
         % Check if sequence/bead is not needed (box not checked in Sequence Selector) (See dmbr_adjust_report)
@@ -267,7 +289,8 @@ for b = 1 : length(beads)
             
             figure(txFig);
             hold on;
-            plot(t,radialdiff*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
+            plot(t,radialdiff*1e6, 'Color', [0 plot_color 0]);
+
             title([vidID ': Radial displacement stack, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('displacement [\mum]');
@@ -277,7 +300,7 @@ for b = 1 : length(beads)
 
             figure(txFig2); 
             hold on;
-            plot(t,radialdiff*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
+            plot(t,radialdiff*1e6, 'Color', [0 plot_color 0]);
             title([vidID ': Radial displacement stack, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('displacement [\mum]');
@@ -296,8 +319,7 @@ for b = 1 : length(beads)
             % scale all cumulative plots by the maximum number of sequences in
             % their bead
             xlim([0 length(seqs)*sum(pulses)]);
-            plot(tcont,radial*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
-            %line([tcont(end) tcont(end)],[radial(1)*1e6 radial(end)*1e6],'Color', [1 0 0], 'LineWidth', 1);
+            plot(tcont,radial*1e6, 'Color', [0 plot_color 0]);
             title([vidID ': Radial displacement, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('displacement [\mum]');
@@ -307,7 +329,7 @@ for b = 1 : length(beads)
 
             figure(txcFig2); 
             hold on;
-            plot(tcont,radial*1e6, 'Color', [0 s/(length(seqs)+1) 0]);
+            plot(tcont,radial*1e6, 'Color', [0 plot_color 0]);
             title([vidID ': Radial displacement, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('displacement [\mum]');
@@ -330,7 +352,7 @@ for b = 1 : length(beads)
             % compliance vs. time plot: stacked
             figure(tJxFig); 
             hold on;
-            plot(t,Jxdiff, 'Color', [s/(length(seqs)+1) 0 0]);
+            plot(t,Jxdiff, 'Color', [plot_color 0 0]);
             title([vidID ': Compliance stack, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('compliance [Pa^{-1}]');
@@ -340,7 +362,7 @@ for b = 1 : length(beads)
 
             figure(tJxFig2); 
             hold on;
-            plot(t,Jxdiff, 'Color', [s/(length(seqs)+1) 0 0]);
+            plot(t,Jxdiff, 'Color', [plot_color 0 0]);
             title([vidID ': Compliance stack, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('compliance [Pa^{-1}]');
@@ -359,7 +381,7 @@ for b = 1 : length(beads)
             % scale all cumulative plots by the maximum number of sequences in
             % their bead
             xlim([0 length(seqs)*sum(pulses)]);
-            plot(tcont, Jx, 'Color', [s/(length(seqs)+1) 0 0]);
+            plot(tcont, Jx, 'Color', [plot_color 0 0]);
             title([vidID ': Compliance, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('compliance [Pa^{-1}]');
@@ -369,7 +391,7 @@ for b = 1 : length(beads)
 
             figure(tJxcFig2); 
             hold on;
-            plot(tcont,Jx, 'Color', [s/(length(seqs)+1) 0 0]);
+            plot(tcont,Jx, 'Color', [plot_color 0 0]);
             title([vidID ': Compliance, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('compliance [Pa^{-1}]');
@@ -377,9 +399,7 @@ for b = 1 : length(beads)
             hold off;
             drawnow;
             
-            tcont(1) = [];
-            Jx(1) = [];
-            gaps(2, 1:2) = [Jx(end), tcont(end)];
+
 
         end
         % Fit plot (Jeffrey)
@@ -416,10 +436,9 @@ for b = 1 : length(beads)
             % scale all cumulative plots by the maximum number of sequences in
             % their bead
             xlim([0 length(seqs)*sum(pulses)]);
-            plot(tcont, fit, 'Color', [0 0 s/(length(seqs)+1)]);
+            plot(tcont, fit, 'Color', [0 0 1]);
             xlim([0 length(seqs)*sum(pulses)]);
-            plot(tcont,Jx, 'Color', [s/(length(seqs)+1) 0 0]);
-%            plot(dt, bobbafit+5, 'Color', [0 0 0]);
+            plot(tcont,Jx, 'Color', [plot_color 0 0]);
             title([vidID ': Compliance of ' fit_type ' model, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('compliance [Pa^{-1}]');
@@ -431,13 +450,19 @@ for b = 1 : length(beads)
             
             figure(tJxcfFig2); 
             hold on;
-            plot(tcont,Jx, 'Color', [s/(length(seqs)+1) 0 0]);
-            title([vidID ': Compliance, bead ' num2str(beads(b))]);
+            plot(tcont, fit, 'Color', [0 0 1]);
+            xlim([0 length(seqs)*sum(pulses)]);
+            plot(tcont,Jx, 'Color', [plot_color 0 0]);
+            title([vidID ': Compliance of ' fit_type ' model, bead ' num2str(beads(b))]);
             xlabel('time [s]');
             ylabel('compliance [Pa^{-1}]');
             pretty_plot;
             hold off;
             drawnow;
+            
+            tcont(1) = [];
+            Jx(1) = [];
+            gaps(2, 1:2) = [Jx(end), tcont(end)];
             
             gaps(3, 1:2) = [fit(end), tcont(end)];
             fitc = gaps(3, 1);
@@ -454,18 +479,18 @@ for b = 1 : length(beads)
     if(plots(b))
         
         
-        txFigfilename   = [figfolder filename_root '.txFig.bead'  num2str(beads(b)) '.png'];
-        txFigfilename2  = [figfolder filename_root '.txFig.bead'  num2str(beads(b)) '.fig'];
-        txcFigfilename  = [figfolder filename_root '.txcFig.bead'  num2str(beads(b)) '.png'];
-        txcFigfilename2  = [figfolder filename_root '.txcFig.bead'  num2str(beads(b)) '.fig'];
+        txFigfilename   = [figfolder filename_root '.disp_stack.bead'  num2str(beads(b)) '.png'];
+        txFigfilename2  = [figfolder filename_root '.disp_stack.bead'  num2str(beads(b)) '.fig'];
+        txcFigfilename  = [figfolder filename_root '.disp_seq.bead'  num2str(beads(b)) '.png'];
+        txcFigfilename2  = [figfolder filename_root '.disp_seq.bead'  num2str(beads(b)) '.fig'];
 
-        tJxFigfilename  = [figfolder filename_root '.tJxFig.bead' num2str(beads(b)) '.png'];
-        tJxFigfilename2  = [figfolder filename_root '.tJxFig.bead' num2str(beads(b)) '.fig'];
-        tJxcFigfilename  = [figfolder filename_root '.tJxcFig.bead' num2str(beads(b)) '.png'];
-        tJxcFigfilename2  = [figfolder filename_root '.tJxcFig.bead' num2str(beads(b)) '.fig'];
+        tJxFigfilename  = [figfolder filename_root '.comp_stack.bead' num2str(beads(b)) '.png'];
+        tJxFigfilename2  = [figfolder filename_root '.comp_stack.bead' num2str(beads(b)) '.fig'];
+        tJxcFigfilename  = [figfolder filename_root '.comp_seq.bead' num2str(beads(b)) '.png'];
+        tJxcFigfilename2  = [figfolder filename_root '.comp_seq.bead' num2str(beads(b)) '.fig'];
         
-        tJxcfFigfilename  = [figfolder filename_root '.tJxcfFig.bead' num2str(beads(b)) '.png'];
-        tJxcfFigfilename2  = [figfolder filename_root '.tJxcfFig.bead' num2str(beads(b)) '.fig'];
+        tJxcfFigfilename  = [figfolder filename_root '.comp_seq_fit.bead' num2str(beads(b)) '.png'];
+        tJxcfFigfilename2  = [figfolder filename_root '.comp_seq_fit.bead' num2str(beads(b)) '.fig'];
         
         
 
@@ -512,7 +537,7 @@ fid = fopen(outfile, 'a+');
 nametag = filename_root;
 % HTML section header
 fprintf(fid, '<hr>\n');
-fprintf(fid, '<a name="%s"><b>Sample Name:</b>%s</a><br/>', filename_root, nametag);
+fprintf(fid, '<a name="%s"><h2>%s</h2></a><br/>', filename_root, nametag);
 fprintf(fid, ' <b>Path:</b>  %s <br/>\n', pathname);
 fprintf(fid, '<a href="#Contents">Back to Top</a></p>\n');
 
@@ -529,34 +554,18 @@ rowsused = 0;
 if info
 
     
-    fprintf(fid, '<br/>');
 
     % Table 1: Identifying information
     fprintf(fid, '<b>General Parameters</b><br/>\n');
     fprintf(fid, '<table border="2" cellpadding="6"> \n');
     fprintf(fid, '<tr> \n');
-    fprintf(fid, ' <td align="left"><b>File:</b>	%s </td> \n', filename_root);
-    fprintf(fid, ' <td align="left"><b>Pulse Voltages (V):</b>	[%s] </td> \n', num2str(voltages));
-    fprintf(fid, '</tr> \n');
-    fprintf(fid, '<tr> \n');
-    fprintf(fid, ' <td align="left" width=250><b>Bead Diameter (um):</b>	%g </td> \n', a*2);
-    fprintf(fid, ' <td align="left"><b>Pulse Widths (s):</b>	[%s]</td> \n', num2str(pulses));
-    fprintf(fid, '</tr> \n');
-    fprintf(fid, '<tr> \n');
-    fprintf(fid, ' <td align="left"><b>Number of Trackers:</b>	%i </td> \n', beadmax);
-    fprintf(fid, ' <td></td> \n');
+    fprintf(fid, ' <td align="left"><b>File:</b> %s </td> \n', filename_root);
+    fprintf(fid, ' <td align="left"><b>Pulse Voltages (V):</b> [%s] </td> \n', num2str(voltages));
+    fprintf(fid, ' <td align="left" width=250><b>Bead Diameter (um):</b> %g </td> \n', a*2);
+    fprintf(fid, ' <td align="left"><b>Pulse Widths (s):</b> [%s]</td> \n', num2str(pulses));
+    fprintf(fid, ' <td align="left"><b>Number of Trackers:</b> %i </td> \n', beadmax);
     fprintf(fid, '</tr> \n');
     fprintf(fid, '</table> \n'); 
-
-    fprintf(fid, '<br/>');
-
-    % Table 2: Moving average and Window size in frames and seconds
-    fprintf(fid, '<b>Scale</b><br/>\n');
-    fprintf(fid, '<table border="2" cellpadding="6"> \n');
-    fprintf(fid, '<tr> \n');
-    fprintf(fid, '<td align="center"> %12.2f </td> \n', input_params.scale);
-    fprintf(fid, '</tr> \n');
-    fprintf(fid, '</table> \n\n'); 
 
     fprintf(fid, '<br/>');
 
@@ -668,11 +677,11 @@ if info
         if(~plots(b))
             continue;
         end
-        txFigfilename   = [local_figures filesep filename_root '.txFig.bead'  num2str(beads(b)) '.png'];
-        txcFigfilename   = [local_figures filesep filename_root '.txcFig.bead'  num2str(beads(b)) '.png'];
-        tJxFigfilename  = [local_figures filesep filename_root '.tJxFig.bead' num2str(beads(b)) '.png'];
-        tJxcFigfilename   = [local_figures filesep filename_root '.tJxcFig.bead'  num2str(beads(b)) '.png'];
-        tJxcfFigfilename = [local_figures filesep filename_root '.tJxcfFig.bead' num2str(beads(b)) '.png']; 
+        txFigfilename   = [local_figures filesep filename_root '.disp_stack.bead'  num2str(beads(b)) '.png'];
+        txcFigfilename   = [local_figures filesep filename_root '.disp_seq.bead'  num2str(beads(b)) '.png'];
+        tJxFigfilename  = [local_figures filesep filename_root '.comp_stack.bead' num2str(beads(b)) '.png'];
+        tJxcFigfilename   = [local_figures filesep filename_root '.comp_seq.bead'  num2str(beads(b)) '.png'];
+        tJxcfFigfilename = [local_figures filesep filename_root '.comp_seq_fit.bead' num2str(beads(b)) '.png']; 
         
         if(plot_select(1, 1))
             fprintf(fid, '<img src= "%s" border=2 > \t', txFigfilename);

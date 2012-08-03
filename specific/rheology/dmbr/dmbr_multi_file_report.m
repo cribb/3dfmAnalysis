@@ -6,15 +6,17 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
 % once, creating one comprehensive HTML and Excel report. Can also be used
 % to run a single data file. Users can select any combination of files and
 % directories; the report will parse all relevant data files out of any
-% folders selected. Runs dmbr_adjust_report upon completion.
+% folders selected. Generates Excel analysis footer and sidebar. Runs
+% dmbr_adjust_report upon completion.
 %
 % Required Parameters:
 %   excel_name: the root name of the new analysis
 % Optional Parameters:
 %   seq_arry: the array of selected sequences
 %   file_array: the array of selected files
+%   filter_ext: a filename filter (defaults to '*.vfd.mat')
 % Returns:
-%   the full filepath & name of the html file
+%   the full filepath/name of the html file
 %
 % Command Line Syntax:
 %   dmbr_multi_file_report(<Analysis_Name>)
@@ -230,7 +232,8 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
     end
     
     if(plot_selection{4, 1})
-        excel_analysis(inseqs, reportbxs, xlfilename, sizeheader, plot_selection{7, 1});
+        pword = plot_selection{8, :};
+        excel_analysis(inseqs, reportbxs, xlfilename, sizeheader, pword{:});
     end
 
     fid = fopen(htmlfile, 'a+');
@@ -320,12 +323,13 @@ function excel_analysis(inseqs, bxs, xlfilename, header, fit_type)
 end
 
 function column = excel_column(b)
-% Calculates the corresponding letter or letter pair of a number. Ranges from
-% 1 = A to 676 = ZZ.
-    b2 = mod(b, 26) + 64;
-    b1 = (b-(b2-64))/26 + 64;
-    c = char(b2);
-    if(b1~=64) c = strcat(char(b1), c); end
+% Calculates the corresponding letter code of a number. Infinite range.
+    c = '';
+    while b > 0
+        m = mod((b - 1), 26);
+        c = [char(m+65) c];
+        b = (b - m - 1) / 26;
+    end
     column = c;
 end
 
@@ -447,7 +451,7 @@ h.f = figure('units','pixels','position',[400,400,350,200], 'toolbar','none','me
 h.panel=uipanel(h.f, 'Units', 'pixels', 'Position',[0 105 1260 1]);
 
 % Checkboxes
-h.c(7) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [190, 140, 150, 15], 'string', 'Check for Breakpoints');
+h.c(7) = uicontrol('Value', 0, 'style','checkbox','units','pixels', 'position', [190, 140, 150, 15], 'string', 'Check for Breakpoints');
 h.c(6) = uicontrol('style', 'edit', 'units','pixels', 'position', [85, 47, 50, 20]);
 h.c(5) = uicontrol('Value', 0, 'style','checkbox','units','pixels', 'position', [15, 50, 65, 15], 'string', 'Set FPS:');
 h.c(4) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 75, 200, 15], 'string', 'Generate Excel Spreadsheet');

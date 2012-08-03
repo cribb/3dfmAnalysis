@@ -1,3 +1,7 @@
+2012-08-13 Christian Stith <chstith@ncsu.edu>
+	* dmbr_multi_file_report.m: fixed Excel analysis generation bug.
+	* dmbr_report_cell_expt: added cosmetic plot changes. rationalized plot naming system.
+
 2012-08-12 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report.m: added filtering functionality to initial file selection process.
 
