@@ -1,10 +1,16 @@
 2012-08-13 Christian Stith <chstith@ncsu.edu>
+	* multi_file_report_readme.txt: added. comprehensive MFR user guide.
+	* dmbr_adjust_report.m: finalized comment header.
+	* dmbr_multi_file_report.m: same.
+	* dmbr_report_cell_expt.m: same.
+
+2012-08-13 Christian Stith <chstith@ncsu.edu>
 	* dmbr_run.m: added sequence selector functionality. conditionally implemented, should not affect unrelated activities.
-	* dmbr_report_cell_expt: modified dmbr_run call.
+	* dmbr_report_cell_expt.m: modified dmbr_run call.
 
 2012-08-13 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report.m: fixed Excel analysis generation bug.
-	* dmbr_report_cell_expt: added cosmetic plot changes. rationalized plot naming system.
+	* dmbr_report_cell_expt.m: added cosmetic plot changes. rationalized plot naming system.
 
 2012-08-12 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report.m: added filtering functionality to initial file selection process.

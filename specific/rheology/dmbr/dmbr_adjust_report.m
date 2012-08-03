@@ -1,5 +1,7 @@
 function dmbr_adjust_report(name, topdir)
 %
+% 
+% Last modified 08/03/12 (stithc)
 % Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
 % dmbr_adjust_report.m
 % Auto-generates a GUI, Sequence Selector, that allows users to

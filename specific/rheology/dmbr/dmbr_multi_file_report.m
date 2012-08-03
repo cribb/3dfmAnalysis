@@ -1,6 +1,7 @@
 function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_ext)
 %
-% Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
+% Last modified 08/03/12 (stithc)
+% Christian Stith <chstith@ncsu.edu> and Jeremy Cribb
 % dmbr_multi_file_report.m
 % Allows a user to run multiple data files through dmbr_report_cell_expt at
 % once, creating one comprehensive HTML and Excel report. Can also be used

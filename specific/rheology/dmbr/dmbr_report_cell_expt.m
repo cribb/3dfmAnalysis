@@ -1,5 +1,6 @@
 function rheo = dmbr_report_cell_expt(filename, excel_name, main_directory, headerheight, plot_select, seq_array, report_params)
 %
+% Last modified 08/03/12 (stithc)
 % Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
 % dmbr_report_cell_expt.m
 % Generates an in-depth analysis and visual HTML and Excel reports of 3DFM
