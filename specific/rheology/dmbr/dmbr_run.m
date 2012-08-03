@@ -1,7 +1,7 @@
-function v = dmbr_run(input_params)
+function v = dmbr_run(input_params, seq_array)
 % 3DFM function   
 % Rheology
-% last modified 03/21/08 (jcribb)
+% last modified 08/03/12 (stithc)
 %  
 % dmbr_run provides a sample function for running the dmbr
 % calibration from the command line.  It is also useful in testing dmbr
@@ -103,19 +103,25 @@ voltages  = unique(rheo_table(:,VOLTS))';
 rheo_table(:,[J:SDJ]) = 0;
 
 count = 1;
+nextBead = 0;
+bIndex = 0;
 for k = 1:length(beads)
     idxB = find(rheo_table(:,ID) == beads(k));
-    
+    nextBead = 1;            
     for m = 1:length(sequences)
+        bIndex = bIndex + 1;
+        if nargin > 1 && (~seq_array{bIndex} || ~nextBead)
+            nextBead = 0;
+            continue;
+        end
         
         idx = find(rheo_table(:,ID) == beads(k) & rheo_table(:, SEQ) == sequences(m));
 
-        
         % compute compliance
         rheo_table(idx,:) = dmbr_compute_compliance(rheo_table(idx,:), params);
-
         
         for n = 1:length(voltages)
+            
 
             idx = find(rheo_table(:,ID)    == beads(k)      & ...
                        rheo_table(:,SEQ)   == sequences(m)  & ...

@@ -147,7 +147,11 @@ input_params.scale = 0.5;
 
 
 if(plot_select(2, 1) || plot_select(3, 1) || plot_select(4, 1))
-    rheo = dmbr_run(input_params);
+    if(specific_seqs)
+        rheo = dmbr_run(input_params, seq_array);
+    else
+        rheo = dmbr_run(input_params);
+    end
     rheo_table = rheo.raw.rheo_table;
 else
     m.poletip_radius = 0;

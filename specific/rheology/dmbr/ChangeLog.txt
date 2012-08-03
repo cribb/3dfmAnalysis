@@ -1,4 +1,8 @@
 2012-08-13 Christian Stith <chstith@ncsu.edu>
+	* dmbr_run.m: added sequence selector functionality. conditionally implemented, should not affect unrelated activities.
+	* dmbr_report_cell_expt: modified dmbr_run call.
+
+2012-08-13 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report.m: fixed Excel analysis generation bug.
 	* dmbr_report_cell_expt: added cosmetic plot changes. rationalized plot naming system.
 
