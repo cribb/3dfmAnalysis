@@ -1,3 +1,6 @@
+2012-09-12  Jeremy Cribb <jcribb@email.unc.edu>
+	* xlswrite.m:  removed.  Newer matlab versions include their own updated copy.
+
 2011-08-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* gen_pub_plotfiles.m:  switched to logentries over throwing errors.
 
