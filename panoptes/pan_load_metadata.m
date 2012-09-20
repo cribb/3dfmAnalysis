@@ -1,9 +1,13 @@
-function outs = pan_load_metadata(filepath, plate_type)
-
-    if nargin < 2 || isempty(plate_type)
+function outs = pan_load_metadata(filepath, systemid, plate_type)
+   
+    if nargin < 3 || isempty(plate_type)
         plate_type = '96well';
     end
 
+    if nargin < 2 || isempty(systemid)
+        systemid = 'monoptes';
+    end
+    
     if nargin < 1 || isempty('filepath')
         filepath = '.';
     end
@@ -39,6 +43,17 @@ function outs = pan_load_metadata(filepath, plate_type)
     if ~isempty(outs.files.wells)
         outs.instr = pan_read_wells_txtfile( outs.files.wells.name );
         outs.instr.fps_bright = 1e6 ./ (outs.instr.OnTime_bright + outs.instr.OffTime);
+        
+        % if the instrument is panoptes (rather than monoptes) then expand
+        % the wellIDs that were defined in the wells.txt file
+        if findstr(systemid,'panoptes');
+            for k = 1:length(outs.instr.well_list)
+                new_well_list(k,1:12) = outs.instr.well_list(k) + [0:11];
+            end
+            new_well_list = new_well_list';
+            outs.instr.well_list = new_well_list(:);
+        end
+        
     end
 
     % Read in the well layout file, if we have one

@@ -1,15 +1,19 @@
-function dataout = pan_process_PMExpt(filepath, exityn)
+function dataout = pan_process_PMExpt(filepath, systemid, exityn)
 % pan_CellProcessingScript
 %Wrapper for CellProcessingScript that runs the CellProcessingScript and
 %exits for use inside PanopticNerve.
 
-if nargin < 2 || isempty(exityn)
+if nargin < 2 || isempty(systemid)
+    systemid = 'monoptes';
+end
+
+if nargin < 3 || isempty(exityn)
     exityn = 'n';
 end
 
 cd(filepath);
 
-metadata = pan_load_metadata(filepath, '96well');
+metadata = pan_load_metadata(filepath, systemid, '96well');
 
 duration = metadata.instr.seconds;
 frame_rate = metadata.instr.fps_bright;
@@ -34,7 +38,7 @@ filt.dead_spots = [492 128 30 30 ; ...
 filt.drift_method = 'center-of-mass';
 
 
-dataout  = pan_analyze_PMExpt(filepath, filt);
+dataout  = pan_analyze_PMExpt(filepath, filt, systemid);
 dataout  = pan_publish_PMExpt(metadata, filt);
 
 

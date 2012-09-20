@@ -1,4 +1,4 @@
-function outs = pan_analyze_PMExpt(filepath, filt)
+function outs = pan_analyze_PMExpt(filepath, filt, systemid)
 
 if ~exist('filepath', 'var'), filepath= []; end;
 if ~exist('filt', 'var'), filt = []; end;
@@ -10,7 +10,7 @@ freqtype = 'f';
 
 [filepath, filt, mode] = check_params(filepath, filt, mode);
 
-metadata = pan_load_metadata(filepath, plate_type);
+metadata = pan_load_metadata(filepath, systemid, plate_type);
 
 logentry('Loaded metadata');
 

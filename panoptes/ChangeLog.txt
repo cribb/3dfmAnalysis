@@ -1,3 +1,10 @@
+2012-09-20  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_analyze_CellExpt.m:  added 'panoptes' 'monoptes' system id.
+	* pan_analyze_PMExpt.m: same.
+	* pan_analyze_combine_data.m: same.
+	* pan_load_metadata.m: same.
+	* pan_process_PMExpt.m: same.
+
 2011-10-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_publish_PM.m: Switched to viscosity as reported value instead of RMS displacement.
 

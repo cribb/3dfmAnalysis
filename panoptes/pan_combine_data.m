@@ -69,10 +69,15 @@ for p = 1:length(paramlist)
                         metadata.instr.fps_bright, ...
                         'm', mycalibum, ...
                         'absolute', 'no', 'table');                                        
-
-    mymsd = video_msd(d, window, metadata.instr.fps_bright, mycalibum, 'no');                
-    msds(p) = msdstat(mymsd);
     
+    % so any aggregated_data files need to use 0.152 as the conversion for
+    % microns to pixels, as the initial scaling of pixel to micron occurred
+    % via a video-by-video and MCUparameter basis.
+    save_evtfile(['aggregated_data_' myparam], d, 'm', 0.152);
+    
+    mymsd = video_msd(d, window, metadata.instr.fps_bright, mycalibum, 'no');                
+    
+    msds(p) = msdstat(mymsd);        
     myve(p)  = ve(mymsd, bead_radius, freqtype, 'no');
 
     clear myMCU;  
