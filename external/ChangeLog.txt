@@ -1,3 +1,6 @@
+2012-09-21  Jeremy Cribb <jcribb@email.unc.edu>
+	* plot2svg_2d.m: fixed fileparts function call because new matlab version deprecates the 'version' output variable.
+
 2012-07-12  Christian Stith <chstith@ncsu.edu>
 	* crop.m: added. automatically crops marginal whitespace from images. modified to include new directory parameter. from http://www.mathworks.com/matlabcentral/fileexchange/20427-crop-whitespace-from-an-image
 	
