@@ -71,6 +71,8 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
         tmp = outs.files.tracking;
     elseif ~isempty(outs.files.evt)
         tmp = outs.files.evt;
+    else
+        error('There are no tracking or evt files to analyze.');
     end
 
 
