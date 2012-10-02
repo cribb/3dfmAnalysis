@@ -50,8 +50,16 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
             for k = 1:length(outs.instr.well_list)
                 new_well_list(k,1:12) = outs.instr.well_list(k) + [0:11];
             end
+            
             new_well_list = new_well_list';
-            outs.instr.well_list = new_well_list(:);
+            new_well_list = unique(new_well_list);
+            %%% TEMPORARY FIX: eliminates channel 4 wells 
+            wells_to_remove = [7 8 19 20 31 32];
+            for removeidx = 1:length(wells_to_remove)
+                new_well_list( new_well_list == wells_to_remove(removeidx)) = [];
+            end
+            %%% end of temporary fix
+            outs.instr.well_list = unique(new_well_list(:));
         end
         
     end

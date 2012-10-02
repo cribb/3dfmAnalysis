@@ -40,7 +40,7 @@ function calibum = pan_MCU2um(MCUparam)
            
            interp_range = [mcu_range(1):mcu_range(2)]';
            interp_calibum = interp1(mcu_range,calibum_range,interp_range);
-           
+          
            % idx = find(interp_range == MCUparam(k));
            calibum(k) = interp_calibum(interp_range == MCUparam(k));
        else
@@ -49,10 +49,10 @@ function calibum = pan_MCU2um(MCUparam)
        
     end
 
-
     return;
 
 % function for writing out stderr log messages
+
 function logentry(txt)
     logtime = clock;
     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
@@ -67,5 +67,4 @@ function logentry(txt)
      
      return;
    
-
 

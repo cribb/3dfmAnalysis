@@ -1,3 +1,7 @@
+2012-10-02  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_MCU2um.m: removed whitespaces.
+	* pan_load_metadata.m: removed wells that are in channel 4 since camera is out (temporary).
+
 2012-09-27  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_MCU2um.m: added case of '-1' MCU parameter for testing code when no MCU parameters are known.  also added faux MCU parameter conversion factor for MCU of '0'.  This needs to be changed for the real value once it's determined.
 	* pan_load_metadata.m: added error message for case where there are no tracking (vrpn.mat) or evt files to analyze.
