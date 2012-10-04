@@ -31,8 +31,8 @@ function calibum = pan_MCU2um(MCUparam)
            logentry('Using a test MCUparameter of -1, meaning conversion is set to 1');
            calibum(k) = 1;           
        elseif MCUparam(k) == 0
-           calibum(k) = 0.1;  
-           logentry('calibum is set to a wrong value and needs to be fixed');           
+           calibum(k) = 0.156;  
+           logentry('calibum is set to an average value for MCUparameter=0.');           
        elseif MCUparam(k) >= 25000 && MCUparam(k) <= 30000
            
            mcu_range = [25000 30000]';

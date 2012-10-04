@@ -1,3 +1,7 @@
+2012-10-04  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_MCU2um.m: changed default varioptic length conversion of pixels to microns to the average of three objectives at zero varioptic voltage.  While this conversion value is still wrong its close enough for now.
+	* pan_process_PMExpt.m:  removed the filter settings for the dead spots on the old monoptes camera.
+
 2012-10-02  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_load_metadata.m: added a logentry that reports which wells are removed.
 
