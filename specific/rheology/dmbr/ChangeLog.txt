@@ -1,3 +1,6 @@
+2012-10-04 Christian Stith <chstith@ncsu.edu>
+	* dmbr_mf_concat: added. concatenates multiple *.seqdat.txt files into one. functional; known bug described in header.
+
 2012-08-13 Christian Stith <chstith@ncsu.edu>
 	* multi_file_report_readme.txt: added. comprehensive MFR user guide.
 	* dmbr_adjust_report.m: finalized comment header.
