@@ -53,14 +53,14 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
             
             new_well_list = new_well_list';
             new_well_list = unique(new_well_list);
-            %%% TEMPORARY FIX: eliminates channel 4 wells 
-            wells_to_remove = [7 8 19 20 31 32];
-            for removeidx = 1:length(wells_to_remove)
-                new_well_list( new_well_list == wells_to_remove(removeidx)) = [];
-            end          
-            logentry([ 'Removing well IDs: [' num2str(wells_to_remove) '] because of bad channel.']);
-            pause(1);
-            %%% end of temporary fix
+% % %             %%% TEMPORARY FIX: eliminates channel 4 wells 
+% % %             wells_to_remove = [7 8 19 20 31 32];
+% % %             for removeidx = 1:length(wells_to_remove)
+% % %                 new_well_list( new_well_list == wells_to_remove(removeidx)) = [];
+% % %             end          
+% % %             logentry([ 'Removing well IDs: [' num2str(wells_to_remove) '] because of bad channel.']);
+% % %             pause(1);
+% % %             %%% end of temporary fix
             outs.instr.well_list = unique(new_well_list(:));
         end
         
