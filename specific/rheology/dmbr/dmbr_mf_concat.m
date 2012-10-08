@@ -1,15 +1,14 @@
 function dmbr_mf_concat(fname)
 %
 % 
-% Last modified 10/04/12 (stithc)
+% Last modified 10/08/12 (stithc and rardinb)
 % Christian Stith <chstith@ncsu.edu>, 10/04/2012
+% Ben Rardin <rardinb@live.unc.edu> 10/08/2012
 % dmbr_adjust_report.m
 % Uses an external filepicker GUI to select multiple *.seqdat.txt files
 % for concatenation into a single new file, <fname>.seqdat.txt
-% 
-% KNOWN BUG: Any characters on the last line must be removed. The
-% file must end on a newline followed by no characters. Check
-% for whitespace.
+% In order to generate a report for the combined *.seqdat.txt file the user
+% must run from the MATLAB command line dmbr_adjust_report 
 % 
 % Required Parameters:
 %   name: the root name of the concatenation file
@@ -25,6 +24,10 @@ filelist = uipickfiles('FilterSpec', '*.seqdat.txt');
 
 x = length(filelist);
 
+
+%Christian Attempt #1 that uses a system command: creates the end of file
+%character that we don't want
+%{
 com = 'copy ';
 
 for i=1:x
@@ -39,17 +42,27 @@ globe = [ '"' pwd filesep fname '.seqdat.txt"' ];
 com = [com ' ' globe];
 
 system(com);
+%}
 
-%{
-seq = [ '"' pwd filesep fname '.seqdat.txt"' ];
-fidin = fopen(globe);
-fidout = fopen(seq);
-tline = '';
-while ischar(tline)
-    tline = fgets(fidin);
-    fprintf(fidout,tline);
+
+
+fidout = fopen([fname '.seqdat.txt'],'w');
+% creates the new text file where the combined text files will be placed
+for i=1:x % loops through the input seqdat.txt files
+    fidin = fopen(filelist{1,i}, 'r');
+    tline = '';
+    while ischar(tline)
+        tline = fgetl(fidin);
+        if ischar(tline)==1
+        fprintf(fidout,'%s\n', tline); %writes old text lines to new file
+        else
+            break
+        end
+    
+    end
 end
 fclose(fidin);
 fclose(fidout);
-%}
+
+
 end
