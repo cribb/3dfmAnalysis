@@ -1,3 +1,6 @@
+2012-10-08 Ben Rardin <rardinb@live.unc.edu>
+	* dmbr_mf_concat: bug fixed. No longer is necessary to delete end of file characters in the created seqdat.txt file
+
 2012-10-04 Christian Stith <chstith@ncsu.edu>
 	* dmbr_mf_concat: added. concatenates multiple *.seqdat.txt files into one. functional; known bug described in header.
 
