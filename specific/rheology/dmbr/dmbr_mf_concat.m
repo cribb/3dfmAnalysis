@@ -7,8 +7,8 @@ function dmbr_mf_concat(fname)
 % dmbr_adjust_report.m
 % Uses an external filepicker GUI to select multiple *.seqdat.txt files
 % for concatenation into a single new file, <fname>.seqdat.txt
-% In order to generate a report for the combined *.seqdat.txt file the user
-% must run from the MATLAB command line dmbr_adjust_report 
+% The program then runs dmbr_adjust_report which reinitialized the report
+% genertating process of dmbr_multi_file_report
 % 
 % Required Parameters:
 %   name: the root name of the concatenation file
@@ -64,5 +64,7 @@ end
 fclose(fidin);
 fclose(fidout);
 
+%Runs dmbr_adjust_report with the newly created *.seqdat.txt file
+dmbr_adjust_report(fname)
 
 end
