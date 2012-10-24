@@ -1,3 +1,6 @@
+2012-10-24 Ben Rardin <rardinb@live.unc.edu>
+	*dmbr_multi_file_report: bug fixed. The excel report created by the GUI now generates the correct "G ratios" when data has been filtered  (removal of certain beads, pulls, etc.) and re-run in the multifilereport GUI.
+
 2012-10-08 Ben Rardin <rardinb@live.unc.edu>
 	* dmbr_mf_concat: bug fixed. No longer is necessary to delete end of file characters in the created seqdat.txt file
 
