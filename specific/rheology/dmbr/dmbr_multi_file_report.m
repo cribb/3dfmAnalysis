@@ -280,13 +280,15 @@ function excel_analysis(inseqs, bxs, xlfilename, header, fit_type)
             
     numcols = 4;
     % G ratio sidebar
+    
+    % THIS IS WHERE THE G INFORMATION IS WRITTEN INTO THE EXCEL FILE
     sidebar = cell(bxs(1,1)+1, bxs(1,2)-1);
     for b=1:(bxs(1,2)-1)
         sidebar(1,b) = cellstr(strcat('G', num2str(b+1), '/G1'));
     end
     first = excel_column(numcols+1);
     for b=1:bxs(1,1)
-        for c=2:(inseqs(b))
+        for c=2:bxs(1,2)
             column = excel_column(numcols+numvars*(c-1)+1);
             sidebar(b+1,c-1) = cellstr(strcat('=', column, num2str(header+(b)+1), '/', first, num2str(header+(b)+1)));
         end
