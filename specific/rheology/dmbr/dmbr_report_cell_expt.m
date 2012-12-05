@@ -1,6 +1,6 @@
 function rheo = dmbr_report_cell_expt(filename, excel_name, main_directory, headerheight, plot_select, seq_array, report_params)
 %
-% Last modified 08/03/12 (stithc)
+% Last modified 12/05/12 (rardinb)
 % Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
 % dmbr_report_cell_expt.m
 % Generates an in-depth analysis and visual HTML and Excel reports of 3DFM
@@ -543,8 +543,8 @@ nametag = filename_root;
 % HTML section header
 fprintf(fid, '<hr>\n');
 fprintf(fid, '<a name="%s"><h2>%s</h2></a><br/>', filename_root, nametag);
-fprintf(fid, ' <b>Path:</b>  %s <br/>\n', pathname);
-fprintf(fid, '<a href="#Contents">Back to Top</a></p>\n');
+fprintf(fid, ' <font size="6" face="Arial">Path:</font>  <font size="6" face="Arial"><b>%s</font></b> <br/>\n', pathname);
+fprintf(fid, '<a href="#Contents"><font size="4" face="Arial">Back to Top</font></a></p>\n');
 
 % check to see if file is used, if so, write reports
 info = 0;
@@ -588,10 +588,13 @@ if info
                 for s = 1 : maxseqs
                     fprintf(fid, '   <td align="center" colspan="3"><b>Sequence #%d</b> </td> \n', s);
                 end
+                 for s = 1 : maxseqs-1
+                    fprintf(fid, '   <td align="center" colspan="4" rowspan=2 bgcolor=#ADD8E6><b>G%d/G1</b> </td> \n', s+1)
+                end
                 fprintf(fid, '</tr> \n');
                 fprintf(fid, '   <td align="center"><b>Tracker ID</b> </td> \n');
                 for s = 1 : maxseqs
-                    fprintf(fid, '   <td align="center"><b>G</b> </td> \n');
+                    fprintf(fid, '   <td align="center" bgcolor=#ADD8E6><b>G</b> </td> \n');
                     fprintf(fid, '   <td align="center"><b>beta</b> </td> \n');
                     fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
                 end
@@ -621,6 +624,9 @@ if info
                         % R^2
                         fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
                     end
+                    for jdx = 1 : maxseqs-1
+                        fprintf(fid, '<td align="center" colspan="4"> %12.4g </td> \n', rheo.G(b+(maxseqs-1)*(b-1)+jdx)/rheo.G(b+(maxseqs-1)*(b-1)));
+                    end
                     if(printed)
                         fprintf(fid, '</tr> \n');
                     end
@@ -630,10 +636,13 @@ if info
                 for s = 1 : maxseqs
                     fprintf(fid, '   <td align="center" colspan="4"><b>Sequence #%d</b> </td> \n', s);
                 end
+                for s = 1 : maxseqs-1
+                    fprintf(fid, '   <td align="center" colspan="4" rowspan=2 bgcolor=#ADD8E6><b>G%d/G1</b> </td> \n', s+1)
+                end
                 fprintf(fid, '</tr> \n');
                 fprintf(fid, '   <td align="center"><b>Tracker ID</b> </td> \n');
                 for s = 1 : maxseqs
-                    fprintf(fid, '   <td align="center"><b>G</b> </td> \n');
+                    fprintf(fid, '   <td align="center" bgcolor=#ADD8E6><b>G</b> </td> \n');
                     fprintf(fid, '   <td align="center"><b>eta1</b> </td> \n');
                     fprintf(fid, '   <td align="center"><b>eta2</b> </td> \n');
                     fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
@@ -666,6 +675,11 @@ if info
                         % R^2
                         fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
                     end
+                    for jdx = 1 : maxseqs-1
+                        fprintf(fid, '<td align="center" colspan="4"> %12.4g </td> \n', rheo.G(b+(maxseqs-1)*(b-1)+jdx)/rheo.G(b+(maxseqs-1)*(b-1)));
+                    end
+                    
+                    
                     if(printed)
                         fprintf(fid, '</tr> \n');
                     end
