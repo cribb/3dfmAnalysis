@@ -1,6 +1,16 @@
 function msdout = msdstat(msdin)
 
-if nargin < 1 || isempty(msdin.tau)
+if nargin < 1 || isempty(msdin)
+    msdout.logtau = NaN;
+    msdout.logmsd = NaN;
+    msdout.mean_logtau = NaN;
+    msdout.mean_logmsd = NaN;
+    msdout.msderr = NaN;
+    
+    return;
+end
+
+if isempty(msdin.tau)
     logentry('Error:  No data to perform statistics on.  Exiting now.');
     
     msdout = msdin;

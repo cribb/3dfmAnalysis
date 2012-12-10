@@ -20,17 +20,17 @@ function varargout = msd(t, data, window)
 % [tau, msd, r2out] = msd
 
 %initializing arguments
-if (nargin < 1) || isempty(t)  
-    error('Input data needed.'); 
-end;
-
-if (nargin < 2) || isempty(data)  
-    error('Input data needed.');
-end;
-
 if (nargin < 3) || isempty(window)  
     window = [1 2 5 10 20 50 100 200 500 1000 1001]; 
 end;
+
+if (nargin < 1) || isempty(t) || isempty(data)
+    logentry('Input data needed, returning empty set'); 
+    tau   = NaN(length(window),1);
+    msd   = NaN(length(window),1);
+    count = NaN(length(window),1);
+end;
+
 
 % for every window size (or tau)
 warning('off', 'MATLAB:divideByZero');

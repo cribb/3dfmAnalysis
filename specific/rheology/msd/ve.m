@@ -30,7 +30,7 @@ if (nargin < 2) || isempty(bead_radius)
     bead_radius = 0.5e-6; 
 end
 
-if (nargin < 1) || isempty(d.tau)    
+if (nargin < 1) || isempty(d) || isempty(d.tau)    
     logentry('Error: no input data found.  Exiting now.'); 
 
     v.f = [];
