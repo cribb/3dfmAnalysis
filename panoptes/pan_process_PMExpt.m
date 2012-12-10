@@ -35,9 +35,8 @@ filt.xyzunits   = 'pixels';
 %                    184 359 30 30 ; ...
 %                    499 319 30 30 ; ...
 %                    216 149 30 30 ];    % flea2 camera deadspots on 2011/10/07
-filt.dead_spots = [0 0 0 0];
+filt.dead_spots = [0 392 28 32];   % flea2 on Monoptes camera after cleaning 2012/11/28
 filt.drift_method = 'center-of-mass';
-
 
 dataout  = pan_analyze_PMExpt(filepath, filt, systemid);
 dataout  = pan_publish_PMExpt(metadata, filt);

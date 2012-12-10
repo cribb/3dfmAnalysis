@@ -1,3 +1,13 @@
+2012-12-10  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_analyze_CellExpt.m:  updated to relevant changes to passive microrhology experiment type (systemid = monoptes | panoptes, etc...).
+	* pan_process_CellExpt.m: same.
+	* pan_publish_CellExpt.m:  changed RMS displacement bar plot to MSD bar plot.
+	* pan_process_PMExpt.m: updated camera filter "dead spots" locations.
+	* pan_load_metadata.m: added descriptive error messages so that missing metadata is defined and communicated to the user rather than making them (read, me) figure it out own their own.
+	* pan_combine_data.m: now handles the case when the MCU parameter may not exist, primarily because the autofocus did not find any focal plane where data was worthy of collection.
+	* pan_MCU2um.m: updated to include new monoptes calibration function.
+	
+
 2012-10-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_load_metadata.m:  added back in the wells associated with channel 4.
 

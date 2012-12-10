@@ -53,29 +53,25 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
             
             new_well_list = new_well_list';
             new_well_list = unique(new_well_list);
-% % %             %%% TEMPORARY FIX: eliminates channel 4 wells 
-% % %             wells_to_remove = [7 8 19 20 31 32];
-% % %             for removeidx = 1:length(wells_to_remove)
-% % %                 new_well_list( new_well_list == wells_to_remove(removeidx)) = [];
-% % %             end          
-% % %             logentry([ 'Removing well IDs: [' num2str(wells_to_remove) '] because of bad channel.']);
-% % %             pause(1);
-% % %             %%% end of temporary fix
             outs.instr.well_list = unique(new_well_list(:));
         end
-        
+    else
+        error('No ExperimentConfig file.')
     end
 
     % Read in the well layout file, if we have one
     if ~isempty(outs.files.layout)
         outs.plate = pan_read_well_layout( outs.files.layout.name , plate_type );
+    else
+        error('No WELL_LAYOUT file.');
     end
 
     % read in the mcu parameters
     if ~isempty(outs.files.MCUparams)
         outs.mcuparams = pan_read_MCUparamsfile( outs.files.MCUparams.name );
+    else
+        error('No MCU parameter file.');
     end
-
 
     if ~isempty(outs.files.tracking)
         tmp = outs.files.tracking;
@@ -84,7 +80,6 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
     else
         error('There are no tracking or evt files to analyze.');
     end
-
 
     for k = 1:length(tmp)
         [well_(k) pass_(k)] = pan_wellpass(tmp(k).name);

@@ -5,11 +5,18 @@ function calibum = pan_MCU2um(MCUparam)
     % Rescaled MCU parameter to distance mapping 
 %   calibum = (0.0009192384 * MCUparam + 0.1338995737);     % (range from 31 to 76) (062011 by Jeremy)
 %    calibum = (0.0012402498 * MCUparam + 0.1089275278);       % (range from 46 to 96) (091911 by Jeremy)
-%    idx = find(MCUparam < 46 & MCUparam > 96);
-%    if ~isempty(idx)
-%        logentry('The input MCU parameter is out of range.  Setting to NaN');
-%        calibum(idx) = NaN;
-%    end
+   
+   calibum = (2.292106704e-6 * MCUparam + 0.1105463685);     % (range from 21000 to 60000) (112812 by Jeremy)
+   idx = find(MCUparam < 21000);
+   if ~isempty(idx)
+       calibum(idx) = 0.157; % um/pixel 
+   end
+   
+   idx = find(MCUparam > 60000);
+   if ~isempty(idx)
+       logentry('The input MCU parameter is out of range.  Setting to NaN');
+       calibum(idx) = NaN;
+   end
     
 %     
 %     for k = 1:length(MCUparam)
@@ -24,35 +31,38 @@ function calibum = pan_MCU2um(MCUparam)
 %         end
 %     end
 
-    
-    for k = 1:length(MCUparam)
-        
-       if  MCUparam(k) == -1
-           logentry('Using a test MCUparameter of -1, meaning conversion is set to 1');
-           calibum(k) = 1;           
-       elseif MCUparam(k) == 0
-           calibum(k) = 0.156;  
-           logentry('calibum is set to an average value for MCUparameter=0.');           
-       elseif MCUparam(k) >= 25000 && MCUparam(k) <= 30000
-           
-           mcu_range = [25000 30000]';
-           calibum_range = [0.1659 0.1766]';
-           
-           interp_range = [mcu_range(1):mcu_range(2)]';
-           interp_calibum = interp1(mcu_range,calibum_range,interp_range);
-          
-           % idx = find(interp_range == MCUparam(k));
-           calibum(k) = interp_calibum(interp_range == MCUparam(k));
-       else
-           error('This calibration factor is unknown.');
-       end
-       
-    end
+   
+%     for k = 1:length(MCUparam)
+%         
+%        if  MCUparam(k) == -1
+%            logentry('Using a test MCUparameter of -1, meaning conversion is set to 1');
+%            calibum(k) = 1;           
+%        elseif MCUparam(k) == 0
+%            calibum(k) = 0.1;  
+%            logentry('calibum is set to a wrong value and needs to be fixed');
+%        elseif MCUparam(k) < 21000
+%            calibum = 0.157;   % um/pixel
+%        elseif MCUparam(k) >= 21000 && MCUparam(k) <= 60000
+%            calibum(k) = (2.292106704e-6 * MCUparam + 0.1105463685);     % (range from 21000 to 60000) (112812 by Jeremy)
+% %            mcu_range = [25000 30000]';
+% %            calibum_range = [0.1659 0.1766]';
+% %            
+% %            interp_range = [mcu_range(1):mcu_range(2)]';
+% %            interp_calibum = interp1(mcu_range,calibum_range,interp_range);
+% 
+% 
+%            % idx = find(interp_range == MCUparam(k));
+% %            calibum(k) = interp_calibum(interp_range == MCUparam(k));
+%        else
+%            error('This calibration factor is unknown.');
+%        end
+%        
+%     end
+
 
     return;
 
 % function for writing out stderr log messages
-
 function logentry(txt)
     logtime = clock;
     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
@@ -67,4 +77,5 @@ function logentry(txt)
      
      return;
    
+
 

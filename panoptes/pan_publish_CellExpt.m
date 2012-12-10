@@ -1,4 +1,4 @@
-function pan = pan_publish_CellExpt(metadata)
+function pan = pan_publish_CellExpt(metadata, filt)
 % PAN_PUBLISH_CELLEXPT  Generates an html report for the Panoptes Cell Experiment
 %
 % CISMM function
@@ -25,12 +25,12 @@ duration = metadata.instr.seconds;
 fps_bright = metadata.instr.fps_bright;
 autofocus = metadata.instr.auto_focus;
 
-filt.min_frames = 10;
-filt.min_pixels = 0;
-filt.max_pixels = Inf;
-filt.tcrop      = 0;
-filt.xycrop     = 0;
-filt.xyzunits   = 'pixels';
+% filt.min_frames = 10;
+% filt.min_pixels = 0;
+% filt.max_pixels = Inf;
+% filt.tcrop      = 0;
+% filt.xycrop     = 0;
+% filt.xyzunits   = 'pixels';
 % filt.calib_um   = 1;
     
 if autofocus
@@ -82,10 +82,10 @@ for k = 1:length(msds)-1
 end
 
 barfig = figure;
-barwitherr( sqrt(10.^(mymsd+myerr)-10.^(mymsd)) *1e6,  sqrt(10 .^ mymsd)*1e6 );
+barwitherr( (10.^(mymsd+myerr))-(10.^(mymsd)),  (10 .^ mymsd));
 set(gca,'XTickLabel',molar_conc)
 xlabel('cell type');
-ylabel('RMS displacment [\mum]');
+ylabel('<r^2> [m^2]');
 barfile = [metadata.instr.experiment '_molar_concentration_ALL' '.bar'];
 gen_pub_plotfiles(barfile, barfig, 'normal');
 close(barfig);
