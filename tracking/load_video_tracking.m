@@ -45,12 +45,16 @@ elseif iscell(filemask)
     for k = 1:length(filemask)
         filelist(k) = dir(filemask{k});
     end    
+elseif isempty(filemask)
+    filelist = [];
 else
     filelist = dir(filemask);
 end
 
 if length(filelist) < 1
-    error(['No files found matching ' filemask '.']);
+    logentry(['No files found matching ' filemask ', returning empty set.']);
+    v = NaN(1,9);
+    return;
 end
 
 if ( length(filelist) ~= length(calib_um) ) && ( length(calib_um) == 1 )
