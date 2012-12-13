@@ -1,3 +1,7 @@
+2012-12-13  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m: removed LumiCrop filter since it's not terribly useful anymore with spot_tracker's autofind capabilities.  added max_pixel filter to remove trackers for beads that diffuse larger ranges than desired (e.g. beads freely diffusing in buffer when they should be attached to cells.)
+	*evt_GUI.fig: same.
+	
 2012-06-26  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m:  added plotting option that displays MSD slope as a function of tau and the distribution of slopes at a given tau.
 	* evt_GUI.fig: same.

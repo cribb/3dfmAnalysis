@@ -29,7 +29,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 20-Jun-2012 11:19:04
+% Last Modified by GUIDE v2.5 13-Dec-2012 10:23:27
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -228,6 +228,12 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         handles.filt.min_pixels = 0;
     end
 
+    if get(handles.checkbox_maxpixels, 'Value')
+        handles.filt.max_pixels = str2num(get(handles.edit_maxpixels, 'String'));
+    else
+        handles.filt.max_pixels = Inf;
+    end
+    
     if get(handles.checkbox_tCrop, 'Value')
         handles.filt.tcrop = str2num(get(handles.edit_tCrop, 'String'));
     else
@@ -314,14 +320,15 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         handles.im = [];
     end
     
-    if exist('MIPexists', 'var') && get(handles.checkbox_LumiCrop, 'Value')
-        desired_lum = str2num(get(handles.edit_LumiCrop, 'String'));
-        threshmult = 1.0;
-        
-        [d,dummyvar1,dummyvar2] = filter_bead_aggregates(d, im, desired_lum, threshmult);
-    elseif get(handles.checkbox_LumiCrop, 'Value')
-        logentry('Cannot filter based on luminance because there no MIP exists');
-    end
+%     if exist('MIPexists', 'var') && get(handles.checkbox_lumicrop, 'Value')
+%         desired_lum = str2num(get(handles.edit_maxpixels, 'String'));
+%         threshmult = 1.0;
+%         
+%         [d,dummyvar1,dummyvar2] = filter_bead_aggregates(d, im, desired_lum, threshmult);
+%     elseif get(handles.checkbox_lumicrop, 'Value')
+%         logentry('Cannot filter based on luminance because there no MIP exists');
+%     end
+
     % set the default output filename
     outfile = get(handles.edit_outfile, 'String');
     if isempty(outfile)
@@ -2063,15 +2070,15 @@ function checkbox_overlayxy_Callback(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
 
 
-% --- Executes on button press in checkbox_LumiCrop.
-function checkbox_LumiCrop_Callback(hObject, eventdata, handles)
+% --- Executes on button press in checkbox_maxpixels.
+function checkbox_maxpixels_Callback(hObject, eventdata, handles)
 
 
-function edit_LumiCrop_Callback(hObject, eventdata, handles)
+function edit_maxpixels_Callback(hObject, eventdata, handles)
 
 
 % --- Executes during object creation, after setting all properties.
-function edit_LumiCrop_CreateFcn(hObject, eventdata, handles)
+function edit_maxpixels_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
@@ -2175,3 +2182,7 @@ function edit_chosentau_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
+
