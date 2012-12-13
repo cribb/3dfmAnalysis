@@ -13,12 +13,11 @@ function outs = filter_video_tracking(data, filt)
 %       "data" 
 %       "filt"
 %	    "min_frames" 
-%       "minPixels" 
-%       "maxPixelRange" 
+%       "min_pixels"
+%       "max_pixels" 
 %       "tcrop" 
 %       "xycrop" 
 %       "minFrames"
-%       "minPixelRange"
 %       "tCrop" 
 %       "xyCrop" 
 %      
@@ -51,6 +50,7 @@ function outs = filter_video_tracking(data, filt)
     if (nargin < 2) || isempty(filt)
         filt.min_frames = 0;
         filt.min_pixels = 0;
+        filt.max_pixels = Inf;
         filt.tcrop      = 0;
         filt.xycrop     = 0;
         filt.xyzunits   = 'pixels';
@@ -100,10 +100,17 @@ function outs = filter_video_tracking(data, filt)
     if isfield(filt, 'min_pixels')
         if filt.min_pixels > 0
             % going to assume pixels
-            data = filter_min_pixel_range(data, filt.min_pixels);
+            data = filter_pixel_range('min', data, filt.min_pixels);
         end
     end
 
+    if isfield(filt, 'max_pixels')
+        if filt.max_pixels < Inf
+            % going to assume pixels
+            data = filter_pixel_range('max', data, filt.max_pixels);
+        end
+    end
+    
     if isfield(filt, 'xycrop')
         if filt.xycrop > 0
             data = filter_xycrop(data, filt.xycrop);
@@ -184,12 +191,11 @@ function data = filter_min_frames(data, minFrames)
     
     return;
 
-
-function data = filter_min_pixel_range(data, minPixelRange, xyzunits, calib_um)
+function data = filter_pixel_range(mode, data, PixelRange, xyzunits, calib_um)
     video_tracking_constants;
     beadlist = unique(data(:,ID));
     
-    if nargin < 4 || isempty(calib_um)
+    if nargin < 5 || isempty(calib_um)
         xyzunits = 'pixels';
         calib_um = 1;
     end
@@ -220,11 +226,20 @@ function data = filter_min_pixel_range(data, minPixelRange, xyzunits, calib_um)
         end
         
         %Delete this bead iff necesary
-        if(xrange<minPixelRange && yrange<minPixelRange) %If this bead has too few datapoints
-            idx  = find(data(:, ID) ~= beadlist(i));     %Get all data rows for this bead
-            data = data(idx, :);                         %Recreate data without this bead
-           continue                                     %Move on to next bead now
-        end
+        switch mode
+            case 'min'
+                if(xrange<PixelRange && yrange<PixelRange)   %If this bead has too few datapoints
+                    idx  = find(data(:, ID) ~= beadlist(i)); %Get all data rows for this bead
+                    data = data(idx, :);                     %Recreate data without this bead
+%                 continue                                     %Move on to next bead now
+                end
+            case 'max'
+                if(xrange>PixelRange && yrange>PixelRange)   %If this bead has too few datapoints
+                    idx  = find(data(:, ID) ~= beadlist(i)); %Get all data rows for this bead
+                    data = data(idx, :);                     %Recreate data without this bead
+%                 continue                                     %Move on to next bead now
+                end
+        end                
     end    
     
     return;
