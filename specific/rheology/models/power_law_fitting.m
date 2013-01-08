@@ -1,4 +1,4 @@
-function [a,b,G0,Rsq] = power_law_fitting(Time,Creep)
+function [a,b,G0,Rsq,t] = power_law_fitting(Time,Creep)
 
 % Input Variables
 %     Time: Time data

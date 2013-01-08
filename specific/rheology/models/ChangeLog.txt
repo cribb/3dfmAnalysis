@@ -1,3 +1,6 @@
+2013-01-08  Jeremy Cribb <jcribb@email.unc.edu>
+	* power_law_fitting.m:  added output variable, t.
+
 2012-08-12 Christian Stith <chstith@ncsu.edu>
 	* power_law_fitting_fabry.m: added. implements Fabry's adaptation of the power law model.
 
