@@ -1,5 +1,8 @@
 function out = uipickfiles(varargin)
-%uipickfiles: GUI program to select files and/or folders.
+% Modified by Christian Stith <chstith@ncsu.edu> to include sortn.m
+% <http://www.mathworks.com/matlabcentral/fileexchange/8399-sortn-sort-text
+% ual-lists>
+% uipickfiles: GUI program to select files and/or folders.
 %
 % Syntax:
 %   files = uipickfiles('PropertyName',PropertyValue,...)
@@ -171,6 +174,8 @@ else
 	numstr = sprintf('Select %d to %d items.',prop.numfiles);
 end
 
+
+
 % Validate Append property and initialize pick data.
 if isstruct(prop.append) && isfield(prop.append,'name')
 	prop.append = {prop.append.name};
@@ -233,6 +238,8 @@ else
 end
 
 
+
+
 % Set style preference for display of folders.
 %   1 => folder icon before and filesep after
 %   2 => bullet before and filesep after
@@ -254,17 +261,21 @@ end
 if isempty(filter)
 	filter = '*';
 end
+
 re_filter = prop.refilter;
 full_filter = fullfile(current_dir,filter);
 network_volumes = {};
 [path_cell,new_network_vol] = path2cell(current_dir);
+
+
 if exist(new_network_vol,'dir')
 	network_volumes = unique([network_volumes,{new_network_vol}]);
 end
-fdir = filtered_dir(full_filter,re_filter,prop.redirs,...
-	@(x)file_sort(x,[1 0 0]));
-filenames = {fdir.name}';
+
+fdir = filtered_dir(full_filter,re_filter,prop.redirs, @(x)file_sort(x,[1 0 0]));
+filenames = {fdir.name};
 filenames = annotate_file_names(filenames,fdir,fsdata);
+
 
 % Initialize some data.
 show_full_path = false;
@@ -276,6 +287,7 @@ history = getpref('uipickfiles','history',...
 default_history_size = 15;
 history_size = getpref('uipickfiles','history_size',default_history_size);
 history = update_history(history,current_dir,now,history_size);
+
 
 % Get figure position preference and create figure.
 gray = get(0,'DefaultUIControlBackgroundColor');
@@ -310,16 +322,18 @@ else
 		'Visible','off');
 end
 
+
+
 % Set system-dependent items.
 if ismac
 	set(fig,'DefaultUIControlFontName','Lucida Grande')
-	set(fig,'DefaultUIControlFontSize',9)
+	set(fig,'DefaultUIControlFontSize',12)
 	sort_ctrl_size = 8;
 	mod_key = 'command';
 	action = 'Control-click';
 elseif ispc
 	set(fig,'DefaultUIControlFontName','Tahoma')
-	set(fig,'DefaultUIControlFontSize',8)
+	set(fig,'DefaultUIControlFontSize',10)
 	sort_ctrl_size = 7;
 	mod_key = 'control';
 	action = 'Right-click';
@@ -1392,24 +1406,26 @@ end
 % --------------------
 
 function [files_sorted,index] = file_sort(files,sort_state)
+
 switch find(sort_state)
+
 	case 1
-		[files_sorted,index] = sort(lower({files.name}));
+		[files_sorted,index] = sortn(lower({files.name}));
 		if sort_state(1) < 0
 			files_sorted = files_sorted(end:-1:1);
 			index = index(end:-1:1);
 		end
 	case 2
 		if sort_state(2) > 0
-			[files_sorted,index] = sort([files.datenum]);
+			[files_sorted,index] = sortn([files.datenum]);
 		else
-			[files_sorted,index] = sort([files.datenum],'descend');
+			[files_sorted,index] = sortn([files.datenum],'descend');
 		end
 	case 3
 		if sort_state(3) > 0
-			[files_sorted,index] = sort([files.bytes]);
+			[files_sorted,index] = sortn([files.bytes]);
 		else
-			[files_sorted,index] = sort([files.bytes],'descend');
+			[files_sorted,index] = sortn([files.bytes],'descend');
 		end
 end
 end

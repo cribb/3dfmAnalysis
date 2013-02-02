@@ -1,3 +1,7 @@
+2013-02-01  Christian Stith <chstith@ncsu.edu>
+	* sortn.m: removed debugging printout line.
+	* uipickfiles.m: implemented sortn function for alphanumerical sorting.
+
 2012-09-21  Jeremy Cribb <jcribb@email.unc.edu>
 	* plot2svg_2d.m: fixed fileparts function call because new matlab version deprecates the 'version' output variable.
 

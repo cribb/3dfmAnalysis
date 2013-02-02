@@ -1,5 +1,4 @@
 function [sortedArr,finalIndex] = sortn(orgArr)
-
 % SORTN - Sort cell array or char array in textual and numerical mode.
 %               Primary sort by first letter, secondary by second letter and so on.
 %               Numbers are considered an numerical values.
@@ -22,7 +21,7 @@ function [sortedArr,finalIndex] = sortn(orgArr)
 %
 %EXAMPLE:
 %               cell_arr = {'abcde54f';
-%                                       'aabde54f'}
+%                           'aabde54f'}
 %
 %              [sorted,indexes]=sortn(cell_arr)
 %
@@ -36,7 +35,7 @@ function [sortedArr,finalIndex] = sortn(orgArr)
 %
 %
 %               cell_arr = {'abcde154f';
-%                                       'abcde54f'}
+%                           'abcde54f'}
 %
 %              [sorted,indexes]=sortn(cell_arr)
 %
@@ -75,21 +74,20 @@ for i=size(g,2):-1:1    %go over cell matrix of breaked strings and sort is from
     
 end
 
-sortedArr =orgArr ;
+sortedArr =orgArr;
 
 
-function [sortedArr,indexes] = SortByColumn(arr,column);    
+function [sortedArr,indexes] = SortByColumn(arr,column)    
 %this function sort each column of the breaked cell-matrix
 %sorting is done by converting each textual number to its real value
 %and later assign every letter its ascii value plus the maximum of all
 %numbers. 
 %the sorting is pure numeric (Matlab sort) so numbers are always before
 %letters.
-
 tempColumn = zeros(size(arr,1),1);
 for i=1:length(tempColumn)
     if ~isempty(str2num(char(arr(i,column)))); %finds all numbers including non-real numbers
-        tempColumn(i) = str2num(char(arr(i,column)))+1; %assign numbers to the vactor
+        tempColumn(i) = str2num(char(arr(i,column)))+1; %assign numbers to the vector
     end
 end
 maxNum = max(tempColumn);
