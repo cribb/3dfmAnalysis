@@ -1,6 +1,6 @@
 function rheo = dmbr_report_cell_expt(filename, excel_name, main_directory, headerheight, plot_select, seq_array, report_params)
 %
-% Last modified 12/05/12 (rardinb)
+% Last modified 08/03/12 (stithc)
 % Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
 % dmbr_report_cell_expt.m
 % Generates an in-depth analysis and visual HTML and Excel reports of 3DFM
@@ -55,8 +55,8 @@ if(nargin < 4)
     headerheight = 1;
 end
 if(nargin < 5)
-    plot_select = cell(8,1);
-    plot_select(1:8,1) = {1};
+    plot_select = cell(9,1);
+    plot_select(1:9,1) = {1};
     plot_select(3,1) = {0};
     plot_select(5,1) = {0};
     plot_select(8,1) = cellstr('Power Law (Fabry)');
@@ -64,12 +64,15 @@ end
 fit_type = plot_select{8};
 fit_type = fit_type{:};
 
+table_mode = plot_select{9,1}; % determines G ratio table mode
+
 plot_select = cell2mat(plot_select(1:6,1));
 
 specific_seqs = 0;
 if(nargin > 5)
     specific_seqs = 1;
 end
+
 
 
 
@@ -543,8 +546,8 @@ nametag = filename_root;
 % HTML section header
 fprintf(fid, '<hr>\n');
 fprintf(fid, '<a name="%s"><h2>%s</h2></a><br/>', filename_root, nametag);
-fprintf(fid, ' <font size="6" face="Arial">Path:</font>  <font size="6" face="Arial"><b>%s</font></b> <br/>\n', pathname);
-fprintf(fid, '<a href="#Contents"><font size="4" face="Arial">Back to Top</font></a></p>\n');
+fprintf(fid, ' <b>Path:</b>  %s <br/>\n', pathname);
+fprintf(fid, '<a href="#Contents">Back to Top</a></p>\n');
 
 % check to see if file is used, if so, write reports
 info = 0;
@@ -576,30 +579,43 @@ if info
 
     % Table 3: G, R^2, and eta1 & eta2 for each bead/sequence
 
+    G1 = 0;
     
     if(plot_select(2, 1) || plot_select(3, 1))
     
         fprintf(fid, '<table border="2" cellpadding="6"> \n');
         fprintf(fid, '<tr> \n');
         fprintf(fid, '<td><b>Summary<br/>of Results</b></td> \n');
+        
+        G_buffer = '';
+        
         switch fit_type
             case 'Power Law (Fabry)'
                 numvars = 3;
                 for s = 1 : maxseqs
-                    fprintf(fid, '   <td align="center" colspan="3"><b>Sequence #%d</b> </td> \n', s);
+                    if ( table_mode == 1 )
+                        fprintf(fid, '   <td align="center" colspan="3"><b>Sequence #%d</b> </td> \n', s);
+                    end
+                    if ( s == 1 )
+                        G_buffer = [G_buffer '   <td align="center" colspan="1"><b>G1</b> </td> \n'];
+                    else
+                        G_buffer = [G_buffer '   <td align="center" colspan="1"><b>G' num2str(s) '/G1</b> </td> \n'];
+                    end
                 end
-                 for s = 1 : maxseqs-1
-                    fprintf(fid, '   <td align="center" colspan="4" rowspan=2 bgcolor=#ADD8E6><b>G%d/G1</b> </td> \n', s+1)
-                end
+                fprintf(fid, '   <td align="center" colspan="4"><b>G Ratios</b> </td> \n');
                 fprintf(fid, '</tr> \n');
                 fprintf(fid, '   <td align="center"><b>Tracker ID</b> </td> \n');
-                for s = 1 : maxseqs
-                    fprintf(fid, '   <td align="center" bgcolor=#ADD8E6><b>G</b> </td> \n');
-                    fprintf(fid, '   <td align="center"><b>beta</b> </td> \n');
-                    fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
+                
+                if ( table_mode == 1 )
+                    for s = 1 : maxseqs
+                        fprintf(fid, '   <td align="center"><b>G</b> </td> \n');
+                        fprintf(fid, '   <td align="center"><b>beta</b> </td> \n');
+                        fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
+                    end
                 end
+                fprintf(fid, G_buffer);
                 fprintf(fid, '</tr> \n\n');
-
+                
                 printed = 1;
                 for b = 1 : length(beads)    
                     if(printed) fprintf(fid, '<tr> \n'); end
@@ -607,46 +623,74 @@ if info
                         fprintf(fid, '<td align="center"> %i </td> \n', b);  
                     end
                     printed = 0;
+                    G_buffer = '';
                     for s = 1 : maxseqs
                         index = length(seqs)*(b-1) + s;
                         idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
                         if(specific_seqs && index > length(seq_array))
+                            if ( table_mode == 1 )
+                                fprintf(fid, '<td colspan="%i" />', numvars*(maxseqs-s+1));
+                            end
                             break;
                         end
                         if(specific_seqs && (~seq_array{index}))  || isnan(rheo.G(idx))
+                            if ( table_mode == 1 )
+                                fprintf(fid, '<td colspan="%i" />', numvars*(maxseqs-s+1));                            
+                            end
                             break;
                         end
                         printed = 1;
-                        % G for this bead sequence
-                        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.G(idx));
-                        % beta for this bead/sequence
-                        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx));
-                        % R^2
-                        fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
-                    end
-                    for jdx = 1 : maxseqs-1
-                        fprintf(fid, '<td align="center" colspan="4"> %12.4g </td> \n', rheo.G(b+(maxseqs-1)*(b-1)+jdx)/rheo.G(b+(maxseqs-1)*(b-1)));
+                        if(s==1)
+                            G1 = rheo.G(idx);
+                        	% G1 for the first bead/sequence
+                            G_buffer = [G_buffer '<td align="center"> ' num2str(G1) ' </td> \n'];                            
+                        else
+                        	% GX/G1 for this bead/sequence
+                            G_buffer = [G_buffer '<td align="center"> ' num2str(rheo.G(idx)/G1) ' </td> \n'];
+                        end
+                        if ( table_mode == 1 )
+                            % G for this bead/sequence
+                            fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.G(idx));
+                            % beta for this bead/sequence
+                            fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx));
+                            % R^2
+                            fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
+                        end
                     end
                     if(printed)
+                        fprintf(fid, G_buffer);
                         fprintf(fid, '</tr> \n');
                     end
                 end
+                
+                
+                
+                
             case 'Jeffrey'
                 numvars = 4;
                 for s = 1 : maxseqs
-                    fprintf(fid, '   <td align="center" colspan="4"><b>Sequence #%d</b> </td> \n', s);
+                    if ( table_mode == 1 )
+                        fprintf(fid, '   <td align="center" colspan="4"><b>Sequence #%d</b> </td> \n', s);
+                    end
+                    if ( s == 1 )
+                        G_buffer = [G_buffer '   <td align="center" colspan="1"><b>G1</b> </td> \n'];
+                    else
+                        G_buffer = [G_buffer '   <td align="center" colspan="1"><b>G' num2str(s) '/G1</b> </td> \n'];
+                    end
                 end
-                for s = 1 : maxseqs-1
-                    fprintf(fid, '   <td align="center" colspan="4" rowspan=2 bgcolor=#ADD8E6><b>G%d/G1</b> </td> \n', s+1)
-                end
+                fprintf(fid, '   <td align="center" colspan="4"><b>G Ratios</b> </td> \n');
                 fprintf(fid, '</tr> \n');
                 fprintf(fid, '   <td align="center"><b>Tracker ID</b> </td> \n');
-                for s = 1 : maxseqs
-                    fprintf(fid, '   <td align="center" bgcolor=#ADD8E6><b>G</b> </td> \n');
-                    fprintf(fid, '   <td align="center"><b>eta1</b> </td> \n');
-                    fprintf(fid, '   <td align="center"><b>eta2</b> </td> \n');
-                    fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
+                
+                if ( table_mode == 1 )
+                    for s = 1 : maxseqs
+                        fprintf(fid, '   <td align="center"><b>G</b> </td> \n');
+                        fprintf(fid, '   <td align="center"><b>eta1</b> </td> \n');
+                        fprintf(fid, '   <td align="center"><b>eta2</b> </td> \n');
+                        fprintf(fid, '   <td align="center"><b>R^2</b> </td> \n');
+                    end
                 end
+                fprintf(fid, G_buffer);
                 fprintf(fid, '</tr> \n\n');
 
                 printed = 1;
@@ -655,32 +699,47 @@ if info
                     if(plots(b))
                         fprintf(fid, '<td align="center"> %i </td> \n', b);  
                     end
+                    G_buffer = '';
                     printed = 0;
                     for s = 1 : maxseqs
                         index = length(seqs)*(b-1) + s;
                         idx = find(rheo.beadID == beads(b) & rheo.seqID == seqs(s));
                         if(specific_seqs && index > length(seq_array))
+                            % Fill with blanks to G Ratios
+                            if ( table_mode == 1 )
+                                fprintf(fid, '<td colspan="%i" />', numvars*(maxseqs-s+1));
+                            end
                             break;
                         end
                         if(specific_seqs && (~seq_array{index}))  || isnan(rheo.G(idx))
+                            % Fill with blanks to G Ratios
+                            if ( table_mode == 1 )
+                                fprintf(fid, '<td colspan="%i" />', numvars*(maxseqs-s+1));
+                            end
                             break;
                         end
                         printed = 1;
-                        % G for this bead sequence
-                        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.G(idx));
-                        % eta1 for this bead/sequence
-                        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx, 1));
-                        % eta2 for this bead/sequence
-                        fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx, 2));
-                        % R^2
-                        fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
+                        if(s==1)
+                            G1 = rheo.G(idx);
+                        	% G1 for the first bead/sequence
+                            G_buffer = [G_buffer '<td align="center"> ' num2str(G1) ' </td> \n'];                            
+                        else
+                        	% GX/G1 for this bead/sequence
+                            G_buffer = [G_buffer '<td align="center"> ' num2str(rheo.G(idx)/G1) ' </td> \n'];
+                        end
+                        if ( table_mode == 1 )
+                            % G for this bead sequence
+                            fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.G(idx));
+                            % eta1 for this bead/sequence
+                            fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx, 1));
+                            % eta2 for this bead/sequence
+                            fprintf(fid, '<td align="center"> %12.4g </td> \n', rheo.eta(idx, 2));
+                            % R^2
+                            fprintf(fid, '<td align="center"> %0.4f </td> \n', rheo.Rsquare(idx));
+                        end
                     end
-                    for jdx = 1 : maxseqs-1
-                        fprintf(fid, '<td align="center" colspan="4"> %12.4g </td> \n', rheo.G(b+(maxseqs-1)*(b-1)+jdx)/rheo.G(b+(maxseqs-1)*(b-1)));
-                    end
-                    
-                    
                     if(printed)
+                        fprintf(fid, G_buffer);
                         fprintf(fid, '</tr> \n');
                     end
                 end

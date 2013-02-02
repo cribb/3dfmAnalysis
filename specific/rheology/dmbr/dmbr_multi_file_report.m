@@ -26,6 +26,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
 %
 
 
+
     if nargin<2
         filelist = full_list(uipickfiles('FilterSpec', '*.vfd.mat'));
     elseif(nargin<3)
@@ -34,6 +35,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
     else
         filelist = file_array;
     end
+    
     
     if (isempty(filelist))
         fprintf('No files selected. Program terminated.\n');
@@ -52,9 +54,12 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         return;
     end
     
+
     
     filelist = char(filelist);
     files = cell(size(filelist, 1), 1);
+    
+    
     
     %remove all non-relevant files
     count = 0;
@@ -76,9 +81,9 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         end
     end
     
-    files = char(files);
-    files = unique(files, 'rows');
-    files = char(sortn(files));
+    q = files;
+    files = char(sortn(unique(q, 'rows')));
+    
     if isempty(files)
         fprintf('No files selected. Program terminated.\n');
         return;
@@ -439,31 +444,34 @@ function selection = report_gui()
 %
 % Displays a checkbox GUI that allows the user to select analysis
 % parameters, including plot type, displacement, compliance, compliance fit, Excel
-% generation, and FPS addition. Easily expandable. Returns an ordered array
+% generation, and FPS addition. Easily expandable. Creates an ordered array
 % of the user's choices.
 %
 
 selection = [];
 
 chosen_plot = cellstr('Jeffrey');
+chosen_mode = 1;
 
 % Create GUI figure
-h.f = figure('units','pixels','position',[400,400,350,200], 'toolbar','none','menu','none', 'Name', 'Plot Selector');
+h.f = figure('units','pixels','position',[400,400,350,200], 'toolbar','none','menu','none', 'Name', 'Analysis Options');
 
 % Divider line
-h.panel=uipanel(h.f, 'Units', 'pixels', 'Position',[0 105 1260 1]);
+h.panel=uipanel(h.f, 'Units', 'pixels', 'Position',[0 100 1260 1]);
 
 % Checkboxes
-h.c(7) = uicontrol('Value', 0, 'style','checkbox','units','pixels', 'position', [190, 140, 150, 15], 'string', 'Check for Breakpoints');
-h.c(6) = uicontrol('style', 'edit', 'units','pixels', 'position', [85, 47, 50, 20]);
-h.c(5) = uicontrol('Value', 0, 'style','checkbox','units','pixels', 'position', [15, 50, 65, 15], 'string', 'Set FPS:');
-h.c(4) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 75, 200, 15], 'string', 'Generate Excel Spreadsheet');
-h.c(3) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 120, 150, 15], 'string', 'Plot Compliance Fit');
-h.c(2) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 145, 150, 15], 'string', 'Plot Compliance');
-h.c(1) = uicontrol('Value', 1, 'style','checkbox','units','pixels', 'position', [15, 170, 150, 15], 'string', 'Plot Displacement');
-
-h.plot(1) = uicontrol( 'style', 'popupmenu', 'String', {'Jeffrey', 'Power Law (Fabry)'},... 'Newtonian', 'Maxwell', 'Kelvin-Voight', 'Stretched Exponential', 'KE model #1', 'Power Law',
+h.c(9) = uicontrol( 'style', 'popupmenu', 'String', {'Mode 1 (All Parameters)', 'Mode 2 (Just G Ratios)'}, 'position', [190, 140, 150, 15], 'callback', @mode);
+h.c(8) = uicontrol( 'style', 'popupmenu', 'String', {'Jeffrey', 'Power Law (Fabry)'}, ... 'Newtonian', 'Maxwell', 'Kelvin-Voight', 'Stretched Exponential', 'KE model #1', 'Power Law',
                     'position', [190, 170, 150, 15], 'callback', @plot_call);
+h.c(7) = uicontrol('Value', 0, 'style', 'checkbox', 'units', 'pixels', 'position', [190, 110, 150, 15], 'string', 'Check for Breakpoints');
+h.c(6) = uicontrol('style', 'edit', 'units', 'pixels', 'position', [85, 47, 50, 20]);
+h.c(5) = uicontrol('Value', 0, 'style', 'checkbox', 'units', 'pixels', 'position', [15, 50, 65, 15], 'string', 'Set FPS:');
+h.c(4) = uicontrol('Value', 1, 'style', 'checkbox', 'units', 'pixels', 'position', [15, 75, 200, 15], 'string', 'Generate Excel Spreadsheet');
+h.c(3) = uicontrol('Value', 1, 'style', 'checkbox', 'units', 'pixels', 'position', [15, 110, 150, 15], 'string', 'Plot Compliance Fit');
+h.c(2) = uicontrol('Value', 1, 'style', 'checkbox', 'units', 'pixels', 'position', [15, 140, 150, 15], 'string', 'Plot Compliance');
+h.c(1) = uicontrol('Value', 1, 'style', 'checkbox', 'units', 'pixels', 'position', [15, 170, 150, 15], 'string', 'Plot Displacement');
+
+
 
 % Create Compute and Cancel pushbuttons 
 h.submit = uicontrol('style','pushbutton','units','pixels', 'position',[15,15,70,20],'string','Compute','callback',@p_call);
@@ -472,9 +480,15 @@ h.cancel = uicontrol('style','pushbutton','units','pixels', 'position',[100,15,7
 uiwait(h.f);
 
     %%%%%
+    function mode(varargin)
+        index = get(h.c(9), 'Value');
+        chosen_mode = index;
+    %%%%%
+    end    
+    
     function plot_call(varargin)
-        contents = get(h.plot,'String');
-        index = get(h.plot, 'Value');
+        contents = get(h.c(8),'String');
+        index = get(h.c(8), 'Value');
         chosen_plot = contents(index);
     %%%%%
     end
