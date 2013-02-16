@@ -17,8 +17,10 @@ function outs = get_TA_col(s, str, unt)
     for k = 1:length(q)
         if k == 1
             headers{k,1} = strtrim( th( 1:q(k) ) );
-        else
+        elseif k > 1 && k < length(q)
             headers{k,1} = strtrim( th( q(k-1):q(k) ) );
+        elseif k == length(q)
+            headers{k+1,1} = strtrim( th( q(k):end ) );
         end
     end
     
@@ -26,8 +28,10 @@ function outs = get_TA_col(s, str, unt)
     for k = 1:length(v)
         if k == 1
             units{k,1} = strtrim( un( 1:v(k) ) );
-        else
+        elseif k > 1 && k < length(v)
             units{k,1} = strtrim( un( v(k-1):v(k) ) );
+        elseif k == length(v)
+            units{k+1,1} = strtrim( un( v(k):end ) );
         end
     end
 

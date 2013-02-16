@@ -86,7 +86,7 @@ for k = 1 : length(fn)
         end
         
         if findstr(exptype, 'temperature')
-            temp = st.table(:,get_TA_col(st, 'temp', '°C'));
+            temp = st.table(:,get_TA_col(st, 'temperature', '°C'));
             visc = st.table(:,get_TA_col(st, 'viscosity', 'Pa.s'));
             srate = st.table(:,get_TA_col(st, 'shear rate', '1/s'));
             figh(count) = plot_cap_temp(temp, visc, [], mytitle);

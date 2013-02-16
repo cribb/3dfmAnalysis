@@ -1,3 +1,7 @@
+2012-02-16  Jeremy Cribb <jcribb@email.unc.edu>
+	* get_TA_col.m: added handling of an edge case.
+	* taplot.m: corrected handling of 'temperature' style plots
+
 2011-07-18  Jeremy Cribb <jcribb@email.unc.edu>
 	* tareport.m:  now handles closing its own figures instead of letting 'gen_plot_pubfiles' do it.
 
