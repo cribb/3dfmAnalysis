@@ -1,0 +1,3 @@
+2013-02-18  Jeremy Cribb <jcribb@email.unc.edu>
+	* added cap_gui.
+
