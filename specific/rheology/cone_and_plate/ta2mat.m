@@ -1,4 +1,4 @@
-function v = ta2mat(filename)
+function v = ta2mat(filename, savemat)
 % TA2MAT converts textual export of rheology datasets from the Ares G2 cone-and-plate rheometer to a matlab structure
 %
 % 3DFM function
@@ -8,11 +8,16 @@ function v = ta2mat(filename)
 % This function works to convert the textual export of rheology datasets 
 % from the Ares G2 cone-and-plate (CAP) rheometer to a matlab structure.
 %  
-%  [output_struct] = ta2mat(filename);  
+%  [output_struct] = ta2mat(filename, savemat);  
 %   
 %  where "filename" is the text file containing the rheology data.
+%        'savemat' is either 'y' or 'n', where 'y' indicates saving the new
+%                  structure as a cap.mat file.
 %  
-  
+
+if nargin < 2 || isempty(savemat)
+    savemat = 'n';
+end
 
 % set delimiter to be a "tab"
 tab = sprintf('\t');
@@ -244,10 +249,10 @@ v.rheometer       = rheometer;
 v.experiments     = exps;
 
 
-% if findstr(savemat, 'y')
-savefile = [filename_root '.cap.mat'];
-save(savefile, '-struct', 'v');
-% end
+if findstr(savemat, 'y')
+    savefile = [filename_root '.cap.mat'];
+    save(savefile, '-struct', 'v');    
+end
 
 
 return;

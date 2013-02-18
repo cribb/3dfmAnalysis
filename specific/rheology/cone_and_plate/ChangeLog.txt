@@ -1,4 +1,8 @@
-2012-02-16  Jeremy Cribb <jcribb@email.unc.edu>
+2013-02-18  Jeremy Cribb <jcribb@email.unc.edu>
+	* ta2mat.m: added option to save output to .mat file.
+	* get_TA_column_headers.m: added.  extracts column headers from TA dataset.
+
+2013-02-16  Jeremy Cribb <jcribb@email.unc.edu>
 	* get_TA_col.m: added handling of an edge case.
 	* taplot.m: corrected handling of 'temperature' style plots
 
