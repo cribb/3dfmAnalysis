@@ -1,3 +1,9 @@
+2013.02.25  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_analyze_CellExpt.m: added bead_radius to the filter structure for min_viscosity filter.
+	* pan_analyze_PMExpt.m: same.
+	* pan_publish_CellExpt.m: added a table that summarizes MSD and RMSD for tested conditions.  Added plots of PDF for different cell types.  Added support for min_visc filter.
+	* pan_process_CellExpt.m: Added support for min_visc filter.	
+
 2012-12-10  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_analyze_CellExpt.m:  updated to relevant changes to passive microrhology experiment type (systemid = monoptes | panoptes, etc...).
 	* pan_process_CellExpt.m: same.

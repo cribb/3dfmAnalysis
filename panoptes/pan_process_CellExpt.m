@@ -29,6 +29,7 @@ filt.tcrop      = 3;
 filt.min_frames = 10;
 filt.min_pixels = 0;
 filt.max_pixels = Inf;
+filt.min_visc   = 0;  % Pa s
 filt.xycrop     = 0;
 filt.xyzunits   = 'pixels';
 filt.dead_spots = [0 392 28 32];   % flea2 on Monoptes camera after cleaning 2012/11/28

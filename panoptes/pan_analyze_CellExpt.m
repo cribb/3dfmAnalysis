@@ -46,9 +46,9 @@ for k = 1:length(filelist)
     
     % logentry(['Loading ' filelist(k).name]);
     
-    filt.xyzunits   = 'm';
-    filt.calib_um   = mycalibum;
-    
+    filt.xyzunits    = 'm';
+    filt.calib_um    = mycalibum;
+    filt.bead_radius = bead_radius;
 
     d = load_video_tracking(filelist(k).name, ...
                             metadata.instr.fps_bright, ...

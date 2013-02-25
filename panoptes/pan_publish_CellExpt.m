@@ -53,25 +53,45 @@ myparam = 'metadata.plate.cell.name';
 % compute the MSD for each condition defined by 'myparam'
 [msds molar_conc] = pan_combine_data(metadata, myparam);
 
-% variablest that contain summarized data
-all_taus = [msds.mean_logtau];
-all_msds = [msds.mean_logmsd];
-all_errs = [msds.msderr];
+% variables that contain summarized data
+all_taus = 10.^[msds.mean_logtau];
+all_msds = 10.^[msds.mean_logmsd];
+all_logtaus = [msds.mean_logtau];
+all_logmsds = [msds.mean_logmsd];
+all_logerrs = [msds.msderr];
+all_ns   = [msds.n];
 
 % create plot with bar graph at a given tau
 spec_tau = 1;
 log_spec_tau = log10(spec_tau);
-[minval, minloc] = min( sqrt((all_taus - log_spec_tau).^2) );
-mytau = 10.^all_taus(minloc(1),:);
-mymsd = all_msds(minloc(1),:);
-myerr = all_errs(minloc(1),:);
+[minval, minloc] = min( sqrt((all_logtaus - log_spec_tau).^2) );
+mytau    = all_taus(minloc(1),:);
+mylogtau = all_logtaus(minloc(1),:);
+mymsd    = all_msds(minloc(1),:);
+mylogmsd = all_logmsds(minloc(1),:);
+mylogerr = all_logerrs(minloc(1),:);
+myerr    = 10.^(mylogmsd + mylogerr) - 10.^(mylogmsd);
+
+% generate information for the data table summary
+rms_mymsd = sqrt(mymsd);
+rms_mymsd_err = sqrt(mymsd+myerr) - rms_mymsd;
+msds_n = all_ns(minloc(1),:);
+
+% create plots of distributions that correspond with bar graph
+for k = 1:length(msds)
+    my_type = msds(k).logmsd(minloc(1),:);
+    [mydensity, my_dens_locs] = ksdensity(my_type);
+    densities(:,k) = mydensity(:);
+    dens_locs(:,k) = my_dens_locs(:);
+    density_names{k} = molar_conc{k};
+end
 
 % Hypothesis Testing (Stat Analysis)
 count = 1;
 for k = 1:length(msds)-1
-    type_A = log10(msds(k).msd(minloc(1),:));   
+    type_A = msds(k).logmsd(minloc(1),:);   
     for m = (k+1):length(msds)
-        type_B = log10(msds(m).msd(minloc(1),:));        
+        type_B = msds(m).logmsd(minloc(1),:);        
         [h(count),p(count)] = ttest2(type_A, type_B);
 
         type_A_names{count} = molar_conc{k};
@@ -81,18 +101,29 @@ for k = 1:length(msds)-1
     end
 end
 
+% construct the ksdensity figure
+ksfig  = figure;
+plot(dens_locs, densities);
+leg = legend(density_names);
+set(leg, 'Interpreter', 'none');
+xlabel('<r^2> [m^2]');
+ylabel('pdf');
+ksdensity_file = [metadata.instr.experiment '_molar_concentration_ALL' '.ksdensity'];
+gen_pub_plotfiles(ksdensity_file, ksfig, 'normal');
+close(ksfig);
+
 barfig = figure;
-barwitherr( (10.^(mymsd+myerr))-(10.^(mymsd)),  (10 .^ mymsd));
+barwitherr( (10.^(mylogmsd+mylogerr))-(10.^(mylogmsd)),  (10 .^ mylogmsd));
 set(gca,'XTickLabel',molar_conc)
 xlabel('cell type');
-ylabel('<r^2> [m^2]');
+ylabel('log_{10}(<r^2> [m^2])');
 barfile = [metadata.instr.experiment '_molar_concentration_ALL' '.bar'];
 gen_pub_plotfiles(barfile, barfig, 'normal');
 close(barfig);
 
 % create plot with mean msd data for all values of 'myparam' across ALL taus
 aggMSDfig = figure; 
-errorbar(all_taus, all_msds, all_errs, 'LineWidth', 2)
+errorbar(all_logtaus, all_logmsds, all_logerrs, 'LineWidth', 2)
 xlabel('time scale, \tau [s]');
 ylabel('<r^2> [m^2]');
 legend(molar_conc, 'Location', 'SouthEast');
@@ -149,6 +180,7 @@ fprintf(fid, '   <h3> Data Filters </h3> \n');
 fprintf(fid, '   <b>Min. number of frames per tracker:</b> %i [frames]<br/> \n', filt.min_frames);
 fprintf(fid, '   <b>Min. number of pixels per tracker:</b> %i [pixels]<br/> \n', filt.min_pixels);
 fprintf(fid, '   <b>Max. number of pixels per tracker:</b> %i [pixels]<br/> \n', filt.max_pixels);
+fprintf(fid, '   <b>Min. viscosity:</b> %8.3g [Pa s]<br/> \n', filt.min_visc);
 fprintf(fid, '   <b>Number of first and Last frames cropped from each tracker:</b> %i [frames] <br/>\n', filt.tcrop);
 fprintf(fid, '   <b>Number of pixels cropped around frame border:</b> %i [pixels] <br/> \n', filt.xycrop);
 fprintf(fid, '</p> \n');
@@ -182,21 +214,67 @@ end
 fprintf(fid, '   </table>\n');
 fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
+
+%
+% % % Report Summary table
+%
+fprintf(fid, '<p> \n');
+fprintf(fid, '   <h3> Summary </h3> \n');
+fprintf(fid, '   <table border="2" cellpadding="6"> \n');
+fprintf(fid, '   <tr> \n');
+fprintf(fid, '      <td align="center" width="200"> <b> Condition </b> </td> \n');
+fprintf(fid, '      <td align="center" width="200"> <b> MSD </b> </td> \n');
+fprintf(fid, '      <td align="center" width="200"> <b> RMS displacement </b> </td> \n');
+fprintf(fid, '      <td align="center" width="200"> <b> No. of trackers </b> </td> \n');
+fprintf(fid, '    </tr>\n');
+
+% Fill in Summary table with data
+for k = 1:length(msds)
+    fprintf(fid, '   <tr> \n');
+    fprintf(fid, '      <td align="center" width="200"> %s </td> \n', molar_conc{k});
+    fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', mymsd(k), myerr(k));
+    fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rms_mymsd(k)*1e9, rms_mymsd_err(k)*1e9);
+    fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_n(k));    
+    fprintf(fid, '   </tr>\n');        
+end
+fprintf(fid, '   </table>\n');
+fprintf(fid, '</p> \n');
+fprintf(fid, '<hr/> \n\n');
+
 %
 % % % Report Summary figure.  Bar chart with error.  (Maybe ANOVA eventually?)
 %
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <b> Summary: Cell Types </b> <br/> \n');
-fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', barfile);
+fprintf(fid, '    <a href="%s">', [barfile '.fig']);
+fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [barfile '.svg']);
+fprintf(fid, '    </a>');
+% fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', barfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
+
+%
+% % % 
+% 
+fprintf(fid, '<p> \n');
+fprintf(fid, '   <b> Summary: Cell Types, PDF </b> <br/> \n');
+fprintf(fid, '    <a href="%s">', [ksdensity_file '.fig']);
+fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [ksdensity_file '.svg']);
+fprintf(fid, '    </a>');
+% fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', ksdensity_file);
+fprintf(fid, '   <br/> \n\n');
+fprintf(fid, '</p> \n\n');
+
 
 %
 % % % Report for aggregated parameter values (this case is molar_concentration)
 %
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <b> Summary: Mean Squared Displacement (MSD) </b> <br/> \n');
-fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', aggMSDfile);
+fprintf(fid, '    <a href="%s">', [aggMSDfile '.fig']);
+fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [aggMSDfile '.svg']);
+fprintf(fid, '    </a>');
+% fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', aggMSDfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 
@@ -213,9 +291,12 @@ fprintf(fid, '     </td>\n  <td align="center" width="425"> <b> Mean Squared Dis
 fprintf(fid, '     </td>\n </tr>\n\n');
 
 for k = 1 : length(molar_conc)   
-   fprintf(fid, '    <tr>\n  <td align="left" width="200">\n    <b> %s </b> <br/> \n', molar_conc{k});
+   fprintf(fid, '    <tr>\n  <td align="left" width="200">\n     <b> %s </b> <br/> \n', molar_conc{k});
    fprintf(fid, '     </td>\n  <td align="center" width="425">\n');
-   fprintf(fid, '       <iframe src="%s.svg" width="400" height="300" border="0"></iframe> \n', MSDfile{k});
+   fprintf(fid, '    <a href="%s">', [MSDfile{k} '.fig']);
+   fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [MSDfile{k} '.svg']);
+   fprintf(fid, '    </a>');
+%    fprintf(fid, '       <iframe src="%s.svg" width="400" height="300" border="0"></iframe> \n', MSDfile{k});
    fprintf(fid, '     </td>\n </tr>\n\n');   
 end
 
