@@ -111,6 +111,13 @@ function outs = filter_video_tracking(data, filt)
         end
     end
     
+    if isfield(filt, 'min_visc') && isfield(filt, 'bead_radius')
+        if filt.min_visc > 0
+            % assuming pixels
+            data = filter_viscosity_range('min', data, filt.min_visc, filt.bead_radius, filt.xyzunits, filt.calib_um);
+        end
+    end
+    
     if isfield(filt, 'xycrop')
         if filt.xycrop > 0
             data = filter_xycrop(data, filt.xycrop);
@@ -238,6 +245,66 @@ function data = filter_pixel_range(mode, data, PixelRange, xyzunits, calib_um)
                     idx  = find(data(:, ID) ~= beadlist(i)); %Get all data rows for this bead
                     data = data(idx, :);                     %Recreate data without this bead
 %                 continue                                     %Move on to next bead now
+                end
+        end                
+    end    
+    
+    return;
+
+    
+function data = filter_viscosity_range(mode, data, ViscRange, bead_radius, xyzunits, calib_um)
+    video_tracking_constants;
+    beadlist = unique(data(:,ID));
+    
+    if nargin < 6 || isempty(calib_um)
+        xyzunits = 'pixels';
+        calib_um = 1;
+    end
+    
+
+
+    
+    for i = 1:length(beadlist)                  %Loop over all beadIDs.
+        idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
+        numFrames = length(idx);    
+
+        mydata = data(idx,:);
+        
+        if isempty(mydata)
+            continue;
+        end
+                
+        longest_frame = max(mydata(:,FRAME)) - min(mydata(:,FRAME));
+        shortest_frame = min(diff(mydata(:,FRAME)));
+        
+        windows = [shortest_frame floor(longest_frame/2)];
+        windows = windows(:);
+        time_scales = windows .* mean(diff(mydata(:,TIME)));
+        
+        % 2D MSD in pixels
+        [tau mymsd_px] = msd(mydata(:,TIME), mydata(:,X:Y), windows);
+        mymsd_px = mymsd_px(:);
+        
+        kb = 1.3806e-23;
+        T = 298;
+        
+        % Calculate range limits for bead diffusing in 2D
+        Rrange_px = sqrt((2*kb*T)/(3*pi*bead_radius*ViscRange) .* time_scales) ./ (calib_um*1e-6);
+                        
+        %Delete this bead iff necesary
+        switch mode
+            case 'max' % delete any tracker that exceeds max visc threshold
+                % large msd means small viscosity
+                if(mymsd_px < Rrange_px)
+                    idx  = find(data(:, ID) ~= beadlist(i)); %Get all data rows for this bead
+                    data = data(idx, :);                     %Recreate data without this bead
+                    logentry('deleted tracker with TOO HIGH viscosity.');
+                end
+            case 'min' % delete any tracker that has a lower viscosity than min visc threshold
+                if(mymsd_px > Rrange_px)
+                    idx  = find(data(:, ID) ~= beadlist(i)); %Get all data rows for this bead
+                    data = data(idx, :);                     %Recreate data without this bead
+                    logentry('deleted tracker with TOO LOW viscosity.');
                 end
         end                
     end    
