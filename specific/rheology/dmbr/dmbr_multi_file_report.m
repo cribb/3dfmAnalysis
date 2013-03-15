@@ -97,7 +97,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         
 %verify all files    
     counter = 1;
-    if(plot_selection{7,1})
+    if(plot_selection{7})
         logentry('Checking for breakpoints.');
     end
     while counter <= size(files,1);
@@ -107,7 +107,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         cd(pathname);
         filename_root = strtrim(filename_root);
         metadatafile = strcat(filename_root, '.vfd.mat');
-        trackfile = tracking_check(filename_root);
+        trackfile = dmbr_locate_trackfile(filename_root);
         if ~exist(metadatafile, 'file')
             fprintf('***The file ');
             fprintf('%s', metadatafile);
@@ -126,7 +126,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
             counter = counter + 1;
         end
 
-        if(plot_selection{7,1})
+        if(plot_selection{7})
             m = load(metadatafile);
             m.trackfile = trackfile;
             m.poleloc = 'poleloc.txt';
@@ -175,7 +175,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
     cd(main_directory);
     
     sizeheader = 1;
-    if(plot_selection{4, 1})
+    if(plot_selection{4})
         if exist(xlfilename, 'file')
             delete(xlfilename);
         end
@@ -237,7 +237,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         end
     end
     
-    if(plot_selection{4, 1})
+    if(plot_selection{4})
         pword = plot_selection{8, :};
         excel_analysis(inseqs, reportbxs, xlfilename, sizeheader, pword{:});
     end
@@ -587,27 +587,5 @@ function time_selected = get_sequence_break(table)
 end
 
 
-% finds a matching tracking file in the current directory
 
-function fname = tracking_check(filename_root)
-    fname_array = [...
-        cellstr('.raw.vrpn.evt.mat')...
-        cellstr('.raw.vrpn.mat'),...
-        cellstr('.avi.vrpn.evt.mat'),...
-        cellstr('.avi.vrpn.mat'),...
-        cellstr('.vrpn.evt.mat'),...
-        cellstr('.vrpn.mat')...
-    ];
-        
-    for i=1:length(fname_array)
-        filen = strcat(filename_root, fname_array{i});
-        if exist(filen, 'file')
-            fname = filen;
-            return;
-        end
-    end
-    warning('Tracking file not found');
-    fname = 'NULL';
-    return;
-end
 

@@ -55,18 +55,18 @@ if(nargin < 4)
     headerheight = 1;
 end
 if(nargin < 5)
-    plot_select = cell(9,1);
-    plot_select(1:9,1) = {1};
-    plot_select(3,1) = {0};
-    plot_select(5,1) = {0};
-    plot_select(8,1) = cellstr('Power Law (Fabry)');
+    plot_select = cell(9);
+    plot_select(1:9) = {1};
+    plot_select(3) = {0};
+    plot_select(5) = {0};
+    plot_select(8) = cellstr('Power Law (Fabry)');
 end
 fit_type = plot_select{8};
 fit_type = fit_type{:};
 
-table_mode = plot_select{9,1}; % determines G ratio table mode
+table_mode = plot_select{9}; % determines G ratio table mode
 
-plot_select = cell2mat(plot_select(1:6,1));
+plot_select = cell2mat(plot_select(1:6));
 
 specific_seqs = 0;
 if(nargin > 5)
@@ -115,7 +115,7 @@ d = load_video_tracking(trackingfile, m.fps, 'pixels', calib_um, 'absolute', 'ye
 beadmax = get_beadmax(d);
 
 calibfile = 'NULL';
-if(plot_select(2, 1) || plot_select(3, 1) || plot_select(4, 1))
+if(plot_select(2) || plot_select(3) || plot_select(4))
     % load calibration 
     filelist = dir('*.vfc.mat');
     calibfile = filelist.name;
@@ -150,7 +150,7 @@ input_params.scale = 0.5;
 
 
 
-if(plot_select(2, 1) || plot_select(3, 1) || plot_select(4, 1))
+if(plot_select(2) || plot_select(3) || plot_select(4))
     if(specific_seqs)
         rheo = dmbr_run(input_params, seq_array);
     else
@@ -204,7 +204,10 @@ for b = 1 : length(beads)
     
     ti1 = 0;
     ti2 = pulses(1);
+    
+    %
     gaps = [0, 0; 0, 0; 0, 0];
+    
     fitc = 0;
     xstart = 0;
     ystart = 0;
@@ -251,7 +254,7 @@ for b = 1 : length(beads)
         tcont = ftable(:,TIME);
         t = tcont - tcont(1);
 
-        %subtract delay
+        %subtract delay: the initial delay before the sequences begin
         
         x1 = ftable(:,X);
         y1 = ftable(:, Y);
@@ -273,7 +276,7 @@ for b = 1 : length(beads)
         
         
         % compliance
-        if(plot_select(2, 1) || plot_select(3, 1))
+        if(plot_select(2) || plot_select(3))
             Jx = ftable(:,J);
             if s==1
                 Jstart = Jx(1);
@@ -289,7 +292,7 @@ for b = 1 : length(beads)
 
         
         % displacement vs. time plot: stacked
-        if(plot_select(1, 1))
+        if(plot_select(1))
             if ~exist('txFig');    txFig   = figure; end
             if ~exist('txFig2');   txFig2  = figure; end
             if ~exist('txcFig');   txcFig  = figure; end
@@ -349,7 +352,7 @@ for b = 1 : length(beads)
             gaps(1, 1:2) = [radial(end), tcont(end)];
         end
 
-        if(plot_select(2, 1))
+        if(plot_select(2))
             if ~exist('tJxFig');   tJxFig  = figure; end        
             if ~exist('tJxFig2');  tJxFig2 = figure; end
             if ~exist('tJxcFig');  tJxcFig  = figure; end
@@ -411,7 +414,7 @@ for b = 1 : length(beads)
 
         end
         % Fit plot (Jeffrey)
-        if(plot_select(3, 1))
+        if(plot_select(3))
             
             if ~exist('tJxcfFig');  tJxcfFig  = figure; end
             if ~exist('tJxcfFig2'); tJxcfFig2  = figure; end
@@ -502,7 +505,7 @@ for b = 1 : length(beads)
         
         
 
-        if(plot_select(1, 1))
+        if(plot_select(1))
             exportfig(txFig, txFigfilename, 'Format', 'png', 'height', 4.5, 'Color', 'cmyk', 'fontmode', 'fixed', 'fontsize', 13);
             exportfig(txcFig, txcFigfilename, 'Format', 'png', 'height', 4.5, 'Color', 'cmyk', 'fontmode', 'fixed', 'fontsize', 13);
             saveas(  txFig2,  txFigfilename2, 'fig');
@@ -512,7 +515,7 @@ for b = 1 : length(beads)
             close(txFig2);
             close(txcFig2);
         end
-        if(plot_select(2, 1))
+        if(plot_select(2))
             exportfig(tJxFig, tJxFigfilename, 'Format', 'png', 'height', 4.5, 'Color', 'cmyk', 'fontmode', 'fixed', 'fontsize', 13);
             exportfig(tJxcFig, tJxcFigfilename, 'Format', 'png', 'height', 4.5, 'Color', 'cmyk', 'fontmode', 'fixed', 'fontsize', 13);
             saveas( tJxFig2, tJxFigfilename2, 'fig');
@@ -523,7 +526,7 @@ for b = 1 : length(beads)
             close(tJxcFig2);
         end
         
-        if(plot_select(3, 1))
+        if(plot_select(3))
             exportfig(tJxcfFig, tJxcfFigfilename, 'Format', 'png', 'height', 4.5, 'Color', 'cmyk', 'fontmode', 'fixed', 'fontsize', 13);
             saveas( tJxcfFig2, tJxcfFigfilename2, 'fig');
             close(tJxcfFig);
@@ -581,7 +584,7 @@ if info
 
     G1 = 0;
     
-    if(plot_select(2, 1) || plot_select(3, 1))
+    if(plot_select(2) || plot_select(3))
     
         fprintf(fid, '<table border="2" cellpadding="6"> \n');
         fprintf(fid, '<tr> \n');
@@ -761,16 +764,16 @@ if info
         tJxcFigfilename   = [local_figures filesep filename_root '.comp_seq.bead'  num2str(beads(b)) '.png'];
         tJxcfFigfilename = [local_figures filesep filename_root '.comp_seq_fit.bead' num2str(beads(b)) '.png']; 
         
-        if(plot_select(1, 1))
+        if(plot_select(1))
             fprintf(fid, '<img src= "%s" border=2 > \t', txFigfilename);
             fprintf(fid, '<img src= "%s" border=2 > \t', txcFigfilename);
         end
-        if(plot_select(2, 1))
+        if(plot_select(2))
             fprintf(fid, '<br/> \n');
             fprintf(fid, '<img src= "%s" border=2 > \t', tJxFigfilename);
             fprintf(fid, '<img src= "%s" border=2 > \n', tJxcFigfilename);
         end
-        if(plot_select(3, 1))
+        if(plot_select(3))
             %print the compliance fit
             spaces = repmat('&nbsp', 1, 154);
             fprintf(fid, ['<br/> \n' spaces]);
@@ -809,7 +812,7 @@ if info
 
 
 %%%%%%%%%%%%%%%%% Printing to Excel Spreadsheet %%%%%%%%%%%%%%%%%
-    if(plot_select(4, 1))
+    if(plot_select(4))
     % data matrix
         % initial columns
         numcol = 4;

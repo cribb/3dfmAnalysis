@@ -1,3 +1,8 @@
+2013-03-15 Christian Stith <chstith@ncsu.edu>
+    * dmbr_adjust_breakpoint: added. implements a breakpoint-changing function for use with multi-file report.
+    * dmbr_multi_file_report: edited to accommodate dmbr_adjust_breakpoint.
+    * dmbr_report_cell_expt: same.
+
 2013-02-01 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report.m: implemented functionality for g ratios in the html report, along with the option for this in the gui.
 	* dmbr_report_cell_expt.m: same.
