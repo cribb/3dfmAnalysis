@@ -1,3 +1,6 @@
+2013-04-01  Jeremy Cribb <jcribb@email.unc.edu>
+	* vfd_fps.m:  minor cosmetic changes to documentation.
+
 2012-08-12  Christian Stith <chstith@ncsu.edu>
 	* vfd_fps: updated to not overwrite existing fps values.
 	* varforce_drive_gui_beta.fig: added. updated version of vfd GUI. now includes test options.

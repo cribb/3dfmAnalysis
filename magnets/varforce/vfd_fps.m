@@ -1,3 +1,4 @@
+function outs = vfd_fps(myfps, vfdfilein)
 % Christian Stith <chstith@ncsu.edu> and Jeremy Cribb, 06-28-2012
 % vfd_fps.m
 % 
@@ -13,7 +14,6 @@
 %       OR              vfd_fps(120, 'vid16.vfd.mat')
 
 
-function outs = vfd_fps(myfps, vfdfilein)
     if(nargin<2)
         files = dir('*.vfd.mat');
         flist = cell(numel(files),1);
