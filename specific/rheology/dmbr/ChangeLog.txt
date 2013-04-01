@@ -1,3 +1,7 @@
+2013-04-01  Jeremy Cribb <jcribb@email.unc.edu>
+    * dmbr_locate_trackfile.m: added on the behalf os Christian Stith.  It finds a matching tracking file in the current directory.
+    * dmbr_adjust_breakpoint: added.  This changlog claims this file was added on 03-15 but when updating CVS has no knowledge of the function's existence.   Adding it now.
+
 2013-03-15 Christian Stith <chstith@ncsu.edu>
     * dmbr_adjust_breakpoint: added. implements a breakpoint-changing function for use with multi-file report.
     * dmbr_multi_file_report: edited to accommodate dmbr_adjust_breakpoint.
