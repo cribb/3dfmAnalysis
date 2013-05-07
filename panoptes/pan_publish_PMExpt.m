@@ -200,9 +200,9 @@ fprintf(fid, '<hr/> \n\n');
 %
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Data Filters </h3> \n');
-fprintf(fid, '   <b>Min. frames per tracker:</b> %i [frames]<br/> \n', filt.min_frames);
-fprintf(fid, '   <b>Min. pixels per tracker:</b> %i [pixels]<br/> \n', filt.min_pixels);
-fprintf(fid, '   <b>Max. pixels per tracker:</b> %i [pixels]<br/> \n', filt.max_pixels);
+fprintf(fid, '   <b>Min. number of frames per tracker:</b> %i [frames]<br/> \n', filt.min_frames);
+fprintf(fid, '   <b>Min. number of pixels per tracker:</b> %i [pixels]<br/> \n', filt.min_pixels);
+fprintf(fid, '   <b>Max. number of pixels per tracker:</b> %i [pixels]<br/> \n', filt.max_pixels);
 fprintf(fid, '   <b>Number of first and Last frames cropped from each tracker:</b> %i [frames] <br/>\n', filt.tcrop);
 fprintf(fid, '   <b>Number of pixels cropped around frame border:</b> %i [pixels] <br/> \n', filt.xycrop);
 fprintf(fid, '   <b>Camera dead spots removed [X Y width height]: <br/>\n');
