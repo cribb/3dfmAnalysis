@@ -22,27 +22,46 @@ function pan = pan_publish_CellExpt(metadata, filt)
 nametag = metadata.instr.experiment;
 outf = metadata.instr.experiment;
 duration = metadata.instr.seconds;
-fps_bright = metadata.instr.fps_bright;
+% fps_bright = metadata.instr.fps_bright;
+% fps_fluo = metadata.instr.fps_fluo;
 autofocus = metadata.instr.auto_focus;
+video_mode = metadata.instr.video_mode;
+imaging_fps = metadata.instr.fps_imagingmode;
 
-% filt.min_frames = 10;
-% filt.min_pixels = 0;
-% filt.max_pixels = Inf;
-% filt.tcrop      = 0;
-% filt.xycrop     = 0;
-% filt.xyzunits   = 'pixels';
-% filt.calib_um   = 1;
-    
 if autofocus
     autofocus_yn = 'Yes.';
 else
     autofocus_yn = 'No.';
 end
 
+switch video_mode
+    case 0
+        video_mode = 'fluorescence burst, then brightfield';
+    case 1
+        video_mode = 'fluorescence only';
+    otherwise
+        error('Unknown video mode type.');
+end
+
 % % START REPORT GENERATION TO HTML PAGE
 
 outfile = [outf '.html'];
 fid = fopen(outfile, 'w');
+
+%%%%
+% compute the MSD for each WELL (for the heatmap)
+spec_tau = 1;
+[wellmsds wellID] = pan_combine_data(metadata, 'metadata.plate.well_map');
+all_welltaus = [wellmsds.mean_logtau];
+all_wellmsds = [wellmsds.mean_logmsd];
+all_wellerrs = [wellmsds.msderr];
+heatmap_msds = NaN(1,96);
+log_spec_welltau = log10(spec_tau);
+[minval, minloc] = min( sqrt((all_welltaus - log_spec_welltau).^2) );
+mywelltau = 10.^all_welltaus(minloc(1),:);
+mywellmsd = all_wellmsds(minloc(1),:);
+heatmap_msds(1, str2num(char(wellID)) ) = mywellmsd;
+heatmap_msds = reshape(heatmap_msds, 12, 8)';
 
 %%%%  Calculate the MSD for different cell types
 
@@ -78,9 +97,15 @@ rms_mymsd_err = sqrt(mymsd+myerr) - rms_mymsd;
 msds_n = all_ns(minloc(1),:);
 
 % create plots of distributions that correspond with bar graph
+npoints_ksdensity = 100;
 for k = 1:length(msds)
     my_type = msds(k).logmsd(minloc(1),:);
-    [mydensity, my_dens_locs] = ksdensity(my_type);
+    if ~isnan(my_type)
+        [mydensity, my_dens_locs] = ksdensity(my_type, 'npoints', npoints_ksdensity);
+    else
+        mydensity = NaN(npoints_ksdensity,1);
+        my_dens_locs = NaN(npoints_ksdensity,1);
+    end
     densities(:,k) = mydensity(:);
     dens_locs(:,k) = my_dens_locs(:);
     density_names{k} = molar_conc{k};
@@ -166,8 +191,9 @@ fprintf(fid, '</p> \n\n');
 %
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Instrument Setup </h3> \n');
+fprintf(fid, '   <b>Imagine Mode:</b>  %s <br/> \n', video_mode);
+fprintf(fid, '   <b>Imaging framerate:</b> %s [fps].<br/> \n', num2str(imaging_fps));
 fprintf(fid, '   <b>Video Duration:</b>  %s [s]<br/> \n', num2str(duration));
-fprintf(fid, '   <b>Video framerate, brightfield:</b> %s [fps].<br/> \n', num2str(fps_bright));
 fprintf(fid, '   <b>Autofocus:</b> %s <br/> \n', autofocus_yn);
 fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
@@ -183,6 +209,13 @@ fprintf(fid, '   <b>Max. number of pixels per tracker:</b> %i [pixels]<br/> \n',
 fprintf(fid, '   <b>Min. viscosity:</b> %8.3g [Pa s]<br/> \n', filt.min_visc);
 fprintf(fid, '   <b>Number of first and Last frames cropped from each tracker:</b> %i [frames] <br/>\n', filt.tcrop);
 fprintf(fid, '   <b>Number of pixels cropped around frame border:</b> %i [pixels] <br/> \n', filt.xycrop);
+fprintf(fid, '   <b>Camera dead spots removed [X Y width height]: <br/>\n');
+for k = 1:size(filt.dead_spots,1)
+    fprintf(fid, '\t &nbsp;&nbsp;&nbsp; [%i %i %i %i] [pixels]<br/> \n', filt.dead_spots(k,1), ...
+                                                                         filt.dead_spots(k,2), ...
+                                                                         filt.dead_spots(k,3), ...
+                                                                         filt.dead_spots(k,4));
+end
 fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
 
@@ -214,6 +247,13 @@ end
 fprintf(fid, '   </table>\n');
 fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
+
+
+
+
+
+
+
 
 %
 % % % Report Summary table
@@ -275,6 +315,16 @@ fprintf(fid, '    <a href="%s">', [aggMSDfile '.fig']);
 fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [aggMSDfile '.svg']);
 fprintf(fid, '    </a>');
 % fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', aggMSDfile);
+fprintf(fid, '   <br/> \n\n');
+fprintf(fid, '</p> \n\n');
+
+%
+% Plate-wide heat-map
+%
+fprintf(fid, '<p> \n');
+fprintf(fid, '   <h3> Heatmap (Viscosity at %i [s] time scale) </h3> \n', spec_tau);
+% fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
+fprintf(fid, '   <iframe src="%s.png" width="800" height="600" border="0"></iframe> <br/> \n', heatmapfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 

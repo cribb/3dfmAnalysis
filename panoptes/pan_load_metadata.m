@@ -43,6 +43,16 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
     if ~isempty(outs.files.wells)
         outs.instr = pan_read_wells_txtfile( outs.files.wells.name );
         outs.instr.fps_bright = 1e6 ./ (outs.instr.OnTime_bright + outs.instr.OffTime);
+        outs.instr.fps_fluo   = 1e6 ./ (outs.instr.OnTime_fluo + outs.instr.OffTime);
+        
+        switch outs.instr.video_mode
+            case 0
+                outs.instr.fps_imagingmode = outs.instr.fps_bright;
+            case 1
+                outs.instr.fps_imagingmode = outs.instr.fps_fluo;
+            otherwise
+                error('Unknown video mode type.');
+        end
         
         % if the instrument is panoptes (rather than monoptes) then expand
         % the wellIDs that were defined in the wells.txt file

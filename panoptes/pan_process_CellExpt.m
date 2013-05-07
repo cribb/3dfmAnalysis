@@ -17,7 +17,7 @@ metadata = pan_load_metadata(filepath, '96well');
 
 % create the 'window' vector that will decide which time scales (taus) we're going to use    
 duration = metadata.instr.seconds;
-frame_rate = metadata.instr.fps_bright;
+frame_rate = metadata.instr.fps_imagingmode;
 
 window = 35;
 window = unique(floor(logspace(0,round(log10(duration*frame_rate)), window)));

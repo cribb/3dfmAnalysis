@@ -22,14 +22,25 @@ function pan = pan_publish_PMExpt(metadata, filt)
 nametag = metadata.instr.experiment;
 outf = metadata.instr.experiment;
 duration = metadata.instr.seconds;
-fps_bright = metadata.instr.fps_bright;
+% fps_bright = metadata.instr.fps_bright;
+% fps_fluo = metadata.instr.fps_fluo;
 autofocus = metadata.instr.auto_focus;
-
+video_mode = metadata.instr.video_mode;
+imaging_fps = metadata.instr.fps_imagingmode;
 
 if autofocus
     autofocus_yn = 'Yes.';
 else
     autofocus_yn = 'No.';
+end
+
+switch video_mode
+    case 0
+        video_mode = 'fluorescence burst, then brightfield';
+    case 1
+        video_mode = 'fluorescence only';
+    otherwise
+        error('Unknown video mode type.');
 end
 
 % % START REPORT GENERATION TO HTML PAGE
@@ -39,7 +50,7 @@ fid = fopen(outfile, 'w');
 
 %%%%
 % compute the MSD for each WELL (for the heatmap)
-spec_tau = 10;
+spec_tau = 1;
 [wellmsds wellID] = pan_combine_data(metadata, 'metadata.plate.well_map');
 all_welltaus = [wellmsds.mean_logtau];
 all_wellmsds = [wellmsds.mean_logmsd];
@@ -94,7 +105,7 @@ all_msds = [msds.mean_logmsd];
 all_errs = [msds.msderr];
 
 % create plot with bar graph at a given tau
-spec_tau = 10;
+spec_tau = 1;
 log_spec_tau = log10(spec_tau);
 [minval, minloc] = min( sqrt((all_taus - log_spec_tau).^2) );
 mytau = 10.^all_taus(minloc(1),:);
@@ -145,7 +156,7 @@ close(aggMSDfig);
 for k = 1:length(molar_conc)    
     MSDfile{k} = [metadata.instr.experiment '_well_' molar_conc{k} '.msd'];
     MSDfig  = plot_msd(msds(k), [], 'ame');
-    set(gca, 'YLim', [-16 -12]);
+%     set(gca, 'YLim', [-16 -12]);
     figure(MSDfig);
     gen_pub_plotfiles(MSDfile{k}, MSDfig, 'normal'); 
     close(MSDfig);    
@@ -177,8 +188,9 @@ fprintf(fid, '</p> \n\n');
 %
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Instrument Setup </h3> \n');
+fprintf(fid, '   <b>Imagine Mode:</b>  %s <br/> \n', video_mode);
+fprintf(fid, '   <b>Imaging framerate:</b> %s [fps].<br/> \n', num2str(imaging_fps));
 fprintf(fid, '   <b>Video Duration:</b>  %s [s]<br/> \n', num2str(duration));
-fprintf(fid, '   <b>Video framerate, brightfield:</b> %s [fps].<br/> \n', num2str(fps_bright));
 fprintf(fid, '   <b>Autofocus:</b> %s <br/> \n', autofocus_yn);
 fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
@@ -208,7 +220,7 @@ fprintf(fid, '<hr/> \n\n');
 % Plate-wide heat-map
 %
 fprintf(fid, '<p> \n');
-fprintf(fid, '   <h3> Heatmap (Viscosity at 10 [s] time scale) </h3> \n');
+fprintf(fid, '   <h3> Heatmap (Viscosity at %i [s] time scale) </h3> \n', spec_tau);
 % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
 fprintf(fid, '   <iframe src="%s.png" width="800" height="600" border="0"></iframe> <br/> \n', heatmapfile);
 fprintf(fid, '   <br/> \n\n');
@@ -247,7 +259,7 @@ fprintf(fid, '</p> \n\n');
 % % % Report Summary figure.  Bar chart with error.  (Maybe ANOVA eventually?)
 %
 fprintf(fid, '<p> \n');
-fprintf(fid, '   <b> Summary: Mean Squared Displacements at 10 [s] timescale </b> <br/> \n');
+fprintf(fid, '   <b> Summary: Mean Squared Displacements at %i [s] timescale </b> <br/> \n', spec_tau);
 fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', barfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');

@@ -79,7 +79,7 @@ for p = 1:length(paramlist)
         
 
         d = load_video_tracking(filelist, ...
-                            metadata.instr.fps_bright, ...
+                            metadata.instr.fps_imagingmode, ...
                             'm', mycalibum, ...
                             'absolute', 'no', 'table');                                        
 
@@ -88,7 +88,7 @@ for p = 1:length(paramlist)
         % via a video-by-video and MCUparameter basis.
         save_evtfile(['aggregated_data_' myparam], d, 'm', 0.152);
 
-        mymsd = video_msd(d, window, metadata.instr.fps_bright, mycalibum, 'no');                
+        mymsd = video_msd(d, window, metadata.instr.fps_imagingmode, mycalibum, 'no');                
 
         msds(p) = msdstat(mymsd);        
         myve(p)  = ve(mymsd, bead_radius, freqtype, 'no');

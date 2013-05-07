@@ -1,3 +1,13 @@
+2013.05.07  Jeremy Cribb <jcribb@email.unc.edu>
+    * pan_analyze_CellExpt.m: updated to check for video mode in case 'fluorescent mode' is used, repairing a bug where the 'brightfield' frame rate was the only one used to compute a video/experiment's frame rate.
+    * pan_analyze_PMexpt.m: same.
+    * pan_combine_data.m: same.
+    * pan_load_metadata.m: same.
+    * pan_process_CellExpt.m: same.
+    * pan_process_PMExpt.m: same.
+    * pan_publish_PMExpt.m: same.
+    * pan_publish_CellExpt.m: same.  also added heatmap to the report.
+
 2013.02.25  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_analyze_CellExpt.m: added bead_radius to the filter structure for min_viscosity filter.
 	* pan_analyze_PMExpt.m: same.
@@ -13,7 +23,6 @@
 	* pan_combine_data.m: now handles the case when the MCU parameter may not exist, primarily because the autofocus did not find any focal plane where data was worthy of collection.
 	* pan_MCU2um.m: updated to include new monoptes calibration function.
 	
-
 2012-10-05  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_load_metadata.m:  added back in the wells associated with channel 4.
 

@@ -51,7 +51,7 @@ for k = 1:length(filelist)
     filt.bead_radius = bead_radius;
 
     d = load_video_tracking(filelist(k).name, ...
-                            metadata.instr.fps_bright, ...
+                            metadata.instr.fps_imagingmode, ...
                             'm', mycalibum, ...
                             'absolute', 'no', 'table');
                        
@@ -61,7 +61,7 @@ for k = 1:length(filelist)
     end
     
     
-%     mymsd = video_msd(d, window, metadata.instr.fps_bright, mycalibum, 'no');        
+%     mymsd = video_msd(d, window, metadata.instr.fps_imagingmode, mycalibum, 'no');        
 %     myve  = ve(mymsd, bead_radius, freqtype, 'no');
     
         if findstr(mode, 'd')            
