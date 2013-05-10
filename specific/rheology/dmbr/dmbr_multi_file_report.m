@@ -26,7 +26,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
 %
 
 
-
+    % check parameters & call uipickfiles
     if nargin<2
         filelist = full_list(uipickfiles('FilterSpec', '*.vfd.mat'));
     elseif(nargin<3)
@@ -36,7 +36,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         filelist = file_array;
     end
     
-    
+    % check filelist
     if (isempty(filelist))
         fprintf('No files selected. Program terminated.\n');
         return;
@@ -48,6 +48,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         
     
     % Give options to user via checkboxes
+    % See function below: report_gui
     plot_selection = report_gui();
     if (isempty(plot_selection) || plot_selection{1} == -1)
         fprintf('Program canceled.\n');
@@ -81,28 +82,27 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         end
     end
     
+    % check files again
     q = files;
     files = char(sortn(unique(q, 'rows')));
-    
     if isempty(files)
         fprintf('No files selected. Program terminated.\n');
         return;
     end
     
-    %parse out first directory
+    % parse out first directory
     [main_directory, ~, ~] = fileparts(char(files(1,:)));
     main_directory = strcat(main_directory, filesep);
     
     xlfilename = [main_directory excel_name '.xlsx'];
         
-%verify all files    
+    % verify all files    
     counter = 1;
     if(plot_selection{7})
         logentry('Checking for breakpoints.');
     end
+    % check all files for breakpoints data
     while counter <= size(files,1);
-        % check all files for breakpoints data
-
         [pathname, filename_root, ext, versn] = fileparts(files(counter,:));
         cd(pathname);
         filename_root = strtrim(filename_root);
@@ -125,7 +125,8 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         else
             counter = counter + 1;
         end
-
+        
+        % select new breakpoint (if needed)
         if(plot_selection{7})
             m = load(metadatafile);
             m.trackfile = trackfile;
@@ -135,9 +136,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
             end
             time_selected = NaN;
             if ~isfield(m, 'time_selected')
-                %%%%
                 % identify location of a break between sequences by clicking on plot
-                %%%%
                 video_tracking_constants;
                 table = load_video_tracking(m.trackfile, m.fps, 'm', m.calibum, 'absolute', 'yes', 'table');
                 poleloc = m.poleloc * m.calibum * 1e-6;
@@ -161,27 +160,34 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         end
     end
 
+    % check file list again
     if(size(files, 1)==0)
         fprintf('No files selected. Program terminated.\n');
         return;
     end
-    
-    fprintf('Files to be analyzed:\n');
-    for i=1:size(files, 1)
-        [~, filename_root, ~] = fileparts(files(i,:));
-        fprintf([filename_root '\n']);
-    end
-    
+ 
+% print out the finalized list of files
+%
+%    fprintf('Files to be analyzed:\n');
+%    for i=1:size(files, 1)
+%        [~, filename_root, ~] = fileparts(files(i,:));
+%        fprintf([filename_root '\n']);
+%    end
+
+    % reset the working directory
     cd(main_directory);
     
+    % prepare the excel file (overwrites)
+    % see function below: write_header
     sizeheader = 1;
     if(plot_selection{4})
         if exist(xlfilename, 'file')
             delete(xlfilename);
         end
-        sizeheader = writeheader(files, xlfilename, main_directory);
+        sizeheader = write_header(files, xlfilename, main_directory);
     end
-        
+    
+    % prepare the html file (overwrites)
     htmlfile = [main_directory excel_name '.html'];
     if exist(htmlfile)
         delete(htmlfile);
@@ -205,52 +211,51 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
     
     adjust = cell(size(files,1), 3);
     
+    % analyze all data: run dmbr_report_cell_expt on each validated file
     for b=1:(size(files,1))
-        % analyze all data
         if(nargin<2)
             temp = dmbr_report_cell_expt(strtrim(files(b,:)), [main_directory excel_name], main_directory, sizeheader, plot_selection);
         else
             temp = dmbr_report_cell_expt(strtrim(files(b,:)), [main_directory excel_name], main_directory, sizeheader, plot_selection, seq_array);
         end
         bxs = temp{1};
-       
+        
+        % update bead/pull counts for excel
         start = length(inseqs);
         inseqs = vertcat(inseqs, temp{2});
         if(nargin>1)
             seq_array(1:(bxs(1,1)*bxs(1,2))) = [];
         end
         
-        
+        % set up dmbr_adjust_report
         adjust{b, 1} = files(b,:);
         adjust{b, 2} = bxs(1,1);
         adjust{b, 3} = bxs(1,2);
         for i=1:bxs(1,1)
             adjust{b, i+3} = inseqs(start+i);
         end
-        
         checkbxs(1, 1) = checkbxs(1, 1) + bxs(1, 1);
         checkbxs(1, 2) = checkbxs(1, 2) + bxs(1, 2);
-        
         reportbxs(1, 1) = reportbxs(1, 1) + bxs(1, 3);
         if(bxs(1, 4) > reportbxs(1, 2))
             reportbxs(1, 2) = bxs(1, 4);
         end
+        
     end
     
+    % finish excel file (see function below: excel_analysis)
     if(plot_selection{4})
         pword = plot_selection{8, :};
         excel_analysis(inseqs, reportbxs, xlfilename, sizeheader, pword{:});
     end
 
+    % finish html file
     fid = fopen(htmlfile, 'a+');
-    
-    
     fprintf(fid, '\n<br/><a href="#Contents">Back to Top</a></p>\n'); 
     fprintf(fid, '</html>\n');
-
     fclose(fid);
     
-%    cd(topir);
+    
     outfile = [excel_name '.seqdat.txt'];
     if(exist(outfile, 'file'))
         delete outfile;
@@ -287,6 +292,8 @@ function excel_analysis(inseqs, bxs, xlfilename, header, fit_type)
     % G ratio sidebar
     
     % THIS IS WHERE THE G INFORMATION IS WRITTEN INTO THE EXCEL FILE
+    % ^ no idea why I capitalized that
+    % It must have been really important
     sidebar = cell(bxs(1,1)+1, bxs(1,2)-1);
     for b=1:(bxs(1,2)-1)
         sidebar(1,b) = cellstr(strcat('G', num2str(b+1), '/G1'));
@@ -345,8 +352,6 @@ end
 function f = full_list(filegetter)
 % Primes the dir_parse function by taking a mixed list of files and
 % folders, and calling the dir_parse function on all folders.
-
-
     files = filegetter';
     b = 1;
     while(b <= length(files))
@@ -369,11 +374,9 @@ function r = dir_parse(folder)
     d = struct2cell(d);
     d = d(1,3:end);
     d = d';
-    
     b = 1;
     while(b <= length(d))
         d(b) = strcat(folder, filesep, char(d(b)));
-        
         if isdir(char(d(b)))
             temp = d(b);
             d(b) = [];
@@ -387,7 +390,7 @@ function r = dir_parse(folder)
     
 end
 
-function num = writeheader(files, filepath, topdir)
+function num = write_header(files, filepath, topdir)
 % Writes the Excel top header, using data from any
 % 'expdata.txt' files found. Data must fit specified
 % formatting.
@@ -529,8 +532,9 @@ function logentry(txt)
 end
 
 
-% returns the closest time to a mouseclick on a figure of video tracking
 function time_selected = get_sequence_break(table)
+% returns the closest time to a mouseclick on a figure of video tracking
+% taken from Jeremy Cribb's code elsewhere
 
     varforce_constants;
 

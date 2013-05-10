@@ -1,6 +1,6 @@
 
 function dmbr_adjust_breakpoint(filename, topdir, analysis)
-    
+    % admin function. runs setup & teardown.
     replace_breakpoint(filename);
     plot_select = {1, 1, 1, 0, 0, 0, 0, {'Jeffrey'}, 1};
     html = 'adjust_breakpoint.html';
@@ -15,6 +15,9 @@ end
 
 
 function replace_breakpoint (filename)
+
+    % replaces a currently existing breakpoint with a user's selection.
+
     filename = [filename '.vfd.mat'];
     fname = load(filename);
     if isfield(fname, 'time_selected')
@@ -64,8 +67,8 @@ function replace_breakpoint (filename)
 end
 
 
-% returns the closest time to a mouseclick on a figure of video tracking
 function time_selected = get_sequence_break(table)
+% returns the closest time to a mouseclick on a figure of video tracking
 
     varforce_constants;
     h = figure(4);
@@ -107,6 +110,8 @@ end
 
 
 function fname = tracking_check(filename_root)
+% looks for tracking files with an array of extensions, keeping
+% the first one it finds
     fname_array = [...
         cellstr('.raw.vrpn.evt.mat')...
         cellstr('.raw.vrpn.mat'),...

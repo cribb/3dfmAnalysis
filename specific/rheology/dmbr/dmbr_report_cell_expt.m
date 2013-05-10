@@ -9,6 +9,10 @@ function rheo = dmbr_report_cell_expt(filename, excel_name, main_directory, head
 % coordinates of the location of the pole tip. [Example: "134, 219"]
 % Can be run in conjunction with other similar files through
 % dmbr_multi_file_report.
+% 
+% This code is in great need of refactoring. Keep regression in mind, since
+% dmbr_multi_file_report and dmbr_adjust_report both depend greatly on the
+% specific return format of this function.
 %
 % Required Parameters:
 %   filename: the name of the file to be analyzed
@@ -20,9 +24,9 @@ function rheo = dmbr_report_cell_expt(filename, excel_name, main_directory, head
 %   seq_array: the array of selected sequences
 %   report_params: report parameters (see dmbr_check_input_params)
 % Returns:
-%   A two-cell array. Cell 1 contains an array (bxs) detailing the number of beads
+%   A two-cell array. Cell 1 contains an array (bxs) detailing: the number of beads
 %   in the file, the maximum number of sequences in the file, the number of
-%   beads used, and the maximum number of sequences used. Cell 2 contains
+%   beads used (selected), and the maximum number of sequences used (selected). Cell 2 contains
 %   a logical array (inseqs) detaling the usage of individual sequences
 %   found in the file.
 % 
@@ -187,7 +191,7 @@ vidID = ['vid' num2str(sscanf(filename_root, 'vid%f'))];
 inseqs = zeros(length(beads),1);
 
 
-
+% process each bead
 for b = 1 : length(beads)
     
     colorindex = length(seqs)*(b-1)+1;
@@ -214,6 +218,7 @@ for b = 1 : length(beads)
     Jstart = 0;
     Jlast = 0;
     
+    % process each sequence. adapted from dmbr_report.
     for s = 1 : length(seqs)
         
         plot_color = 0;
@@ -540,10 +545,8 @@ end
 
 % report
 outfile = [excel_name '.html'];
-% append information
+% append information (NOT write)
 fid = fopen(outfile, 'a+');
-
-% html code
 
 nametag = filename_root;
 % HTML section header
@@ -552,7 +555,7 @@ fprintf(fid, '<a name="%s"><h2>%s</h2></a><br/>', filename_root, nametag);
 fprintf(fid, ' <b>Path:</b>  %s <br/>\n', pathname);
 fprintf(fid, '<a href="#Contents">Back to Top</a></p>\n');
 
-% check to see if file is used, if so, write reports
+% check to see if file is used; if so, write reports
 info = 0;
 for b=1:length(beads)
     if(plots(b))
@@ -592,6 +595,7 @@ if info
         
         G_buffer = '';
         
+        % two fit types: Fabry and Jeffrey
         switch fit_type
             case 'Power Law (Fabry)'
                 numvars = 3;
@@ -926,15 +930,13 @@ temp{1} = bxs;
 temp{2} = inseqs;
 rheo = temp;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 return;
 
 end
 
-% finds a matching tracking file in the current directory
 
 function fname = tracking_check(filename_root)
+% finds a matching tracking file in the current directory
     fname_array = [...
         cellstr('.raw.vrpn.evt.mat')...
         cellstr('.raw.vrpn.mat'),...
