@@ -5,7 +5,10 @@ function dmbr_adjust_breakpoint(filename, topdir, analysis)
     plot_select = {1, 1, 1, 0, 0, 0, 0, {'Jeffrey'}, 1};
     [~, name, ext] = fileparts(filename);
     html = ['adjust_breakpoint_' name '.html']
-    cd(topdir);    
+    cd(topdir);
+    if ( exist(html) )
+        delete(html);
+    end
     dmbr_report_cell_expt(filename, [pwd filesep 'adjust_breakpoint_' name], [pwd filesep], 0, plot_select);    
     web(html, '-browser');
     dmbr_adjust_report(analysis, topdir, 0);

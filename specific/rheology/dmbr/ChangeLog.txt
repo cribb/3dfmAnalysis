@@ -1,4 +1,7 @@
 2013-05-10  Christian Stith <chstith@ncsu.edu>
+	* dmbr_adjust_breakpoint.m: converted file addending to overwriting
+
+2013-05-10  Christian Stith <chstith@ncsu.edu>
 	* dmbr_report_cell_expt.m: added html title declaration.
 	* dmbr_adjust_breakpoint.m: fixed adjust breakpoint bug.
 	* dmbr_multi_file_report.m: same.
