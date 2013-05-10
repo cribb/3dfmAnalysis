@@ -1,4 +1,10 @@
 2013-05-10  Christian Stith <chstith@ncsu.edu>
+	* dmbr_report_cell_expt.m: added html title declaration.
+	* dmbr_adjust_breakpoint.m: fixed adjust breakpoint bug.
+	* dmbr_multi_file_report.m: same.
+	* dmbr_adjust_report: same.
+
+2013-05-10  Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report.m: updated comments.
 	* dmbr_report_cell_expt.m: same.
 	* dmbr_adjust_breakpoint.m: same.
@@ -9,9 +15,9 @@
 	* dmbr_adjust_breakpoint: added.  This changlog claims this file was added on 03-15 but when updating CVS has no knowledge of the function's existence.   Adding it now.
 
 2013-03-15 Christian Stith <chstith@ncsu.edu>
-    * dmbr_adjust_breakpoint: added. implements a breakpoint-changing function for use with multi-file report.
-    * dmbr_multi_file_report: edited to accommodate dmbr_adjust_breakpoint.
-    * dmbr_report_cell_expt: same.
+	* dmbr_adjust_breakpoint: added. implements a breakpoint-changing function for use with multi-file report.
+	* dmbr_multi_file_report: edited to accommodate dmbr_adjust_breakpoint.
+	* dmbr_report_cell_expt: same.
 
 2013-02-01 Christian Stith <chstith@ncsu.edu>
 	* dmbr_multi_file_report.m: implemented functionality for g ratios in the html report, along with the option for this in the gui.

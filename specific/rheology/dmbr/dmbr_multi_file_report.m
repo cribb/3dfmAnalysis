@@ -199,6 +199,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
         [~, filename_root, ~] = fileparts(files(b,:));
         fprintf(fid, '<a href="#%s">%s</a><br/>\n', filename_root, filename_root);
     end
+%    fprintf(fid, ['<title>' excel_name '</title>\n']);
     fclose(fid);
     xlfilename = [main_directory excel_name];
 

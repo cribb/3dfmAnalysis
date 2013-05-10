@@ -3,10 +3,10 @@ function dmbr_adjust_breakpoint(filename, topdir, analysis)
     % admin function. runs setup & teardown.
     replace_breakpoint(filename);
     plot_select = {1, 1, 1, 0, 0, 0, 0, {'Jeffrey'}, 1};
-    html = 'adjust_breakpoint.html';
-    cd(topdir);
-    delete(html);
-    dmbr_report_cell_expt(filename, [pwd filesep 'adjust_breakpoint'], [pwd filesep], 0, plot_select);    
+    [~, name, ext] = fileparts(filename);
+    html = ['adjust_breakpoint_' name '.html']
+    cd(topdir);    
+    dmbr_report_cell_expt(filename, [pwd filesep 'adjust_breakpoint_' name], [pwd filesep], 0, plot_select);    
     web(html, '-browser');
     dmbr_adjust_report(analysis, topdir, 0);
     

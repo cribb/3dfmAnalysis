@@ -158,10 +158,6 @@ a.cancel = uicontrol('style','pushbutton','units','pixels', 'position',[15,45,70
             end
             filename = temp{1};
         end
-        % Reassign selected breakpoints
-        breaks = get(a.b,'Value')
-        % breaks = cell2mat(breaks);
-        remove_breakpoints(breaks, filearray);
         % Close the figure
         close(gcf);
         pause(0.1);

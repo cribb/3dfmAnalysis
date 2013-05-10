@@ -550,6 +550,7 @@ fid = fopen(outfile, 'a+');
 
 nametag = filename_root;
 % HTML section header
+fprintf(fid, ['<title>' excel_root '</title>\n']);
 fprintf(fid, '<hr>\n');
 fprintf(fid, '<a name="%s"><h2>%s</h2></a><br/>', filename_root, nametag);
 fprintf(fid, ' <b>Path:</b>  %s <br/>\n', pathname);
