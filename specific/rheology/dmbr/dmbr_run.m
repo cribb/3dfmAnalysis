@@ -51,6 +51,9 @@ scale             = input_params.scale;
 % load drive parameters from dmbr_drive code.  Next we will add
 % the analysis_parameters.
 params = load(metafile);
+if ( exist('input_params.fps', 'var') )
+    params.fps = input_params.fps;
+end
 
 % we want to put all of the metadata into a single "parameters" structure.
 % However, because there are two places where metadata are inputted (once

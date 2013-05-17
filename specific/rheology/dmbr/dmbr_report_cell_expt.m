@@ -115,6 +115,15 @@ end
 
 d = load(trackingfile);
 
+if ( plot_select(5) == 1 )
+    m.fps = plot_select(6);
+else
+    m.fps =  0;
+end
+frame_rate = m.fps;
+
+% fprintf(['HELLO: ' num2str(m.fps) '\n']);
+
 d = load_video_tracking(trackingfile, m.fps, 'pixels', calib_um, 'absolute', 'yes', 'table');
 beadmax = get_beadmax(d);
 
@@ -148,6 +157,7 @@ input_params.force_type = 'disp';
 input_params.tau = 6.25;
 input_params.fit_type = fit_type;
 input_params.scale = 0.5;
+input_params.fps = frame_rate;
 
 
 
@@ -163,6 +173,7 @@ if(plot_select(2) || plot_select(3) || plot_select(4))
     rheo_table = rheo.raw.rheo_table;
 else
     m.poletip_radius = 0;
+    m.fps = frame_rate;
     [vid_table,  junk] = dmbr_init(m);
     rheo_table = vid_table;
 end

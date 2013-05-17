@@ -59,6 +59,7 @@ function [table_out,  params] = dmbr_init(params)
     %%%%
     table = load_video_tracking(trackfile, fps, 'm', calib_um, 'absolute', 'yes', 'table');
     
+    
     %%%%
     % Set the initial value for the additional columns to NaN.  This allows
     % for non-numeric placeholders.  Doesn't affect means or other statistics.
