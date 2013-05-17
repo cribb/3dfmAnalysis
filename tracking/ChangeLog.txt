@@ -1,3 +1,6 @@
+2013.05.17  Christian Stith <chstith@ncsu.edu>
+	* load_video_tracking.m: updated to implement optional frame rate input.
+
 2013.02.25  Jeremy Cribb <jcribb@email.unc.edu>
 	* filter_video_tracking.m:  implemented minimum viscosity filter that will remove trackers that exhibit Newtonian behavior at viscosities less than the min_visc value.  Useful for eliminating beads diffusing in solvent while interesting beads are those that are attached to cells. 
 

@@ -36,7 +36,7 @@ if (nargin < 6 || isempty(tstamps));        tstamps  = 'no';	       end;
 if (nargin < 5 || isempty(absolute_pos));   absolute_pos = 'relative'; end;
 if (nargin < 4 || isempty(calib_um));       calib_um = 1;              end;
 if (nargin < 3 || isempty(xyzunits));       xyzunits  = 'pixels';      end;
-if (nargin < 2 || isempty(frame_rate));     frame_rate = 120;          end;
+if (nargin < 2 || isempty(frame_rate) || frame_rate == 0); frame_rate = 120; end;
 
 
 if isstruct(filemask)
@@ -209,9 +209,9 @@ for fid = 1:length(filelist)
         tfile = strrep(tfile, '.evt',  '');
         
         try
-            times = load([tfile '.raw.tstamp.txt'], 'ASCII');            
+            times = load([tfile '.raw.tstamp.txt'], 'ASCII');
         catch
-            tstamps = 'no';                
+            tstamps = 'no';
             logentry('Attempt to load timestamps failed (file not found). Using frame rate to construct timestamps');
         end
     end
@@ -259,16 +259,16 @@ for fid = 1:length(filelist)
             data(idx,TIME) = times(active_frames+1);
 
             logentry('Successfully loaded and attached time stamps.');
-
-        end
-        
-        if strcmp(tstamps, 'no')
+            
+        elseif strcmp(tstamps, 'no')
             if sum(this_tracker(:,FRAME)) > 0
                 data(idx,TIME) = data(idx,FRAME) * 1/frame_rate;
             else
                 frames = [0 : rows(this_tracker)-1]';
                 data(idx,TIME) = frames * 1/frame_rate;
-            end                
+            end
+            
+            logentry(['Computed time using specified frame rate of ' num2str(frame_rate) ' fps.']);
         end    
 
 
