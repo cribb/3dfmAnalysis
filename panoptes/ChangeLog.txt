@@ -1,6 +1,9 @@
+2013.06.03  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_publish_PMExpt.m: commented out bug that I added while updating earlier report code.
+
 2013.05.07  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_publish_PMExpt.m: minor changes to report code.
-
+	
 2013.05.07  Jeremy Cribb <jcribb@email.unc.edu>
     * pan_analyze_CellExpt.m: updated to check for video mode in case 'fluorescent mode' is used, repairing a bug where the 'brightfield' frame rate was the only one used to compute a video/experiment's frame rate.
     * pan_analyze_PMexpt.m: same.
