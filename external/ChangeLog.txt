@@ -1,3 +1,6 @@
+2013-06-03  Jeremy Cribb
+	* added msd_bayes folder which contains code for analyzing/filtering MSD data according to different model types using Bayesian statistics.  It was written by the Mark Bathe group at MIT, code located at www.msd-bayes.org.  The code has a licensing agreement included that restricts any changes.  Use at your own risk. 
+
 2013-02-01  Christian Stith <chstith@ncsu.edu>
 	* sortn.m: removed debugging printout line.
 	* uipickfiles.m: implemented sortn function for alphanumerical sorting.
