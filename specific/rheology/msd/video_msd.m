@@ -100,7 +100,9 @@ end
 
 % handle windows vector, if a scalar, create evenly spaced windows
 if length(window) == 1
-    window = unique(floor(logspace(0,round(log10(max(v(:,FRAME)))), window)));
+    % percent_duration is
+    percent_duration = .25;
+    window = unique(floor(logspace(0,round(log10(max(v(:,FRAME))*percent_duration)), window)));
 end
 
 
