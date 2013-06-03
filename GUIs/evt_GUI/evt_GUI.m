@@ -1428,7 +1428,8 @@ function plot_data(hObject, eventdata, handles)
     calib_um   = str2num(get(handles.edit_calib_um, 'String'));
     bead_diameter_um = str2num(get(handles.edit_bead_diameter_um, 'String'));
     numtaus = round(str2num(get(handles.edit_numtaus, 'String')));
-    win = unique(floor(logspace(0,log10(max(frame)),numtaus)));
+%     win = unique(floor(logspace(0,log10(max(frame)),numtaus)));
+    win = numtaus;
 
     if strcmp(AUXtype, 'MSD')  || ...
        strcmp(AUXtype, 'GSER') || ...

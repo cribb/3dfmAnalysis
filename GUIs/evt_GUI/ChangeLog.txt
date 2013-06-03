@@ -1,3 +1,6 @@
+2013-06-03  Jeremy Cribb <jcribb@email.unc.edu>
+	* evt_GUI.m: removed the code that calculates taus equally spread across the available space.  This functionality is already included in video_msd and did not need to be repeated here.
+
 2012-12-13  Jeremy Cribb <jcribb@email.unc.edu>
 	* evt_GUI.m: removed LumiCrop filter since it's not terribly useful anymore with spot_tracker's autofind capabilities.  added max_pixel filter to remove trackers for beads that diffuse larger ranges than desired (e.g. beads freely diffusing in buffer when they should be attached to cells.)
 	*evt_GUI.fig: same.
