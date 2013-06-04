@@ -11,7 +11,7 @@ function rcdata = rcmain(rcfile,rcoutput)
     rcfile = strcat(rcfile, '.tif');
      
     I = imread(rcfile);
-    image(I);
+    imshow(I);
     
     %Runs set scale wich outputs units and pixal to unit ratio 
     [units, p_ratio] = setscale();    

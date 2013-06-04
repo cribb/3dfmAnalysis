@@ -1,3 +1,6 @@
+2013-06-04 Robert Judith <rjudith@email.unc.edu>
+	* image(I) --> imshow(I) to fix display issues
+
 2011-06-28  Robert Judith <rjudith@email.unc.edu>
 	* Initial Version
 	* Program opens an image file and from user input calculates radius 	of curvature and length of arc segments. It saves the collected 	data to a .cvs file.
