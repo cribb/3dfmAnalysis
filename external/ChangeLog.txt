@@ -1,4 +1,8 @@
-2013-06-03  Jeremy Cribb
+2013-06-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* mygenvarname.m: added.  External function that constructs a valid matlab variable name from a given candidate.
+	* myksdensity.m: added.  External function that generates ksdensity functions.
+
+2013-06-03  Jeremy Cribb <jcribb@email.unc.edu>
 	* added msd_bayes folder which contains code for analyzing/filtering MSD data according to different model types using Bayesian statistics.  It was written by the Mark Bathe group at MIT, code located at www.msd-bayes.org.  The code has a licensing agreement included that restricts any changes.  Use at your own risk. 
 
 2013-02-01  Christian Stith <chstith@ncsu.edu>
