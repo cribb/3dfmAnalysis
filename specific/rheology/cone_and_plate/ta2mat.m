@@ -3,7 +3,7 @@ function v = ta2mat(filename, savemat)
 %
 % 3DFM function
 % specific/rheology/cone_and_plate
-% last modified 11/19/08 (krisford)
+% last modified 5/15/2013 (cribb)
 %  
 % This function works to convert the textual export of rheology datasets 
 % from the Ares G2 cone-and-plate (CAP) rheometer to a matlab structure.
@@ -124,9 +124,9 @@ for f = 1:numfiles
     end
 
     % Parse each specific procedure section for metadata
-    if ~exist('exps')
-
-        exps = struct;
+    if ~exist('protocols')
+        protocols = struct;
+    end
 
         clear foo;
 
@@ -141,19 +141,29 @@ for f = 1:numfiles
             munged_sname = lower(sname);
             munged_sname = strrep(munged_sname, ' ', '_');
             munged_sname = strrep(munged_sname, '-', '_');
-
+            munged_sname = strrep(munged_sname, ',', '');
+            munged_sname = strrep(munged_sname, '%', 'pct');
+            
             % generate a list of section field_names (instead of labels)
             mlist{k,:} = munged_sname;
 
             % set the metadata structure
             metadata = extract_parameter_value_pair(outl, sectn_start, sectn_end);
+            
+            if ~isfield(protocols, munged_sname)
+%                 foo.metadata = metadata;
+                protocols = setfield(protocols, munged_sname, metadata);    
+            else
+% %                 if isfield(getfield(protocols, munged_sname), 'units')
+% %                     logentry('Experiment-level metadata exists, not overwriting.');
+% %                 else
+% % %                     foo.metadata = metadata;
+% %                     protocols = setfield(protocols, munged_sname, metadata);   
+% % %                     logentry('YAYYYYYYYYYYYYYYYYYYYYY!');
+                end
+            end
 
-            foo.metadata = metadata;
-            exps = setfield(exps, munged_sname, foo);    
         end
-    else
-        logentry('Experiment-level metadata exists, not overwriting.');
-    end
 
     % Section 4. Geometry
     % - contains stable parameter-value pair info on specific geometry used 
@@ -185,11 +195,12 @@ for f = 1:numfiles
         logentry('Rheometer metadata already exists, not overwriting.');
     end
 
+    %
     % Sections 6-n. Data Sections
     % Start by iterating through available Data Sections
-
+    %
+    
     for k = 1:num_data_sections
-    clear table;
 
         section_start = data_sections(k);
 
@@ -197,17 +208,17 @@ for f = 1:numfiles
         p = strmatch(data_section_label{k}, slist, 'exact');
         fprintf('%s is protocol section #%i in the experimental data.\n', slist{p}, p);
 
-        try
-            myexp = getfield(exps, mlist{p}); %#ok<GFLD>
-        catch
-            logentry('Data section label was rewritten.  Do not know how to handle it.  Breaking out.');
-            break;
-        end
-
-        if isfield(myexp, 'table')
-            logentry('Avoiding overwrite to datatable.  Breaking out.');
-            break;
-        end
+%         try
+%             myexp = getfield(exps, mlist{p}); %#ok<GFLD>
+%         catch
+%             logentry('Data section label was rewritten.  Do not know how to handle it.  Breaking out.');
+%             break;
+%         end
+% 
+%         if isfield(myexp, 'table')
+%             logentry('Avoiding overwrite to datatable.  Breaking out.');
+%             break;
+%         end
 
         try
             section_end   = data_sections(k+1)-1;
@@ -218,26 +229,45 @@ for f = 1:numfiles
         table_headers = outl{section_start+2};
         table_units   = outl{section_start+3};
 
+        [table_headers, table_units]= get_TA_column_headers(table_headers,table_units);
+        
         mycount = 1;
         for m = section_start+5:section_end
             foo = str2num(outl{m}); %#ok<ST2NM>
             if ~isempty(foo)
-                table(mycount,:) = foo; %#ok<AGROW>
+                table(mycount,:) = foo; %#ok<AGROW>                               
                 mycount = mycount + 1;
             end                                           
         end
+        
+        if ~exist('data', 'var')
+            data = struct; 
+            units = struct;
+        end
+        
+        if ~exist('results', 'var')
+            results = struct;
+        end
+        
+        oldvar = data;
+        
+        for u = 1:length(table_units);
+            if ~isfield(data, table_headers{u})
+                data = setfield(data, table_headers{u}, table(:,u));
+            else %if strcmp(table_units{u}, oldvar.
+                data = setfield(data, [table_headers{u} '_' mygenvarname(table_units{u})], table(:,u));
+                logentry(['Almost clobbered the ' table_headers{u} ' data column']);
+            end
+                
+            units = setfield(units, table_headers{u}, table_units{u});
+        end
+        
+        temp.data = data;
+        temp.units = units;
+                
+        results = setfield(results, mlist{p}, temp);    
 
-
-
-
-        myexp.table_headers = table_headers;
-        myexp.table_units   = table_units;
-        myexp.table         = table;
-
-        exps = setfield(exps, mlist{p}, myexp); %#ok<SFLD>
-
-
-    end
+        clear('table', 'data', 'units');
 
 end
 
@@ -246,8 +276,8 @@ v.file_header     = file_header;
 v.global_protocol = global_protocol;
 v.geometry        = geometry;
 v.rheometer       = rheometer;
-v.experiments     = exps;
-
+v.protocols       = protocols;
+v.results         = results;
 
 if findstr(savemat, 'y')
     savefile = [filename_root '.cap.mat'];
@@ -256,7 +286,6 @@ end
 
 
 return;
-
 
 
 % blah
@@ -315,6 +344,86 @@ function out_struct = extract_parameter_value_pair(outl, startp, endp)
 
     return;
 
+function [headers, units]= get_TA_column_headers(s,t)
+    
+    dlim = sprintf('\t'); %the 'tab' is the delimiter here.
+          
+    if nargin < 2 || isstruct(s)
+        th = s.table_headers;
+        un = s.table_units;        
+    else
+        th = s;
+        un = t;
+    end
+            
+    % sanitize table headers and units
+    th = strrep(th, '|G*|.sin(delta)', 'Gstar_times_sin_delta');
+    th = strrep(th, '|G*|/sin(delta)', 'Gstar_over_sin_delta');
+    th = strrep(th, '|G*|.time', 'Gstar_times_time');
+    th = strrep(th, '|G*|', 'Gstar');
+    th = strrep(th, '|J*|', 'Jstar');
+    th = strrep(th, 'modulus G(t)', 'modulus_Gt');
+    th = strrep(th, 'ang. frequency', 'ang_frequency');
+    th = strrep(th, 'G''''', 'G_double_prime');
+    th = strrep(th, 'G''', 'G_prime');
+    th = strrep(th, 'J''''', 'J_double_prime');
+    th = strrep(th, 'J''', 'J_prime');
+    th = strrep(th, 'n''''', 'n_double_prime');
+    th = strrep(th, 'n''', 'n_prime');
+    th = strrep(th, '|n*|', 'nstar');
+    th = strrep(th, 'osc. stress (sample)', 'osc_stress_sample');
+    th = strrep(th, '% strain (sample)', 'percent_strain_sample');
+    th = strrep(th, '% strain', 'percent_strain');
+    th = strrep(th, 'strain (sample)', 'strain_sample');
+    th = strrep(th, 'tan(delta)', 'tan_delta');
+    th = strrep(th, 'osc. stress', 'osc_stress');
+    th = strrep(th, 'osc. torque', 'osc_torque');
+    th = strrep(th, '1/temperature', 'one_over_temperature');
+    th = strrep(th, 'compliance J(t)', 'compliance_Jt');
+    th = strrep(th, ' ', '_');
+    th = strrep(th, ',', '');
+    
+    q = regexp(th, dlim);
+    v = regexp(un, dlim);
+
+    % Create an indexed list of table headers
+    for k = 1:length(q)+1
+        if k == 1
+            headers{k,1} = strtrim( th( 1:q(k) ) ); %#ok<AGROW>
+%             disp('1');
+        elseif k > 1 && k <= length(q)
+            headers{k,1} = strtrim( th( q(k-1):q(k) ) ); %#ok<AGROW>
+%             disp('2');          
+        elseif k > length(q)
+            headers{k,1} = strtrim( th( q(k-1):end ) ); %#ok<AGROW>
+%             disp('3');
+        end
+    end
+   
+    % Create an indexed list of units for each header.
+    for k = 1:length(v)+1
+        if k == 1
+            units{k,1} = strtrim( un( 1:v(k) ) ); %#ok<AGROW>
+        elseif k > 1 && k <= length(v)
+            units{k,1} = strtrim( un( v(k-1):v(k) ) ); %#ok<AGROW>
+        elseif k > length(v)
+            units{k,1} = strtrim( un( v(k-1):end ) ); %#ok<AGROW>
+        end
+    end
+
+    list = [headers,units];
+    
+% %     if isempty(unt)
+% %         outs = find( strcmp(str, list(:,1)) );
+% %     else
+% %         outs = find(strcmp(str, list(:,1)) & strcmp(unt, list(:,2)) );
+% %     end
+% % 
+% %         % to account for the case (that actually happens with TA datafiles)
+% %         % where a column is repeated.
+% %         outs = outs(1);
+    return;
+    
     
 % Prints out a log message complete with timestamp.
 function logentry(txt)

@@ -3,7 +3,7 @@ function figh = taplot(filename, mytitle)
 %
 % 3DFM function
 % specific/rheology/cone_and_plate
-% last modified 11/19/08 (krisford)
+% last modified 3/20/2013 (cribb)
 %  
 % Plots rheology curves for TA Instruments cone and plate data.  Uses
 % "plot_" functions for difference rheometry tests.
@@ -24,80 +24,87 @@ else
     v = ta2mat(filename);
 end
     
-fn = fieldnames(v.experiments);
+fn = fieldnames(v.results);
 
-% figure out which 'experiments' have data 'tables' and plot if data exists
+% figure out which 'experiments' have data 'units' and plot if data exists
 count = 1;
 for k = 1 : length(fn)
    
-    if isfield(getfield(v.experiments, fn{k}), 'table');
+%     if isfield(getfield(v.experiments, fn{k}), 'units');
 
-        % extract each table's information and plot
-        st  = getfield(v.experiments, fn{k});
+        % extract each experiments's information and plot
+        protocol = getfield(v.protocols, fn{k});
+        result  = getfield(v.results, fn{k});
 
-        exptype = lower(st.metadata.step_name);
+        exptype = lower(protocol.step_name);
         
         if findstr(exptype, 'stress sweep')
-            stress = st.table(:,get_TA_col(st, 'osc. stress', 'Pa'));
-            gp = st.table(:,get_TA_col(st, 'G''', 'Pa'));
-            gpp= st.table(:,get_TA_col(st, 'G''''', 'Pa'));
+            stress = result.data.osc_stress;
+            gp = result.data.G_prime;
+            gpp= result.data.G_double_prime;
             figh(count) = plot_cap_ssweep(stress, [gp gpp], [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'ssweep'));
         end
         
         if findstr(exptype, 'strain sweep')
-            strain = st.table(:,get_TA_col(st, 'strain', ''));
-            gp = st.table(:,get_TA_col(st, 'G''', 'Pa'));
-            gpp= st.table(:,get_TA_col(st, 'G''''', 'Pa'));
+            strain = result.data.strain;
+            gp = result.data.G_prime;
+            gpp= result.data.G_double_prime;
             figh(count) = plot_cap_nsweep(strain, [gp gpp], [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'nsweep'));
         end
         
         if findstr(exptype, 'frequency sweep') | findstr(exptype, 'tts')
-            freq = st.table(:,get_TA_col(st, 'frequency', 'Hz'));
-            gp = st.table(:,get_TA_col(st, 'G''', 'Pa'));
-            gpp= st.table(:,get_TA_col(st, 'G''''', 'Pa'));
-            delta = st.table(:,get_TA_col(st, 'delta', ''));            
+            if isfield(result.data, 'frequency')
+                freq = result.data.frequency;
+            elseif isfield(result.data, 'ang_frequency');
+                freq = result.data.ang_frequency ./ (2*pi);
+            else
+                error('Cannot plot frequency.  No frequencies found.');
+            end
+            gp = result.data.G_prime;
+            gpp= result.data.G_double_prime;
+            delta = result.data.delta;            
             figh(count) = plot_cap_fsweep(freq, [gp gpp], [], mytitle, 'ff');
             set(figh(count), 'Name', figname(fn{k}, 'fsweep'));
         end
 
         if findstr(exptype, 'flow')
-            shear_rate = st.table(:,get_TA_col(st, 'shear rate', '1/s'));
-            visc = st.table(:,get_TA_col(st, 'viscosity', 'Pa.s'));            
+            shear_rate = result.data.shear_rate;
+            visc = result.data.viscosity;            
             figh(count) = plot_cap_flow(shear_rate, visc, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'flow'));
         end
 
         if findstr(exptype, 'creep')
-            t = st.table(:,get_TA_col(st, 'time', 's'));
-            strain = st.table(:,get_TA_col(st, 'strain', ''));
-            stress = st.table(:,get_TA_col(st, 'shear stress', 'Pa'));
+            t = result.data.time;
+            strain = result.data.strain;
+%             stress = result.data.shear_stress;
             figh(count) = plot_cap_creep(t, strain, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'creep'));
         end
         
         if findstr(exptype, 'recovery')
-            t = st.table(:,get_TA_col(st, 'time', 's'));
-            strain = st.table(:,get_TA_col(st, 'strain', ''));
-            stress = st.table(:,get_TA_col(st, 'shear stress', 'Pa'));
+            t = result.data.time;
+            strain = result.data.strain;
+            stress = result.data.shear_stress;
             figh(count) = plot_cap_creep(t, strain, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'recov'));
         end
         
         if findstr(exptype, 'temperature')
-            temp = st.table(:,get_TA_col(st, 'temperature', '°C'));
-            visc = st.table(:,get_TA_col(st, 'viscosity', 'Pa.s'));
-            srate = st.table(:,get_TA_col(st, 'shear rate', '1/s'));
+            temp = result.data.temperature;
+            visc = result.data.viscosity;
+            srate = result.data.shear_rate;
             figh(count) = plot_cap_temp(temp, visc, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'temp'));
         end
         
         if findstr(exptype, 'peak hold')
-            time = st.table(:,get_TA_col(st, 'time', 's'));
-            visc = st.table(:,get_TA_col(st, 'viscosity', 'Pa.s'));            
-            strain = st.table(:,get_TA_col(st, 'strain', ''));            
-            strainrate = strrep(st.metadata.controlled_variable, 'shear rate ', '');
+            time = result.data.time;
+            visc = result.data.viscosity;            
+%             strain = result.data.strain;            
+            strainrate = strrep(protocol.controlled_variable, 'shear rate ', '');
             figh(count) = plot_cap_peakhold(time, visc, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'peakstrain'));
             ser = get(gca, 'Children');
@@ -105,9 +112,9 @@ for k = 1 : length(fn)
         end           
             
         if findstr(exptype, 'stress relaxation')
-            time = st.table(:,get_TA_col(st, 'time', 's'));
-            Gt = st.table(:,get_TA_col(st, 'modulus G(t)', 'Pa'));            
-            strain = st.table(:,get_TA_col(st, 'strain', ''));            
+            time = result.data.time;
+            Gt = result.data.modulus_Gt;            
+            strain = result.data.strain;            
             figh(count) = plot_cap_relax(time, Gt, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'relax'));
             ser = get(gca, 'Children');
@@ -129,13 +136,13 @@ for k = 1 : length(fn)
         end
 
         count = count + 1;        
-    end
+%     end
         
 end
 
-% if ~exist('exptype')
-%    figh(count) = NaN;
-% end
+if ~exist('exptype')
+   figh(count) = NaN;
+end
 
 return;
 

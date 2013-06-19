@@ -1,3 +1,10 @@
+2013-06-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* ta2mat.m:  changed to better designed data structure.
+	* taplot.m: same.
+	* tareport.m: same.
+	* get_TA_col.m: same.
+	* get_TA_column_headers.m: same.
+
 2013-02-18  Jeremy Cribb <jcribb@email.unc.edu>
 	* ta2mat.m: added option to save output to .mat file.
 	* get_TA_column_headers.m: added.  extracts column headers from TA dataset.

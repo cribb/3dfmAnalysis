@@ -3,7 +3,7 @@ function cap = tareport(filename, nametag)
 %
 % 3DFM function
 % specific/rheology/cone_and_plate
-% last modified 11/19/08 (krisford)
+% last modified 3/13/2013 (cribb)
 %  
 % Generates an html report file(s) for rheology tests done on a particular sample.
 % Includes all TA txt files that match 'filename' and reports the results
@@ -20,7 +20,7 @@ function cap = tareport(filename, nametag)
 %
 
 % load data from cone and plate
-cap = ta2mat(filename);
+cap = ta2mat(filename, 'y');
 
 % generate plots as indicated by data
 figs = taplot(cap, nametag);
@@ -36,7 +36,7 @@ for k = 1:length(figs)
     close(figs(k));
 end
 
-fn = fieldnames(cap.experiments);
+fn = fieldnames(cap.protocols);
 
 % % START REPORT GENERATION TO HTML PAGE
 outfile = [outf '.html'];
@@ -86,21 +86,22 @@ for k = 1 : length(fn)
    
     myfn = fn{k};
     
-    if isfield(getfield(cap.experiments, myfn), 'table');
+    if isfield(cap.results, myfn);
 
         % extract each table's information and plot
-        st  = getfield(cap.experiments, myfn);
+        qr  = getfield(cap.protocols, myfn);
+        st  = getfield(cap.results, myfn);
         
         testnum = myfn(regexp(myfn, '[0-9]'));
         if isempty(testnum); testnum='1'; end;
-        exptype = lower(st.metadata.step_name);
+        exptype = lower(qr.step_name);
         
-        fprintf(fid, ' <tr>\n  <td align="left" width="200">\n    <b> %s </b> <br/> \n', st.metadata.step_name);
+        fprintf(fid, ' <tr>\n  <td align="left" width="200">\n    <b> %s </b> <br/> \n', qr.step_name);
         
         if findstr(exptype, 'stress sweep');
             ssweepimg = [outf '-ssweep' testnum];
-            sfreq = mean(st.table(:,get_TA_col(st, 'ang. frequency')));
-            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            sfreq = mean(st.data.ang_frequency);
+            temp = mean(st.data.temperature);
             fprintf(fid, '    <b> angular frequency: </b> %s rad/s (%s Hz) <br/> \n',num2str(sfreq),num2str(sfreq/(2*pi)));
             fprintf(fid, '    <b> temperature: </b> %s ºC <br/> \n', num2str(temp));
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
@@ -112,8 +113,8 @@ for k = 1 : length(fn)
         
         if findstr(exptype, 'strain sweep')
             nsweepimg = [outf '-nsweep' testnum];
-            sfreq = mean(st.table(:,get_TA_col(st, 'ang. frequency')));
-            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            sfreq = mean(st.data.ang_frequency);
+            temp = mean(st.data.temperature);
             fprintf(fid, '    <b> angular frequency: </b> %s rad/s (%s Hz) <br/> \n',num2str(sfreq),num2str(sfreq/(2*pi)));
             fprintf(fid, '    <b> temperature: </b> %s ºC<br/> \n', num2str(temp));
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
@@ -125,9 +126,9 @@ for k = 1 : length(fn)
         
         if findstr(exptype, 'frequency sweep')
             freqimg = [outf '-fsweep' testnum];
-            samp = st.table(:,get_TA_col(st, 'osc. stress'));
-            namp = st.table(:,get_TA_col(st, 'strain'));       
-            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            samp = st.data.osc_stress;
+            namp = st.data.strain;       
+            temp = mean(st.data.temperature);
             fprintf(fid, '    <b> Stress amplitude: </b> %s +- %s Pa <br/> \n',num2str(mean(samp)),num2str(stderr(samp)));
             fprintf(fid, '    <b> Strain amplitude: </b> %s +- %s  <br/> \n',num2str(mean(namp)),num2str(stderr(namp)));
             fprintf(fid, '    <b> temperature: </b> %s ºC<br/> \n', num2str(temp));
@@ -139,8 +140,8 @@ for k = 1 : length(fn)
         end
 
         if findstr(exptype, 'creep')
-            appval = st.metadata.applied_value;
-            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            appval = qr.applied_value;
+            temp = mean(st.data.temperature);
             creepimg = [outf '-creep' testnum];
             fprintf(fid, '    <b> Applied Value: </b> %s <br/> \n',appval);
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));
@@ -152,8 +153,8 @@ for k = 1 : length(fn)
         end
 
         if findstr(exptype, 'recovery')
-            appval = st.metadata.applied_value;
-            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            appval = qr.applied_value;
+            temp = mean(st.data.temperature);
             creepimg = [outf '-recov' testnum];
             fprintf(fid, '    <b> Applied Value: </b> %s <br/> \n',appval);
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));
@@ -166,7 +167,7 @@ for k = 1 : length(fn)
         
         if findstr(exptype, 'flow');
             flowimg = [outf '-flow' testnum];
-            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            temp = mean(st.data.temperature);
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
             fprintf(fid, '    <a href="%s">', [flowimg '.fig']);
@@ -177,7 +178,7 @@ for k = 1 : length(fn)
         
         if findstr(exptype, 'temperature');
             tempimg = [outf '-temp' testnum];
-            appval = st.metadata.controlled_variable;
+            appval = qr.controlled_variable;
             fprintf(fid, '     %s \n', appval);            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
             fprintf(fid, '    <a href="%s">', [tempimg '.fig']);
@@ -188,8 +189,8 @@ for k = 1 : length(fn)
 
         if findstr(exptype, 'peak hold');
             tempimg = [outf '-peakstrain' testnum];
-            appval = st.metadata.controlled_variable;
-            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            appval = qr.controlled_variable;
+            temp = mean(st.data.temperature);
             fprintf(fid, '    %s \n', appval);            
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
@@ -201,8 +202,8 @@ for k = 1 : length(fn)
 
         if findstr(exptype, 'relaxation');
             tempimg = [outf '-relax' testnum];
-            appval = st.metadata.applied_value;
-            temp = mean(st.table(:,get_TA_col(st, 'temperature')));
+            appval = qr.applied_value;
+            temp = mean(st.data.temperature);
             fprintf(fid, '    <b> strain: </b> %s <br/> \n', appval);            
             fprintf(fid, '    <b> Temperature: </b> %s ºC<br/> \n', num2str(temp));            
             fprintf(fid, '  </td>\n  <td align="center" width="425">\n');
