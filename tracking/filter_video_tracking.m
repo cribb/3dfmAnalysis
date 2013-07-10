@@ -132,8 +132,11 @@ function outs = filter_video_tracking(data, filt)
     
     if isfield(filt, 'drift_method')
         if ~strcmp(filt.drift_method, 'none')
-            data = filter_subtract_drift(data, filt.drift_method);
+            [data,drift_vector] = filter_subtract_drift(data, filt.drift_method);
+            logentry(['Removed drift of ' num2str(drift_vector*filt.calib_um) ' um/s from data.']);
         end
+        
+
     end
     
 
@@ -390,10 +393,10 @@ function data = filter_dead_spots(data, dead_spots)
     
     return;
 
-function data = filter_subtract_drift(data, drift_method)
+function [data,drift_vector] = filter_subtract_drift(data, drift_method)
     drift_start_time = [];
     drift_end_time = [];    
-    [data,q] = remove_drift(data, drift_start_time, drift_end_time, drift_method);
+    [data,drift_vector] = remove_drift(data, drift_start_time, drift_end_time, drift_method);
 return;
 
 % function for writing out stderr log messages

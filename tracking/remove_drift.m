@@ -75,9 +75,14 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
 
     firstframe = min(v(:,FRAME));
     lastframe  = max(v(:,FRAME));
+    
+
+    
 
     id_list = unique(v(:,ID));
 
+    
+    
     % % % % % % % % % % % % % % figh = figure; 
     % % % % % % % % % % % % % % subplot(2,3,1); 
     % % % % % % % % % % % % % % plot(v(:,X), v(:,Y), '.');
@@ -91,6 +96,10 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
         q = v(  v(:,ID) == id_list(k) , FRAME); 
         frameone(1,k) = q(1,1); 
         frameend(1,k) = q(end,1); 
+        
+        time_pts = v( v(:,ID) == id_list(k), TIME);
+        frame_rates(1,k) = mean(1./diff(time_pts));
+
     end;
 
     % 'C=setdiff(A,B)' returns for C the values in A that are not in B.  Here we use
@@ -157,7 +166,7 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
     %     plot(tmp(:,TIME), tmp(:,X:Y), 'or', v(idx,TIME), v(idx,X:Y), '.b');
      end
     
-    q = 0;    
+    q = [mean_com_vel_x, mean_com_vel_y]*mean(frame_rates);    % px/sec
 
     return;
 

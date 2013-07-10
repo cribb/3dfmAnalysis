@@ -1,3 +1,7 @@
+2013.07.10  Jeremy Cribb <jcribb@email.unc.edu>
+	* remove_drift.m:  added drift velocity in pixels/sec as an output.
+	* filter_video_tracking.m:  now reports drift velocity to console.
+
 2013.05.17  Christian Stith <chstith@ncsu.edu>
 	* load_video_tracking.m: updated to implement optional frame rate input.
 
