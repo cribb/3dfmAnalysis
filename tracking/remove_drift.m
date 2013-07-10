@@ -72,7 +72,13 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
     %     v = v(t_idx,:);
 
         % DRIFT SUBTRACTION
-
+%        
+%        figh = figure;
+%        plot(v(:,X), v(:,Y), '.');
+%        xlabel('x [px]');
+%        ylabel('y [px]');
+%        axis([0 648 0 484]);
+%        
     firstframe = min(v(:,FRAME));
     lastframe  = max(v(:,FRAME));
     
@@ -80,6 +86,8 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
     
 
     id_list = unique(v(:,ID));
+
+
 
     
     
@@ -89,6 +97,7 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
     % % % % % % % % % % % % % % xlabel('x [px]');
     % % % % % % % % % % % % % % ylabel('y [px]');
     % % % % % % % % % % % % % % axis([0 648 0 484]);
+
 
     % Identify the first and last "frames of existence" for every tracker and
     % place the list as 'frameone' and 'frameend' variables
@@ -126,6 +135,7 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
 
         idx1 = find(v(:,FRAME) == thisFRAME);
         idx2 = find(v(:,FRAME) == thisFRAME+1);
+        
         table1 = v(idx1,:);
         table2 = v(idx2,:);
 
@@ -148,6 +158,7 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
     mean_com_vel_x = nanmean(outv(:,2));
     mean_com_vel_y = nanmean(outv(:,3));
 
+    
     % subtract out drift vector from each tracker
      for k = 1:length(id_list)
         idx = (  v(:,ID) == id_list(k)  );
@@ -158,12 +169,11 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
         driftx = cumsum(mean_com_vel_x * [0; dt]);
         drifty = cumsum(mean_com_vel_y * [0; dt]);
 
-
         v(idx,X) = tmp(:,X) - driftx;
         v(idx,Y) = tmp(:,Y) - drifty;    
-
-    %     figure; 
-    %     plot(tmp(:,TIME), tmp(:,X:Y), 'or', v(idx,TIME), v(idx,X:Y), '.b');
+    
+%         figure; 
+%         plot(tmp(:,TIME), tmp(:,X:Y), 'or', v(idx,TIME), v(idx,X:Y), '.b');
      end
     
     q = [mean_com_vel_x, mean_com_vel_y]*mean(frame_rates);    % px/sec
@@ -171,6 +181,7 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
     return;
 
 function [v,drift_vectors] = linear(data, drift_start_time, drift_end_time)
+
 
     video_tracking_constants;
 
@@ -195,7 +206,7 @@ function [v,drift_vectors] = linear(data, drift_start_time, drift_end_time)
             fitz = polyfit(t(idx), bead(idx,Z), 1);
             beadz = bead(:,Z) - polyval(fitz, t) + fitz(2);
 
-            % logentry(['Bead ' num2str(k) ': Removed linear drift velocity of x=' num2str(fitx(1)) ', y=' num2str(fity(1)) ', z=' num2str(fitz(1)) '.']);
+%             logentry(['Bead ' num2str(k) ': Removed linear drift velocity of x=' num2str(fitx(1)) ', y=' num2str(fity(1)) ', z=' num2str(fitz(1)) '.']);
 
             % implement fits for ROLL PITCH AND YAW later.
             

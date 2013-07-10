@@ -1,4 +1,8 @@
 2013.07.10  Jeremy Cribb <jcribb@email.unc.edu>
+	* filter_video_tracking.m:  added viscosity filter.
+	* remove_drift.m: repaired commit collisions and moved plotting code to new location.
+
+2013.07.10  Jeremy Cribb <jcribb@email.unc.edu>
 	* remove_drift.m:  added drift velocity in pixels/sec as an output.
 	* filter_video_tracking.m:  now reports drift velocity to console.
 

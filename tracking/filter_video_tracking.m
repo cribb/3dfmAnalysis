@@ -118,6 +118,13 @@ function outs = filter_video_tracking(data, filt)
         end
     end
     
+    if isfield(filt, 'max_visc') && isfield(filt, 'bead_radius')
+        if filt.max_visc > 0
+            % assuming pixels
+            data = filter_viscosity_range('max', data, filt.max_visc, filt.bead_radius, filt.xyzunits, filt.calib_um);
+        end
+    end
+    
     if isfield(filt, 'xycrop')
         if filt.xycrop > 0
             data = filter_xycrop(data, filt.xycrop);

@@ -6,7 +6,7 @@ end
 
 if nargin < 2 || isempty(flag)
     flag = [];
-    dim = 1;
+%     dim = 1;
 end
 
 if (length(size(X)) == 2)  && (size(X,1) == 1)
