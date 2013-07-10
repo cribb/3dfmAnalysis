@@ -1404,7 +1404,7 @@ function plot_data(hObject, eventdata, handles)
     
     figure(handles.XTfig);
     if get(handles.checkbox_neutoffsets, 'Value')
-        plot(t(k) - mintime, [x(k)-x(k(1)) y(k)-y(k(1))], '.');        
+        plot(t(k) - mintime, [x(k)-x(k(1)) y(k)-y(k(1))], '.-');        
     else
         plot(t(k) - mintime, [x(k) y(k)], '.');
     end
@@ -1486,7 +1486,7 @@ function plot_data(hObject, eventdata, handles)
 
             r = magnitude(x(k) - xinit, y(k) - yinit);
 
-            plot(t(k) - mintime, r, '.');
+            plot(t(k) - mintime, r, '.-');
             xlabel('time (s)');
             ylabel(['radial ' ylabel_string]);
             set(handles.AUXfig, 'Units', 'Normalized');
@@ -1499,7 +1499,7 @@ function plot_data(hObject, eventdata, handles)
             set(AUXfig, 'Visible', 'on');
             clf(AUXfig);
             
-            [p, f, id] = mypsd([x(k) y(k)]*1e-6, frame_rate, 10/frame_rate, 'rectangle');
+            [p, f, id] = mypsd([x(k) y(k)]*1e-6, frame_rate, frame_rate/100, 'rectangle');
 
             loglog(f, p);
             xlabel('frequency [Hz]');
