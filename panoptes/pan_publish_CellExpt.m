@@ -63,11 +63,43 @@ mywellmsd = all_wellmsds(minloc(1),:);
 heatmap_msds(1, str2num(char(wellID)) ) = mywellmsd;
 heatmap_msds = reshape(heatmap_msds, 12, 8)';
 
+visc = (2 * 1.3806e-23 * 300 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^heatmap_msds);
+% Heat map
+heatmapfig = figure; 
+% imagesc(1:12, 1:8, heatmap_msds); 
+imagesc(1:12, 1:8, log10(visc)); 
+colormap((hot));
+cb = colorbar;
+set(heatmapfig, 'Units', 'Pixels');
+set(heatmapfig, 'Position', [300 300 800 600]);
+set(gca, 'XTick', [1:12]');
+set(gca, 'XTickLabel', [1:12]');
+set(gca, 'XAxisLocation', 'top');
+set(gca, 'YTick', [1:8]');
+set(gca, 'YTickLabel', {'A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'});
+cbticks = get(cb, 'YTick')';
+cbtick_labels = cellstr([repmat('10^{', size(cbticks)) num2str(cbticks) repmat('}', size(cbticks))]);
+set(cb, 'YTickLabel', cbtick_labels);
+title('Viscosity (in log_{10} Pa s})');
+    alpha = ones(8,12);
+    alpha(isnan(heatmap_msds)) = 0.5;
+    im = get(gca, 'Children');
+%     set(im, 'AlphaData', alpha);
+pretty_plot;
+heatmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
+gen_pub_plotfiles(heatmapfile, heatmapfig, 'normal');
+close(heatmapfig);
+
+
+
+
+
 %%%%  Calculate the MSD for different cell types
 
 % myparam = 'metadata.plate.solution.molar_concentration';
 % myparam = 'metadata.plate.well_map';
-myparam = 'metadata.plate.cell.name';
+% myparam = 'metadata.plate.cell.name';
+myparam = 'metadata.plate.solution.name';
 
 % compute the MSD for each condition defined by 'myparam'
 [msds molar_conc] = pan_combine_data(metadata, myparam);

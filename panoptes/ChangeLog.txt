@@ -1,3 +1,9 @@
+2013.07.10  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_process_CellExpt.m:  updated camera dead spots.
+	* pan_process_PMExpt.m: same.
+	* pan_publish_CellExpt.m:  added heatmaps to the report structure. 
+	* pan_publsih_PMExpt.m: slight tweaks to code that determines alpha values for outputted png heatmap (wells with no data show up as gray, a color not in the colormap)
+
 2013.06.03  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_publish_PMExpt.m: commented out bug that I added while updating earlier report code.
 

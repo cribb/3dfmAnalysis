@@ -32,8 +32,10 @@ filt.max_pixels = Inf;
 filt.min_visc   = 0;  % Pa s
 filt.xycrop     = 0;
 filt.xyzunits   = 'pixels';
-filt.dead_spots = [0 392 28 32];   % flea2 on Monoptes camera after cleaning 2012/11/28
-
+% filt.dead_spots = [0 392 28 32];   % flea2 on Monoptes camera after cleaning 2012/11/28
+filt.dead_spots = [0 0 0 0];   % flea2 on Monoptes camera after cleaning 2013/05
+% filt.drift_method = 'none';
+filt.drift_method = 'center-of-mass';
 
 dataout  = pan_analyze_CellExpt(filepath, filt, systemid);
 dataout  = pan_publish_CellExpt(metadata, filt);
