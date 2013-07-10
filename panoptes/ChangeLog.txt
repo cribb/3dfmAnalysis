@@ -1,4 +1,10 @@
 2013.07.10  Jeremy Cribb <jcribb@email.unc.edu>
+	* pan_process_PMExpt.m:  repaired problems I caused by colliding commits.
+	* pan_publish_PMExpt.m:  now saves output data to a .mat file.  also added noise estimates for heatmap viscosities.
+	* pan_ranomize_well_list.m:  added.  Given a list of well IDs, this will generate and print to the console a randomly ordered list of those wells for pasting into the wells.txt file.
+	* pan_compute_viscosity_heatmap.m:  added.  Pulling code for plotting heatmaps from other panoptes analysis functions.  not finished yet.
+
+2013.07.10  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_process_CellExpt.m:  updated camera dead spots.
 	* pan_process_PMExpt.m: same.
 	* pan_publish_CellExpt.m:  added heatmaps to the report structure. 
