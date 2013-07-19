@@ -29,7 +29,7 @@
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 13-Dec-2012 10:23:27
+% Last Modified by GUIDE v2.5 19-Jul-2013 13:51:48
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -1024,7 +1024,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_msdmean     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1038,8 +1040,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1053,8 +1057,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1067,8 +1073,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1091,8 +1099,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_msdall   ,  'Visible', 'on', 'Enable', 'on');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'on', 'Enable', 'on');
@@ -1108,8 +1118,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1125,8 +1137,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1143,7 +1157,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_msdmean     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall      ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1159,8 +1175,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1176,8 +1194,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1193,8 +1213,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1211,7 +1233,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_G       ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.checkbox_Gstar   ,  'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_eta      ,  'Visible', 'on', 'Enable', 'on');
+            set(handles.checkbox_etastar  ,  'Visible', 'on', 'Enable', 'on');
             set(handles.edit_bead_diameter_um,  'Visible', 'on', 'Enable', 'on');
             set(handles.text_bead_diameter,  'Visible', 'on', 'Enable', 'on');
             set(handles.text_numtaus         ,  'Visible', 'on', 'Enable', 'on');
@@ -1227,8 +1251,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1244,8 +1270,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1261,8 +1289,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_bead_diameter_um,  'Visible', 'on', 'Enable', 'on');
             set(handles.text_bead_diameter,  'Visible', 'on', 'Enable', 'on');
             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
@@ -1300,17 +1330,25 @@ function checkbox_msdall_Callback(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
 
     
-% --- Executes on button press in checkbox_eta.
-function checkbox_eta_Callback(hObject, eventdata, handles)
-    plot_data(hObject, eventdata, handles);
-
-
 % --- Executes on button press in checkbox_G.
 function checkbox_G_Callback(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
 
+% --- Executes on button press in checkbox_Gstar.
+function checkbox_Gstar_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
 
+% --- Executes on button press in checkbox_eta.
+function checkbox_eta_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
+
+% --- Executes on button press in checkbox_etastar.
+function checkbox_etastar_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
+    
+    
 function edit_bead_diameter_um_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
 
 
 function edit_bead_diameter_um_CreateFcn(hObject, eventdata, handles)
@@ -1611,19 +1649,53 @@ function plot_data(hObject, eventdata, handles)
             
             
         case 'GSER'
+
+            plotG       = get(handles.checkbox_G, 'Value');
+            ploteta     = get(handles.checkbox_eta, 'Value');
+            plotGstar   = get(handles.checkbox_Gstar, 'Value');
+            plotetastar = get(handles.checkbox_etastar, 'Value');
+            
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
-
-            plotG   = get(handles.checkbox_G, 'Value');
-            ploteta = get(handles.checkbox_eta, 'Value');
-
-            if (plotG && ploteta)
-                plot_ve(myve, 'f', AUXfig, 'GgNn');
-            elseif plotG
-                plot_ve(myve, 'f', AUXfig, 'Gg');
-            elseif ploteta
-                plot_ve(myve, 'f', AUXfig, 'Nn');
+            clf;
+            
+            hold on;
+            
+            plotstring = [];
+            
+            if plotG
+                plotstring = [plotstring 'Gg'];
             end
+            
+            if ploteta
+                plotstring = [plotstring 'Nn'];
+            end
+            
+            if plotGstar
+                plotstring = [plotstring 'S'];
+            end
+            
+            if plotetastar
+                plotstring = [plotstring 's'];                
+            end
+            
+            hold off;
+
+            plot_ve(myve, 'f', AUXfig, plotstring);                
+            
+%             if (plotG && ploteta)
+%                 plot_ve(myve, 'f', AUXfig, 'GgNn');
+%             elseif plotG
+%                 plot_ve(myve, 'f', AUXfig, 'Gg');
+%             elseif ploteta
+%                 plot_ve(myve, 'f', AUXfig, 'Nn');
+%             elseif (plotGstar && plotetastar)
+%                 plot_ve(myve, 'f', AUXfig, 'Ss');
+%             elseif plotGstar
+%                 plot_ve(myve, 'f', AUXfig, 'S');
+%             elseif plotetastar
+%                 plot_ve(myve, 'f', AUXfig, 's');
+%             end
             
         case 'pole locator'
             set(AUXfig, 'Visible', 'on');
@@ -2183,7 +2255,3 @@ function edit_chosentau_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-
-
