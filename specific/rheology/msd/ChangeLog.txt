@@ -1,3 +1,6 @@
+2013-07-19  Jeremy Cribb <jcribb@email.unc.edu>
+	* plot_ve.m:  now plots G* and eta* too.
+
 2013-06-03  Jeremy Cribb <jcribb@email.unc.edu>
 	* video_msd.m:  added parameter that limits the available time scales to defined percentage of video duration (identified and calculated here by frame IDs).
 
