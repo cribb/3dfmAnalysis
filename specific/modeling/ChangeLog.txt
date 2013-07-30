@@ -1,3 +1,7 @@
+2013.07.30   Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_video_diff_expt.m:  fixed logentry function.
+	* sim_video_diff_solid_expt.m: same.
+
 2011-09-21   Jeremy Cribb <jcribb@email.unc.edu>
 	* sim_newt_fluid.m:  added check for 'seed' input parameter.
 
