@@ -68,6 +68,7 @@ function v = sim_newt_fluid_evt(outfile, sampling_rate, duration, ...
     tmp_t  = repmat(t,numpaths,1);
     tmp_f  = repmat(frame, numpaths,1); 
     tmp_id = repmat(id, duration*sampling_rate, 1);
+
     tmp_x  = squeeze(xy(:,1,:))';
     tmp_y  = squeeze(xy(:,2,:))';
 
@@ -93,7 +94,7 @@ function logentry(txt)
                    num2str(logtime(3),        '%02i') ', ' ...
                    num2str(logtime(4),        '%02i') ':' ...
                    num2str(logtime(5),        '%02i') ':' ...
-                   num2str(round(logtime(6)), '%02i') ') '];
+                   num2str(floor(logtime(6)), '%02i') ') '];
      headertext = [logtimetext 'sim_newt_fluid_evt: '];
      
      fprintf('%s%s\n', headertext, txt);

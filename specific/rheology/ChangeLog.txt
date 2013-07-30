@@ -1,3 +1,6 @@
+2013.07.30  Jeremy Cribb <jcribb@email.unc.edu>
+	* sim_newt_fluid_evt.m: fixed logentry function.
+
 2012-03-31  Jeremy Cribb <jcribb@email.unc.edu>
 	* save_msdfile.m: now accommodates the msd's flag for outputting the step sizes for particles.
 
