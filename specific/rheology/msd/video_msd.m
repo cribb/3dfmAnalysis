@@ -100,9 +100,11 @@ end
 
 % handle windows vector, if a scalar, create evenly spaced windows
 if length(window) == 1
-    % percent_duration is
-    percent_duration = .25;
+    % percent_duration refers to proportion of data used in determining the
+    % msd (1 = all data, 0.5 half data)
+    percent_duration = 1;
     window = unique(floor(logspace(0,round(log10(max(v(:,FRAME))*percent_duration)), window)));
+    window(window>max(v(:,FRAME))) = [];
 end
 
 
@@ -192,7 +194,7 @@ function logentry(txt)
                    num2str(logtime(3),        '%02i') ', ' ...
                    num2str(logtime(4),        '%02i') ':' ...
                    num2str(logtime(5),        '%02i') ':' ...
-                   num2str(floor(logtime(6)), '%02i') ') '];
+                   num2str(round(logtime(6)), '%02i') ') '];
      headertext = [logtimetext 'video_msd: '];
      
      fprintf('%s%s\n', headertext, txt);
