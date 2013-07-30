@@ -1,3 +1,6 @@
+2013.07.30  Jeremy Cribb <jcribb@email.unc.edu>
+	* fixed logentry functions for filter_video_tracking, load_video_tracking, remove_drift, and SetFPSandMinFrames.m
+
 2013.07.10  Jeremy Cribb <jcribb@email.unc.edu>
 	* filter_video_tracking.m:  added viscosity filter.
 	* remove_drift.m: repaired commit collisions and moved plotting code to new location.

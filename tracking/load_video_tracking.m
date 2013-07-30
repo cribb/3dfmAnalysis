@@ -268,7 +268,7 @@ for fid = 1:length(filelist)
                 data(idx,TIME) = frames * 1/frame_rate;
             end
             
-            logentry(['Computed time using specified frame rate of ' num2str(frame_rate) ' fps.']);
+%             logentry(['Computed time using specified frame rate of ' num2str(frame_rate) ' fps.']);
         end    
 
 
@@ -282,8 +282,14 @@ for fid = 1:length(filelist)
     if isempty(beadmax)
         beadmax = 0;
     end
-    data(:,ID) = data(:,ID) + beadmax + 1;            
-    glommed_d = [glommed_d ; data];
+    data(:,ID) = data(:,ID) + beadmax + 1;     
+    
+    if isempty(glommed_d)
+        glommed_d = data;
+    elseif ~isempty(data) && ~isempty(glommed_d)
+        glommed_d = [glommed_d ; data];
+    end
+    
    
 end
 
@@ -320,7 +326,7 @@ function logentry(txt)
                    num2str(logtime(3),        '%02i') ', ' ...
                    num2str(logtime(4),        '%02i') ':' ...
                    num2str(logtime(5),        '%02i') ':' ...
-                   num2str(round(logtime(6)), '%02i') ') '];
+                   num2str(floor(logtime(6)), '%02i') ') '];
      headertext = [logtimetext 'load_video_tracking: '];
      
      fprintf('%s%s\n', headertext, txt);
