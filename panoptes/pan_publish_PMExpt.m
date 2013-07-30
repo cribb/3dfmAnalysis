@@ -48,58 +48,64 @@ end
 outfile = [outf '.html'];
 fid = fopen(outfile, 'w');
 
-%%%%
-% compute the MSD for each WELL (for the heatmap)
-spec_tau = 1;
-[wellmsds wellID] = pan_combine_data(metadata, 'metadata.plate.well_map');
-all_welltaus = [wellmsds.mean_logtau];
-all_wellmsds = [wellmsds.mean_logmsd];
-all_wellerrs = [wellmsds.msderr];
-heatmap_msds = NaN(1,96);
-heatmap_errs = NaN(1,96);
-log_spec_welltau = log10(spec_tau);
-[minval, minloc] = min( sqrt((all_welltaus - log_spec_welltau).^2) );
-mywelltau = 10.^all_welltaus(minloc(1),:);
-mywellmsd = all_wellmsds(minloc(1),:);
-mywellerr = all_wellerrs(minloc(1),:);
-heatmap_msds(1, str2num(char(wellID)) ) = mywellmsd;
-heatmap_errs(1, str2num(char(wellID)) ) = mywellerr;
-heatmap_msds = reshape(heatmap_msds, 12, 8)';
-heatmap_errs = reshape(heatmap_errs, 12, 8)';
+% % % % %%%%
+% % % % % compute the MSD for each WELL (for the heatmap)
+% % % % spec_tau = 1;
+% % % % [wellmsds wellID] = pan_combine_data(metadata, 'metadata.plate.well_map');
+% % % % all_welltaus = [wellmsds.mean_logtau];
+% % % % all_wellmsds = [wellmsds.mean_logmsd];
+% % % % all_wellerrs = [wellmsds.msderr];
+% % % % heatmap_msds = NaN(1,96);
+% % % % heatmap_errs = NaN(1,96);
+% % % % log_spec_welltau = log10(spec_tau);
+% % % % [minval, minloc] = min( sqrt((all_welltaus - log_spec_welltau).^2) );
+% % % % mywelltau = 10.^all_welltaus(minloc(1),:);
+% % % % mywellmsd = all_wellmsds(minloc(1),:);
+% % % % mywellerr = all_wellerrs(minloc(1),:);
+% % % % heatmap_msds(1, str2num(char(wellID)) ) = mywellmsd;
+% % % % heatmap_errs(1, str2num(char(wellID)) ) = mywellerr;
+% % % % heatmap_msds = reshape(heatmap_msds, 12, 8)';
+% % % % heatmap_errs = reshape(heatmap_errs, 12, 8)';
+% % % % 
+% % % % visc = (2 * 1.3806e-23 * 296 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^heatmap_msds);
+% % % % visc_with_err = (2 * 1.3806e-23 * 300 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^(heatmap_msds+heatmap_errs));
+% % % % visc_err = abs(visc_with_err - visc);
 
-visc = (2 * 1.3806e-23 * 296 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^heatmap_msds);
-visc_with_err = (2 * 1.3806e-23 * 300 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^(heatmap_msds+heatmap_errs));
-visc_err = abs(visc_with_err - visc);
+[visc, visc_err] = pan_compute_viscosity_heatmap(metadata);
 
 D = (1.3806e-23 * 296) ./ (6 * pi * 0.25e-6 * visc);
 
-visc = (2 * 1.3806e-23 * 300 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^heatmap_msds);
+% % % % % Heat map
+% % % % heatmapfig = figure; 
+% % % % % imagesc(1:12, 1:8, heatmap_msds); 
+% % % % imagesc(1:12, 1:8, log10(visc)); 
+% % % % colormap((hot));
+% % % % cb = colorbar;
+% % % % set(heatmapfig, 'Units', 'Pixels');
+% % % % set(heatmapfig, 'Position', [300 300 800 600]);
+% % % % set(gca, 'XTick', [1:12]');
+% % % % set(gca, 'XTickLabel', [1:12]');
+% % % % set(gca, 'XAxisLocation', 'top');
+% % % % set(gca, 'YTick', [1:8]');
+% % % % set(gca, 'YTickLabel', {'A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'});
+% % % % cbticks = get(cb, 'YTick')';
+% % % % cbtick_labels = cellstr([repmat('10^{', size(cbticks)) num2str(cbticks) repmat('}', size(cbticks))]);
+% % % % set(cb, 'YTickLabel', cbtick_labels);
+% % % % title('Viscosity (in log_{10} Pa s})');
+% % % %     my_alpha = ones(8,12);
+% % % %     my_alpha(isnan(heatmap_msds)) = 0.5;
+% % % %     im = get(gca, 'Children');
+% % % %     set(gcf, 'AlphaData', my_alpha);
+% % % % pretty_plot;
+% % % % heatmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
+% % % % gen_pub_plotfiles(heatmapfile, heatmapfig, 'normal');
+% % % % close(heatmapfig);
 
-% Heat map
-heatmapfig = figure; 
-% imagesc(1:12, 1:8, heatmap_msds); 
-imagesc(1:12, 1:8, log10(visc)); 
-colormap((hot));
-cb = colorbar;
-set(heatmapfig, 'Units', 'Pixels');
-set(heatmapfig, 'Position', [300 300 800 600]);
-set(gca, 'XTick', [1:12]');
-set(gca, 'XTickLabel', [1:12]');
-set(gca, 'XAxisLocation', 'top');
-set(gca, 'YTick', [1:8]');
-set(gca, 'YTickLabel', {'A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'});
-cbticks = get(cb, 'YTick')';
-cbtick_labels = cellstr([repmat('10^{', size(cbticks)) num2str(cbticks) repmat('}', size(cbticks))]);
-set(cb, 'YTickLabel', cbtick_labels);
-title('Viscosity (in log_{10} Pa s})');
-    my_alpha = ones(8,12);
-    my_alpha(isnan(heatmap_msds)) = 0.5;
-    im = get(gca, 'Children');
-    set(gcf, 'AlphaData', my_alpha);
-pretty_plot;
+heatmapfig = pan_plot_viscosity_heatmap(visc);
 heatmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
 gen_pub_plotfiles(heatmapfile, heatmapfig, 'normal');
 close(heatmapfig);
+drawnow;
 
 %%%%  Calculate the MSD for different wells/conditions
 % myparam = 'metadata.plate.solution.molar_concentration';
@@ -143,7 +149,7 @@ myerr = all_errs(minloc(1),:);
 % One-dimensional bar chart
 MSD = (10 .^ mymsd);
 MSD_err = (10.^(mymsd+myerr)-10.^(mymsd));
-barfig = figure;
+barfig = figure('Visible', 'off');
 barwitherr( MSD_err, MSD );
 set(gca, 'XTick', 1:length(molar_conc));
 set(gca,'XTickLabel',molar_conc)
@@ -152,9 +158,11 @@ ylabel('MSD [m^2] at \tau=10 [s]');
 barfile = [metadata.instr.experiment '_well_ALL' '.bar'];
 gen_pub_plotfiles(barfile, barfig, 'normal');
 close(barfig);
+drawnow;
 
 % create plot with mean msd data for all values of 'myparam' across ALL taus
 aggMSDfig = figure; 
+set(aggMSDfig, 'Visible', 'off');
 errorbar(all_taus, all_msds, all_errs, 'LineWidth', 2)
 xlabel('time scale, \tau [s]');
 ylabel('<r^2> [m^2]');
@@ -162,13 +170,28 @@ legend(molar_conc, 'Location', 'SouthEast');
 aggMSDfile = [metadata.instr.experiment '_well_ALL' '.aggmsd'];
 gen_pub_plotfiles(aggMSDfile, aggMSDfig, 'normal');
 close(aggMSDfig);
+drawnow;
 
 % create plots for each parameter value
+
+% find the highest and lowest mean MSD value for the entire run and plot
+% all msd curves onto that grid so plots from different wells can be
+% compared to one another by eye.  
+
+% To do this, we need to pull out ALL of the MSD values and extract the
+% absolute min and max of the dataset.
+for k = 1:length(msds)
+    temp_meanlogmsd(:,k) = msds(k).mean_logmsd;
+end
+YLim_low = floor(nanmin(temp_meanlogmsd(:)));
+YLim_high = ceil(nanmax(temp_meanlogmsd(:)));
+
 for k = 1:length(molar_conc)    
     MSDfile{k} = [metadata.instr.experiment '_well_' molar_conc{k} '.msd'];
-    MSDfig  = plot_msd(msds(k), [], 'ame');
-%     set(gca, 'YLim', [-16 -12]);
-    figure(MSDfig);
+    MSDfig  = figure('Visible', 'off');
+    plot_msd(msds(k), MSDfig, 'ame');
+    set(gca, 'YLim', [YLim_low YLim_high]);
+%     figure(MSDfig);
     gen_pub_plotfiles(MSDfile{k}, MSDfig, 'normal'); 
     close(MSDfig);    
 end
@@ -233,7 +256,7 @@ fprintf(fid, '<hr/> \n\n');
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Heatmap (Viscosity at %i [s] time scale) </h3> \n', spec_tau);
 % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
-fprintf(fid, '   <iframe src="%s.png" width="800" height="600" border="0"></iframe> <br/> \n', heatmapfile);
+fprintf(fid, '   <img src="%s.png" width=50% border="0"></img> <br/> \n', heatmapfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 

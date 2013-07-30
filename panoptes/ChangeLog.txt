@@ -1,3 +1,15 @@
+2013.07.30  Jeremy Cribb <jcribb@email.unc.edu>
+	* CellProcessingScript.m:  fixed logentry function output for 'seconds'
+	* pan_gen_filelist.m: same.
+	* pan_MCU2um.m: same.
+	* pan_combine_data.m: same.
+	* pan_load_metadata.m: same.
+	* pan_analyze_CellExpt.m: same.
+	* pan_analyze_PMExpt.m: same.
+	* pan_clean_path.m:  added logentry function.  
+	* pan_plot_viscosity_heatmap.m: added.  Moved heatmap plotting code from the 'analyze' functions.
+	* pan_publsih_PMExpt.m:  removed heatmap plotting code.  fixed logentry function.  Turned plots 'invisible' so they don't spam the desktop and steal focus.  Added a standardized range for the colormap so heatmaps can be compared to one another.  Set the range for the MSD curves to the max and min values found in the full dataset running through the code.  Updated some of the html code for the report.
+
 2013.07.10  Jeremy Cribb <jcribb@email.unc.edu>
 	* pan_process_PMExpt.m:  repaired problems I caused by colliding commits.
 	* pan_publish_PMExpt.m:  now saves output data to a .mat file.  also added noise estimates for heatmap viscosities.
