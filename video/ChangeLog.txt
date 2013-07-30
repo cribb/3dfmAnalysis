@@ -1,3 +1,6 @@
+2013.07.30  Jeremy Cribb <jcribb@email.unc.edu>
+	* fixed logentry functions for save_evtfile and save_vrpnmatfile.m
+
 2013-03-04 Robert Judith <rjudith@email.unc.edu>
 	* vid_frame_mean.m added. Takes a video (.avi or .raw) and outputs the average intensity per frame.
 
