@@ -42,10 +42,20 @@ switch type
 end
 
 try
-    h = figure(fig_or_figfile);
+    foo = get(fig_or_figfile);
 catch
     disp('No figure handle to grab.');
     return;
+end
+
+visibility = get(fig_or_figfile, 'Visible');
+
+switch visibility
+    case 'off'
+        h = figure(fig_or_figfile);
+        set(h, 'Visible', 'off');
+    case 'on'
+        h = figure(fig_or_figfile);
 end
 
 %pretty_plot(h, 'eps', mag);
@@ -58,10 +68,14 @@ end
 
 
 set(h, 'PaperPositionMode', 'auto');
+set(h, 'units', 'normalized');
+
 saveas(h, [outf '.fig'], 'fig');
 % print(h, '-r0', [outf '.eps'], '-depsc'); 
-print(h, '-r0', [outf '.png'], '-dpng'); 
+% print(h, '-r0', [outf '.png'], '-dpng'); 
+print('-dpng', ['test' '.png'], '-zbuffer','-r300');
 % print(h, '-r0', [outf '.jpg'], '-djpg'); 
+saveas(h, [outf '.png'], 'png');
 plot2svg_2d([outf '.svg'], h);
 % close(h);
 
@@ -75,7 +89,7 @@ function logentry(txt)
                    num2str(logtime(3),        '%02i') ', ' ...
                    num2str(logtime(4),        '%02i') ':' ...
                    num2str(logtime(5),        '%02i') ':' ...
-                   num2str(round(logtime(6)), '%02i') ') '];
+                   num2str(floor(logtime(6)), '%02i') ') '];
      headertext = [logtimetext 'gen_pub_plotfiles: '];
      
      fprintf('%s%s\n', headertext, txt);

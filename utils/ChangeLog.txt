@@ -1,3 +1,7 @@
+2013.07.30  Jeremy Cribb <jcribb@email.unc.edu>
+	* Fixed logentry functions for gen_pub_plotfiles and pretty_plot.
+	* gen_pub_plotfiles.m:  also now handles cases of plot invisibility.
+	
 2012-09-12  Jeremy Cribb <jcribb@email.unc.edu>
 	* xlswrite.m:  removed.  Newer matlab versions include their own updated copy.
 
