@@ -1,4 +1,7 @@
 2013.07.30  Jeremy Cribb <jcribb@email.unc.edu>
+	* vidtable2beadstruct.m:  added.  converts from the vrpn video table matrix to a bead-centric structure array.
+
+2013.07.30  Jeremy Cribb <jcribb@email.unc.edu>
 	* fixed logentry functions for save_evtfile and save_vrpnmatfile.m
 
 2013-03-04 Robert Judith <rjudith@email.unc.edu>
