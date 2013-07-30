@@ -1,3 +1,6 @@
+2013.07.30   Jeremy Cribb <jcribb@email.unc.edu>
+	evt_GUI.fig: removed the default action to plot G* and eta*.
+
 2013.07.19   Jeremy Cribb <jcribb@email.unc.edu>
 	evt_GUI.m: added G* and eta* to list of plottable viscoelastic functions.
 	evt_GUI.fig: same.
