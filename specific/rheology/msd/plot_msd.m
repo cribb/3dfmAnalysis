@@ -23,6 +23,8 @@ end
 
 if nargin < 2 || isempty(h)
     h = figure;
+else
+    brought_own_figure_handle = 1;
 end
 
 if nargin < 1 || isempty(d.tau)
@@ -36,8 +38,10 @@ end
 d = msdstat(d);
 
 % creating the plot
-figure(h);
-
+if ~brought_own_figure_handle
+    figure(h);
+end
+    
 if strcmpi(optstring, 'u')
     d.mean_logmsd = d.mean_logmsd + 12;
     d.msd = d.msd * 1e12;
@@ -84,7 +88,7 @@ function logentry(txt)
                    num2str(logtime(3),        '%02i') ', ' ...
                    num2str(logtime(4),        '%02i') ':' ...
                    num2str(logtime(5),        '%02i') ':' ...
-                   num2str(round(logtime(6)), '%02i') ') '];
+                   num2str(floor(logtime(6)), '%02i') ') '];
      headertext = [logtimetext 'plot_msd: '];
      
      fprintf('%s%s\n', headertext, txt);

@@ -1,3 +1,13 @@
+2013.07.30  Jeremy Cribb <jcribb@email.unc.edu>
+	* msd.m: fixed logentry function.
+	* msdstat.m: same.
+	* plot_alphadist.m: same.
+	* plot_alphavstau.m: same.
+	* plot_msd.m: same.
+	* plot_ve.m: same.
+	* ve.m: same.
+	* video_msd.m: same.
+	
 2013-07-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* plot_ve.m:  now plots G* and eta* too.
 
