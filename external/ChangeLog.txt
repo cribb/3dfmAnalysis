@@ -1,3 +1,6 @@
+2013.07.30  Jeremy Cribb <jcribb@email.unc.edu>
+	* cbar_pro.m:  added from MatlabCentral.  Allows superscripts in colorbars for 2D scalar fields.
+
 2013-06-19  Jeremy Cribb <jcribb@email.unc.edu>
 	* fBmXY_HD.m:  from Paula Vasquez.  This function computes trajectories for fractional Brownian motion, with an alpha value (slope of MSD) of less than one.
 
