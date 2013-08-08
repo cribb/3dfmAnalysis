@@ -58,17 +58,18 @@ for k = 1:length(filelist)
     % only have to filter if we need to process .vrpn.mat to .vrpn.evt.mat
     if length(metadata.files.evt) ~= length(metadata.files.tracking)
         d = filter_video_tracking(d, filt);
+        save_evtfile(filelist(k).name, d, 'm', mycalibum);
     end
     
     
 %     mymsd = video_msd(d, window, metadata.instr.fps_imagingmode, mycalibum, 'no');        
 %     myve  = ve(mymsd, bead_radius, freqtype, 'no');
     
-        if findstr(mode, 'd')            
-            save_evtfile(filelist(k).name, d, 'm', mycalibum);
-%             save_msdfile(filelist(k).name, mymsd);
-%             save_gserfile(filelist(k).name, myve);
-        end                
+% % %         if findstr(mode, 'd')            
+% % %             save_evtfile(filelist(k).name, d, 'm', mycalibum);
+% % % %             save_msdfile(filelist(k).name, mymsd);
+% % % %             save_gserfile(filelist(k).name, myve);
+% % %         end                
     
    
 %     
