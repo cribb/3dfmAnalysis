@@ -1,12 +1,17 @@
 function [visc, visc_err] = pan_compute_viscosity_heatmap(metadata)
 
-nametag = metadata.instr.experiment;
-outf = metadata.instr.experiment;
-duration = metadata.instr.seconds;
-autofocus = metadata.instr.auto_focus;
-video_mode = metadata.instr.video_mode;
-imaging_fps = metadata.instr.fps_imagingmode;
+% nametag = metadata.instr.experiment;
+% outf = metadata.instr.experiment;
+% duration = metadata.instr.seconds;
+% autofocus = metadata.instr.auto_focus;
+% video_mode = metadata.instr.video_mode;
+% imaging_fps = metadata.instr.fps_imagingmode;
 
+kB = 1.3806e-23;
+T = 296; % temperature in Kelvin 
+
+bead_radius = cellfun(@str2num, metadata.plate.bead.diameter) ./ (2 * 1e6);
+bead_radius = bead_radius(:)';
 
 %%%%
 % compute the MSD for each WELL (for the heatmap)
@@ -24,11 +29,14 @@ mywellmsd = all_wellmsds(minloc(1),:);
 mywellerr = all_wellerrs(minloc(1),:);
 heatmap_msds(1, str2num(char(wellID)) ) = mywellmsd;
 heatmap_errs(1, str2num(char(wellID)) ) = mywellerr;
-heatmap_msds = reshape(heatmap_msds, 12, 8)';
-heatmap_errs = reshape(heatmap_errs, 12, 8)';
 
-visc = (2 * 1.3806e-23 * 296 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^heatmap_msds);
-visc_with_err = (2 * 1.3806e-23 * 300 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^(heatmap_msds+heatmap_errs));
+
+visc = (2 * kB * T * spec_tau) ./ (3 * pi * bead_radius .* 10.^heatmap_msds);
+visc_with_err = (2 * kB * T * spec_tau) ./ (3 * pi * bead_radius .* 10.^(heatmap_msds+heatmap_errs));
+
 visc_err = abs(visc_with_err - visc);
+
+visc = reshape(visc, 12, 8)';
+visc_err = reshape(visc_err, 12, 8)';
 
 return;
