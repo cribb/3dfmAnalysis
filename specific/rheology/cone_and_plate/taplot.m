@@ -78,16 +78,17 @@ for k = 1 : length(fn)
 
         if findstr(exptype, 'creep')
             t = result.data.time;
-            strain = result.data.strain;
+%             strain = result.data.strain;
 %             stress = result.data.shear_stress;
-            figh(count) = plot_cap_creep(t, strain, [], mytitle);
+            compliance_Jt = result.data.compliance_Jt;
+            figh(count) = plot_cap_creep(t, compliance_Jt-compliance_Jt(1), [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'creep'));
         end
         
         if findstr(exptype, 'recovery')
             t = result.data.time;
             strain = result.data.strain;
-            stress = result.data.shear_stress;
+%             stress = result.data.shear_stress;
             figh(count) = plot_cap_creep(t, strain, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'recov'));
         end
