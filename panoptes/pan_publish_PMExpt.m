@@ -3,7 +3,6 @@ function pan = pan_publish_PMExpt(metadata, filt)
 %
 % CISMM function
 % Panoptes
-% last modified 2011.08.10
 %  
 % Generates a report for tests perfomed on Panoptes using the
 % "Mucus (passive) microrheology" paradigm.
@@ -22,8 +21,6 @@ function pan = pan_publish_PMExpt(metadata, filt)
 nametag = metadata.instr.experiment;
 outf = metadata.instr.experiment;
 duration = metadata.instr.seconds;
-% fps_bright = metadata.instr.fps_bright;
-% fps_fluo = metadata.instr.fps_fluo;
 autofocus = metadata.instr.auto_focus;
 video_mode = metadata.instr.video_mode;
 imaging_fps = metadata.instr.fps_imagingmode;
@@ -48,58 +45,9 @@ end
 outfile = [outf '.html'];
 fid = fopen(outfile, 'w');
 
-% % % % %%%%
-% % % % % compute the MSD for each WELL (for the heatmap)
-% % % % spec_tau = 1;
-% % % % [wellmsds wellID] = pan_combine_data(metadata, 'metadata.plate.well_map');
-% % % % all_welltaus = [wellmsds.mean_logtau];
-% % % % all_wellmsds = [wellmsds.mean_logmsd];
-% % % % all_wellerrs = [wellmsds.msderr];
-% % % % heatmap_msds = NaN(1,96);
-% % % % heatmap_errs = NaN(1,96);
-% % % % log_spec_welltau = log10(spec_tau);
-% % % % [minval, minloc] = min( sqrt((all_welltaus - log_spec_welltau).^2) );
-% % % % mywelltau = 10.^all_welltaus(minloc(1),:);
-% % % % mywellmsd = all_wellmsds(minloc(1),:);
-% % % % mywellerr = all_wellerrs(minloc(1),:);
-% % % % heatmap_msds(1, str2num(char(wellID)) ) = mywellmsd;
-% % % % heatmap_errs(1, str2num(char(wellID)) ) = mywellerr;
-% % % % heatmap_msds = reshape(heatmap_msds, 12, 8)';
-% % % % heatmap_errs = reshape(heatmap_errs, 12, 8)';
-% % % % 
-% % % % visc = (2 * 1.3806e-23 * 296 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^heatmap_msds);
-% % % % visc_with_err = (2 * 1.3806e-23 * 300 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^(heatmap_msds+heatmap_errs));
-% % % % visc_err = abs(visc_with_err - visc);
+
 
 [visc, visc_err] = pan_compute_viscosity_heatmap(metadata);
-
-D = (1.3806e-23 * 296) ./ (6 * pi * 0.25e-6 * visc);
-
-% % % % % Heat map
-% % % % heatmapfig = figure; 
-% % % % % imagesc(1:12, 1:8, heatmap_msds); 
-% % % % imagesc(1:12, 1:8, log10(visc)); 
-% % % % colormap((hot));
-% % % % cb = colorbar;
-% % % % set(heatmapfig, 'Units', 'Pixels');
-% % % % set(heatmapfig, 'Position', [300 300 800 600]);
-% % % % set(gca, 'XTick', [1:12]');
-% % % % set(gca, 'XTickLabel', [1:12]');
-% % % % set(gca, 'XAxisLocation', 'top');
-% % % % set(gca, 'YTick', [1:8]');
-% % % % set(gca, 'YTickLabel', {'A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'});
-% % % % cbticks = get(cb, 'YTick')';
-% % % % cbtick_labels = cellstr([repmat('10^{', size(cbticks)) num2str(cbticks) repmat('}', size(cbticks))]);
-% % % % set(cb, 'YTickLabel', cbtick_labels);
-% % % % title('Viscosity (in log_{10} Pa s})');
-% % % %     my_alpha = ones(8,12);
-% % % %     my_alpha(isnan(heatmap_msds)) = 0.5;
-% % % %     im = get(gca, 'Children');
-% % % %     set(gcf, 'AlphaData', my_alpha);
-% % % % pretty_plot;
-% % % % heatmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
-% % % % gen_pub_plotfiles(heatmapfile, heatmapfig, 'normal');
-% % % % close(heatmapfig);
 
 heatmapfig = pan_plot_viscosity_heatmap(visc);
 heatmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
@@ -144,7 +92,11 @@ myerr = all_errs(minloc(1),:);
 % % % %     end
 % % % % end
 
-
+% generate information for the data table summary
+all_ns   = [msds.n];
+rms_mymsd = sqrt(mymsd);
+rms_mymsd_err = sqrt(mymsd+myerr) - rms_mymsd;
+msds_n = all_ns(minloc(1),:);
 
 % One-dimensional bar chart
 MSD = (10 .^ mymsd);
@@ -256,10 +208,35 @@ fprintf(fid, '<hr/> \n\n');
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Heatmap (Viscosity at %i [s] time scale) </h3> \n', spec_tau);
 % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
-fprintf(fid, '   <img src="%s.png" width=50% border="0"></img> <br/> \n', heatmapfile);
+fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', heatmapfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 
+%
+% % % Report Summary table
+%
+fprintf(fid, '<p> \n');
+fprintf(fid, '   <h3> Summary </h3> \n');
+fprintf(fid, '   <table border="2" cellpadding="6"> \n');
+fprintf(fid, '   <tr> \n');
+fprintf(fid, '      <td align="center" width="200"> <b> Condition </b> </td> \n');
+fprintf(fid, '      <td align="center" width="200"> <b> MSD </b> </td> \n');
+fprintf(fid, '      <td align="center" width="200"> <b> RMS displacement </b> </td> \n');
+fprintf(fid, '      <td align="center" width="200"> <b> No. of trackers </b> </td> \n');
+fprintf(fid, '    </tr>\n');
+
+% Fill in Summary table with data
+for k = 1:length(msds)
+    fprintf(fid, '   <tr> \n');
+    fprintf(fid, '      <td align="center" width="200"> %s </td> \n', molar_conc{k});
+    fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', mymsd(k), myerr(k));
+    fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rms_mymsd(k)*1e9, rms_mymsd_err(k)*1e9);
+    fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_n(k));    
+    fprintf(fid, '   </tr>\n');        
+end
+fprintf(fid, '   </table>\n');
+fprintf(fid, '</p> \n');
+fprintf(fid, '<hr/> \n\n');
 % % % % % %
 % % % % % % Hypothesis Testing (html code)
 % % % % % %
