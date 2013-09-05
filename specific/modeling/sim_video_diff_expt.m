@@ -3,7 +3,7 @@ function varargout = sim_video_diff_expt(filename, in_struct)
 %
 % 3DFM function
 % specific/modeling
-% last modified 2011.07.22 (jcribb)
+% last modified 2013.08.29 (yingzhou)
 %
 % This function simulates a bead diffusion experiment for a Newtonian
 % fluid.  
@@ -29,9 +29,34 @@ function varargout = sim_video_diff_expt(filename, in_struct)
 %         in_struct.calib_um = conversion unit in [microns/pixel].  Default: 0.152.
 %         in_struct.xdrift_vel = x-drift in [meters/frame].  Default: 0.
 %         in_struct.ydrift_vel = y-drift in [meters/frame].  Default: 0.
-%
+%         in_struct.rad_confined = the particle's radius of confinement in [m]. Default: Inf.
+%         in_struct.alpha = anomalous diffusion constant. Default: 1.
+%         in_struct.dim = dimension of the diffusion (usually 1D, 2D, or
+%         3D)
+%         in_struct.modulus = modulus of the fluid [Pa]. Default: 2.2e9 (bulk modulus of water).
+ 
+% Determine the type of model needed for the simulation based on the input
+% structure
+if isfield(in_struct, 'viscosity')&&isfield(in_struct, 'alpha')&&isfield(in_struct, 'xdrift_vel')&&isfield(in_struct, 'ydrift_vel')
+    model_type = 'DAV';
+elseif isfield(in_struct, 'viscosity')&&isfield(in_struct, 'alpha')
+    model_type = 'DA';
+elseif isfield(in_struct, 'viscosity')&&isfield (in_struct, 'rad_confined')
+    model_type = 'DR';
+elseif isfield(in_struct, 'viscosity')&&isfield(in_struct, 'xdrift_vel')&&isfield(in_struct, 'ydrift_vel')
+    model_type = 'DV';
+elseif isfield(in_struct, 'xdrift_vel')&&isfield(in_struct, 'ydrift_vel')
+    model_type = 'V';
+elseif isfield(in_struct, 'viscosity')
+    model_type = 'D';
+elseif isfield(in_struct, 'modulus')
+    model_type = 'N';
+end
+
+logentry(['Parameters indicate a ' model_type ' model type.']);    
 
 video_tracking_constants; 
+
 
 if nargin < 2 || isempty(in_struct)
     logentry('Model parameters are not set.  Will create the default simulation.');
@@ -56,23 +81,42 @@ in_struct = param_check(in_struct);
     calib_um     = in_struct.calib_um;       % [um/pixel]
     xdrift_vel   = in_struct.xdrift_vel;     % [m/frame]
     ydrift_vel   = in_struct.ydrift_vel;     % [m/frame]
+    rad_confined = in_struct.rad_confined;   % [m]
+    alpha        = in_struct.alpha;          % slope of loglog(MSD) plot
+    modulus      = in_struct.modulus;        % [Pa]
 
-    
-% simulation test
-simout = [];
 
+    % simulation test
+    simout = [];
 
-    
     % time vector
     t = (1/frame_rate) * [1:(frame_rate*duration)]' - (1/frame_rate);  %#ok<NBRAK>
-    
+
     % vector of frame ID's
     fr = [1:(frame_rate*duration)]'; %#ok<NBRAK>
+       
+    % xy tracker locations with zero offset        
+    switch model_type  % to select the model functions to run
+        case 'N'
+            xy = sim_boltzmann_solid(modulus, bead_radius, frame_rate, duration, tempK, 2, numpaths);
+        case 'D'
+            xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
+        case 'V'
+            xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
+        case 'DV'
+            xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
+        case 'DR'
+            xy = confined_diffusion (viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths, rad_confined); 
+        case 'DA'
+            xy = fBmXY_HD(viscosity, bead_radius, frame_rate, duration, tempK, numpaths, alpha);
+        case 'DAV'
+            xy = fBmXY_HD(viscosity, bead_radius, frame_rate, duration, tempK, numpaths, alpha); 
+        otherwise
+            error('Cannot select model type from the parameters given in the input structure.');
+    end
     
-    % xy tracker locations with zero offset
-    xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
     
-    % create random starting locations (offsets) within the prescribed field
+        % create random starting locations (offsets) within the prescribed field
     position_offsets = repmat(rand(1,2,numpaths), [frame_rate*duration,1,1]).* ...
                        repmat([field_width field_height],[frame_rate*duration,1,numpaths]) .* ...
                        (calib_um / 1e6);
@@ -84,23 +128,11 @@ simout = [];
     accumulated_drift = cumsum( repmat([xdrift_vel ydrift_vel], ...
                                        [frame_rate*duration, 1, ...
                                        numpaths] ) );
-    % apply the drift 
+    % apply the drift-drift is already applied for all cases in 
     xy = xy + accumulated_drift;
     
     % extraneous columns in the vrpn.mat format
     zrpy = zeros(frame_rate*duration,4);
-
-for k = 1:numpaths;     
-    % vector of tracker ID's
-    id = ones(frame_rate*duration,1)*k; 
-    
-
-    % add this tracker's data to the output table
-    simout = [simout; t, id,  fr,  xy(:,:,k), zrpy];
-end;
-
-% convert physical locations to pixel locations to simulate expt
-simout(:,X:Y) = simout(:,X:Y) / (calib_um/1e6);  % puts into pixels
 
 % Clip data to "camera" field
 % idx = find( simout(:,X) >=            0  & ...
@@ -109,11 +141,26 @@ simout(:,X:Y) = simout(:,X:Y) / (calib_um/1e6);  % puts into pixels
 %             simout(:,Y) <= field_height  );
 % simout = simout(idx,:);
 
+for k = 1:numpaths;     
+    % vector of tracker ID's
+    id = ones(frame_rate*duration,1)*k; 
+    
+
+    % add this tracker's data to the output table
+    simout = [simout; t, id,  fr,  xy(:,:,k), zrpy];
+    
+end;
+
+% convert physical locations to pixel locations to simulate expt
+simout(:,X:Y) = simout(:,X:Y) / (calib_um/1e6);  % puts into pixels
+
 if exist('filename', 'var') && ~isempty(filename)
     save_vrpnmatfile(filename, simout, 'pixels', 1);
 %     csvwrite([filename '.csv'], simout);
     logentry(['Saved data to file: ' filename]);
 end
+
+
 
 switch nargout
     case 1
@@ -175,7 +222,19 @@ function out = param_check(in)
     if ~isfield(in, 'ydrift_vel') || isempty(in.ydrift_vel)
         in.ydrift_vel = 0;   % [m/frame]
     end
+    
+    if ~isfield(in, 'rad_confined') || isempty(in.rad_confined)
+        in.rad_confined = Inf;   % [m]
+    end
+    
+    if ~isfield(in, 'alpha') || isempty(in.alpha)
+        in.alpha = 1;   % [unitless]
+    end
 
+    if ~isfield(in, 'modulus') || isempty(in.modulus)
+        in.modulus = 2.2e9;   % [Pa]
+    end
+    
     out = in;
     
 return;
@@ -187,7 +246,7 @@ function logentry(txt)
                    num2str(logtime(3),        '%02i') ', ' ...
                    num2str(logtime(4),        '%02i') ':' ...
                    num2str(logtime(5),        '%02i') ':' ...
-                   num2str(floor(logtime(6)), '%02i') ') '];
+                   num2str(round(logtime(6)), '%02i') ') '];
      headertext = [logtimetext 'sim_video_diff_expt: '];
      
      fprintf('%s%s\n', headertext, txt);
