@@ -32,12 +32,12 @@ video_tracking_constants;
 %this will extract the individual curves from the aggregate data file
 % for i=1:length(idlist)
 [idlist] = extract_indiv_curves (filename, expttype);
-% subtraj = subtracks;
+
 
 %this will separate the individual bead trajectories into a specified
 %number of subtrajectories
 filename2 = [num2str(expttype) '.vrpn.evt.mat'];
-[subtraj_paths, idlist] = sub_tracks(filename2, subtraj, idlist);
+[subtraj_paths, idlist] = sub_tracks(filename2, subtracks, idlist);
 
 %this function runs the Bayesian analysis and creates a new matrix
 %structure for the model type, parameters, and parameter standard errors.
