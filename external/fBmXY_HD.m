@@ -1,22 +1,45 @@
-function [X,Y,r,sigx1,sigy1,sigx2,sigy2,DD,HH] = fBmXY_HD(H,DfBm,Np)
+function [out, X,Y] = fBmXY_HD(viscosity, bead_radius, sampling_rate, duration, tempK, numpaths, alpha)
 
-% Generating Np paths given H and DfBm
+% MSD Simulator function
+% yingzhou/desktop/MSD Bayes/Functions
+% last modified 08/19/13 (yingzhou)
+%
+%fBmXY_HD simulates an anomalous bead diffusion experiment for a bead with an alpha (or slope value) of H.
+%
+%  
+%  [displacement] = sim_newt_fluid(viscosity, bead_radius, sampling_rate,
+%                                  duration, temp, dim, numpaths, seed);  
+%   
+%  where "viscosity" is in [Pa sec] 
+%        "bead_radius" is in [m] 
+%		 "sampling_rate" is in [Hz] 
+%        "duration" is in [s]
+%        "tempK" is in [K]
+%        "numpaths" is the number of particle paths to be simulated
+%        "H" is the anomalous exponent*2
+%        
+%  Notes:  
+%
 
-%% Set up parameters
-% number of points in the path
-  N = 1800;
-% total time
-  Tf = 30;  % [s]  
+out = [];
+
+H = alpha/2;
+Np=numpaths; %number of paths
+N = duration*sampling_rate; % number of points in the path
+Tf = duration;  % total time [s]  
 % One can use total time and dt instead
-  % N = Tf/dt;
-  
+  % N = Tf/dt;  
 
+k = 1.3806e-23;
+kT = k*tempK; % kBoltzman x T @ 300K
+DfBm = kT/(6*pi*viscosity*bead_radius);  
+  
 %% Set up time vector and covariance matrix  
 % Vector for time
   t =linspace(0,Tf,N);
 
 % Construction covariance matrix
-  t1=repmat(t,1800,1);
+  t1=repmat(t,N,1);
   t2=t1';
   dt12=abs(t2-t1);
   S=0.5*(t1.^(2*H)+t2.^(2*H)-dt12.^(2*H));
@@ -52,3 +75,13 @@ function [X,Y,r,sigx1,sigy1,sigx2,sigy2,DD,HH] = fBmXY_HD(H,DfBm,Np)
   
   HH = [hx, hy];
   DD = [ddx, ddy];
+
+for i_spot = 1:numpaths
+    out(:, :, i_spot) = [X(:, i_spot) Y(:, i_spot)];
+end
+% calib_um = 0.152;
+% 
+% frames = repmat([1:frame]',1,Np);
+% ids=repmat([1:Np],frame,1);
+% tr = [frames(:)*time/frame-time/frame ids(:) frames(:) x(:) y(:) zeros(Np*frame,4)];
+% outfile = save_evtfile(['DA_D=' num2str(D) '_alpha=' num2str(alpha) '_N=30_' num2str(time) 's'], tr, 'm', calib_um);
