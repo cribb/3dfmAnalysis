@@ -1,4 +1,4 @@
-function pan = pan_publish_PMExpt(metadata, filt)
+function pan = pan_publish_PMExpt(metadata, filt, report_blocks)
 % PAN_PUBLISH_PMEXPT  Generates an html report for the Panoptes PM Experiment
 %
 % CISMM function
@@ -46,7 +46,6 @@ outfile = [outf '.html'];
 fid = fopen(outfile, 'w');
 
 
-
 [visc, visc_err] = pan_compute_viscosity_heatmap(metadata);
 
 heatmapfig = pan_plot_viscosity_heatmap(visc);
@@ -64,7 +63,7 @@ myparam = 'metadata.plate.well_map';
 % compute the MSD for each condition defined by 'myparam'
 [msds molar_conc] = pan_combine_data(metadata, myparam);
 
-% variablest that contain summarized data
+% variables that contain summarized data
 all_taus = [msds.mean_logtau];
 all_msds = [msds.mean_logmsd];
 all_errs = [msds.msderr];

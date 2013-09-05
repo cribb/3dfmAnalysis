@@ -3,7 +3,10 @@ function outs = pan_read_well_layout( csvfile , plate_type )
 %   
 %  outs = pan_well_layout_to_struct( csvfile , plate_type )
 %
-%  where
+%  where "csvfile" defines the file that contains the well layout
+%  information from the Well_Layout interface for PanopticNerve.  The
+%  plate_type can be either '96well' or '384well'.
+%
 
 
 
@@ -12,9 +15,11 @@ switch plate_type
         plate_length = 96;
     case '384well'
         plate_length = 384;
+    otherwise
+        error('Unknown plate type.');
 end
 
-% set delimiter to be a "tab"
+% set delimiter to be a comma
 dlim = sprintf(',');
 
 fname_root = csvfile(1:end-4);
