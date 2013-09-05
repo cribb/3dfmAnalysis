@@ -102,6 +102,8 @@ in_struct = param_check(in_struct);
         case 'D'
             xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
         case 'V'
+            in_struct.viscosity = 1e9;
+            viscosity=in_struct.viscosity;
             xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
         case 'DV'
             xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
