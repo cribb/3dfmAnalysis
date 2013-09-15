@@ -65,6 +65,7 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
             new_well_list = unique(new_well_list);
             outs.instr.well_list = unique(new_well_list(:));
         end
+        outs.instr.systemid = systemid;
     else
         error('No ExperimentConfig file.')
     end
