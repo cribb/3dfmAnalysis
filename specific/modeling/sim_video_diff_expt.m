@@ -3,7 +3,7 @@ function varargout = sim_video_diff_expt(filename, in_struct)
 %
 % 3DFM function
 % specific/modeling
-% last modified 2013.08.29 (yingzhou)
+% last modified 2013.09.08 (cribb)
 %
 % This function simulates a bead diffusion experiment for a Newtonian
 % fluid.  
@@ -31,32 +31,10 @@ function varargout = sim_video_diff_expt(filename, in_struct)
 %         in_struct.ydrift_vel = y-drift in [meters/frame].  Default: 0.
 %         in_struct.rad_confined = the particle's radius of confinement in [m]. Default: Inf.
 %         in_struct.alpha = anomalous diffusion constant. Default: 1.
-%         in_struct.dim = dimension of the diffusion (usually 1D, 2D, or
-%         3D)
 %         in_struct.modulus = modulus of the fluid [Pa]. Default: 2.2e9 (bulk modulus of water).
- 
-% Determine the type of model needed for the simulation based on the input
-% structure
-if isfield(in_struct, 'viscosity')&&isfield(in_struct, 'alpha')&&isfield(in_struct, 'xdrift_vel')&&isfield(in_struct, 'ydrift_vel')
-    model_type = 'DAV';
-elseif isfield(in_struct, 'viscosity')&&isfield(in_struct, 'alpha')
-    model_type = 'DA';
-elseif isfield(in_struct, 'viscosity')&&isfield (in_struct, 'rad_confined')
-    model_type = 'DR';
-elseif isfield(in_struct, 'viscosity')&&isfield(in_struct, 'xdrift_vel')&&isfield(in_struct, 'ydrift_vel')
-    model_type = 'DV';
-elseif isfield(in_struct, 'xdrift_vel')&&isfield(in_struct, 'ydrift_vel')
-    model_type = 'V';
-elseif isfield(in_struct, 'viscosity')
-    model_type = 'D';
-elseif isfield(in_struct, 'modulus')
-    model_type = 'N';
-end
-
-logentry(['Parameters indicate a ' model_type ' model type.']);    
+%
 
 video_tracking_constants; 
-
 
 if nargin < 2 || isempty(in_struct)
     logentry('Model parameters are not set.  Will create the default simulation.');
@@ -68,6 +46,45 @@ if ~exist('filename', 'var') || isempty(filename)
 end
 
 in_struct = param_check(in_struct);
+
+% Determine the type of model needed for the simulation based on the input
+% structure.  (Example:  If the viscosity and alpha are defined with alpha 
+% not equal to one, and there is a non-zero velocity in x or y, then the
+% model must be a DAV model)
+if     isfield(in_struct, 'viscosity')  && ...
+       isfield(in_struct, 'alpha')      && ...
+       in_struct.alpha ~= 1             && ...
+     ((isfield(in_struct, 'xdrift_vel') && ...
+       in_struct.xdrift_vel ~= 0 )      || ...
+       isfield(in_struct, 'ydrift_vel') && ...
+       in_struct.ydrift_vel ~= 0 )
+    model_type = 'DAV';
+elseif isfield(in_struct, 'viscosity') && ...
+       isfield(in_struct, 'alpha')     && ...
+       in_struct.alpha ~= 1
+    model_type = 'DA';
+elseif isfield(in_struct, 'viscosity')     && ...
+       isfield (in_struct, 'rad_confined') && ...
+       in_struct.rad_confined < Inf
+    model_type = 'DR';
+elseif isfield(in_struct, 'viscosity')  && ...
+     ((isfield(in_struct, 'xdrift_vel') && ...
+       in_struct.xdrift_vel ~= 0 )      || ...
+       isfield(in_struct, 'ydrift_vel') && ...
+       in_struct.ydrift_vel ~= 0 )
+    model_type = 'DV';
+elseif  ( isfield(in_struct, 'xdrift_vel') && ...
+          in_struct.xdrift_vel ~= 0 )      || ...
+        ( isfield(in_struct, 'ydrift_vel') && ...
+          in_struct.ydrift_vel ~= 0 )
+    model_type = 'V';
+elseif isfield(in_struct, 'viscosity')
+    model_type = 'D';
+elseif isfield(in_struct, 'modulus') && in_struct.modulus > 0
+    model_type = 'N';
+end
+
+logentry(['Parameters indicate a ' model_type ' model type.']);    
 
     seed         = in_struct.seed;           %#ok<NASGU>
     numpaths     = in_struct.numpaths;
@@ -145,8 +162,7 @@ in_struct = param_check(in_struct);
 
 for k = 1:numpaths;     
     % vector of tracker ID's
-    id = ones(frame_rate*duration,1)*k; 
-    
+    id = ones(frame_rate*duration,1)*k;     
 
     % add this tracker's data to the output table
     simout = [simout; t, id,  fr,  xy(:,:,k), zrpy];
@@ -158,11 +174,10 @@ simout(:,X:Y) = simout(:,X:Y) / (calib_um/1e6);  % puts into pixels
 
 if exist('filename', 'var') && ~isempty(filename)
     save_vrpnmatfile(filename, simout, 'pixels', 1);
+    save_evtfile(filename, simout, 'pixels', calib_um);
 %     csvwrite([filename '.csv'], simout);
     logentry(['Saved data to file: ' filename]);
 end
-
-
 
 switch nargout
     case 1
@@ -234,7 +249,7 @@ function out = param_check(in)
     end
 
     if ~isfield(in, 'modulus') || isempty(in.modulus)
-        in.modulus = 2.2e9;   % [Pa]
+        in.modulus = 0;   % [Pa]
     end
     
     out = in;
