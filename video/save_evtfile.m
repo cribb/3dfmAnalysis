@@ -1,4 +1,27 @@
 function outfile = save_evtfile(filename, data, xyzunits, calib_um)
+% SAVE_EVTFILE saves tracking data to the evt.vrpn.mat format 
+%
+% 3DFM function
+% video
+% last modified 2013.09.08 (cribb)
+%
+% This function saves tracking data (eg. from simulations, etc) to the
+% evt.vrpn.mat format used in EVT_GUI.  This format retains the length scale
+% calibration information provided in the function call as a field in the
+% evt data structure (tracking.calib_um).
+%
+% [outfile] = save_evtfile(filename, data, xyzunits, calib_um)
+%
+% where "outfile" is the filename where save_evtfile saved the data.
+%       "filename" is the filename where save_evtfile will save the data. 
+%       "data" is a table of tracking data used in video_spot_tracker.  The
+%              column id's can be found in the 'video_tracking_constants'
+%              file, but are typically in this order: TIME, FRAME, ID, X,
+%              Y, Z, ROLL, PITCH, YAW.
+%       "xyzunits" defines the length scale units used in the "data" input,
+%                  which can be 'm' (meters), 'um', 'nm', or 'pixels'
+%       "calib_um" defines the length scale calibration in [um/pixel]
+%
 
     video_tracking_constants;
 
@@ -18,13 +41,14 @@ function outfile = save_evtfile(filename, data, xyzunits, calib_um)
     end
         
     tracking.spot3DSecUsecIndexFramenumXYZRPY = data;
-    
-    logentry(['Saving ' num2str(length(unique(data(:,ID)))) ' trackers in ' filename]);
+    tracking.calib_um = calib_um;       
     
     filename = strrep(filename, '.evt', '');
     filename = strrep(filename, '.mat', '');
     outfile = [filename '.evt.mat'];
+    
     save(outfile, 'tracking');   
+    logentry(['Saved ' num2str(length(unique(data(:,ID)))) ' trackers in ' outfile]);
     
 return;
 
