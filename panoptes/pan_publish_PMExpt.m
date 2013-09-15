@@ -93,10 +93,19 @@ myerr = all_errs(minloc(1),:);
 
 % generate information for the data table summary
 all_ns   = [msds.n];
-rms_mymsd = sqrt(mymsd);
-rms_mymsd_err = sqrt(mymsd+myerr) - rms_mymsd;
+rms_mymsd = sqrt(10.^mymsd);
+rms_mymsd_err = sqrt(10.^(mymsd+myerr)) - rms_mymsd;
 msds_n = all_ns(minloc(1),:);
 
+% inst_visc(k), inst_visc_err(k))
+bead_radius = cellfun(@str2num, metadata.plate.bead.diameter) ./ (2 * 1e6);
+bead_radius = bead_radius(:)';
+kB = 1.3806e-23;
+T = 296;
+inst_visc = (2 * kB * T * spec_tau) ./ (3 * pi * bead_radius .* 10.^mymsd);
+visc_with_err = (2 * kB * T * spec_tau) ./ (3 * pi * bead_radius .* 10.^(mymsd+myerr));
+inst_visc_err = abs(inst_visc - visc_with_err);
+ 
 % One-dimensional bar chart
 MSD = (10 .^ mymsd);
 MSD_err = (10.^(mymsd+myerr)-10.^(mymsd));
@@ -215,12 +224,13 @@ fprintf(fid, '</p> \n\n');
 % % % Report Summary table
 %
 fprintf(fid, '<p> \n');
-fprintf(fid, '   <h3> Summary </h3> \n');
+fprintf(fid, '   <h3> Summary at %i timescale </h3> \n', num2str(spec_tau));
 fprintf(fid, '   <table border="2" cellpadding="6"> \n');
 fprintf(fid, '   <tr> \n');
 fprintf(fid, '      <td align="center" width="200"> <b> Condition </b> </td> \n');
 fprintf(fid, '      <td align="center" width="200"> <b> MSD </b> </td> \n');
 fprintf(fid, '      <td align="center" width="200"> <b> RMS displacement </b> </td> \n');
+fprintf(fid, '      <td align="center" width="200"> <b> Inst. Viscosity </b> </td> \n');
 fprintf(fid, '      <td align="center" width="200"> <b> No. of trackers </b> </td> \n');
 fprintf(fid, '    </tr>\n');
 
@@ -228,8 +238,9 @@ fprintf(fid, '    </tr>\n');
 for k = 1:length(msds)
     fprintf(fid, '   <tr> \n');
     fprintf(fid, '      <td align="center" width="200"> %s </td> \n', molar_conc{k});
-    fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', mymsd(k), myerr(k));
+    fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', MSD(k), MSD_err(k));
     fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rms_mymsd(k)*1e9, rms_mymsd_err(k)*1e9);
+    fprintf(fid, '      <td align="center" width="200"> %8.1f +/- %8.2f [mPa s] </td> \n', inst_visc(k)*1e3, inst_visc_err(k)*1e3);
     fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_n(k));    
     fprintf(fid, '   </tr>\n');        
 end
