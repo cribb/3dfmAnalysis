@@ -1,18 +1,19 @@
-function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
-                                  absolute_pos, tstamps, table)
-% LOAD_VIDEO_TRACKING Loads into memory 3DFM video tracking dataset(s).
+function [v, calout] = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
+                                           absolute_pos, tstamps, table)
+% LOAD_VIDEO_TRACKING Loads 3DFM video tracking dataset(s) into memory.
 %
 % 3DFM function  
 % Tracking 
 % 
-% This function reads in a Video Tracking dataset, saved in the 
-% matlab workspace file (*.mat) format and prepares it for most 
-% data analysis functions.
+% This function reads in a Video Tracking dataset, saved in either the
+% matlab workspace file (*.mat) format or as a CSV file provided by 
+% video_spot_tracker and prepares it for most data analysis functions.
 % 
-% function v = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
-%                                  absolute_pos, tstamps, table)
-%
-% where "d" is the outputted data table
+% function [v, calout] = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
+%                                            absolute_pos, tstamps, table)
+%  
+% where "v" is the outputted data table
+%       "calout" is the outputted calibration factor
 %       "filemask" is the .mat filename(s) (i.e. wildcards ok)
 %       "frame_rate" (default 120fps) is the frame rate of the captured video sequence
 %	    "xyzunits" is either 'nm' 'um' 'm' or 'pixels'
@@ -38,7 +39,7 @@ if (nargin < 4 || isempty(calib_um));       calib_um = 1;              end;
 if (nargin < 3 || isempty(xyzunits));       xyzunits  = 'pixels';      end;
 if (nargin < 2 || isempty(frame_rate) || frame_rate == 0); frame_rate = 120; end;
 
-
+% deal with different ways to list files
 if isstruct(filemask)
     filelist = filemask;
 elseif iscell(filemask)
@@ -57,19 +58,22 @@ if length(filelist) < 1
     return;
 end
 
+% Need to handle the ambiguity between loading N files with just one
+% calibration factor versus loading N files with N calibration factors.
 if ( length(filelist) ~= length(calib_um) ) && ( length(calib_um) == 1 )
     calib_um = repmat(calib_um, length(filelist), 1);
 elseif ( length(filelist) ~= length(calib_um) )
     error('Mismatch between the number of files in inputted list and number of defined calib_um');
 end
 
+% Now, for every file...
 for fid = 1:length(filelist)
     
     file = filelist(fid).name;
     
-    % what if we want to use the csv file provided by video spot tracker?
-    % we have to make a decision here, and we'll base it on the filename
-    % extension
+    % What if we want to use the csv file provided by video spot tracker?
+    % We have to make a decision here, and we'll base it on the filename
+    % extension...
     if ~isempty(strfind(file, '.csv')) && isempty(strfind(file, '.mat'))
         % assume csv file is the input and load accordingly
         dd = csvread(file, 1, 0);
@@ -113,7 +117,27 @@ for fid = 1:length(filelist)
         continue;
     elseif ~isempty(strfind(file, '.evt.')) && isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
-    
+        
+        % need to handle the presence and absence of a calibration factor inside the
+        % tracking structure
+        
+        % A calibration factor (CF) can exist in either the function call
+        % for load_video_tracking or within the inputted tracking
+        % structure, or both.  If there is a CF in the tracking 
+        % structure AND the function call, they had better be the same or
+        % there's a contradiction we don't know how to resolve (error).  If
+        % there is just one CF and it lives in the tracking structure 
+        % then forward it through the rest of load_video_tracking as the 
+        % root 'calib_um'.
+        if isfield(dd.tracking, 'calib_um')
+            if ~isempty(calib_um(fid)) && dd.tracking.calib_um ~= calib_um(fid)
+                warning('The inputted calib_um at function call does not equal calib_um in the tracking data structure, using data structure version.');
+            end
+            calib_um(fid) = dd.tracking.calib_um;
+        elseif ~isempty(calib_um(fid))
+            dd.tracking.calib_um = calib_um(fid);
+        end
+        
         % if there are timestamps, and evt_gui was used, then they are already attached
         tstamps = 'done';
         
@@ -183,7 +207,7 @@ for fid = 1:length(filelist)
       dd.tracking.spot3DSecUsecIndexFramenumXYZRPY = zeros(1,10);
       data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
 %       error('I do not know how to handle this video VRPN file (weird fieldnames).');
-    end
+end
         
     % handle the physical units
     units{X} = xyzunits;  units{Y} = xyzunits;  units{Z} = xyzunits;
@@ -290,7 +314,7 @@ for fid = 1:length(filelist)
         glommed_d = [glommed_d ; data];
     end
     
-   
+    calout(fid,1) = calib_um(fid);
 end
 
 data = glommed_d;
