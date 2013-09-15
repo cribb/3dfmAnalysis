@@ -2,6 +2,8 @@ function [msds paramlist] = pan_combine_data(metadata, filtparam_name)
 
 video_tracking_constants;
 
+systemid = metadata.instr.systemid;
+
 if nargin < 2 || isempty(filtparam_name)
     filtparam_name = 'well';
     filtparam = 1;
@@ -60,6 +62,9 @@ for p = 1:length(paramlist)
 
             thisMCU = metadata.mcuparams.mcu(metadata.mcuparams.well == mywell & ...
                                              metadata.mcuparams.pass == mypass );
+                                         
+            my_well_list(m) = mywell;
+            
             if ~isempty(thisMCU)
                myMCU(m) = thisMCU;
             else
@@ -70,10 +75,11 @@ for p = 1:length(paramlist)
         bead_radius = str2double(metadata.plate.bead.diameter(mywell)) * 1e-6 / 2;
     else
         myMCU = NaN;
+        my_well_list = NaN;
         bead_radius = NaN;
     end
     
-    mycalibum = pan_MCU2um(myMCU);                               
+    mycalibum = pan_MCU2um(myMCU, systemid, my_well_list);
 
         
         
