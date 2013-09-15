@@ -1,0 +1,22 @@
+- Analysis code Input Parameters -
+(variable name in matlab and their default values are in parentheses)
+
+--- MSD Computation Parameters
+Number of taus (num_taus = 35) for MSD computation.  
+Calibration functions (cal_coeffs) for converting MCU values to um/pixel.
+
+--- Filtering parameters ---
+XYZ Units (xyzunits= 'pixels') - Defines the units of the trajectories that will be filtered.  For PanopticNerve this should probably alway be 'pixels' unless we want to implement a different length scale type.
+Time crop (time_crop=5) - Trims trajectory by removing time_crop number of time points from the beginning and end of each trajectory.
+Minimum # of points (min_frames=10) - Trajectories that have fewer than this number of frames are entirely eliminated from the tracking data.
+Minimum travel (min_pixels=0) - Trajectories that DO NOT travel beyond this distance in pixels are eliminated from the tracking data.
+Maximum travel (max_pixels=Inf) - Trajectories that DO travel beyond this distance in pixels are eliminated from the tracking data.
+Minimum viscosity (min_visc=0) - Defines the minimum viscosity allowed for a trajectory.  This filter uses the 'bead_radius' parameter from the WELL_LAYOUT metadata file.
+Maximum viscosity (max_visc=Inf) - Defines the maximum viscosity allowed for a trajectory.  This filter uses the 'bead_radius' parameter from the WELL_LAYOUT metadata file.
+Trim frame (xycrop=0) - defines a boundary of pixels around the edge of the image and eliminates trajectories that cross this boundary.
+Camera dead spots (dead_spots=[0 0 0 0]) - The 'dead_spots' parameter is synonymous with the 'xycrop' filter except that it eliminates trackers that wander into a "dead spot" in the image. The first two values define the x & y position in pixels for the upper left corner of the dead spot.  The last two values define the length and width of the dead spot in pixels.  Multiple dead spots can be defined by adding more rows to the dead spot matrix, with rows separated by a semicolon.  Example: filt.dead_spots = [492 128 30 30 ; 84 359 30 30 ; 499 319 30 30 ; 216 149 30 30 ]; 
+Drift Subtraction (drift_method='center-of-mass')- sets the drift subtraction technique.  Valid values are 'none;', 'center-of-mass', and 'linear.'  Note:  Linear drift subtraction should never be used on freely diffusing data.  It, however, can be used on beads actuated by an external force like a magnetic field.
+Bayesian model types (bayes_models = {'D', 'V', 'DV', 'DA', 'DR'}) - The 'bayes_models' cell array defines the
+
+--- Data Visualization types (tables, heatmaps, well MSDs, etc.)
+Report blocks (report_blocks = {'heatmap','rmsdisp','meanMSD','MSD'})  listbox, multiple selections, order matters.
