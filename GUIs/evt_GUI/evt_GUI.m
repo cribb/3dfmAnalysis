@@ -251,13 +251,23 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     
 %     try
-        d = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table');
+        [d, calout] = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table');
         d = filter_video_tracking(d, handles.filt);
 %     catch
 %         msgbox('File Not Loaded! Problem with load_video_tracking.', 'Error.');
 %         return;
 %     end
     
+    if ~isempty(calout)
+        if length(unique(calout)) == 1
+            set(handles.edit_calib_um, 'String', num2str(calout(1)));
+        else
+            msgbox('evt_GUI cannot load multiple files with multiple calibration factors at this time.', 'Error.', 'error');
+            return;
+        end        
+    end
+    
+
     if isempty(d)
         msgbox('No data exists in this fileset!');
         return;
