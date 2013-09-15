@@ -40,7 +40,10 @@ for k = 1:length(filelist)
                                    metadata.mcuparams.pass == mypass );
                                
 %     metadata.filt.xyzunits = 'm';
-    mycalibum = pan_MCU2um(myMCU);
+
+    
+    mycalibum = pan_MCU2um(myMCU, systemid, mywell);
+
 
     bead_radius = str2double(metadata.plate.bead.diameter(mywell)) .* 1e-6 ./ 2;
     
