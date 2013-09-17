@@ -97,15 +97,6 @@ rms_mymsd = sqrt(10.^mymsd);
 rms_mymsd_err = sqrt(10.^(mymsd+myerr)) - rms_mymsd;
 msds_n = all_ns(minloc(1),:);
 
-% inst_visc(k), inst_visc_err(k))
-bead_radius = cellfun(@str2num, metadata.plate.bead.diameter) ./ (2 * 1e6);
-bead_radius = bead_radius(:)';
-kB = 1.3806e-23;
-T = 296;
-inst_visc = (2 * kB * T * spec_tau) ./ (3 * pi * bead_radius .* 10.^mymsd);
-visc_with_err = (2 * kB * T * spec_tau) ./ (3 * pi * bead_radius .* 10.^(mymsd+myerr));
-inst_visc_err = abs(inst_visc - visc_with_err);
- 
 % One-dimensional bar chart
 MSD = (10 .^ mymsd);
 MSD_err = (10.^(mymsd+myerr)-10.^(mymsd));
@@ -230,7 +221,7 @@ fprintf(fid, '   <tr> \n');
 fprintf(fid, '      <td align="center" width="200"> <b> Condition </b> </td> \n');
 fprintf(fid, '      <td align="center" width="200"> <b> MSD </b> </td> \n');
 fprintf(fid, '      <td align="center" width="200"> <b> RMS displacement </b> </td> \n');
-fprintf(fid, '      <td align="center" width="200"> <b> Inst. Viscosity </b> </td> \n');
+fprintf(fid, '      <td align="center" width="200"> <b> App. Viscosity </b> </td> \n');
 fprintf(fid, '      <td align="center" width="200"> <b> No. of trackers </b> </td> \n');
 fprintf(fid, '    </tr>\n');
 
@@ -240,7 +231,7 @@ for k = 1:length(msds)
     fprintf(fid, '      <td align="center" width="200"> %s </td> \n', molar_conc{k});
     fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', MSD(k), MSD_err(k));
     fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rms_mymsd(k)*1e9, rms_mymsd_err(k)*1e9);
-    fprintf(fid, '      <td align="center" width="200"> %8.1f +/- %8.2f [mPa s] </td> \n', inst_visc(k)*1e3, inst_visc_err(k)*1e3);
+    fprintf(fid, '      <td align="center" width="200"> %8.1f +/- %8.2f [mPa s] </td> \n', visc(k)*1e3, visc_err(k)*1e3);
     fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_n(k));    
     fprintf(fid, '   </tr>\n');        
 end

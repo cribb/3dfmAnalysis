@@ -10,8 +10,11 @@ function [visc, visc_err] = pan_compute_viscosity_heatmap(metadata)
 kB = 1.3806e-23;
 T = 296; % temperature in Kelvin 
 
-bead_radius = cellfun(@str2num, metadata.plate.bead.diameter) ./ (2 * 1e6);
-bead_radius = bead_radius(:)';
+bead_radius = metadata.plate.bead.diameter ./ (2 * 1e6);
+    
+    
+% bead_radius = cellfun(@str2num, metadata.plate.bead.diameter) ./ (2 * 1e6);
+% bead_radius = bead_radius(:)';
 
 %%%%
 % compute the MSD for each WELL (for the heatmap)

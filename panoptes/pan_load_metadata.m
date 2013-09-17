@@ -99,6 +99,26 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
     outs.well_list = unique(well_)';
     outs.pass_list = unique(pass_)';    
     
+    % Need to convert bead diameters from cell of strings to numerical
+    % vector.  I'm sure there is an easier way to do this, something that
+    % is not so awkward.  I wish I had time to figure it out.
+    if isfield(outs.plate.bead, 'diameter')
+        for k = 1:96
+            this_diameter = str2num(outs.plate.bead.diameter{k});
+
+            if ~isempty(this_diameter)
+                bead_diameter(1,k) =  this_diameter;
+            else
+                bead_diameter(1,k) = NaN;           
+            end
+        end
+        
+        outs.plate.bead.diameter = bead_diameter;
+
+    else
+        error('No bead data defined.');
+    end
+    
 return;
 
 
