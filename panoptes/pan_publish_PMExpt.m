@@ -47,6 +47,8 @@ fid = fopen(outfile, 'w');
 
 
 [visc, visc_err] = pan_compute_viscosity_heatmap(metadata);
+visclist = reshape(transpose(visc), 1, length(visc(:)));
+visc_errlist = reshape(transpose(visc_err), 1, length(visc(:)));
 
 heatmapfig = pan_plot_viscosity_heatmap(visc);
 heatmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
@@ -231,7 +233,7 @@ for k = 1:length(msds)
     fprintf(fid, '      <td align="center" width="200"> %s </td> \n', molar_conc{k});
     fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', MSD(k), MSD_err(k));
     fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rms_mymsd(k)*1e9, rms_mymsd_err(k)*1e9);
-    fprintf(fid, '      <td align="center" width="200"> %8.1f +/- %8.2f [mPa s] </td> \n', visc(k)*1e3, visc_err(k)*1e3);
+    fprintf(fid, '      <td align="center" width="200"> %8.1f +/- %8.2f [mPa s] </td> \n', visclist(k)*1e3, visc_errlist(k)*1e3);
     fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_n(k));    
     fprintf(fid, '   </tr>\n');        
 end
