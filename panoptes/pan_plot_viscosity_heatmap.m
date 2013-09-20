@@ -5,6 +5,7 @@ colorbar_limits = [-3.3 2];
 % Heat map
 heatmapfig = figure; 
 % imagesc(1:12, 1:8, heatmap_msds); 
+set(heatmapfig, 'Visible', 'off');
 imagesc(1:12, 1:8, log10(visc), colorbar_limits); 
 colormap((hot));
 cb = colorbar;
