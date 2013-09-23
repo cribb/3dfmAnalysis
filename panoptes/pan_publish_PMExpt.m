@@ -139,6 +139,14 @@ end
 YLim_low = floor(nanmin(temp_meanlogmsd(:)));
 YLim_high = ceil(nanmax(temp_meanlogmsd(:)));
 
+if isnan(YLim_low )
+    YLim_low = -18;
+end
+
+if isnan(YLim_high)
+    YLim_high = -12;
+end
+
 for k = 1:length(molar_conc)    
     MSDfile{k} = [metadata.instr.experiment '_well_' molar_conc{k} '.msd'];
     MSDfig  = figure('Visible', 'off');
