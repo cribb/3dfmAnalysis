@@ -36,12 +36,31 @@ function [calibum, calibum_err] = pan_MCU2um(MCUparam, systemid, wellid)
            calibum_err = NaN; % don't know this error
     elseif channelid > 0 % case for panoptes
 
-        % calibrations for Panoptes channels 1-12 given an MCU parameter of zero.
-        MCU_zero_calibum = [0.151447, 0.149707, 0.148812, 0.148333, 0.149083, 0.147706, 0.148374, 0.149008, 0.149312, 0.149215, 0.149227, 0.144805];
-        MCU_zero_calibum_error = [0.00179751, 0.00373752, 0.00371864, 0.00218959, 0.00180049, 0.00124988, 0.00339845, 0.00153736, 0.00232281, 0.00248024, 0.000841523, 0.00206237];
-        
-        calibum = MCU_zero_calibum( channelid );
-        calibum_err = MCU_zero_calibum_error( channelid );
+        % commented out the accurate calibratation for each channel for an
+        % MCU parameter of just zero. 
+% % %         % calibrations for Panoptes channels 1-12 given an MCU parameter of zero.
+% % %         MCU_zero_calibum = [0.151447, 0.149707, 0.148812, 0.148333, 0.149083, 0.147706, 0.148374, 0.149008, 0.149312, 0.149215, 0.149227, 0.144805];
+% % %         MCU_zero_calibum_error = [0.00179751, 0.00373752, 0.00371864, 0.00218959, 0.00180049, 0.00124988, 0.00339845, 0.00153736, 0.00232281, 0.00248024, 0.000841523, 0.00206237];
+% % %         
+% % %         calibum = MCU_zero_calibum( channelid );
+% % %         calibum_err = MCU_zero_calibum_error( channelid );
+
+        % We do not have a full calibration across the range of MCU values for the individual channels in Panoptes
+        % so we are just going to assume every channel has an identical calibration
+        % to Monoptes.  This will need to be removed in the future.
+           calibum = (2.292106704e-6 * MCUparam + 0.1105463685);     % (range from 21000 to 60000) (112812 by Jeremy)
+           idx = find(MCUparam < 21000);
+           if ~isempty(idx)
+               calibum(idx) = 0.157; % um/pixel 
+           end
+
+           idx = find(MCUparam > 60000);
+           if ~isempty(idx)
+               logentry('The input MCU parameter is out of range.  Setting to NaN');
+               calibum(idx) = NaN;
+           end
+
+           calibum_err = NaN; % don't know this error
 
     end
     

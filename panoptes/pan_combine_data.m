@@ -54,6 +54,8 @@ for p = 1:length(paramlist)
 
     filelist = pan_gen_filelist(metadata, wells_to_combine, []);
     
+    my_well_list = [];
+    
     if ~isempty(filelist)
         for m = 1 : length(filelist)
 
