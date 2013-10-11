@@ -65,7 +65,8 @@ heatmap_msds = reshape(heatmap_msds, 12, 8)';
 
 visc = (2 * 1.3806e-23 * 300 * spec_tau) ./ (3 * pi * 0.25e-6 * 10.^heatmap_msds);
 % Heat map
-heatmapfig = figure; 
+heatmapfig = figure('Visible', 'off');
+
 % imagesc(1:12, 1:8, heatmap_msds); 
 imagesc(1:12, 1:8, log10(visc)); 
 colormap((hot));
@@ -98,8 +99,8 @@ close(heatmapfig);
 
 % myparam = 'metadata.plate.solution.molar_concentration';
 % myparam = 'metadata.plate.well_map';
-% myparam = 'metadata.plate.cell.name';
-myparam = 'metadata.plate.solution.name';
+myparam = 'metadata.plate.cell.name';
+% myparam = 'metadata.plate.solution.name';
 
 % compute the MSD for each condition defined by 'myparam'
 [msds molar_conc] = pan_combine_data(metadata, myparam);
@@ -159,7 +160,7 @@ for k = 1:length(msds)-1
 end
 
 % construct the ksdensity figure
-ksfig  = figure;
+ksfig  = figure('Visible', 'off');
 plot(dens_locs, densities);
 leg = legend(density_names);
 set(leg, 'Interpreter', 'none');
@@ -169,7 +170,7 @@ ksdensity_file = [metadata.instr.experiment '_molar_concentration_ALL' '.ksdensi
 gen_pub_plotfiles(ksdensity_file, ksfig, 'normal');
 close(ksfig);
 
-barfig = figure;
+barfig = figure('Visible', 'off');
 barwitherr( (10.^(mylogmsd+mylogerr))-(10.^(mylogmsd)),  (10 .^ mylogmsd));
 set(gca,'XTickLabel',molar_conc)
 xlabel('cell type');
@@ -179,7 +180,7 @@ gen_pub_plotfiles(barfile, barfig, 'normal');
 close(barfig);
 
 % create plot with mean msd data for all values of 'myparam' across ALL taus
-aggMSDfig = figure; 
+aggMSDfig = figure('Visible', 'off'); 
 errorbar(all_logtaus, all_logmsds, all_logerrs, 'LineWidth', 2)
 xlabel('time scale, \tau [s]');
 ylabel('<r^2> [m^2]');
@@ -191,8 +192,8 @@ close(aggMSDfig);
 % create plots for each parameter value
 for k = 1:length(molar_conc)    
     MSDfile{k} = [metadata.instr.experiment '_molar_concentration_' molar_conc{k} '.msd'];
-    MSDfig  = plot_msd(msds(k), [], 'ame');
-    figure(MSDfig);
+    MSDfig  = figure('Visible', 'off');
+    plot_msd(msds(k), MSDfig, 'ame');
     gen_pub_plotfiles(MSDfile{k}, MSDfig, 'normal'); 
     close(MSDfig);    
 end
