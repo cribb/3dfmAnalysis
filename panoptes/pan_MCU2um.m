@@ -54,11 +54,11 @@ function [calibum, calibum_err] = pan_MCU2um(MCUparam, systemid, wellid)
                calibum(idx) = 0.157; % um/pixel 
            end
 
-           idx = find(MCUparam > 60000);
-           if ~isempty(idx)
-               logentry('The input MCU parameter is out of range.  Setting to NaN');
-               calibum(idx) = NaN;
-           end
+%            idx = find(MCUparam > 60000);
+%            if ~isempty(idx)
+%                logentry('The input MCU parameter is out of range.  Setting to NaN');
+%                calibum(idx) = NaN;
+%            end
 
            calibum_err = NaN; % don't know this error
 
