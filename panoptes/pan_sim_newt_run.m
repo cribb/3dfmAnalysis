@@ -1,22 +1,56 @@
 function outs = pan_sim_newt_run(fileroot, wells, passes, simstruct)
+% PAN_SIM_NEWT_RUN simulates a Panoptes run, creating a dataset for a Newtonian fluid.
+%
+% Panoptes function 
+% 
+% This function creates a dataset for a set of conditions defined for Panoptes, 
+% our high-throughput microscope.
+%
+% function outs = pan_sim_newt_run(fileroot, wells, passes, simstruct)
+%
+% where "outs" is a dummy output set to zero
+%       "fileroot" defines the location for tracking data and metadata files
+%       "wells" defines the systed used, is either 'Monoptes' or 'Panoptes'
+%       "passes" if 'y' matlab closes after finishing the analysis
+%       "simstruct" is the input structure, with default settings as follows:
+%                    simstruct.numpaths = 10;
+%                    simstruct.viscosity = [0.1:0.1:1];     % [Pa s]
+%                    simstruct.bead_radius = 0.5e-6;        % [m]
+%                    simstruct.frame_rate = 54;             % [frames/s]
+%                    simstruct.duration = 60;               % [s]
+%                    simstruct.tempK = 300;                 % [K]
+%                    simstruct.field_width = 648;           % [pixels]
+%                    simstruct.field_height = 488;          % [pixels]
+%                    simstruct.calib_um = 0.171;            % [um/pixel];
+%                    simstruct.xdrift_vel = 0;              % [m/frame];
+%                    simstruct.ydrift_vel = 0;              % [m/frame];
+%
+% Notes:
+% - This function is designed to work within the PanopticNerve software
+% chain but can be used manually from the matlab command line interface.
+%
 
+% sets the root filename in case one was not presented during the function call
 if nargin < 1 || isempty(fileroot)
     fileroot = 'testfile';
 end
 
+% Default wells identified as wells 1 through 10
 if nargin < 2 || isempty(wells)
     wells = [1:10];
 end
 
+% assume one pass of the plate as the default
 if nargin < 3 || isempty(passes)
     passes = 1;
 else 
     passes = 1:passes;
 end
 
+% default values for the simulation structure
 if nargin < 4 || isempty(simstruct)
     simstruct.numpaths = 10;
-    simstruct.viscosity = [0.1:0.1:1];     % [Pa s]
+    simstruct.viscosity = 1;     % [Pa s]
     simstruct.bead_radius = 0.5e-6;        % [m]
     simstruct.frame_rate = 54;             % [frames/s]
     simstruct.duration = 60;               % [s]
@@ -29,25 +63,25 @@ if nargin < 4 || isempty(simstruct)
 end
 
 simstruct = param_check(simstruct);
-
-fn = fieldnames(simstruct);
-
-% expand along the field that has our variable values
-for k = 1:length(fn)
-    sz(k,1) = length(getfield(simstruct,fn{k}));
-end
-
-idx = find( sz(:,1) == max(sz(:,1)) );
-
-for k = 1:length(fn)
-    
-    tmp = getfield(simstruct,fn{k});
-    
-    if k ~= idx  && size(tmp,1) == 1 && size(tmp,2) == 1
-        simstruct = setfield(simstruct,fn{k}, repmat(tmp, 1, sz(idx) ) );
-    end
-    
-end
+% 
+% fn = fieldnames(simstruct);
+% 
+% % expand along the field that has our variable values
+% for k = 1:length(fn)
+%     sz(k,1) = length(getfield(simstruct,fn{k}));
+% end
+% 
+% idx = find( sz(:,1) == max(sz(:,1)) );
+% 
+% for k = 1:length(fn)
+%     
+%     tmp = getfield(simstruct,fn{k});
+%     
+%     if k ~= idx  && size(tmp,1) == 1 && size(tmp,2) == 1
+%         simstruct = setfield(simstruct,fn{k}, repmat(tmp, 1, sz(idx) ) );
+%     end
+%     
+% end
 
 for w = 1:length(wells)
     
@@ -55,17 +89,17 @@ for w = 1:length(wells)
         
         filename = [fileroot '_video' '_pass' num2str(passes(p)) '_well' num2str(wells(w)) '_TRACKED.vrpn.mat'];
             
-        mystruct.numpaths  = simstruct.numpaths(w);
-        mystruct.viscosity = simstruct.viscosity(w);
-        mystruct.bead_radius = simstruct.bead_radius(w);
-        mystruct.frame_rate = simstruct.frame_rate(w);
-        mystruct.duration = simstruct.duration(w);
-        mystruct.tempK = simstruct.tempK(w);
-        mystruct.field_width = simstruct.field_width(w);
-        mystruct.field_height = simstruct.field_height(w);
-        mystruct.calib_um   = simstruct.calib_um(w);
-        mystruct.xdrift_vel = simstruct.xdrift_vel(w);
-        mystruct.ydrift_vel = simstruct.ydrift_vel(w);
+        mystruct.numpaths  = simstruct.numpaths;
+        mystruct.viscosity = simstruct.viscosity;
+        mystruct.bead_radius = simstruct.bead_radius;
+        mystruct.frame_rate = simstruct.frame_rate;
+        mystruct.duration = simstruct.duration;
+        mystruct.tempK = simstruct.tempK;
+        mystruct.field_width = simstruct.field_width;
+        mystruct.field_height = simstruct.field_height;
+        mystruct.calib_um   = simstruct.calib_um;
+        mystruct.xdrift_vel = simstruct.xdrift_vel;
+        mystruct.ydrift_vel = simstruct.ydrift_vel;
         
         
         sim_video_diff_expt(filename, mystruct);
