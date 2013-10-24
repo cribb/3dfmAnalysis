@@ -45,8 +45,8 @@ visc_with_err = (2 * kB * T * spec_tau) ./ (3 * pi * bead_radius .* 10.^(heatmap
 
 visc_err = abs(visc_with_err - visc);
 
-msdmap = reshape(well_specmsd, 12, 8)';
-msdmap_err = reshape(well_spec_err, 12, 8)';
+msdmap = reshape(heatmap_msds, 12, 8)';
+msdmap_err = reshape(heatmap_errs, 12, 8)';
 
 visc = reshape(visc, 12, 8)';
 visc_err = reshape(visc_err, 12, 8)';
