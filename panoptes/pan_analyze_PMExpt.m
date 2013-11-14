@@ -2,13 +2,15 @@ function outs = pan_analyze_PMExpt(filepath, filt, systemid)
 
 if ~exist('filepath', 'var'), filepath= []; end;
 if ~exist('filt', 'var'), filt = []; end;
-if ~exist('mode', 'var'), mode = []; end;
-    
+if ~exist('systemid', 'var'), systemid = []; end;
+
+video_tracking_constants;
+
 % other parameter settings
 plate_type = '96well';
 freqtype = 'f';
 
-[filepath, filt, mode] = check_params(filepath, filt, mode);
+[filepath, filt, systemid] = check_params(filepath, filt, systemid);
 
 metadata = pan_load_metadata(filepath, systemid, plate_type);
 
@@ -60,38 +62,108 @@ for k = 1:length(filelist)
                        
     % only have to filter if we need to process .vrpn.mat to .vrpn.evt.mat
     if length(metadata.files.evt) ~= length(metadata.files.tracking)
-        d = filter_video_tracking(d, filt);
-        save_evtfile(filelist(k).name, d, 'm', mycalibum);
+        [d, filtout] = filter_video_tracking(d, filt);
+
+        if isfield(filtout, 'drift_vector') 
+                drift_vectors.pass(k,1) = mypass;
+                drift_vectors.well(k,1) = mywell;
+
+                if ~isempty(filtout.drift_vector)
+                    drift_vectors.xvel(k,1) = filtout.drift_vector(1,1);
+                    drift_vectors.yvel(k,1) = filtout.drift_vector(1,2);
+                else
+                    drift_vectors.xvel(k,1) = NaN;
+                    drift_vectors.yvel(k,1) = NaN;
+                end
+        end
+        
+        if isfield(filtout, 'num_jerks') 
+            jerk_report.pass(k,1) = mypass;
+            jerk_report.well(k,1) = mywell;
+
+            if ~isempty(filtout.num_jerks)
+                jerk_report.num_jerks(k,1) = filtout.num_jerks;
+            else
+                jerk_report.num_jerks(k,1) = NaN;
+            end
+        end
+        
+        save_evtfile(filelist(k).name, d, 'm', mycalibum);        
     end
     
+% %     % plotting tracker availability
+% %     travfig = figure('Visible','off'); 
+% %     if ~isempty(d)
+% %         plot_tracker_avail(d(:,FRAME), d(:,ID), travfig);
+% %         tr_avail_file_temp = strrep(filelist(k).name, 'vrpn.mat', '');
+% %         tr_avail_file_temp = strrep(tr_avail_file_temp, 'vrpn.evt.mat', '');    
+% %         tr_avail_file{k} = [tr_avail_file_temp  'trav'];
+% % 
+% %         saveas(travfig, [tr_avail_file{k} '.png'], 'png');
+% % %         gen_pub_plotfiles(tr_avail_file{k}, travfig, 'normal'); 
+% %         close(travfig); 
+% %     end
+% %     
+% %     % plot longest time,XY trace
+% %     if ~isempty(d)
+% %         tracker_list = unique(d(:,ID));
+% %         txy_file_temp = strrep(filelist(k).name, 'vrpn.mat', '');
+% %         txy_file_temp = strrep(tr_avail_file_temp, 'vrpn.evt.mat', '');    
+% %         txy_file{k} = [tr_avail_file_temp  'txy'];
+% % 
+% %             longest_tracker = mode(tracker_list);
+% %             LTidx = find(d(:,ID) == longest_tracker);
+% %             this_trajectory = d(LTidx,:);
+% % 
+% %             x_px = ( this_trajectory(:,X) - this_trajectory(1,X) ) * 1e6 / calib_um;
+% %             y_px = ( this_trajectory(:,Y) - this_trajectory(1,Y) ) * 1e6 / calib_um;
+% %             
+% %             XTfig = figure;
+% %             plot(this_trajectory(:,TIME), [ x_px, y_px ], '.-');        
+% %             xlabel('time [s]');
+% %             ylabel('displacement [px]');
+% %             legend('x', 'y');    
+% %             set(XTfig, 'DoubleBuffer', 'on');
+% %             set(XTfig, 'BackingStore', 'off');    
+% %             drawnow;
+% % 
+% %             saveas(XTfig, [txy_file{k} '.png'], 'png');
+% %             close(XTfig)
+% %     end
+    
+  
     
 %     mymsd = video_msd(d, window, metadata.instr.fps_imagingmode, mycalibum, 'no');        
 %     myve  = ve(mymsd, bead_radius, freqtype, 'no');
     
 % % %         if findstr(mode, 'd')            
 % % %             save_evtfile(filelist(k).name, d, 'm', mycalibum);
-% % % %             save_msdfile(filelist(k).name, mymsd);
-% % % %             save_gserfile(filelist(k).name, myve);
+% % %             save_msdfile(filelist(k).name, mymsd);
+% % %             save_gserfile(filelist(k).name, myve);
 % % %         end                
     
-   
-%     
+     
 end
 
+drift_filename = [metadata.instr.experiment '.drift.mat'];
+if exist('drift_vectors', 'var')
+    save(drift_filename, '-STRUCT', 'drift_vectors');
+end
+
+jerk_filename = [metadata.instr.experiment '.numjerks.mat'];
+if exist('jerk_report', 'var')
+    save(jerk_filename, '-STRUCT', 'jerk_report');
+end
 outs = 0;
 
 return;
 
 
-function [filepath, filt, mode] = check_params(filepath, filt, mode)
+function [filepath, filt, systemid] = check_params(filepath, filt, systemid)
 
-    if nargin < 3 || isempty(mode)
-        mode = 'd';
+    if nargin < 3 || isempty(systemid)
+        systemid = 'panoptes';
     end
-
-%     if nargin < 2 || isempty(filt) || ~isfield(filt, 'frame_rate')
-%         filt.frame_rate = 54;
-%     end
 
     if nargin < 2 || isempty(filt) || ~isfield(filt, 'min_frames')
         filt.min_frames = 15;
