@@ -155,11 +155,12 @@ if isnan(YLim_high)
 end
 
 for k = 1:length(molar_conc)    
-    MSDfile{k} = [metadata.instr.experiment '_well_' molar_conc{k} '.msd'];
+    my_molar_conc = strrep(molar_conc{k}, ' ', '');
+    MSDfile{k} = [metadata.instr.experiment '_well_' my_molar_conc '.msd'];
     MSDfig  = figure('Visible', 'off');
     plot_msd(msds(k), MSDfig, 'ame');
     set(gca, 'YLim', [YLim_low YLim_high]);
-%     figure(MSDfig);
+
     gen_pub_plotfiles(MSDfile{k}, MSDfig, 'normal'); 
     close(MSDfig);    
 end
