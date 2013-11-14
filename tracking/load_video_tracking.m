@@ -55,6 +55,7 @@ end
 if length(filelist) < 1
     logentry(['No files found matching ' filemask ', returning empty set.']);
     v = NaN(1,9);
+    calout = NaN;
     return;
 end
 
@@ -340,7 +341,7 @@ else
     v = [];
 end 
     
-
+return;
 
 % function for writing out stderr log messages
 function logentry(txt)
@@ -354,3 +355,5 @@ function logentry(txt)
      headertext = [logtimetext 'load_video_tracking: '];
      
      fprintf('%s%s\n', headertext, txt);
+
+     return;
