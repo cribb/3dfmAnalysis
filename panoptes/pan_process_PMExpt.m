@@ -139,6 +139,14 @@ filt.drift_method = 'none';
 % list box with multiple selections, order is unimportant
 filt.bayes_models = {'D', 'V', 'DV', 'DA', 'DR'};
 
+% The 'remove jerks' filter will search through the data and find extreme
+% changes in the image due to varioptic jerk and remove them.  The value
+% indicates the number of pixels to observe a jerk take and jerks above
+% this value are eliminated.  The jerky points are removed and replaced
+% with the average value of the two nearest neighboring points (before and
+% after).
+% filt.jerk_limit = 1.5;
+
 % list box with multiple selections, order is important
 report_blocks = {'heatmap','rmsdisp','meanMSD','MSD'};
 
