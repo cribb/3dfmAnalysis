@@ -3,7 +3,12 @@ function beadstruct = convert_vidtable_to_beadstruct(vidtable)
 
 video_tracking_constants;
 
-beadID = vidtable(:,ID);
+if ~isempty(vidtable)
+    beadID = vidtable(:,ID);
+else
+    beadstruct = [];
+    return;
+end
 
 for k = 0:max(beadID)
 
