@@ -1720,14 +1720,7 @@ function plot_data(hObject, eventdata, handles)
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
 
-            plot(frame, beadID, '.');
-            xlabel('frame number');
-            ylabel('Tracker ID');
-            set(handles.AUXfig, 'Units', 'Normalized');
-            set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
-            set(handles.AUXfig, 'DoubleBuffer', 'on');
-            set(handles.AUXfig, 'BackingStore', 'off');    
-            drawnow;
+            plot_tracker_avail(frame, beadID, handles.AUXfig);
             
         case '2pt MSD'
             figure(handles.AUXfig);
