@@ -20,6 +20,7 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
     outs.files.wells     = dir('*ExperimentConfig*.txt');
     outs.files.layout    = dir('*WELL_LAYOUT*.csv');
     outs.files.MCUparams = dir('*MCUparams*.txt');
+    outs.files.FLburst   = dir('*FLburst*');
 
     % other file lists
     outs.files.video    = dir('*video*.vrpn.mat');

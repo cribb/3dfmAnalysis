@@ -3,7 +3,7 @@ function pan_clean_path(filepath)
 cd(filepath)
 
 try
-    delete('*.evt.mat', '*.svg', '*.png', '*.fig', '*.html');
+    delete('*.evt.mat', '*.svg', '*.png', '*.fig', '*.html', '*.drift.mat');
 catch
     logentry('Some files were not deleted.');
 end

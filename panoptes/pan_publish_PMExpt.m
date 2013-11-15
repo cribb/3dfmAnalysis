@@ -46,15 +46,22 @@ outfile = [outf '.html'];
 fid = fopen(outfile, 'w');
 
 
-[visc, visc_err] = pan_compute_viscosity_heatmap(metadata);
+[msdmap, msdmap_err, visc, visc_err] = pan_compute_viscosity_heatmap(metadata);
+
+msdmapfig = pan_plot_msd_heatmap(msdmap);
+msdmapfile = [metadata.instr.experiment '_well_ALL' '.msdheatmap'];
+gen_pub_plotfiles(msdmapfile, msdmapfig, 'normal');
+close(msdmapfig);
+drawnow;
+
+viscmapfig = pan_plot_viscosity_heatmap(visc);
+viscmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
+gen_pub_plotfiles(viscmapfile, viscmapfig, 'normal');
+close(viscmapfig);
+drawnow;
+
 visclist = reshape(transpose(visc), 1, length(visc(:)));
 visc_errlist = reshape(transpose(visc_err), 1, length(visc(:)));
-
-heatmapfig = pan_plot_viscosity_heatmap(visc);
-heatmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
-gen_pub_plotfiles(heatmapfile, heatmapfig, 'normal');
-close(heatmapfig);
-drawnow;
 
 %%%%  Calculate the MSD for different wells/conditions
 % myparam = 'metadata.plate.solution.molar_concentration';
@@ -148,11 +155,12 @@ if isnan(YLim_high)
 end
 
 for k = 1:length(molar_conc)    
-    MSDfile{k} = [metadata.instr.experiment '_well_' molar_conc{k} '.msd'];
+    my_molar_conc = strrep(molar_conc{k}, ' ', '');
+    MSDfile{k} = [metadata.instr.experiment '_well_' my_molar_conc '.msd'];
     MSDfig  = figure('Visible', 'off');
     plot_msd(msds(k), MSDfig, 'ame');
     set(gca, 'YLim', [YLim_low YLim_high]);
-%     figure(MSDfig);
+
     gen_pub_plotfiles(MSDfile{k}, MSDfig, 'normal'); 
     close(MSDfig);    
 end
@@ -212,12 +220,22 @@ fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
 
 %
+% Plate-wide MSD heat-map
+%
+fprintf(fid, '<p> \n');
+fprintf(fid, '   <h3> Heatmap (MSD at 10 [s] time scale) </h3> \n');
+% fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', MSD_heatmapfile);
+fprintf(fid, '   <iframe src="%s.png" width="800" height="600" border="0"></iframe> <br/> \n', msdmapfile);
+fprintf(fid, '   <br/> \n\n');
+fprintf(fid, '</p> \n\n');
+
+%
 % Plate-wide heat-map
 %
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Heatmap (Viscosity at %i [s] time scale) </h3> \n', spec_tau);
 % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
-fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', heatmapfile);
+fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', viscmapfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 

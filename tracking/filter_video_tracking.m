@@ -1,4 +1,4 @@
-function outs = filter_video_tracking(data, filt)
+function [outs, filtout] = filter_video_tracking(data, filt)
 % FILTER_VIDEO_TRACKING    Filters video tracking datasets
 % CISMM function
 % video
@@ -20,6 +20,7 @@ function outs = filter_video_tracking(data, filt)
 %       "minFrames"
 %       "tCrop" 
 %       "xyCrop" 
+%       "jerk_limit"
 %      
 %       
 %
@@ -55,13 +56,17 @@ function outs = filter_video_tracking(data, filt)
         filt.xycrop     = 0;
         filt.xyzunits   = 'pixels';
         filt.calib_um   = 1;
-        filt.drift_method = 'n';
+        filt.drift_method = 'none';
         filt.dead_spots = [];
+        filt.jerk_limit = [];
     end
 
+    filtout = filt;
+    
     if (nargin < 1) || isempty(data); 
         logentry('No data inputs set. Exiting filter_video_tracking now.');
         outs = [];
+        filtout.drift_vector = [NaN NaN];
         return;
     end
 
@@ -140,15 +145,21 @@ function outs = filter_video_tracking(data, filt)
     if isfield(filt, 'drift_method')
         if ~strcmp(filt.drift_method, 'none')
             [data,drift_vector] = filter_subtract_drift(data, filt.drift_method);
+            filtout.drift_vector = drift_vector;
             logentry(['Removed drift of ' num2str(drift_vector*filt.calib_um) ' um/s from data.']);
-        end
-        
+        end        
+    end    
 
+    if isfield(filt, 'jerk_limit')
+        if ~isempty(filt.jerk_limit) && filt.jerk_limit < inf
+            [data,num_jerks] = filter_remove_tracker_jerk(data, filt.jerk_limit);
+            filtout.num_jerks = num_jerks;
+            logentry(['Large, jerky displacements (larger than ' num2str(filt.jerk_limit) ') removed.']);
+        end
     end
     
-
     % Relabel trackers to have consecutive IDs
-    beadlist = unique(data(:,ID));
+    beadlist = unique(data(:,ID));   
     if length(beadlist) == max(beadlist)+1
     %     logentry('No empty trackers, so no need to redefine tracker IDs.');
     else
@@ -403,8 +414,68 @@ function data = filter_dead_spots(data, dead_spots)
 function [data,drift_vector] = filter_subtract_drift(data, drift_method)
     drift_start_time = [];
     drift_end_time = [];    
-    [data,drift_vector] = remove_drift(data, drift_start_time, drift_end_time, drift_method);
+    [data,drift_vector] = remove_drift(data, drift_start_time, drift_end_time, drift_method);    
 return;
+
+function [data,num_jerks] = filter_remove_tracker_jerk(data, jerk_limit)
+    video_tracking_constants;
+    
+    if isempty(data) 
+        num_jerks = NaN;
+        return;
+    end
+    tracker_list = unique(data(:,ID));
+    temp = data;
+    for k = 1:length(tracker_list)
+        idx = find(data(:,ID) == tracker_list(k));
+        xy = data(idx, X:Y);    
+        dxdy = diff(xy);
+        
+        jerk_idxX = find(abs(dxdy(:,1)) > jerk_limit);
+        jerk_idxY = find(abs(dxdy(:,2)) > jerk_limit);        
+        jerk_idx = union(jerk_idxX, jerk_idxY);
+        new_xy = xy;
+        new_xy(jerk_idx+1,:) = NaN;
+        
+        for m = 1:length(jerk_idx)
+            pre = new_xy(jerk_idx(m),:);
+            trigger = NaN;
+            count = 1;
+            while isnan(trigger)
+                if jerk_idx(m)+count > length(new_xy)
+                    count = count-1;
+                    trigger = 0;
+                else
+                    trigger = sum(new_xy(jerk_idx(m)+count,:));
+                end
+                
+                if isnan(trigger)
+                    count = count + 1;
+                end
+            end
+            post = new_xy(jerk_idx(m)+count,:);
+            myidx = jerk_idx(m)+1:jerk_idx(m)+count-1; 
+            new_xy(myidx,:) = repmat(mean([pre ; post]),length(myidx),1);
+        end
+        
+        temp(idx,X:Y) = new_xy;
+        
+        data(idx,X:Y) = new_xy;
+        
+%         if ~isempty(jerk_idx)
+%             figure;
+%             subplot(2,1,1)
+%                 plot(data(idx,TIME), xy(:,1), 'b', data(idx,TIME), new_xy(:,1), 'r');
+%             subplot(2,1,2)
+%                 plot(data(idx,TIME), xy(:,2), 'b', data(idx,TIME), new_xy(:,2), 'r');        
+%             drawnow;
+%         end
+
+        num_jerks = length(jerk_idx);
+    end
+    
+return;
+
 
 % function for writing out stderr log messages
 function logentry(txt)

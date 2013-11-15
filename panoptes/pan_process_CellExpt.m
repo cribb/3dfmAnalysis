@@ -13,7 +13,7 @@ end
 
 cd(filepath);
 
-metadata = pan_load_metadata(filepath, '96well');
+metadata = pan_load_metadata(filepath, systemid, '96well');
 
 % create the 'window' vector that will decide which time scales (taus) we're going to use    
 duration = metadata.instr.seconds;
@@ -34,8 +34,8 @@ filt.xycrop     = 0;
 filt.xyzunits   = 'pixels';
 % filt.dead_spots = [0 392 28 32];   % flea2 on Monoptes camera after cleaning 2012/11/28
 filt.dead_spots = [0 0 0 0];   % flea2 on Monoptes camera after cleaning 2013/05
-% filt.drift_method = 'none';
-filt.drift_method = 'center-of-mass';
+filt.drift_method = 'none';
+% filt.drift_method = 'center-of-mass';
 
 dataout  = pan_analyze_CellExpt(filepath, filt, systemid);
 dataout  = pan_publish_CellExpt(metadata, filt);

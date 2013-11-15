@@ -1,11 +1,29 @@
 function [msds paramlist] = pan_combine_data(metadata, filtparam_name)
+% PAN_COMBINE_DATA  Combines necessary data to analyze for a Panoptes experiment
+%
+% CISMM function
+% Panoptes
+%  
+% Determines which files/datasets to combine in order to analyze a Panoptes 
+% experiment.  This function is intended to be used for any experiment 
+% (so far) described and ran by PanopticNerve.
+% 
+%  pan = panoptes_combine_data(metadata, filtparam_name) 
+%   
+%  "metadata" is the matlab structure that describes a Panoptes experiment
+%  design, outputted by 'pan_load_metadata'
+%  "filtparam_name" is a string that identifies the content over which the
+%  data need to be combined.  The default value is 'well'
+%  "msds" contains the outputted mean square displacement data
+%  "paramlist" 
+%
 
 video_tracking_constants;
 
 systemid = metadata.instr.systemid;
 
 if nargin < 2 || isempty(filtparam_name)
-    filtparam_name = 'well';
+    filtparam_name = 'metadata.plate.well_map';
     filtparam = 1;
 else 
     filtparam = evalin('caller', filtparam_name);
@@ -26,10 +44,12 @@ end
 
 welllist = metadata.well_list;
 paramlist = unique(filtparam);
+
   % filter out empty strings 
   paramlist = paramlist( ~strcmp(paramlist, '') );
 
-% paramlist = paramlist{~isempty(paramlist)};
+% Put together a list of aggregating members and output that to the console for
+% debugging purposes
 mystring = [];
 for k = 1:length(paramlist)
     mystring = [mystring paramlist{k} '  '];
@@ -37,6 +57,7 @@ end
 
 logentry(['Parameter *' filtparam_name '* has ' num2str(length(paramlist)) ' members:  ' mystring ]);
 
+% Iterate over the aggregating members
 for p = 1:length(paramlist)
 
     switch filtparam_name
@@ -52,7 +73,11 @@ for p = 1:length(paramlist)
             end
     end
 
+    % Generate the list of files that need to be loaded and combined into
+    % an aggregate dataset.w
     filelist = pan_gen_filelist(metadata, wells_to_combine, []);
+    
+    my_well_list = [];
     
     if ~isempty(filelist)
         for m = 1 : length(filelist)
@@ -84,11 +109,15 @@ for p = 1:length(paramlist)
         
         
 
-        d = load_video_tracking(filelist, ...
+        [d, calout] = load_video_tracking(filelist, ...
                             metadata.instr.fps_imagingmode, ...
                             'm', mycalibum, ...
                             'absolute', 'no', 'table');                                        
 
+%         if calout ~= mycalibum 
+%             error('Loaded calibration value does note equal determined value.');
+%         end
+        
         % so any aggregated_data files need to use 0.152 as the conversion for
         % microns to pixels, as the initial scaling of pixel to micron occurred
         % via a video-by-video and MCUparameter basis.
