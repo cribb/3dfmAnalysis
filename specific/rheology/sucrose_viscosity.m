@@ -21,8 +21,6 @@ function [v,rho] = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units
 %  Notes:  
 %   
 %  - This model gives ~1% error on the experimental values.  
-%  - The website where this model and equations were extracted can be found
-%    at: http://www.univ-reims.fr/Externes/AVH/MementoSugar/001.htm
 %    
 
 
