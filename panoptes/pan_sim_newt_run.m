@@ -99,14 +99,12 @@ for w = 1:length(wells)
         mystruct.field_height = simstruct.field_height;
         mystruct.calib_um   = simstruct.calib_um;
         mystruct.xdrift_vel = simstruct.xdrift_vel;
-        mystruct.ydrift_vel = simstruct.ydrift_vel;
-        
+        mystruct.ydrift_vel = simstruct.ydrift_vel;        
         
         sim_video_diff_expt(filename, mystruct);
     end
 end
         
-
 outs = 0;
 
 return;
