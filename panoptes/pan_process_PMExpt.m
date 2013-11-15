@@ -22,7 +22,7 @@ function dataout = pan_process_PMExpt(filepath, systemid, exityn)
 % First, set up default values for input parameters in case they are empty 
 % or otherwise do not exist.  
 
-% defaults the single-channel instrument
+% defaults to the single-channel instrument
 if nargin < 2 || isempty(systemid)
     systemid = 'monoptes';
 end
@@ -104,7 +104,7 @@ filt.max_pixels = Inf;
 % The 'min_visc' filter defines the minimum viscosity allowed for a 
 % trajectory.  This filter uses the 'bead_radius' parameter from the 
 % WELL_LAYOUT metadata file.
-% filt.min_visc = 0;
+% filt.min_visc = 0; % Pa s
 
 % The 'max_visc' filter defines the maximum viscosity allowed for a 
 % trajectory.  This filter uses the 'bead_radius' parameter from the 
@@ -135,10 +135,6 @@ filt.dead_spots = [0 0 0 0];
 % can be used on beads actuated by an external force like a magnetic field.
 filt.drift_method = 'none';
 
-% The 'bayes_models' cell array defines the
-% list box with multiple selections, order is unimportant
-filt.bayes_models = {'D', 'V', 'DV', 'DA', 'DR'};
-
 % The 'remove jerks' filter will search through the data and find extreme
 % changes in the image due to varioptic jerk and remove them.  The value
 % indicates the number of pixels to observe a jerk take and jerks above
@@ -147,14 +143,33 @@ filt.bayes_models = {'D', 'V', 'DV', 'DA', 'DR'};
 % after).
 % filt.jerk_limit = 1.5;
 
+% The 'bayes_models' cell array defines the
+% list box with multiple selections, order is unimportant
+filt.bayes_models = {'D', 'V', 'DV', 'DA', 'DR'};
+
+
 % list box with multiple selections, order is important
-report_blocks = {'heatmap','rmsdisp','meanMSD','MSD'};
+report_blocks = {'visc_heatmap', 'msd_heatmap', 'rmsdisp_heatmap', 'rmsdisp','meanMSD','MSD'};
 
 % Baseline MSD computations for all datafiles
 dataout  = pan_analyze_PMExpt(filepath, filt, systemid);
 
 % Aggregate appropriate datasets and generate output report as an html file
 dataout  = pan_publish_PMExpt(metadata, filt, report_blocks);
+
+% move files into the appropriate analysis folder
+outf = metadata.instr.experiment;
+didx = regexp(MSD_agg_param, '[.]');
+% analysis_dir = ['./matlab_analysis/' MSD_agg_param(didx(end)+1:end)];
+mkdir(analysis_dir);
+copyfile('*.txt', analysis_dir);
+movefile('*.html', analysis_dir);
+movefile('*.fig', analysis_dir);
+movefile('*.png', analysis_dir);
+movefile('*.svg', analysis_dir);
+movefile('*.evt.mat', analysis_dir);
+movefile('*.drift.mat', analysis_dir);
+movefile([outf '.mat'], analysis_dir);
 
 % Elapsed time
 elapsed_time = toc(tid);
