@@ -45,8 +45,10 @@ end
 outfile = [outf '.html'];
 fid = fopen(outfile, 'w');
 
+spec_tau = 1;
 
-[msdmap, msdmap_err, visc, visc_err] = pan_compute_viscosity_heatmap(metadata);
+[msdmap, msdmap_err] = pan_compute_platewide_msd(metadata, spec_tau);
+[visc, visc_err] = pan_compute_viscosity_heatmap(metadata, spec_tau, msdmap, msdmap_err);
 
 msdmapfig = pan_plot_msd_heatmap(msdmap);
 msdmapfile = [metadata.instr.experiment '_well_ALL' '.msdheatmap'];
@@ -225,7 +227,7 @@ fprintf(fid, '<hr/> \n\n');
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Heatmap (MSD at 10 [s] time scale) </h3> \n');
 % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', MSD_heatmapfile);
-fprintf(fid, '   <iframe src="%s.png" width="800" height="600" border="0"></iframe> <br/> \n', msdmapfile);
+fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', msdmapfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 
