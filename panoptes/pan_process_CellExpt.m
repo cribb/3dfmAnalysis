@@ -161,7 +161,7 @@ movefile('*.fig', analysis_dir);
 movefile('*.png', analysis_dir);
 movefile('*.svg', analysis_dir);
 movefile('*.evt.mat', analysis_dir);
-movefile('*.drift.mat', analysis_dir);
+if ~isempty(dir('*.drift.mat')); movefile('*.drift.mat', analysis_dir); end;
 movefile([outf '.mat'], analysis_dir);
 
 % Elapsed time
