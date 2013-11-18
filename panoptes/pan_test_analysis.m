@@ -3,11 +3,17 @@ function outs = pan_test_analysis
     % TEST 1: simulate 10 trackers for every well in the plate and check 
     % that returned viscosity is equal to input viscosity
     fileroot = '.';
+    
     wells = [1:96];
     passes = [1:5];
 
-    mkdir('test1');
-    cd('test1');
+    testname = 'test1';
+    
+    mkdir(testname);
+    cd(testname);
+    test1_EC_file = which('test1_ExperimentConfig.txt');
+    
+    copyfile(test1_EC_file, '.');
     
     simstruct.numpaths = 10;
     simstruct.viscosity = 1;     % [Pa s]
@@ -21,7 +27,8 @@ function outs = pan_test_analysis
     simstruct.xdrift_vel = 0;              % [m/frame];
     simstruct.ydrift_vel = 0;              % [m/frame];
 
-    test1 = pan_sim_newt_run(fileroot, wells, passes, simstruct);
+    
+    test1 = pan_sim_newt_run(testname, wells, passes, simstruct);
 
     d = pan_process_PMExpt('.', 'panoptes', 'n');
     
