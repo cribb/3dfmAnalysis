@@ -1,0 +1,38 @@
+experiment  pan_analysis_test1 
+logging_directory . // specify the data logging directory (no blank spaces)
+
+collect_video 1   // collect video data; yes = 1, no = 0
+video_cycles 1    // number of times to visit each location
+video_mode 1      // video collection mode; fluorescent burst + brightfield = 0, fluorescence = 1
+run_vst 1         // run VideoSpotTracker to locate and track beads; yes = 1, no = 0 
+run_vrpnlogtomatlab 1	// Convert the .vrpn spot-tracker files to Matlab format (yes = 1, no = 0)
+copy_uncompressed_video_data 0  // Copy uncompressed video to main host; yes = 1, no = 0
+run_compress_test 1  // Test to see if the compression all worked; yes = 1, no = 0
+run_deletion_if_okay 0  // Delete all of the local files if compression did not fail; yes = 1, no = 0
+run_deletion_regardless 0  // Delete all of the local files; yes = 1, no = 0
+run_matlab 1      // run Matlab analysis script (CellProcessingScript.m) on tracked data; yes = 1, no = 0
+
+default_focus 0  // Varioptic position if auto-focus is not being used
+manual_focus 0    // pause for manual focus adjustment; yes = 1, no = 0
+auto_focus 0      // run autofocus; yes = 1, no = 0
+
+fluo_type blue
+OnTime_bright 1000  // brightfield exposure time (us)
+OnTime_fluo  7500 // fluorescence exposure time (us)
+OffTime 18500      // readout time for both brightfield and fluorescence (us)
+seconds  30       // video duration (sec)
+
+// well offsets at which video data will be collected
+offset 0 0
+
+wells // wells in which data will be collected at the above offsets
+1
+2
+13
+14
+25
+26
+37
+38
+EOF
+
