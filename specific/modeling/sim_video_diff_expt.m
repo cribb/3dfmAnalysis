@@ -10,28 +10,35 @@ function varargout = sim_video_diff_expt(filename, in_struct)
 %
 % [sim, out_struct] = sim_video_diff_expt(filename, in_struct)
 %
-% where "filename" is the filename where the simulation will be saved 
-%                  (uses evt_GUI 'evt' format) 
+% where "sim" is the outputted simulation data in the traditional
+%             video_spot_tracker 'table' format (see load_video_tracking)
+%             with the positions in pixel units.
+%       "out_struct" is a copy of the inputted simulation complete with
+%                    default vales that my not have been specified on the input
+%                    parameter.
+%       "filename" is the filename where the simulation will be saved 
+%                  (uses evt_GUI 'evt' format).  If an empty set is passed to
+%                  this parameter, i.e. [], then the simulation is not
+%                  saved to disk.
 %       "in_struct" is a structure that specifies the paramters for the
 %                   simulation.  Its fields include:
-%
-%         in_struct.seed = seed value to give to random number generator.
-%                          If this value is absent, the generator uses the 
-%                          system time as the seed.
-%         in_struct.numpaths = number of bead paths.  Default: 10.
-%         in_struct.bead_radius = bead radius in [m].  Default: 0.5e-6. 
-%         in_struct.viscosity = solution viscosity in [Pa s].  Default: 0.023 (2 M sucrose).
-%         in_struct.rad_confined = the particle's radius of confinement in [m]. Default: Inf.
-%         in_struct.alpha = anomalous diffusion constant. Default: 1.
-%         in_struct.modulus = modulus of the fluid [Pa]. Default: 2.2e9 (bulk modulus of water).
-%         in_struct.frame_rate = frame rate of camera in [fps].  Default: 30.
-%         in_struct.duration = duration of video in [s].  Default: 60.
-%         in_struct.tempK = temperature of fluid in [K].  Default: 300.
-%         in_struct.field_width = width of video frame in [px].  Default: 648.
-%         in_struct.field_height = height of video frame in [px].  Default: 484.
-%         in_struct.calib_um = conversion unit in [microns/pixel].  Default: 0.152.
-%         in_struct.xdrift_vel = x-drift in [meters/frame].  Default: 0.
-%         in_struct.ydrift_vel = y-drift in [meters/frame].  Default: 0.
+%            in_struct.seed = seed value to give to random number generator.
+%                             If this value is absent, the generator uses the 
+%                             system time as the seed.
+%            in_struct.numpaths = number of bead paths.  Default: 10.
+%            in_struct.bead_radius = bead radius in [m].  Default: 0.5e-6. 
+%            in_struct.viscosity = solution viscosity in [Pa s].  Default: 0.023 (2 M sucrose).
+%            in_struct.rad_confined = the particle's radius of confinement in [m]. Default: Inf.
+%            in_struct.alpha = anomalous diffusion constant. Default: 1.
+%            in_struct.modulus = modulus of the fluid [Pa]. Default: 2.2e9 (bulk modulus of water).
+%            in_struct.frame_rate = frame rate of camera in [fps].  Default: 30.
+%            in_struct.duration = duration of video in [s].  Default: 60.
+%            in_struct.tempK = temperature of fluid in [K].  Default: 300.
+%            in_struct.field_width = width of video frame in [px].  Default: 648.
+%            in_struct.field_height = height of video frame in [px].  Default: 484.
+%            in_struct.calib_um = conversion unit in [microns/pixel].  Default: 0.152.
+%            in_struct.xdrift_vel = x-drift in [meters/frame].  Default: 0.
+%            in_struct.ydrift_vel = y-drift in [meters/frame].  Default: 0.
 %
 
 video_tracking_constants; 
