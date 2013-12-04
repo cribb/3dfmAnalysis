@@ -13,8 +13,10 @@ function outs = pan_sim_newt_run(fileroot, wells, passes, simstruct)
 %       "wells" defines the systed used, is either 'Monoptes' or 'Panoptes'
 %       "passes" if 'y' matlab closes after finishing the analysis
 %       "simstruct" is the input structure, with default settings as follows:
+%                    simstruct.pass     = 1;
+%                    simstruct.well     = [1:96];
 %                    simstruct.numpaths = 10;
-%                    simstruct.viscosity = [0.1:0.1:1];     % [Pa s]
+%                    simstruct.viscosity = 1;     % [Pa s]
 %                    simstruct.bead_radius = 0.5e-6;        % [m]
 %                    simstruct.frame_rate = 54;             % [frames/s]
 %                    simstruct.duration = 60;               % [s]
@@ -37,7 +39,7 @@ end
 
 % Default wells identified as wells 1 through 10
 if nargin < 2 || isempty(wells)
-    wells = [1:10];
+    wells = [1:10]; %#ok<*NBRAK>
 end
 
 % assume one pass of the plate as the default
@@ -112,54 +114,79 @@ return;
 
 function out = param_check(in)
 
-    if ~isfield(in, 'seed') || isempty(in.seed)
-        in.seed = sum(100000*clock);
-    end
-    
-    if ~isfield(in, 'numpaths') || isempty(in.numpaths)
-        in.numpaths = 10;
-    end
-    
-    if ~isfield(in, 'viscosity') || isempty(in.viscosity)
-        in.viscosity = 0.01;     % [Pa s]
-    end
-    
-    if ~isfield(in, 'bead_radius') || isempty(in.bead_radius)
-        in.bead_radius = 0.5e-6;  % [m]
-    end
-
-    if ~isfield(in, 'frame_rate') || isempty(in.frame_rate)
-        in.frame_rate = 30;       % [frames/sec]
-    end
-
-    if ~isfield(in, 'duration') || isempty(in.duration)
-        in.duration = 60;        % [sec]
-    end
-    
-    if ~isfield(in, 'tempK') || isempty(in.tempK)
-        in.tempK = 300;        % [K]
-    end
-
-    if ~isfield(in, 'field_width') || isempty(in.field_width)
-        in.field_width = 648;     % [pixels]
-    end
-
-    if ~isfield(in, 'field_height') || isempty(in.field_height)
-        in.field_height = 484;    % [pixels]
-    end
-
-    if ~isfield(in, 'calib_um') || isempty(in.calib_um)
-        in.calib_um = 0.179;      % [um/pixel]
-    end
-
-    if ~isfield(in, 'xdrift_vel') || isempty(in.xdrift_vel)
-        in.xdrift_vel = 0;   % [m/frame]
-    end
-
-    if ~isfield(in, 'ydrift_vel') || isempty(in.ydrift_vel)
-        in.ydrift_vel = 0;   % [m/frame]
-    end
-
     out = in;
+    
+    if ~isfield(out, 'seed') || isempty(out.seed)
+        out.seed = sum(100000*clock);
+    end
+    
+    if ~isfield(out, 'pass') || isempty(out.pass)
+        out.pass = 1;
+    end
+    
+    if ~isfield(out, 'well') || iempty(out.well)
+        out.well = [1:96]; 
+    end
+    
+    if ~isfield(out, 'numpaths') || isempty(out.numpaths)
+        out.numpaths = 10;
+    end
+    
+    if ~isfield(out, 'viscosity') || isempty(out.viscosity)
+        out.viscosity = 0.01;     % [Pa s]
+    end
+    
+    if ~isfield(out, 'bead_radius') || isempty(out.bead_radius)
+        out.bead_radius = 0.5e-6;  % [m]
+    end
+
+    if ~isfield(out, 'frame_rate') || isempty(out.frame_rate)
+        out.frame_rate = 30;       % [frames/sec]
+    end
+
+    if ~isfield(out, 'duration') || isempty(out.duration)
+        out.duration = 60;        % [sec]
+    end
+    
+    if ~isfield(out, 'tempK') || isempty(out.tempK)
+        out.tempK = 300;        % [K]
+    end
+
+    if ~isfield(out, 'field_width') || isempty(out.field_width)
+        out.field_width = 648;     % [pixels]
+    end
+
+    if ~isfield(out, 'field_height') || isempty(out.field_height)
+        out.field_height = 484;    % [pixels]
+    end
+
+    if ~isfield(out, 'calib_um') || isempty(out.calib_um)
+        out.calib_um = 0.179;      % [um/pixel]
+    end
+
+    if ~isfield(out, 'xdrift_vel') || isempty(out.xdrift_vel)
+        out.xdrift_vel = 0;   % [m/frame]
+    end
+
+    if ~isfield(out, 'ydrift_vel') || isempty(out.ydrift_vel)
+        out.ydrift_vel = 0;   % [m/frame]
+    end
+
+    % now that the gang is all here we need to make sure everything matches
+    % in terms of vector sizes.
+    fnames = fieldnames(out);
+    
+    % get the vector sizes    
+    for k = 1:length(fnames);
+        fname_sizes(k) = size(fnames{k}_;
+    end
+    
+    % if they are not all the same size...
+    if length(unique(fname_sizes)) > 1
+        
+    else
+        % move along to the end
+    end
+    
     
 return;
