@@ -161,6 +161,7 @@ dataout  = pan_publish_PMExpt(metadata, filt, report_blocks);
 outf = metadata.instr.experiment;
 didx = regexp(MSD_agg_param, '[.]');
 % analysis_dir = ['./matlab_analysis/' MSD_agg_param(didx(end)+1:end)];
+analysis_dir = ['./matlab_analysis/PM_rheology'];
 mkdir(analysis_dir);
 copyfile('*.txt', analysis_dir);
 movefile('*.html', analysis_dir);
