@@ -380,6 +380,7 @@ function [headers, units]= get_TA_column_headers(s,t)
     th = strrep(th, 'osc. torque', 'osc_torque');
     th = strrep(th, '1/temperature', 'one_over_temperature');
     th = strrep(th, 'compliance J(t)', 'compliance_Jt');
+    th = strrep(th, '.', 'p');
     th = strrep(th, ' ', '_');
     th = strrep(th, ',', '');
     
