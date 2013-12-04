@@ -81,15 +81,22 @@ for k = 1 : length(fn)
 %             strain = result.data.strain;
 %             stress = result.data.shear_stress;
             compliance_Jt = result.data.compliance_Jt;
+            ending_Jt = compliance_Jt(end) - compliance_Jt(1);
             figh(count) = plot_cap_creep(t, compliance_Jt-compliance_Jt(1), [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'creep'));
         end
         
         if findstr(exptype, 'recovery')
             t = result.data.time;
-            strain = result.data.strain;
+
+            if exist('ending_Jt', 'var') && ~isempty(ending_Jt)
+                compliance_Jt = ending_Jt - result.data.compliance_Jt;
+                clear ending_Jt;
+            else
+                compliance_Jt = -result.data.compliance_Jt;
+            end
 %             stress = result.data.shear_stress;
-            figh(count) = plot_cap_creep(t, strain, [], mytitle);
+            figh(count) = plot_cap_creep(t, compliance_Jt, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'recov'));
         end
         
