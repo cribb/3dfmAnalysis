@@ -15,6 +15,10 @@ function [mywell, mypass] = pan_wellpass(filenamein)
     
     pchunk = regexp(filenamein, '_pass[0-9]*', 'match');
     mypass = regexp(pchunk, '[0-9]*', 'match');
+    if isempty(mypass)
+        mypass = {'-1'};
+    end
+    
     mypass = str2double(mypass{:});
        
   return;
