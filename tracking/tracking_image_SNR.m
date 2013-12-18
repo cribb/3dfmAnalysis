@@ -90,7 +90,7 @@ for fid = 1:length(files)
 
     mean_max_sig = mean(bead_sig);
 
-    SNR(fid) = mean_max_sig / noise(end);
+    SNR(fid) = (mean_max_sig - noise(end)) / noise(end);
 
 
     if strcmp(report, 'y')
