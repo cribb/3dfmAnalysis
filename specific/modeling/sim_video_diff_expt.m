@@ -118,7 +118,10 @@ logentry(['Parameters indicate a ' model_type ' model type.']);
 
     % vector of frame ID's
     fr = [1:(frame_rate*duration)]'; %#ok<NBRAK>
-       
+    
+    
+   model_type = 'DRV'
+   
     % xy tracker locations with zero offset        
     switch model_type  % to select the model functions to run
         case 'N'
@@ -132,6 +135,8 @@ logentry(['Parameters indicate a ' model_type ' model type.']);
         case 'DV'
             xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
         case 'DR'
+            xy = confined_diffusion (viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths, rad_confined); 
+        case 'DRV'
             xy = confined_diffusion (viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths, rad_confined); 
         case 'DA'
             xy = fBmXY_HD(viscosity, bead_radius, frame_rate, duration, tempK, numpaths, alpha);
