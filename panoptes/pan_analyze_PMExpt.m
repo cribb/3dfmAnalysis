@@ -91,6 +91,17 @@ for k = 1:length(filelist)
         save_evtfile(filelist(k).name, d, 'm', mycalibum);        
     end
     
+    % summarize the tracking information for each video
+    if ~isempty(d)
+        num_trackers = length(unique(d(:,ID)));
+        tracker_with_longest_duration = mode(d(:,ID));
+        longest_duration = max( d( d(:,ID) == tracker_with_longest_duration, FRAME));   
+        summary.data(k,:) = [mypass mywell num_trackers tracker_with_longest_duration longest_duration];   
+        summary.data = sortrows(summary.data, [1 2]);
+        summary.headers = {'pass' 'well' 'number of trackers' 'tracker with longest duration' 'longest duration'};
+        summary.units   = {'[]' '[]' '[]' '[]' 'frames'};
+    end
+    
 % %     % plotting tracker availability
 % %     travfig = figure('Visible','off'); 
 % %     if ~isempty(d)
@@ -153,6 +164,11 @@ end
 jerk_filename = [metadata.instr.experiment '.numjerks.mat'];
 if exist('jerk_report', 'var')
     save(jerk_filename, '-STRUCT', 'jerk_report');
+end
+
+summary_filename = [metadata.instr.experiment '.tracking_summary.mat'];
+if exist('summary', 'var')
+    save(summary_filename, '-STRUCT', 'summary');
 end
 outs = 0;
 
