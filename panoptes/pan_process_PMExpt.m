@@ -164,7 +164,7 @@ didx = regexp(MSD_agg_param, '[.]');
 analysis_dir = ['./matlab_analysis/PM_rheology'];
 mkdir(analysis_dir);
 copyfile('*.txt', analysis_dir);
-movefile('*.html', analysis_dir);
+[s,mess,messid] = movefile('*.html', analysis_dir);
 movefile('*.fig', analysis_dir);
 movefile('*.png', analysis_dir);
 movefile('*.svg', analysis_dir);
