@@ -54,42 +54,8 @@ end
 
 in_struct = param_check(in_struct);
 
-% Determine the type of model needed for the simulation based on the input
-% structure.  (Example:  If the viscosity and alpha are defined with alpha 
-% not equal to one, and there is a non-zero velocity in x or y, then the
-% model must be a DAV model)
-if     isfield(in_struct, 'viscosity')  && ...
-       isfield(in_struct, 'alpha')      && ...
-       in_struct.alpha ~= 1             && ...
-     ((isfield(in_struct, 'xdrift_vel') && ...
-       in_struct.xdrift_vel ~= 0 )      || ...
-       isfield(in_struct, 'ydrift_vel') && ...
-       in_struct.ydrift_vel ~= 0 )
-    model_type = 'DAV';
-elseif isfield(in_struct, 'viscosity') && ...
-       isfield(in_struct, 'alpha')     && ...
-       in_struct.alpha ~= 1
-    model_type = 'DA';
-elseif isfield(in_struct, 'viscosity')     && ...
-       isfield (in_struct, 'rad_confined') && ...
-       in_struct.rad_confined < Inf
-    model_type = 'DR';
-elseif isfield(in_struct, 'viscosity')  && ...
-     ((isfield(in_struct, 'xdrift_vel') && ...
-       in_struct.xdrift_vel ~= 0 )      || ...
-       isfield(in_struct, 'ydrift_vel') && ...
-       in_struct.ydrift_vel ~= 0 )
-    model_type = 'DV';
-elseif  ( isfield(in_struct, 'xdrift_vel') && ...
-          in_struct.xdrift_vel ~= 0 )      || ...
-        ( isfield(in_struct, 'ydrift_vel') && ...
-          in_struct.ydrift_vel ~= 0 )
-    model_type = 'V';
-elseif isfield(in_struct, 'viscosity')
-    model_type = 'D';
-elseif isfield(in_struct, 'modulus') && in_struct.modulus > 0
-    model_type = 'N';
-end
+% Determine model type needed for the simulation based on the input structure.  
+model_type = determine_model_type(in_struct);
 
 logentry(['Parameters indicate a ' model_type ' model type.']);    
 
@@ -109,7 +75,6 @@ logentry(['Parameters indicate a ' model_type ' model type.']);
     alpha        = in_struct.alpha;          % slope of loglog(MSD) plot
     modulus      = in_struct.modulus;        % [Pa]
 
-
     % simulation test
     simout = [];
 
@@ -120,7 +85,7 @@ logentry(['Parameters indicate a ' model_type ' model type.']);
     fr = [1:(frame_rate*duration)]'; %#ok<NBRAK>
     
     
-   model_type = 'DRV'
+%    model_type = 'DRV'
    
     % xy tracker locations with zero offset        
     switch model_type  % to select the model functions to run
@@ -190,6 +155,8 @@ if exist('filename', 'var') && ~isempty(filename)
 %     csvwrite([filename '.csv'], simout);
     logentry(['Saved data to file: ' filename]);
 end
+
+in_struct.model_type = model_type;
 
 switch nargout
     case 1
@@ -268,14 +235,70 @@ function out = param_check(in)
     
 return;
 
-function logentry(txt)
-    logtime = clock;
-    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
-                   num2str(logtime(2),        '%02i') '.' ...
-                   num2str(logtime(3),        '%02i') ', ' ...
-                   num2str(logtime(4),        '%02i') ':' ...
-                   num2str(logtime(5),        '%02i') ':' ...
-                   num2str(round(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext 'sim_video_diff_expt: '];
-     
-     fprintf('%s%s\n', headertext, txt);
+
+function model_type = determine_model_type(in_struct)
+    % (Example:  If the viscosity and alpha are defined with alpha 
+    % not equal to one, and there is a non-zero velocity in x or y, then the
+    % model must be a DAV model)
+    if     in_struct.viscosity > 0        && ...
+           in_struct.alpha < 1            && ...
+         ( in_struct.xdrift_vel ~= 0      || ...
+           in_struct.ydrift_vel ~= 0 )
+
+           model_type = 'DAV';
+
+    % check for Confined Diffusion with driven velocity (DRV) model    
+    elseif in_struct.rad_confined < Inf    && ...
+         ( in_struct.xdrift_vel ~= 0       || ...
+           in_struct.ydrift_vel ~= 0 )
+
+           model_type = 'DRV';
+
+    % check for Anomalous Diffusion (DA) model (alpha < 1, visc > 0)
+    elseif in_struct.viscosity > 0       && ...
+           in_struct.viscosity < Inf     && ...
+           in_struct.alpha < 1
+
+           model_type = 'DA';
+
+    % check for Confined Diffusion (DR) model (visc > 0, conf_rad < inf)    
+    elseif in_struct.viscosity > 0        && ...
+           in_struct.viscosity < Inf      && ...
+           in_struct.rad_confined < Inf
+
+           model_type = 'DR';
+
+    % check for Brownian Diffusion with Drift (DV) model (visc > 0, |vel| > 0)    
+    elseif in_struct.viscosity > 0        && ...
+           in_struct.viscosity < Inf      && ...
+         ( in_struct.xdrift_vel ~= 0      || ...
+           in_struct.ydrift_vel ~= 0 )
+
+           model_type = 'DV';
+
+    % check for Drift model (V) (|vel| > 0)    
+    elseif  in_struct.xdrift_vel ~= 0   || ...
+            in_struct.ydrift_vel ~= 0 
+
+           model_type = 'V';
+
+    % check for Diffusion model (D) (Inf > viscosity > 0)
+    elseif in_struct.viscosity < Inf    && ...
+           in_struct.viscosity > 0      && ...
+           in_struct.modulus == 0
+
+           model_type = 'D';
+
+    % check for Elastic Solid model (N) (viscosity = 0, modulus > 0)    
+    elseif in_struct.modulus > 0        && ...
+           in_struct.viscosity == 0%     && ...
+           %in_struct.alpha == 0;
+
+           model_type = 'N';
+
+    % If we get here we are in real trouble    
+    else
+        logentry('Model not found.');
+        error('Model not found.');
+    end
+return;
