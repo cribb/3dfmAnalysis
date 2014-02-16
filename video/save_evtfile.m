@@ -43,9 +43,10 @@ function outfile = save_evtfile(filename, data, xyzunits, calib_um)
     tracking.spot3DSecUsecIndexFramenumXYZRPY = data;
     tracking.calib_um = calib_um;       
     
+    filename = strrep(filename, '.vrpn', '');
     filename = strrep(filename, '.evt', '');
     filename = strrep(filename, '.mat', '');
-    outfile = [filename '.evt.mat'];
+    outfile = [filename '.vrpn.evt.mat'];
     
     save(outfile, 'tracking');   
     logentry(['Saved ' num2str(length(unique(data(:,ID)))) ' trackers in ' outfile]);
