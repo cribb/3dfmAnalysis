@@ -85,21 +85,6 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
         error('No MCU parameter file.');
     end
 
-    if ~isempty(outs.files.tracking)
-        tmp = outs.files.tracking;
-    elseif ~isempty(outs.files.evt)
-        tmp = outs.files.evt;
-    else
-        error('There are no tracking or evt files to analyze.');
-    end
-
-    for k = 1:length(tmp)
-        [well_(k) pass_(k)] = pan_wellpass(tmp(k).name);
-    end
-
-    outs.well_list = unique(well_)';
-    outs.pass_list = unique(pass_)';    
-    
     % Need to convert bead diameters from cell of strings to numerical
     % vector.  I'm sure there is an easier way to do this, something that
     % is not so awkward.  I wish I had time to figure it out.
@@ -119,7 +104,22 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
     else
         error('No bead data defined.');
     end
+
+    if ~isempty(outs.files.tracking)
+        tmp = outs.files.tracking;
+    elseif ~isempty(outs.files.evt)
+        tmp = outs.files.evt;
+    else
+        warning('There are no tracking or evt files to analyze.');
+        return;
+    end
     
+    for k = 1:length(tmp)
+        [well_(k) pass_(k)] = pan_wellpass(tmp(k).name);
+    end
+
+    outs.well_list = unique(well_)';
+    outs.pass_list = unique(pass_)';  
 return;
 
 
@@ -167,19 +167,3 @@ function outs = check_file_inputs(ins)
     outs = ins;
     
     return;
-
-
-% function for writing out stderr log messages
-function logentry(txt)
-    logtime = clock;
-    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
-                   num2str(logtime(2),        '%02i') '.' ...
-                   num2str(logtime(3),        '%02i') ', ' ...
-                   num2str(logtime(4),        '%02i') ':' ...
-                   num2str(logtime(5),        '%02i') ':' ...
-                   num2str(floor(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext 'pan_load_metadata: '];
-     
-     fprintf('%s%s\n', headertext, txt);
-     
-     return;
