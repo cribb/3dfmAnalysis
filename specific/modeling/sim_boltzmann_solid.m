@@ -38,6 +38,8 @@ for n=1:numpaths
 
     A = sqrt(2*D);
 
+    A = A / sqrt(2); % I have no idea why I have to do this
+    
     xy = A * randn(sampling_rate * duration, dim);
     
     xy0 = xy(1,:);
