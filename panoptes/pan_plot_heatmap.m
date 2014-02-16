@@ -18,7 +18,7 @@ switch type
     case 'rms displacement'
         data = data * 1e9;
         mytitle = 'RMS Displacement (in log_{10} [nm]';
-        colorbar_limits = [0 200];
+        colorbar_limits = [0 max(data(:))+eps];
         mycolormap = hot(256);
         logdata = 0;
     case 'msd'
