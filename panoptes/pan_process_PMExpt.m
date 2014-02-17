@@ -151,22 +151,23 @@ filt.bayes_models = {'N', 'D', 'V', 'DV', 'DA', 'DR', 'DAV', 'DRV'};
 metadata.filt = filt;
 
 % list box with multiple selections, order is important
-% 'msd_heatmap'     = plate heatmap of MSD at a particular time constant (spec_tau)
-% 'rmsdisp_heatmap' = same as MSD heatmap except for RMS displacement at spec_tau
-% 'visc_heatmap'    = same as MSD heatmap except for viscosity at spec_tau
-% 'MCU_heatmap'     =
-% 'NumTr_heatmap'   =
-% 'plate_msd_bar'
-% 'plate_rmsdisp_bar'
-% 'plate_visc_var'
-% 'plate_summary'
+% 'msd_heatmap'       = plate heatmap of MSD at a particular time constant (spec_tau)
+% 'rmsdisp_heatmap'   = same as MSD heatmap except for RMS displacement at spec_tau
+% 'visc_heatmap'      = same as MSD heatmap except for viscosity at spec_tau
+% 'MCU_heatmap'       =
+% 'NumTr_heatmap'     =
+% 'plate_msd_bar'     =
+% 'plate_rmsdisp_bar' =
+% 'plate_visc_var'    =
+% 'plate_summary'     =
 metadata.report_blocks = {'visc_heatmap', 'msd_heatmap', 'rmsdisp_heatmap', 'rmsdisp', 'meanMSD', 'MSD'};
 
 % Baseline MSD computations for all datafiles
 dataout  = pan_analyze_PMExpt(filepath, filt, systemid);
 
 % Aggregate appropriate datasets and generate output report as an html file
-dataout  = pan_publish_PMExpt(metadata, filt);
+spec_tau = 1;
+dataout  = pan_publish_PMExpt(metadata, spec_tau);
 
 % move files into the appropriate analysis folder
 outf = metadata.instr.experiment;
