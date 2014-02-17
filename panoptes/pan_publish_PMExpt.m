@@ -1,4 +1,4 @@
-function pan = pan_publish_PMExpt(metadata, filt, report_blocks)
+function pan = pan_publish_PMExpt(metadata, filt, spec_tau)
 % PAN_PUBLISH_PMEXPT  Generates an html report for the Panoptes PM Experiment
 %
 % CISMM function
@@ -17,6 +17,11 @@ function pan = pan_publish_PMExpt(metadata, filt, report_blocks)
 %  "metadata" is the matlab structure that describes a Panoptes experiment
 %  design, outputted by 'pan_load_metadata'
 %
+if nargin < 2 || isempty(spec_tau)
+    spec_tau = 1;
+end
+
+filt = metadata.filt;
 
 nametag = metadata.instr.experiment;
 outf = metadata.instr.experiment;
@@ -45,7 +50,6 @@ end
 outfile = [outf '.html'];
 fid = fopen(outfile, 'w');
 
-spec_tau = 1;
 log_spec_tau = log10(spec_tau);
 
 % CALCULATE out all summary data well-by-well
@@ -131,9 +135,6 @@ beadcount_list = pan_plate2array(heatmaps.beadcount);
 % % % % % % % % % 
 % % % % % % % % % % compute the MSD for each condition defined by 'myparam'
 % % % % % % % % % [plate_msds_by_well molar_conc] = pan_combine_data(metadata, myparam);
-
-
-
 
 
 % % % % % Hypothesis Testing (Stat Analysis)
@@ -310,7 +311,7 @@ fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 
 %
-% Plate-wide MCU heat-map
+% Plate-wide Number of Trackers heat-map
 %
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Heatmap (Number of Trackers) </h3> \n', spec_tau);
