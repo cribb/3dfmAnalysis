@@ -1,4 +1,4 @@
-function pan = pan_publish_PMExpt(metadata, filt, spec_tau)
+function pan = pan_publish_PMExpt(metadata, spec_tau)
 % PAN_PUBLISH_PMEXPT  Generates an html report for the Panoptes PM Experiment
 %
 % CISMM function
