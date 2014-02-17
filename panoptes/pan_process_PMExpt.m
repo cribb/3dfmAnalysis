@@ -145,17 +145,28 @@ filt.drift_method = 'none';
 
 % The 'bayes_models' cell array defines the
 % list box with multiple selections, order is unimportant
-filt.bayes_models = {'D', 'V', 'DV', 'DA', 'DR'};
+filt.bayes_models = {'N', 'D', 'V', 'DV', 'DA', 'DR', 'DAV', 'DRV'};
 
+% stick filters into metadata structure
+metadata.filt = filt;
 
 % list box with multiple selections, order is important
-report_blocks = {'visc_heatmap', 'msd_heatmap', 'rmsdisp_heatmap', 'rmsdisp','meanMSD','MSD'};
+% 'msd_heatmap'     = plate heatmap of MSD at a particular time constant (spec_tau)
+% 'rmsdisp_heatmap' = same as MSD heatmap except for RMS displacement at spec_tau
+% 'visc_heatmap'    = same as MSD heatmap except for viscosity at spec_tau
+% 'MCU_heatmap'     =
+% 'NumTr_heatmap'   =
+% 'plate_msd_bar'
+% 'plate_rmsdisp_bar'
+% 'plate_visc_var'
+% 'plate_summary'
+metadata.report_blocks = {'visc_heatmap', 'msd_heatmap', 'rmsdisp_heatmap', 'rmsdisp', 'meanMSD', 'MSD'};
 
 % Baseline MSD computations for all datafiles
 dataout  = pan_analyze_PMExpt(filepath, filt, systemid);
 
 % Aggregate appropriate datasets and generate output report as an html file
-dataout  = pan_publish_PMExpt(metadata, filt, report_blocks);
+dataout  = pan_publish_PMExpt(metadata, filt);
 
 % move files into the appropriate analysis folder
 outf = metadata.instr.experiment;
