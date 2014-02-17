@@ -1,4 +1,4 @@
-function pan = pan_publish_expt(metadata, filt, myparam, report_blocks)
+function pan = pan_publish_expt(metadata, filt, myparam)
 % PAN_PUBLISH_EXPT  Generates an html report for Panoptes Experiments
 %
 % CISMM function
@@ -43,83 +43,23 @@ if nargin < 1 || isempty(metadata)
     error('No metadata information found.');
 end
 
-% Pull out info into shorter variable names
-nametag = metadata.instr.experiment;
-% outf = metadata.instr.experiment;
-duration = metadata.instr.seconds;
-autofocus = metadata.instr.auto_focus;
-video_mode = metadata.instr.video_mode;
-imaging_fps = metadata.instr.fps_imagingmode;
-
-% Did this experiment use autofocus? (This looks stupid at first glance)
-if autofocus
-    autofocus_yn = 'Yes.';
-else
-    autofocus_yn = 'No.';
-end
-
-% which video mode did we use?
-switch video_mode
-    case 0
-        video_mode = 'fluorescence burst, then brightfield';
-    case 1
-        video_mode = 'fluorescence only';
-    otherwise
-        error('Unknown video mode type.');
-end
-
-
 spec_tau = 1;
 
 % XXX Need to wrap this in an 'if' block so that if the report blocks 
 %     don't contain the need to compute the heatmaps then don't do this
 %     very slow process of computing the msd for each well.
 % report blocks for this include: 'visc_heatmap', 'msd_heatmap', 'rmsdisp_heatmap', ???
+if find(strcmp(report_blocks, 'msd_heatmap'))       || ...
+   find(strcmp(report_blocks, 'rmsdisp_heatmap'))   || ...
+   find(strcmp(report_blocks, 'visc_heatmap'))      || ...
+   find(strcmp(report_blocks, 'plate_msd_bar'))     || ...
+   find(strcmp(report_blocks, 'plate_rmsdisp_bar')) || ...
+   find(strcmp(report_blocks, 'plate_visc_bar'))    || ...
+   find(strcmp(report_blocks, 'plate_summary'))
 
-%%%%  Calculate the MSD for different wells
-[msdmap, msdmap_err] = pan_compute_platewide_msd(metadata, spec_tau);
-[visc, visc_err] = pan_compute_viscosity_heatmap(metadata, spec_tau, msdmap, msdmap_err);
-visclist = reshape(transpose(visc), 1, length(visc(:)));
-visc_errlist = reshape(transpose(visc_err), 1, length(visc(:)));
-
-
-
-
-
-
-
-
-%
-%%%%%% REPORTING.  NO CALCULATIONS BELOW HERE.
-%
-for blockidx = 1:length(report_blocks)
-    switch report_blocks{blockidx}
-        % report_blocks = {'visc_heatmap', 'msd_heatmap', 'rmsdisp_heatmap', 'rmsdisp','meanMSD','MSD'};
-        case 'visc_heatmap'
-            viscmapfig = pan_plot_viscosity_heatmap(visc);
-            viscmapfile = [metadata.instr.experiment '_well_ALL' '.vischeatmap'];
-            gen_pub_plotfiles(viscmapfile, viscmapfig, 'normal');
-            close(viscmapfig);
-            drawnow;            
-        case 'msd_heatmap'
-            msdmapfig = pan_plot_msd_heatmap(msdmap);
-            msdmapfile = [metadata.instr.experiment '_well_ALL' '.msdheatmap'];
-            gen_pub_plotfiles(msdmapfile, msdmapfig, 'normal');
-            close(msdmapfig);
-            drawnow;
-        case 'rmsdisp_heatmap'
-            error('The RMSdisp_heatmap is not implemented yet.');
-        case 'rmsdisp_table'
-            error('The RMS displacement table is not implemented yet.');
-        case 'meanMSD'
-            error('The meanMSD section is not implemented yet.');
-        case 'MSD'
-            error('The MSD section is not implemented yet.');            
-        otherwise
-            error('unknown block type for panoptes report.');
-    end
+   %%%%  Calculate the MSD for different wells
+   [plate_msds_by_well, heatmaps] = pan_compute_platewide_msd(metadata, spec_tau);    
 end
-
 
 
 % compute the MSD for the condition defined by 'myparam'
@@ -131,7 +71,6 @@ all_msds = [msds.mean_logmsd];
 all_errs = [msds.msderr];
 
 % create plot with bar graph at a given tau
-spec_tau = 1;
 log_spec_tau = log10(spec_tau);
 [minval, minloc] = min( sqrt((all_taus - log_spec_tau).^2) );
 mytau = 10.^all_taus(minloc(1),:);
@@ -218,7 +157,34 @@ for k = 1:length(data_for_myparam)
     close(MSDfig);    
 end
 
+
+
+
 % % START REPORT GENERATION TO HTML PAGE
+
+% Pull out info into shorter variable names
+nametag     = metadata.instr.experiment;
+duration    = metadata.instr.seconds;
+autofocus   = metadata.instr.auto_focus;
+video_mode  = metadata.instr.video_mode;
+imaging_fps = metadata.instr.fps_imagingmode;
+
+% Did this experiment use autofocus? (This looks stupid at first glance)
+if autofocus
+    autofocus_yn = 'Yes.';
+else
+    autofocus_yn = 'No.';
+end
+
+% which video mode did we use?
+switch video_mode
+    case 0
+        video_mode = 'fluorescence burst, then brightfield';
+    case 1
+        video_mode = 'fluorescence only';
+    otherwise
+        error('Unknown video mode type.');
+end
 
 outfile = [nametag '.html'];
 fid = fopen(outfile, 'w');
@@ -268,34 +234,129 @@ fprintf(fid, '   <b>Number of first and Last frames cropped from each tracker:</
 fprintf(fid, '   <b>Number of pixels cropped around frame border:</b> %i [pixels] <br/> \n', filt.xycrop);
 fprintf(fid, '   <b>Camera dead spots removed [X Y width height]: <br/>\n');
 for k = 1:size(filt.dead_spots,1)
-fprintf(fid, '\t &nbsp;&nbsp;&nbsp; [%i %i %i %i] [pixels]<br/> \n', filt.dead_spots(k,1), ...
-                                                                     filt.dead_spots(k,2), ...
-                                                                     filt.dead_spots(k,3), ...
-                                                                     filt.dead_spots(k,4));
+    fprintf(fid, '\t &nbsp;&nbsp;&nbsp; [%i %i %i %i] [pixels]<br/> \n', filt.dead_spots(k,1), ...
+                                                                         filt.dead_spots(k,2), ...
+                                                                         filt.dead_spots(k,3), ...
+                                                                         filt.dead_spots(k,4));
 end
 fprintf(fid, '   <b>Drift subtraction method:</b> %s <br/> \n', filt.drift_method);
 fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
 
+
+%
+% Plate-wide RMS displacement heat-map
+%
+if find(strcmp(report_blocks, 'rmsdisp_heatmap'))
+    [heatmaps.rmsdisp, heatmaps.rmsdisp_err] = pan_compute_rmsdisp_heatmap(heatmaps.msd, heatmaps.msd_err);
+
+    % RMS displacement heatmap
+    heatmaps.rmsdisp = sqrt(10.^heatmaps.msd);
+    rmsmapfig = pan_plot_heatmap(heatmaps.rmsdisp, 'rms displacement');
+    rmsmapfile = [metadata.instr.experiment '_well_ALL' '.RMSheatmap'];
+    gen_pub_plotfiles(rmsmapfile, rmsmapfig, 'normal');
+    close(rmsmapfig);
+    drawnow;
+    
+    fprintf(fid, '<p> \n');
+    fprintf(fid, '   <h3> Heatmap (RMS displacement at %i [s] time scale) </h3> \n', spec_tau);
+    % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', MSD_heatmapfile);
+    fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', rmsmapfile);
+    fprintf(fid, '   <br/> \n\n');
+    fprintf(fid, '</p> \n\n');
+end
+
+
 %
 % Plate-wide MSD heat-map
 %
-fprintf(fid, '<p> \n');
-fprintf(fid, '   <h3> Heatmap (MSD at 10 [s] time scale) </h3> \n');
-% fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', MSD_heatmapfile);
-fprintf(fid, '   <iframe src="%s.png" width="800" height="600" border="0"></iframe> <br/> \n', msdmapfile);
-fprintf(fid, '   <br/> \n\n');
-fprintf(fid, '</p> \n\n');
+if find(strcmp(report_blocks, 'msd_heatmap'))
+    % MSD heatmap
+    msdmapfig = pan_plot_heatmap(heatmaps.msd, 'msd');
+    msdmapfile = [metadata.instr.experiment '_well_ALL' '.msdheatmap'];
+    gen_pub_plotfiles(msdmapfile, msdmapfig, 'normal');
+    close(msdmapfig);
+    drawnow;
+
+    fprintf(fid, '<p> \n');
+    fprintf(fid, '   <h3> Heatmap (MSD at 10 [s] time scale) </h3> \n');
+    % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', MSD_heatmapfile);
+    fprintf(fid, '   <iframe src="%s.png" width="800" height="600" border="0"></iframe> <br/> \n', msdmapfile);
+    fprintf(fid, '   <br/> \n\n');
+    fprintf(fid, '</p> \n\n');
+end
+
 
 %
-% Plate-wide heat-map
+% Plate-wide Viscosity heat-map
 %
-fprintf(fid, '<p> \n');
-fprintf(fid, '   <h3> Heatmap (Viscosity at %i [s] time scale) </h3> \n', spec_tau);
-% fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
-fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', viscmapfile);
-fprintf(fid, '   <br/> \n\n');
-fprintf(fid, '</p> \n\n');
+if find(strcmp(report_blocks, 'visc_heatmap'))
+    [heatmaps.visc, heatmaps.visc_err] = pan_compute_viscosity_heatmap(metadata, spec_tau, heatmaps.msd, heatmaps.msd_err);    
+
+    % Viscosity heatmap
+    viscmapfig = pan_plot_heatmap(heatmaps.visc, 'viscosity');
+    viscmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
+    gen_pub_plotfiles(viscmapfile, viscmapfig, 'normal');
+    close(viscmapfig);
+    drawnow;
+    
+    fprintf(fid, '<p> \n');
+    fprintf(fid, '   <h3> Heatmap (Viscosity at %i [s] time scale) </h3> \n', spec_tau);
+    % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
+    fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', viscmapfile);
+    fprintf(fid, '   <br/> \n\n');
+    fprintf(fid, '</p> \n\n');
+end
+
+
+%
+% Plate-wide MCU heat-map
+%
+if find(strcmp(report_blocks, 'MCU_heatmap'))
+    % MCU parameter heatmap
+    mcumap = NaN(1,96);
+    for wellIDX = 1:96
+        mywell = find(metadata.mcuparams.well == wellIDX);
+        if ~isempty(mywell)
+            mcumap(wellIDX) = mean( metadata.mcuparams.mcu(mywell) );
+        else
+            mcumap(wellIDX) = NaN;
+        end
+    end
+    heatmaps.mcu = pan_array2plate(mcumap);
+    mcumapfig = pan_plot_heatmap(heatmaps.mcu, 'MCU parameter');
+    mcumapfile = [metadata.instr.experiment '_well_ALL' '.MCUheatmap'];
+    gen_pub_plotfiles(mcumapfile, mcumapfig, 'normal');
+    close(mcumapfig);
+    drawnow;
+
+    fprintf(fid, '<p> \n');
+    fprintf(fid, '   <h3> Heatmap (MCU parameter) </h3> \n', spec_tau);
+    % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
+    fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', mcumapfile);
+    fprintf(fid, '   <br/> \n\n');
+    fprintf(fid, '</p> \n\n');
+end
+
+
+%
+% Plate-wide Number of Trackers heat-map
+%
+if find(strcmp(report_blocks, 'NumTr_heatmap'))
+    % Number of trackers heatmap
+    trkrmapfig = pan_plot_heatmap(heatmaps.beadcount, 'num trackers');
+    trkrmapfile = [metadata.instr.experiment '_well_ALL' '.trkrheatmap'];
+    gen_pub_plotfiles(trkrmapfile, trkrmapfig, 'normal');
+    close(trkrmapfig);
+    drawnow;
+
+    fprintf(fid, '<p> \n');
+    fprintf(fid, '   <h3> Heatmap (Number of Trackers) </h3> \n', spec_tau);
+    % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
+    fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', trkrmapfile);
+    fprintf(fid, '   <br/> \n\n');
+    fprintf(fid, '</p> \n\n');
+end
 
 %
 % % % Report Summary table
@@ -324,6 +385,7 @@ end
 fprintf(fid, '   </table>\n');
 fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
+
 % % % % % %
 % % % % % % Hypothesis Testing (html code)
 % % % % % %
