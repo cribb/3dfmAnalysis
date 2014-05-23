@@ -33,7 +33,9 @@ outf = strrep(outf, ' ', '_');
 
 for k = 1:length(figs)
     gen_pub_plotfiles(outf, figs(k), 'normal');
-    close(figs(k));
+    if ~isnan(figs(k))
+        close(figs(k));
+    end
 end
 
 fn = fieldnames(cap.protocols);
