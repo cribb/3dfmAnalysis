@@ -38,7 +38,23 @@ for k = 1 : length(fn)
 
         exptype = lower(protocol.step_name);
         
-        if findstr(exptype, 'stress sweep')
+        % had to hack through a 'zero' if string not found by using the sum
+        % on the empty return of strfind
+        if sum(strfind(exptype, 'equilibration step')) || sum(strfind(exptype, 'dissipation step'))
+            t = result.data.time;
+            displacement = result.data.displacement - result.data.displacement(1);
+            figh(count) = plot_cap_dissipation(t, displacement, [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'equilibration'));
+        end            
+        
+        if sum(strfind(exptype, 'pre-stress')) || sum(strfind(exptype, 'prestress'))
+            t = result.data.time;
+            displacement = result.data.displacement - result.data.displacement(1);
+            figh(count) = plot_cap_dissipation(t, displacement, [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'prestress'));
+        end
+        
+        if sum(strfind(exptype, 'stress sweep'))
             stress = result.data.osc_stress;
             gp = result.data.G_prime;
             gpp= result.data.G_double_prime;
@@ -46,7 +62,7 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'ssweep'));
         end
         
-        if findstr(exptype, 'strain sweep')
+        if sum(strfind(exptype, 'strain sweep'))
             strain = result.data.strain;
             gp = result.data.G_prime;
             gpp= result.data.G_double_prime;
@@ -54,7 +70,7 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'nsweep'));
         end
         
-        if findstr(exptype, 'frequency sweep') | findstr(exptype, 'tts')
+        if sum(strfind(exptype, 'frequency sweep')) || sum(strfind(exptype, 'tts'))
             if isfield(result.data, 'frequency')
                 freq = result.data.frequency;
             elseif isfield(result.data, 'ang_frequency');
@@ -69,14 +85,14 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'fsweep'));
         end
 
-        if findstr(exptype, 'flow')
+        if sum(strfind(exptype, 'flow'))
             shear_rate = result.data.shear_rate;
             visc = result.data.viscosity;            
             figh(count) = plot_cap_flow(shear_rate, visc, [], mytitle);
             set(figh(count), 'Name', figname(fn{k}, 'flow'));
         end
 
-        if findstr(exptype, 'creep')
+        if sum(strfind(exptype, 'creep'))
             t = result.data.time;
 %             strain = result.data.strain;
 %             stress = result.data.shear_stress;
@@ -86,7 +102,7 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'creep'));
         end
         
-        if findstr(exptype, 'recovery')
+        if sum(strfind(exptype, 'recovery'))
             t = result.data.time;
 
             if exist('ending_Jt', 'var') && ~isempty(ending_Jt)
@@ -100,7 +116,7 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'recov'));
         end
         
-        if findstr(exptype, 'temperature')
+        if sum(strfind(exptype, 'temperature'))
             temp = result.data.temperature;
             visc = result.data.viscosity;
             srate = result.data.shear_rate;
@@ -108,7 +124,7 @@ for k = 1 : length(fn)
             set(figh(count), 'Name', figname(fn{k}, 'temp'));
         end
         
-        if findstr(exptype, 'peak hold')
+        if sum(strfind(exptype, 'peak hold'))
             time = result.data.time;
             visc = result.data.viscosity;            
 %             strain = result.data.strain;            
@@ -119,7 +135,7 @@ for k = 1 : length(fn)
             set(ser, 'DisplayName', strainrate);
         end           
             
-        if findstr(exptype, 'stress relaxation')
+        if sum(strfind(exptype, 'stress relaxation'))
             time = result.data.time;
             Gt = result.data.modulus_Gt;            
             strain = result.data.strain;            
@@ -129,18 +145,22 @@ for k = 1 : length(fn)
 %             set(ser, 'DisplayName', strain);
         end
         
-        if isempty(findstr(exptype, 'stress sweep')) && ...
-           isempty(findstr(exptype, 'strain sweep')) && ...
-           isempty(findstr(exptype, 'frequency sweep')) && ...
-           isempty(findstr(exptype, 'flow')) && ...
-           isempty(findstr(exptype, 'creep')) && ...
-           isempty(findstr(exptype, 'recov')) && ...
-           isempty(findstr(exptype, 'temperature')) && ...
-           isempty(findstr(exptype, 'peak hold')) && ... 
-           isempty(findstr(exptype, 'relax')) && ...
-           isempty(findstr(exptype, 'TTS'))
+        if isempty(strfind(exptype, 'equilibration step')) && ...
+           isempty(strfind(exptype, 'dissipation step')) && ...
+           isempty(strfind(exptype, 'pre-stress')) && ...
+           isempty(strfind(exptype, 'prestress')) && ...
+           isempty(strfind(exptype, 'stress sweep')) && ...                
+           isempty(strfind(exptype, 'strain sweep')) && ...
+           isempty(strfind(exptype, 'frequency sweep')) && ...
+           isempty(strfind(exptype, 'flow')) && ...
+           isempty(strfind(exptype, 'creep')) && ...
+           isempty(strfind(exptype, 'recov')) && ...
+           isempty(strfind(exptype, 'temperature')) && ...
+           isempty(strfind(exptype, 'peak hold')) && ... 
+           isempty(strfind(exptype, 'relax')) && ...
+           isempty(strfind(exptype, 'TTS'))
        
-                figh(count) = NaN;
+            figh(count) = NaN;
         end
 
         count = count + 1;        
