@@ -1176,9 +1176,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'on', 'Enable', 'on');
+            set(handles.text_chosentau       , 'Visible', 'on', 'Enable', 'on');
+            set(handles.text_chosentau_value , 'Visible', 'on', 'Enable', 'on');
        case 'Diffusivity @ a tau'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1484,7 +1484,8 @@ function plot_data(hObject, eventdata, handles)
        strcmp(AUXtype, 'alpha vs tau') || ...
        strcmp(AUXtype, 'alpha histogram') || ...
        strcmp(AUXtype, 'Diffusivity vs. tau') || ...
-       strcmp(AUXtype, 'MSD histogram')
+       strcmp(AUXtype, 'MSD histogram') || ...
+       strcmp(AUXtype, 'RMS displacement')
         if handles.recomputeMSD % && get(handles.checkbox_msdmean, 'Value')
             data_in_correct_units = data;
             data_in_correct_units(:,X:Z) = data(:,X:Z) * calib_um * 1e-6;
@@ -1512,7 +1513,6 @@ function plot_data(hObject, eventdata, handles)
         case 'OFF'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'off');
-
             
         case 'radial vector'
             figure(handles.AUXfig);
@@ -1542,6 +1542,7 @@ function plot_data(hObject, eventdata, handles)
             set(handles.AUXfig, 'DoubleBuffer', 'on');
             set(handles.AUXfig, 'BackingStore', 'off');    
             drawnow;
+            
         case 'PSD'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
@@ -1604,6 +1605,11 @@ function plot_data(hObject, eventdata, handles)
             
             grid on;
             
+        case 'RMS displacement'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            plot_rmsdisp(mymsd, AUXfig, 'm');
+            
         case 'alpha vs tau'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
@@ -1626,13 +1632,24 @@ function plot_data(hObject, eventdata, handles)
             plot_alphadist(myalpha, AUXfig);
             
         case 'MSD histogram'
+            mytauidx = str2num(get(handles.edit_chosentau, 'String'));
+            numbins = 51;
+            
+            mymsd_at_mytau = mymsd.msd(mytauidx, :);
+            
+            set(handles.text_chosentau_value, 'String', num2str(mean(mymsd.tau(mytauidx,:))));
+            
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
 
-            numbins = 51;
+
             
-            v = msdhist(mymsd, numbins);
-            plot_msdhist(v, AUXfig, 's');
+            
+% This is for plotting the surface or colormap of all r^2 for all taus, 
+% allowing for a 'mean' or 'most probable' MSD to show up as a max or peak
+% value. These functions should be rebased accordingly.
+%             v = msdhist(mymsd, numbins);
+%             plot_msdhist(v, AUXfig, 's');
                        
         case 'temporal MSD'
             figure(handles.AUXfig);
