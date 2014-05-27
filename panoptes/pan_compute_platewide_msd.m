@@ -21,6 +21,10 @@ if nargin < 2 || isempty(spec_tau)
     spec_tau = 1;
 end
 
+msds = NaN(1,96);
+msd_err = NaN(1,96);
+ns  = NaN(1,96);
+
 [plate_msds_by_well wellID] = pan_combine_data(metadata, 'metadata.plate.well_map');
 
 all_taus = [plate_msds_by_well.mean_logtau];
