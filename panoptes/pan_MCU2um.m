@@ -64,7 +64,11 @@ function [calibum, calibum_err] = pan_MCU2um(MCUparam, systemid, wellid)
 
     end
     
+%     calibum = 0.361; % [um/pixel] 20X objective with no installed VOL in Monoptes
+%     
+%     calibum_err = 0;
     
+    return;
 %     
 %     for k = 1:length(MCUparam)
 %         switch MCUparam(k)
@@ -105,9 +109,6 @@ function [calibum, calibum_err] = pan_MCU2um(MCUparam, systemid, wellid)
 %        end
 %        
 %     end
-
-
-    return;
 
 % function for writing out stderr log messages
 function logentry(txt)
