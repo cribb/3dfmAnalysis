@@ -158,8 +158,13 @@ metadata.filt = filt;
 % 'NumTr_heatmap'     =
 % 'plate_msd_bar'     =
 % 'plate_rmsdisp_bar' =
-% 'plate_visc_var'    =
+% 'plate_visc_bar'    =
 % 'plate_summary'     =
+% 'agg_msd_bar'       =
+% 'agg_rmsdisp_bar'   =
+% 'agg_visc_bar'      =
+% 'agg_summary'       =
+% 'agg_hyp_test'      =
 metadata.report_blocks = {'visc_heatmap', 'msd_heatmap', 'rmsdisp_heatmap', 'rmsdisp', 'meanMSD', 'MSD'};
 
 % Baseline MSD computations for all datafiles
