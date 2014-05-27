@@ -1,19 +1,17 @@
 function h = plot_rmsdisp(d, h, optstring)
-% PLOT_MSD plots the graph of mean square displacement versus tau for an aggregate number of beads 
+% PLOT_RMSDISP plots the graph of RMS displacement versus tau for an aggregate number of beads 
 %
 % 3DFM function
 % specific\rheology\msd
-% last modified 11/20/08 (krisford)
 %
+% plot_rmsdisp(d,h,optstring)
 %
-% plot_msd(d)
-%
-% where "d" is the input structure and should contain the mean square displacement, the tau 
+% where "d" is the input structure and should contain the RMS displacement, the tau 
 %       value (window size), and the number of beads in a given window.
 %       "h" is the figure handle in which to put the plot.  If h is not
 %       used, a new figure is generated.
 %      "optstring" is a string containing 'a' to plot all individual paths, 'm'
-%      to plot the mean msd function, and 'e' to include errorbars on mean,
+%      to plot the mean RMS displacement, and 'e' to include errorbars on mean,
 %      'u' to plot msd in units of um^2
 
 if nargin < 3 || isempty(optstring)
@@ -34,35 +32,30 @@ if nargin < 1 || isempty(d.tau)
 end
 
 if strcmpi(optstring, 'u')
-    d.mean_logmsd = d.mean_logmsd + 12;
-    d.msd = d.msd * 1e12;
+    d.mean_logrmsdisp = d.mean_logrmsdisp + 12;
+    d.rmsdisp = d.rmsdisp * 1e12;
 end
 
 % calculate statistical measures for msd and plant into data structure
 d = msdstat(d);
-d.logrmsdisp = d.logmsd;
-d.logrmsdisp = sqrt(10.^mymsd);
-rmsdisp_err = sqrt(10.^(mymsd+mymsd_err)) - rmsdisp;
 
 % creating the plot
 if ~exist('brought_own_figure_handle')
     figure(h);
 end
     
-
-
 if strcmpi(optstring, 'a')
-    plot(d.logtau, d.logmsd, 'b');
+    plot(d.logtau, d.logrmsdisp, 'b');
 elseif strcmpi(optstring, 'm')
-    plot(d.mean_logtau, d.mean_logmsd, 'k.-');
+    plot(d.mean_logtau, d.mean_logrmsdisp, 'k.-');
 elseif strcmpi(optstring, 'am')
-    plot(d.logtau, d.logmsd, 'b', d.mean_logtau, d.mean_logmsd, 'k.-');
+    plot(d.logtau, d.logrmsdisp, 'b', d.mean_logtau, d.mean_logrmsdisp, 'k.-');
 elseif strcmpi(optstring, 'me') || strcmpi(optstring, 'e')
-    errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, '.-', 'Color', 'cyan', 'LineWidth', 2);
+    errorbar(d.mean_logtau, d.mean_logrmsdisp, d.rmsdisp_err, '.-', 'Color', 'cyan', 'LineWidth', 2);
 elseif strcmpi(optstring, 'ame')
-    plot(log10(d.tau), log10(d.msd), 'b-');
+    plot(log10(d.tau), log10(d.rmsdisp), 'b-');
     hold on;
-        errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, '.-', 'Color', 'cyan', 'LineWidth', 2);
+        errorbar(d.mean_logtau, d.mean_logrmsdisp, d.rmsdisp_err, '.-', 'Color', 'cyan', 'LineWidth', 2);
     hold off;
 end
 
@@ -73,9 +66,9 @@ end
 
 xlabel('log_{10}(\tau) [s]');
 if strcmpi(optstring,'u')
-    ylabel('log_{10}(MSD) [\mum^2]');
+    ylabel('log_{10}(RMS disp) [\mum]');
 else
-    ylabel('log_{10}(MSD) [m^2]');
+    ylabel('log_{10}(RMS disp) [m]');
 end
 grid on;
 pretty_plot;
