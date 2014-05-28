@@ -1,4 +1,4 @@
-function pan = pan_publish_expt(metadata, filt, myparam)
+function pan = pan_publish_expt(metadata, spec_tau)
 % PAN_PUBLISH_EXPT  Generates an html report for Panoptes Experiments
 %
 % CISMM function
@@ -26,141 +26,87 @@ function pan = pan_publish_expt(metadata, filt, myparam)
 
 % Process the inputs adequately to ensure operability later on in this
 % function
-if nargin < 4 || isemtpy(report_blocks)
-    report_blocks = {'msd_heatmap'};
+
+% if nargin < 4 || isempty(report_blocks)
+%     report_blocks = {'msd_heatmap'};
+% end
+
+if ~isfield(metadata, 'report_blocks')
+    metadata.report_blocks = {'msd_heatmap'};
 end
 
-if nargin < 3 || isempty(myparam)
-    myparam = 'metadata.plate.well_map';
+if ~isfield(metadata, 'filt')
+    error('No filter defined.');
+end
+
+if ~isfield(metadata, 'myparam') || isempty(metadata.myparam)
+    metadata.myparam = 'metadata.plate.well_map';
     % myparam = 'metadata.plate.cell.name';
 end
-
-if nargin < 2 || isempty(filt)
-    error('No filter information found.');
-end    
+% 
+% if nargin < 2 || isempty(filt)
+%     error('No filter information found.');
+% end    
 
 if nargin < 1 || isempty(metadata)
     error('No metadata information found.');
 end
 
-spec_tau = 1;
+myparam = metadata.myparam;
+report_blocks = metadata.report_blocks;
+filt = metadata.filt;
+
 
 % XXX Need to wrap this in an 'if' block so that if the report blocks 
 %     don't contain the need to compute the heatmaps then don't do this
 %     very slow process of computing the msd for each well.
 % report blocks for this include: 'visc_heatmap', 'msd_heatmap', 'rmsdisp_heatmap', ???
-if find(strcmp(report_blocks, 'msd_heatmap'))       || ...
-   find(strcmp(report_blocks, 'rmsdisp_heatmap'))   || ...
-   find(strcmp(report_blocks, 'visc_heatmap'))      || ...
-   find(strcmp(report_blocks, 'plate_msd_bar'))     || ...
-   find(strcmp(report_blocks, 'plate_rmsdisp_bar')) || ...
-   find(strcmp(report_blocks, 'plate_visc_bar'))    || ...
-   find(strcmp(report_blocks, 'plate_summary'))
+if sum(strcmp(report_blocks, 'msd_heatmap'))       || ...
+   sum(strcmp(report_blocks, 'rmsdisp_heatmap'))   || ...
+   sum(strcmp(report_blocks, 'visc_heatmap'))      || ...
+   sum(strcmp(report_blocks, 'plate_msd_bar'))     || ...
+   sum(strcmp(report_blocks, 'plate_rmsdisp_bar')) || ...
+   sum(strcmp(report_blocks, 'plate_visc_bar'))    || ...
+   sum(strcmp(report_blocks, 'plate_summary'))
 
    %%%%  Calculate the MSD for different wells
    [plate_msds_by_well, heatmaps] = pan_compute_platewide_msd(metadata, spec_tau);    
+   
+   %%%% Calculate all remaining heatmaps (computationally inexpensive)
+   [heatmaps.rmsdisp, heatmaps.rmsdisp_err] = pan_compute_rmsdisp_heatmap(heatmaps.msd, heatmaps.msd_err);
+   [heatmaps.visc, heatmaps.visc_err] = pan_compute_viscosity_heatmap(metadata, spec_tau, heatmaps.msd, heatmaps.msd_err);       
+   [heatmaps.mcu] = pan_compute_MCU_heatmap(metadata);
+   
+   
+   % convert information to array format for the data table summary
+    msd_list = pan_plate2array(heatmaps.msd);
+    msd_err_list = pan_plate2array(heatmaps.msd_err);
+    visc_list = pan_plate2array(heatmaps.visc);
+    visc_err_list = pan_plate2array(heatmaps.visc_err);
+    rmsdisp_list = pan_plate2array(heatmaps.rmsdisp);
+    rmsdisp_err_list = pan_plate2array(heatmaps.rmsdisp_err);
+    beadcount_list = pan_plate2array(heatmaps.beadcount);
+
 end
 
 
-% compute the MSD for the condition defined by 'myparam'
-[msds data_for_myparam] = pan_combine_data(metadata, myparam);
-
-% variables that contain summarized data
-all_taus = [msds.mean_logtau];
-all_msds = [msds.mean_logmsd];
-all_errs = [msds.msderr];
-
-% create plot with bar graph at a given tau
-log_spec_tau = log10(spec_tau);
-[minval, minloc] = min( sqrt((all_taus - log_spec_tau).^2) );
-mytau = 10.^all_taus(minloc(1),:);
-mymsd = all_msds(minloc(1),:);
-myerr = all_errs(minloc(1),:);
-
-% % % % % Hypothesis Testing (Stat Analysis)
-% % % % count = 1;
-% % % % for k = 1:length(msds)-1
-% % % %     type_A = log10(msds(k).msd(minloc(1),:));   
-% % % %     for m = (k+1):length(msds)
-% % % %         type_B = log10(msds(m).msd(minloc(1),:));        
-% % % %         [h(count),p(count)] = ttest2(type_A, type_B);
-% % % % 
-% % % %         type_A_names{count} = data_for_myparam{k};
-% % % %         type_B_names{count} = data_for_myparam{m};
-% % % %         
-% % % %         count = count + 1;
-% % % %     end
-% % % % end
-
-% generate information for the data table summary
-all_ns   = [msds.n];
-rms_mymsd = sqrt(10.^mymsd);
-rms_mymsd_err = sqrt(10.^(mymsd+myerr)) - rms_mymsd;
-msds_n = all_ns(minloc(1),:);
-
-% One-dimensional bar chart
-MSD = (10 .^ mymsd);
-MSD_err = (10.^(mymsd+myerr)-10.^(mymsd));
-barfig = figure('Visible', 'off');
-barwitherr( MSD_err, MSD );
-set(gca, 'XTick', 1:length(data_for_myparam));
-set(gca,'XTickLabel',data_for_myparam)
-xlabel('Well ID');
-ylabel('MSD [m^2] at \tau=10 [s]');
-barfile = [metadata.instr.experiment '_well_ALL' '.bar'];
-gen_pub_plotfiles(barfile, barfig, 'normal');
-close(barfig);
-drawnow;
-
-% create plot with mean msd data for all values of 'myparam' across ALL taus
-aggMSDfig = figure; 
-set(aggMSDfig, 'Visible', 'off');
-errorbar(all_taus, all_msds, all_errs, 'LineWidth', 2)
-xlabel('time scale, \tau [s]');
-ylabel('<r^2> [m^2]');
-legend(data_for_myparam, 'Location', 'SouthEast');
-aggMSDfile = [metadata.instr.experiment '_well_ALL' '.aggmsd'];
-gen_pub_plotfiles(aggMSDfile, aggMSDfig, 'normal');
-close(aggMSDfig);
-drawnow;
-
-% create plots for each parameter value
-
-% find the highest and lowest mean MSD value for the entire run and plot
-% all msd curves onto that grid so plots from different wells can be
-% compared to one another by eye.  
-
-% To do this, we need to pull out ALL of the MSD values and extract the
-% absolute min and max of the dataset.
-for k = 1:length(msds)
-    temp_meanlogmsd(:,k) = msds(k).mean_logmsd;
-end
-YLim_low = floor(nanmin(temp_meanlogmsd(:)));
-YLim_high = ceil(nanmax(temp_meanlogmsd(:)));
-
-if isnan(YLim_low )
-    YLim_low = -18;
-end
-
-if isnan(YLim_high)
-    YLim_high = -12;
-end
-
-for k = 1:length(data_for_myparam)    
-    my_data_for_myparam = strrep(data_for_myparam{k}, ' ', '');
-    MSDfile{k} = [metadata.instr.experiment '_well_' my_data_for_myparam '.msd'];
-    MSDfig  = figure('Visible', 'off');
-    plot_msd(msds(k), MSDfig, 'ame');
-    set(gca, 'YLim', [YLim_low YLim_high]);
-
-    gen_pub_plotfiles(MSDfile{k}, MSDfig, 'normal'); 
-    close(MSDfig);    
+% Need to compute MSDs based on conditions other than 'wellID', here that
+% condition is defined by 'myparam'
+if (sum(strcmp(report_blocks, 'agg_msd_bar'))      || ...
+   sum(strcmp(report_blocks, 'agg_rmsdisp_bar'))   || ...
+   sum(strcmp(report_blocks, 'agg_visc_bar'))      || ...
+   sum(strcmp(report_blocks, 'agg_summary'))       || ...
+   sum(strcmp(report_blocks, 'agg_hyp_test')))     && ...
+   ~strcmp(myparam, 'metadata.plate.well_map')
+disp('looks like i am in the aggregate level of the report');
+%     [msds data_for_myparam] = pan_combine_data(metadata, myparam);
 end
 
 
 
-
+%
 % % START REPORT GENERATION TO HTML PAGE
+%
 
 % Pull out info into shorter variable names
 nametag     = metadata.instr.experiment;
@@ -210,6 +156,7 @@ fprintf(fid, '   <b>Path:</b>  %s <br/>\n', pwd);
 fprintf(fid, '   <b>Filename:</b>  %s \n', outfile);
 fprintf(fid, '</p> \n\n');
 
+
 %
 % Instrument setup
 %
@@ -221,6 +168,7 @@ fprintf(fid, '   <b>Video Duration:</b>  %s [s]<br/> \n', num2str(duration));
 fprintf(fid, '   <b>Autofocus:</b> %s <br/> \n', autofocus_yn);
 fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
+
 
 %
 % Data Filters setup
@@ -248,10 +196,8 @@ fprintf(fid, '<hr/> \n\n');
 % Plate-wide RMS displacement heat-map
 %
 if find(strcmp(report_blocks, 'rmsdisp_heatmap'))
-    [heatmaps.rmsdisp, heatmaps.rmsdisp_err] = pan_compute_rmsdisp_heatmap(heatmaps.msd, heatmaps.msd_err);
 
     % RMS displacement heatmap
-    heatmaps.rmsdisp = sqrt(10.^heatmaps.msd);
     rmsmapfig = pan_plot_heatmap(heatmaps.rmsdisp, 'rms displacement');
     rmsmapfile = [metadata.instr.experiment '_well_ALL' '.RMSheatmap'];
     gen_pub_plotfiles(rmsmapfile, rmsmapfig, 'normal');
@@ -271,6 +217,7 @@ end
 % Plate-wide MSD heat-map
 %
 if find(strcmp(report_blocks, 'msd_heatmap'))
+    
     % MSD heatmap
     msdmapfig = pan_plot_heatmap(heatmaps.msd, 'msd');
     msdmapfile = [metadata.instr.experiment '_well_ALL' '.msdheatmap'];
@@ -291,7 +238,6 @@ end
 % Plate-wide Viscosity heat-map
 %
 if find(strcmp(report_blocks, 'visc_heatmap'))
-    [heatmaps.visc, heatmaps.visc_err] = pan_compute_viscosity_heatmap(metadata, spec_tau, heatmaps.msd, heatmaps.msd_err);    
 
     % Viscosity heatmap
     viscmapfig = pan_plot_heatmap(heatmaps.visc, 'viscosity');
@@ -313,17 +259,6 @@ end
 % Plate-wide MCU heat-map
 %
 if find(strcmp(report_blocks, 'MCU_heatmap'))
-    % MCU parameter heatmap
-    mcumap = NaN(1,96);
-    for wellIDX = 1:96
-        mywell = find(metadata.mcuparams.well == wellIDX);
-        if ~isempty(mywell)
-            mcumap(wellIDX) = mean( metadata.mcuparams.mcu(mywell) );
-        else
-            mcumap(wellIDX) = NaN;
-        end
-    end
-    heatmaps.mcu = pan_array2plate(mcumap);
     mcumapfig = pan_plot_heatmap(heatmaps.mcu, 'MCU parameter');
     mcumapfile = [metadata.instr.experiment '_well_ALL' '.MCUheatmap'];
     gen_pub_plotfiles(mcumapfile, mcumapfig, 'normal');
@@ -351,69 +286,92 @@ if find(strcmp(report_blocks, 'NumTr_heatmap'))
     drawnow;
 
     fprintf(fid, '<p> \n');
-    fprintf(fid, '   <h3> Heatmap (Number of Trackers) </h3> \n', spec_tau);
+    fprintf(fid, '   <h3> Heatmap (Number of Trackers) </h3> \n');
     % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
     fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', trkrmapfile);
     fprintf(fid, '   <br/> \n\n');
     fprintf(fid, '</p> \n\n');
 end
 
-%
-% % % Report Summary table
-%
-fprintf(fid, '<p> \n');
-fprintf(fid, '   <h3> Summary at %i timescale </h3> \n', num2str(spec_tau));
-fprintf(fid, '   <table border="2" cellpadding="6"> \n');
-fprintf(fid, '   <tr> \n');
-fprintf(fid, '      <td align="center" width="200"> <b> Condition </b> </td> \n');
-fprintf(fid, '      <td align="center" width="200"> <b> MSD </b> </td> \n');
-fprintf(fid, '      <td align="center" width="200"> <b> RMS displacement </b> </td> \n');
-fprintf(fid, '      <td align="center" width="200"> <b> App. Viscosity </b> </td> \n');
-fprintf(fid, '      <td align="center" width="200"> <b> No. of trackers </b> </td> \n');
-fprintf(fid, '    </tr>\n');
 
-% Fill in Summary table with data
-for k = 1:length(msds)
+%
+% % % Plate Summary table
+%
+% generate information for the data table summary
+if find(strcmp(report_blocks, 'plate_summary'))
+    fprintf(fid, '<p> \n');
+    fprintf(fid, '   <h3> Summary at %i timescale </h3> \n', num2str(spec_tau));
+    fprintf(fid, '   <table border="2" cellpadding="6"> \n');
     fprintf(fid, '   <tr> \n');
-    fprintf(fid, '      <td align="center" width="200"> %s </td> \n', data_for_myparam{k});
-    fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', MSD(k), MSD_err(k));
-    fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rms_mymsd(k)*1e9, rms_mymsd_err(k)*1e9);
-    fprintf(fid, '      <td align="center" width="200"> %8.1f +/- %8.2f [mPa s] </td> \n', visclist(k)*1e3, visc_errlist(k)*1e3);
-    fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_n(k));    
-    fprintf(fid, '   </tr>\n');        
-end
-fprintf(fid, '   </table>\n');
-fprintf(fid, '</p> \n');
-fprintf(fid, '<hr/> \n\n');
+    fprintf(fid, '      <td align="center" width="200"> <b> Condition </b> </td> \n');
+    fprintf(fid, '      <td align="center" width="200"> <b> MSD </b> </td> \n');
+    fprintf(fid, '      <td align="center" width="200"> <b> RMS displacement </b> </td> \n');
+    fprintf(fid, '      <td align="center" width="200"> <b> App. Viscosity </b> </td> \n');
+    fprintf(fid, '      <td align="center" width="200"> <b> No. of trackers </b> </td> \n');
+    fprintf(fid, '    </tr>\n');
 
-% % % % % %
-% % % % % % Hypothesis Testing (html code)
-% % % % % %
-% % % % % fprintf(fid, '<p> \n');
-% % % % % fprintf(fid, '   <h3> Hypothesis Testing </h3> \n');
-% % % % % fprintf(fid, '   <table border="2" cellpadding="6"> \n');
-% % % % % fprintf(fid, '   <tr> \n');
-% % % % % fprintf(fid, '      <td align="center" width="200"> <b> A </b> </td> \n');
-% % % % % fprintf(fid, '      <td align="center" width="200"> <b> B </b> </td> \n');
-% % % % % fprintf(fid, '      <td align="center" width="200"> <b> p-value </b> </td> \n');
-% % % % % fprintf(fid, '    </tr>\n');
-% % % % % 
-% % % % % % Report p-values
-% % % % % count = 1;
-% % % % % for k = 1:length(msds)-1
-% % % % %     for m = (k+1):length(msds)
-% % % % %         fprintf(fid, '   <tr> \n');
-% % % % %         fprintf(fid, '      <td align="center" width="200"> %s </td> \n', type_A_names{count});
-% % % % %         fprintf(fid, '      <td align="center" width="200"> %s </td> \n', type_B_names{count});
-% % % % %         fprintf(fid, '      <td align="center" width="200"> %8.2e </td> \n', p(count));
-% % % % %         fprintf(fid, '   </tr>\n');        
-% % % % %         count = count + 1;
-% % % % %     end
-% % % % % end
-% % % % % 
-% % % % % fprintf(fid, '   </table>\n');
-% % % % % fprintf(fid, '</p> \n');
-% % % % % fprintf(fid, '<hr/> \n\n');
+    % Fill in Summary table with data
+    for k = 1:length(msds)
+        fprintf(fid, '   <tr> \n');
+        fprintf(fid, '      <td align="center" width="200"> %s </td> \n', data_for_myparam{k});
+        fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', MSD(k), MSD_err(k));
+        fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rms_mymsd(k)*1e9, rms_mymsd_err(k)*1e9);
+        fprintf(fid, '      <td align="center" width="200"> %8.1f +/- %8.2f [mPa s] </td> \n', visclist(k)*1e3, visc_errlist(k)*1e3);
+        fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_n(k));    
+        fprintf(fid, '   </tr>\n');        
+    end
+    fprintf(fid, '   </table>\n');
+    fprintf(fid, '</p> \n');
+    fprintf(fid, '<hr/> \n\n');
+end
+
+
+%
+% Hypothesis Testing for an aggregated parameter (analysis & html code)
+%
+if find(strcmp(report_blocks, 'agg_hyp_test'))
+    % Hypothesis Testing (Stat Analysis)
+    count = 1;
+    for k = 1:length(msds)-1
+        type_A = log10(msds(k).msd(minloc(1),:));   
+        for m = (k+1):length(msds)
+            type_B = log10(msds(m).msd(minloc(1),:));        
+            [h(count),p(count)] = ttest2(type_A, type_B);
+
+            type_A_names{count} = data_for_myparam{k};
+            type_B_names{count} = data_for_myparam{m};
+
+            count = count + 1;
+        end
+    end
+    
+    fprintf(fid, '<p> \n');
+    fprintf(fid, '   <h3> Hypothesis Testing </h3> \n');
+    fprintf(fid, '   <table border="2" cellpadding="6"> \n');
+    fprintf(fid, '   <tr> \n');
+    fprintf(fid, '      <td align="center" width="200"> <b> A </b> </td> \n');
+    fprintf(fid, '      <td align="center" width="200"> <b> B </b> </td> \n');
+    fprintf(fid, '      <td align="center" width="200"> <b> p-value </b> </td> \n');
+    fprintf(fid, '    </tr>\n');
+
+    % Report p-values
+    count = 1;
+    for k = 1:length(msds)-1
+        for m = (k+1):length(msds)
+            fprintf(fid, '   <tr> \n');
+            fprintf(fid, '      <td align="center" width="200"> %s </td> \n', type_A_names{count});
+            fprintf(fid, '      <td align="center" width="200"> %s </td> \n', type_B_names{count});
+            fprintf(fid, '      <td align="center" width="200"> %8.2e </td> \n', p(count));
+            fprintf(fid, '   </tr>\n');        
+            count = count + 1;
+        end
+    end
+
+    fprintf(fid, '   </table>\n');
+    fprintf(fid, '</p> \n');
+    fprintf(fid, '<hr/> \n\n');
+end
+
 
 %
 % % % Report Summary figure.  Bar chart with error.  (Maybe ANOVA eventually?)
