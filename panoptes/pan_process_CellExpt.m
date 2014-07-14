@@ -155,14 +155,22 @@ didx = regexp(MSD_agg_param, '[.]');
 % analysis_dir = ['./matlab_analysis/' MSD_agg_param(didx(end)+1:end)];
 analysis_dir = ['./matlab_analysis/cell_rheology'];
 mkdir(analysis_dir);
-copyfile('*.txt', analysis_dir);
-movefile('*.html', analysis_dir);
-movefile('*.fig', analysis_dir);
-movefile('*.png', analysis_dir);
-movefile('*.svg', analysis_dir);
-movefile('*.evt.mat', analysis_dir);
-if ~isempty(dir('*.drift.mat')); movefile('*.drift.mat', analysis_dir); end;
-movefile([outf '.mat'], analysis_dir);
+
+[status,message,messageid] = copyfile('*.txt', analysis_dir);
+% if ~status
+%     logentry([message, '  ', '(' messageid ')']);
+% end
+
+[status,message,messageid] = movefile('*.html', analysis_dir);
+[status,message,messageid] = movefile('*.fig', analysis_dir);
+[status,message,messageid] = movefile('*.png', analysis_dir);
+[status,message,messageid] = movefile('*.svg', analysis_dir);
+[status,message,messageid] = movefile('*.evt.mat', analysis_dir);
+if ~isempty(dir('*.drift.mat')); 
+    [status,message,messageid] = movefile('*.drift.mat', analysis_dir); 
+end;
+
+[status,message,messageid] = movefile([outf '.mat'], analysis_dir);
 
 % Elapsed time
 elapsed_time = toc(tid);
