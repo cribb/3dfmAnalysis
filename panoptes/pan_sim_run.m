@@ -49,8 +49,34 @@ function outs = pan_sim_run(filepath, systemid, plate_type)
                 sim.tempK = str2double(metadata.plate.solution(s).temperature{w,1})+273;
                 sim.field_width = str2double(metadata.plate.simulation.fov_width{w,1});
                 sim.field_height = str2double(metadata.plate.simulation.fov_height{w,1});
-                sim.xdrift_vel = str2double(metadata.plate.simulation.drift_velocity_x{w,1}) * 1e-6 / sim.frame_rate;
-                sim.ydrift_vel = str2double(metadata.plate.simulation.drift_velocity_y{w,1}) * 1e-6 / sim.frame_rate;
+                
+% %                 % Set up the drift vectors such that the image is 'rotated'
+% %                 % to match Panoptes camera rotation.
+% %                 given_xvel = metadata.plate.simulation.drift_velocity_x{w,1};
+% %                 given_yvel = metadata.plate.simulation.drift_velocity_y{w,1};
+% %                 
+% %                 channelid = pan_get_channel_id(mywell);
+% %                 
+% % 
+% %                 if ~mod(channelid,2) %even
+% %                     newxy = [-rotxy(:,1)  rotxy(:,2)];
+% %                 else % odd
+% %                     newxy = [ rotxy(:,1) -rotxy(:,2)];    
+% %                 end
+% %                 
+% %                 % do the initial rotation
+% %                 theta = -pi/2;
+% %                 R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+% %                 rotxy = R * xy;
+% %     
+
+                    
+                
+                
+                sim.xdrift_vel = str2double(rot_Xvel) * 1e-6 / sim.frame_rate;
+                sim.ydrift_vel = str2double(rot_Yvel) * 1e-6 / sim.frame_rate;
+                
+                % Now, calibrate length scales
                [sim.calib_um, ~] = pan_MCU2um(myMCU, systemid, mywell);
 
                 [traj, simout] = sim_video_diff_expt([], sim);
