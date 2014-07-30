@@ -24,25 +24,25 @@ function newxy = pan_rot2stage(xy, wellid, theta)
 % First, set up default values for input parameters in case they are empty 
 % or otherwise do not exist.
 
-    if ~exist('theta') || isempty(theta)
-        theta = 90;
+    if nargin < 3 || isempty(theta)
+        theta = pi/2;
     end
 
-    if ~exist('wellid') || isempty(wellid)
+    if nargin < 2 || isempty(wellid)
         error('No well ID defined.');
     end 
 
-    if ~exist(xy) || isempty(xy)
+    if nargin < 1 || isempty(xy)
         error('No input coords defined');
     end
-
+    
     channelid = pan_get_channel_id(wellid);
 
     % do the initial rotation
     R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
     rotxy = R * xy;
 
-    if mod(channelid,2) %even
+    if ~mod(channelid,2) %even
         newxy = [-rotxy(:,1)  rotxy(:,2)];
     else % odd
         newxy = [ rotxy(:,1) -rotxy(:,2)];    
