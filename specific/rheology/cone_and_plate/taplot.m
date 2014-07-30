@@ -24,7 +24,13 @@ else
     v = ta2mat(filename);
 end
     
-fn = fieldnames(v.results);
+if isfield(v, 'results')
+    fn = fieldnames(v.results);
+else
+    logentry('No results in this file');
+    figh = NaN;
+    return;
+end
 
 % figure out which 'experiments' have data 'units' and plot if data exists
 count = 1;
