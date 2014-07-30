@@ -76,7 +76,8 @@ saveas(h, [outf '.fig'], 'fig');
 print('-dpng', ['test' '.png'], '-zbuffer','-r300');
 % print(h, '-r0', [outf '.jpg'], '-djpg'); 
 saveas(h, [outf '.png'], 'png');
-plot2svg_2d([outf '.svg'], h);
+% plot2svg_2d([outf '.svg'], h);
+plot2svg([outf '.svg'], h);
 % close(h);
 
 return;
