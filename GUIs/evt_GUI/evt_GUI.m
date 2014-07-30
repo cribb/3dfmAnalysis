@@ -304,7 +304,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 
             % or, try loading the first frame        
             try
-                fimfile = [filenameroot, '0001.bmp'];
+                fimfile = [filenameroot, '.0001.bmp'];
                 im = imread(fimfile, 'BMP');
                 logentry('Successfully loaded first frame image...');            
             catch
