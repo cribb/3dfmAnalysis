@@ -56,6 +56,8 @@ log_spec_tau = log10(spec_tau);
 myparam = 'metadata.plate.well_map';
 
 [plate_msds_by_well, heatmaps] = pan_compute_platewide_msd(metadata, spec_tau);
+% gsers = pan_compute_VE_heatmaps(metadata, plate_msds_by_well, spec_tau);
+
 [heatmaps.visc, heatmaps.visc_err] = pan_compute_viscosity_heatmap(metadata, spec_tau, heatmaps.msd, heatmaps.msd_err);
 [heatmaps.rmsdisp, heatmaps.rmsdisp_err] = pan_compute_rmsdisp_heatmap(heatmaps.msd, heatmaps.msd_err);
 
@@ -205,7 +207,8 @@ if isnan(YLim_high)
     YLim_high = -12;
 end
 
-for k = 1:length(molar_conc)    
+for k = 1:length(plate_msds_by_well)    
+% for k = 1:length(molar_conc)    
     my_molar_conc = strrep(molar_conc{k}, ' ', '');
     MSDfile{k} = [metadata.instr.experiment '_well_' my_molar_conc '.msd'];
     MSDfig  = figure('Visible', 'off');
@@ -408,7 +411,7 @@ fprintf(fid, '    <tr>\n  <td align="center" width="200">\n    <b> %s </b> <br/>
 fprintf(fid, '     </td>\n  <td align="center" width="425"> <b> Mean Squared Displacement (MSD) </b> <br/> \n');
 fprintf(fid, '     </td>\n </tr>\n\n');
 
-for k = 1 : length(molar_conc)   
+for k = 1 : length(MSDfile)   
    fprintf(fid, '    <tr>\n  <td align="left" width="200">\n    <b> %s </b> <br/> \n', molar_conc{k});
    fprintf(fid, '     </td>\n  <td align="center" width="425">\n');
    fprintf(fid, '       <iframe src="%s.svg" width="400" height="300" border="0"></iframe> \n', MSDfile{k});
