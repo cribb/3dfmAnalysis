@@ -29,7 +29,7 @@ figs = taplot(cap, nametag);
 % filename conditioning
 outf = cap.global_protocol.results_file_name;
 outf = strrep(outf, ' ', '_');
-
+outf = strrep(outf, '#', '_');
 
 for k = 1:length(figs)
     gen_pub_plotfiles(outf, figs(k), 'normal');
@@ -80,6 +80,21 @@ end
 fprintf(fid, '</p>\n\n');
 
 
+% check for results. if there are no data, then publish empty html doc and
+% return
+if ~isfield(cap, 'results')
+    logentry('No data to plot (no ''results'' reported in outputted data structure).');
+    fprintf(fid, '<p> \n');
+    fprintf(fid, '    <b> No data to plot (no ''results'' reported in outputted data structure).</b> >br/> \n');
+    fprintf(fid, '</p> \n\n');
+    fprintf(fid, '</table>\n\n');
+    fprintf(fid, '</body> \n');
+    fprintf(fid, '</html> \n\n');
+
+    fclose(fid);    
+    
+    return;
+end
 
 % Produce results from each procedural section
 fprintf(fid, '<table border="2" cellpadding="6"> \n');
