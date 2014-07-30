@@ -18,7 +18,7 @@ for fid = 1:length(files)
 
     % read in the filename
     im = imread(filename);
-
+    im = im(:,:,1);
     % % create a mask using the disk structural element
     % mask = imopen(im, strel('disk',disk_radius));
 
@@ -90,7 +90,7 @@ for fid = 1:length(files)
 
     mean_max_sig = mean(bead_sig);
 
-    SNR(fid) = mean_max_sig / noise(end);
+    SNR(fid) = (mean_max_sig - noise(end)) / noise(end);
 
 
     if strcmp(report, 'y')

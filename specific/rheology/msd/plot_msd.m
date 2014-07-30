@@ -23,6 +23,7 @@ end
 
 if nargin < 2 || isempty(h)
     h = figure;
+    brought_own_figure_handle = 0;
 else
     brought_own_figure_handle = 1;
 end
