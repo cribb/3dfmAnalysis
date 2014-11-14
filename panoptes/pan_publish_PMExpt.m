@@ -346,7 +346,7 @@ fclose(fid);
 
 pan = msds;
 
-save(outf);
+save([outf '.mat'], '-mat');
 
 return;
 
