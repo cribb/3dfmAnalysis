@@ -201,7 +201,7 @@ function pushbutton_start_Callback(hObject, eventdata, handles)
     params.calibum              = str2num(get(handles.edit_calibum, 'String'));
     params.deg_tau              = str2num(get(handles.edit_deg_tau, 'String'));
     params.deg_freq             = str2num(get(handles.edit_deg_freq, 'String'));
-    params.fps                  = str2num(get(handles.fps_edit, 'String'));
+    params.fps                  = str2num(get(handles.edit_fps, 'String'));
 
     if get(handles.checkbox_degauss, 'Value');
         params.degauss = 'on';
