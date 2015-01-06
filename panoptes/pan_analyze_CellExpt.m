@@ -46,6 +46,8 @@ for k = 1:length(filelist)
     
     % logentry(['Loading ' filelist(k).name]);
     
+    myfps = metadata.instr.fps_fluo;
+    
     filt.xyzunits    = 'm';
     filt.calib_um    = mycalibum;
     filt.bead_radius = bead_radius;
@@ -65,7 +67,7 @@ for k = 1:length(filelist)
 %     myve  = ve(mymsd, bead_radius, freqtype, 'no');
     
         if findstr(mode, 'd')            
-            save_evtfile(filelist(k).name, d, 'm', mycalibum);
+            save_evtfile(filelist(k).name, d, 'm', mycalibum, myfps);
 %             save_msdfile(filelist(k).name, mymsd);
 %             save_gserfile(filelist(k).name, myve);
         end                
