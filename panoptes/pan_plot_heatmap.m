@@ -28,7 +28,7 @@ switch type
         mycolormap = hot(256);
         logdata = 1;
     case 'viscosity'
-%         data = log10(data);
+        data = log10(data);
         mytitle = 'Viscosity (in log_{10} [Pa s])';
         colorbar_limits = [-3.3 2];
         mycolormap = hot(256);
