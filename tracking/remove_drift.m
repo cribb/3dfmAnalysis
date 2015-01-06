@@ -62,8 +62,9 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
 % at each time point, average all beads x, y, and z values to determine
 % center of mass vector and subtract that from each bead's position.
 % This routine is insensitive to the disapperance of old trackers or the 
-% sudden existence of new trackers.  This may cause sudden 'jumps' in the 
-% center-of-mass, so a polyfit of the center-of-mass should be used.
+% sudden existence of new trackers that would otherwise cause sudden 
+% jumps in the center-of-mass, so a polyfit of the center-of-mass should be
+% used.
 
         video_tracking_constants;   
 
@@ -155,10 +156,63 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
         lastframe = max(contig_list);
     end
 
+    % computing the mean center-of-meass velocity for x and y directions 
+    % will allow us to subtract an *average* displacement per time-stamp.
+    % This may be sufficient if the velocity itself is constant.
     mean_com_vel_x = nanmean(outv(:,2));
     mean_com_vel_y = nanmean(outv(:,3));
 
+    % Another way to deal with this is to fit the center-of-mass
+    % displacement function and subtract out a drift of arbitrary
+    % polynomial order. Any order of polynomial and drift subtraction is
+    % going to generate artifacts in diffusion data, and the higher the
+    % order, the more extreme the artifact. However, it may be useful to be
+    % able to subtract out drifts that change direction during the video
+    % collection.
     
+    % First, get a list of the frames that DO and DO NOT contribute to the 
+    % generation of the center-of-mass definition.
+    full_frame_list = (firstframe:lastframe)';
+    [missing_frames, idx_for_missing_frames] = setdiff(full_frame_list, outv(:,1));
+    weights = ones(size(full_frame_list));
+    weights(idx_for_missing_frames) = 0;
+    
+    
+    interp_displacements = cumsum(interp1(outv(:,1),outv(:,2:3),full_frame_list));
+    
+    order = 2;
+    
+    px = polyfitw(full_frame_list, interp_displacements(:,1),order,[],weights);
+    py = polyfitw(full_frame_list, interp_displacements(:,2),order,[],weights);
+    
+    driftx = polyval(px,full_frame_list);
+    drifty = polyval(py,full_frame_list);
+    
+        figh = figure; 
+        set(figh, 'Units', 'Normalized');
+        set(figh, 'Position', [0.1 0.1 0.3 0.6]);
+        
+        subplot(2,1,1);
+        hold on;
+        plot( full_frame_list, interp_displacements(:,1), '.', 'MarkerEdgeColor', [0 1 0])
+        plot( full_frame_list, interp_displacements(:,2), '.', 'MarkerEdgeColor', [0 0.5 0])
+        plot( full_frame_list, [driftx drifty], 'k');
+        plot( full_frame_list(idx_for_missing_frames), [interp_displacements(idx_for_missing_frames,1) interp_displacements(idx_for_missing_frames,2)], 'or');
+        legend('x com', 'y com', 'x fit', 'y fit', 'missing');
+        title(['Center-of-mass for tracking data, order=' num2str(order)]);
+        grid on;
+        xlabel('Frame Number');
+        ylabel('Pixels');
+        pretty_plot;
+        
+        subplot(2,1,2);
+        plot(interp_displacements-[driftx drifty], '.');
+        Title('Residuals from center-of-mass fit');
+        grid on;
+        xlabel('Frame Number');
+        ylabel('Pixels');
+        pretty_plot;
+       
     % subtract out drift vector from each tracker
      for k = 1:length(id_list)
         idx = (  v(:,ID) == id_list(k)  );
@@ -166,17 +220,21 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
 
         dt = diff(tmp(:,FRAME));  % labeled as 'dt' here for 'velocity' sake, but actually it's 'dFRAME'
 
-        driftx = cumsum(mean_com_vel_x * [0; dt]);
-        drifty = cumsum(mean_com_vel_y * [0; dt]);
+        my_frame_list = ( min(tmp(:,FRAME)):max(tmp(:,FRAME)) )';
+        my_driftx = polyval(px,my_frame_list);
+        my_drifty = polyval(py,my_frame_list);               
 
-        v(idx,X) = tmp(:,X) - driftx;
-        v(idx,Y) = tmp(:,Y) - drifty;    
+        v(idx,X) = tmp(:,X) - my_driftx;
+        v(idx,Y) = tmp(:,Y) - my_drifty;    
     
 %         figure; 
 %         plot(tmp(:,TIME), tmp(:,X:Y), 'or', v(idx,TIME), v(idx,X:Y), '.b');
+%         drawnow;
      end
     
-    q = [mean_com_vel_x, mean_com_vel_y]*mean(frame_rates);    % px/sec
+     % output average velocities for x and y (not sure what else to do
+     % here, maybe polynomial coefficients?)
+     q = [mean(diff(driftx)), mean(diff(drifty))]    % px/sec
 
     return;
 
