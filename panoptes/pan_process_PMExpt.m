@@ -53,9 +53,11 @@ num_taus = 35;  % number of time scales for which to calculate MSD.
 % available frames (times) in the log scale sense.  To do this we generate
 % a logspace range, eliminate any repeated values and round them 
 % appropriately, getting a list of strides that may not be as long as we
-% asked but pretty close.
-num_taus = unique(floor(logspace(0,round(log10(duration*frame_rate)), num_taus)));
-num_taus = num_taus(:);
+% asked but pretty close. This is already done in video_msd, the function
+% which calculates the MSD for video data. So here, the num_taus value is a
+% number that defines the approximate number of time-scales to use
+% num_taus = unique(floor(logspace(0,round(log10(duration*frame_rate)), num_taus)));
+% num_taus = num_taus(:);
 
 % Add our new list of num_taus sizes into our general metadata structure.
 metadata.window = num_taus;
@@ -133,7 +135,7 @@ filt.dead_spots = [0 0 0 0];
 % values are 'none;', 'center-of-mass', and 'linear.'  Note:  Linear drift
 % subtraction should never be used on freely diffusing data.  It, however,
 % can be used on beads actuated by an external force like a magnetic field.
-filt.drift_method = 'none';
+filt.drift_method = 'center-of-mass';
 
 % The 'remove jerks' filter will search through the data and find extreme
 % changes in the image due to varioptic jerk and remove them.  The value
