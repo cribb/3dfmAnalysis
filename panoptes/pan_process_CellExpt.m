@@ -126,7 +126,7 @@ filt.dead_spots = [0 0 0 0];
 % values are 'none;', 'center-of-mass', and 'linear.'  Note:  Linear drift
 % subtraction should never be used on freely diffusing data.  It, however,
 % can be used on beads actuated by an external force like a magnetic field.
-filt.drift_method = 'none';
+filt.drift_method = 'center-of-mass';
 
 % The 'remove jerks' filter will search through the data and find extreme
 % changes in the image due to varioptic jerk and remove them.  The value
@@ -162,7 +162,7 @@ movefile('*.png', analysis_dir);
 movefile('*.svg', analysis_dir);
 movefile('*.evt.mat', analysis_dir);
 if ~isempty(dir('*.drift.mat')); movefile('*.drift.mat', analysis_dir); end;
-movefile([outf '.mat'], analysis_dir);
+[s,mess,messid] = movefile([outf '.mat'], analysis_dir);
 
 % Elapsed time
 elapsed_time = toc(tid);
