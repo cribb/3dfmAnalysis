@@ -41,7 +41,9 @@ for k = 1:length(filelist)
     myMCU = metadata.mcuparams.mcu(metadata.mcuparams.well == mywell & ...
                                    metadata.mcuparams.pass == mypass );
                                
-%     metadata.filt.xyzunits = 'm';
+    myfps = metadata.instr.fps_fluo;
+
+    %     metadata.filt.xyzunits = 'm';
 
     
     mycalibum = pan_MCU2um(myMCU, systemid, mywell);
@@ -88,7 +90,7 @@ for k = 1:length(filelist)
             end
         end
         
-        save_evtfile(filelist(k).name, d, 'm', mycalibum);        
+        save_evtfile(filelist(k).name, d, 'm', mycalibum, myfps);        
     end
     
     % summarize the tracking information for each video
