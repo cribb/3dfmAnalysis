@@ -95,16 +95,27 @@ else
     % in this case, we assume that the incoming units are in their intended
     % form
     v = files;
-    % v(:,X:Z) = v(:,X:Z) * calib_um * 1e-6;
+    v(:,X:Z) = v(:,X:Z) * calib_um * 1e-6;
 end
 
-% handle windows vector, if a scalar, create evenly spaced windows
+% We want to identify a set of strides to step across for a given set of 
+% images (frames).  We would like them to be spread evenly across the 
+% available frames (times) in the log scale sense.  To do this we generate
+% a logspace range, eliminate any repeated values and round them 
+% appropriately, getting a list of strides that may not be as long as we
+% asked but pretty close. 
 if length(window) == 1
     % percent_duration refers to proportion of data used in determining the
     % msd (1 = all data, 0.5 half data)
     percent_duration = 1;
-    window = unique(floor(logspace(0,round(log10(max(v(:,FRAME))*percent_duration)), window)));
-    window(window>max(v(:,FRAME))) = [];
+    
+    newFRAMEmax = max(v(:,FRAME))*percent_duration;
+    window_vect = unique(floor(logspace(0,round(log10(newFRAMEmax)), window)));
+    
+    window_vect( window_vect >= newFRAMEmax) = [];
+    
+    window = NaN(1,window);
+    window(1:length(window_vect)) = window_vect;        
 end
 
 
@@ -134,14 +145,14 @@ for k = 1 : length(beadID);
     
     % call up the MSD kernel-function to compute the MSD for each bead    
     if calc_r2 || calc_r
-        [tau_ msd_ nbead r]  = msd(b(:, TIME), b(:, X:Y), window);
+        [tau_ msd_ nbead r]  = msd(b(:, TIME), b(:, X:Y), window(~isnan(window)));
     else
-        [tau_ msd_ nbead]    = msd(b(:, TIME), b(:, X:Y), window);
+        [tau_ msd_ nbead]    = msd(b(:, TIME), b(:, X:Y), window(~isnan(window)));
     end
     
-    tau(:,k) = tau_; 
-    mymsd(:,k) = msd_;
-    counts(:,k) = nbead;
+    tau(1:length(tau_),k) = tau_; 
+    mymsd(1:length(msd_),k) = msd_;
+    counts(1:length(nbead),k) = nbead;
     
     if calc_r
         [ntimes, ncoords, nwindows] = size(r);
