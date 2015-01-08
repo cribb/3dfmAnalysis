@@ -120,8 +120,10 @@ close(mcumapfig);
 drawnow;
 
 % generate information for the data table summary
-msd_list = pan_plate2array(heatmaps.msd);
-msd_err_list = pan_plate2array(heatmaps.msd_err);
+msd_list = 10 .^ pan_plate2array(heatmaps.msd);
+msd_err_list = 10 .^ (pan_plate2array(heatmaps.msd) + ...
+                      pan_plate2array(heatmaps.msd_err)) - ...
+               10 .^ pan_plate2array(heatmaps.msd);
 visc_list = pan_plate2array(heatmaps.visc);
 visc_err_list = pan_plate2array(heatmaps.visc_err);
 rmsdisp_list = pan_plate2array(heatmaps.rmsdisp);
