@@ -59,9 +59,21 @@ for k = 1:length(filelist)
                        
     % only have to filter if we need to process .vrpn.mat to .vrpn.evt.mat
     if length(metadata.files.evt) ~= length(metadata.files.tracking)
-        d = filter_video_tracking(d, filt);
+        [d,filtout] = filter_video_tracking(d, filt);
     end
     
+            if isfield(filtout, 'drift_vector') 
+                drift_vectors.pass(k,1) = mypass;
+                drift_vectors.well(k,1) = mywell;
+
+                if ~isempty(filtout.drift_vector)
+                    drift_vectors.xvel(k,1) = filtout.drift_vector(1,1);
+                    drift_vectors.yvel(k,1) = filtout.drift_vector(1,2);
+                else
+                    drift_vectors.xvel(k,1) = NaN;
+                    drift_vectors.yvel(k,1) = NaN;
+                end
+            end
     
 %     mymsd = video_msd(d, window, metadata.instr.fps_imagingmode, mycalibum, 'no');        
 %     myve  = ve(mymsd, bead_radius, freqtype, 'no');
@@ -74,6 +86,11 @@ for k = 1:length(filelist)
     
    
 %     
+end
+
+drift_filename = [metadata.instr.experiment '.drift.mat'];
+if exist('drift_vectors', 'var')
+    save(drift_filename, '-STRUCT', 'drift_vectors');
 end
 
 outs = 0;
