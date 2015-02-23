@@ -188,30 +188,30 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
     driftx = polyval(px,full_frame_list);
     drifty = polyval(py,full_frame_list);
     
-        figh = figure; 
-        set(figh, 'Units', 'Normalized');
-        set(figh, 'Position', [0.1 0.1 0.3 0.6]);
-        
-        subplot(2,1,1);
-        hold on;
-        plot( full_frame_list, interp_displacements(:,1), '.', 'MarkerEdgeColor', [0 1 0])
-        plot( full_frame_list, interp_displacements(:,2), '.', 'MarkerEdgeColor', [0 0.5 0])
-        plot( full_frame_list, [driftx drifty], 'k');
-        plot( full_frame_list(idx_for_missing_frames), [interp_displacements(idx_for_missing_frames,1) interp_displacements(idx_for_missing_frames,2)], 'or');
-        legend('x com', 'y com', 'x fit', 'y fit', 'missing');
-        title(['Center-of-mass for tracking data, order=' num2str(order)]);
-        grid on;
-        xlabel('Frame Number');
-        ylabel('Pixels');
-        pretty_plot;
-        
-        subplot(2,1,2);
-        plot(interp_displacements-[driftx drifty], '.');
-        Title('Residuals from center-of-mass fit');
-        grid on;
-        xlabel('Frame Number');
-        ylabel('Pixels');
-        pretty_plot;
+% %         figh = figure; 
+% %         set(figh, 'Units', 'Normalized');
+% %         set(figh, 'Position', [0.1 0.1 0.3 0.6]);
+% %         
+% %         subplot(2,1,1);
+% %         hold on;
+% %         plot( full_frame_list, interp_displacements(:,1), '.', 'MarkerEdgeColor', [0 1 0])
+% %         plot( full_frame_list, interp_displacements(:,2), '.', 'MarkerEdgeColor', [0 0.5 0])
+% %         plot( full_frame_list, [driftx drifty], 'k');
+% %         plot( full_frame_list(idx_for_missing_frames), [interp_displacements(idx_for_missing_frames,1) interp_displacements(idx_for_missing_frames,2)], 'or');
+% %         legend('x com', 'y com', 'x fit', 'y fit', 'missing');
+% %         title(['Center-of-mass for tracking data, order=' num2str(order)]);
+% %         grid on;
+% %         xlabel('Frame Number');
+% %         ylabel('Pixels');
+% %         pretty_plot;
+% %         
+% %         subplot(2,1,2);
+% %         plot(interp_displacements-[driftx drifty], '.');
+% %         Title('Residuals from center-of-mass fit');
+% %         grid on;
+% %         xlabel('Frame Number');
+% %         ylabel('Pixels');
+% %         pretty_plot;
        
     % subtract out drift vector from each tracker
      for k = 1:length(id_list)
