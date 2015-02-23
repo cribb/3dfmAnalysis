@@ -1,4 +1,4 @@
-function pan = pan_publish_PMExpt(metadata, filt, report_blocks)
+function pan = pan_publish_PMExpt(metadata, spec_tau)
 % PAN_PUBLISH_PMEXPT  Generates an html report for the Panoptes PM Experiment
 %
 % CISMM function
@@ -17,6 +17,11 @@ function pan = pan_publish_PMExpt(metadata, filt, report_blocks)
 %  "metadata" is the matlab structure that describes a Panoptes experiment
 %  design, outputted by 'pan_load_metadata'
 %
+if nargin < 2 || isempty(spec_tau)
+    spec_tau = 1;
+end
+
+filt = metadata.filt;
 
 nametag = metadata.instr.experiment;
 outf = metadata.instr.experiment;
@@ -45,54 +50,103 @@ end
 outfile = [outf '.html'];
 fid = fopen(outfile, 'w');
 
-spec_tau = 1;
+log_spec_tau = log10(spec_tau);
 
-[msdmap, msdmap_err] = pan_compute_platewide_msd(metadata, spec_tau);
-[visc, visc_err] = pan_compute_viscosity_heatmap(metadata, spec_tau, msdmap, msdmap_err);
-
-msdmapfig = pan_plot_msd_heatmap(msdmap);
-msdmapfile = [metadata.instr.experiment '_well_ALL' '.msdheatmap'];
-gen_pub_plotfiles(msdmapfile, msdmapfig, 'normal');
-close(msdmapfig);
-drawnow;
-
-viscmapfig = pan_plot_viscosity_heatmap(visc);
-viscmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
-gen_pub_plotfiles(viscmapfile, viscmapfig, 'normal');
-close(viscmapfig);
-drawnow;
-
-visclist = reshape(transpose(visc), 1, length(visc(:)));
-visc_errlist = reshape(transpose(visc_err), 1, length(visc(:)));
-
-%%%%  Calculate the MSD for different wells/conditions
-% myparam = 'metadata.plate.solution.molar_concentration';
-% myparam = 'metadata.plate.solution.mass_concentration';
+% CALCULATE out all summary data well-by-well
 myparam = 'metadata.plate.well_map';
-% myparam = 'metadata.plate.cell.name';
 
-% compute the MSD for each condition defined by 'myparam'
-[msds molar_conc] = pan_combine_data(metadata, myparam);
+[plate_msds_by_well, heatmaps] = pan_compute_platewide_msd(metadata, spec_tau);
+% gsers = pan_compute_VE_heatmaps(metadata, plate_msds_by_well, spec_tau);
+
+[heatmaps.visc, heatmaps.visc_err] = pan_compute_viscosity_heatmap(metadata, spec_tau, heatmaps.msd, heatmaps.msd_err);
+[heatmaps.rmsdisp, heatmaps.rmsdisp_err] = pan_compute_rmsdisp_heatmap(heatmaps.msd, heatmaps.msd_err);
 
 % variables that contain summarized data
-all_taus = [msds.mean_logtau];
-all_msds = [msds.mean_logmsd];
-all_errs = [msds.msderr];
+all_taus = [plate_msds_by_well.mean_logtau];
+all_msds = [plate_msds_by_well.mean_logmsd];
+all_errs = [plate_msds_by_well.msderr];
 
-% create plot with bar graph at a given tau
-spec_tau = 1;
-log_spec_tau = log10(spec_tau);
 [minval, minloc] = min( sqrt((all_taus - log_spec_tau).^2) );
 mytau = 10.^all_taus(minloc(1),:);
 mymsd = all_msds(minloc(1),:);
 myerr = all_errs(minloc(1),:);
 
+% HEATMAP
+
+% MSD heatmap
+msdmapfig = pan_plot_heatmap(heatmaps.msd, 'msd');
+msdmapfile = [metadata.instr.experiment '_well_ALL' '.msdheatmap'];
+gen_pub_plotfiles(msdmapfile, msdmapfig, 'normal');
+close(msdmapfig);
+drawnow;
+
+% Number of trackers heatmap
+trkrmapfig = pan_plot_heatmap(heatmaps.beadcount, 'num trackers');
+trkrmapfile = [metadata.instr.experiment '_well_ALL' '.trkrheatmap'];
+gen_pub_plotfiles(trkrmapfile, trkrmapfig, 'normal');
+close(trkrmapfig);
+drawnow;
+
+% Viscosity heatmap
+viscmapfig = pan_plot_heatmap(heatmaps.visc, 'viscosity');
+viscmapfile = [metadata.instr.experiment '_well_ALL' '.heatmap'];
+gen_pub_plotfiles(viscmapfile, viscmapfig, 'normal');
+close(viscmapfig);
+drawnow;
+
+% RMS displacement heatmap
+heatmaps.rmsdisp = sqrt(10.^heatmaps.msd);
+rmsmapfig = pan_plot_heatmap(heatmaps.rmsdisp, 'rms displacement');
+rmsmapfile = [metadata.instr.experiment '_well_ALL' '.RMSheatmap'];
+gen_pub_plotfiles(rmsmapfile, rmsmapfig, 'normal');
+close(rmsmapfig);
+drawnow;
+
+% MCU parameter heatmap
+mcumap = NaN(1,96);
+for wellIDX = 1:96
+    mywell = find(metadata.mcuparams.well == wellIDX);
+    if ~isempty(mywell)
+        mcumap(wellIDX) = mean( metadata.mcuparams.mcu(mywell) );
+    else
+        mcumap(wellIDX) = NaN;
+    end
+end
+heatmaps.mcu = pan_array2plate(mcumap);
+mcumapfig = pan_plot_heatmap(heatmaps.mcu, 'MCU parameter');
+mcumapfile = [metadata.instr.experiment '_well_ALL' '.MCUheatmap'];
+gen_pub_plotfiles(mcumapfile, mcumapfig, 'normal');
+close(mcumapfig);
+drawnow;
+
+% generate information for the data table summary
+msd_list = 10 .^ pan_plate2array(heatmaps.msd);
+msd_err_list = 10 .^ (pan_plate2array(heatmaps.msd) + ...
+                      pan_plate2array(heatmaps.msd_err)) - ...
+               10 .^ pan_plate2array(heatmaps.msd);
+visc_list = pan_plate2array(heatmaps.visc);
+visc_err_list = pan_plate2array(heatmaps.visc_err);
+rmsdisp_list = pan_plate2array(heatmaps.rmsdisp);
+rmsdisp_err_list = pan_plate2array(heatmaps.rmsdisp_err);
+beadcount_list = pan_plate2array(heatmaps.beadcount);
+
+
+% % % % % % % % % %%%%  Calculate the MSD for different wells/conditions
+% % % % % % % % % % myparam = 'metadata.plate.solution.molar_concentration';
+% % % % % % % % % % myparam = 'metadata.plate.solution.mass_concentration';
+% % % % % % % % % myparam = 'metadata.plate.well_map';
+% % % % % % % % % % myparam = 'metadata.plate.cell.name';
+% % % % % % % % % 
+% % % % % % % % % % compute the MSD for each condition defined by 'myparam'
+% % % % % % % % % [plate_msds_by_well molar_conc] = pan_combine_data(metadata, myparam);
+
+
 % % % % % Hypothesis Testing (Stat Analysis)
 % % % % count = 1;
-% % % % for k = 1:length(msds)-1
-% % % %     type_A = log10(msds(k).msd(minloc(1),:));   
-% % % %     for m = (k+1):length(msds)
-% % % %         type_B = log10(msds(m).msd(minloc(1),:));        
+% % % % for k = 1:length(plate_msds_by_well)-1
+% % % %     type_A = log10(plate_msds_by_well(k).msd(minloc(1),:));   
+% % % %     for m = (k+1):length(plate_msds_by_well)
+% % % %         type_B = log10(plate_msds_by_well(m).msd(minloc(1),:));        
 % % % %         [h(count),p(count)] = ttest2(type_A, type_B);
 % % % % 
 % % % %         type_A_names{count} = molar_conc{k};
@@ -102,11 +156,10 @@ myerr = all_errs(minloc(1),:);
 % % % %     end
 % % % % end
 
-% generate information for the data table summary
-all_ns   = [msds.n];
-rms_mymsd = sqrt(10.^mymsd);
-rms_mymsd_err = sqrt(10.^(mymsd+myerr)) - rms_mymsd;
-msds_n = all_ns(minloc(1),:);
+% stupid hack for "molar_conc" variable which is a stupid name that doesn't
+% really mean anything
+for k = 1:96; molar_conc{k} = num2str(k); end;
+
 
 % One-dimensional bar chart
 MSD = (10 .^ mymsd);
@@ -142,8 +195,8 @@ drawnow;
 
 % To do this, we need to pull out ALL of the MSD values and extract the
 % absolute min and max of the dataset.
-for k = 1:length(msds)
-    temp_meanlogmsd(:,k) = msds(k).mean_logmsd;
+for k = 1:length(plate_msds_by_well)
+    temp_meanlogmsd(:,k) = plate_msds_by_well(k).mean_logmsd;
 end
 YLim_low = floor(nanmin(temp_meanlogmsd(:)));
 YLim_high = ceil(nanmax(temp_meanlogmsd(:)));
@@ -156,11 +209,12 @@ if isnan(YLim_high)
     YLim_high = -12;
 end
 
-for k = 1:length(molar_conc)    
+for k = 1:length(plate_msds_by_well)    
+% for k = 1:length(molar_conc)    
     my_molar_conc = strrep(molar_conc{k}, ' ', '');
     MSDfile{k} = [metadata.instr.experiment '_well_' my_molar_conc '.msd'];
     MSDfig  = figure('Visible', 'off');
-    plot_msd(msds(k), MSDfig, 'ame');
+    plot_msd(plate_msds_by_well(k), MSDfig, 'ame');
     set(gca, 'YLim', [YLim_low YLim_high]);
 
     gen_pub_plotfiles(MSDfile{k}, MSDfig, 'normal'); 
@@ -222,17 +276,27 @@ fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
 
 %
+% Plate-wide RMS displacement heat-map
+%
+fprintf(fid, '<p> \n');
+fprintf(fid, '   <h3> Heatmap (RMS displacement at %i [s] time scale) </h3> \n', spec_tau);
+% fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', MSD_heatmapfile);
+fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', rmsmapfile);
+fprintf(fid, '   <br/> \n\n');
+fprintf(fid, '</p> \n\n');
+
+%
 % Plate-wide MSD heat-map
 %
 fprintf(fid, '<p> \n');
-fprintf(fid, '   <h3> Heatmap (MSD at 10 [s] time scale) </h3> \n');
+fprintf(fid, '   <h3> Heatmap (MSD at %i [s] time scale) </h3> \n', spec_tau);
 % fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', MSD_heatmapfile);
 fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', msdmapfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 
 %
-% Plate-wide heat-map
+% Plate-wide Viscosity heat-map
 %
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <h3> Heatmap (Viscosity at %i [s] time scale) </h3> \n', spec_tau);
@@ -242,10 +306,30 @@ fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 
 %
+% Plate-wide MCU heat-map
+%
+fprintf(fid, '<p> \n');
+fprintf(fid, '   <h3> Heatmap (MCU parameter) </h3> \n', spec_tau);
+% fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
+fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', mcumapfile);
+fprintf(fid, '   <br/> \n\n');
+fprintf(fid, '</p> \n\n');
+
+%
+% Plate-wide Number of Trackers heat-map
+%
+fprintf(fid, '<p> \n');
+fprintf(fid, '   <h3> Heatmap (Number of Trackers) </h3> \n', spec_tau);
+% fprintf(fid, '   <iframe src="%s.png" border="0"></iframe> <br/> \n', heatmapfile);
+fprintf(fid, '   <img src="%s.png" width=50%% border="0"></img> <br/> \n', trkrmapfile);
+fprintf(fid, '   <br/> \n\n');
+fprintf(fid, '</p> \n\n');
+
+%
 % % % Report Summary table
 %
 fprintf(fid, '<p> \n');
-fprintf(fid, '   <h3> Summary at %i timescale </h3> \n', num2str(spec_tau));
+fprintf(fid, '   <h3> Summary at %s [s] timescale </h3> \n', num2str(spec_tau));
 fprintf(fid, '   <table border="2" cellpadding="6"> \n');
 fprintf(fid, '   <tr> \n');
 fprintf(fid, '      <td align="center" width="200"> <b> Condition </b> </td> \n');
@@ -256,18 +340,20 @@ fprintf(fid, '      <td align="center" width="200"> <b> No. of trackers </b> </t
 fprintf(fid, '    </tr>\n');
 
 % Fill in Summary table with data
-for k = 1:length(msds)
+for k = 1:length(plate_msds_by_well)
     fprintf(fid, '   <tr> \n');
     fprintf(fid, '      <td align="center" width="200"> %s </td> \n', molar_conc{k});
-    fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', MSD(k), MSD_err(k));
-    fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rms_mymsd(k)*1e9, rms_mymsd_err(k)*1e9);
-    fprintf(fid, '      <td align="center" width="200"> %8.1f +/- %8.2f [mPa s] </td> \n', visclist(k)*1e3, visc_errlist(k)*1e3);
-    fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_n(k));    
+    fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', msd_list(k), msd_err_list(k));
+    fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rmsdisp_err_list(k)*1e9, rmsdisp_err_list(k)*1e9);
+    fprintf(fid, '      <td align="center" width="200"> %8.1f +/- %8.2f [mPa s] </td> \n', visc_list(k)*1e3, visc_err_list(k)*1e3);
+    fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', beadcount_list(k));    
     fprintf(fid, '   </tr>\n');        
 end
 fprintf(fid, '   </table>\n');
 fprintf(fid, '</p> \n');
 fprintf(fid, '<hr/> \n\n');
+
+
 % % % % % %
 % % % % % % Hypothesis Testing (html code)
 % % % % % %
@@ -282,8 +368,8 @@ fprintf(fid, '<hr/> \n\n');
 % % % % % 
 % % % % % % Report p-values
 % % % % % count = 1;
-% % % % % for k = 1:length(msds)-1
-% % % % %     for m = (k+1):length(msds)
+% % % % % for k = 1:length(plate_msds_by_well)-1
+% % % % %     for m = (k+1):length(plate_msds_by_well)
 % % % % %         fprintf(fid, '   <tr> \n');
 % % % % %         fprintf(fid, '      <td align="center" width="200"> %s </td> \n', type_A_names{count});
 % % % % %         fprintf(fid, '      <td align="center" width="200"> %s </td> \n', type_B_names{count});
@@ -327,7 +413,7 @@ fprintf(fid, '    <tr>\n  <td align="center" width="200">\n    <b> %s </b> <br/>
 fprintf(fid, '     </td>\n  <td align="center" width="425"> <b> Mean Squared Displacement (MSD) </b> <br/> \n');
 fprintf(fid, '     </td>\n </tr>\n\n');
 
-for k = 1 : length(molar_conc)   
+for k = 1 : length(MSDfile)   
    fprintf(fid, '    <tr>\n  <td align="left" width="200">\n    <b> %s </b> <br/> \n', molar_conc{k});
    fprintf(fid, '     </td>\n  <td align="center" width="425">\n');
    fprintf(fid, '       <iframe src="%s.svg" width="400" height="300" border="0"></iframe> \n', MSDfile{k});
@@ -344,7 +430,7 @@ fprintf(fid, '</html> \n\n');
 
 fclose(fid);
 
-pan = msds;
+pan = plate_msds_by_well;
 
 save([outf '.mat'], '-mat');
 

@@ -127,9 +127,17 @@ function v = gser(tau, msd, N, bead_radius)
 
 %     alpha = log10(D./C)./log10(B./A);
 
-    timeblur_decade_fraction = .3;
-    [alpha, tau_evenspace, msd_evenspace] = getMSDSlope(msd, tau, timeblur_decade_fraction);
+    
+    % trim out NaNs
+    mymsd = msd( ~isnan(tau));
+    mytau = tau( ~isnan(tau));
 
+    timeblur_decade_fraction = .3;
+    [myalpha, tau_evenspace, msd_evenspace] = getMSDSlope(mymsd, mytau, timeblur_decade_fraction);
+
+    alpha = NaN(size(msd));
+    alpha(1:length(myalpha)) = myalpha;
+    
     MYgamma = gamma(1 + abs(alpha));
     % gamma = 0.457*(1+alpha).^2-1.36*(1+alpha)+1.9;
 

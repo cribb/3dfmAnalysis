@@ -1,4 +1,4 @@
-function outfile = save_evtfile(filename, data, xyzunits, calib_um)
+function outfile = save_evtfile(filename, tracking_in, xyzunits, calib_um, fps)
 % SAVE_EVTFILE saves tracking data to the evt.vrpn.mat format 
 %
 % 3DFM function
@@ -24,7 +24,27 @@ function outfile = save_evtfile(filename, data, xyzunits, calib_um)
 %
 
     video_tracking_constants;
-
+    
+    if nargin < 5 || isempty(fps)
+        fps = NaN;
+    end
+    
+    if nargin < 4 || isempty(calib_um)
+        calib_um = NaN;
+    end
+    
+    if isstruct(tracking_in)
+        data = tracking_in.spot3DSecUsecIndexFramenumXYZRPY;
+        if isfield(tracking_in, 'info');
+            myinfo = tracking_in.info;
+        else
+            myinfo = NaN;
+        end
+    elseif isnumeric(tracking_in)
+        data = tracking_in;
+        myinfo = NaN;
+    end
+          
     if isempty(data)
         logentry('Saving empty dataset.');
         data = ones(0,10);    
@@ -41,11 +61,14 @@ function outfile = save_evtfile(filename, data, xyzunits, calib_um)
     end
         
     tracking.spot3DSecUsecIndexFramenumXYZRPY = data;
+    tracking.info = myinfo;
     tracking.calib_um = calib_um;       
+    tracking.fps      = fps;
     
+    filename = strrep(filename, '.vrpn', '');
     filename = strrep(filename, '.evt', '');
     filename = strrep(filename, '.mat', '');
-    outfile = [filename '.evt.mat'];
+    outfile = [filename '.vrpn.evt.mat'];
     
     save(outfile, 'tracking');   
     logentry(['Saved ' num2str(length(unique(data(:,ID)))) ' trackers in ' outfile]);

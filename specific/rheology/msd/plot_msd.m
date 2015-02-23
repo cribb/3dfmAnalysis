@@ -39,7 +39,7 @@ end
 d = msdstat(d);
 
 % creating the plot
-if ~brought_own_figure_handle
+if ~exist('brought_own_figure_handle')
     figure(h);
 end
     

@@ -51,14 +51,18 @@ Nfiles = length(filelist);
 
 logentry(['Plotting the tracker availability for ' num2str(Nfiles) ' files.']);
 
+count = 1;  
 for k = 1:Nfiles
     d = load_video_tracking(filelist(k).name, ...
                         metadata.instr.fps_imagingmode, ...
                         'pixels', 1, ...
                         'absolute', 'no', 'table');
-                    
+              
+    [mywell, mypass] = pan_wellpass(filelist(k).name);
+    
+    
     % plotting tracker availability
-    travfig = figure('Visible','off'); 
+    travfig = figure('Visible','off');  
     if ~isempty(d)
         h = plot_tracker_avail(d(:,FRAME), d(:,ID), travfig);
         set(gca, 'XLim', [0 numframes*1.1]);
@@ -70,12 +74,34 @@ for k = 1:Nfiles
 %         gen_pub_plotfiles(tr_avail_file{k}, travfig, 'normal'); 
         close(travfig); 
         
+        Ntrackers = length(unique(d(:,ID)));
+        
         tracker_list = unique(d(:,ID));
         for m = 1:length(tracker_list); 
             idx = find(d(:,ID) == tracker_list(m));
+            
             max_frame(m) = max( d(idx,FRAME));
+            
+            Nframes_trkr = max( d(idx,FRAME));
+            
+            max_Xjump = max(diff(d(idx,X)));
+            max_Yjump = max(diff(d(idx,Y)));
+            
+            if isempty(max_Xjump) 
+                max_Xjump = NaN;
+                max_Yjump = NaN;
+            end
+            
+            tracker_summary(count,:) = [mywell, mypass, tracker_list(m), Nframes_trkr, max_Xjump, max_Yjump]; 
+            count = count + 1;
         end
         most_frequent_num_of_frames(k) = mode(max_frame);
+        
+        frame_max = floor(metadata.instr.seconds * metadata.instr.fps_fluo) - 1; 
+        N_trackers = length(unique(d(:,ID)));
+        N_trackers_at_end_time = length(find( d(:,FRAME) == frame_max));
+        
+        fov_summary(k,:) = [mywell, mypass, N_trackers, frame_max, N_trackers_at_end_time];
         
     end       
     
@@ -83,9 +109,14 @@ end
 
 elapsed_time = toc(tid); 
 
-logentry(['Plotting these data took ' num2str(elapsed_time) 'seconds.']);
+logentry(['Plotting these data took ' num2str(elapsed_time) ' seconds.']);
 
-dataout = most_frequent_num_of_frames;
+% dataout = most_frequent_num_of_frames;
+
+dataout.tracker_summary = tracker_summary;
+dataout.tracker_summary_cols = {'well', 'pass', 'trackerID', 'number of tracked frames', 'max X jump', 'max Y jump'};
+dataout.fov_summary = fov_summary;
+dataout.fov_summary_cols = {'well', 'pass', 'number of trackers', 'last frame', 'number of trackers at last frame'};
 
 return;
 

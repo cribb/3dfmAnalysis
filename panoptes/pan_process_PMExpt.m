@@ -53,9 +53,11 @@ num_taus = 35;  % number of time scales for which to calculate MSD.
 % available frames (times) in the log scale sense.  To do this we generate
 % a logspace range, eliminate any repeated values and round them 
 % appropriately, getting a list of strides that may not be as long as we
-% asked but pretty close.
-num_taus = unique(floor(logspace(0,round(log10(duration*frame_rate)), num_taus)));
-num_taus = num_taus(:);
+% asked but pretty close. This is already done in video_msd, the function
+% which calculates the MSD for video data. So here, the num_taus value is a
+% number that defines the approximate number of time-scales to use
+% num_taus = unique(floor(logspace(0,round(log10(duration*frame_rate)), num_taus)));
+% num_taus = num_taus(:);
 
 % Add our new list of num_taus sizes into our general metadata structure.
 metadata.window = num_taus;
@@ -133,7 +135,7 @@ filt.dead_spots = [0 0 0 0];
 % values are 'none;', 'center-of-mass', and 'linear.'  Note:  Linear drift
 % subtraction should never be used on freely diffusing data.  It, however,
 % can be used on beads actuated by an external force like a magnetic field.
-filt.drift_method = 'none';
+filt.drift_method = 'center-of-mass';
 
 % The 'remove jerks' filter will search through the data and find extreme
 % changes in the image due to varioptic jerk and remove them.  The value
@@ -145,17 +147,34 @@ filt.drift_method = 'none';
 
 % The 'bayes_models' cell array defines the
 % list box with multiple selections, order is unimportant
-filt.bayes_models = {'D', 'V', 'DV', 'DA', 'DR'};
+filt.bayes_models = {'N', 'D', 'V', 'DV', 'DA', 'DR', 'DAV', 'DRV'};
 
+% stick filters into metadata structure
+metadata.filt = filt;
 
 % list box with multiple selections, order is important
-report_blocks = {'visc_heatmap', 'msd_heatmap', 'rmsdisp_heatmap', 'rmsdisp','meanMSD','MSD'};
+% 'msd_heatmap'       = plate heatmap of MSD at a particular time constant (spec_tau)
+% 'rmsdisp_heatmap'   = same as MSD heatmap except for RMS displacement at spec_tau
+% 'visc_heatmap'      = same as MSD heatmap except for viscosity at spec_tau
+% 'MCU_heatmap'       =
+% 'NumTr_heatmap'     =
+% 'plate_msd_bar'     =
+% 'plate_rmsdisp_bar' =
+% 'plate_visc_bar'    =
+% 'plate_summary'     =
+% 'agg_msd_bar'       =
+% 'agg_rmsdisp_bar'   =
+% 'agg_visc_bar'      =
+% 'agg_summary'       =
+% 'agg_hyp_test'      =
+metadata.report_blocks = {'visc_heatmap', 'msd_heatmap', 'rmsdisp_heatmap', 'rmsdisp', 'meanMSD', 'MSD'};
 
 % Baseline MSD computations for all datafiles
 dataout  = pan_analyze_PMExpt(filepath, filt, systemid);
 
 % Aggregate appropriate datasets and generate output report as an html file
-dataout  = pan_publish_PMExpt(metadata, filt, report_blocks);
+spec_tau = 1;
+dataout  = pan_publish_PMExpt(metadata, spec_tau);
 
 % move files into the appropriate analysis folder
 outf = metadata.instr.experiment;
@@ -164,7 +183,7 @@ didx = regexp(MSD_agg_param, '[.]');
 analysis_dir = ['./matlab_analysis/PM_rheology'];
 mkdir(analysis_dir);
 copyfile('*.txt', analysis_dir);
-movefile('*.html', analysis_dir);
+[s,mess,messid] = movefile('*.html', analysis_dir);
 movefile('*.fig', analysis_dir);
 movefile('*.png', analysis_dir);
 movefile('*.svg', analysis_dir);

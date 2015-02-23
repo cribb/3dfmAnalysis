@@ -1,6 +1,8 @@
-rootdir = 'K:\data\material\mucus_HBE\2013.11.12__CAP_HBE_mucus_5pct';
+rootdir = 'K:\data\material\mucus_HBE\2014.11.20__CAP_HBE_mucus_2pct';
+cd(rootdir);
 
-rsl_file_list = 
+rsl_file_list = importdata([rootdir '\rsl_file_list.txt']);
+
 for k = 1:length(rsl_file_list)
     cd(rootdir);
     
@@ -8,7 +10,7 @@ for k = 1:length(rsl_file_list)
     
     cd(pathstr);
     
-    cap = tareport([filename ' exp.txt'], '5% HBE mucus');
+    cap = tareport([filename ' exp.txt'], '2% HBE mucus, batch 2014.10.13');
     
 end
 

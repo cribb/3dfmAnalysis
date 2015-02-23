@@ -39,12 +39,14 @@ warning('off', 'MATLAB:divideByZero');
 tau   = NaN(length(window),1);
 msd   = NaN(length(window),1);
 count = NaN(length(window),1);
+
 if nargout == 4
     r2out = NaN(length(window),1);
 end
-
-    numpoints = size(data,1);
     
+    Rout = NaN(size(data,1),size(data,2),length(window));
+    numpoints = size(data,1);
+
     if numpoints == 1
         logentry('Insufficient points to compute any MSD value');
         varargout{1} = tau;
@@ -55,10 +57,14 @@ end
         end
         return;
     end
-         Rout = NaN(size(data,1),size(data,2),length(window));
+         
          
     for w = 1:length(window)
     
+        if isnan(window(w))
+            continue;
+        end
+        
       % for x,y,z (k = 1,2,3) directions  
       for k = 1:cols(data)
   

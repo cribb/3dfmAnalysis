@@ -4,6 +4,7 @@ function [alpha, tau_evenspace, msd_evenspace] =...
 tau_exponents = log10(tau(:, 1));
 msd_exponents = log10(msd);
 
+
 %Find ranges of tau, prepare for interpolation
 min_tau         = min(tau_exponents);
 tau_interp_step = min(diff(tau_exponents))/2;
@@ -11,7 +12,7 @@ max_tau         = max(tau_exponents);
 tau_evenspace   = (min_tau : tau_interp_step : max_tau)';
 
 % handle case where empty dataset is sent
-if (isnan(min_tau) && isnan(max_tau)) || isempty(tau)
+if isempty(tau) || (isnan(min_tau) && isnan(max_tau))
     alpha = NaN;
     tau_evenspace = NaN;
     msd_evenspace = NaN;

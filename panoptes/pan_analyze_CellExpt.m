@@ -46,6 +46,8 @@ for k = 1:length(filelist)
     
     % logentry(['Loading ' filelist(k).name]);
     
+    myfps = metadata.instr.fps_fluo;
+    
     filt.xyzunits    = 'm';
     filt.calib_um    = mycalibum;
     filt.bead_radius = bead_radius;
@@ -57,21 +59,38 @@ for k = 1:length(filelist)
                        
     % only have to filter if we need to process .vrpn.mat to .vrpn.evt.mat
     if length(metadata.files.evt) ~= length(metadata.files.tracking)
-        d = filter_video_tracking(d, filt);
+        [d,filtout] = filter_video_tracking(d, filt);
     end
     
+            if isfield(filtout, 'drift_vector') 
+                drift_vectors.pass(k,1) = mypass;
+                drift_vectors.well(k,1) = mywell;
+
+                if ~isempty(filtout.drift_vector)
+                    drift_vectors.xvel(k,1) = filtout.drift_vector(1,1);
+                    drift_vectors.yvel(k,1) = filtout.drift_vector(1,2);
+                else
+                    drift_vectors.xvel(k,1) = NaN;
+                    drift_vectors.yvel(k,1) = NaN;
+                end
+            end
     
 %     mymsd = video_msd(d, window, metadata.instr.fps_imagingmode, mycalibum, 'no');        
 %     myve  = ve(mymsd, bead_radius, freqtype, 'no');
     
         if findstr(mode, 'd')            
-            save_evtfile(filelist(k).name, d, 'm', mycalibum);
+            save_evtfile(filelist(k).name, d, 'm', mycalibum, myfps);
 %             save_msdfile(filelist(k).name, mymsd);
 %             save_gserfile(filelist(k).name, myve);
         end                
     
    
 %     
+end
+
+drift_filename = [metadata.instr.experiment '.drift.mat'];
+if exist('drift_vectors', 'var')
+    save(drift_filename, '-STRUCT', 'drift_vectors');
 end
 
 outs = 0;

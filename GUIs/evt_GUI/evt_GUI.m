@@ -1,4 +1,4 @@
- function varargout = evt_GUI(varargin)
+function varargout = evt_GUI(varargin)
 % EVT_GUI creates a new evt_GUI or raises the existing singleton
 %
 % 3DFM function
@@ -304,7 +304,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 
             % or, try loading the first frame        
             try
-                fimfile = [filenameroot, '0001.bmp'];
+                fimfile = [filenameroot, '.0001.bmp'];
                 im = imread(fimfile, 'BMP');
                 logentry('Successfully loaded first frame image...');            
             catch
@@ -1176,9 +1176,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-            set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-            set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-            set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
+            set(handles.edit_chosentau       , 'Visible', 'on', 'Enable', 'on');
+            set(handles.text_chosentau       , 'Visible', 'on', 'Enable', 'on');
+            set(handles.text_chosentau_value , 'Visible', 'on', 'Enable', 'on');
        case 'Diffusivity @ a tau'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1476,6 +1476,8 @@ function plot_data(hObject, eventdata, handles)
     calib_um   = str2num(get(handles.edit_calib_um, 'String'));
     bead_diameter_um = str2num(get(handles.edit_bead_diameter_um, 'String'));
     numtaus = round(str2num(get(handles.edit_numtaus, 'String')));
+    dt = 1 ./ frame_rate;
+    
 %     win = unique(floor(logspace(0,log10(max(frame)),numtaus)));
     win = numtaus;
 
@@ -1484,11 +1486,13 @@ function plot_data(hObject, eventdata, handles)
        strcmp(AUXtype, 'alpha vs tau') || ...
        strcmp(AUXtype, 'alpha histogram') || ...
        strcmp(AUXtype, 'Diffusivity vs. tau') || ...
-       strcmp(AUXtype, 'MSD histogram')
+       strcmp(AUXtype, 'MSD histogram') || ...
+       strcmp(AUXtype, 'RMS displacement')
         if handles.recomputeMSD % && get(handles.checkbox_msdmean, 'Value')
-            data_in_correct_units = data;
-            data_in_correct_units(:,X:Z) = data(:,X:Z) * calib_um * 1e-6;
-            mymsd = video_msd(data_in_correct_units, win, frame_rate, calib_um, 'no');            
+            if calib_um ~= 1
+                data(:,[X Y Z]) = data(:,[X Y Z]) * calib_um * 1e-6;
+            end
+            mymsd = video_msd(data, win, frame_rate, calib_um, 'no');            
             myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n');
             myD = mymsd.msd ./ (4 .* mymsd.tau);
             handles.mymsd = mymsd;
@@ -1512,7 +1516,6 @@ function plot_data(hObject, eventdata, handles)
         case 'OFF'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'off');
-
             
         case 'radial vector'
             figure(handles.AUXfig);
@@ -1542,6 +1545,58 @@ function plot_data(hObject, eventdata, handles)
             set(handles.AUXfig, 'DoubleBuffer', 'on');
             set(handles.AUXfig, 'BackingStore', 'off');    
             drawnow;
+            
+        case 'velocity'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            
+            if get(handles.radio_relative, 'Value')
+                xinit = x(k); xinit = xinit(1);
+                yinit = y(k); yinit = yinit(1);        
+            elseif get(handles.radio_arb_origin, 'Value')            
+                xinit = arb_origin(1);
+                yinit = arb_origin(2);
+
+                % handle the case where 'microns' are selected
+                if get(handles.radio_microns, 'Value');
+                    xinit = xinit * calib_um;
+                    yinit = yinit * calib_um;                
+                end                        
+            end
+
+            velx = CreateGaussScaleSpace(x(k), 1, 0.5)/dt;
+            vely = CreateGaussScaleSpace(y(k), 1, 0.5)/dt;
+            
+            vr = magnitude(velx, vely);            
+            
+            plot(t(k) - mintime, vr(:), '.-');
+            xlabel('time (s)');
+            ylabel(['velocity ']);
+            legend('x', 'y');    
+            set(handles.AUXfig, 'Units', 'Normalized');
+            set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
+            set(handles.AUXfig, 'DoubleBuffer', 'on');
+            set(handles.AUXfig, 'BackingStore', 'off');    
+            drawnow;
+            
+        case 'velocity magnitude'
+                        figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            
+            velx = CreateGaussScaleSpace(x(k), 1, 0.5)/dt;
+            vely = CreateGaussScaleSpace(y(k), 1, 0.5)/dt;
+            
+            velr = magnitude
+            plot(t(k) - mintime, [velx(:) vely(:)], '.-');
+            xlabel('time (s)');
+            ylabel(['velocity ']);
+            legend('x', 'y');    
+            set(handles.AUXfig, 'Units', 'Normalized');
+            set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
+            set(handles.AUXfig, 'DoubleBuffer', 'on');
+            set(handles.AUXfig, 'BackingStore', 'off');    
+            drawnow;
+            
         case 'PSD'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
@@ -1604,6 +1659,11 @@ function plot_data(hObject, eventdata, handles)
             
             grid on;
             
+        case 'RMS displacement'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            plot_rmsdisp(mymsd, AUXfig, 'm');
+            
         case 'alpha vs tau'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
@@ -1626,13 +1686,24 @@ function plot_data(hObject, eventdata, handles)
             plot_alphadist(myalpha, AUXfig);
             
         case 'MSD histogram'
+            mytauidx = str2num(get(handles.edit_chosentau, 'String'));
+            numbins = 51;
+            
+            mymsd_at_mytau = mymsd.msd(mytauidx, :);
+            
+            set(handles.text_chosentau_value, 'String', num2str(mean(mymsd.tau(mytauidx,:))));
+            
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
 
-            numbins = 51;
+
             
-            v = msdhist(mymsd, numbins);
-            plot_msdhist(v, AUXfig, 's');
+            
+% This is for plotting the surface or colormap of all r^2 for all taus, 
+% allowing for a 'mean' or 'most probable' MSD to show up as a max or peak
+% value. These functions should be rebased accordingly.
+%             v = msdhist(mymsd, numbins);
+%             plot_msdhist(v, AUXfig, 's');
                        
         case 'temporal MSD'
             figure(handles.AUXfig);

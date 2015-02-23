@@ -277,7 +277,9 @@ v.global_protocol = global_protocol;
 v.geometry        = geometry;
 v.rheometer       = rheometer;
 v.protocols       = protocols;
-v.results         = results;
+if exist('results')
+    v.results         = results;
+end
 
 if findstr(savemat, 'y')
     savefile = [filename_root '.cap.mat'];

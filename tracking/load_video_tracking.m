@@ -52,6 +52,24 @@ else
     filelist = dir(filemask);
 end
 
+% check for proper filepath
+orig_directory = pwd;
+
+% we need to handle the case that an absolute filename is used (complete 
+% with path). I've put this into a try:catch block because matlab's fileparts 
+% requires a char array for input and dir outputs a struct. If dir is used
+% then there won't be any path information anyway. And if there's no path
+% on the input then it won't hurt anything.
+% 
+try
+    [pathstr, name, ext] = fileparts(filemask);
+catch
+end
+
+if exist('pathstr') && ~isempty(pathstr)
+    cd(pathstr);
+end
+
 if length(filelist) < 1
     logentry(['No files found matching ' filemask ', returning empty set.']);
     v = NaN(1,9);
@@ -341,6 +359,7 @@ else
     v = [];
 end 
     
+    cd(orig_directory);
 return;
 
 % function for writing out stderr log messages

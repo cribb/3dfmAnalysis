@@ -3,7 +3,6 @@ function pan = pan_publish_CellExpt(metadata, filt)
 %
 % CISMM function
 % Panoptes
-% last modified 2011.08.10
 %  
 % Generates a report for tests perfomed on Panoptes using the
 % "Beads diffusing on Cells" paradigm.
@@ -394,6 +393,8 @@ fprintf(fid, '</html> \n\n');
 fclose(fid);
 
 pan = msds;
+
+save(outf);
 
 return;
 

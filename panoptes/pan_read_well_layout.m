@@ -68,54 +68,53 @@ vidx = ~cellfun('isempty', values);
 
 % datatable = datatable(vidx,:);
 
-well_ID = str2double(datatable(:,WELLID));
-obj_ID = str2double(datatable(:,OBJID));
+wellID_data = str2double(datatable(:,WELLID));
+objID_data = str2double(datatable(:,OBJID));
 
 % datatable = sortrows(datatable, WELLID);
 
 % how many different objects do we have
-objids = unique(obj_ID)';
+objids = unique(objID_data)';
+objnamelist = unique(datatable(:, OBJNAME));
 
 % bind objID to objName
 for k = 1:length(objids)
-    idx = find( obj_ID == objids(k) );
+    idx = find( objID_data == objids(k) );
     objname(k) = unique( datatable(idx, OBJNAME) )';
 end
 
 q.well_map = repmat(cellstr(''), 96, 1);
 
-welllist = unique(well_ID(vidx));
+welllist = unique(wellID_data(vidx));
 
 q.well_map(welllist) = cellstr(num2str(welllist));
 
-
+% A limited number of object names (or object types) exist in the
+% WELL_LAYOUT csv file. More than one instance of each object name can
+% exist in a file (e.g. more than one celltype or additive solution could
+% exist in a well). We have to separate the name/type of the object from
+% the instance of the object. In other words, one object type might have
+% more than one object id in the file.
 for k = 1:length(objids)
+    myobj_name = objname{k};
     
-    kidx = find(obj_ID == k-1);
+    if isfield(q, myobj_name)        
+        index = length(getfield(q,myobj_name))+1;
+    else
+        index = 1;
+    end
+    
+    kidx = find(objID_data == objids(k));
     fnames = unique( datatable(kidx, FIELDNAME) )';
-        
+    
     for m = 1:length(fnames)
 
         foo = strcmp(datatable(:,FIELDNAME), fnames(m));
         midx = find( str2double(datatable(:,OBJID)) == objids(k)  & foo);
         
-        q.(objname{k}).(fnames{m}) = values(midx);
-        
-%         for w = 1:plate_length
-%             midx = find(well_ID == w & obj_ID == k-1);
-%             
-%             val = datatable(midx,VALUE);                    
-%             
-%             q.(objname{k}).(fnames{m}){w} = val{m};
-%              
-%         end
-        
-        
-        
-    end
-    
+        q.(objname{k})(index).(fnames{m}) = values(midx);
+    end        
 end
-
 
 fclose(fid);
 
