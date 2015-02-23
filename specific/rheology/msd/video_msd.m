@@ -95,7 +95,11 @@ else
     % in this case, we assume that the incoming units are in their intended
     % form
     v = files;
-    v(:,X:Z) = v(:,X:Z) * calib_um * 1e-6;
+    
+%     if calib_um ~= 1 % assume inputs are 
+%         v(:,X:Z) = v(:,X:Z) * calib_um * 1e-6;
+%     end
+    
 end
 
 % We want to identify a set of strides to step across for a given set of 
