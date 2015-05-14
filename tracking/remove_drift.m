@@ -16,7 +16,8 @@ function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
         data = [];
     end;
     
-    if isempty(data); 
+
+    if isempty(data) || sum(isnan(data(:))) == length(data(:))
         logentry('No data found. Exiting function.'); 
         v = data;
         q = [];
@@ -234,7 +235,7 @@ function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
     
      % output average velocities for x and y (not sure what else to do
      % here, maybe polynomial coefficients?)
-     q = [mean(diff(driftx)), mean(diff(drifty))]    % px/sec
+     q = [mean(diff(driftx)), mean(diff(drifty))];    % px/sec
 
     return;
 
