@@ -1,5 +1,15 @@
-function [alpha, tau_evenspace, msd_evenspace] =...
+function [alpha, tau_evenspace, msd_evenspace] = ...
                             getMSDSlope (msd, tau, timeblur_decade_fraction)
+
+% % deal with NaN inputs
+% if sum(isnan(msd)) == length(msd) || sum(isnan(tau)) == length(tau)
+%     alpha = NaN(size(tau));
+%     tau_evenspace = NaN;
+%     msd_evenspace = NaN;
+%     logentry('No data on which to compute the MSD Slope. Exiting now with NaN');
+%     return;
+% end
+
 %Get into log space
 tau_exponents = log10(tau(:, 1));
 msd_exponents = log10(msd);

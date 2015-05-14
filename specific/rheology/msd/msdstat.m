@@ -57,15 +57,15 @@ sample_count(clip,:) = [];
 % did we delete out everything? if so, return empty set
 if isempty(tau) && isempty(mymsd) && isempty(counts) && isempty(sample_count)
     msdout = msdin;
-    msdout.logtau = NaN(size(msdin.window));
-    msdout.logmsd = NaN(size(msdin.window));
-    msdout.mean_logtau = NaN(size(msdin.window));
-    msdout.mean_logmsd = NaN(size(msdin.window));
-    msdout.msderr = NaN(size(msdin.window));
-    msdout.rmsdisp = NaN(size(msdin.window));
-    msdout.logrmsdisp = NaN(size(msdin.window));
-    msdout.mean_logrmsdisp = NaN(size(msdin.window));
-    msdout.rmsdisp_err = NaN(size(msdin.window));    
+    msdout.logtau = NaN(length(msdin.window),1);
+    msdout.logmsd = NaN(length(msdin.window),1);
+    msdout.mean_logtau = NaN(length(msdin.window),1);
+    msdout.mean_logmsd = NaN(length(msdin.window),1);
+    msdout.msderr = NaN(length(msdin.window),1);
+    msdout.rmsdisp = NaN(length(msdin.window),1);
+    msdout.logrmsdisp = NaN(length(msdin.window),1);
+    msdout.mean_logrmsdisp = NaN(length(msdin.window),1);
+    msdout.rmsdisp_err = NaN(length(msdin.window),1);    
     return;
 end
 

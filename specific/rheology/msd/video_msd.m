@@ -109,17 +109,8 @@ end
 % appropriately, getting a list of strides that may not be as long as we
 % asked but pretty close. 
 if length(window) == 1
-    % percent_duration refers to proportion of data used in determining the
-    % msd (1 = all data, 0.5 half data)
-    percent_duration = 1;
-    
-    newFRAMEmax = max(v(:,FRAME))*percent_duration;
-    window_vect = unique(floor(logspace(0,round(log10(newFRAMEmax)), window)));
-    
-    window_vect( window_vect >= newFRAMEmax) = [];
-    
-    window = NaN(1,window);
-    window(1:length(window_vect)) = window_vect;        
+   percent_duration = 1;
+   window = msd_gen_taus(max(v(:,FRAME)), window, percent_duration);
 end
 
 
