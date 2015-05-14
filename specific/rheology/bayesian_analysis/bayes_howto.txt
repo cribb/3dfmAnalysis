@@ -1,0 +1,36 @@
+Hey,
+
+So, I've put the bayesian code in:
+
+\\nsrg.cs.unc.edu\nanodata2\cribb\FROM LUKE
+
+I also put a directory with the construct expt from the other week.  You should be able to run bayes_process.m (described below) from within this directory and the code will work.  Rename the current "bayes_analysis" folder so that it does not get written over.
+
+So I tried to add clarifying things to bayesian html output.  I think it's self-explanatory -- but I am also pretty sure I've looked at that output so much that I am not seeing it fresh.
+
+Definitely let me know if you have questions.  Getting it running will help with seeing what is going on.  To do that do the following:
+
+-- cd into directory that contains panoptes output of aggregated datasets:  filename.vrpn.evt.mat files
+-- A better version of file_re_name_order.m is needed to rename to conditions to 2 letter names (helps with graphs) and in an order that is the same for each experiment
+-- run bayes process.m, shown below
+
+dataout = bayes_process(num_subtraj, frame_rate, calibum, metadata, k_norm)
+
+I typically use:
+
+num_subtraj = 60
+frame_rate = 32
+calibum = 0.152
+metadata is a structure as shown:  (a field for each condition in the expt)
+
+metadata.bead_radius(1) = 1E-6;
+metadata.bead_radius(2) = 1E-6;
+metadata.bead_radius(3) = 1E-6;
+metadata.bead_radius(4) = 1E-6;
+metadata.bead_radius(5) = 1E-6;
+metadata.bead_radius(6) = 1E-6;
+
+k_norm --> a number referring to the condition you want bar plots normalized to.  E.g.  if you rename files such that construct control (CC) is the second .vrpn.evt.mat file read, k_norm =2
+
+
+Again, don't hesitate with questions. 
