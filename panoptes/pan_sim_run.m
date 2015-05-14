@@ -84,31 +84,8 @@ function outs = pan_sim_run(filepath, systemid, plate_type)
                 sim.ydrift_vel = str2double(metadata.plate.simulation.drift_velocity_y{w,1}) * 1e-6 / sim.frame_rate;
                 sim.numpaths = str2double(metadata.plate.simulation.num_paths{w,1});
                 
-% %                 % Set up the drift vectors such that the image is 'rotated'
-% %                 % to match Panoptes camera rotation.
-% %                 given_xvel = metadata.plate.simulation.drift_velocity_x{w,1};
-% %                 given_yvel = metadata.plate.simulation.drift_velocity_y{w,1};
-% %                 
-% %                 channelid = pan_get_channel_id(mywell);
-% %                 
-% % 
-% %                 if ~mod(channelid,2) %even
-% %                     newxy = [-rotxy(:,1)  rotxy(:,2)];
-% %                 else % odd
-% %                     newxy = [ rotxy(:,1) -rotxy(:,2)];    
-% %                 end
-% %                 
-% %                 % do the initial rotation
-% %                 theta = -pi/2;
-% %                 R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
-% %                 rotxy = R * xy;
-% %     
-% %                 sim.xdrift_vel = str2double(rot_Xvel) * 1e-6 / sim.frame_rate;
-% %                 sim.ydrift_vel = str2double(rot_Yvel) * 1e-6 / sim.frame_rate;
-
-
                 % Now, calibrate length scales
-               [sim.calib_um, ~] = pan_MCU2um(myMCU, systemid, mywell);
+               [sim.calib_um, ~] = pan_MCU2um(myMCU, systemid, mywell, metadata);
 
                 [traj, simout] = sim_video_diff_expt([], sim);
                 
@@ -129,3 +106,24 @@ function outs = pan_sim_run(filepath, systemid, plate_type)
     
     outs = metadata;
 return;
+
+
+% function check_sim_inputs(sim)
+%     sim.bead_radius = metadata.plate.bead.diameter(1,w)/2 * 1e-6;
+%     sim.viscosity = str2double(metadata.plate.solution(s).viscosity{w,1});
+%     sim.rad_confined = str2double(metadata.plate.solution(s).confinement_radius{w,1})*1e-6;
+%     sim.alpha = str2double(metadata.plate.solution(s).alpha{w,1});
+%     sim.modulus = str2double(metadata.plate.solution(s).modulus{w,1});
+%     sim.frame_rate = fps;
+%     sim.duration = duration;
+%     sim.tempK = str2double(metadata.plate.solution(s).temperature{w,1})+273;
+%     sim.field_width = str2double(metadata.plate.simulation.fov_width{w,1});
+%     sim.field_height = str2double(metadata.plate.simulation.fov_height{w,1});
+%     sim.xdrift_vel = str2double(metadata.plate.simulation.drift_velocity_x{w,1}) * 1e-6 / sim.frame_rate;
+%     sim.ydrift_vel = str2double(metadata.plate.simulation.drift_velocity_y{w,1}) * 1e-6 / sim.frame_rate;
+%     sim.numpaths = str2double(metadata.plate.simulation.num_paths{w,1});
+%                 
+%     simout = sim;
+% 
+% return;
+                

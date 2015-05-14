@@ -47,6 +47,7 @@ duration = metadata.instr.seconds;
 frame_rate = metadata.instr.fps_imagingmode;
 
 num_taus = 35;  % number of time scales for which to calculate MSD.
+frame_max = floor(duration * frame_rate);
 
 % We want to identify a set of strides to step across for a given set of 
 % images (frames).  We would like them to be spread evenly across the 
@@ -60,7 +61,9 @@ num_taus = 35;  % number of time scales for which to calculate MSD.
 % num_taus = num_taus(:);
 
 % Add our new list of num_taus sizes into our general metadata structure.
-metadata.window = num_taus;
+percent_duration = 1;
+metadata.window = msd_gen_taus(frame_max, num_taus, percent_duration);
+
 
 % Define the Aggregation parameter/parameters that will be used to combine
 % the datasets in a reasonable way for analysis.

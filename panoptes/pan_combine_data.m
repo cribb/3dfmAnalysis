@@ -104,7 +104,7 @@ for p = 1:length(paramlist)
         bead_radius = NaN;
     end
     
-    mycalibum = pan_MCU2um(myMCU, systemid, my_well_list);
+    mycalibum = pan_MCU2um(myMCU, systemid, my_well_list, metadata);
 
         
         
@@ -113,7 +113,8 @@ for p = 1:length(paramlist)
                             metadata.instr.fps_imagingmode, ...
                             'm', mycalibum, ...
                             'absolute', 'no', 'table');                                        
-
+        if isempty(d) % when there are no returned data
+        end
 %         if calout ~= mycalibum 
 %             error('Loaded calibration value does note equal determined value.');
 %         end
@@ -126,9 +127,9 @@ for p = 1:length(paramlist)
         mymsd = video_msd(d, window, metadata.instr.fps_imagingmode, 1, 'no');                
 
         msds(p) = msdstat(mymsd);    
-        fprintf('parameter value %i,  size %i \n', p, size(msds(p).mean_logtau));
+%         fprintf('parameter value %i,  size %i \n', p, size(msds(p).mean_logtau));
         
-        myve(p)  = ve(mymsd, bead_radius, freqtype, 'no');
+%         myve(p)  = ve(mymsd, bead_radius, freqtype, 'no');
 
         clear myMCU;  
 %     else
