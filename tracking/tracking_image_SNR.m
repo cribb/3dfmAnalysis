@@ -1,7 +1,7 @@
-function SNR = tracking_image_SNR(filelist, err_thresh, report)
+function [SNR, EM, h] = tracking_image_SNR(filelist, err_thresh, report)
 
 if nargin < 3 || isempty(report)
-    report = 'no';
+    report = 'n';
 end
 
 % filename = 'channel10_MCU0_2ms_exp_2umbead.pgm';
@@ -9,20 +9,28 @@ end
 format long g;
 
 files = dir(filelist);
+if isempty(files)
+    error('No files in list. Wrong filename?');
+end
 
 for fid = 1:length(files)
 
     filename = files(fid).name;
     
-    logentry(['Loading'  files(fid).name '.']);
+    logentry(['Loading '  files(fid).name '.']);
 
     % read in the filename
     im = imread(filename);
     im = im(:,:,1);
+    
+    q = double(im);
+    q = q/2^16*2^8;
+    im = uint8(q);
+    
     % % create a mask using the disk structural element
     % mask = imopen(im, strel('disk',disk_radius));
 
-    level = graythresh(im);
+    [level EM(fid)] = graythresh(im);
     mask = im2bw(im, level);
     mask = bwareaopen(mask, 50);
 
@@ -96,7 +104,8 @@ for fid = 1:length(files)
     if strcmp(report, 'y')
 
         % Diagnostic Figure 1
-        h = figure; 
+        h(fid) = figure; 
+        hfid = h(fid);
         set(gcf, 'Units', 'Normalized');
         set(gcf, 'Position', [0.15 0.15 4/3*0.6 0.5]);
         subplot(2,4,1);
@@ -104,56 +113,61 @@ for fid = 1:length(files)
         colormap(gray(256));
         title('original image, scaled');
 
-        figure(h);
+        figure(hfid);
         subplot(2,4,2);
         imagesc(dil_mask);
         title('Mask');
 
-        figure(h);
+        figure(hfid);
         subplot(2,4,3);
         imagesc(im_noise);
         title('Noise pixels, scaled');
 
-        figure(h);
+        figure(hfid);
         subplot(2,4,4);
         imagesc(im_signal);
         title('Signal pixels, scaled');
 
-        figure(h);
+        figure(hfid);
         subplot(2,4,5);    
-        hist(noise_data, 15);
+        [histy histx] = hist(noise_data, 15);
+        plot(histx, histy, '.');
         set(gca, 'Xlim', [0 max(noise_data(:))]);
-        title('Noise Pixel Dist.');
+        set(gca, 'YScale', 'log');
+        title('Noise Pixel Hist.');
         xlabel('pixel value');
         ylabel('count');    
 
-        figure(h);
+        figure(hfid);
         subplot(2,4,6);    
-        hist(sig_data, 25);
+        [histy histx] = hist(sig_data, 25);
+        plot(histx, histy, '.');
         set(gca, 'Xlim', [0 max(sig_data(:))]);
-        title('Signal Pixel Dist.');
+        set(gca, 'YScale', 'log');
+        title('Signal Pixel Hist.');
         xlabel('pixel value');
         ylabel('count');         
 
     %     % showing the thresholded image.
-    %     figure(h);
+    %     figure(hfid);
     %     subplot(2,4,7);   
     %     imagesc(mask);
     %     title('Thresholded image');
 
-    %     figure(h);
+    %     figure(hfid);
     %     subplot(2,4,7);   
     %     plot(noise, '.-');
     %     title('Noise');
     %     xlabel('iteration');
 
-        figure(h);
+        figure(hfid);
         subplot(2,4,7);   
-        plot(mean_max_sig ./ noise, '.-');
+        plot((mean_max_sig - noise) ./ noise, '.-');
+%         plot(SNR, '.-');
         title('SNR');
         xlabel('iteration');
 
-        figure(h);
+        figure(hfid);
         subplot(2,4,8);
         plot(delta_error(2:end), '.-');
         xlabel('iteration');

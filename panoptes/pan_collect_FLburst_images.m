@@ -20,7 +20,7 @@ data = load(['matlab_analysis/PM_rheology/' metadata.instr.experiment '.mat']);
 
 % the viscosities are going to include all passes and so every viscosity
 % for a particular well will be constant for all passes.
-visclist = data.visclist;
+% visclist = data.visclist;
 
 % start working on the fluorescence burst (FLburst) files outtputed by the metadata structure
 if ~isempty(metadata.files.FLburst)
@@ -70,9 +70,9 @@ for k = 1:length(filelist)
     myMCU = metadata.mcuparams.mcu(metadata.mcuparams.well == mywell & ...
                                    metadata.mcuparams.pass == mypass );
                                
-    myvisc = visclist(mywell);
+%     myvisc = visclist(mywell);
 
-    metadata_out(k,:) = [mypass, mywell, mychannel, myMCU, myvisc];
+    metadata_out(k,:) = [mypass, mywell, mychannel, myMCU];
     filelist_out{k,1} = new_FLburst_filename;
 end
 
@@ -88,8 +88,8 @@ switch order_var
         values = num2str(sorted_metadata(:,2));
     case 'MCU'
         values = num2str(sorted_metadata(:,4));
-    case 'visc'
-        values = num2str(sorted_metadata(:,5), '%10.2e\n');
+%     case 'visc'
+%         values = num2str(sorted_metadata(:,5), '%10.2e\n');
     otherwise
         error('unknown order_var');        
 end
