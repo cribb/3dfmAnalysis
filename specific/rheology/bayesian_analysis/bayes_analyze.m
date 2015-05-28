@@ -46,9 +46,9 @@ for k = 1:length(list)
     % Filter data for minimum number of frames
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%     filt.min_frames = 1600; % DEFAULT
+    filt.min_frames = 1600; % DEFAULT
 %     filt.min_frames = 500; % Panoptes rebuild analysis
-    filt.min_frames = 667; % Panoptes noise analysis (20s video)
+%     filt.min_frames = 667; % Panoptes noise analysis (20s video)
     filt.xyzunits   = 'm';
     filt.calib_um   = calibum;
 
