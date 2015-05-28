@@ -1,0 +1,27 @@
+an email from chong on 2015-05-07
+
+Hi Jeremy,
+
+corrTestOnPixels() is the function I used to compute the correlation-based segmentation of an image sequence.
+
+In order to call it, you need to pass five parameters: A, window_height, window_width, dim1, dim2.
+
+dim1 and dim2 are the dimensions of the image (height & width)
+window_height and window_width are the size of neighborhood in computing the correlation score. Here just use 3 and 3.
+A is video data matrix.
+
+In order to get A, you need to have a .txt file saving the intensity value of every pixel over time, columnwise. Every pixel is separated by a newline character. I attached a sample .txt file. It's size is 200x200.
+
+Line 1: Pixel(1,1): intensity1 intensity2 intensity3 ... intensityN
+Line 2: Pixel(2,1); intensity1 ... intensityN
+
+where N is the number of frames in the stack
+
+After you have that file, you can write:
+A = readPixelsOverTimeTxt(file_name);
+[r_values, r_image, b_image] = corrTestOnPixels(A, window_height, window_width, dim1,dim2);
+
+The second returned value is the correlation image.
+You can further threshold on the correlation image to get a segmentation. 
+
+So basically you can write a script to convert any of your video into a .txt file and use my code.
