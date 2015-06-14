@@ -136,12 +136,18 @@ function [outs, filtout] = filter_video_tracking(data, filt)
         end
     end
 
+    if isfield(filt, 'max_area')
+        if filt.max_area < Inf
+            data = filter_max_area(data, filt.max_area);
+        end
+    end
+    
     if isfield(filt, 'dead_spots')
         if ~isempty(filt.dead_spots);
             data = filter_dead_spots(data, filt.dead_spots);
         end
     end
-    
+        
     if isfield(filt, 'drift_method')
         if ~strcmp(filt.drift_method, 'none')
             [data,drift_vector] = filter_subtract_drift(data, filt.drift_method);
@@ -373,6 +379,30 @@ function data = filter_xycrop(data, xycrop)
 
     data(DeleteRowsIDX,:) = [];
 
+    return;
+
+%Perform xyCrop
+function data = filter_max_area(data, max_area)
+%   'max_area' is the maximum allowable pixel area (signal) for a tracker 
+
+    video_tracking_constants;
+    beadlist = unique(data(:,ID));
+
+    for i = 1:length(beadlist)                  %Loop over all beadIDs.
+        idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
+
+        
+        numFrames = length(idx);
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+        % Remove trackers that are too short in time
+        if(numFrames < minFrames)             %If this bead has too few datapoints
+            idx = find(data(:, ID) ~= beadlist(i)); %Get the rest of the data
+            data = data(idx, :);                    %Recreate data without this bead
+            continue                                %Move on to next bead now
+        end
+    end
+    
     return;
 
     

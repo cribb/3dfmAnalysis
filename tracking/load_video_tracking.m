@@ -95,7 +95,15 @@ for fid = 1:length(filelist)
     % extension...
     if ~isempty(strfind(file, '.csv')) && isempty(strfind(file, '.mat'))
         % assume csv file is the input and load accordingly
-        dd = csvread(file, 1, 0);
+%         dd = csvread(file, 1, 0);
+          dd = importdata(file, ',', 1);
+          if isstruct(dd) && isfield(dd, 'data')
+              dd = dd.data;
+          else
+              logentry('No data. Moving on...');
+              v = [];
+              return;
+          end
     else
         % Load the tracking data after it has been converted to a .mat file    
         dd=load(file);
@@ -115,6 +123,14 @@ for fid = 1:length(filelist)
         CSVX     = 3;
         CSVY     = 4;
         CSVZ     = 5;
+        
+        if size(dd,2) >= 14
+            CSVAREA = 14;
+        end
+        
+        if size(dd,2) >= 15
+            CSVSENS = 15;
+        end
 
         data(:,TIME)  = zeros(rows(dd),1);
         data(:,FRAME) = dd(:,CSVFRAME);
@@ -125,6 +141,14 @@ for fid = 1:length(filelist)
         data(:,ROLL)  = zeros(rows(dd),1);
         data(:,PITCH) = zeros(rows(dd),1);
         data(:,YAW)   = zeros(rows(dd),1);
+        
+        if size(dd,2) >= 14
+            data(:,AREA) = dd(:,CSVAREA);
+        end
+        
+        if size(dd,2) >= 15
+            data(:,SENS) = dd(:,CSVSENS);
+        end
 
         % no timestamps in this vrpn file format
         tstamps = 'no';
@@ -353,7 +377,13 @@ if ~isempty(data)
             v.z = data(:,Z);		
             if exist('ROLL');    v.roll = data(:,ROLL);    end;
             if exist('PITCH');   v.pitch= data(:,PITCH);   end;
-            if exist('YAW');     v.yaw  = data(:,YAW);     end;                    
+            if exist('YAW');     v.yaw  = data(:,YAW);     end;    
+            if size(dd,2) == 14
+                v.area = data(:,AREA);
+            end
+            if size(dd,2) == 15
+                v.sens = data(:,SENS);
+            end
     end
 else
     v = [];
@@ -362,17 +392,17 @@ end
     cd(orig_directory);
 return;
 
-% function for writing out stderr log messages
-function logentry(txt)
-    logtime = clock;
-    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
-                   num2str(logtime(2),        '%02i') '.' ...
-                   num2str(logtime(3),        '%02i') ', ' ...
-                   num2str(logtime(4),        '%02i') ':' ...
-                   num2str(logtime(5),        '%02i') ':' ...
-                   num2str(floor(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext 'load_video_tracking: '];
-     
-     fprintf('%s%s\n', headertext, txt);
-
-     return;
+% % function for writing out stderr log messages
+% function logentry(txt)
+%     logtime = clock;
+%     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+%                    num2str(logtime(2),        '%02i') '.' ...
+%                    num2str(logtime(3),        '%02i') ', ' ...
+%                    num2str(logtime(4),        '%02i') ':' ...
+%                    num2str(logtime(5),        '%02i') ':' ...
+%                    num2str(floor(logtime(6)), '%02i') ') '];
+%      headertext = [logtimetext 'load_video_tracking: '];
+%      
+%      fprintf('%s%s\n', headertext, txt);
+% 
+%      return;

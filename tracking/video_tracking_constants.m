@@ -2,7 +2,7 @@
 %
 % 3DFM function  
 % Tracking 
-% last modified 2008.11.14 (jcribb)
+% last modified 2015.06.05 (jcribb)
 %   
 % script that creates column constants for video tracking data matrix.
 %
@@ -16,7 +16,8 @@
     ROLL   = 7; 
     PITCH  = 8; 
     YAW    = 9; 
-    RADIAL = 10;
-
+    AREA   = 10;
+    SENS   = 11;
+    
     
     
