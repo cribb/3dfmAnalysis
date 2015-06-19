@@ -77,7 +77,13 @@ print('-dpng', ['test' '.png'], '-zbuffer','-r300');
 % print(h, '-r0', [outf '.jpg'], '-djpg'); 
 saveas(h, [outf '.png'], 'png');
 % plot2svg_2d([outf '.svg'], h);
-plot2svg([outf '.svg'], h);
+try
+    saveas(h, [outf 'svg'], 'svg');
+catch
+    logentry('You are using an old version of Matlab. Version 2014b saves SVGs natively');
+    plot2svg([outf '.svg'], h);
+end
+
 % close(h);
 
 return;
