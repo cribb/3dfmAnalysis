@@ -115,20 +115,20 @@ end
 
 
 % for every bead
-beadID = unique(v(:,ID))';
+beadIDs = unique(v(:,ID))';
 
-tau    = NaN(length(window), length(beadID));
-mymsd  = NaN(length(window), length(beadID));
-counts = NaN(length(window), length(beadID));
+tau    = NaN(length(window), length(beadIDs));
+mymsd  = NaN(length(window), length(beadIDs));
+counts = NaN(length(window), length(beadIDs));
 
         if calc_r2
-            myr2   = NaN(max(v(:,FRAME)+1), length(window), length(beadID));
+            myr2   = NaN(max(v(:,FRAME)+1), length(window), length(beadIDs));
         elseif calc_r
             % the 2 here refers to the number of coordinates,being just X and Y
-            myr    = NaN(max(v(:,FRAME)+1), 2, length(window), length(beadID));   
+            myr    = NaN(max(v(:,FRAME)+1), 2, length(window), length(beadIDs));   
         end;
                 
-for k = 1 : length(beadID);
+for k = 1 : length(beadIDs);
     TIME   = 1; 
     ID     = 2; 
     FRAME  = 3; 
@@ -136,7 +136,7 @@ for k = 1 : length(beadID);
     Y      = 5; 
     Z      = 6;
     
-    b = get_bead(v, beadID(k));    
+    b = get_bead(v, beadIDs(k));    
     
     % call up the MSD kernel-function to compute the MSD for each bead    
     if calc_r2 || calc_r
@@ -173,6 +173,7 @@ sample_count = sum(~isnan(mymsd),2);
 
 
 % output structure
+vmsd.trackerID = reshape(beadIDs, 1, length(beadIDs));
 vmsd.tau = tau;
 vmsd.msd = mymsd;
 if calc_r
