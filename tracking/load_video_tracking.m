@@ -90,6 +90,8 @@ for fid = 1:length(filelist)
     
     file = filelist(fid).name;
     
+
+    
     % What if we want to use the csv file provided by video spot tracker?
     % We have to make a decision here, and we'll base it on the filename
     % extension...
@@ -102,7 +104,7 @@ for fid = 1:length(filelist)
           else
               logentry('No data. Moving on...');
               v = [];
-              return;
+              continue;
           end
     else
         % Load the tracking data after it has been converted to a .mat file    
@@ -144,20 +146,26 @@ for fid = 1:length(filelist)
         
         if size(dd,2) >= 14
             data(:,AREA) = dd(:,CSVAREA);
+        else
+            data(:,AREA) = 0;
         end
         
         if size(dd,2) >= 15
             data(:,SENS) = dd(:,CSVSENS);
+        else
+            data(:,SENS) = 0;
         end
-
+        
         % no timestamps in this vrpn file format
         tstamps = 'no';
+        
     elseif isempty(fieldnames(dd))
         logentry(['No data found in *' file '*.']);
         if ~exist('glommed_d', 'var')            
             glommed_d = [];
         end
         continue;
+        
     elseif ~isempty(strfind(file, '.evt.')) && isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
         
@@ -251,7 +259,16 @@ for fid = 1:length(filelist)
       data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
 %       error('I do not know how to handle this video VRPN file (weird fieldnames).');
 end
-        
+
+    % Add in compatibility with Panoptes runs
+    [well, pass] = pan_wellpass(file);
+    if well == 0
+        well = fid; % use the 'well' heading as a placeholder for "filenumber" when there's no Panoptes data
+    else
+        data(:,WELL) = well;
+    end
+    data(:,PASS) = pass;        
+    
     % handle the physical units
     units{X} = xyzunits;  units{Y} = xyzunits;  units{Z} = xyzunits;
 	if strcmp(xyzunits,'m')
@@ -290,8 +307,10 @@ end
     end
     
     % now do all of the bead specific things
-    for k = 0 : max(trackerID)    
-                    
+    IDlist = unique(trackerID)';
+    % for k = 0 : max(trackerID)    
+    for k = 1 : length(IDlist)
+        
         % select rows in table that correspond only to the k-th bead
         idx = find(trackerID == k);
         this_tracker  = data(idx,:);
@@ -353,8 +372,10 @@ end
     
     if isempty(glommed_d)
         glommed_d = data;
+        clear data;
     elseif ~isempty(data) && ~isempty(glommed_d)
         glommed_d = [glommed_d ; data];
+        clear data;
     end
     
     calout(fid,1) = calib_um(fid);
@@ -378,12 +399,16 @@ if ~isempty(data)
             if exist('ROLL');    v.roll = data(:,ROLL);    end;
             if exist('PITCH');   v.pitch= data(:,PITCH);   end;
             if exist('YAW');     v.yaw  = data(:,YAW);     end;    
-            if size(dd,2) == 14
-                v.area = data(:,AREA);
-            end
-            if size(dd,2) == 15
-                v.sens = data(:,SENS);
-            end
+            if exist('AREA');    v.area = data(:,AREA);    end;
+            if exist('SENS');    v.sens = data(:,SENS);    end;
+            if exist('WELL');    v.well = data(:,WELL);    end;
+            if exist('PASS');    v.pass = data(:,PASS);    end;
+%             if size(dd,2) == 14
+%                 v.area = data(:,AREA);
+%             end
+%             if size(dd,2) == 15
+%                 v.sens = data(:,SENS);
+%             end
     end
 else
     v = [];

@@ -1,4 +1,4 @@
-function [tracker_stack, tracker_list] = get_tracker_images(vid_table, im, tracker_halfsize, reportyn)
+function tracker_stack = get_tracker_images(vid_table, im, tracker_halfsize, reportyn)
 % tracker locations embedded in video_tracking_constants format
 
 video_tracking_constants;
@@ -33,7 +33,7 @@ height = size(im, 1);
 
 tfs = 2*tracker_halfsize;
 
-tracker_stack = zeros(tfs, tfs, Ntrackers);
+mystack = zeros(tfs, tfs, Ntrackers);
 
 for k = 1:Ntrackers
 
@@ -107,11 +107,15 @@ for k = 1:Ntrackers
     mini_im(row1:row2, col1:col2) = tmp_im;
     
     % put mini-image into proper location in outputted stack
-    tracker_stack(:,:,k) = mini_im;
+    mystack(:,:,k) = mini_im;
 end
 
+    tracker_stack.halfsize = tracker_halfsize;
+    tracker_stack.vid_table = vid_table;
+    tracker_stack.stack = mystack;
+
 if findstr(lower(reportyn), 'y')
-%     plot_tracker_images();
+    h = plot_tracker_images(tracker_stack, 'id');
 end
 
 return

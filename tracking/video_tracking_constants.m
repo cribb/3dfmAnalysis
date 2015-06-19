@@ -6,6 +6,11 @@
 %   
 % script that creates column constants for video tracking data matrix.
 %
+% NOTE: If memory issues occur because of too many columns, consider a
+% change to the vrpnlog2mat software that will selectively choose
+% *relevant* columns (e.g. not including ROLL PITCH and YAW when tracked
+% objects are spheres and have no rotational moments).
+%
 
     TIME   = 1; 
     ID     = 2; 
@@ -18,6 +23,8 @@
     YAW    = 9; 
     AREA   = 10;
     SENS   = 11;
+    WELL   = 12;
+    PASS   = 13;
     
     
     

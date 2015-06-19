@@ -49,16 +49,18 @@ function [outs, filtout] = filter_video_tracking(data, filt)
 
     %  Handle inputs
     if (nargin < 2) || isempty(filt)
-        filt.min_frames = 0;
-        filt.min_pixels = 0;
-        filt.max_pixels = Inf;
-        filt.tcrop      = 0;
-        filt.xycrop     = 0;
-        filt.xyzunits   = 'pixels';
-        filt.calib_um   = 1;
-        filt.drift_method = 'none';
-        filt.dead_spots = [];
-        filt.jerk_limit = [];
+        filt.min_frames      = 0;
+        filt.min_pixels      = 0;
+        filt.max_pixels      = Inf;
+        filt.max_region_size = 50000;
+        filt.min_sens        = 0;
+        filt.tcrop           = 0;
+        filt.xycrop          = 0;
+        filt.xyzunits        = 'pixels';
+        filt.calib_um        = 1;
+        filt.drift_method    = 'none';
+        filt.dead_spots      = [];
+        filt.jerk_limit      = [];
     end
 
     filtout = filt;
@@ -87,8 +89,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     end
 
 
-    %  Handle filters
-    
+    %  Handle filters    
     if isfield(filt, 'tcrop')
         if filt.tcrop > 0
             data = filter_tcrop(data, filt.tcrop);    
@@ -101,7 +102,23 @@ function [outs, filtout] = filter_video_tracking(data, filt)
             data = filter_min_frames(data, filt.min_frames);
         end
     end
-
+    
+    
+    % Minimum sensitivity given the first XY datapoint of the trajectory
+    if isfield(filt, 'min_sens')
+        if filt.min_sens > 0
+            data = filter_min_sens(data, filt.min_sens);
+        end
+    end
+    
+    
+    % maxarea given the first XY datapoint of the trajectory
+    if isfield(filt, 'max_region_size')
+        if filt.max_region_size < Inf
+            data = filter_max_region_size(data, filt.max_region_size);
+        end
+    end
+    
     if isfield(filt, 'min_pixels')
         if filt.min_pixels > 0
             % going to assume pixels
@@ -224,6 +241,46 @@ function data = filter_min_frames(data, minFrames)
     end
     
     return;
+
+    
+function data = filter_max_region_size(data, max_region_size)
+    video_tracking_constants;
+    beadlist = unique(data(:,ID));
+
+    for i = 1:length(beadlist)                  %Loop over all beadIDs.
+        idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
+        numFrames = length(idx);
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+        % Remove trackers that have too much area
+        if(data(idx(1),AREA) > max_region_size)            %If this bead has too much area
+            idx = (data(:, ID) ~= beadlist(i));     %Get the rest of the data
+            data = data(idx, :);                    %Recreate data without this bead
+            continue                                %Move on to next bead now
+        end
+    end
+return;
+
+
+function data = filter_min_sens(data, min_sens)
+    video_tracking_constants;
+    
+    beadlist = unique(data(:,ID));
+    
+    lowsens_data = ( data(:, SENS) < min_sens );
+    
+    ids_to_remove = unique( data(lowsens_data,ID) );
+    
+    midx = zeros(size(data,1),1);
+    for k = 1:length(ids_to_remove)
+        idx = ( data(:,ID) == ids_to_remove(k) );
+        midx = or(midx, idx);
+    end
+    
+    data(midx,:) = [];
+    
+return;
+
 
 function data = filter_pixel_range(mode, data, PixelRange, xyzunits, calib_um)
     video_tracking_constants;
@@ -381,27 +438,27 @@ function data = filter_xycrop(data, xycrop)
 
     return;
 
-%Perform xyCrop
-function data = filter_max_area(data, max_area)
-%   'max_area' is the maximum allowable pixel area (signal) for a tracker 
-
-    video_tracking_constants;
-    beadlist = unique(data(:,ID));
-
-    for i = 1:length(beadlist)                  %Loop over all beadIDs.
-        idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
-
-        
-        numFrames = length(idx);
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-        % Remove trackers that are too short in time
-        if(numFrames < minFrames)             %If this bead has too few datapoints
-            idx = find(data(:, ID) ~= beadlist(i)); %Get the rest of the data
-            data = data(idx, :);                    %Recreate data without this bead
-            continue                                %Move on to next bead now
-        end
-    end
+% % % % %Perform xyCrop
+% % % % function data = filter_max_region_size(data, max_region_size)
+% % % % %   'max_area' is the maximum allowable pixel area (signal) for a tracker 
+% % % % 
+% % % %     video_tracking_constants;
+% % % %     beadlist = unique(data(:,ID));
+% % % % 
+% % % %     for i = 1:length(beadlist)                  %Loop over all beadIDs.
+% % % %         idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
+% % % % 
+% % % %         
+% % % %         numFrames = length(idx);
+% % % % 
+% % % %         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+% % % %         % Remove trackers that are too short in time
+% % % %         if(numFrames < minFrames)             %If this bead has too few datapoints
+% % % %             idx = find(data(:, ID) ~= beadlist(i)); %Get the rest of the data
+% % % %             data = data(idx, :);                    %Recreate data without this bead
+% % % %             continue                                %Move on to next bead now
+% % % %         end
+% % % %     end
     
     return;
 
@@ -446,6 +503,8 @@ function [data,drift_vector] = filter_subtract_drift(data, drift_method)
     drift_end_time = [];    
     [data,drift_vector] = remove_drift(data, drift_start_time, drift_end_time, drift_method);    
 return;
+
+
 
 function [data,num_jerks] = filter_remove_tracker_jerk(data, jerk_limit)
     video_tracking_constants;
@@ -505,19 +564,4 @@ function [data,num_jerks] = filter_remove_tracker_jerk(data, jerk_limit)
     end
     
 return;
-
-
-% function for writing out stderr log messages
-function logentry(txt)
-    logtime = clock;
-    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
-                   num2str(logtime(2),        '%02i') '.' ...
-                   num2str(logtime(3),        '%02i') ', ' ...
-                   num2str(logtime(4),        '%02i') ':' ...
-                   num2str(logtime(5),        '%02i') ':' ...
-                   num2str(floor(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext 'filter_video_tracking: '];
-     
-     fprintf('%s%s\n', headertext, txt);
-     
-     return;
+    
