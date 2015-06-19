@@ -81,8 +81,8 @@ v.params = params;
 % found again.
 save(params.metafile, '-struct', 'params');
 
-% need the magnitudes after all the adjustments for radial position.
-vid_table(:,RADIAL) = magnitude(vid_table(:,X:Y));
+% % need the magnitudes after all the adjustments for radial position.
+% vid_table(:,RADIAL) = magnitude(vid_table(:,X:Y));
 
 % output the data in raw form.
 v.raw.video_table = vid_table;

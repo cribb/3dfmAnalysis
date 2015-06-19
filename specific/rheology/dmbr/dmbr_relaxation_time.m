@@ -11,7 +11,7 @@ function out = dmbr_relaxation_time(rheo_table, params)
 
     if length(idx) > 1
         t = rheo_table(idx,TIME);
-        r = rheo_table(idx,RADIAL);
+        r = magnitude(rheo_table(idx,X:Y));
         n = 1; % number of taus
         [J,tau,R_square] = relaxation_time(t, r, n, 'off');
         xy = mean(rheo_table(idx,X:Y));

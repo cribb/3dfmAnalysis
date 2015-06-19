@@ -17,30 +17,30 @@
     video_tracking_constants;
     
     % new columns/labels.
-    VOLTS  = 11;
-    SEQ    = 12;
-    DEGAUSS= 13;
+    VOLTS  = 17;
+    SEQ    = 18;
+    DEGAUSS= 19;
     
-    FORCE  = 14;
-    FERR_H = 15;
-    FERR_L = 16;
+    FORCE  = 20;
+    FERR_H = 21;
+    FERR_L = 22;
     
     % Creep Compliance at time points
-    J      = 17;        
+    J      = 23;        
 
     % Scale space zeroth derivative (smoothed displacments)
-    SX     = 18;
-    SY     = 19;
-    SJ     = 20;
+    SX     = 24;
+    SY     = 25;
+    SJ     = 26;
     
     % Scale space first derivative (unsmoothed velocity)
-    DX     = 21;
-    DY     = 22;
-    DJ     = 23;
+    DX     = 27;
+    DY     = 28;
+    DJ     = 29;
 
     % Scale space first derivative (smoothed velocity/viscosity)
-    SDX    = 24;
-    SDY    = 25;
-    SDJ    = 26;
+    SDX    = 30;
+    SDY    = 31;
+    SDJ    = 32;
     
     

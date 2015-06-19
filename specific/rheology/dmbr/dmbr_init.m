@@ -64,7 +64,7 @@ function [table_out,  params] = dmbr_init(params)
     % Set the initial value for the additional columns to NaN.  This allows
     % for non-numeric placeholders.  Doesn't affect means or other statistics.
     %%%%
-    table(:,RADIAL:DEGAUSS) = NaN;
+    table(:,AREA:DEGAUSS) = NaN;
     
     %%%%
     % Define the zero location as the center of the circle that inscribes

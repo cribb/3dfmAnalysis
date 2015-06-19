@@ -9,7 +9,7 @@ for k = 1:length(voltages)
     
     idx = find(vid_table(:,VOLTS) == voltages(k));
     
-    r = vid_table(idx,RADIAL);
+    r = magnitude(vid_table(idx,X:Y));
     
     [force, force_err] = varforce_get_force(calib, r, voltages(k));
     
