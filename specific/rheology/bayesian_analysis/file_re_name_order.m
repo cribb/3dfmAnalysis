@@ -5,23 +5,23 @@ function [ re_name_order ] = file_re_name_order( filepath )
 cd(filepath)
 
 
-% movefile('aggregated_data_noise.vrpn.evt.mat',   'aggregated_data_1.NF.vrpn.evt.mat');
-% movefile('aggregated_data_HPDE.vrpn.evt.mat',    'aggregated_data_2.DE.vrpn.evt.mat');
-% movefile('aggregated_data_HPDEcc.vrpn.evt.mat',  'aggregated_data_3.CC.vrpn.evt.mat');
-% movefile('aggregated_data_H-ras.vrpn.evt.mat',   'aggregated_data_4.H-.vrpn.evt.mat');
-% movefile('aggregated_data_Myr-AKT.vrpn.evt.mat', 'aggregated_data_5.My.vrpn.evt.mat');
-% movefile('aggregated_data_TGFBR1.vrpn.evt.mat',  'aggregated_data_6.R1.vrpn.evt.mat');
-% movefile('aggregated_data_Bcl2.vrpn.evt.mat',    'aggregated_data_7.B2.vrpn.evt.mat');
-% movefile('aggregated_data_HPNE.vrpn.evt.mat',    'aggregated_data_8.NE.vrpn.evt.mat');
+movefile('aggregated_data_noise.vrpn.evt.mat',   'aggregated_data_1.NF.vrpn.evt.mat');
+movefile('aggregated_data_HPDE.vrpn.evt.mat',    'aggregated_data_2.DE.vrpn.evt.mat');
+movefile('aggregated_data_HPDEcc.vrpn.evt.mat',  'aggregated_data_3.CC.vrpn.evt.mat');
+movefile('aggregated_data_H-ras.vrpn.evt.mat',   'aggregated_data_4.H-.vrpn.evt.mat');
+movefile('aggregated_data_Myr-AKT.vrpn.evt.mat', 'aggregated_data_5.My.vrpn.evt.mat');
+movefile('aggregated_data_TGFBR1.vrpn.evt.mat',  'aggregated_data_6.R1.vrpn.evt.mat');
+movefile('aggregated_data_Bcl2.vrpn.evt.mat',    'aggregated_data_7.B2.vrpn.evt.mat');
+movefile('aggregated_data_HPNE.vrpn.evt.mat',    'aggregated_data_8.NE.vrpn.evt.mat');
 
-movefile('aggregated_data_A.vrpn.evt.mat',  'aggregated_data_1.A.vrpn.evt.mat');
-movefile('aggregated_data_B.vrpn.evt.mat',  'aggregated_data_2.B.vrpn.evt.mat');
-movefile('aggregated_data_C.vrpn.evt.mat',  'aggregated_data_3.C.vrpn.evt.mat');
-movefile('aggregated_data_D.vrpn.evt.mat',  'aggregated_data_4.D.vrpn.evt.mat');
-movefile('aggregated_data_E.vrpn.evt.mat',  'aggregated_data_5.E.vrpn.evt.mat');
-movefile('aggregated_data_F.vrpn.evt.mat',  'aggregated_data_6.F.vrpn.evt.mat');
-movefile('aggregated_data_G.vrpn.evt.mat',  'aggregated_data_7.G.vrpn.evt.mat');
-movefile('aggregated_data_H.vrpn.evt.mat',  'aggregated_data_8.H.vrpn.evt.mat');
+% movefile('aggregated_data_A.vrpn.evt.mat',  'aggregated_data_1.A.vrpn.evt.mat');
+% movefile('aggregated_data_B.vrpn.evt.mat',  'aggregated_data_2.B.vrpn.evt.mat');
+% movefile('aggregated_data_C.vrpn.evt.mat',  'aggregated_data_3.C.vrpn.evt.mat');
+% movefile('aggregated_data_D.vrpn.evt.mat',  'aggregated_data_4.D.vrpn.evt.mat');
+% movefile('aggregated_data_E.vrpn.evt.mat',  'aggregated_data_5.E.vrpn.evt.mat');
+% movefile('aggregated_data_F.vrpn.evt.mat',  'aggregated_data_6.F.vrpn.evt.mat');
+% movefile('aggregated_data_G.vrpn.evt.mat',  'aggregated_data_7.G.vrpn.evt.mat');
+% movefile('aggregated_data_H.vrpn.evt.mat',  'aggregated_data_8.H.vrpn.evt.mat');
 
 % movefile('aggregated_data_NE_1_FN.vrpn.evt.mat',   'aggregated_data_1.FN1.vrpn.evt.mat');
 % movefile('aggregated_data_NE_2_FN.vrpn.evt.mat',    'aggregated_data_2.FN2.vrpn.evt.mat');
