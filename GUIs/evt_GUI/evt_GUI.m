@@ -288,6 +288,14 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     end
     
     % try loading the MIP file
+try
+        MIPfile = [filenameroot, '.pgm'];
+        MIPfile = strrep(MIPfile, '_TRACKED', '');
+        MIPfile = strrep(MIPfile, 'video', 'FLburst');
+        im = imread(MIPfile, 'PGM');
+        logentry('Successfully loaded FLburst image from a Panoptes run...');
+        MIPexists = 1;
+catch
     try 
         MIPfile = [filenameroot, '.MIP.bmp'];
         im = imread(MIPfile, 'BMP');
@@ -322,7 +330,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
             end        
         end
     end
-    
+end
     % if the background MIP image exists, attach it to handles structure
     if exist('im', 'var')
         handles.im = im;
@@ -804,19 +812,6 @@ function pushbutton_export_bead_Callback(hObject, eventdata, handles)
 % --- Executes on button press in pushbutton_export_all_beads.
 function pushbutton_export_all_beads_Callback(hObject, eventdata, handles)
     video_tracking_constants;
-    
-%     beadID = handles.table(:,ID);
-% 
-%     for k = 0:max(beadID)
-%     
-%         idx = find(beadID == k);
-% 
-%         bead(k+1).t      = handles.table(idx,TIME) - min(handles.table(:,TIME));
-%         bead(k+1).x      = handles.table(idx,X);
-%         bead(k+1).y      = handles.table(idx,Y);
-%         bead(k+1).yaw    = handles.table(idx,YAW);
-%         
-%     end
     
     bead = convert_vidtable_to_beadstruct(handles.table);
     
