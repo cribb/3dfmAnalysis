@@ -1,4 +1,4 @@
-function [areas, sens, bead_im] = pan_collect_tracker_areas(filepath, systemid, imagereport)
+function bead_stacks = pan_collect_tracker_areas(filepath, systemid, imagereport)
 
 if nargin < 3 || isempty(imagereport)
     imagereport = 'no';
@@ -31,7 +31,7 @@ Nfiles = length(filelist);
 duration = metadata.instr.seconds;
 
 filetype = 'csv'; % at the time this was written, only csv files contained area and sens values
-areas = []; sens = [];
+% areas = []; sens = [];
 
 for k = 1:Nfiles
     
@@ -77,37 +77,39 @@ for k = 1:Nfiles
         
         FLfile = [FLburst_dir '\frame0001.pgm'];
         im = imread(FLfile);
-        tracker_halfwidth = 15; % pull this from metadata when tracking cfg is included
+        tracker_halfsize = 15; % pull this from metadata when tracking cfg is included
         sort_by = 'sens';
 
-        [tstack,tlist] = get_tracker_images(frame1, im, tracker_halfwidth);
-
-        bead_im(k).pass = pass;
-        bead_im(k).well = well;
-        bead_im(k).tlist = tlist;
-        bead_im(k).trajdata = frame1;
-        bead_im(k).tstack = tstack;
-        bead_im(k).area   = tmparea;
-        bead_im(k).sensitivity = tmpsens;
+% function tracker_stack = get_tracker_images(vid_table, im, tracker_halfsize, reportyn)
+        mystack = get_tracker_images(frame1, im, tracker_halfsize, 'n');
+    
+        bead_stacks(k).pass        = pass;
+        bead_stacks(k).well        = well;
+%         bead_stacks(k).tlist       = tlist;
+        bead_stacks(k).halfsize    = tracker_halfsize;
+        bead_stacks(k).vid_table   = mystack.vid_table;
+        bead_stacks(k).stack       = mystack.stack;
+%         bead_stacks(k).area        = tmparea;
+%         bead_stacks(k).sensitivity = tmpsens;
             
         if strfind(imagereport, 'y');    
-            h = plot_tracker_images(frame1, im, tracker_halfwidth, sort_by);
+            h = plot_tracker_images(frame1, im, tracker_halfsize, sort_by);
             
             figure(h);
             set(h, 'Name', ['Pass ' num2str(pass) ', Well ' num2str(well)]);            
         end
         
-        areas = [areas; tmparea];
-        sens  = [sens; tmpsens];
+%         areas = [areas; tmparea];
+%         sens  = [sens; tmpsens];
     end    
     
 
 end
 
-figure; 
-hist(areas, 50);
-xlabel('Region Area [px^2]');
-ylabel('count');
-title('Tracker Region Areas for Panoptes Run');
+% figure; 
+% hist(areas, 50);
+% xlabel('Region Area [px^2]');
+% ylabel('count');
+% title('Tracker Region Areas for Panoptes Run');
 
 return;
