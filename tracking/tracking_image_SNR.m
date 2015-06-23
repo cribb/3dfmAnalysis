@@ -1,4 +1,4 @@
-function [SNR, EM, h] = tracking_image_SNR(filelist, err_thresh, report) %filename, 0.5, y
+function [SNR, EM, h] = tracking_image_SNR(filelist, err_thresh, report)
 
 if nargin < 3 || isempty(report)
     report = 'n';
@@ -23,12 +23,6 @@ for fid = 1:length(files)
     im = imread(filename);
     im = im(:,:,1);
     
-    %write a switch case, use funciton class, figure out to do conversion
-    %from 16 -> 8, want output to be uint8. 
-    
-%     q = double(im);
-%     q = q/2^16*2^8;
-%     im = uint8(q);
 
 %   this will determine if image is 16-bit or 8-bit. If 16-bit, will reduce
 %   to 8-bit. If aready 8-bit, nothing happens. 
