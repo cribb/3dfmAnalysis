@@ -12,7 +12,7 @@ traj = sim_video_diff_expt(folder,in_struct);
 xtraj = traj(:,X);
 ytraj = traj(:,Y);
 
-blank = zeros(in_struct.field_width,in_struct.field_height);
+blank = zeros(in_struct.field_height,in_struct.field_width);
 
 %may be a better way to do this part - instead of 2 for loops make the 
 %'center' input to new_guass a vector instead of a point

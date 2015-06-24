@@ -12,8 +12,6 @@ function [] = generate_noise_tif(filename_format, in_struct, mean, stdev)
 
 numframes = in_struct.frame_rate*in_struct.duration;
 
-stdev = stdev/255;
-
 for n = 1:numframes
     orig_frame_name = [filename_format sprintf('%04d',(n-1)) '.tif'];
     orig_frame = imread(orig_frame_name);
