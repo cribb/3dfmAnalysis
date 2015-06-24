@@ -23,10 +23,23 @@ for fid = 1:length(files)
     im = imread(filename);
     im = im(:,:,1);
     
-    q = double(im);
-    q = q/2^16*2^8;
-    im = uint8(q);
-    
+
+%   this will determine if image is 16-bit or 8-bit. If 16-bit, will reduce
+%   to 8-bit. If aready 8-bit, nothing happens. 
+    picinfo = imfinfo(im);
+    bit = picinfo.BitDepth;
+
+    switch bit
+        case 16
+            q = double(im);
+            q = q/2^16*2^8;
+            im = uint8(q);
+        case 8
+            % No change required
+        otherwise
+            error('image neither 16-bit or 8-bit depth');
+    end
+%     class(im)
     % % create a mask using the disk structural element
     % mask = imopen(im, strel('disk',disk_radius));
 
