@@ -1,7 +1,6 @@
 function [] = video_sim(in_struct)
 %Will create frames in the current directory, must create directory
-%before
-%using function
+%before using function
 %Uses 8-bit integers
 
 %Verify that all parameters have been specified, give default value to any
