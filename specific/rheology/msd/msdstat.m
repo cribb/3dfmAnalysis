@@ -34,9 +34,10 @@ end
 % estimates (differences) of MSD that exist within a given timescale. The 
 % 'n' field refers to the number of trackers available within that particular
 % timescale.
-tau    = msdin.tau;
-mymsd  = msdin.msd;
-counts = msdin.ns;
+trackerID = msdin.trackerID;
+tau       = msdin.tau;
+mymsd     = msdin.msd;
+counts    = msdin.ns;
 
 % compatibility issues with old msd.m
 if isfield(msdin, 'n');
@@ -114,6 +115,12 @@ msdout = msdin;
 % variable/parameter value checks.
 msdout.logtau = logtau;
 msdout.logmsd = logmsd;
+
+if isempty(trackerID)
+    msdout.trackerID = NaN(size(msdin.trackerID,1),1);
+else
+    msdout.trackerID = trackerID;
+end    
 
 if isempty(mean_logtau)
     msdout.mean_logtau = NaN(size(msdin.tau,1),1);

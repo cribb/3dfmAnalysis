@@ -54,6 +54,7 @@ if (nargin < 1) || isempty(files)
         empty_set = NaN(window,1);
     end
     
+    vmsd.trackerID = empty_set;
     vmsd.tau = empty_set;
     vmsd.msd = empty_set;
     if calc_r2
