@@ -104,20 +104,17 @@ for fid = 1:length(filelist)
           else
               logentry('No data. Moving on...');
               v = [];
-              continue;
+              if size(filelist,1) > 1
+                  continue;
+              else
+                  return;
+              end
           end
     else
         % Load the tracking data after it has been converted to a .mat file    
         dd=load(file);
     end
 
-%     if isempty(fieldnames(dd))
-%         logentry(['No data found in this file: ' file '.']);
-%         if ~exist('v', 'var')            
-%             v = [];
-%         end
-%         continue;
-%     end
 
     if ~isempty(strfind(file, '.csv')) && isempty(strfind(file, '.mat'))
         CSVFRAME = 1;
