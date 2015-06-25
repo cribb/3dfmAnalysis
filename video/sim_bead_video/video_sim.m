@@ -1,5 +1,6 @@
 function [] = video_sim(in_struct)
-%Will create frames in the current directory, must create directory before
+%Will create frames in the current directory, must create directory
+%before
 %using function
 %Uses 8-bit integers
 
@@ -33,21 +34,21 @@ logentry('All parameters set');
 
 
 
-svde_struct.seed         = seed;
-svde_struct.numpaths     = numpaths;
-svde_struct.viscosity    = viscosity;
-svde_struct.bead_radius  = bead_radius;
-svde_struct.frame_rate   = frame_rate;
-svde_struct.duration     = duration;
-svde_struct.tempK        = tempK;
-svde_struct.field_width  = field_width;
-svde_struct.field_height = field_height;
-svde_struct.calim_um     = calib_um;
-svde_struct.xdrift_vel   = xdrift_vel;
-svde_struct.ydrift_vel   = ydrift_vel;
-svde_struct.rad_confined = rad_confined;
-svde_struct.alpha        = alpha;
-svde_struct.modulus      = modulus;
+    svde_struct.seed         = seed;
+    svde_struct.numpaths     = numpaths;
+    svde_struct.viscosity    = viscosity;
+    svde_struct.bead_radius  = bead_radius;
+    svde_struct.frame_rate   = frame_rate;
+    svde_struct.duration     = duration;
+    svde_struct.tempK        = tempK;
+    svde_struct.field_width  = field_width;
+    svde_struct.field_height = field_height;
+    svde_struct.calim_um     = calib_um;
+    svde_struct.xdrift_vel   = xdrift_vel;
+    svde_struct.ydrift_vel   = ydrift_vel;
+    svde_struct.rad_confined = rad_confined;
+    svde_struct.alpha        = alpha;
+    svde_struct.modulus      = modulus;
 
 
 %Simulate the trajectories
