@@ -1,6 +1,6 @@
 function [] = video_sim(in_struct)
-%Will create frames in the current directory, must create directory before
-%using function
+%Will create frames in the current directory, must create directory
+%before using function
 %Uses 8-bit integers
 
 %Verify that all parameters have been specified, give default value to any
@@ -33,21 +33,21 @@ logentry('All parameters set');
 
 
 
-svde_struct.seed         = seed;
-svde_struct.numpaths     = numpaths;
-svde_struct.viscosity    = viscosity;
-svde_struct.bead_radius  = bead_radius;
-svde_struct.frame_rate   = frame_rate;
-svde_struct.duration     = duration;
-svde_struct.tempK        = tempK;
-svde_struct.field_width  = field_width;
-svde_struct.field_height = field_height;
-svde_struct.calim_um     = calib_um;
-svde_struct.xdrift_vel   = xdrift_vel;
-svde_struct.ydrift_vel   = ydrift_vel;
-svde_struct.rad_confined = rad_confined;
-svde_struct.alpha        = alpha;
-svde_struct.modulus      = modulus;
+    svde_struct.seed         = seed;
+    svde_struct.numpaths     = numpaths;
+    svde_struct.viscosity    = viscosity;
+    svde_struct.bead_radius  = bead_radius;
+    svde_struct.frame_rate   = frame_rate;
+    svde_struct.duration     = duration;
+    svde_struct.tempK        = tempK;
+    svde_struct.field_width  = scale*field_width;
+    svde_struct.field_height = scale*field_height;
+    svde_struct.calim_um     = calib_um;
+    svde_struct.xdrift_vel   = xdrift_vel;
+    svde_struct.ydrift_vel   = ydrift_vel;
+    svde_struct.rad_confined = rad_confined;
+    svde_struct.alpha        = alpha;
+    svde_struct.modulus      = modulus;
 
 
 %Simulate the trajectories
@@ -63,11 +63,13 @@ logentry(['number of frames: ' num2str(numframes)]);
 %Another way to do this: numframes = length(xtraj)/numpaths;
 
 
+calib_um_scaled = calib_um/scale;
 %Calculate st dev of gaussians from bead radius
 bead_r_m = bead_radius;
 bead_r_um = bead_r_m*1000000;
-bead_pix_r = bead_r_um/calib_um;
-logentry(['bead radius is ' num2str(bead_pix_r) ' pixels']);
+bead_r_nm = bead_r_um*1000;
+bead_pix_r = bead_r_um/calib_um_scaled;
+logentry(['bead radius is ' num2str(bead_r_nm) ' nm']);
 
 %Calculate noise (standard deviation of background) from SNR and signal
 noise = (signal - background)/SNR;
@@ -94,7 +96,7 @@ for i = 1:numframes
     
     %Simulate each spot in the frame
     for spot = 1:numframes:(length(xtraj)-1);
-        paths = paths + gauss2d(blank,bead_pix_r,[xtraj(frames+spot),ytraj(frames+spot)],a);
+        paths = paths + gauss2d(blank,(scale*bead_pix_r),[xtraj(frames+spot),ytraj(frames+spot)],a);
     end
     
     frame = uint8(255.*paths);

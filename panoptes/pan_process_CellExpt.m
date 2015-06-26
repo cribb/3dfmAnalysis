@@ -89,6 +89,8 @@ filt.tcrop      = 3;
 % frames are entirely eliminated from the tracking data.
 filt.min_frames = 10;
 
+filt.min_sens  = 7;
+
 % The 'min_pixels' filter defines the minimum number of pixels any
 % trajectory must cross from its initial position.  This helps eliminate
 % "stuck" beads from a collection of trajectories

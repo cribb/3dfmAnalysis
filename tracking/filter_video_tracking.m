@@ -271,6 +271,10 @@ function data = filter_min_sens(data, min_sens)
     
     ids_to_remove = unique( data(lowsens_data,ID) );
     
+    if isempty(ids_to_remove)
+        return;
+    end
+    
     midx = zeros(size(data,1),1);
     for k = 1:length(ids_to_remove)
         idx = ( data(:,ID) == ids_to_remove(k) );
