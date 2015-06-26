@@ -188,6 +188,8 @@ for fid = 1:length(files)
 
     end
 end
+
+avgSNR=mean(SNR)
 return;
 
 
