@@ -19,7 +19,7 @@ logentry('All parameters set');
     field_height = in_struct.field_height;   % [pixels]
     calib_um     = in_struct.calib_um;       % [um/pixel]
     scale        = in_struct.scale;          % [scaling factor]
-    signal       = in_struct.signal;         % [max intensity of signal]
+    intensity    = in_struct.intensity;      % [max intensity of image]
     background   = in_struct.background;     % [max intensity value]
     SNR          = in_struct.SNR;
     seed         = in_struct.seed;           %  #ok<NASGU>
@@ -49,7 +49,13 @@ logentry('All parameters set');
     svde_struct.alpha        = alpha;
     svde_struct.modulus      = modulus;
 
+    
+%Check to make sure that there will not be bleaching
+if intensity >= 255
+    error('Photobleaching will occur at this level of intensity--cannot simulate video.');
+end
 
+    
 %Simulate the trajectories
 traj = sim_video_diff_expt('expected',svde_struct); 
 %named the vrpn file 'expected' for now, is this necessary to save in the future?
@@ -72,18 +78,12 @@ bead_pix_r = bead_r_um/calib_um_scaled;
 logentry(['bead radius is ' num2str(bead_r_nm) ' nm']);
 
 %Calculate noise (standard deviation of background) from SNR and signal
-noise = (signal - background)/SNR;
+noise = (intensity - background)/SNR;
 
 
 %Calculate scalar for gaussian function
+signal = intensity-background-(2*noise);
 a = signal/255;
-
-
-%Check to make sure that there will not be bleaching
-total_I = signal+background+(2*noise);
-if total_I >= 255
-    error('Photobleaching will occur, cannot simulate video.');
-end
 
 
 %may be a better way to do this part - instead of 2 for loops make the 
@@ -155,8 +155,8 @@ function out = param_check(in)
         in.scale = 1;   % [scaling factor]
     end
     
-    if ~isfield(in, 'signal') || isempty(in.signal)
-        in.signal = 200;   % [max intensity of signal]
+    if ~isfield(in, 'intensity') || isempty(in.intensity)
+        in.intensity = 250;   % [max intensity of signal]
     end
     
     if ~isfield(in, 'background') || isempty(in.background)
