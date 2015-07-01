@@ -114,7 +114,7 @@ for i = 1:numframes
     filename = ['frame_' sprintf('%04d',i-1) '.tif'];
     imwrite(frame, filename, 'Tiff');
     frames = frames+1;
-    logentry(['created frame ' sprintf('%04d',i-1)]);
+    logentry(['Created frame ' sprintf('%04d',i-1)]);
 end
 
 logentry('Created final frames');
