@@ -1,14 +1,54 @@
 function [] = video_sim(in_struct)
-%Will create frames in the current directory, must create directory
-%before using function
-%Uses 8-bit integers
+%VIDEO_SIM creates a simulated video of fluorescent beads moving
+%through a Newtonian fluid
+%
+%3DFM function
+%video/sim_bead_video
+%last modified 7.5.2015 (ptlee)
+%
+%This function will simulate videos of fluorescent beads moving through a
+%Newtonian fluid as several tiff image frames. 
+%
+%Video_sim will not create a directory for the frames - it will save them
+%in the current directory. 
+%
+%The resulting frames will be created as matrices of 8-bit integers and saved as tiff images.
+%
+%
+%
+%Takes a single structure that specifies the parameters for the simulation as an input.
+%Its fields include:
+%       in_struct.numpaths = number of bead paths.  Default: 10.
+%       in_struct.bead_radius = bead radius in [m].  Default: 0.5e-6.
+%       in_struct.frame_rate = frame rate of camera in [fps].  Default: 30.
+%       in_struct.duration = duration of video in [s].  Default: 60.
+%       in_struct.field_width = width of video frame in [px].  Default: 648.
+%       in_struct.field_height = height of video frame in [px].  Default: 484.
+%       in_struct.calib_um = conversion unit in [microns/pixel].  Default: 0.152.
+%       in_struct.scale = scaling factor for the field height and width.  Default: 1.
+%       in_struct.intensity = maximum intensity for the final image.  Default: 250.
+%               Maximum intensity cannot be greater than 255 (frames are
+%               created as matrices of 8-bit integers).
+%       in_struct.background = mean intensity value, image matrix, or image
+%               filename to be used as a background for the video.  Default: mean
+%               intensity of 10.
+%       in_struct.SNR = signal-to-noise ratio for the video.  Default: 10. 
+%       in_struct.seed = seed value to give to random number generator.
+%               If this value is absent, the generator uses the 
+%               system time as the seed.
+%       in_struct.viscosity = solution viscosity in [Pa s].  Default: 0.023 (2 M sucrose).
+%       in_struct.tempK = temperature of fluid in [K].  Default: 300.
+%       in_struct.xdrift_vel = x-drift in [meters/frame].  Default: 0.
+%       in_struct.ydrift_vel = y-drift in [meters/frame].  Default: 0.
+%       in_struct.rad_confined = the particle's radius of confinement in [m]. Default: Inf.
+%       in_struct.alpha = anomalous diffusion constant. Default: 1.
+%       in_struct.modulus = modulus of the fluid [Pa]. Default: 2.2e9 (bulk modulus of water).
 
-%Verify that all parameters have been specified, give default value to any
-%that have not been chosen
 
 video_tracking_constants;
 
-
+%Verify that all parameters have been specified, give default value to any
+%that have not been chosen
 in_struct = param_check(in_struct);
 logentry('All parameters set');
     numpaths     = in_struct.numpaths;
