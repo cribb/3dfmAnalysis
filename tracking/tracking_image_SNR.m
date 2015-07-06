@@ -13,11 +13,12 @@ if isempty(files)
     error('No files in list. Wrong filename?');
 end
 
+
 for fid = 1:length(files)
 
     filename = files(fid).name;
     
-    logentry(['Loading '  files(fid).name '.']);
+    %logentry(['Loading '  files(fid).name '.']);
 
     % read in the filename
     im = imread(filename);
@@ -26,7 +27,7 @@ for fid = 1:length(files)
 
 %   this will determine if image is 16-bit or 8-bit. If 16-bit, will reduce
 %   to 8-bit. If aready 8-bit, nothing happens. 
-    picinfo = imfinfo(im);
+    picinfo = imfinfo(filename);
     bit = picinfo.BitDepth;
 
     switch bit
@@ -111,7 +112,7 @@ for fid = 1:length(files)
 
     mean_max_sig = mean(bead_sig);
 
-    SNR(fid) = (mean_max_sig - noise(end)) / noise(end);
+    SNR(fid) = (mean_max_sig - mean_noise(end)) / noise(end);
 
 
     if strcmp(report, 'y')
