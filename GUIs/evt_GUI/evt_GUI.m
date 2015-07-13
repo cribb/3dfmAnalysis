@@ -1689,7 +1689,7 @@ function plot_data(hObject, eventdata, handles)
             
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
-
+            plot_msdhist_at_tau(mymsd_at_mytau, AUXfig);
 
             
             
