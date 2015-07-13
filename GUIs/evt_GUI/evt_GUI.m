@@ -1381,10 +1381,10 @@ function plot_data(hObject, eventdata, handles)
 
     if get(handles.radio_pixels, 'Value');
         calib_um = 1;
-        ylabel_string = 'displacement [pixels]';
+        ylabel_unit = 'pixels';
     elseif get(handles.radio_microns, 'Value');
         calib_um = str2double(get(handles.edit_calib_um, 'String')); 
-        ylabel_string = 'displacement [\mum]';
+        ylabel_unit = '\mum';
     end
     
     im     = handles.im;
@@ -1436,8 +1436,8 @@ function plot_data(hObject, eventdata, handles)
         hold off;
     end
     
-    xlabel(ylabel_string);
-    ylabel(ylabel_string);    
+    xlabel(['displacement [' ylabel_unit ']']);
+    ylabel(['displacement [' ylabel_unit ']']);    
     axis([0 imx 0 imy] .* calib_um);
     set(handles.XYfig, 'Units', 'Normalized');
     set(handles.XYfig, 'Position', [0.1 0.05 0.4 0.4]);
@@ -1452,7 +1452,7 @@ function plot_data(hObject, eventdata, handles)
         plot(t(k) - mintime, [x(k) y(k)], '.');
     end
     xlabel('time [s]');
-    ylabel(ylabel_string);
+    ylabel(['displacement [' ylabel_unit ']']);
     legend('x', 'y');    
     set(handles.XTfig, 'Units', 'Normalized');
     set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
@@ -1534,7 +1534,7 @@ function plot_data(hObject, eventdata, handles)
 
             plot(t(k) - mintime, r, '.-');
             xlabel('time (s)');
-            ylabel(['radial ' ylabel_string]);
+            ylabel(['radial dispacement [' ylabel_unit ']']);
             set(handles.AUXfig, 'Units', 'Normalized');
             set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
             set(handles.AUXfig, 'DoubleBuffer', 'on');
@@ -1561,12 +1561,10 @@ function plot_data(hObject, eventdata, handles)
 
             velx = CreateGaussScaleSpace(x(k), 1, 0.5)/dt;
             vely = CreateGaussScaleSpace(y(k), 1, 0.5)/dt;
-            
-            vr = magnitude(velx, vely);            
-            
-            plot(t(k) - mintime, vr(:), '.-');
+                      
+            plot(t(k) - mintime, [velx(:) vely(:)], '.-');
             xlabel('time (s)');
-            ylabel(['velocity ']);
+            ylabel(['velocity [' ylabel_unit '/s]']);
             legend('x', 'y');    
             set(handles.AUXfig, 'Units', 'Normalized');
             set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
@@ -1575,17 +1573,18 @@ function plot_data(hObject, eventdata, handles)
             drawnow;
             
         case 'velocity magnitude'
-                        figure(handles.AUXfig);
+            figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
             
             velx = CreateGaussScaleSpace(x(k), 1, 0.5)/dt;
             vely = CreateGaussScaleSpace(y(k), 1, 0.5)/dt;
             
-            velr = magnitude
-            plot(t(k) - mintime, [velx(:) vely(:)], '.-');
+            vr = magnitude(velx, vely);    
+            
+            plot(t(k) - mintime, [vr(:)], '.-');
             xlabel('time (s)');
-            ylabel(['velocity ']);
-            legend('x', 'y');    
+            ylabel(['velocity [' ylabel_unit '/s]']);
+            legend('r');    
             set(handles.AUXfig, 'Units', 'Normalized');
             set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
             set(handles.AUXfig, 'DoubleBuffer', 'on');
