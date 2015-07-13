@@ -85,7 +85,7 @@ for fid = 1:length(files)
         c = c + 1;
     end
 
-    sig_data = double(im(dil_mask > 0)) - noise(end);
+    sig_data = double(im(dil_mask > 0)) - mean_noise(end);
 
 
 
@@ -93,10 +93,10 @@ for fid = 1:length(files)
     % im_noise = double(im) .* double(~im_bw);
     % im_signal = (double(im)-noise) .* double(im_bw);
 
-    im_signal = (double(im)-noise(end)) .* double(dil_mask);
+    im_signal = (double(im)-mean_noise(end)) .* double(dil_mask);
     im_noise = double(im) .* double(~dil_mask);
 
-    cc = bwconncomp(mask, 4);
+    cc = bwconncomp(mask, 8);
     numbeads = cc.NumObjects;
 
     for k = 1:numbeads
