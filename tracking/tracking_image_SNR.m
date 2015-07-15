@@ -8,7 +8,7 @@ end
 
 format long g;
 
-files = dir(filelist);
+files = dir('*.tif');
 if isempty(files)
     error('No files in list. Wrong filename?');
 end
@@ -104,7 +104,7 @@ for fid = 1:length(files)
         this_bead_px = im(this_bead_idx);
 
         bead_sig(k) = double(max(this_bead_px(:)));
-    end;
+    end
 
     % filter out any overexposed values
     % oe_idx = find(bead_sig >= 255);
