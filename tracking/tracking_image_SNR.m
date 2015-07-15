@@ -46,7 +46,7 @@ for fid = 1:length(files)
 
     [level EM(fid)] = graythresh(im);
     mask = im2bw(im, level);
-    mask = bwareaopen(mask, 50);
+    mask = bwareaopen(mask, 10);
 
 
     dil_mask = mask;

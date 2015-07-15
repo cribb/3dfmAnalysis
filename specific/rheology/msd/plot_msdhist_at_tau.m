@@ -1,17 +1,20 @@
-function h = plot_alphadist(alpha, h)
-% PLOT_ALPHAVSTAU plots the graph of slope (alpha) of mean square displacement values versus tau for an aggregate number of beads 
+function h = plot_msdhist_at_tau(msd_at_tau, h)
+% PLOT_MSDHIST_AT_TAU generates a simple histogram of msd values at a specific tau
 %
 % 3DFM function
 % specific\rheology\msd
-% last modified 11/20/08 (krisford)
 %
 %
-% plot_msd(d)
+% plot_msdhist_at_tau(msd_at_tau)
 %
-% where "d" is the input structure vrom the ve function and should contain the mean square displacement, the tau 
-%       value (window size), and the number of beads in a given window.
+% where "msd_at_tau" contains the msd values for a particular tau       
 %       "h" is the figure handle in which to put the plot.  If h is not
 %       used, a new figure is generated.
+%
+% Note: tau should become an input so the time scale can be placed upon the
+% figure legend.
+%
+
 
 
 
@@ -37,14 +40,14 @@ end
 
 % creating the plot
 figure(h);
-hist(alpha(:),25);
+hist(msd_at_tau(:),25);
 
 ch = get(gca, 'Children');
 for k = 1:length(ch)
     set(ch(k), 'DisplayName', num2str(length(ch)-k));
 end
 
-xlabel('alpha');
+xlabel('MSD [m^2]');
 ylabel('counts');
 
 grid on;
