@@ -8,7 +8,7 @@ end
 
 format long g;
 
-files = dir('*.tif');
+files = dir(filelist);
 if isempty(files)
     error('No files in list. Wrong filename?');
 end
@@ -44,11 +44,18 @@ for fid = 1:length(files)
     % % create a mask using the disk structural element
     % mask = imopen(im, strel('disk',disk_radius));
 
-    [level EM(fid)] = graythresh(im);
+    
+    %I_sig > Th * (I_max - I_min) + I_min
+     maxPixel=double(max(im(:)));
+    minPixel=double(min(im(:)));
+    medPixel=double(median(im(:)));
+    Threshold =medPixel/maxPixel;
+    signalLevel=Threshold*(maxPixel-minPixel)+minPixel;
+   level=signalLevel/maxPixel;
+   %[level EM(fid)] = graythresh(im);
     mask = im2bw(im, level);
-    mask = bwareaopen(mask, 10);
-
-
+    mask = bwareaopen(mask, 1);
+    imshow(mask);
     dil_mask = mask;
     dilation_step_size = 1;
 
@@ -61,7 +68,7 @@ for fid = 1:length(files)
         % pull out all of the values
         noise_data = double(im(~dil_mask));
         mean_noise(c) = mean(noise_data(:));
-        max_noise(c) = max(noise_data(:));
+        %max_noise(c) = max(noise_data(:));
         noise(c) = std(noise_data(:));
 
         if c > 1
