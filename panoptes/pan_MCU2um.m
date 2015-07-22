@@ -70,7 +70,7 @@ function [calibum, calibum_err] = pan_MCU2um(MCUparam, systemid, wellid, metadat
                     logentry('MCU parameter value is NaN. Returning NaN');
                     calibum(q) = NaN;
                 elseif MCUparam(q) < lim_lo
-                    calibum(chanIDX,q) = scales(idx, SLOPE) * lim_lo + scales(idx, INTERCEPT);          
+                    calibum(q) = scales(idx, SLOPE) * lim_lo + scales(idx, INTERCEPT);          
                 elseif MCUparam(q) < lim_hi && MCUparam(q) > lim_lo
                     calibum(q) = scales(idx, SLOPE) .* MCUparam(q) + scales(idx,INTERCEPT);
                 elseif MCUparam(q) > lim_hi
