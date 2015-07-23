@@ -111,12 +111,15 @@ logentry(['Number of frames: ' num2str(numframes)]);
 %Another way to do this: numframes = length(xtraj)/numpaths;
 
 
-%Calculate st dev of gaussians from bead radius
 bead_r_m = bead_radius;
 bead_r_um = bead_r_m*1000000;
 bead_r_nm = bead_r_um*1000;
-bead_pix_r = bead_r_um/calib_um_scaled;
-logentry(['Bead radius is ' num2str(bead_r_nm) ' nm']);
+% bead_pix_r = bead_r_um/calib_um_scaled;
+logentry(['Bead diameter is ' num2str(bead_r_nm*2) ' nm']);
+
+
+%Calculate st dev of gaussians from bead radius
+[stdev_gaussian] = lookup_radius(bead_radius);
 
 
 %Calculate scalar for gaussian function
@@ -141,7 +144,7 @@ for i = 1:numframes
     
     %Simulate each spot in the frame
     for spot = 1:numframes:(length(xtraj)-1);
-        paths = paths + gauss2d(blank,(scale*bead_pix_r),[xtraj(frames+spot),ytraj(frames+spot)],a);
+        paths = paths + gauss2d(blank,(scale*stdev_gaussian),[xtraj(frames+spot),ytraj(frames+spot)],a);
     end
     
     frame = uint8(255.*paths);
