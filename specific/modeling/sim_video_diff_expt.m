@@ -112,7 +112,7 @@ logentry(['Parameters indicate a ' model_type ' model type.']);
     end
     
     
-        % create random starting locations (offsets) within the prescribed field
+    % create random starting locations (offsets) within the prescribed field
     position_offsets = repmat(rand(1,2,numpaths), [frame_rate*duration,1,1]).* ...
                        repmat([field_width field_height],[frame_rate*duration,1,numpaths]) .* ...
                        (calib_um / 1e6);

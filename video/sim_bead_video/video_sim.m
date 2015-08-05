@@ -60,7 +60,7 @@ logentry('All parameters set');
     calib_um     = in_struct.calib_um;       % [um/pixel]
     scale        = in_struct.scale;          % [scaling factor]
     intensity    = in_struct.intensity;      % [max intensity of image]
-    background   = in_struct.background;     % [max intensity value]
+    background   = in_struct.background;     % [mean intensity, image matrix, or filename]
     SNR          = in_struct.SNR;
     seed         = in_struct.seed;           %  #ok<NASGU>
     viscosity    = in_struct.viscosity;      % [Pa s]
@@ -72,6 +72,8 @@ logentry('All parameters set');
     modulus      = in_struct.modulus;        % [Pa]
 
 
+calib_um_scaled = calib_um/scale;
+    
 
     svde_struct.seed         = seed;
     svde_struct.numpaths     = numpaths;
@@ -82,7 +84,7 @@ logentry('All parameters set');
     svde_struct.tempK        = tempK;
     svde_struct.field_width  = scale*field_width;
     svde_struct.field_height = scale*field_height;
-    svde_struct.calim_um     = calib_um;
+    svde_struct.calib_um     = calib_um_scaled;
     svde_struct.xdrift_vel   = xdrift_vel;
     svde_struct.ydrift_vel   = ydrift_vel;
     svde_struct.rad_confined = rad_confined;
@@ -90,10 +92,10 @@ logentry('All parameters set');
     svde_struct.modulus      = modulus;
 
     
-%Check to make sure that there will not be bleaching
-if intensity >= 255
-    error('Photobleaching will occur at this level of intensity--cannot simulate video.');
-end
+%Based on what type of input background is this function will create a
+%matrix for the background, determine how much noise is necessary for the
+%parameters, and determine how much more noise needs to be added
+[background_mat,bg_mean,noise,need_noise] = create_background(background,intensity,SNR,field_height,field_width);
 
     
 %Simulate the trajectories
@@ -105,25 +107,31 @@ ytraj = traj(:,Y);
 
 %Determine the number of frames in the video
 numframes = frame_rate*duration;
-logentry(['number of frames: ' num2str(numframes)]);
+logentry(['Number of frames: ' num2str(numframes)]);
 %Another way to do this: numframes = length(xtraj)/numpaths;
 
 
-calib_um_scaled = calib_um/scale;
-%Calculate st dev of gaussians from bead radius
 bead_r_m = bead_radius;
 bead_r_um = bead_r_m*1000000;
 bead_r_nm = bead_r_um*1000;
-bead_pix_r = bead_r_um/calib_um_scaled;
-logentry(['bead radius is ' num2str(bead_r_nm) ' nm']);
+% bead_pix_r = bead_r_um/calib_um_scaled;
+logentry(['Bead diameter is ' num2str(bead_r_nm*2) ' nm']);
 
-%Calculate noise (standard deviation of background) from SNR and signal
-noise = (intensity - background)/SNR;
+
+%Calculate st dev of gaussians from bead radius
+[stdev_gaussian] = lookup_radius(bead_radius);
 
 
 %Calculate scalar for gaussian function
-signal = intensity-background-(2*noise);
+signal = intensity-bg_mean-(2*noise);
 a = signal/255;
+
+
+%Check to make sure that there will not be bleaching
+overall_I = bg_mean + signal + (2*noise);
+if overall_I >= 255
+    error('Photobleaching will occur at this level of intensity--cannot simulate video.');
+end
 
 
 %may be a better way to do this part - instead of 2 for loops make the 
@@ -136,7 +144,7 @@ for i = 1:numframes
     
     %Simulate each spot in the frame
     for spot = 1:numframes:(length(xtraj)-1);
-        paths = paths + gauss2d(blank,(scale*bead_pix_r),[xtraj(frames+spot),ytraj(frames+spot)],a);
+        paths = paths + gauss2d(blank,(scale*stdev_gaussian),[xtraj(frames+spot),ytraj(frames+spot)],a);
     end
     
     frame = uint8(255.*paths);
@@ -144,11 +152,9 @@ for i = 1:numframes
     %Downsample the frame to the correct size
     frame = image_downsample(frame,scale);
     
-    %Generate noise on the frame
-    rand_noise = uint8(background + noise .* randn(field_height,field_width));
-    frame = frame + rand_noise;
-    
-    %Add background
+    %Generate noise on the frame and add a background
+    rand_noise = uint8(need_noise .* randn(field_height,field_width));
+    frame = frame + background_mat + rand_noise;
     
     %Save the frame 
     filename = ['frame_' sprintf('%04d',i-1) '.tif'];
@@ -242,4 +248,47 @@ function out = param_check(in)
     out = in;
     
 return;
+end
+
+
+function [background_mat,bg_mean,noise,need_noise] = create_background(background,intensity,SNR,field_height,field_width)
+
+if (isnumeric(background) && (length(background) <=1 || length(background) <=3)) == 1
+    bg_mean = background;
+    logentry(['Mean background intensity = ' num2str(bg_mean) '. Background is a matrix of ' num2str(bg_mean) 's.']);
+    noise = (intensity-bg_mean)/SNR;
+    background_mat = repmat(bg_mean, field_height, field_width);
+    background_mat = uint8(background_mat);
+    need_noise = noise;
+    
+elseif (isnumeric(background) && length(background) > 3) == 1;
+    logentry('Background is an image matrix.');
+    background_mat = double(background);
+    bg_mean = mean(mean(background_mat));
+    logentry(['Mean background intensity = ' num2str(bg_mean) '.']);
+    existingnoise = std(std(background_mat));
+    noise = (intensity-bg_mean)/SNR;
+    background_mat = uint8(background_mat);
+    if existingnoise > noise
+        error('Too much noise in the background for this SNR.');
+    else need_noise = noise - existingnoise;
+    end
+    
+elseif ischar(background) == 1 ;
+    if exist(background, 'file') ~= 2
+        error('Background image file does not exist. Please add file to Matlab path.');
+    end
+    logentry('Background is an image file.');
+    background_mat = double(imread(background));
+    bg_mean = mean(mean(background_mat));
+    logentry(['Mean background intensity = ' num2str(bg_mean) '.']);
+    existingnoise = std(std(background_mat));
+    noise = (intensity-bg_mean)/SNR;
+    background_mat = uint8(background_mat);
+    if existingnoise > noise
+        error('Too much noise in the background for this SNR.');
+    else need_noise = noise - existingnoise;
+    end
+end
+% imwrite(background_mat,'background.tif','tiff');
 end
