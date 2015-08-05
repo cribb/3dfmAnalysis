@@ -4,7 +4,7 @@ function [] = video_sim(in_struct)
 %
 %3DFM function
 %video/sim_bead_video
-%last modified 7.5.2015 (ptlee)
+%last modified 8.5.2015 (ptlee)
 %
 %This function will simulate videos of fluorescent beads moving through a
 %Newtonian fluid as several tiff image frames. 
@@ -95,7 +95,8 @@ calib_um_scaled = calib_um/scale;
 %Based on what type of input background is this function will create a
 %matrix for the background, determine how much noise is necessary for the
 %parameters, and determine how much more noise needs to be added
-[background_mat,bg_mean,noise,need_noise] = create_background(background,intensity,SNR,field_height,field_width);
+%[background_mat,bg_mean,noise,need_noise] = create_background(background,intensity,SNR,field_height,field_width);
+[background_mat,bg_mean,extra_bg,noise,add_noise] = create_background(background,intensity,SNR,field_height,field_width);
 
     
 %Simulate the trajectories
@@ -123,12 +124,12 @@ logentry(['Bead diameter is ' num2str(bead_r_nm*2) ' nm']);
 
 
 %Calculate scalar for gaussian function
-signal = intensity-bg_mean-(2*noise);
+signal = intensity-bg_mean-(noise);
 a = signal/255;
 
 
 %Check to make sure that there will not be bleaching
-overall_I = bg_mean + signal + (2*noise);
+overall_I = bg_mean + signal + (noise);
 if overall_I >= 255
     error('Photobleaching will occur at this level of intensity--cannot simulate video.');
 end
@@ -150,11 +151,15 @@ for i = 1:numframes
     frame = uint8(255.*paths);
     
     %Downsample the frame to the correct size
-    frame = image_downsample(frame,scale);
+    if scale ~= 1
+        frame = image_downsample(frame,scale);
+    end
     
     %Generate noise on the frame and add a background
-    rand_noise = uint8(need_noise .* randn(field_height,field_width));
-    frame = frame + background_mat + rand_noise;
+    
+    noisy_bg = uint8(add_noise .* randn(field_height,field_width) + bg_mean);
+    balance_bg = uint8(repmat(extra_bg,field_height,field_width));
+    frame = frame + noisy_bg + background_mat - balance_bg;
     
     %Save the frame 
     filename = ['frame_' sprintf('%04d',i-1) '.tif'];
@@ -251,28 +256,34 @@ return;
 end
 
 
-function [background_mat,bg_mean,noise,need_noise] = create_background(background,intensity,SNR,field_height,field_width)
+function [background_mat,bg_mean,extra_bg,noise,add_noise] = create_background(background,intensity,SNR,field_height,field_width)
 
 if (isnumeric(background) && (length(background) <=1 || length(background) <=3)) == 1
     bg_mean = background;
     logentry(['Mean background intensity = ' num2str(bg_mean) '. Background is a matrix of ' num2str(bg_mean) 's.']);
     noise = (intensity-bg_mean)/SNR;
-    background_mat = repmat(bg_mean, field_height, field_width);
-    background_mat = uint8(background_mat);
-    need_noise = noise;
+    add_noise = noise;
+    extra_bg = 0;
+    background_mat = uint8(zeros(field_height,field_width));
     
 elseif (isnumeric(background) && length(background) > 3) == 1;
     logentry('Background is an image matrix.');
     background_mat = double(background);
-    bg_mean = mean(mean(background_mat));
+    bg_dim = size(background_mat);
+    if bg_dim(1) ~= field_height || bg_dim(2) ~= field_width
+        error('Background size does not match frame size.');
+    end
+    bg_mean = mean(background_mat(:));
     logentry(['Mean background intensity = ' num2str(bg_mean) '.']);
-    existingnoise = std(std(background_mat));
+    existingnoise = std(background_mat(:));
     noise = (intensity-bg_mean)/SNR;
+    extra_bg = bg_mean;
     background_mat = uint8(background_mat);
     if existingnoise > noise
         error('Too much noise in the background for this SNR.');
-    else need_noise = noise - existingnoise;
+    else add_noise = noise - existingnoise;
     end
+    imwrite(background_mat,'background.tif','tiff');
     
 elseif ischar(background) == 1 ;
     if exist(background, 'file') ~= 2
@@ -280,15 +291,21 @@ elseif ischar(background) == 1 ;
     end
     logentry('Background is an image file.');
     background_mat = double(imread(background));
-    bg_mean = mean(mean(background_mat));
+    bg_dim = size(background_mat);
+    if bg_dim(1) ~= field_height || bg_dim(2) ~= field_width
+        error('Background size does not match frame size.');
+    end
+    bg_mean = mean(background_mat(:));
     logentry(['Mean background intensity = ' num2str(bg_mean) '.']);
-    existingnoise = std(std(background_mat));
+    existingnoise = std(background_mat(:));
     noise = (intensity-bg_mean)/SNR;
+    extra_bg = bg_mean;
     background_mat = uint8(background_mat);
     if existingnoise > noise
         error('Too much noise in the background for this SNR.');
-    else need_noise = noise - existingnoise;
+    else add_noise = noise - existingnoise;
     end
+    imwrite(background_mat,'background.tif','tiff');
 end
 % imwrite(background_mat,'background.tif','tiff');
 end
