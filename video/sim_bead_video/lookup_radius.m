@@ -10,5 +10,11 @@ switch(bead_radius)
     case 2.5e-7;
         stdev_gaussian = 2.6;
         
+    case 5e-7;
+        stdev_gaussian = 5.2;
+        
+    case 1e-6;
+        stdev_gaussian = 10.4;
+        
 end
 end
