@@ -18,15 +18,15 @@ for fid = 1:length(files)
 
     filename = files(fid).name;
     
-    %logentry(['Loading '  files(fid).name '.']);
+    logentry(['Loading '  files(fid).name '.']);
 
-    % read in the filename
+   % read in the filename
     im = imread(filename);
     im = im(:,:,1);
     
 
-%   this will determine if image is 16-bit or 8-bit. If 16-bit, will reduce
-%   to 8-bit. If aready 8-bit, nothing happens. 
+  this will determine if image is 16-bit or 8-bit. If 16-bit, will reduce
+  to 8-bit. If aready 8-bit, nothing happens. 
     picinfo = imfinfo(filename);
     bit = picinfo.BitDepth;
 
@@ -46,15 +46,16 @@ for fid = 1:length(files)
 
     
     %I_sig > Th * (I_max - I_min) + I_min
+   
      maxPixel=double(max(im(:)));
     minPixel=double(min(im(:)));
     medPixel=double(median(im(:)));
-    Threshold =medPixel/maxPixel;
+    Threshold =.52;
     signalLevel=Threshold*(maxPixel-minPixel)+minPixel;
-   level=signalLevel/maxPixel;
+   level=signalLevel/256;
    %[level EM(fid)] = graythresh(im);
     mask = im2bw(im, level);
-    mask = bwareaopen(mask, 1);
+    mask = bwareaopen(mask, 2);
     imshow(mask);
     dil_mask = mask;
     dilation_step_size = 1;
@@ -68,7 +69,7 @@ for fid = 1:length(files)
         % pull out all of the values
         noise_data = double(im(~dil_mask));
         mean_noise(c) = mean(noise_data(:));
-        %max_noise(c) = max(noise_data(:));
+        max_noise(c) = max(noise_data(:));
         noise(c) = std(noise_data(:));
 
         if c > 1
@@ -195,9 +196,8 @@ for fid = 1:length(files)
         ylabel('error signal (\Delta noise)');
 
     end
+avgSNR=mean(SNR);
 end
-
-avgSNR=mean(SNR)
 return;
 
 

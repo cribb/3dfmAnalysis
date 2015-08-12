@@ -1,4 +1,4 @@
-function outs=get_frames_combo(filepath)
+function outs=get_frames_combo(filepath,datatag)
 
 
 file_name=filepath;
@@ -22,7 +22,18 @@ background = imopen(im,strel('disk',100));
 
 for i=1:num_images
     frame(:,:,i)=frame(:,:,i)-background;
-
-end
-outs=frame;
     
+end
+
+
+[snr, em] = tracking_image_SNR(frame, 0.05, 'n');
+   avgSNR=mean(snr)
+   snfig = figure; 
+   plot(1:length(snr), snr);
+   xlabel('Frame #');
+   ylabel('Signal-to-Noise Ratio');
+   title([datatag ' full frame, with bkgd subtr']);
+   pretty_plot;
+  
+
+   
