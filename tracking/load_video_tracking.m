@@ -309,7 +309,7 @@ end
     for k = 1 : length(IDlist)
         
         % select rows in table that correspond only to the k-th bead
-        idx = find(trackerID == k);
+        idx = find(trackerID == IDlist(k));
         this_tracker  = data(idx,:);
         
         % handle the case for which a trackerID was used, but no points

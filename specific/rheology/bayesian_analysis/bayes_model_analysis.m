@@ -47,44 +47,49 @@ for k = 1:length(bayes_output)
 
         
         for i = 1:length(N_curves)
-        N_curve_struct.tau    = bayes_output(k,1).agg_data.tau(:,N_row_index');
-        N_curve_struct.msd    = bayes_output(k,1).agg_data.msd(:,N_row_index');
-        N_curve_struct.n      = bayes_output(k,1).agg_data.n;
-        N_curve_struct.ns     = bayes_output(k,1).agg_data.ns(:,N_row_index');
-        N_curve_struct.window = bayes_output(k,1).agg_data.window;
+            N_curve_struct.trackerID = bayes_output(k,1).agg_data.trackerID(1,N_row_index');
+            N_curve_struct.tau       = bayes_output(k,1).agg_data.tau(:,N_row_index');
+            N_curve_struct.msd       = bayes_output(k,1).agg_data.msd(:,N_row_index');
+            N_curve_struct.n         = bayes_output(k,1).agg_data.n;
+            N_curve_struct.ns        = bayes_output(k,1).agg_data.ns(:,N_row_index');
+            N_curve_struct.window    = bayes_output(k,1).agg_data.window;
         end
 
         for i = 1:length(D_curves)
-        D_curve_struct.tau    = bayes_output(k,1).agg_data.tau(:,D_row_index');
-        D_curve_struct.msd    = bayes_output(k,1).agg_data.msd(:,D_row_index');
-        D_curve_struct.n      = bayes_output(k,1).agg_data.n;
-        D_curve_struct.ns     = bayes_output(k,1).agg_data.ns(:,D_row_index');
-        D_curve_struct.window = bayes_output(k,1).agg_data.window;
+            D_curve_struct.trackerID = bayes_output(k,1).agg_data.trackerID(1,D_row_index');
+            D_curve_struct.tau       = bayes_output(k,1).agg_data.tau(:,D_row_index');
+            D_curve_struct.msd       = bayes_output(k,1).agg_data.msd(:,D_row_index');
+            D_curve_struct.n         = bayes_output(k,1).agg_data.n;
+            D_curve_struct.ns        = bayes_output(k,1).agg_data.ns(:,D_row_index');
+            D_curve_struct.window    = bayes_output(k,1).agg_data.window;
         end
 
         for i = 1:length(DA_curves)
-        DA_curve_struct.tau    = bayes_output(k,1).agg_data.tau(:,DA_row_index');
-        DA_curve_struct.msd    = bayes_output(k,1).agg_data.msd(:,DA_row_index');
-        DA_curve_struct.n      = bayes_output(k,1).agg_data.n;
-        DA_curve_struct.ns     = bayes_output(k,1).agg_data.ns(:,DA_row_index');
-        DA_curve_struct.window = bayes_output(k,1).agg_data.window;
+            DA_curve_struct.trackerID = bayes_output(k,1).agg_data.trackerID(1,DA_row_index');
+            DA_curve_struct.tau       = bayes_output(k,1).agg_data.tau(:,DA_row_index');
+            DA_curve_struct.msd       = bayes_output(k,1).agg_data.msd(:,DA_row_index');
+            DA_curve_struct.n         = bayes_output(k,1).agg_data.n;
+            DA_curve_struct.ns        = bayes_output(k,1).agg_data.ns(:,DA_row_index');
+            DA_curve_struct.window    = bayes_output(k,1).agg_data.window;
         end
 
         for i = 1:length(DR_curves)
-        DR_curve_struct.tau    = bayes_output(k,1).agg_data.tau(:,DR_row_index');
-        DR_curve_struct.msd    = bayes_output(k,1).agg_data.msd(:,DR_row_index');
-        DR_curve_struct.n      = bayes_output(k,1).agg_data.n;
-        DR_curve_struct.ns     = bayes_output(k,1).agg_data.ns(:,DR_row_index');
-        DR_curve_struct.window = bayes_output(k,1).agg_data.window;
+            DR_curve_struct.trackerID = bayes_output(k,1).agg_data.trackerID(1,DR_row_index');
+            DR_curve_struct.tau       = bayes_output(k,1).agg_data.tau(:,DR_row_index');
+            DR_curve_struct.msd       = bayes_output(k,1).agg_data.msd(:,DR_row_index');
+            DR_curve_struct.n         = bayes_output(k,1).agg_data.n;
+            DR_curve_struct.ns        = bayes_output(k,1).agg_data.ns(:,DR_row_index');
+            DR_curve_struct.window    = bayes_output(k,1).agg_data.window;
         end
 
         for i = 1:length(V_curves)
-        V_curve_struct.tau    = bayes_output(k,1).agg_data.tau(:,V_row_index');
-        V_curve_struct.msd    = bayes_output(k,1).agg_data.msd(:,V_row_index');
-        V_curve_struct.n      = bayes_output(k,1).agg_data.n;
-        V_curve_struct.ns     = bayes_output(k,1).agg_data.ns(:,V_row_index');
-        V_curve_struct.window = bayes_output(k,1).agg_data.window;
-        %V_curve_struct.window(:,i) = bayes_output(k,1).agg_data.window;
+            V_curve_struct.trackerID = bayes_output(k,1).agg_data.trackerID(1,V_row_index');
+            V_curve_struct.tau       = bayes_output(k,1).agg_data.tau(:,V_row_index');
+            V_curve_struct.msd       = bayes_output(k,1).agg_data.msd(:,V_row_index');
+            V_curve_struct.n         = bayes_output(k,1).agg_data.n;
+            V_curve_struct.ns        = bayes_output(k,1).agg_data.ns(:,V_row_index');
+            V_curve_struct.window    = bayes_output(k,1).agg_data.window;
+            %V_curve_struct.window(:,i) = bayes_output(k,1).agg_data.window;
         end
 
 
