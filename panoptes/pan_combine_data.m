@@ -123,9 +123,11 @@ for p = 1:length(paramlist)
         % via a video-by-video and MCUparameter basis.
         save_evtfile(['aggregated_data_' myparam], d, 'm', 0.152);
 
-        mymsd = video_msd(d, window, metadata.instr.fps_imagingmode, mycalibum, 'no');                
+        mymsd = video_msd(d, window, metadata.instr.fps_imagingmode, 1, 'no');                
 
-        msds(p) = msdstat(mymsd);        
+        msds(p) = msdstat(mymsd);    
+        fprintf('parameter value %i,  size %i \n', p, size(msds(p).mean_logtau));
+        
         myve(p)  = ve(mymsd, bead_radius, freqtype, 'no');
 
         clear myMCU;  

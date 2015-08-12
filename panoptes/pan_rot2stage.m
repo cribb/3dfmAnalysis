@@ -36,16 +36,28 @@ function newxy = pan_rot2stage(xy, wellid, theta)
         error('No input coords defined');
     end
     
+    if size(xy,2) == 2
+        xy = transpose(xy);
+    end
+    
     channelid = pan_get_channel_id(wellid);
 
     % do the initial rotation
     R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
     rotxy = R * xy;
 
-    if ~mod(channelid,2) %even
+%     newxy = transpose(rotxy);
+    
+    rotxy = transpose(rotxy);
+    
+    
+    
+    if mod(channelid,2) % odd
         newxy = [-rotxy(:,1)  rotxy(:,2)];
-    else % odd
+    else % even
         newxy = [ rotxy(:,1) -rotxy(:,2)];    
     end
 
+    
+    
 return;

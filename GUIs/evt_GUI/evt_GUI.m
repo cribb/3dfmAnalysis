@@ -1,4 +1,4 @@
- function varargout = evt_GUI(varargin)
+function varargout = evt_GUI(varargin)
 % EVT_GUI creates a new evt_GUI or raises the existing singleton
 %
 % 3DFM function
@@ -1489,6 +1489,9 @@ function plot_data(hObject, eventdata, handles)
        strcmp(AUXtype, 'MSD histogram') || ...
        strcmp(AUXtype, 'RMS displacement')
         if handles.recomputeMSD % && get(handles.checkbox_msdmean, 'Value')
+            if calib_um ~= 1
+                data(:,[X Y Z]) = data(:,[X Y Z]) * calib_um * 1e-6;
+            end
             mymsd = video_msd(data, win, frame_rate, calib_um, 'no');            
             myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n');
             myD = mymsd.msd ./ (4 .* mymsd.tau);

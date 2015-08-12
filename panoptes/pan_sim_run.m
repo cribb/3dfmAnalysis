@@ -1,5 +1,36 @@
 function outs = pan_sim_run(filepath, systemid, plate_type)
-    
+% PAN_SIM_RUN simulates a diffusing-bead experiment on Panoptes
+%
+% Panoptes function 
+% 
+% This function is used primarily to test updates to the Panoptes analysis
+% code, but can be used to simulate full-plate experiments if desired. To
+% use this function you must provide the necessary metadata files in the
+% filepath in which the simluation runs.
+% 
+% outs = pan_sim_run(filepath, systemid, plate_type) 
+%
+% where "outs" is the simulation metadata (not trajectories) outputted 
+%          to the workspace.
+%       "filepath" is where the entire simluated experiment will reside.
+%          This path needs to already exist, AND CONTAIN THE METADATA FILES
+%          for the expected Panoptes (simulated) run. These files include the
+%          'wells.txt' (or 'ExperimentConfig') file, the MCU file, and the
+%          well layout file.
+%       "systemid" is either 'Monoptes' or 'Panoptes'
+%       "plate_type" is either '96well' or 384well'
+%
+% Notes:
+% This function is designed to simulate an experiment by generating
+% *trajectories* of spheres diffusing in fluids with known properties. 
+% It does NOT generate test videos and subsequently track them with 
+% Video Spot Tracker. 
+%
+
+
+% Set up default values for input parameters in case they are empty 
+% or otherwise do not exist. 
+
     if nargin < 3 || isempty(plate_type)
         plate_type = '96well';
     end
