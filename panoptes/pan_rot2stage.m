@@ -5,8 +5,8 @@ function newxy = pan_rot2stage(xy, wellid, theta)
 % 
 % This function is used by the Panoptes analysis code to rotate a velocity
 % vector inplace to coordinate directionality from the camera frame to the
-% stage frame. The lower left corner of the stage (in the vicinity of
-% optics channel 7) is considered the origin for both the X and Y
+% stage frame. The upper left corner of the stage (in the vicinity of
+% optics channel 1) is considered the origin for both the X and Y
 % coordinates.
 % 
 % newxy = pan_rot2stage(xy, wellid, theta) 
