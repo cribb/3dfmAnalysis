@@ -63,7 +63,7 @@ if isnan(A)
     q.meanABdiffXY      = NaN;
     q.maxABdiffXY       = NaN;
     q.stdABdiffXY       = NaN;
-    
+    q.filteredB         = NaN(size(A));
     return;
 end
 
@@ -87,8 +87,8 @@ q.stdABdiffXY       = stats.stdABdiffXY;
 
 % Filter the data if (1) we are instrusted to do so and (2) if there's any
 % reason to, i.e. if there are any NaNs in the paired IDs variable.
-if strcmpi(filteryn, 'y') && sum(isnan(pairedAB_IDs(:))) > 0
-    q.filteredB = filter_mismatches(pairedAB_IDs, A, B);
+if strcmpi(filteryn, 'y')
+        q.filteredB = filter_mismatches(pairedAB_IDs, A, B);
 end
 
 return;
