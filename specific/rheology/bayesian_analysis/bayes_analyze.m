@@ -70,21 +70,45 @@ for k = 1:length(list)
     if ~isempty(data_in) && ~isnan(data_in(1))
         
         agg_msdcalc = video_msd(data, 35, frame_rate, calibum, 'n');
+        
+%         % attach the pass and well ids to the msd data
+%         for wp = 1:length(agg_msdcalc.trackerID)
+%             wpidx = ( data(:,ID) == agg_msdcalc.trackerID(wp) );
+%             wpdata = data(wpidx,:);
+%             agg_msdcalc.pass(wp) = wpdata(1, PASS); 
+%             agg_msdcalc.well(wp) = wpdata(1, WELL);
+%             agg_msdcalc.area(wp) = wpdata(1, AREA);
+%             agg_msdcalc.sens(wp) = wpdata(1, SENS);
+%         end
+        
         % plot_msd(data_msdcalc, [], 'ame');    
 
         % separate aggregate tracker data set into individual trackers
-        tracker_IDlist = unique(data(:,ID));                                        % creates the list of unique tracker IDs
+%         tracker_IDlist = unique(data(:,ID));                                        % creates the list of unique tracker IDs
+        tracker_IDlist = agg_msdcalc.trackerID;
 
+        tracker_IDlist = tracker_IDlist(~isnan(tracker_IDlist));
+        
         for i = 1:length(tracker_IDlist)
 
-            row_index = data(:,ID)==tracker_IDlist(i);                              % selects all the rows in data matrix that belong 
+            row_index = ( data(:,ID)==tracker_IDlist(i) );                          % selects all the rows in data matrix that belong 
                                                                                     % to the ith tracker (the ith element of the tracker_IDlist) 
-
             single_curve = data(row_index,:);                                       % assigns variable to a single tracker
 
             fprintf('\n Separated tracker %-1.0f ', i)
             fprintf('from the %s data set. ', filename)
             fprintf('Breaking up curve into %-1.0f subtrajectories.', num_subtraj)
+            
+            agg_msdcalc.pass(i) = single_curve(1, PASS); 
+            agg_msdcalc.well(i) = single_curve(1, WELL);
+            agg_msdcalc.area(i) = single_curve(1, AREA);
+            agg_msdcalc.sens(i) = single_curve(1, SENS);
+            
+            % extract pass, well, area, and starting sens info for this ID
+            pass_data = single_curve(1,PASS);
+            well_data = single_curve(1,WELL);
+            area_data = single_curve(1,AREA);
+            sens_data = single_curve(1,SENS);
 
 
             [subtraj_matrix, subtraj_dur] = break_into_subtraj(single_curve, ...
@@ -119,10 +143,13 @@ for k = 1:length(list)
                                              msdcalc.msd*1E12, msd_params);     % computes Bayesian statistics on MSDs of matrix of subtrajectories
 
 
-            [model, prob] = bayes_assign_model(bayes_results);                  % assigns each single curve a model and assocaited probability
+            [model, prob] = bayes_assign_model(bayes_results);                  % assigns each single curve a model and associated probability
 
-
-            b_out.ID(i,:)                  = tracker_IDlist(i);
+            b_out.pass(i,:)                = agg_msdcalc.pass(i);
+            b_out.well(i,:)                = agg_msdcalc.well(i);
+            b_out.area(i,:)                = agg_msdcalc.area(i);
+            b_out.sens(i,:)                = agg_msdcalc.sens(i);
+            b_out.trackerID(i,:)           = tracker_IDlist(i);
             b_out.model{i,:}               = model;
             b_out.prob(i,:)                = prob;
             b_out.results(i,:)             = bayes_results;
@@ -136,7 +163,11 @@ for k = 1:length(list)
         bayes_output(k,1).filename            = filename;
         bayes_output(k,1).min_frames          = filt.min_frames;
         bayes_output(k,1).bead_radius         = bead_radius;
-        bayes_output(k,1).ID                  = b_out.ID;
+        bayes_output(k,1).pass                = b_out.pass;
+        bayes_output(k,1).well                = b_out.well;
+        bayes_output(k,1).area                = b_out.area;
+        bayes_output(k,1).sens                = b_out.sens;       
+        bayes_output(k,1).trackerID           = b_out.trackerID;
         bayes_output(k,1).model               = b_out.model;
         bayes_output(k,1).prob                = b_out.prob;
         bayes_output(k,1).results             = b_out.results;
@@ -146,20 +177,24 @@ for k = 1:length(list)
         
     else   % if statement to check if data set is empty
     
-    bayes_output(k,1).name                = name;
-    bayes_output(k,1).filename            = filename;
-    bayes_output(k,1).min_frames          = [];
-    bayes_output(k,1).bead_radius         = [];
-    bayes_output(k,1).ID                  = [];
-    bayes_output(k,1).model               = [];
-    bayes_output(k,1).prob                = [];
-    bayes_output(k,1).results             = [];
-    bayes_output(k,1).num_subtraj         = [];
-    bayes_output(k,1).original_curve_data = [];
-    bayes_output(k,1).agg_data            = [];
+        bayes_output(k,1).name                = name;
+        bayes_output(k,1).filename            = filename;
+        bayes_output(k,1).min_frames          = [];
+        bayes_output(k,1).bead_radius         = [];
+        bayes_output(k,1).pass                = [];
+        bayes_output(k,1).well                = [];
+        bayes_output(k,1).area                = [];
+        bayes_output(k,1).sens                = [];          
+        bayes_output(k,1).trackerID           = [];
+        bayes_output(k,1).model               = [];
+        bayes_output(k,1).prob                = [];
+        bayes_output(k,1).results             = [];
+        bayes_output(k,1).num_subtraj         = [];
+        bayes_output(k,1).original_curve_data = [];
+        bayes_output(k,1).agg_data            = [];
     end   % if statement to check if data set is empty
        
 end % aggregated file loop
 
 
-end % bayes_analyze function
+return % bayes_analyze function

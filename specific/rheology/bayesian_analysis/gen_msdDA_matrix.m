@@ -11,26 +11,50 @@ for k = 1:length(bayes_model_output)
                                           - log10(spec_tau)).^2) );
     
     if isfield(msd_struct, 'msd')
-        new_column = msd_struct.msd(minloc(1),:);
+        new_column_msd  = transpose(msd_struct.msd(minloc(1),:));
+        new_column_pass = transpose(msd_struct.pass);
+        new_column_well = transpose(msd_struct.well);
+        new_column_area = transpose(msd_struct.area);
+        new_column_sens = transpose(msd_struct.sens);
         
-        if length(new_column) <= 500
-            a = 500 - length(new_column);
-            dummy_matrix = NaN(1,a);
-            new_column = horzcat(new_column, dummy_matrix);   
+        if length(new_column_msd) <= 500
+            a = 500 - length(new_column_msd);
+            dummy_matrix = NaN(a,1);
+            new_column_msd  = vertcat(new_column_msd , dummy_matrix); 
+            new_column_pass = vertcat(new_column_pass, dummy_matrix); 
+            new_column_well = vertcat(new_column_well, dummy_matrix); 
+            new_column_area = vertcat(new_column_area, dummy_matrix); 
+            new_column_sens = vertcat(new_column_sens, dummy_matrix); 
         else
             fprintf('There are more than 500 beads.  Need to change the dummy_matrix limits.');
         end
-        new_column = new_column';
+
     else
-        new_column = NaN(1,500)';
+        new_column_msd  = NaN(500,1);
+        new_column_pass = NaN(500,1);
+        new_column_well = NaN(500,1);
+        new_column_area = NaN(500,1);
+        new_column_sens = NaN(500,1);
     end
-    msdDA_matrix(:,k) = new_column(:);
+    
+     msd_matrix(:,k) = new_column_msd;
+    pass_matrix(:,k) = new_column_pass;
+    well_matrix(:,k) = new_column_well;
+    area_matrix(:,k) = new_column_area;
+    sens_matrix(:,k) = new_column_sens;
+    
 end
 
 
-LOG10_msdDA_matrix = log10(msdDA_matrix);
 
+LOG10_msdDA_matrix.spec_tau = spec_tau;
+LOG10_msdDA_matrix.logtau   = log10(minval);
+LOG10_msdDA_matrix.logmsd   = log10(msd_matrix);
+LOG10_msdDA_matrix.pass     = pass_matrix;
+LOG10_msdDA_matrix.well     = well_matrix;
+LOG10_msdDA_matrix.channel  = pan_get_channel_id(well_matrix);
+LOG10_msdDA_matrix.area     = area_matrix;
+LOG10_msdDA_matrix.sens     = sens_matrix;
 
-
-end
+return;
 

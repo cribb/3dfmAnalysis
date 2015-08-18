@@ -85,7 +85,7 @@ for i = 1:length(tracker_IDlist)
     [model, prob] = bayes_assign_model(bayes_results);                      % assigns each single curve a model and assocaited probability
     
     
-    bayes_output.ID(i,:) = tracker_IDlist(i);
+    bayes_output.trackerID(i,:) = tracker_IDlist(i);
     bayes_output.model{i,:} = model;
     bayes_output.prob(i,:) = prob;
     bayes_output.results(i,:) = bayes_results;

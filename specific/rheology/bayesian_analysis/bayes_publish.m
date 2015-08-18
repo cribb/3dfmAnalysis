@@ -500,8 +500,8 @@ RMS_struct = bayes_calc_RMS(bayes_output, bayes_model_output);
 [ LOG10_msdN_matrix ] = gen_msdN_matrix( bayes_model_output );
 
 % calculating the median RMS of N model
-for i = 1:size(LOG10_msdN_matrix, 2)
-    median_N_model_MSD(i) = 10.^nanmedian(LOG10_msdN_matrix(:,i));
+for i = 1:size(LOG10_msdN_matrix.logmsd, 2)
+    median_N_model_MSD(i) = 10.^nanmedian(LOG10_msdN_matrix.logmsd(:,i));
     median_N_model_RMS(i) = sqrt(median_N_model_MSD(i))*1E9;
 end
 
@@ -666,13 +666,13 @@ fprintf(fid, '</p> \n');
 %%% in MSD space, compared to k_norm condition
 
 [ LOG10_msdDA_matrix ] = gen_msdDA_matrix( bayes_model_output );
-[ p_value ]            = bayes_ttest2( LOG10_msdDA_matrix, k_norm );
-[ p_value_ranksum ]    = bayes_ranksum( LOG10_msdDA_matrix, k_norm );
-[ skewnessDA_array, kurtosisDA_array, p_value_SW ] = bayes_normalityTest( LOG10_msdDA_matrix );
+[ p_value ]            = bayes_ttest2( LOG10_msdDA_matrix.logmsd, k_norm );
+[ p_value_ranksum ]    = bayes_ranksum( LOG10_msdDA_matrix.logmsd, k_norm );
+[ skewnessDA_array, kurtosisDA_array, p_value_SW ] = bayes_normalityTest( LOG10_msdDA_matrix.logmsd );
 
 % calculating the median MSD and RMS
-for i = 1:size(LOG10_msdDA_matrix, 2)
-    median_MSD_DA(i) = 10.^nanmedian(LOG10_msdDA_matrix(:,i));
+for i = 1:size(LOG10_msdDA_matrix.logmsd, 2)
+    median_MSD_DA(i) = 10.^nanmedian(LOG10_msdDA_matrix.logmsd(:,i));
     median_RMS_DA(i) = sqrt(median_MSD_DA(i))*1E9;
 end
 
@@ -815,7 +815,7 @@ close(bar_eta_DA);
 drawnow;
 
 
-plot_msdBoxPlot = pan_plot_msdBoxPlot(bayes_model_output, LOG10_msdDA_matrix );
+plot_msdBoxPlot = pan_plot_msdBoxPlot(bayes_model_output, LOG10_msdDA_matrix.logmsd );
 box_plot_MSD = 'box_plot_MSD';
 gen_pub_plotfiles(box_plot_MSD, plot_msdBoxPlot, 'normal')
 close(plot_msdBoxPlot);

@@ -48,6 +48,10 @@ for k = 1:length(bayes_output)
         
         for i = 1:length(N_curves)
             N_curve_struct.trackerID = bayes_output(k,1).agg_data.trackerID(1,N_row_index');
+            N_curve_struct.pass      = bayes_output(k,1).agg_data.pass(1,N_row_index');
+            N_curve_struct.well      = bayes_output(k,1).agg_data.well(1,N_row_index');
+            N_curve_struct.area      = bayes_output(k,1).agg_data.area(1,N_row_index');
+            N_curve_struct.sens      = bayes_output(k,1).agg_data.sens(1,N_row_index');
             N_curve_struct.tau       = bayes_output(k,1).agg_data.tau(:,N_row_index');
             N_curve_struct.msd       = bayes_output(k,1).agg_data.msd(:,N_row_index');
             N_curve_struct.n         = bayes_output(k,1).agg_data.n;
@@ -57,6 +61,10 @@ for k = 1:length(bayes_output)
 
         for i = 1:length(D_curves)
             D_curve_struct.trackerID = bayes_output(k,1).agg_data.trackerID(1,D_row_index');
+            D_curve_struct.pass      = bayes_output(k,1).agg_data.pass(1,D_row_index');
+            D_curve_struct.well      = bayes_output(k,1).agg_data.well(1,D_row_index');
+            D_curve_struct.area      = bayes_output(k,1).agg_data.area(1,D_row_index');
+            D_curve_struct.sens      = bayes_output(k,1).agg_data.sens(1,D_row_index');            
             D_curve_struct.tau       = bayes_output(k,1).agg_data.tau(:,D_row_index');
             D_curve_struct.msd       = bayes_output(k,1).agg_data.msd(:,D_row_index');
             D_curve_struct.n         = bayes_output(k,1).agg_data.n;
@@ -66,6 +74,10 @@ for k = 1:length(bayes_output)
 
         for i = 1:length(DA_curves)
             DA_curve_struct.trackerID = bayes_output(k,1).agg_data.trackerID(1,DA_row_index');
+            DA_curve_struct.pass      = bayes_output(k,1).agg_data.pass(1,DA_row_index');
+            DA_curve_struct.well      = bayes_output(k,1).agg_data.well(1,DA_row_index');
+            DA_curve_struct.area      = bayes_output(k,1).agg_data.area(1,DA_row_index');
+            DA_curve_struct.sens      = bayes_output(k,1).agg_data.sens(1,DA_row_index'); 
             DA_curve_struct.tau       = bayes_output(k,1).agg_data.tau(:,DA_row_index');
             DA_curve_struct.msd       = bayes_output(k,1).agg_data.msd(:,DA_row_index');
             DA_curve_struct.n         = bayes_output(k,1).agg_data.n;
@@ -75,6 +87,10 @@ for k = 1:length(bayes_output)
 
         for i = 1:length(DR_curves)
             DR_curve_struct.trackerID = bayes_output(k,1).agg_data.trackerID(1,DR_row_index');
+            DR_curve_struct.pass      = bayes_output(k,1).agg_data.pass(1,DR_row_index');
+            DR_curve_struct.well      = bayes_output(k,1).agg_data.well(1,DR_row_index');
+            DR_curve_struct.area      = bayes_output(k,1).agg_data.area(1,DR_row_index');
+            DR_curve_struct.sens      = bayes_output(k,1).agg_data.sens(1,DR_row_index');             
             DR_curve_struct.tau       = bayes_output(k,1).agg_data.tau(:,DR_row_index');
             DR_curve_struct.msd       = bayes_output(k,1).agg_data.msd(:,DR_row_index');
             DR_curve_struct.n         = bayes_output(k,1).agg_data.n;
@@ -84,6 +100,10 @@ for k = 1:length(bayes_output)
 
         for i = 1:length(V_curves)
             V_curve_struct.trackerID = bayes_output(k,1).agg_data.trackerID(1,V_row_index');
+            V_curve_struct.pass      = bayes_output(k,1).agg_data.pass(1,V_row_index');
+            V_curve_struct.well      = bayes_output(k,1).agg_data.well(1,V_row_index');
+            V_curve_struct.area      = bayes_output(k,1).agg_data.area(1,V_row_index');
+            V_curve_struct.sens      = bayes_output(k,1).agg_data.sens(1,V_row_index');             
             V_curve_struct.tau       = bayes_output(k,1).agg_data.tau(:,V_row_index');
             V_curve_struct.msd       = bayes_output(k,1).agg_data.msd(:,V_row_index');
             V_curve_struct.n         = bayes_output(k,1).agg_data.n;
@@ -152,7 +172,12 @@ for k = 1:length(bayes_output)
             DADR_curve_struct = DR_curve_struct;
         elseif isempty(DR_curve_struct)
             DADR_curve_struct = DA_curve_struct;
-        else 
+        else
+            DADR_curve_struct.trackerID = horzcat(DA_curve_struct.trackerID, DR_curve_struct.trackerID);
+            DADR_curve_struct.pass = horzcat(DA_curve_struct.pass, DR_curve_struct.pass);
+            DADR_curve_struct.well = horzcat(DA_curve_struct.well, DR_curve_struct.well);
+            DADR_curve_struct.area = horzcat(DA_curve_struct.area, DR_curve_struct.area);
+            DADR_curve_struct.sens = horzcat(DA_curve_struct.sens, DR_curve_struct.sens);
             DADR_curve_struct.tau = horzcat(DA_curve_struct.tau, DR_curve_struct.tau);
             DADR_curve_struct.msd = horzcat(DA_curve_struct.msd, DR_curve_struct.msd);
             DADR_curve_struct.n = DA_curve_struct.n;
