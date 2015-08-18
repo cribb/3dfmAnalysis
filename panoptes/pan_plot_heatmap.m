@@ -13,12 +13,18 @@ if nargin < 3 || isempty(colorbar_limits)
     colorbar_limits = [-3.3 2];
 end
 
+if sum(isnan(data(:))) == length(data(:)) % i.e. everything's a NaN
+    cbar_max = eps;
+else
+    cbar_max = max(data(:))+eps;
+end
+
 % set the differences for the plot based on the plot type
 switch type    
     case 'rms displacement'
         data = data * 1e9;
         mytitle = 'RMS Displacement (in log_{10} [nm]';
-        colorbar_limits = [0 max(data(:))+eps];
+        colorbar_limits = [0 cbar_max];
         mycolormap = hot(256);
         logdata = 0;
     case 'msd'
@@ -35,22 +41,22 @@ switch type
         logdata = 1;
     case 'longest tracker duration'        
         mytitle = 'Longest Tracking Duration [s]';
-        colorbar_limits = [0 max(data(:))+eps];
+        colorbar_limits = [0 cbar_max];
         mycolormap = winter(256);
         logdata = 0;
     case 'image SNR'
         mytitle = 'Image SNR';
-        colorbar_limits = [0 max(data(:))+eps];
+        colorbar_limits = [0 cbar_max];
         mycolormap = hot(256);
         logdata = 0;
     case 'num trackers'
         mytitle = 'Number of trackers';
-        colorbar_limits = [0 max(data(:))+eps];
+        colorbar_limits = [0 cbar_max];
         logdata = 0;
         mycolormap = winter(256);
     case 'MCU parameter'
         mytitle = 'MCU parameter';
-        colorbar_limits = [0 max(data(:))+eps];
+        colorbar_limits = [0 cbar_max];
         logdata = 0;
         mycolormap = winter(256);
     otherwise
