@@ -9,15 +9,17 @@ end;
 metadata = pan_load_metadata(filepath, systemid, plate_type);
 
 fps = metadata.instr.fps_imagingmode;
+mytitle = metadata.instr.experiment;
 
 bead_stacks_NF = pan_collect_tracker_areas(filepath, 'panoptes', 'n');
 
 cs = combine_tracker_image_stacks(bead_stacks_NF);
 scs = sort_tracker_images(cs, 'sens');
-h = plot_tracker_images(scs, 'sens');
+h = plot_tracker_images(scs, 'sens', mytitle);
 
 % Load ALL of the trajectories in the path
-csvfiles = '*video_*_TRACKED.csv';
+csvfiles = dir('*video_*_TRACKED.vrpn.csv');
+
 d = load_video_tracking(csvfiles, fps, 'pixels', [], 'absolute', 'no', 'table');
 
 % Assemble the filt structure for filtering the data
