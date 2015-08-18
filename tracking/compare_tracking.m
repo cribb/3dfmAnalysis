@@ -98,9 +98,6 @@ function v = filter_mismatches(IDlist, A, B)
 
     video_tracking_constants;
     
-    IDlistA = IDlist(:,1);
-    IDlistB = IDlist(:,2);
-    
     % the "good" IDs in B correspond to IDs in A that are NOT NaN. Because
     % A is assumed to be the "good" tracking file, there is no need to
     % filter out data in A that has no corresponding good data in B.
@@ -128,7 +125,7 @@ function v = pull_first_points(table)
         if ~isnan(list)
             v(k,:) = table(idx(1),:);
         else
-            v(k,:) = NaN;
+            v(k,:) = NaN(1,13);
         end
     end
     
@@ -190,13 +187,17 @@ function [list, match_err] = gen_AB_tracker_list(A, B, id_error_thresh)
         % If the minimum distance is greater than (or equal to) the defined
         % error threshold, then this A tracker does NOT have a match in B,
         % and needs to be identified as such. BECAUSE we make the
-        % assumption that the A list is the 'ground truth', we don't delete
-        % the tracker from the A list, but we do copy the ID number in to
+        % assumption that the A list is the 'ground truth', we remove
+        % the tracker from the A list, and place its ID number only in to
         % an "A_list_only" variable so we can keep track of which trackers
         % didn't get picked up by the conditions used to create trajectory
         % list B.
-        if mindist >= id_error_thresh
+        if isempty(mindist) || isnan(mindist) || mindist >= id_error_thresh
             list(count,:) = [A(1,ID) NaN];
+            if isempty(mindist) 
+                mindist = NaN;
+            end
+            
             match_err(count,:) = mindist;
             A(1,:) = [];
         end
