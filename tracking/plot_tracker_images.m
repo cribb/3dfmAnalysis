@@ -1,5 +1,9 @@
-function h = plot_tracker_images(tracker_stack, sort_by)
+function h = plot_tracker_images(tracker_stack, sort_by, title_text)
 
+if nargin < 3 || isempty(title_text)
+    title_text = '';
+end
+    
 if nargin < 2 || isempty(sort_by)
     sort_by = 'id';
 end
@@ -28,6 +32,7 @@ figure(h);
     h1 = subplot(2,1,1); 
     imagesc(bead_strip_image); 
     colormap(gray(256)); 
+    title(title_text, 'Interpreter', 'none');
     xlim([0 N*fullsize]);
     set(gca, 'XTick', centered_locations_in_x);
     set(gca, 'XTicklabel', tick_values_for_x);
@@ -71,7 +76,7 @@ tick_values_for_y = round(sorted_stack.sorted_vals(1:N_sheet_row_tiles+1:end),1)
 f = figure;
 figure(f);
 imagesc(bead_sheet);
-title([sort_by ' (scaled)']);
+title([sort_by ' (scaled): ' title_text], 'Interpreter', 'None');
 colormap(gray(256));
     xlim([0 N_sheet_cols]);
     set(gca, 'XTick', centered_locations_in_x);
