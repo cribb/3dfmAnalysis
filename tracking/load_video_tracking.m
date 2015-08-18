@@ -72,7 +72,7 @@ end
 
 if length(filelist) < 1
     logentry(['No files found matching ' filemask ', returning empty set.']);
-    v = NaN(1,9);
+    v = NaN(1,13);
     calout = NaN;
     return;
 end
@@ -88,9 +88,7 @@ end
 % Now, for every file...
 for fid = 1:length(filelist)
     
-    file = filelist(fid).name;
-    
-
+    file = filelist(fid).name;    
     
     % What if we want to use the csv file provided by video spot tracker?
     % We have to make a decision here, and we'll base it on the filename
@@ -103,7 +101,7 @@ for fid = 1:length(filelist)
               dd = dd.data;
           else
               logentry('No data. Moving on...');
-              v = [];
+              v = NaN(1,13);
               if size(filelist,1) > 1
                   continue;
               else
@@ -111,51 +109,22 @@ for fid = 1:length(filelist)
               end
           end
     else
-        % Load the tracking data after it has been converted to a .mat file    
+        % Load the tracking data from a .mat file    
         dd=load(file);
     end
 
-
+    % Handle the incoming data for whatever type it is...
+    % First, check if it's a csv file
     if ~isempty(strfind(file, '.csv')) && isempty(strfind(file, '.mat'))
-        CSVFRAME = 1;
-        CSVID    = 2;
-        CSVX     = 3;
-        CSVY     = 4;
-        CSVZ     = 5;
         
-        if size(dd,2) >= 14
-            CSVAREA = 14;
-        end
-        
-        if size(dd,2) >= 15
-            CSVSENS = 15;
-        end
-
-        data(:,TIME)  = zeros(rows(dd),1);
-        data(:,FRAME) = dd(:,CSVFRAME);
-        data(:,ID)    = dd(:,CSVID);
-        data(:,X)     = dd(:,CSVX);
-        data(:,Y)     = dd(:,CSVY);
-        data(:,Z)     = dd(:,CSVZ);
-        data(:,ROLL)  = zeros(rows(dd),1);
-        data(:,PITCH) = zeros(rows(dd),1);
-        data(:,YAW)   = zeros(rows(dd),1);
-        
-        if size(dd,2) >= 14
-            data(:,AREA) = dd(:,CSVAREA);
-        else
-            data(:,AREA) = 0;
-        end
-        
-        if size(dd,2) >= 15
-            data(:,SENS) = dd(:,CSVSENS);
-        else
-            data(:,SENS) = 0;
-        end
-        
+        data = convert_csv(dd);
+                
         % no timestamps in this vrpn file format
         tstamps = 'no';
         
+    % If it's not a csv file, it should be a vrpn2mat structure, which
+    % changes depending on the vrpnlog2matlab version. In any case, if the
+    % input has no fieldnames then we don't know what kind of file this is.
     elseif isempty(fieldnames(dd))
         logentry(['No data found in *' file '*.']);
         if ~exist('glommed_d', 'var')            
@@ -163,6 +132,7 @@ for fid = 1:length(filelist)
         end
         continue;
         
+    % Is it an EVT (edited video tracking) file?
     elseif ~isempty(strfind(file, '.evt.')) && isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
         
@@ -192,56 +162,16 @@ for fid = 1:length(filelist)
     elseif isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
 
-        % Let's axe the VRPN "time-stamps"... they don't mean anything here
-        data(:,2) = zeros(size(data, 1),1);  %fill the second column with zeros
-        data = data(:,2:end); %delete the first column
-
+        data = axe_vrpn_timestamps(data); 
+        
     elseif isfield(dd.tracking, 'videoTrackingSecUsecZeroXYZ')        
-        data = dd.tracking.videoTrackingSecUsecZeroXYZ;
-
-        % Let's axe the VRPN "time-stamps"... they don't mean anything here
-        data(:,2) = zeros(size(data, 1),1);  
-        data = data(:,2:end);
-        
-        video_tracking_constants; 
-        
-        % set up variables for easy tracking of table's column headings
-        myTIME = 1; myID = 2; myX = 3; myY = 4; myZ = 5; 
-
-        data(:,TIME) = data(:,myTIME);
-        data(:,ID)   = data(:,myID);
-        data(:,FRAME)= 1:rows(data);
-        data(:,X)    = data(:,myX);
-        data(:,Y)    = data(:,myY);
-        data(:,Z)    = data(:,myZ);
-        data(:,ROLL) = zeros(rows(data),1);
-        data(:,PITCH) = zeros(rows(data),1);
-        data(:,YAW) = zeros(rows(data),1);
+        data = convert_videoTrackingSecUsecZeroXYZ(dd);
          
         % no timestamps in this vrpn file format
         tstamps = 'no';
 
     elseif isfield(dd.tracking, 'spot2DSecUsecIndexXYZ')
-        mydata = dd.tracking.spot2DSecUsecIndexXYZ;
-
-        % Let's axe the VRPN "time-stamps"... they don't mean anything here
-        mydata(:,2) = zeros(size(mydata, 1),1);  
-        mydata = mydata(:,2:end);
-
-        video_tracking_constants; 
-        
-        % set up variables for easy tracking of table's column headings
-        myTIME = 1; myID = 2; myX = 3; myY = 4; myZ = 5; 
-
-        data(:,TIME) = mydata(:,myTIME);
-        data(:,ID)   = mydata(:,myID);
-        data(:,FRAME)= zeros(rows(mydata),1);
-        data(:,X)    = mydata(:,myX);
-        data(:,Y)    = mydata(:,myY);
-        data(:,Z)    = mydata(:,myZ);
-        data(:,ROLL) = zeros(rows(mydata),1);
-        data(:,PITCH) = zeros(rows(mydata),1);
-        data(:,YAW) = zeros(rows(mydata),1);
+        data = convert_spot2DSecUsecIndexXYZ(dd);
         
         % no timestamps in this vrpn file format
         tstamps = 'no';
@@ -252,19 +182,21 @@ for fid = 1:length(filelist)
         error(['CONGRATULATIONS! You have stumbled upon an OLD video-tracking VRPN format. ' ...
               '\nYou will have to edit load_video_tracking and include a filter for this format.']);
     else
-      dd.tracking.spot3DSecUsecIndexFramenumXYZRPY = zeros(1,10);
-      data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
-%       error('I do not know how to handle this video VRPN file (weird fieldnames).');
-end
+      data = zeros(1,13);
 
-    % Add in compatibility with Panoptes runs
-    [well, pass] = pan_wellpass(file);
-    if well == 0
-        well = fid; % use the 'well' heading as a placeholder for "filenumber" when there's no Panoptes data
-    else
-        data(:,WELL) = well;
     end
-    data(:,PASS) = pass;        
+
+    % Add in compatibility with Panoptes runs, but only when there's no
+    % pass or well data to clobber (sums > 0)
+    if size(data,2) < 12 || (sum(data(:,PASS)) == 0 && sum(data(:,WELL)) == 0)
+        [well, pass] = pan_wellpass(file);
+        if well == 0
+            well = fid; % use the 'well' heading as a placeholder for "filenumber" when there's no Panoptes data
+        else
+            data(:,WELL) = well;
+        end
+        data(:,PASS) = pass;        
+    end
     
     % handle the physical units
     units{X} = xyzunits;  units{Y} = xyzunits;  units{Z} = xyzunits;
@@ -305,7 +237,6 @@ end
     
     % now do all of the bead specific things
     IDlist = unique(trackerID)';
-    % for k = 0 : max(trackerID)    
     for k = 1 : length(IDlist)
         
         % select rows in table that correspond only to the k-th bead
@@ -361,11 +292,13 @@ end
     % we don't want to repeat any beadIDs as we concatenate the
     % datasets from each filename in the stack.  To avoid this, we add
     % the max(beadID) to the newdata's beadID and then we concatenate.
-    beadmax = max(glommed_d(:,ID));
-    if isempty(beadmax)
+    if ~isempty(glommed_d)
+        beadmax = max(glommed_d(:,ID));
+    else
         beadmax = 0;
     end
-    data(:,ID) = data(:,ID) + beadmax + 1;     
+    
+    data(:,ID) = data(:,ID) + beadmax + 1;
     
     if isempty(glommed_d)
         glommed_d = data;
@@ -376,6 +309,7 @@ end
     end
     
     calout(fid,1) = calib_um(fid);
+%     fprintf('The size of glommed_d is: %i, %i\n', size(glommed_d,1), size(glommed_d,2));
 end
 
 data = glommed_d;
@@ -408,23 +342,106 @@ if ~isempty(data)
 %             end
     end
 else
-    v = [];
+    v = NaN(1,size(data,2));
 end 
     
     cd(orig_directory);
 return;
 
-% % function for writing out stderr log messages
-% function logentry(txt)
-%     logtime = clock;
-%     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
-%                    num2str(logtime(2),        '%02i') '.' ...
-%                    num2str(logtime(3),        '%02i') ', ' ...
-%                    num2str(logtime(4),        '%02i') ':' ...
-%                    num2str(logtime(5),        '%02i') ':' ...
-%                    num2str(floor(logtime(6)), '%02i') ') '];
-%      headertext = [logtimetext 'load_video_tracking: '];
-%      
-%      fprintf('%s%s\n', headertext, txt);
-% 
-%      return;
+function data = axe_vrpn_timestamps(data)
+    % Let's axe the VRPN "time-stamps"... they don't mean anything here
+    data(:,2) = zeros(size(data, 1),1);  %fill the second column with zeros
+    data = data(:,2:end); %delete the first column
+    return;
+
+function data = convert_csv(dd)
+    video_tracking_constants;
+
+    CSVFRAME = 1;
+    CSVID    = 2;
+    CSVX     = 3;
+    CSVY     = 4;
+    CSVZ     = 5;
+
+    if size(dd,2) >= 14
+        CSVAREA = 14;
+    end
+
+    if size(dd,2) >= 15
+        CSVSENS = 15;
+    end
+
+    data(:,TIME)  = zeros(rows(dd),1);
+    data(:,FRAME) = dd(:,CSVFRAME);
+    data(:,ID)    = dd(:,CSVID);
+    data(:,X)     = dd(:,CSVX);
+    data(:,Y)     = dd(:,CSVY);
+    data(:,Z)     = dd(:,CSVZ);
+    data(:,ROLL)  = zeros(rows(dd),1);
+    data(:,PITCH) = zeros(rows(dd),1);
+    data(:,YAW)   = zeros(rows(dd),1);
+
+    if size(dd,2) >= 14
+        data(:,AREA) = dd(:,CSVAREA);
+    else
+        data(:,AREA) = 0;
+    end
+
+    if size(dd,2) >= 15
+        data(:,SENS) = dd(:,CSVSENS);
+    else
+        data(:,SENS) = 0;
+    end
+    
+    return;
+    
+    
+function data = convert_videoTrackingSecUsecZeroXYZ(dd)
+    video_tracking_constants; 
+
+    data = dd.tracking.videoTrackingSecUsecZeroXYZ;
+
+    data = axe_vrpn_timestamps(data);
+
+
+    % set up variables for easy tracking of table's column headings
+    myTIME = 1; myID = 2; myX = 3; myY = 4; myZ = 5; 
+
+    data(:,TIME) = data(:,myTIME);
+    data(:,ID)   = data(:,myID);
+    data(:,FRAME)= 1:rows(data);
+    data(:,X)    = data(:,myX);
+    data(:,Y)    = data(:,myY);
+    data(:,Z)    = data(:,myZ);
+    data(:,ROLL) = zeros(rows(data),1);
+    data(:,PITCH) = zeros(rows(data),1);
+    data(:,YAW) = zeros(rows(data),1);
+    
+    return;
+    
+function data = convert_spot2DSecUsecIndexXYZ(dd)
+        
+    video_tracking_constants;
+    mydata = dd.tracking.spot2DSecUsecIndexXYZ;
+
+    % Let's axe the VRPN "time-stamps"... they don't mean anything here
+    mydata(:,2) = zeros(size(mydata, 1),1);  
+    mydata = mydata(:,2:end);
+
+    video_tracking_constants; 
+
+    % set up variables for easy tracking of table's column headings
+    myTIME = 1; myID = 2; myX = 3; myY = 4; myZ = 5; 
+
+    data(:,TIME) = mydata(:,myTIME);
+    data(:,ID)   = mydata(:,myID);
+    data(:,FRAME)= zeros(rows(mydata),1);
+    data(:,X)    = mydata(:,myX);
+    data(:,Y)    = mydata(:,myY);
+    data(:,Z)    = mydata(:,myZ);
+    data(:,ROLL) = zeros(rows(mydata),1);
+    data(:,PITCH) = zeros(rows(mydata),1);
+    data(:,YAW) = zeros(rows(mydata),1);
+    
+    return;
+    
