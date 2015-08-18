@@ -1,9 +1,8 @@
-function outfile = save_evtfile(filename, tracking_in, xyzunits, calib_um, fps)
+function outfile = save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, outtype)
 % SAVE_EVTFILE saves tracking data to the evt.vrpn.mat format 
 %
 % 3DFM function
 % video
-% last modified 2013.09.08 (cribb)
 %
 % This function saves tracking data (eg. from simulations, etc) to the
 % evt.vrpn.mat format used in EVT_GUI.  This format retains the length scale
@@ -21,10 +20,15 @@ function outfile = save_evtfile(filename, tracking_in, xyzunits, calib_um, fps)
 %       "xyzunits" defines the length scale units used in the "data" input,
 %                  which can be 'm' (meters), 'um', 'nm', or 'pixels'
 %       "calib_um" defines the length scale calibration in [um/pixel]
+%       "fps"
+%       "outtype" is a string that defines the output evt filetype, either 'mat' or 'csv'
 %
 
     video_tracking_constants;
     
+    if nargin < 6 || isempty(outtype)
+        outtype = 'mat';
+    end
     if nargin < 5 || isempty(fps)
         fps = NaN;
     end
@@ -47,7 +51,7 @@ function outfile = save_evtfile(filename, tracking_in, xyzunits, calib_um, fps)
           
     if isempty(data)
         logentry('Saving empty dataset.');
-        data = ones(0,10);    
+        data = zeros(0,13);    
     elseif strcmp(xyzunits,'m')
 		data(:,X:Z) = data(:,X:Z) ./ calib_um * 1e6;  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'um')
@@ -60,33 +64,118 @@ function outfile = save_evtfile(filename, tracking_in, xyzunits, calib_um, fps)
         units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
     end
         
-    tracking.spot3DSecUsecIndexFramenumXYZRPY = data;
-    tracking.info = myinfo;
-    tracking.calib_um = calib_um;       
-    tracking.fps      = fps;
-    
-    filename = strrep(filename, '.vrpn', '');
-    filename = strrep(filename, '.evt', '');
-    filename = strrep(filename, '.mat', '');
-    outfile = [filename '.vrpn.evt.mat'];
-    
-    save(outfile, 'tracking');   
-    logentry(['Saved ' num2str(length(unique(data(:,ID)))) ' trackers in ' outfile]);
+    switch outtype
+        case 'mat'
+            save_matfile(filename, data, fps, calib_um, myinfo);            
+        case 'csv'
+            save_csvfile(data, filename);
+        otherwise
+            error('Incorrect filetype specified for output filename.');
+    end
     
 return;
 
 
-% function for writing out stderr log messages
-function logentry(txt)
-    logtime = clock;
-    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
-                   num2str(logtime(2),        '%02i') '.' ...
-                   num2str(logtime(3),        '%02i') ', ' ...
-                   num2str(logtime(4),        '%02i') ':' ...
-                   num2str(logtime(5),        '%02i') ':' ...
-                   num2str(floor(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext 'save_evtfile: '];
+function outs = save_matfile(filename, data, fps, calib_um, myinfo)
+
+    video_tracking_constants;
+    
+    tracking.spot3DSecUsecIndexFramenumXYZRPY = data;
+    tracking.info = myinfo;
+    tracking.calib_um = calib_um;       
+    tracking.fps      = fps;
+
+    filename = strrep(filename, '.vrpn', '');
+    filename = strrep(filename, '.evt', '');
+    filename = strrep(filename, '.mat', '');
+    filename = strrep(filename, '.csv', '');    
+    outfile = [filename '.vrpn.evt.mat'];
+
+    save(outfile, 'tracking');  
+
+    logentry(['Saved ' num2str(length(unique(data(:,ID)))) ' trackers in ' outfile]);
+    
+    outs = 0;
+    
+    return;
+
+    
+function outs = save_csvfile(data, filename)
+
+     video_tracking_constants;
      
-     fprintf('%s%s\n', headertext, txt);
-     
-     return;
+     CSVFRAME  = 1;
+     CSVID     = 2;
+     CSVX      = 3;
+     CSVY      = 4;
+     CSVZ      = 5;
+     CSVRADIUS = 6;
+     CSVINTENS = 7;
+     CSVORIENT = 8;
+     CSVLENGTH = 9;
+     CSVFIT    = 10;
+     CSVGAUSS  = 11;
+     CSVMEAN   = 12;
+     CSVSUMMED = 13;
+     CSVAREA   = 14;
+     CSVSENS   = 15;
+
+     dummyzeros = zeros(size(data,1),1);
+
+     csv_data(:,CSVFRAME)  = data(:, FRAME);
+     csv_data(:,CSVID)     = data(:, ID);
+     csv_data(:,CSVX)      = data(:, X);
+     csv_data(:,CSVY)      = data(:, Y);
+     csv_data(:,CSVZ)      = data(:, Z);
+     csv_data(:,CSVRADIUS) = dummyzeros;
+     csv_data(:,CSVINTENS) = dummyzeros; 
+     csv_data(:,CSVORIENT) = dummyzeros; 
+     csv_data(:,CSVLENGTH) = dummyzeros; 
+     csv_data(:,CSVFIT)    = dummyzeros; 
+     csv_data(:,CSVGAUSS)  = dummyzeros; 
+     csv_data(:,CSVMEAN)   = dummyzeros; 
+     csv_data(:,CSVSUMMED) = dummyzeros; 
+     csv_data(:,CSVAREA)   = data(:, AREA);
+     csv_data(:,CSVSENS)   = data(:, SENS);             
+
+     csv_header = { 'FrameNumber' ...
+                    'Spot ID' ...
+                    'X' ...
+                    'Y' ...
+                    'Z' ...
+                    'Radius' ...
+                    'Center Intensity' ...
+                    'Orientation (if meaningful)' ...
+                    'Length (if meaningful)' ...
+                    'Fit Background (for FIONA)' ...
+                    'Gaussian Summed Value (for FIONA)' ...
+                    'Mean Background (FIONA)' ...
+                    'Summed Value (for FIONA)' ...
+                    'Region Size' ...
+                    'Sensitivity'};
+
+    filename = strrep(filename, '.vrpn', '');
+    filename = strrep(filename, '.evt', '');
+    filename = strrep(filename, '.mat', '');
+    filename = strrep(filename, '.csv', '');    
+    outfile = [filename '.vrpn.csv'];
+
+    fid = fopen(outfile, 'w');
+    fprintf(fid, '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n',csv_header{:});
+    fclose(fid);
+    
+%     if ~isempty(csv_data) &&  length(csv_data(:)) ~= sum(isnan(csv_data(:)))
+    if size(csv_data,1) > 1 && ~isnan(csv_data(1,X))
+        dlmwrite(outfile, csv_data, '-append', 'delimiter', ',', 'precision', '%10.5f');
+    else
+        logentry('No data to save.');
+    end
+
+    logentry(['Saved ' num2str(length(unique(data(:,ID)))) ' trackers in ' outfile]);
+    
+    outs = 0;
+    
+    return;
+    
+    
+    
