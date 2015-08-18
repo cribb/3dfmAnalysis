@@ -1,4 +1,4 @@
-function h = plot_msd(d, h, optstring)
+function h = plot_msd(d_in, h, optstring)
 % PLOT_MSD plots the graph of mean square displacement versus tau for an aggregate number of beads 
 %
 % 3DFM function
@@ -28,7 +28,7 @@ else
     brought_own_figure_handle = 1;
 end
 
-if nargin < 1 || isempty(d.tau)
+if nargin < 1 || isempty(d_in.tau)
     logentry('No data to plot.  Exiting now.');
     close(h);
     h = [];
@@ -36,7 +36,7 @@ if nargin < 1 || isempty(d.tau)
 end
 
 % calculate statistical measures for msd and plant into data structure
-d = msdstat(d);
+d = msdstat(d_in);
 
 % creating the plot
 if ~exist('brought_own_figure_handle')
