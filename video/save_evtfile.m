@@ -51,7 +51,7 @@ function outfile = save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, 
           
     if isempty(data)
         logentry('Saving empty dataset.');
-        data = zeros(0,13);    
+        data = NULLTRACK;    
     elseif strcmp(xyzunits,'m')
 		data(:,X:Z) = data(:,X:Z) ./ calib_um * 1e6;  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'um')

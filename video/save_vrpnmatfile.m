@@ -29,7 +29,7 @@ function outfile = save_vrpnmatfile(filename, data, xyzunits, calib_um)
 
     if isempty(data)
         logentry('Saving empty dataset.');
-        data = ones(0,10);    
+        data = NULLTRACK;    
     elseif strcmp(xyzunits,'m')
 		data(:,X:Z) = data(:,X:Z) ./ calib_um * 1e6;  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'um')
