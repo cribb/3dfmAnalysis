@@ -26,5 +26,7 @@
     WELL   = 12;
     PASS   = 13;
     
+    NULLTRACK = zeros(0,13);
+    
     
     

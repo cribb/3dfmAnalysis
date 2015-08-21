@@ -55,7 +55,7 @@ A = load_video_tracking(fileA, [], 'pixels', 1, 'absolute', 'no', 'table');
 B = load_video_tracking(fileB, [], 'pixels', 1, 'absolute', 'no', 'table');
 
 % check file A for "no data" (just NaNs) and return if true
-if isnan(A)    
+if isempty(A)    
     q.pairedAB_IDs      = NaN;
     q.match_err         = NaN;
     q.nPointsAB         = NaN;
@@ -120,12 +120,17 @@ function v = pull_first_points(table)
 
     list = unique(table(:,ID));
 
+    if isempty(table)
+        v = NULLTRACK;
+        return;
+    end
+    
     for k = 1:length(list)
         idx = find(table(:,ID) == list(k));
         if ~isnan(list)
             v(k,:) = table(idx(1),:);
         else
-            v(k,:) = NaN(1,13);
+            v(k,:) = NULLTRACK;
         end
     end
     

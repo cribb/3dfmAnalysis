@@ -72,7 +72,7 @@ end
 
 if length(filelist) < 1
     logentry(['No files found matching ' filemask ', returning empty set.']);
-    v = NaN(1,13);
+    v = NULLTRACK;
     calout = NaN;
     return;
 end
@@ -101,7 +101,7 @@ for fid = 1:length(filelist)
               dd = dd.data;
           else
               logentry('No data. Moving on...');
-              v = NaN(1,13);
+              v = NULLTRACK;
               if size(filelist,1) > 1
                   continue;
               else
@@ -185,6 +185,10 @@ for fid = 1:length(filelist)
       data = zeros(1,13);
 
     end
+    
+    if fid == 1
+        glommed_d = zeros(0,size(data,2));
+    end
 
     % Add in compatibility with Panoptes runs, but only when there's no
     % pass or well data to clobber (sums > 0)
@@ -230,10 +234,6 @@ for fid = 1:length(filelist)
     end
 
     logentry(['Loaded *' filelist(fid).name '* which contains ' num2str(max(data(:,ID))) ' initial trackers.']);
-    
-    if fid == 1
-        glommed_d = zeros(0,size(data,2));
-    end
     
     % now do all of the bead specific things
     IDlist = unique(trackerID)';
@@ -342,7 +342,7 @@ if ~isempty(data)
 %             end
     end
 else
-    v = NaN(1,size(data,2));
+    v = NULLTRACK;
 end 
     
     cd(orig_directory);
