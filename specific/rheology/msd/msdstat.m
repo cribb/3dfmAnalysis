@@ -2,7 +2,7 @@ function msdout = msdstat(msdin)
 
 if nargin < 1 || isempty(msdin) || ~isfield(msdin, 'tau') || isempty(msdin.tau)
     
-    if exist(msdin)
+    if exist('msdin')
         msdout = msdin;
     end
     
