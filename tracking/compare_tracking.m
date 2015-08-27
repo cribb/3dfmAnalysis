@@ -146,9 +146,8 @@ function [list, match_err] = gen_AB_tracker_list(A, B, id_error_thresh)
     end
 
     video_tracking_constants;
-    
-   
 
+     id_error_thresh = 1; 
     % initialize counter for output table
     count = 1;
     
