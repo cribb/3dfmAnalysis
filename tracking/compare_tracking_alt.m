@@ -1,4 +1,4 @@
-function q = compare_tracking(fileA, fileB, id_error_thresh, xy_error_thresh, filteryn)
+function q = compare_tracking_alt(fileA, fileB, id_error_thresh, xy_error_thresh, filteryn)
 % COMPARE_TRACKING Compares Video Spot Tracker datasets and reports differences.
 %
 % CISMM function  
@@ -210,6 +210,7 @@ function [list, match_err] = gen_AB_tracker_list(A, B, id_error_thresh)
         count = count + 1;
             
     end
+    num_A_only=length(list);
     
     % Whatever trackerIDs are left exist only in B
     while ~isempty(B)
@@ -218,7 +219,8 @@ function [list, match_err] = gen_AB_tracker_list(A, B, id_error_thresh)
       match_err(count,:) = NaN;
       count = count + 1;
     end
-    
+     
+    num_B_only=length(list);
     
     return;
 
@@ -265,10 +267,11 @@ function q = gen_traj_stats(pairedAB_IDs, A, B)
 
         % Calculate statistical values for the output....
         meanABdiffXY(k,:) = mean(ABdiffXY,1);
-         maxABdiffXY(k,:) = max(ABdiffXY,[],1);
-         stdABdiffXY(k,:) = std(ABdiffXY,[],1);    
+        maxABdiffXY(k,:) = max(ABdiffXY,[],1);
+        stdABdiffXY(k,:) = std(ABdiffXY,[],1);    
     end
-    
+    q.num_A_only         =num_A_only;
+    q.num_B_only        = num_B_only;
     q.nPointsAB         = nPointsAB;
     q.diff_nPointsAB    = diff_nPointsAB;
     q.meanABdiffXY      = meanABdiffXY;
