@@ -34,73 +34,65 @@ hold on
 
 if N_count/num_trackers> 0.15
     for i = transpose(find(outs_bayes.prob(:,N)>=0.5))
-        idx = outs_bayes.idlist(i)
-% d = load_video_tracking(['single_curve_ID'  num2str(i, '%03u') '_' num2str(filename)], 55, 'm', 0.152, 'absolute', 'no', 'table');
-         vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
-         loglog(vmsd.tau, vmsd.msd, 'r')
+        idx = outs_bayes.idlist(i);
+        vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
+        loglog(vmsd.tau, vmsd.msd, 'r');
     end
 end
 
 if D_count/num_trackers> 0.15
     for i = transpose(find(outs_bayes.prob(:,D)>=0.5))
-        idx = outs_bayes.idlist(i)
-%      d = load_video_tracking(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename)], 55, 'm', 0.152, 'absolute', 'no', 'table');
-         vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
-         loglog(vmsd.tau, vmsd.msd, 'k')
+        idx = outs_bayes.idlist(i);
+        vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
+        loglog(vmsd.tau, vmsd.msd, 'k');
     end
 end
 
 if V_count/num_trackers> 0.15
     for i = transpose(find(outs_bayes.prob(:,V)>=0.5))
-    	idx = outs_bayes.idlist(i)
-%      d = load_video_tracking(['single_curve_ID'  num2str(i, '%03u') '_' num2str(filename)], 55, 'm', 0.152, 'absolute', 'no', 'table');
-         vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
-         loglog(vmsd.tau, vmsd.msd, '[1,0.4,0.6]')
+    	idx = outs_bayes.idlist(i);
+        vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
+        loglog(vmsd.tau, vmsd.msd, '[1,0.4,0.6]');
     end
 end
 
 if DV_count/num_trackers> 0.15
     for i = transpose(find(outs_bayes.prob(:,DV)>=0.5))
-        idx = outs_bayes.idlist(i)
-%      d = load_video_tracking(['single_curve_ID'  num2str(i, '%03u') '_' num2str(filename)], 55, 'm', 0.152, 'absolute', 'no', 'table');
-         vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
-         loglog(vmsd.tau, vmsd.msd, 'g')
+        idx = outs_bayes.idlist(i);
+        vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
+        loglog(vmsd.tau, vmsd.msd, 'g');
     end
 end
 
 if DR_count/num_trackers> 0.15
      for i = transpose(find(outs_bayes.prob(:,DR)>=0.5))
-         idx = outs_bayes.idlist(i)
-%      d = load_video_tracking(['single_curve_ID'  num2str(i, '%03u') '_' num2str(filename)], 55, 'm', 0.152, 'absolute', 'no', 'table');
+         idx = outs_bayes.idlist(i);
          vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
-         loglog(vmsd.tau, vmsd.msd, 'b')
+         loglog(vmsd.tau, vmsd.msd, 'b');
     end
 end
 
 if DA_count/num_trackers> 0.15
     for i = transpose(find(outs_bayes.prob(:,DA)>=0.5))
-        idx = outs_bayes.idlist(i)
-%      d = load_video_tracking(['single_curve_ID'  num2str(i, '%03u') '_' num2str(filename)], 55, 'm', 0.152, 'absolute', 'no', 'table');
-         vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
-         loglog(vmsd.tau, vmsd.msd, 'm')
+        idx = outs_bayes.idlist(i);
+        vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
+        loglog(vmsd.tau, vmsd.msd, 'm');
     end
 end
 
 if DRV_count/num_trackers> 0.15
     for  i = transpose(find(outs_bayes.prob(:,DRV)>=0.5))
-         idx = outs_bayes.idlist(i)
-%      d = load_video_tracking(['single_curve_ID'  num2str(i, '%03u') '_' num2str(filename)], 55, 'm', 0.152, 'absolute', 'no', 'table');
+         idx = outs_bayes.idlist(i);
          vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
-         loglog(vmsd.tau, vmsd.msd, 'c')
+         loglog(vmsd.tau, vmsd.msd, 'c');
     end
 end
 
 if DAV_count/num_trackers> 0.15
     for i = transpose(find(outs_bayes.prob(:,DAV)>=0.5))
-        idx = outs_bayes.idlist(i)
-%      d = load_video_tracking(['single_curve_ID'  num2str(i, '%03u') '_' num2str(filename)], 55, 'm', 0.152, 'absolute', 'no', 'table');
-         vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
-         loglog(vmsd.tau, vmsd.msd, 'y')
+        idx = outs_bayes.idlist(i);
+        vmsd = video_msd(['single_curve_ID'  num2str(idx, '%03u') '_' num2str(filename_original)], 40, 30, 0.152, 'n');
+        loglog(vmsd.tau, vmsd.msd, 'y');
     end
 end
 
