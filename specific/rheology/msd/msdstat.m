@@ -17,20 +17,8 @@ if nargin < 1 || isempty(msdin) || ~isfield(msdin, 'tau') || isempty(msdin.tau)
     return;
 end
 
-% if isempty(msdin.tau)
-%     
-%     
-%     msdout = msdin;
-%     msdout.logtau = NaN(size(msdin.window));
-%     msdout.logmsd = NaN(size(msdin.window));
-%     msdout.mean_logtau = NaN(size(msdin.window));
-%     msdout.mean_logmsd = NaN(size(msdin.window));
-%     msdout.msderr = NaN(size(msdin.window));
-%     
-%     return;
-% end
 
-% renaming input structure. the 'ns' field refers to the number of
+% Renaming input structure. The 'ns' field refers to the number of
 % estimates (differences) of MSD that exist within a given timescale. The 
 % 'n' field refers to the number of trackers available within that particular
 % timescale.
@@ -150,7 +138,7 @@ if isempty(logrmsdisp)
     msdout.logrmsdisp = NaN(size(logrmsdisp,1),1);
 else    
     msdout.logrmsdisp = logrmsdisp;
-end
+end  
 
 if isempty(mean_logrmsdisp)
     msdout.mean_logrmsdisp = NaN(size(mean_logrmsdisp,1),1);
