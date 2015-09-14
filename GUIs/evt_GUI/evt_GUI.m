@@ -250,13 +250,9 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     handles.filt.calib_um = 1;
     
     
-%     try
-        [d, calout] = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table');
-        d = filter_video_tracking(d, handles.filt);
-%     catch
-%         msgbox('File Not Loaded! Problem with load_video_tracking.', 'Error.');
-%         return;
-%     end
+    [d, calout] = load_video_tracking(filename, [], [], [], 'absolute', 'yes', 'table');
+     d = filter_video_tracking(d, handles.filt);
+
     
     if ~isempty(calout)
         if length(unique(calout)) == 1
