@@ -1,4 +1,4 @@
-function q = compare_tracking(fileA, fileB, id_error_thresh, xy_error_thresh, filteryn)
+function q = compare_tracking(fileA, fileB, id_error_thresh, xy_error_thresh, firstonly, filteryn)
 % COMPARE_TRACKING Compares Video Spot Tracker datasets and reports differences.
 %
 % CISMM function  
@@ -31,8 +31,12 @@ function q = compare_tracking(fileA, fileB, id_error_thresh, xy_error_thresh, fi
 %       
 %
 
-if nargin < 5 || isempty(filteryn)
+if nargin < 6 || isempty(filteryn)
     filteryn = 'n';
+end
+
+if nargin < 5 || isempty(firstonly)
+    firstonly = 'y';
 end
 
 if nargin < 4 || isempty(xy_error_thresh)
@@ -67,29 +71,45 @@ if isempty(A)
     return;
 end
 
-% Pull the first tracker locations for each available ID.
-Afirst = pull_first_points(A);
-Bfirst = pull_first_points(B);
+framelist = unique(A(:,FRAME));
 
-% Generate list of IDs that exist in (A), in (B), and in (A AND B)
-[pairedAB_IDs match_err] = gen_AB_tracker_list(Afirst, Bfirst, id_error_thresh);
-
-% Now we drill into the specific trajectories and compare their properties
-stats = gen_traj_stats(pairedAB_IDs, A, B);
-
-q.pairedAB_IDs      = pairedAB_IDs;
-q.match_err         = match_err;
-q.nPointsAB         = stats.nPointsAB;
-q.diff_nPointsAB    = stats.diff_nPointsAB;
-q.meanABdiffXY      = stats.meanABdiffXY;
-q.maxABdiffXY       = stats.maxABdiffXY;
-q.stdABdiffXY       = stats.stdABdiffXY;
-
-% Filter the data if (1) we are instrusted to do so and (2) if there's any
-% reason to, i.e. if there are any NaNs in the paired IDs variable.
-if strcmpi(filteryn, 'y')
-        q.filteredB = filter_mismatches(pairedAB_IDs, A, B);
+if strfind(lower(firstonly), 'y') % only comparing the first frames.
+    framelist = framelist(1); 
 end
+
+q = [];
+for k = 1:length(framelist)
+
+    % Pull the first tracker locations for each available ID.
+    Aframe = pull_frame_from_table(A, framelist(k));
+    Bframe = pull_frame_from_table(B, framelist(k));
+    
+    % Generate list of IDs that exist in (A), in (B), and in (A AND B)
+    [pairedAB_IDs match_err] = gen_AB_tracker_list(Aframe, Bframe, id_error_thresh);
+    
+    % Now we drill into the specific trajectories and compare their properties
+    stats = gen_traj_stats(pairedAB_IDs, A, B);
+    
+
+    tmp = [pairedAB_IDs match_err stats.nPointsAB stats.diff_nPointsAB stats.meanABdiffXY stats.maxABdiffXY stats.stdABdiffXY];
+    framecol = repmat(framelist(k), size(tmp, 1), 1);
+    
+    q = [q; framecol tmp];
+end
+
+% q.pairedAB_IDs      = pairedAB_IDs;
+% q.match_err         = match_err;
+% q.nPointsAB         = stats.nPointsAB;
+% q.diff_nPointsAB    = stats.diff_nPointsAB;
+% q.meanABdiffXY      = stats.meanABdiffXY;
+% q.maxABdiffXY       = stats.maxABdiffXY;
+% q.stdABdiffXY       = stats.stdABdiffXY;
+% 
+% % Filter the data if (1) we are instrusted to do so and (2) if there's any
+% % reason to, i.e. if there are any NaNs in the paired IDs variable.
+% if strcmpi(filteryn, 'y')
+%         q.filteredB = filter_mismatches(pairedAB_IDs, A, B);
+% end
 
 return;
 
@@ -114,21 +134,24 @@ function v = filter_mismatches(IDlist, A, B)
     
 return;
 
+
 function v = pull_first_points(table)
 
     video_tracking_constants;
-
-    list = unique(table(:,ID));
 
     if isempty(table)
         v = NULLTRACK;
         return;
     end
     
+    cropped_table = pull_frame_from_table(table, 1);
+
+    list = unique(cropped_table(:,ID));
+    
     for k = 1:length(list)
-        idx = find(table(:,ID) == list(k));
+        idx = find(cropped_table(:,ID) == list(k));
         if ~isnan(list)
-            v(k,:) = table(idx(1),:);
+            v(k,:) = cropped_table(idx(1),:);
         else
             v(k,:) = NULLTRACK;
         end
@@ -136,6 +159,19 @@ function v = pull_first_points(table)
     
     return;
 
+    
+function v = pull_frame_from_table(table, framenumber)
+    video_tracking_constants;
+    
+    if isempty(table)
+        v = NULLTRACK;
+        return;
+    else
+        idx = find(table(:,FRAME) == framenumber);
+        v = table(idx,:);
+    end
+    
+    return;
 
     
 function [list, match_err] = gen_AB_tracker_list(A, B, id_error_thresh)
@@ -207,8 +243,7 @@ function [list, match_err] = gen_AB_tracker_list(A, B, id_error_thresh)
 
         count = count + 1;
             
-    end
-    num_A_only=length(list);
+    end       
     
     % Whatever trackerIDs are left exist only in B
     while ~isempty(B)
@@ -217,8 +252,6 @@ function [list, match_err] = gen_AB_tracker_list(A, B, id_error_thresh)
       match_err(count,:) = NaN;
       count = count + 1;
     end
-     
-    num_B_only=length(list);
     
     return;
 
@@ -269,8 +302,8 @@ function q = gen_traj_stats(pairedAB_IDs, A, B)
         stdABdiffXY(k,:) = std(ABdiffXY,[],1);    
     end
     
-    q.num_A_only         =num_A_only;
-    q.num_B_only        = num_B_only;
+%     q.num_A_only        = num_A_only;
+%     q.num_B_only        = num_B_only;
     q.nPointsAB         = nPointsAB;
     q.diff_nPointsAB    = diff_nPointsAB;
     q.meanABdiffXY      = meanABdiffXY;
