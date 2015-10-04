@@ -1,4 +1,4 @@
-function [ sense_data ] = find_error_signals(ground_truth,sense_dir,thresh_dir);
+function [ sense_data ] = find_error_signals(ground_truth,sense_dir,thresh_dir)
 %Find Error Signals
 %explain yourself
 

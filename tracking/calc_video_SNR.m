@@ -1,4 +1,4 @@
-function outs=check_files(filepath,filenum,beadsize,thresh)
+function outs=calc_video_SNR(filepath,filenum,beadsize,thresh)
 
 double errorthresh;
 cd(filepath);
@@ -50,16 +50,17 @@ num_images=numel(info);
         for i=1:fid
             
               frame(:,:,i)=double(frame(:,:,i))-background;
-             [snr(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh, 'n',threshold);
+             [snr(i) total_error(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh, 'n',threshold);
              
     
         end
    tracking_single_image_SNR(frame(:,:,1),errorthresh,'y',threshold);     
   
    avgSNR=mean(snr)
-   
+   err=mean(total_error)
    snfig = figure; 
-   plot(1:length(snr), snr);
+  % plot(1:length(snr), snr);
+   errorbar(1:length(snr),snr,total_error);
    xlabel('Frame #');
    ylabel('Signal-to-Noise Ratio');
    title([filename]);
@@ -95,13 +96,15 @@ num_images=numel(info);
           background = imopen(im,strel('disk',100));
         for i=1:num_images
              frame(:,:,i)=double(frame(:,:,i))-background;
-             [snr(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh, 'n',threshold);
+             [snr(i) total_error(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh, 'n',threshold);
                  
         end
 tracking_single_image_SNR(frame(:,:,1),errorthresh,'y',threshold);
    avgSNR=mean(snr)
+   err=mean(total_error);
    snfig = figure; 
-   plot(1:length(snr), snr);
+   %plot(1:length(snr), snr);
+   errorbar(1:length(snr),snr,total_error);
    xlabel('Frame #');
    ylabel('Signal-to-Noise Ratio');
    title([filename]);
