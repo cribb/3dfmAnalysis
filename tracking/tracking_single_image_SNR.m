@@ -1,4 +1,4 @@
-function [SNR total_error]= tracking_single_image_SNR(image, err_thresh, report,thresh)
+function [avgSNR, maxSNR, minSNR, total_error]= tracking_single_image_SNR(image, err_thresh, report,thresh)
 
 
 
@@ -68,13 +68,15 @@ end
     cc = bwconncomp(mask, 8);
     numbeads = cc.NumObjects;
     kickedout=0;
+    bead_num=1;
     for k = 1:numbeads
         this_bead_idx = cc.PixelIdxList{k};
         this_bead_px = im(this_bead_idx);
         tops=max(this_bead_px(:));
       
         if double(max(this_bead_px(:))) <254
-            bead_sig(k) = double(max(this_bead_px(:)));
+            bead_sig(bead_num) = double(max(this_bead_px(:)));
+            bead_num=bead_num+1;
         else
             kickedout=kickedout+1;
         end
@@ -107,11 +109,14 @@ end
 %     title('bead_sig');
 
      mean_max_sig = mean(bead_sig);
+     max_bead_sig=max(bead_sig);
+     min_bead_sig=min(bead_sig);
     signal_standard_error=std(bead_sig)/sqrt(length(bead_sig));
     background_standard_error=std(mean_noise)/sqrt(length(mean_noise));
     total_error=signal_standard_error+background_standard_error;
-    SNR = (mean_max_sig - mean_noise(end)) / noise(end);
-
+    avgSNR = (mean_max_sig - mean_noise(end)) / noise(end);
+    maxSNR=(max_bead_sig-mean_noise(end))/noise(end);
+    minSNR=(min_bead_sig-mean_noise(end))/noise(end);
 
     if strcmp(report, 'y')
 
@@ -204,4 +209,4 @@ function logentry(txt)
      
      fprintf('%s%s\n', headertext, txt);
      
-     return;    
+     return;

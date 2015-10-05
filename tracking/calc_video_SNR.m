@@ -1,4 +1,4 @@
-function outs=calc_video_SNR(filepath,filenum,beadsize,thresh)
+function [midSNR, highSNR, lowSNR]=calc_video_SNR(filepath,filenum,beadsize,thresh)
 
 double errorthresh;
 cd(filepath);
@@ -50,18 +50,23 @@ num_images=numel(info);
         for i=1:fid
             
               frame(:,:,i)=double(frame(:,:,i))-background;
-             [snr(i) total_error(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh, 'n',threshold);
+             [avgSNR(i) maxSNR(i) minSNR(i) total_error(i)] = tracking_single_image_SNR_try2(frame(:,:,i), errorthresh, 'n',threshold);
              
     
         end
-   tracking_single_image_SNR(frame(:,:,1),errorthresh,'y',threshold);     
-  
-   avgSNR=mean(snr)
-   err=mean(total_error)
-   snfig = figure; 
-  % plot(1:length(snr), snr);
-   errorbar(1:length(snr),snr,total_error);
-   xlabel('Frame #');
+   %tracking_single_image_SNR_try2(frame(:,:,1),errorthresh,'y',threshold);     
+    midSNR=mean(avgSNR);
+   lowSNR=mean(minSNR);
+   highSNR=mean(maxSNR);
+  err=mean(total_error)
+  snfig = figure; 
+ % plot(1:length(avgSNR), avgSNR);
+ h= errorbar(1:length(avgSNR),avgSNR,total_error);
+  %// a color spec here would affect both data and error bars
+hc = get(h, 'Children')
+set(hc(1),'color','b') %// data
+set(hc(2),'color','g') %// error bars
+  xlabel('Frame #');
    ylabel('Signal-to-Noise Ratio');
    title([filename]);
    pretty_plot;
@@ -96,14 +101,16 @@ num_images=numel(info);
           background = imopen(im,strel('disk',100));
         for i=1:num_images
              frame(:,:,i)=double(frame(:,:,i))-background;
-             [snr(i) total_error(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh, 'n',threshold);
+             [avgSNR(i) maxSNR(i) minSNR(i) total_error(i)] = tracking_single_image_SNR_try2(frame(:,:,i), errorthresh, 'n',threshold);
                  
         end
-tracking_single_image_SNR(frame(:,:,1),errorthresh,'y',threshold);
-   avgSNR=mean(snr)
+%tracking_single_image_SNR_try2(frame(:,:,1),errorthresh,'y',threshold);
+   midSNR=mean(avgSNR);
+   lowSNR=mean(minSNR);
+   highSNR=mean(maxSNR);
    err=mean(total_error);
    snfig = figure; 
-   %plot(1:length(snr), snr);
+   plot(1:length(snr), snr);
    errorbar(1:length(snr),snr,total_error);
    xlabel('Frame #');
    ylabel('Signal-to-Noise Ratio');
