@@ -1,4 +1,4 @@
-function [avgSNR, maxSNR, minSNR, total_error]= tracking_single_image_SNR(image, err_thresh, report,thresh)
+function [avgSNR]= tracking_single_image_SNR_try2(image,err_thresh, report,thresh,bit)
 
 
 
@@ -15,8 +15,15 @@ end
     medPixel=double(median(im(:)));
     threshold =thresh;
     signalLevel=threshold*(maxPixel-minPixel)+minPixel;
-   level=signalLevel/256;
-   %[level EM(fid)] = graythresh(im);
+    
+    if bit ==8
+        level=signalLevel/256;
+    elseif bit==16
+        level=signalLevel/65537;
+   
+    end
+        
+        %[level EM(fid)] = graythresh(im);
     mask = im2bw(im, level);
     mask = bwareaopen(mask, 4);
     dil_mask = mask;
@@ -73,14 +80,21 @@ end
         this_bead_idx = cc.PixelIdxList{k};
         this_bead_px = im(this_bead_idx);
         tops=max(this_bead_px(:));
-      
+       if bit==8
         if double(max(this_bead_px(:))) <254
             bead_sig(bead_num) = double(max(this_bead_px(:)));
             bead_num=bead_num+1;
         else
             kickedout=kickedout+1;
         end
-       
+       elseif bit==16
+           if double(max(this_bead_px(:))) <65535
+             bead_sig(bead_num) = double(max(this_bead_px(:)));
+             bead_num=bead_num+1;
+           else
+             kickedout=kickedout+1;
+           end
+       end
     end
     
 if numbeads==kickedout
@@ -209,4 +223,4 @@ function logentry(txt)
      
      fprintf('%s%s\n', headertext, txt);
      
-     return;
+     return;    

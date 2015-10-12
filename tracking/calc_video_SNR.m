@@ -28,20 +28,13 @@ num_images=numel(info);
             im=imread(filename);
             picinfo = imfinfo(filename);
             bit = picinfo.BitDepth;
-
-             switch bit
-                case 16
-                    q = double(im);
-                    q = q/2^16*2^8;
-                    im = uint8(q);
-                case 8
-            % No change required
-                otherwise
-                     error('image neither 16-bit or 8-bit depth');
-         end
+                
+                if bit ~=8 && bit~=16
+                       error('image neither 16-bit or 8-bit depth');
+                end
             frame(:,:,fid) = im;
         end
-        
+   
          im=mean(frame,3);
          im = im/fid;
          
@@ -50,22 +43,21 @@ num_images=numel(info);
         for i=1:fid
             
               frame(:,:,i)=double(frame(:,:,i))-background;
-             [avgSNR(i) maxSNR(i) minSNR(i) total_error(i)] = tracking_single_image_SNR_try2(frame(:,:,i), errorthresh, 'n',threshold);
+             [avgSNR(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh,'n',threshold,bit);
              
     
         end
-   %tracking_single_image_SNR_try2(frame(:,:,1),errorthresh,'y',threshold);     
+   tracking_single_image_SNR(frame(:,:,1),errorthresh,'y',threshold,bit);     
     midSNR=mean(avgSNR);
-   lowSNR=mean(minSNR);
-   highSNR=mean(maxSNR);
-  err=mean(total_error)
+   
+  err=std(avgSNR)/sqrt(length(avgSNR))
   snfig = figure; 
- % plot(1:length(avgSNR), avgSNR);
- h= errorbar(1:length(avgSNR),avgSNR,total_error);
+ plot(1:length(avgSNR), avgSNR);
+% h= errorbar(1:length(avgSNR),avgSNR);
   %// a color spec here would affect both data and error bars
-hc = get(h, 'Children')
-set(hc(1),'color','b') %// data
-set(hc(2),'color','g') %// error bars
+%hc = get(h, 'Children');
+%set(hc(1),'color','b') %// data
+%set(hc(2),'color','g') %// error bars
   xlabel('Frame #');
    ylabel('Signal-to-Noise Ratio');
    title([filename]);
@@ -101,17 +93,16 @@ set(hc(2),'color','g') %// error bars
           background = imopen(im,strel('disk',100));
         for i=1:num_images
              frame(:,:,i)=double(frame(:,:,i))-background;
-             [avgSNR(i) maxSNR(i) minSNR(i) total_error(i)] = tracking_single_image_SNR_try2(frame(:,:,i), errorthresh, 'n',threshold);
+             [avgSNR(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh,'n',threshold,bit);
                  
         end
-%tracking_single_image_SNR_try2(frame(:,:,1),errorthresh,'y',threshold);
+tracking_single_image(frame(:,:,1),errorthresh,'y',threshold, bit);
    midSNR=mean(avgSNR);
-   lowSNR=mean(minSNR);
-   highSNR=mean(maxSNR);
-   err=mean(total_error);
+   
+   err=stddev(avgSNR)/sqrt(length(avgSNR))
    snfig = figure; 
    plot(1:length(snr), snr);
-   errorbar(1:length(snr),snr,total_error);
+   %errorbar(1:length(snr),snr,total_error);
    xlabel('Frame #');
    ylabel('Signal-to-Noise Ratio');
    title([filename]);
