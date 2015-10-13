@@ -30,7 +30,7 @@ ns  = NaN(1,96);
 all_taus = [plate_msds_by_well.mean_logtau];
 all_msds = [plate_msds_by_well.mean_logmsd];
 all_errs = [plate_msds_by_well.msderr];
-all_ns   = [plate_msds_by_well.n];
+all_Ntrackers   = [plate_msds_by_well.Ntrackers];
 
 log_spec_welltau = log10(spec_tau);
 
@@ -38,7 +38,7 @@ log_spec_welltau = log10(spec_tau);
 
 msds(1, str2num(char(wellID)) ) = all_msds(minloc(1),:); %#ok<*ST2NM>
 msd_err(1, str2num(char(wellID)) ) = all_errs(minloc(1),:);
-ns(  1, str2num(char(wellID)) ) = all_ns(minloc(1),:);
+Ntrackers(  1, str2num(char(wellID)) ) = all_Ntrackers(minloc(1),:);
 
 heatmaps.spec_tau = spec_tau;
 heatmaps.msd = pan_array2plate(msds);
