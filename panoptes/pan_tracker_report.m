@@ -14,53 +14,37 @@ mytitle = metadata.instr.experiment;
 bead_stacks_NF = pan_collect_tracker_areas(filepath, 'panoptes', 'n');
 
 cs = combine_tracker_image_stacks(bead_stacks_NF);
+
 scs = sort_tracker_images(cs, 'sens');
-h = plot_tracker_images(scs, 'sens', mytitle);
+hs = plot_tracker_images(scs, 'sens', mytitle);
 
-% Load ALL of the trajectories in the path
-csvfiles = dir('*video_*_TRACKED.vrpn.csv');
+sca = sort_tracker_images(cs, 'area');
+ha = plot_tracker_images(sca, 'area', mytitle);
+% 
+% scna = sort_tracker_images(cs, 'newarea');
+% hna = plot_tracker_images(scna, 'newarea', mytitle);
 
-d = load_video_tracking(csvfiles, fps, 'pixels', [], 'absolute', 'no', 'table');
+sens = scs.sorted_vals;
+area = sca.sorted_vals;
+% newarea = scna.sorted_vals;
 
-% Assemble the filt structure for filtering the data
-filt.xyzunits   = 'pixels';
-filt.tcrop      = 3;
-filt.min_frames = 10;
-filt.min_pixels = 0;
-filt.max_pixels = Inf;
-filt.min_visc = 0;  % Pa s
-filt.xycrop     = 0;
-filt.dead_spots = [0 0 0 0];
-filt.drift_method = 'none';
-filt.max_region_size = Inf;
-filt.min_sens = 0;
+histfig = figure;
 
-% filter the data
-[dfilt, filtout] = filter_video_tracking(d, filt);
+    figure(histfig);
 
-% compute the MSDs
-mymsd = video_msd(dfilt, 50, 32.6, 0.152, 'y', 'no');
-
-% Pull out the ID numbers from the resulting filtered data. These IDs will
-% serve as the index for all tracked particles for ALL data, images
-% included (well there will be two lists that will be checked against each
-% other for consistency).
-IDlist = unique(dfilt(:,ID))';
-
-% Pull out the corresponding sensitivity (goodnes-of-fit) data
-for k = 1:length(IDlist); 
-    idx = find( dfilt(:,ID) == IDlist(k)); 
-    mysens(1,k) = dfilt(idx(1),SENS); 
-end;
-
-MSDdat = [mymsd.trackerID(:) mymsd.msd(1,:)'];
-SENSdat = [IDlist(:) mysens(:)];
-
-figure; 
-plot(log10(SENSdat(:,2)), log10(MSDdat(:,2)),'.');
-xlabel('log_{10}(sens)'); 
-ylabel('log_{10}(MSD)');
-
-outs = [];
-
-return;
+    subplot(2, 1, 1);
+    hist(log10(sens), 50);
+    xlabel('log_{10}(VST sensitivity)');
+    ylabel('counts');
+    
+    subplot(2,1,2);
+    hist(area, 50);
+    xlabel('VST region size (area)');
+    ylabel('counts');
+%     
+%     subplot(3,1,3);
+%     hist(newarea, 50);
+%     xlabel('new_area');
+%     ylabel('counts');
+    
+outs = cs;
