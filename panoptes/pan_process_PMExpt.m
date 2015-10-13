@@ -106,7 +106,7 @@ filt.min_pixels = 0;
 % freely diffusing beads from a collection of trajectories
 filt.max_pixels = Inf;
 
-filt.min_sens = 7;
+filt.min_sens = 0.5;
 
 % The 'min_visc' filter defines the minimum viscosity allowed for a 
 % trajectory.  This filter uses the 'bead_radius' parameter from the 
@@ -181,6 +181,8 @@ dataout  = pan_analyze_PMExpt(filepath, filt, systemid);
 % Aggregate appropriate datasets and generate output report as an html file
 spec_tau = 1;
 dataout  = pan_publish_PMExpt(metadata, spec_tau);
+
+fclose('all');
 
 % move files into the appropriate analysis folder
 outf = metadata.instr.experiment;
