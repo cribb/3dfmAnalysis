@@ -1,4 +1,4 @@
-function [dataout, summary] = pan_load_tracking(filepath, systemid, filetype)
+function [dataout, summary] = pan_load_tracking(filepath, systemid, filetype, filt)
 % PAN_LOAD_TRACKING loads all tracking files for a panoptes run
 %
 % Panoptes function 
@@ -19,17 +19,17 @@ function [dataout, summary] = pan_load_tracking(filepath, systemid, filetype)
 
 % First, set up default values for input parameters in case they are empty 
 % or otherwise do not exist.  
-
-video_tracking_constants;
-
 if nargin < 3 || isempty(filetype)
     filetype = 'vrpn';
 end
 
-% defaults the single-channel instrument
+% defaults to the single-channel instrument
 if nargin < 2 || isempty(systemid)
     systemid = 'monoptes';
 end
+
+% Pull in constants for panoptes video tracking structure
+pan_video_tracking_constants;
 
 % moving to the path defined as the 'root for the experimental data'
 cd(filepath);
@@ -57,37 +57,56 @@ for k = 1:Nfiles
         case 'csv'
             myfile = filelist(k).name;
             myfile = strrep(myfile, 'vrpn.mat', 'csv');
+
         otherwise
             error('Unknown filetype. Use ''vrpn'' or ''csv'' instead.');
     end
 
-    d = load_video_tracking(myfile, ...
-                        metadata.instr.fps_imagingmode, ...
-                        'pixels', 1, ...
-                        'absolute', 'no', 'table');
-                    
-
+    d_in = load_video_tracking(myfile, ...
+                              metadata.instr.fps_imagingmode, ...
+                              'pixels', ...
+                              1, ...
+                              'absolute', ...
+                              'no', ...
+                              'table');
+                               
+    [d_in, newfilt] = filter_video_tracking(d_in, filt);
     
-    if ~isempty(d)
-        numrows = size(d,1);
+    % OLD SPEC
+    % These constants come from 'video_tracking_constants' specification but
+    % are renamed here. They are used for importing data from vrpn.mat files 
+    % outputted by vrpnlog2matlab converter
+    video_tracking_constants;
+                                
+    if ~isempty(d_in)
+        numrows = size(d_in,1);
         
-%         d(:,[TIME Z:YAW]) = [];
-        
-        well_vec = repmat(mywell,numrows,1);
         pass_vec = repmat(mypass,numrows,1);
+        well_vec = repmat(mywell,numrows,1);
+
+
+        % New spec for pan_load_tracking
+        d(:,PANPASS)  = pass_vec;
+        d(:,PANWELL)  = well_vec;
+        d(:,PANFRAME) = d_in(:,FRAME);
+        d(:,PANID)    = d_in(:,ID);
+        d(:,PANX)     = d_in(:,X);
+        d(:,PANY)     = d_in(:,Y);
+        d(:,PANAREA)  = d_in(:,AREA);
+        d(:,PANSENS)  = d_in(:,SENS);
+            
+        dataout = [dataout ; d];
         
-        % summarize the information for each video
-        num_trackers = length(unique(d(:,ID)));
-        tracker_with_longest_duration = mode(d(:,ID));
-        longest_duration = max( d( d(:,ID) == tracker_with_longest_duration, FRAME));
+        % summarize the information for each video (this should be remoted
+        % off to another function
+        num_trackers = length(unique(d(:,PANID)));
+        tracker_with_longest_duration = mode(d(:,PANID));
+        longest_duration = max( d( d(:,PANID) == tracker_with_longest_duration, PANFRAME));
         
         % well, pass, num_trackers, tracker_with_longest_duration, longest_duration
         summary(k,:) = [mywell mypass num_trackers tracker_with_longest_duration longest_duration];
         
-        d = [pass_vec well_vec d];
-        dataout = [dataout ; d];
-        
-        
+        clear d; % so next sizes are correct
     end
     
 end
