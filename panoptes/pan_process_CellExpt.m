@@ -54,9 +54,11 @@ num_taus = 35;  % number of time scales for which to calculate MSD.
 % a logspace range, eliminate any repeated values and round them 
 % appropriately, getting a list of strides that may not be as long as we
 % asked but pretty close.
-num_taus = unique(floor(logspace(0,round(log10(duration*frame_rate)), num_taus)));
-num_taus = num_taus(:);
-metadata.window = num_taus;
+
+% taus = unique(floor(logspace(0,round(log10(duration*frame_rate)), num_taus)));
+% taus = num_taus(:);
+% metadata.window = taus;
+metadata.window = msd_gen_taus(floor(duration*frame_rate), num_taus, 1);
 
 % Define the Aggregation parameter/parameters that will be used to combine
 % the datasets in a reasonable way for analysis.
@@ -89,7 +91,7 @@ filt.tcrop      = 3;
 % frames are entirely eliminated from the tracking data.
 filt.min_frames = 10;
 
-filt.min_sens  = 7;
+% filt.min_sens  = 7;
 
 % The 'min_pixels' filter defines the minimum number of pixels any
 % trajectory must cross from its initial position.  This helps eliminate
@@ -129,6 +131,7 @@ filt.dead_spots = [0 0 0 0];
 % subtraction should never be used on freely diffusing data.  It, however,
 % can be used on beads actuated by an external force like a magnetic field.
 filt.drift_method = 'none';
+% filt.drift_method = 'center-of-mass';
 
 % The 'remove jerks' filter will search through the data and find extreme
 % changes in the image due to varioptic jerk and remove them.  The value
@@ -150,6 +153,8 @@ dataout  = pan_analyze_CellExpt(filepath, filt, systemid);
 
 % Aggregate appropriate datasets and generate output report as an html file
 dataout  = pan_publish_CellExpt(metadata, filt);
+
+fclose('all');
 
 % move files into the appropriate analysis folder
 outf = metadata.instr.experiment;
