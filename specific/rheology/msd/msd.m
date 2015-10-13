@@ -26,9 +26,9 @@ end;
 
 if (nargin < 1) || isempty(t) || isempty(data)
     logentry('Input data needed, returning empty set'); 
-    tau   = NaN(length(window),1);
-    msd   = NaN(length(window),1);
-    count = NaN(length(window),1);
+    tau        = NaN(length(window),1);
+    msd        = NaN(length(window),1);
+    Nestimates = NaN(length(window),1);
 end;
 
 
@@ -36,9 +36,9 @@ end;
 warning('off', 'MATLAB:divideByZero');
 
 % preinitialize all output variables to maintain sizein == sizeout
-tau   = NaN(length(window),1);
-msd   = NaN(length(window),1);
-count = NaN(length(window),1);
+tau        = NaN(length(window),1);
+msd        = NaN(length(window),1);
+Nestimates = NaN(length(window),1);
 
 if nargout == 4
     r2out = NaN(length(window),1);
@@ -51,7 +51,7 @@ end
         logentry('Insufficient points to compute any MSD value');
         varargout{1} = tau;
         varargout{2} = msd;
-        varargout{3} = count;
+        varargout{3} = Nestimates;
         if nargout == 4
             varargout{4} = r2out;        
         end
@@ -88,15 +88,15 @@ end
         end
       end
       
-        tau(w, :)   = window(w) * mean(diff(t));        
-        msd(w, :)   = mean(r2);
-        count(w, :) = n;        
+        tau(w, :)        = window(w) * mean(diff(t));        
+        msd(w, :)        = mean(r2);
+        Nestimates(w, :) = n;        
 
     end
 
     varargout{1} = tau;
     varargout{2} = msd;
-    varargout{3} = count;
+    varargout{3} = Nestimates;
     if nargout == 4
         varargout{4} = Rout;
     end

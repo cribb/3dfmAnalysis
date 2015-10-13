@@ -22,29 +22,27 @@ end
 % estimates (differences) of MSD that exist within a given timescale. The 
 % 'n' field refers to the number of trackers available within that particular
 % timescale.
-trackerID = msdin.trackerID;
-tau       = msdin.tau;
-mymsd     = msdin.msd;
-counts    = msdin.ns;
+trackerID  = msdin.trackerID;
+tau        = msdin.tau;
+mymsd      = msdin.msd;
+Nestimates = msdin.Nestimates;
 
 % compatibility issues with old msd.m
-if isfield(msdin, 'n');
-    sample_count = msdin.n;
+if isfield(msdin, 'Ntrackers');
+    Ntrackers = msdin.Ntrackers;
 else
-    sample_count = sum(~isnan(mymsd),2);
-    idx = find(sample_count > 0);
-    sample_count = sample_count(idx);
-    msdin.n = sample_count;
+    Ntrackers = sum( (Nestimates > 0) ,2);
+    msdin.Ntrackers = Ntrackers;
 end
 
-clip = find(sum(~isnan(counts),2) <= 1);
-tau(clip,:) = [];
-mymsd(clip,:) = [];
-counts(clip,:) = [];
-sample_count(clip,:) = [];
+% clip = find(sum( (Nestimates > 0),2) <= 1);
+% tau(clip,:) = [];
+% mymsd(clip,:) = [];
+% Nestimates(clip,:) = [];
+% Ntrackers(clip,:) = [];
 
 % did we delete out everything? if so, return empty set
-if isempty(tau) && isempty(mymsd) && isempty(counts) && isempty(sample_count)
+if isempty(tau) && isempty(mymsd) && isempty(Nestimates) && isempty(Ntrackers)
     msdout = msdin;
     msdout.logtau = NaN(length(msdin.window),1);
     msdout.logmsd = NaN(length(msdin.window),1);
@@ -72,8 +70,8 @@ logrmsdisp = log10(rmsdisp);
 numbeads   = size(logmsd,2);
 
 % weighted mean for logmsd
-baseline = repmat(nansum(counts,2), 1, size(counts,2));
-weights = counts ./ baseline;
+baseline = repmat(nansum(Nestimates,2), 1, size(Nestimates,2));
+weights = Nestimates ./ baseline;
 
 mean_logtau = nanmean(logtau,2);
 mean_logmsd = nansum(weights .* logmsd, 2);
@@ -86,9 +84,9 @@ mean_logrmsdisp( mean_logrmsdisp == 0) = NaN;
 
 % computing error for logmsd
 Vishmat = nansum(weights .* (repmat(mean_logmsd, 1, numbeads) - logmsd).^2, 2);
-msderr =  sqrt(Vishmat ./ sample_count);
+msderr =  sqrt(Vishmat ./ Ntrackers);
 Vishmat_rmsdisp = nansum(weights .* (repmat(mean_logrmsdisp, 1, numbeads) - logrmsdisp).^2, 2);
-rmsdisp_err = sqrt(Vishmat_rmsdisp ./ sample_count);
+rmsdisp_err = sqrt(Vishmat_rmsdisp ./ Ntrackers);
 
 %d.logrmsdisp = d.logmsd;
 %d.logrmsdisp = sqrt(10.^mymsd);

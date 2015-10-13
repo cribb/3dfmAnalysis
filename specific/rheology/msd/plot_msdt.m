@@ -31,12 +31,12 @@ function v = plot_msdt(d, h, optstring)
 % % % % tau = d.tau;
 % % % % msd = d.msd;
 % % % % 
-% % % % if isfield(d, 'n');
-% % % %     sample_count = d.n;
+% % % % if isfield(d, 'Ntrackers');
+% % % %     Ntrackers = d.Ntrackers;
 % % % % else
-% % % %     sample_count = sum(~isnan(msd),2);
-% % % %     idx = find(sample_count > 0);
-% % % %     sample_count = sample_count(idx);
+% % % %     Ntrackers = sum( (d.Nestimates > 0) ,2);
+% % % %     idx = find(Ntrackers > 0);
+% % % %     Ntrackers = Ntrackers(idx);
 % % % % end
 % % % % 
 % % % % 
@@ -48,8 +48,8 @@ function v = plot_msdt(d, h, optstring)
 % % % % mean_logtau = nanmean(logtau');
 % % % % mean_logmsd = nanmean(logmsd');
 % % % % 
-% % % % ste_logtau = nanstd(logtau') ./ sqrt(sample_count');
-% % % % ste_logmsd = nanstd(logmsd') ./ sqrt(sample_count');
+% % % % ste_logtau = nanstd(logtau') ./ sqrt(Ntrackers');
+% % % % ste_logmsd = nanstd(logmsd') ./ sqrt(Ntrackers');
 % % % % 
 % % % % % creating the plot
 % % % % figure(h);

@@ -8,7 +8,7 @@ function v = ve(d, bead_radius, freq_type, plot_results)
 % ve computes the viscoelastic moduli from mean-square displacement data.
 % The output structure of ve contains four members: raw (contains data for 
 % each individual tracker/bead), mean (contains means across trackers/beads), and 
-% error (contains standard error (stdev/sqrt(N) about the mean value, and N (the
+% error (contains standard error (stdev/sqrt(Ntrackers) about the mean value, and Ntrackers (the
 % number of trackers/beads in the dataset.
 %
 %  [v] = ve(d, bead_radius, freq_type, plot_results);  
@@ -51,8 +51,14 @@ end
 
 msd = d.msd;
 tau = d.tau;
-  N = d.n; % corresponds to the number of trackers at each tau
-counts = d.ns; % corresponds to the number of estimates for each bead at each tau
+Nestimates = d.Nestimates; % corresponds to the number of estimates for each bead at each tau
+
+if isfield(d, 'Ntrackers')
+    Ntrackers = d.Ntrackers; % corresponds to the number of trackers at each tau
+else
+    Ntrackers = sum( (d.Nestimates > 0), 2);
+end
+
 
 meantau = nanmean(tau,2);
 % meanmsd = nanmean(msd,2);
@@ -66,7 +72,7 @@ logmsd = log10(msd);
 numbeads = size(logmsd,2);
 
 % weighted mean for logmsd
-weights = counts ./ repmat(nansum(counts,2), 1, size(counts,2));
+weights = Nestimates ./ repmat(nansum(Nestimates,2), 1, size(Nestimates,2));
 
 mean_logtau = nanmean(logtau');
 mean_logmsd = nansum(weights .* logmsd, 2);
@@ -75,16 +81,16 @@ meanmsd = 10 .^ (mean_logmsd);
 
 % computing error for logmsd
 Vishmat = nansum(weights .* (repmat(mean_logmsd, 1, numbeads) - logmsd).^2, 2);
-msderr =  sqrt(Vishmat ./ N);
+msderr =  sqrt(Vishmat ./ Ntrackers);
 
 
 errhmsd = 10 .^ (mean_logmsd + msderr);
 errlmsd = 10 .^ (mean_logmsd - msderr);
 
 
-mygser  = gser(meantau, meanmsd, N, bead_radius);
-maxgser = gser(meantau, errhmsd, N, bead_radius);
-mingser = gser(meantau, errlmsd, N, bead_radius);
+mygser  = gser(meantau, meanmsd, Ntrackers, bead_radius);
+maxgser = gser(meantau, errhmsd, Ntrackers, bead_radius);
+mingser = gser(meantau, errlmsd, Ntrackers, bead_radius);
 
 v = mygser;
 
@@ -103,7 +109,7 @@ v.error.npp = abs(mygser.npp - mingser.npp);
 
 v.raw = d;
 
-v.n = N;
+v.Ntrackers = Ntrackers;
 
 % plot output
 if (nargin < 4) || isempty(plot_results) || strncmp(plot_results,'y',1)  
@@ -116,7 +122,7 @@ return;
 
 
 
-function v = gser(tau, msd, N, bead_radius)
+function v = gser(tau, msd, Ntrackers, bead_radius)
     k = 1.3806e-23;
     T = 298;
 
@@ -145,7 +151,7 @@ function v = gser(tau, msd, N, bead_radius)
     % to delete the last row of f, tau, and msd values computed.
     % msd = msd(1:end-1,:);
     % tau = tau(1:end-1,:);
-    %   N =   N(1:end-1,:);
+    % Ntrackers = Ntrackers(1:end-1,:);
 
     % get frequencies all worked out from timing (tau)
     f = 1 ./ tau;

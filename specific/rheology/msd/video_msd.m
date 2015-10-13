@@ -63,8 +63,8 @@ if (nargin < 1) || isempty(files)
     if calc_r
         vmsd.r = [];
     end
-    vmsd.n = empty_set;
-    vmsd.ns = empty_set;
+%     vmsd.n = empty_set;
+    vmsd.Nestimates = empty_set;
     vmsd.window = empty_set;
     return;
 end;
@@ -120,7 +120,7 @@ beadIDs = unique(v(:,ID))';
 
 tau    = NaN(length(window), length(beadIDs));
 mymsd  = NaN(length(window), length(beadIDs));
-counts = NaN(length(window), length(beadIDs));
+Nestimates = NaN(length(window), length(beadIDs));
 
         if calc_r2
             myr2   = NaN(max(v(:,FRAME)+1), length(window), length(beadIDs));
@@ -130,25 +130,22 @@ counts = NaN(length(window), length(beadIDs));
         end;
                 
 for k = 1 : length(beadIDs);
-    TIME   = 1; 
-    ID     = 2; 
-    FRAME  = 3; 
-    X      = 4; 
-    Y      = 5; 
-    Z      = 6;
     
     b = get_bead(v, beadIDs(k));    
     
+    first_positions_X(1,k) = b(1,X) / (calib_um * 1e-6);
+    first_positions_Y(1,k) = b(1,Y) / (calib_um * 1e-6);
+    
     % call up the MSD kernel-function to compute the MSD for each bead    
     if calc_r2 || calc_r
-        [tau_ msd_ nbead r]  = msd(b(:, TIME), b(:, X:Y), window(~isnan(window)));
+        [tau_ msd_ nest_ r]  = msd(b(:, TIME), b(:, X:Y), window(~isnan(window)));
     else
-        [tau_ msd_ nbead]    = msd(b(:, TIME), b(:, X:Y), window(~isnan(window)));
+        [tau_ msd_ nest_]    = msd(b(:, TIME), b(:, X:Y), window(~isnan(window)));
     end
     
     tau(1:length(tau_),k) = tau_; 
     mymsd(1:length(msd_),k) = msd_;
-    counts(1:length(nbead),k) = nbead;
+    Nestimates(1:length(nest_),k) = nest_;
     
     if calc_r
         [ntimes, ncoords, nwindows] = size(r);
@@ -164,17 +161,19 @@ end;
 
 
 % trim the data by removing window sizes that returned no data
-sample_count = sum(~isnan(mymsd),2);
+% sample_count = sum(~isnan(mymsd),2);
 
 % idx = find(sample_count > 0);
 % tau = tau(idx,:);
 % mymsd = mymsd(idx,:);
-% counts = counts(idx,:);
+% Nestimates = Nestimates(idx,:);
 % sample_count = sample_count(idx);
 
 
 % output structure
 vmsd.trackerID = reshape(beadIDs, 1, length(beadIDs));
+% vmsd.firstposX = first_positions_X;
+% vmsd.firstposY = first_positions_Y;
 vmsd.tau = tau;
 vmsd.msd = mymsd;
 if calc_r
@@ -182,8 +181,8 @@ if calc_r
 elseif calc_r2
     vmsd.r2 = myr2;
 end
-vmsd.n = sample_count;
-vmsd.ns = counts;
+% vmsd.n = sample_count;
+vmsd.Nestimates = Nestimates;
 vmsd.window = window;
 
 % creation of the plot MSD vs. tau
@@ -191,6 +190,7 @@ if (nargin < 5) || isempty(make_plot) || strncmp(make_plot,'y',1)
     plot_msd(vmsd, [], 'me'); 
 end;
 
+fprintf('size(vmsd): %i,  %i\n',size(vmsd.msd));
 return;
 
 

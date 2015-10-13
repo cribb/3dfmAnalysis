@@ -52,7 +52,7 @@ for D_type = 1:3
     end    
 
 	tau = d.tau;
-	N = d.n(1:end-1); % corresponds to the number of trackers (rods)
+	N = d.Ntrackers(1:end-1); % corresponds to the number of trackers (rods)
 	
 	A = tau(1:end-1,:);
 	B = tau(2:end,:);
@@ -184,5 +184,5 @@ for D_type = 1:3
 	end
 end
 
-ve.n = N;
+ve.Ntrackers = N;
 
