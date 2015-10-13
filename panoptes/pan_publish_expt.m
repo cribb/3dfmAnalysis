@@ -317,7 +317,7 @@ if find(strcmp(report_blocks, 'plate_summary'))
         fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', MSD(k), MSD_err(k));
         fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rms_mymsd(k)*1e9, rms_mymsd_err(k)*1e9);
         fprintf(fid, '      <td align="center" width="200"> %8.1f +/- %8.2f [mPa s] </td> \n', visclist(k)*1e3, visc_errlist(k)*1e3);
-        fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_n(k));    
+        fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_Ntrackers(k));    
         fprintf(fid, '   </tr>\n');        
     end
     fprintf(fid, '   </table>\n');
