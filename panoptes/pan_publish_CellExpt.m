@@ -98,8 +98,8 @@ close(heatmapfig);
 
 % myparam = 'metadata.plate.solution.molar_concentration';
 % myparam = 'metadata.plate.well_map';
-myparam = 'metadata.plate.cell.name';
-% myparam = 'metadata.plate.solution.name';
+% myparam = 'metadata.plate.cell.name';
+myparam = 'metadata.plate.solution.name';
 
 % compute the MSD for each condition defined by 'myparam'
 [msds molar_conc] = pan_combine_data(metadata, myparam);
@@ -110,8 +110,8 @@ all_msds = 10.^[msds.mean_logmsd];
 all_logtaus = [msds.mean_logtau];
 all_logmsds = [msds.mean_logmsd];
 all_logerrs = [msds.msderr];
+all_Ntrackers   = [msds.Ntrackers];
 
-all_ns   = [msds.n];
 
 % create plot with bar graph at a given tau
 spec_tau = 1;
@@ -128,7 +128,7 @@ myerr    = 10.^(mylogmsd + mylogerr) - 10.^(mylogmsd);
 a = metadata.plate.bead.diameter(1)/2*1e-6;
 rms_mymsd = sqrt(mymsd);
 rms_mymsd_err = sqrt(mymsd+myerr) - rms_mymsd;
-msds_n = all_ns(minloc(1),:);
+msds_Ntrackers = all_Ntrackers(minloc(1),:);
 myvisc    = (2 * 1.3806e-23 * 296 .* mytau) ./ (3 * pi *  mymsd * a);
 myvisc_hi = (2 * 1.3806e-23 * 296 .* mytau) ./ (3 * pi * (mymsd+myerr) * a);
 myvisc_err = abs(myvisc_hi - myvisc);
@@ -314,7 +314,7 @@ for k = 1:length(msds)
     fprintf(fid, '      <td align="center" width="200"> %8.2g +/- %8.2g [m^2]</td> \n', mymsd(k), myerr(k));
     fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [nm] </td> \n', rms_mymsd(k)*1e9, rms_mymsd_err(k)*1e9);
     fprintf(fid, '      <td align="center" width="200"> %8.0f +/- %8.1f [mPa s] </td> \n', myvisc(k)*1000, myvisc_err(k)*1000);
-    fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_n(k));    
+    fprintf(fid, '      <td align="center" width="200"> %8i </td> \n', msds_Ntrackers(k));    
     fprintf(fid, '   </tr>\n');        
 end
 fprintf(fid, '   </table>\n');
