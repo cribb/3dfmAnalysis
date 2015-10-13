@@ -85,9 +85,11 @@ for k = 1:length(list)
 
         % separate aggregate tracker data set into individual trackers
 %         tracker_IDlist = unique(data(:,ID));                                        % creates the list of unique tracker IDs
-        tracker_IDlist = agg_msdcalc.trackerID;
-
-        tracker_IDlist = tracker_IDlist(~isnan(tracker_IDlist));
+        goodIDs = ~isnan(agg_msdcalc.trackerID);
+        
+        tracker_IDlist = agg_msdcalc.trackerID(goodIDs);
+%              firstposX = agg_msdcalc.firstposX(goodIDs);
+%              firstposY = agg_msdcalc.firstposY(goodIDs);
         
         for i = 1:length(tracker_IDlist)
 
@@ -95,20 +97,20 @@ for k = 1:length(list)
                                                                                     % to the ith tracker (the ith element of the tracker_IDlist) 
             single_curve = data(row_index,:);                                       % assigns variable to a single tracker
 
-            fprintf('\n Separated tracker %-1.0f ', i)
-            fprintf('from the %s data set. ', filename)
-            fprintf('Breaking up curve into %-1.0f subtrajectories.', num_subtraj)
+%             fprintf('\n Separated tracker %-1.0f ', i)
+%             fprintf('from the %s data set. ', filename)
+%             fprintf('Breaking up curve into %-1.0f subtrajectories.', num_subtraj)
             
             agg_msdcalc.pass(i) = single_curve(1, PASS); 
             agg_msdcalc.well(i) = single_curve(1, WELL);
             agg_msdcalc.area(i) = single_curve(1, AREA);
             agg_msdcalc.sens(i) = single_curve(1, SENS);
             
-            % extract pass, well, area, and starting sens info for this ID
-            pass_data = single_curve(1,PASS);
-            well_data = single_curve(1,WELL);
-            area_data = single_curve(1,AREA);
-            sens_data = single_curve(1,SENS);
+%             % extract pass, well, area, and starting sens info for this ID
+%             pass_data = single_curve(1,PASS);
+%             well_data = single_curve(1,WELL);
+%             area_data = single_curve(1,AREA);
+%             sens_data = single_curve(1,SENS);
 
 
             [subtraj_matrix, subtraj_dur] = break_into_subtraj(single_curve, ...
@@ -149,7 +151,10 @@ for k = 1:length(list)
             b_out.well(i,:)                = agg_msdcalc.well(i);
             b_out.area(i,:)                = agg_msdcalc.area(i);
             b_out.sens(i,:)                = agg_msdcalc.sens(i);
+%             b_out.n(i,:)                   = agg_msdcalc.n(i);
             b_out.trackerID(i,:)           = tracker_IDlist(i);
+%             b_out.firstposX(i,1)           = firstposX(i);
+%             b_out.firstposY(i,1)           = firstposY(i);
             b_out.model{i,:}               = model;
             b_out.prob(i,:)                = prob;
             b_out.results(i,:)             = bayes_results;
@@ -166,8 +171,11 @@ for k = 1:length(list)
         bayes_output(k,1).pass                = b_out.pass;
         bayes_output(k,1).well                = b_out.well;
         bayes_output(k,1).area                = b_out.area;
-        bayes_output(k,1).sens                = b_out.sens;       
+        bayes_output(k,1).sens                = b_out.sens;    
+%         bayes_output(k,1).n                   = b_out.n;
         bayes_output(k,1).trackerID           = b_out.trackerID;
+%         bayes_output(k,1).firstposX           = b_out.firstposX;
+%         bayes_output(k,1).firstposY           = b_out.firstposY;
         bayes_output(k,1).model               = b_out.model;
         bayes_output(k,1).prob                = b_out.prob;
         bayes_output(k,1).results             = b_out.results;
@@ -184,8 +192,11 @@ for k = 1:length(list)
         bayes_output(k,1).pass                = [];
         bayes_output(k,1).well                = [];
         bayes_output(k,1).area                = [];
-        bayes_output(k,1).sens                = [];          
+        bayes_output(k,1).sens                = [];  
+%         bayes_output(k,1).Ntrackers          = [];
         bayes_output(k,1).trackerID           = [];
+%         bayes_output(k,1).firstposX           = [];
+%         bayes_output(k,1).firstposY           = [];
         bayes_output(k,1).model               = [];
         bayes_output(k,1).prob                = [];
         bayes_output(k,1).results             = [];
