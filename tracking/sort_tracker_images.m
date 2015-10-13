@@ -25,6 +25,19 @@ switch lower(sort_by)
     case 'area'
        tmp = sortrows(tmp, AREA+1);
        sorted_vals = tmp(:, AREA+1);
+    case 'newarea'       
+        % scale images to be 255 max
+        for k = 1:length(sorted_stack.stack)
+            tmp_im = sorted_stack.stack(:,:,k);
+            tmp_im = tmp_im / max(tmp_im(:)) * 255;
+            px_above_thresh = tmp_im > (255 * 0.5); 
+            newarea(k) = sum(px_above_thresh(:));
+        end
+        
+        tmp = [tmp , newarea(:)];
+        newareaCOL = size(tmp,2);
+        tmp = sortrows(tmp, newareaCOL);
+        sorted_vals = tmp(:,newareaCOL);                
     case 'yaw'
        tmp = sortrows(tmp, YAW+1);
        sorted_vals = tmp(:, YAW+1);        
