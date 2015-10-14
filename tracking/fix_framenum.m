@@ -1,13 +1,19 @@
-function [] = fix_framenum(file)
+function [] = fix_framenum(files)
+%input files must be cell
 
 video_tracking_constants;
 
-original = load_video_tracking(file, [], 'pixels', 1, 'absolute', 'no', 'table');
-
-framenum = original(:,FRAME);
-new_framenum = framenum-1;
-
-original(:,FRAME) = new_framenum;
-
-newfile = [file '_fixed'];
-save_vrpnmatfile(newfile,original,'pixels');
+for f = 1:length(files)
+    file = files{f};
+    
+    data = load_video_tracking(file,[],'pixels',1,'absolute','no','table');
+    framenum = data(:,FRAME);
+    new_frame = framenum - 1;
+    
+    data(:,FRAME) = new_frame;
+    
+    new_file = [file '_fixed'];
+    save_vrpnmatfile(new_file,data,'pixels');
+    
+    %data_set.(file) = data;
+end
