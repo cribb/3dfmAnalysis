@@ -97,12 +97,12 @@ end
 % % % mean_logmsd_n = nanmean(logmsd_n');
 % % % mean_logmsd_r = nanmean(logmsd_r');
 % % % 
-% % % sample_count = sum(~isnan(logmsd_a),2);
+% % % Ntrackers = sum(~isnan(logmsd_a),2);
 % % % 
-% % % ste_logtau   = nanstd(logtau')  ./ sqrt(sample_count');
-% % % ste_logmsd_a = nanstd(logmsd_a') ./ sqrt(sample_count');
-% % % ste_logmsd_n = nanstd(logmsd_n') ./ sqrt(sample_count');
-% % % ste_logmsd_r = nanstd(logmsd_r') ./ sqrt(sample_count');
+% % % ste_logtau   = nanstd(logtau')  ./ sqrt(Ntrackers');
+% % % ste_logmsd_a = nanstd(logmsd_a') ./ sqrt(Ntrackers');
+% % % ste_logmsd_n = nanstd(logmsd_n') ./ sqrt(Ntrackers');
+% % % ste_logmsd_r = nanstd(logmsd_r') ./ sqrt(Ntrackers');
 % % % 
 % % % 	figure;
 % % % 	errorbar(repmat(mean_logtau',1,3), [mean_logmsd_a' mean_logmsd_n' mean_logmsd_r'], ...
@@ -122,6 +122,6 @@ end
 % % % d.D_a = D_a;
 % % % d.D_n = D_n;
 % % % d.D_r = D_r;
-% % % d.n = sample_count; % because beadID's are indexed by 0.
+% % % d.Ntrackers = Ntrackers; % because beadID's are indexed by 0.
 
 

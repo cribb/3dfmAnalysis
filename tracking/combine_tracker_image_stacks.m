@@ -8,15 +8,18 @@ tssa = tracker_stack_struct_array;
 
 vout = tssa(1).vid_table;
 sout = tssa(1).stack;
+aout = tssa(1).newarea;
 
 for k = 2 : length(tssa)
     vout = cat(1, vout, tssa(k).vid_table);
     sout = cat(3, sout, tssa(k).stack);
+    aout = cat(1, aout, tssa(k).newarea);
 end
 
 combined_stack.halfsize = tssa(1).halfsize;
 combined_stack.vid_table = vout;
 combined_stack.stack = sout;
+combined_stack.newarea = aout;
 
 return;
 

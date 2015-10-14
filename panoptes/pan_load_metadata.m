@@ -24,7 +24,9 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
 
     % other file lists
     outs.files.video    = dir('*video*.vrpn.mat');
-    outs.files.tracking = dir('*_TRACKED.vrpn.mat');
+%     outs.files.tracking = dir('*_TRACKED.vrpn.mat');
+    outs.files.tracking = dir('*_TRACKED.csv');
+%     outs.files.tracking = dir('*_TRACKED.vrpn.csv');
     outs.files.evt      = dir('*.vrpn.evt.mat');
 
     outs = check_file_inputs(outs);

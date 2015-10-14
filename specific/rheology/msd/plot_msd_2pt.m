@@ -28,21 +28,21 @@ end
 tau = d(:,1,1);
 msd = d(:,4,1);
 msd = msd*10^-12; %converting to meters
-% counts = d.ns;
+% counts = d.Nestimates;
 
-% if isfield(d, 'n');
-%     sample_count = d.n;
+% if isfield(d, 'Ntrackers');
+%     Ntrackers = d.Ntrackers;
 % else
-%     sample_count = sum(~isnan(msd),2);
-%     idx = find(sample_count > 0);
-%     sample_count = sample_count(idx);
+%     Ntrackers = sum(~isnan(msd),2);
+%     idx = find(Ntrackers > 0);
+%     Ntrackers = Ntrackers(idx);
 % end
 % 
 % clip = find(sum(~isnan(counts),2) <= 1);
 % tau(clip,:) = [];
 % msd(clip,:) = [];
 % counts(clip,:) = [];
-% sample_count(clip,:) = [];
+% Ntrackers(clip,:) = [];
 
 % setting up axis transforms for the figure plotted below.  You cannot plot
 % errorbars on a loglog plot, it seems, so we have to set it up here.
@@ -59,7 +59,7 @@ logmsd = log10(msd);
 % 
 % % computing error for logmsd
 % Vishmat = nansum(weights .* (repmat(mean_logmsd, 1, numbeads) - logmsd).^2, 2);
-% msderr =  sqrt(Vishmat ./ sample_count);
+% msderr =  sqrt(Vishmat ./ Ntrackers);
 
 msderr = d(:,7,1);
 % creating the plot

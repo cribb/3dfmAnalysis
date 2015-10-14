@@ -65,7 +65,10 @@ for k = 1:length(filelist)
                             metadata.instr.fps_imagingmode, ...
                             'm', mycalibum, ...
                             'absolute', 'no', 'table');
-                       
+%     if sum(isnan(d(:))) == length(d(:))
+%         d = [];
+%     end
+    
     % only have to filter if we need to process .vrpn.mat to .vrpn.evt.mat
     if length(metadata.files.evt) ~= length(metadata.files.tracking)
         [d, filtout] = filter_video_tracking(d, filt);
@@ -210,17 +213,3 @@ function [filepath, filt, systemid] = check_params(filepath, filt, systemid)
     return;
     
     
-% function for writing out stderr log messages
-function logentry(txt)
-    logtime = clock;
-    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
-                   num2str(logtime(2),        '%02i') '.' ...
-                   num2str(logtime(3),        '%02i') ', ' ...
-                   num2str(logtime(4),        '%02i') ':' ...
-                   num2str(logtime(5),        '%02i') ':' ...
-                   num2str(floor(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext 'pan_analyze_PMExpt: '];
-     
-     fprintf('%s%s\n', headertext, txt);
-     
-     return;    

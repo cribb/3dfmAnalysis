@@ -26,13 +26,14 @@ end
 tau = d.tau;
 r2  = d.r2;
 msd = d.msd;
+Nestimates = d.Nestimates;
 
-if isfield(d, 'n');
-    n = d.n;
+if isfield(d, 'Ntrackers');
+    Ntrackers = d.Ntrackers;
 else
-    n = sum(~isnan(msd),2);
+    Ntrackers = sum( (Nestimates > 0), 2);
     idx = find(sample_count > 0);
-    n = n(idx);
+    Ntrackers = Ntrackers(idx);
 end
 
 logr = log10(r2);
@@ -72,7 +73,7 @@ end
 idx = find(sum(abs(myhist),1) == 0);
 myhist(:,idx) = [];
 
-myhist = myhist ./ repmat(n', size(myhist,1),1);
+myhist = myhist ./ repmat(Ntrackers', size(myhist,1),1);
 mytau = mean(tau,2);
 
 d.hist = myhist;

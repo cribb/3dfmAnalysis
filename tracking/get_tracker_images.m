@@ -108,14 +108,24 @@ for k = 1:Ntrackers
     
     % put mini-image into proper location in outputted stack
     mystack(:,:,k) = mini_im;
+    
+    % calculate the cross-sectional area of the tracker and add it to the
+    % outputted data. I don't know a better place to put this at the moment    
+    scaled_tmp_im = tmp_im / max(tmp_im(:)) * 255;  % scale images to be 255 max
+    px_above_thresh = scaled_tmp_im > (255 * 0.5);  % assuming full 'width' at half max
+    newarea(k,1) = sum(px_above_thresh(:));
+    
 end
 
     tracker_stack.halfsize = tracker_halfsize;
     tracker_stack.vid_table = vid_table;
     tracker_stack.stack = mystack;
-
+    tracker_stack.trackerID = tracker_list(:);
+    tracker_stack.newarea = newarea;
+    
 if findstr(lower(reportyn), 'y')
     h = plot_tracker_images(tracker_stack, 'id');
 end
 
 return
+

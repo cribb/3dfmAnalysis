@@ -53,7 +53,7 @@ np  = v.np;
 npp = v.npp;
 gstar = sqrt(gp.^2 + gpp.^2);
 nstar = sqrt(np.^2 + npp.^2);
-N   = v.n;
+N   = v.Ntrackers;
 
 gperr = v.error.gp;
 gpperr= v.error.gpp;

@@ -1,15 +1,11 @@
-function bead_stacks = pan_collect_tracker_areas(filepath, systemid, imagereport)
-
-if nargin < 3 || isempty(imagereport)
-    imagereport = 'no';
-end
+function outs = pan_attach_newarea_values(filepath, systemid)
 
 if nargin < 2 || isempty(systemid)
-     error('Need systemid-- either ''panoptes'' or ''monoptes''');
+    systemid = 'monoptes';
 end
 
 if nargin < 1 || isempty(filepath)
-    error('No file defined.'); 
+    error('No filepath defined.'); 
 end
 
 video_tracking_constants;
@@ -26,7 +22,7 @@ metadata = pan_load_metadata(filepath, systemid, '96well');
 filelist = metadata.files.tracking;
 
 if isempty(filelist)
-    filelist = dir('*.vrpn.csv');
+    filelist = dir('*.csv');
 end
 
 FLburstfiles = metadata.files.FLburst;
@@ -37,7 +33,7 @@ duration = metadata.instr.seconds;
 
 filetype = 'csv'; % at the time this was written, only csv files contained area and sens values
 % areas = []; sens = [];
-count = 1;
+% count = 1;
 for k = 1:Nfiles
     
     % clear out old versions of these variables if they exist
@@ -62,14 +58,12 @@ for k = 1:Nfiles
                         'pixels', 1, ...
                         'absolute', 'no', 'table');
                     
-    if isempty(d)
-        continue;
-    end
-
     tracker_halfsize = 15; % pull this from metadata when tracking cfg is included
     sort_by = 'sens';
 
-    if ~isempty(d)
+    if isempty(d)
+        continue;
+    else
         
         % extract the first frame from the video data
         idx = ( d(:, FRAME) == 1 );
@@ -78,49 +72,40 @@ for k = 1:Nfiles
         % generate a list of tracker IDs
         tracker_list = unique(d(:,ID));
         
-        % extract the AREA and SENSITIVITY (fitness) of each tracker
-        for m = 1:length(tracker_list)
-            idx = ( frame1(:,ID) == tracker_list(m) );
-            tmpdata = d(idx,:);
-            tmparea(m,1) = tmpdata(1,AREA);
-            tmpsens(m,1) = tmpdata(1,SENS);
-        end                
-        
         FLfile = [FLburst_dir '\frame0001.pgm'];
         im = imread(FLfile);
 
         mystack = get_tracker_images(frame1, im, tracker_halfsize, 'n');
     
-        bead_stacks(count).pass        = pass;
-        bead_stacks(count).well        = well;
-%         bead_stacks(count).tlist       = tlist;
-        bead_stacks(count).halfsize    = tracker_halfsize;
-        bead_stacks(count).vid_table   = mystack.vid_table;
-        bead_stacks(count).stack       = mystack.stack;
-        bead_stacks(count).newarea     = mystack.newarea;
-        
-%         bead_stacks(count).area        = tmparea;
-%         bead_stacks(count).sensitivity = tmpsens;
-            
-        if strfind(imagereport, 'y');    
-            h = plot_tracker_images(frame1, im, tracker_halfsize, sort_by);
-            
-            figure(h);
-            set(h, 'Name', ['Pass ' num2str(pass) ', Well ' num2str(well)]);            
+        dout = d;
+        for m = 1:length(tracker_list);
+            idx = ( d(:,ID) == tracker_list(m) );
+            dout(idx,AREA) = mystack.newarea(m);
         end
         
-        count = count + 1;
-%         areas = [areas; tmparea];
-%         sens  = [sens; tmpsens];
+        new_filename = strrep(filelist(k).name, '.csv', '.vrpn.csv');
+        save_vrpn_csv_file(new_filename, dout);
+                
     end    
     
 
 end
+ outs = 0;
+return;
 
-% figure; 
-% hist(areas, 50);
-% xlabel('Region Area [px^2]');
-% ylabel('count');
-% title('Tracker Region Areas for Panoptes Run');
-
+function save_vrpn_csv_file(filename, dout)
+    video_tracking_constants;
+    
+    fid = fopen(filename, 'w');
+    
+    fprintf(fid, 'FrameNumber,Spot ID,X,Y,Z,Radius,Center Intensity,Orientation (if meaningful),Length (if meaningful),Fit Background (for FIONA),Gaussian Summed Value (for FIONA),Mean Background (FIONA),Summed Value (for FIONA),Region Size,Sensitivity\n');
+    
+    for k = 1:size(dout,1)
+        fprintf(fid, '%u, %u, %0.5f, %0.5f, %0.5f, %0.5f, %0.5f, %0.5f, %0.5f, %0.5f, %0.5f, %0.5f, %0.5f, %u, %0.5f\n', ...
+              dout(k,FRAME),dout(k,ID),dout(k,X),dout(k,Y),0,0,0,0,0,0,0,0,0, dout(k,AREA), dout(k,SENS) );
+    end
+    
+    logentry(['Saved ' filename]);
+    
+    fclose(fid);
 return;
