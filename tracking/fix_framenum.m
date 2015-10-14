@@ -1,5 +1,6 @@
 function [] = fix_framenum(files)
-%input files must be cell
+%input files must be cells with file paths (ie. files{1} =
+%Users/phoebelee/...)
 
 video_tracking_constants;
 
