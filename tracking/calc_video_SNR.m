@@ -1,8 +1,14 @@
-function [midSNR]=calc_video_SNR(filepath,filenum,beadsize,thresh)
+function [midSNR]=calc_video_SNR(filepath,filenum,beadsize,thresh,filetype)
 
 double errorthresh;
 cd(filepath);
-files=dir('*.pgm');
+
+switch filetype 
+    case '.tif'
+     files=dir('*.tif');
+    case '.pgm'
+        files=dir('*.pgm');
+end 
 
 if nargin <4 || isempty(thresh)
     thresh=.3;
@@ -48,7 +54,7 @@ num_images=numel(info);
     
         end
    tracking_single_image_SNR(frame(:,:,1),errorthresh,'y',threshold,bit);     
-    midSNR=mean(avgSNR);
+    midSNR=mean(avgSNR)
    
   err=std(avgSNR)/sqrt(length(avgSNR))
   snfig = figure; 
@@ -97,7 +103,7 @@ num_images=numel(info);
                  
         end
 tracking_single_image(frame(:,:,1),errorthresh,'y',threshold, bit);
-   midSNR=mean(avgSNR);
+   midSNR=mean(avgSNR)
    
    err=stddev(avgSNR)/sqrt(length(avgSNR))
    snfig = figure; 
