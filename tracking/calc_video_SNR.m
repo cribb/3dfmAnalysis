@@ -1,11 +1,11 @@
-function [midSNR, highSNR, lowSNR]=calc_video_SNR(filepath,filenum,beadsize,thresh)
+function [midSNR]=calc_video_SNR(filepath,filenum,beadsize,thresh)
 
 double errorthresh;
 cd(filepath);
-files=dir('*.tif');
+files=dir('*.pgm');
 
 if nargin <4 || isempty(thresh)
-    thresh=.4;
+    thresh=.3;
 end
 threshold=thresh;
 if isempty(files)

@@ -1,4 +1,4 @@
-function [avgSNR]= tracking_single_image_SNR_try2(image,err_thresh, report,thresh,bit)
+function [avgSNR]= tracking_single_image_SNR(image,err_thresh, report,thresh,bit)
 
 
 
