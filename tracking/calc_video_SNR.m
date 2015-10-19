@@ -1,4 +1,4 @@
-function [midSNR]=calc_video_SNR(filepath,filenum,beadsize,thresh,filetype)
+function [midSNR]=calc_video_SNR(filepath,filenum,beadsize,filetype,thresh)
 
 double errorthresh;
 cd(filepath);
