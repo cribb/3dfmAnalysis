@@ -1,4 +1,4 @@
-function [midSNR]=calc_video_SNR(filepath,filenum,beadsize,filetype,thresh)
+function [SNR, signal, background, noise]=calc_video_SNR(filepath,filenum,beadsize,filetype,thresh)
 
 double errorthresh;
 cd(filepath);
@@ -7,10 +7,10 @@ switch filetype
     case '.tif'
      files=dir('*.tif');
     case '.pgm'
-        files=dir('*.pgm');
+      files=dir('*.pgm');
 end 
 
-if nargin <4 || isempty(thresh)
+if nargin <5 || isempty(thresh)
     thresh=.3;
 end
 threshold=thresh;
@@ -49,13 +49,15 @@ num_images=numel(info);
         for i=1:fid
             
               frame(:,:,i)=double(frame(:,:,i))-background;
-             [avgSNR(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh,'n',threshold,bit);
+             [avgSNR(i), mean_max_sig(i), image_background(i), image_noise(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh,'n',threshold,bit);
              
     
         end
    tracking_single_image_SNR(frame(:,:,1),errorthresh,'y',threshold,bit);     
-    midSNR=mean(avgSNR)
-   
+   SNR=mean(avgSNR)
+   signal=mean(mean_max_sig)
+   background=mean(image_background)
+   noise=mean(image_noise)
   err=std(avgSNR)/sqrt(length(avgSNR))
   snfig = figure; 
  plot(1:length(avgSNR), avgSNR);
@@ -99,12 +101,14 @@ num_images=numel(info);
           background = imopen(im,strel('disk',100));
         for i=1:num_images
              frame(:,:,i)=double(frame(:,:,i))-background;
-             [avgSNR(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh,'n',threshold,bit);
+             [avgSNR(i), mean_max_sig(i), image_background(i), image_noise(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh,'n',threshold,bit);
                  
         end
 tracking_single_image(frame(:,:,1),errorthresh,'y',threshold, bit);
-   midSNR=mean(avgSNR)
-   
+  SNR=mean(avgSNR)
+   signal=mean(mean_max_sig)
+   background=mean(image_background)
+   noise=mean(image_noise)
    err=stddev(avgSNR)/sqrt(length(avgSNR))
    snfig = figure; 
    plot(1:length(snr), snr);

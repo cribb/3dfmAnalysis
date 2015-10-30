@@ -1,4 +1,4 @@
-function [avgSNR]= tracking_single_image_SNR(image,err_thresh, report,thresh,bit)
+function [avgSNR, mean_max_sig, image_background, image_noise]= tracking_single_image_SNR(image,err_thresh, report,thresh,bit)
 
 
 
@@ -128,6 +128,8 @@ end
     signal_standard_error=std(bead_sig)/sqrt(length(bead_sig));
     background_standard_error=std(mean_noise)/sqrt(length(mean_noise));
     total_error=signal_standard_error+background_standard_error;
+    image_background=mean_noise(end);
+    image_noise=noise(end);
     avgSNR = (mean_max_sig - mean_noise(end)) / noise(end);
     maxSNR=(max_bead_sig-mean_noise(end))/noise(end);
     minSNR=(min_bead_sig-mean_noise(end))/noise(end);
