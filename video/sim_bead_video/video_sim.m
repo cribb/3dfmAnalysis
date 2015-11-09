@@ -1,4 +1,4 @@
-function [] = video_sim(in_struct)
+function [] = video_sim(in_struct,grid)
 %VIDEO_SIM creates a simulated video of fluorescent beads moving
 %through a Newtonian fluid
 %
@@ -43,6 +43,7 @@ function [] = video_sim(in_struct)
 %       in_struct.rad_confined = the particle's radius of confinement in [m]. Default: Inf.
 %       in_struct.alpha = anomalous diffusion constant. Default: 1.
 %       in_struct.modulus = modulus of the fluid [Pa]. Default: 2.2e9 (bulk modulus of water).
+% grid is a 'y'/'n' input
 
 
 video_tracking_constants;
@@ -72,7 +73,8 @@ logentry('All parameters set');
     modulus      = in_struct.modulus;        % [Pa]
 
 
-calib_um_scaled = calib_um/scale;
+    calib_um_scaled = calib_um/scale;
+    num_frames = frame_rate*duration;
     
 
     svde_struct.seed         = seed;
@@ -100,11 +102,26 @@ calib_um_scaled = calib_um/scale;
 
     
 %Simulate the trajectories
-traj = sim_video_diff_expt('expected',svde_struct); 
+if grid == 'y'
+    traj = sim_video_diff_expt_seed([],svde_struct); 
+elseif grid == 'n'
+    traj = sim_video_diff_expt([],svde_struct);
+end
+
 %named the vrpn file 'expected' for now, is this necessary to save in the future?
 xtraj = traj(:,X);
 ytraj = traj(:,Y);
 
+xtraj_corrected = xtraj/scale;
+ytraj_corrected = ytraj/scale;
+
+traj_to_save = traj;
+traj_to_save(:,X) = xtraj_corrected;
+traj_to_save(:,Y) = ytraj_corrected;
+
+% [path,folder] = fileparts(pwd);
+% vrpnfilename = [folder '_expected'];
+% save_vrpnmatfile(vrpnfilename,traj_to_save,'pixels',calib_um);
 
 %Determine the number of frames in the video
 numframes = frame_rate*duration;
@@ -121,7 +138,6 @@ logentry(['Bead diameter is ' num2str(bead_r_nm*2) ' nm']);
 
 %Calculate st dev of gaussians from bead radius
 [stdev_gaussian] = lookup_radius(bead_radius);
-
 
 %Calculate scalar for gaussian function
 signal = intensity-bg_mean-(noise);
@@ -145,18 +161,17 @@ for i = 1:numframes
     
     %Simulate each spot in the frame
     for spot = 1:numframes:(length(xtraj)-1);
-        paths = paths + gauss2d(blank,(scale*stdev_gaussian),[xtraj(frames+spot),ytraj(frames+spot)],a);
+        paths = paths + gauss2d(blank,((scale^2)*stdev_gaussian),[xtraj(frames+spot),ytraj(frames+spot)],a);
     end
     
     frame = uint8(255.*paths);
     
     %Downsample the frame to the correct size
     if scale ~= 1
-        frame = image_downsample(frame,scale);
+        frame = imresize(frame,(1/scale));
     end
     
     %Generate noise on the frame and add a background
-    
     noisy_bg = uint8(add_noise .* randn(field_height,field_width) + bg_mean);
     balance_bg = uint8(repmat(extra_bg,field_height,field_width));
     frame = frame + noisy_bg + background_mat - balance_bg;
