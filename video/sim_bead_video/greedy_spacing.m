@@ -1,37 +1,51 @@
-function [allframepairs] = greedy_spacing(numpaths,frame_width,frame_height,num_frames)
-%Can only be used for even number of spots, spots do not move
-%if mod(numpaths,2) == 0 %even
-    col_spots = numpaths;
-    for a = 1:numpaths
-        new_col = numpaths/a;
-        if new_col < col_spots && new_col>a && round(new_col)==new_col
-            col_spots = new_col;
-        end
+function [allframes] = greedy_spacing(numpaths,frame_width,frame_height,numframes)
+
+%if isprime???
+
+if mod(numpaths,2) == 0
+    numcolumns = numpaths;
+elseif mod(numpaths,2) == 1;
+    numcolumns = numpaths-1;
+end
+
+for c = 1:numpaths
+    change_c = numpaths/c;
+    if change_c < numcolumns && change_c >= c && mod(numpaths,c) == 0
+        numcolumns = change_c;
     end
-    row_spots = numpaths/col_spots;
-    
-    space_x = frame_width/col_spots;
-    space_y = frame_height/row_spots;
-    
-    %x = zeros(1, col_spots);
-    x = zeros(col_spots,1);
-    y = zeros(row_spots,1);
-    
-    for xpoints = 1:col_spots
-        x(xpoints) = (space_x/2)+(space_x*(xpoints-1));
-    end
-    
-    for ypoints = 1:row_spots
-            y(ypoints) = (space_y/2)+(space_y*(ypoints-1));
-    end
-        
-    %xcoordinates = repmat(x,row_spots,1);
-    %ycoordinates = repmat(y,1,col_spots);
-    [xcoords,ycoords] = meshgrid(x,y);
-    pairs = [xcoords(:) ycoords(:)];
-    
-    allframepairs_1 = repmat(pairs,1,1,num_frames);
-    
-    allframepairs = permute(allframepairs_1,[3 2 1]);
+end
+
+numrows = numpaths/numcolumns;
+% 
+% if numrows_r > numrows
+%     extra_spaces = mod(numpaths,numcolumns);
+%     extra_spots = 0;
+% elseif numrows_r < numrows 
+%     extra_spots = mod(numpaths,numcolumns);
+%     extra_spaces = 0;
+% elseif numrows_r == numrows
+%     extra_spots = 0;
+%     extra_spaces = 0;
+% end
+
+x_spacing = frame_width/numcolumns;
+y_spacing = frame_height/numrows;
+
+x = zeros(numcolumns,1);
+y = zeros(numrows,1);
+
+for xpoints = 1:numcolumns
+    x(xpoints) = (x_spacing/2) + (x_spacing*(xpoints-1));
+end
+
+for ypoints = 1:numrows
+    y(ypoints) = (y_spacing/2) + (y_spacing*(ypoints-1));
+end
+
+[xcoords,ycoords] = meshgrid(x,y);
+pairs = [xcoords(:) ycoords(:)];
+
+allframes = repmat(pairs,1,1,numframes);
+allframes = permute(allframes,[3 2 1]);
     
 end
