@@ -74,7 +74,6 @@ logentry('All parameters set');
 
 
     calib_um_scaled = calib_um/scale;
-    num_frames = frame_rate*duration;
     
 
     svde_struct.seed         = seed;
@@ -102,11 +101,8 @@ logentry('All parameters set');
 
     
 %Simulate the trajectories
-if grid == 'y'
-    traj = sim_video_diff_expt_seed([],svde_struct); 
-elseif grid == 'n'
-    traj = sim_video_diff_expt([],svde_struct);
-end
+traj = sim_video_diff_expt([],svde_struct,grid);
+
 
 %named the vrpn file 'expected' for now, is this necessary to save in the future?
 xtraj = traj(:,X);
@@ -119,9 +115,9 @@ traj_to_save = traj;
 traj_to_save(:,X) = xtraj_corrected;
 traj_to_save(:,Y) = ytraj_corrected;
 
-% [path,folder] = fileparts(pwd);
-% vrpnfilename = [folder '_expected'];
-% save_vrpnmatfile(vrpnfilename,traj_to_save,'pixels',calib_um);
+[~,folder] = fileparts(pwd);
+vrpnfilename = [folder '_expected'];
+save_vrpnmatfile(vrpnfilename,traj_to_save,'pixels',calib_um);
 
 %Determine the number of frames in the video
 numframes = frame_rate*duration;
