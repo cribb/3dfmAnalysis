@@ -1,4 +1,4 @@
-function [avgSNR, mean_max_sig, image_background, image_noise]= tracking_single_image_SNR(image,err_thresh, report,thresh,bit)
+function [avgSNR, mean_max_sig, image_background, image_noise, intensities]=  tracking_single_image_SNR(image,err_thresh, report,thresh,bit)
 
 
 
@@ -79,7 +79,7 @@ end
     for k = 1:numbeads
         this_bead_idx = cc.PixelIdxList{k};
         this_bead_px = im(this_bead_idx);
-        tops=max(this_bead_px(:));
+        intensities(k)=max(this_bead_px(:));
        if bit==8
         if double(max(this_bead_px(:))) <254
             bead_sig(bead_num) = double(max(this_bead_px(:)));
