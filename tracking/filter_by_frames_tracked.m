@@ -1,4 +1,4 @@
-function [data]= filter_by_frames_tracked(filepath,numframes)
+function [data]= filter_by_frames_tracked(filepath,numframes,sensitivity)
 
 if isempty(filepath)
     error('No file found, please enter a vide to filter');
@@ -13,7 +13,15 @@ for (i=1:length(freqstats(:,2)))
      TF1= data(:,ID)==freqstats(i);
      data(TF1,:)=[];
     end
+   
      
 end
-;
+
+TF1= data(:,SENS)<sensitivity;
+     data(TF1,:)=[];
+     
+[path, name, ext]=fileparts(filepath);
+cd(path);
+newfile=[name '_filtered' ext];
+csvwrite(newfile,data);
    
