@@ -22,6 +22,6 @@ TF1= data(:,SENS)<sensitivity;
      
 [path, name, ext]=fileparts(filepath);
 cd(path);
-newfile=[name '_framefiltered' ext];
+newfile=[name '_filtered' ext];
 csvwrite(newfile,data);
    
