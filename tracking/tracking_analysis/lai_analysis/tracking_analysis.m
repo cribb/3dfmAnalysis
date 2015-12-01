@@ -80,10 +80,10 @@ end
 track.track_eff = track_eff;
 track.avg_track_eff = mean(track_eff);
 track.overall_track_eff = matched_traj_overall/total_traj_man_overall;
-track.extraA = extraA;
-track.extraAtotal = sum(extraA(:));
-track.extraB = extraB;
-track.extraBtotal = sum(extraB(:));
+%track.extraA = extraA;
+%track.extraAtotal = sum(extraA(:));
+%track.extraB = extraB;
+%track.extraBtotal = sum(extraB(:));
 track.fraction_untracked = fraction_untracked;
 track.avg_untracked = mean(fraction_untracked);
 track.overall_untracked = (total_traj_man_overall - matched_traj_overall)/total_traj_man_overall;
