@@ -21,8 +21,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
 %       "tCrop" 
 %       "xyCrop" 
 %       "jerk_limit"
-%      
-%       
+%       "min_intensity"
 %
 % Notes:
 % - This function is designed to work under default conditions with
@@ -61,6 +60,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
         filt.drift_method    = 'none';
         filt.dead_spots      = [];
         filt.jerk_limit      = [];
+        filt.min_intensity   = 0;
     end
 
     filtout = filt;
@@ -100,6 +100,12 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     if isfield(filt, 'min_frames')
         if filt.min_frames > 0
             data = filter_min_frames(data, filt.min_frames);
+        end
+    end
+    
+    if isfield(filt, 'min_intensity')
+        if filt.min_intensity>0
+            data=filter_min_intensity(data,filt.min_intensity);
         end
     end
     
@@ -284,6 +290,32 @@ function data = filter_min_sens(data, min_sens)
     data(midx,:) = [];
     
 return;
+
+function data = filter_min_intensity(data, min_intensity)
+    video_tracking_constants;
+    
+    beadlist = unique(data(:,ID));
+    
+    lowintens_data = ( data(:, 7) < min_intensity );
+    
+    ids_to_remove = unique( data(lowintens_data,ID) );
+    
+    if isempty(ids_to_remove)
+        return;
+    end
+    
+    midx = zeros(size(data,1),1);
+    for k = 1:length(ids_to_remove)
+        idx = ( data(:,ID) == ids_to_remove(k) );
+        midx = or(midx, idx);
+    end
+    
+    data(midx,:) = [];
+    
+return;
+
+
+
 
 
 function data = filter_pixel_range(mode, data, PixelRange, xyzunits, calib_um)
