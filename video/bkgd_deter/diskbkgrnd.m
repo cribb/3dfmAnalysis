@@ -1,15 +1,15 @@
 
-function outs = diskbkgrnd(filepath)
+function outs = diskbkgrnd(filepath,numframes,disksize)
 
 
 
 % load the frames 
 cd(filepath);
 filelist = dir('*.tif');
-for k = 1:50; 
+for k = 1:numframes; 
 
     imtemp = imread(filelist(k).name); 
-    sub_background(:,:,k) = imopen(imtemp,strel('disk',128));
+    sub_background(:,:,k) = imopen(imtemp,strel('disk',disksize));
     
     
 
