@@ -12,21 +12,22 @@
 % objects are spheres and have no rotational moments).
 %
 
-    TIME   = 1; 
-    ID     = 2; 
-    FRAME  = 3; 
-    X      = 4; 
-    Y      = 5; 
-    Z      = 6;
-    ROLL   = 7; 
-    PITCH  = 8; 
-    YAW    = 9; 
-    AREA   = 10;
-    SENS   = 11;
-    WELL   = 12;
-    PASS   = 13;
+    TIME     = 1; 
+    ID       = 2; 
+    FRAME    = 3; 
+    X        = 4; 
+    Y        = 5; 
+    Z        = 6;
+    ROLL     = 7; 
+    PITCH    = 8; 
+    YAW      = 9; 
+    AREA     = 10;
+    SENS     = 11;
+    CENTINTS = 12;
+    WELL     = 13;
+    PASS     = 14;
     
-    NULLTRACK = zeros(0,13);
+    NULLTRACK = zeros(0,14);
     
     
     

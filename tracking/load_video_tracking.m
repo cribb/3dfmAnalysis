@@ -182,7 +182,7 @@ for fid = 1:length(filelist)
         error(['CONGRATULATIONS! You have stumbled upon an OLD video-tracking VRPN format. ' ...
               '\nYou will have to edit load_video_tracking and include a filter for this format.']);
     else
-      data = zeros(1,13);
+      data = NULLTRACK;
 
     end
     
@@ -192,7 +192,7 @@ for fid = 1:length(filelist)
 
     % Add in compatibility with Panoptes runs, but only when there's no
     % pass or well data to clobber (sums > 0)
-    if size(data,2) < 12 || (sum(data(:,PASS)) == 0 && sum(data(:,WELL)) == 0)
+    if size(data,2) < 13 || (sum(data(:,PASS)) == 0 && sum(data(:,WELL)) == 0)
         [well, pass] = pan_wellpass(file);
         if well == 0
             well = fid; % use the 'well' heading as a placeholder for "filenumber" when there's no Panoptes data
@@ -332,6 +332,7 @@ if ~isempty(data)
             if exist('YAW');     v.yaw  = data(:,YAW);     end;    
             if exist('AREA');    v.area = data(:,AREA);    end;
             if exist('SENS');    v.sens = data(:,SENS);    end;
+            if exist('CENTINTS');v.centints = data(:,CENTINTS);  end;           
             if exist('WELL');    v.well = data(:,WELL);    end;
             if exist('PASS');    v.pass = data(:,PASS);    end;
 %             if size(dd,2) == 14
@@ -363,6 +364,10 @@ function data = convert_csv(dd)
     CSVY     = 4;
     CSVZ     = 5;
 
+    if size(dd,2) >= 7
+        CSVCENTINTS = 7;
+    end
+    
     if size(dd,2) >= 14
         CSVAREA = 14;
     end
@@ -381,6 +386,12 @@ function data = convert_csv(dd)
     data(:,PITCH) = zeros(rows(dd),1);
     data(:,YAW)   = zeros(rows(dd),1);
 
+    if size(dd,2) >= 7
+        data(:,CENTINTS) = dd(:,CSVCENTINTS);
+    else
+        data(:,CENTINTS) = 0;
+    end    
+        
     if size(dd,2) >= 14
         data(:,AREA) = dd(:,CSVAREA);
     else
@@ -392,7 +403,7 @@ function data = convert_csv(dd)
     else
         data(:,SENS) = 0;
     end
-    
+        
     return;
     
     

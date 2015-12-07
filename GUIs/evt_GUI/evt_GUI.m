@@ -487,8 +487,11 @@ function pushbutton_savefile_Callback(hObject, eventdata, handles)
         return;
     end
     
-    tracking.spot3DSecUsecIndexFramenumXYZRPY = handles.table;
-    save(outfile, 'tracking');
+%     tracking.spot3DSecUsecIndexFramenumXYZRPY = handles.table;
+    calib = 1;
+    fps = get(handles.edit_frame_rate, 'String');
+    save_evtfile(outfile, handles.table, 'pixels', calib, fps, 'mat');
+%     save(outfile, 'tracking');
     logentry(['New tracking file, ' outfile ', saved...']);
     
     set(handles.edit_infile, 'String', '');
