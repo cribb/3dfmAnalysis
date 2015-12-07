@@ -1,27 +1,27 @@
-%filepath1 is where the  frames you want to load are stored
-%filepath2 is where you want the foreground images to be saved
-%filepath3 is wher you want the background images to be saved
 
-function outs = diskbkgrnd(filepath1,filepath2,filepath3)
+function outs = diskbkgrnd(filepath,numframes,disksize)
 
+if nargin < 3
+    disksize=128;
+elseif nargin<2
+    numframes=50;
+end
 
 
 % load the frames 
-cd(filepath1);
-filelist = dir('frame_0001.tif');
-for k = 1:length(filelist); 
+cd(filepath);
+filelist = dir('*.tif');
+for k = 1:numframes; 
 
-    cd(filepath1);
     imtemp = imread(filelist(k).name); 
-    background = imopen(imtemp,strel('disk',100));
-    foreground=imtemp-background;
-    cd(filepath2);
-    imwrite(foreground,filelist(k).name);
-    cd(filepath3);
-    imwrite(background,filelist(k).name);
+    sub_background(:,:,k) = imopen(imtemp,strel('disk',disksize));
+    
+    
+
 end;
 
-
+background=uint16(mean(sub_background,3));
+imwrite(background,'background.tif');
 
 
 

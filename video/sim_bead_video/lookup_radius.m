@@ -1,4 +1,4 @@
-function [stdev_gaussian] = lookup_radius(bead_radius)
+function [stdev_gaussian] = lookup_radius(bead_radius,calib_um)
 %add if statements for various cameras?
 switch(bead_radius)
     case 5e-8;
@@ -15,6 +15,9 @@ switch(bead_radius)
         
     case 1e-6;
         stdev_gaussian = 10.4;
-        
+    case 'bg' %gaussian background frames
+        stdev_gaussian = 30000;
+    otherwise 
+        stdev_gaussian = bead_radius*(1/calib_um)*1e6;
 end
 end
