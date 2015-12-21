@@ -9,6 +9,7 @@ function [] = generate_noise_tif(filename_format, in_struct, mean, stdev)
 %       digit number
 %   -num_frames is the number of frames in the video
 %   -variance is the variance of the gaussian noise that you are simulating
+%Output will be 8-bit images. 
 
 numframes = in_struct.frame_rate*in_struct.duration;
 
