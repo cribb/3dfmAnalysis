@@ -16,7 +16,7 @@ function [] = video_sim(in_struct,grid)
 %
 %
 %
-%Takes a single structure that specifies the parameters for the simulation as an input.
+%Takes a structure that specifies the parameters for the simulation as an input.
 %Its fields include:
 %       in_struct.numpaths = number of bead paths.  Default: 10.
 %       in_struct.bead_radius = bead radius in [m].  Default: 0.5e-6.
@@ -43,7 +43,10 @@ function [] = video_sim(in_struct,grid)
 %       in_struct.rad_confined = the particle's radius of confinement in [m]. Default: Inf.
 %       in_struct.alpha = anomalous diffusion constant. Default: 1.
 %       in_struct.modulus = modulus of the fluid [Pa]. Default: 2.2e9 (bulk modulus of water).
-% grid is a 'y'/'n' input
+% Second input "grid" is a 'y'/'n' input. The simulated video can contain
+% stationary particles organized into a grid ('y') or random diffusing
+% particles ('n'). The stationary grid videos cannot contain a prime number
+% of particles.
 
 
 video_tracking_constants;
@@ -133,7 +136,7 @@ logentry(['Bead diameter is ' num2str(bead_r_nm*2) ' nm']);
 
 
 %Calculate st dev of gaussians from bead radius
-[stdev_gaussian] = lookup_radius(bead_radius);
+[stdev_gaussian] = lookup_radius(bead_radius,calib_um);
 
 %Calculate scalar for gaussian function
 signal = intensity-bg_mean-(noise);
@@ -149,18 +152,19 @@ end
 
 %may be a better way to do this part - instead of 2 for loops make the 
 %'center' input to new_guass a vector instead of a point
-frames = 0;
+frames = 0; 
 blank = zeros((field_height*scale),(field_width*scale));
 for i = 1:numframes
     %Create a blank frame to start with (rows, columns)
     paths = blank;
     
     %Simulate each spot in the frame
-    for spot = 1:numframes:(length(xtraj)-1);
+    for spot = 1:numframes:(length(xtraj)-0); %changed from -1 to -0 for bg frame gaussian
         paths = paths + gauss2d(blank,((scale^2)*stdev_gaussian),[xtraj(frames+spot),ytraj(frames+spot)],a);
     end
     
-    frame = uint8(255.*paths);
+    frame = 255.*paths;
+    frame = uint8(frame);
     
     %Downsample the frame to the correct size
     if scale ~= 1
