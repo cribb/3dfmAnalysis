@@ -1,6 +1,11 @@
 
 function outs = diskbkgrnd(filepath,numframes,disksize)
 
+if nargin < 3
+    disksize=128;
+elseif nargin<2
+    numframes=50;
+end
 
 
 % load the frames 

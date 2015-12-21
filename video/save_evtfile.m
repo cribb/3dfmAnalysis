@@ -110,7 +110,7 @@ function outs = save_csvfile(data, filename)
      CSVY      = 4;
      CSVZ      = 5;
      CSVRADIUS = 6;
-     CSVINTENS = 7;
+     CSVCENTINTS = 7;
      CSVORIENT = 8;
      CSVLENGTH = 9;
      CSVFIT    = 10;
@@ -122,21 +122,21 @@ function outs = save_csvfile(data, filename)
 
      dummyzeros = zeros(size(data,1),1);
 
-     csv_data(:,CSVFRAME)  = data(:, FRAME);
-     csv_data(:,CSVID)     = data(:, ID);
-     csv_data(:,CSVX)      = data(:, X);
-     csv_data(:,CSVY)      = data(:, Y);
-     csv_data(:,CSVZ)      = data(:, Z);
-     csv_data(:,CSVRADIUS) = dummyzeros;
-     csv_data(:,CSVINTENS) = dummyzeros; 
-     csv_data(:,CSVORIENT) = dummyzeros; 
-     csv_data(:,CSVLENGTH) = dummyzeros; 
-     csv_data(:,CSVFIT)    = dummyzeros; 
-     csv_data(:,CSVGAUSS)  = dummyzeros; 
-     csv_data(:,CSVMEAN)   = dummyzeros; 
-     csv_data(:,CSVSUMMED) = dummyzeros; 
-     csv_data(:,CSVAREA)   = data(:, AREA);
-     csv_data(:,CSVSENS)   = data(:, SENS);             
+     csv_data(:,CSVFRAME)    = data(:, FRAME);
+     csv_data(:,CSVID)       = data(:, ID);
+     csv_data(:,CSVX)        = data(:, X);
+     csv_data(:,CSVY)        = data(:, Y);
+     csv_data(:,CSVZ)        = data(:, Z);
+     csv_data(:,CSVRADIUS)   = dummyzeros;
+     csv_data(:,CSVCENTINTS) = dummyzeros; 
+     csv_data(:,CSVORIENT)   = dummyzeros; 
+     csv_data(:,CSVLENGTH)   = dummyzeros; 
+     csv_data(:,CSVFIT)      = dummyzeros; 
+     csv_data(:,CSVGAUSS)    = dummyzeros; 
+     csv_data(:,CSVMEAN)     = dummyzeros; 
+     csv_data(:,CSVSUMMED)   = dummyzeros; 
+     csv_data(:,CSVAREA)     = data(:, AREA);
+     csv_data(:,CSVSENS)     = data(:, SENS);             
 
      csv_header = { 'FrameNumber' ...
                     'Spot ID' ...
