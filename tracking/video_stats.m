@@ -1,29 +1,28 @@
 function [stats_table,num_pix] = video_stats(files)
 % must be in the directory of the video you want to analyze 
-% files is what all the filenames have in common, must be a string
+% files is what all the filenames of the frames have in common, must be a string
 
 list = dir([files '*']);
 firstframe = imread(list(1).name);
-max_I = max(max(firstframe));
-%logentry(['Maximum intensity of first frame is ' num2str(max_I) '.']);
 
+bits = bitdepth(list(1).name);
 num_frames = length(list);
 
-switch max_I
-    case 255;
-        logentry('Frames are 8-bit images.');
-    case 4095;
-        logentry('Frames are 12-bit images.');
-    case 65535
-        logentry('Frames are 16-bit images.');
-    otherwise 
-        logentry('No photobleaching occurs');
-        num_pix = [];
-        return;
+
+if bits == 8
+    maximum_I = 255;
+    logentry('8-bit images.');
+elseif bits == 12
+    maximum_I = 4095;
+    logentry('12-bit images.');
+elseif bits == 16
+    maximum_I = 65535;
+    logentry('16-bit images.');
 end
 
+
 stats = zeros(num_frames,6);
-num_pix = zeros(1,length(list));
+num_pix = zeros(1,num_frames);
 
 for i = 1:num_frames
     frame = imread(list(i).name);
@@ -46,9 +45,13 @@ for i = 1:num_frames
     min_I = min(frame(:));
     stats(i,6) = min_I;
     
-    bleached = (frame == max_I);
+    bleached = (frame == maximum_I);
     count = sum(sum(bleached));
     num_pix(i) = count;
+end
+
+if count == 0
+    logentry('No photobleaching occurs.');
 end
 
 stats_table = mat2dataset(stats);
