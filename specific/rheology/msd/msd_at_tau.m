@@ -6,7 +6,7 @@ function msdout = msd_at_tau(msdin, timescale)
 % for another day.
 
 % expect an msd structure as the input
-taus = msdin.tau(:,1);
+taus = msdin.tau;
 msds = msdin.msd;
 Nestimates = msdin.Nestimates;
 Ncols = size(msds,2);
@@ -29,11 +29,15 @@ if isfield(msdin, 'tau')
 end
 
 if isfield(msdin, 'msd')
-    msdout.msd = interp1(taus, msds, timescale, 'linear');
+    for k = 1:size(taus,2)
+        msdout.msd(1,k) = interp1(taus(:,k), msds(:,k), timescale, 'linear');
+    end
 end
 
 if isfield(msdin, 'Nestimates')
-    msdout.Nestimates = floor(interp1(taus, Nestimates, timescale, 'linear'));
+    for k = 1:size(taus,2)
+        msdout.Nestimates(1,k) = floor(interp1(taus(:,k), Nestimates(:,k), timescale, 'linear'));
+    end
 end
 
 return;
