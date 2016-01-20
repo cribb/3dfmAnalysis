@@ -1,4 +1,4 @@
-function [figh,p] = plot_msd_boxplot(msd_summary_struct, compare_data_label)
+function [figh,p] = plot_msd_boxplot(msd_summary_struct, compare_data_label, violinyn)
 % 
 
 ins = msd_summary_struct;
@@ -24,7 +24,14 @@ end
 
 % do the basic plotting first
 figh = figure;
-boxplot(logmsd, 'labels', msd_summary_struct.data_labels, 'notch', 'on');
+% boxplot(logmsd, 'labels', msd_summary_struct.data_labels, 'notch', 'on');
+if strfind(lower(violinyn), 'y')
+    violin(logmsd, 'xlabel', msd_summary_struct.data_labels, 'facecolor', 'yellow', 'mc', [], 'medc', []);
+end
+hold on; 
+    boxplot(logmsd, 'labels', msd_summary_struct.data_labels, 'notch', 'on');
+hold off;
+    
 title('MSD Distributions')
 % ylim([-16, -12])    
 % set(gca, 'YTick', [-16; -15; -14; -13; -12])    
