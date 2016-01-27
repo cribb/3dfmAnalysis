@@ -4,6 +4,7 @@ data = sortrows(comptrackdata,2);
 numframes = max(data(:,1));
 
 
+
 [track_eff_frame,track_eff_avg,track_eff_video] = tracking_efficiency(data,numframes);
 
 [fraction_untracked_frame,fraction_untracked_avg,fraction_untracked_video] = untracked(data,numframes);
