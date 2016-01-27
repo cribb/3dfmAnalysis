@@ -1,7 +1,7 @@
 function [figh,p] = plot_msd_boxplot(msd_summary_struct, compare_data_label, violinyn)
 % 
 
-if nargin < 4 || isempty(violinyn)
+if nargin < 3 || isempty(violinyn)
     violinyn = 'n';
 end
 
