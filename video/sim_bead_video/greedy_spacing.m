@@ -1,17 +1,21 @@
-function [allframes] = greedy_spacing(numpaths,frame_width,frame_height,numframes)
+function [allframes] = greedy_spacing(numpaths,frame_width,frame_height,calib_um,numframes)
+
+frame_width_m = frame_width*(calib_um/1e6);
+frame_height_m = frame_height*(calib_um/1e6);
 
 %if isprime???
 if numpaths == 1
 
-    x = frame_width/2;
-    y = frame_height/2;
+    x = frame_width_m/2;
+    y = frame_height_m/2;
     
     [xcoords,ycoords] = meshgrid(x,y);
     pairs = [xcoords(:) ycoords(:)];
 
     allframes = repmat(pairs,1,1,numframes);
     allframes = permute(allframes,[3 2 1]);
-return;
+    return;
+end
 
 if mod(numpaths,2) == 0
     numcolumns = numpaths;
@@ -39,8 +43,8 @@ numrows = numpaths/numcolumns;
 %     extra_spaces = 0;
 % end
 
-x_spacing = frame_width/numcolumns;
-y_spacing = frame_height/numrows;
+x_spacing = frame_width_m/numcolumns;
+y_spacing = frame_height_m/numrows;
 
 x = zeros(numcolumns,1);
 for xpoints = 1:numcolumns
