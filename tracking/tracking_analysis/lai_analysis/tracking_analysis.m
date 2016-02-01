@@ -159,6 +159,7 @@ orig_particleIDs = unique(data(:,2));
 keep = ~isnan(orig_particleIDs);
 orig_particleIDs = orig_particleIDs(keep);
 particle_eff = zeros(size(orig_particleIDs));
+B_IDs = cell.empty(0,length(orig_particleIDs));
 
 for m = 1:length(orig_particleIDs)
     ID = orig_particleIDs(m);
@@ -179,8 +180,22 @@ for m = 1:length(orig_particleIDs)
     particle_eff_p = matched_frames_p/expected_frames_p;
     
     particle_eff(m) = particle_eff_p;
+    
+    %Which IDs in B were matched with this ID from A?
+    B_IDs_p = matcheddata(:,3);
+    B_IDs_p = unique(B_IDs_p);
+    
+    if isempty(B_IDs_p)
+        B_IDs{m} = NaN;
+    else B_IDs{m} = B_IDs_p;
+    end
+    
 end
 
-table = horzcat(orig_particleIDs,particle_eff);
+B_IDs = transpose(B_IDs);
+orig_particleIDs = num2cell(orig_particleIDs);
+particle_eff = num2cell(particle_eff);
+
+table = horzcat(orig_particleIDs,particle_eff,B_IDs);
 
 end
