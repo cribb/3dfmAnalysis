@@ -26,7 +26,7 @@ for k = 1:length(bayes_output)
     filename = bayes_output(k,1).filename;
     
     
-    if ~isempty(bayes_output(k,1).original_curve_data)
+    if ~isempty(bayes_output(k,1).original_curve_msd)
         
         % determining the indices of the structure for each model type 
 
@@ -39,11 +39,11 @@ for k = 1:length(bayes_output)
 
         % generating a list of original curves structures (taus, msds, n, ns, window) for each model type
 
-        N_curves   = bayes_output(k,1).original_curve_data(N_row_index, 1);
-        D_curves   = bayes_output(k,1).original_curve_data(D_row_index, 1);
-        DA_curves  = bayes_output(k,1).original_curve_data(DA_row_index, 1);
-        DR_curves  = bayes_output(k,1).original_curve_data(DR_row_index, 1);
-        V_curves   = bayes_output(k,1).original_curve_data(V_row_index, 1);
+        N_curves   = bayes_output(k,1).original_curve_msd(N_row_index, 1);
+        D_curves   = bayes_output(k,1).original_curve_msd(D_row_index, 1);
+        DA_curves  = bayes_output(k,1).original_curve_msd(DA_row_index, 1);
+        DR_curves  = bayes_output(k,1).original_curve_msd(DR_row_index, 1);
+        V_curves   = bayes_output(k,1).original_curve_msd(V_row_index, 1);
 
         
         for i = 1:length(N_curves)
@@ -174,7 +174,7 @@ for k = 1:length(bayes_output)
 
 
 
-    else   % isempty bayes_output(k,1).original_curve_data
+    else   % isempty bayes_output(k,1).original_curve_msd
         bayes_model_output(k,1).name     = name;
         bayes_model_output(k,1).filename = filename;
 
@@ -185,7 +185,7 @@ for k = 1:length(bayes_output)
         bayes_model_output(k,1).V_curve_struct   = [];
 
         bayes_model_output(k,1).DADR_curve_struct   = [];
-    end    % isempty bayes_output(k,1).original_curve_data
+    end    % isempty bayes_output(k,1).original_curve_msd
 
 
 clear N_curve_struct;
