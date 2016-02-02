@@ -1,4 +1,4 @@
-function track = tracking_analysis(comptrackdata)
+function [byframe, byparticle] = tracking_analysis(comptrackdata)
 
 data = sortrows(comptrackdata,2);
 numframes = max(data(:,1));
@@ -13,21 +13,23 @@ numframes = max(data(:,1));
 [errorx_frame,errorx_avg,errory_frame,errory_avg] = position_error(data,numframes);
 
 
-track.track_eff = track_eff_frame;
-track.avg_track_eff = track_eff_avg;
-track.overall_track_eff = track_eff_video;
+byframe.track_eff = track_eff_frame;
+byframe.avg_track_eff = track_eff_avg;
+byframe.overall_track_eff = track_eff_video;
 
-track.fraction_untracked = fraction_untracked_frame;
-track.avg_untracked = fraction_untracked_avg;
-track.overall_untracked = fraction_untracked_video;
+byframe.fraction_untracked = fraction_untracked_frame;
+byframe.avg_untracked = fraction_untracked_avg;
+byframe.overall_untracked = fraction_untracked_video;
 
-track.artifactor = artifactor_frame;
-track.avg_artifactor = artifactor_avg;
+byframe.artifactor = artifactor_frame;
+byframe.avg_artifactor = artifactor_avg;
 
-track.errorx = errorx_frame;
-track.avg_errorx = errorx_avg;
-track.errory = errory_frame;
-track.avg_errory = errory_avg;
+byframe.errorx = errorx_frame;
+byframe.avg_errorx = errorx_avg;
+byframe.errory = errory_frame;
+byframe.avg_errory = errory_avg;
+
+byparticle = particle_efficiency(data);
 
 end
 
@@ -143,5 +145,57 @@ errorx_frame = errorx;
 errorx_avg = mean(errorx(:));
 errory_frame = errory;
 errory_avg = mean(errory(:));
+
+end
+
+
+function table = particle_efficiency(data)
+
+%sort the data by ID in A
+%data_byparticle = sortrows(data,2);
+
+%list the IDs found in A
+orig_particleIDs = unique(data(:,2));
+keep = ~isnan(orig_particleIDs);
+orig_particleIDs = orig_particleIDs(keep);
+particle_eff = zeros(size(orig_particleIDs));
+B_IDs = cell.empty(0,length(orig_particleIDs));
+
+for m = 1:length(orig_particleIDs)
+    ID = orig_particleIDs(m);
+    
+    %How many frames does that ID appear in A?
+    ID_found = (data(:,2) == ID);
+    dataforID = data(ID_found,:);
+    expected_frames_p = length(dataforID);
+    
+    %How many of those were matched with an ID in B?
+    onlymatched = ~isnan(dataforID(:,3));
+    matcheddata = dataforID(onlymatched,:);
+    
+    s = size(matcheddata);
+    matched_frames_p = s(1);
+    
+    %Particle efficiency = matched/expected;
+    particle_eff_p = matched_frames_p/expected_frames_p;
+    
+    particle_eff(m) = particle_eff_p;
+    
+    %Which IDs in B were matched with this ID from A?
+    B_IDs_p = matcheddata(:,3);
+    B_IDs_p = unique(B_IDs_p);
+    
+    if isempty(B_IDs_p)
+        B_IDs{m} = NaN;
+    else B_IDs{m} = B_IDs_p;
+    end
+    
+end
+
+B_IDs = transpose(B_IDs);
+orig_particleIDs = num2cell(orig_particleIDs);
+particle_eff = num2cell(particle_eff);
+
+table = horzcat(orig_particleIDs,particle_eff,B_IDs);
 
 end

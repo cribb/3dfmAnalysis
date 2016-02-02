@@ -1,4 +1,4 @@
-function varargout = sim_video_diff_expt(filename, in_struct, grid)
+function varargout = sim_video_diff_expt_new(filename, in_struct, grid)
 % SIM_VIDEO_DIFF_EXPT simulates a bead diffusion experiment for a Newtonian fluid
 %
 % 3DFM function
@@ -119,8 +119,38 @@ logentry(['Parameters indicate a ' model_type ' model type.']);
         % apply the random starting location 
         xy = xy + position_offsets;
     elseif grid == 'y'
+        % xy tracker locations with zero offset        
+        switch model_type  % to select the model functions to run
+            case 'N'
+                xy = sim_boltzmann_solid(modulus, bead_radius, frame_rate, duration, tempK, 2, numpaths);
+            case 'D'
+                xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
+            case 'V'
+                in_struct.viscosity = 1e9;
+                viscosity=in_struct.viscosity;
+                xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
+            case 'DV'
+                xy = sim_newt_fluid(viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths);
+            case 'DR'
+                xy = confined_diffusion (viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths, rad_confined); 
+            case 'DRV'
+                xy = confined_diffusion (viscosity, bead_radius, frame_rate, duration, tempK, 2, numpaths, rad_confined); 
+            case 'DA'
+                xy = fBmXY_HD(viscosity, bead_radius, frame_rate, duration, tempK, numpaths, alpha);
+            case 'DAV'
+                xy = fBmXY_HD(viscosity, bead_radius, frame_rate, duration, tempK, numpaths, alpha); 
+            otherwise
+                error('Cannot select model type from the parameters given in the input structure.');
+        end
+        
+        % create grid starting locations (offsets) within the prescribed field
         num_frames = frame_rate*duration;
-        [xy] = greedy_spacing(numpaths,field_width,field_height,num_frames);
+        [grid_position_offsets] = greedy_spacing(numpaths,field_width,field_height,calib_um,num_frames);
+
+        % apply the random starting location 
+        xy = xy + grid_position_offsets;
+    else
+        error('Did not specify type of position offsets (grid: y/n).');
     end
     
     % drift vector for independent drift velocities in x and y
@@ -150,9 +180,9 @@ for k = 1:numpaths;
 end;
 
 % convert physical locations to pixel locations to simulate expt
-if grid == 'n'
-    simout(:,X:Y) = simout(:,X:Y) / (calib_um/1e6);  % puts into pixels
-end
+%if grid == 'n'
+simout(:,X:Y) = simout(:,X:Y) / (calib_um/1e6);  % puts into pixels
+%end
 
 if exist('filename', 'var') && ~isempty(filename)
     save_vrpnmatfile(filename, simout, 'pixels', 1);

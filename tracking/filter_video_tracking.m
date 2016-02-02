@@ -296,7 +296,7 @@ function data = filter_min_intensity(data, min_intensity)
     
     beadlist = unique(data(:,ID));
     
-    lowintens_data = ( data(:, 7) < min_intensity );
+    lowintens_data = ( data(:, CENTINTS) < min_intensity );
     
     ids_to_remove = unique( data(lowintens_data,ID) );
     

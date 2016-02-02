@@ -100,14 +100,13 @@ logentry('All parameters set');
 %matrix for the background, determine how much noise is necessary for the
 %parameters, and determine how much more noise needs to be added
 %[background_mat,bg_mean,noise,need_noise] = create_background(background,intensity,SNR,field_height,field_width);
-[background_mat,bg_mean,extra_bg,noise,add_noise] = create_background(background,intensity,SNR,field_height,field_width);
+[background_mat,bg_mean,noise,add_noise] = create_background(background,intensity,SNR,field_height,field_width);
 
     
 %Simulate the trajectories
 traj = sim_video_diff_expt([],svde_struct,grid);
 
 
-%named the vrpn file 'expected' for now, is this necessary to save in the future?
 xtraj = traj(:,X);
 ytraj = traj(:,Y);
 
@@ -172,9 +171,9 @@ for i = 1:numframes
     end
     
     %Generate noise on the frame and add a background
-    noisy_bg = uint8(add_noise .* randn(field_height,field_width) + bg_mean);
-    balance_bg = uint8(repmat(extra_bg,field_height,field_width));
-    frame = frame + noisy_bg + background_mat - balance_bg;
+    noisy_bg = uint8(add_noise .* randn(field_height,field_width));% + bg_mean);
+    %balance_bg = uint8(repmat(extra_bg,field_height,field_width));
+    frame = frame + noisy_bg + background_mat; % - balance_bg;
     
     %Save the frame 
     filename = ['frame_' sprintf('%04d',i-1) '.tif'];
@@ -271,14 +270,14 @@ return;
 end
 
 
-function [background_mat,bg_mean,extra_bg,noise,add_noise] = create_background(background,intensity,SNR,field_height,field_width)
+function [background_mat,bg_mean,noise,add_noise] = create_background(background,intensity,SNR,field_height,field_width)
 
 if (isnumeric(background) && (length(background) <=1 || length(background) <=3)) == 1
     bg_mean = background;
     logentry(['Mean background intensity = ' num2str(bg_mean) '. Background is a matrix of ' num2str(bg_mean) 's.']);
     noise = (intensity-bg_mean)/SNR;
     add_noise = noise;
-    extra_bg = 0;
+    %extra_bg = 0;
     background_mat = uint8(zeros(field_height,field_width));
     
 elseif (isnumeric(background) && length(background) > 3) == 1;
@@ -292,12 +291,13 @@ elseif (isnumeric(background) && length(background) > 3) == 1;
     logentry(['Mean background intensity = ' num2str(bg_mean) '.']);
     existingnoise = std(background_mat(:));
     noise = (intensity-bg_mean)/SNR;
-    extra_bg = bg_mean;
+    %extra_bg = bg_mean;
     background_mat = uint8(background_mat);
-    if existingnoise > noise
-        error('Too much noise in the background for this SNR.');
-    else add_noise = noise - existingnoise;
-    end
+%     if existingnoise > noise
+%         error('Too much noise in the background for this SNR.');
+%     else add_noise = noise - existingnoise;
+%     end
+    add_noise = noise;
     imwrite(background_mat,'background.tif','tiff');
     
 elseif ischar(background) == 1 ;
@@ -314,12 +314,13 @@ elseif ischar(background) == 1 ;
     logentry(['Mean background intensity = ' num2str(bg_mean) '.']);
     existingnoise = std(background_mat(:));
     noise = (intensity-bg_mean)/SNR;
-    extra_bg = bg_mean;
+    %extra_bg = bg_mean;
     background_mat = uint8(background_mat);
-    if existingnoise > noise
-        error('Too much noise in the background for this SNR.');
-    else add_noise = noise - existingnoise;
-    end
+%     if existingnoise > noise
+%         error('Too much noise in the background for this SNR.');
+%     else add_noise = noise - existingnoise;
+%     end
+    add_noise = noise;
     imwrite(background_mat,'background.tif','tiff');
 end
 % imwrite(background_mat,'background.tif','tiff');
