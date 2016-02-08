@@ -90,7 +90,7 @@ for i = 1:length(tracker_IDlist)
     bayes_output.prob(i,:) = prob;
     bayes_output.results(i,:) = bayes_results;
     bayes_output.num_subtraj = num_subtraj;
-    bayes_output.original_curve_data(i,:) = sc_msdcalc;
+    bayes_output.original_curve_msd(i,:) = sc_msdcalc;
     bayes_output.agg_data(:) = agg_msdcalc;
         
 end

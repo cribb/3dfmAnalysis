@@ -10,7 +10,9 @@ function winout = msd_gen_taus(framemax, numtaus, percent_duration)
     newFRAMEmax = floor(framemax*percent_duration);
     
     if numtaus >= newFRAMEmax
-        error('Too many windows for the available number of frames');
+        logentry('Too many windows for the available number of frames. Reducing to every instance of best case.');
+        winout(:,1) = 1:newFRAMEmax-1;
+        return;
     end
         
     
@@ -38,3 +40,17 @@ function winout = msd_gen_taus(framemax, numtaus, percent_duration)
 %     winout(1:length(window_vect)) = window_vect;    
     
     winout = window_vect(:);
+return;
+    
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(floor(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'msd_gen_taus: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+return;

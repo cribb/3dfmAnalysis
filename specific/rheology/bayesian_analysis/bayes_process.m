@@ -14,6 +14,20 @@ function dataout = bayes_process(num_subtraj, frame_rate, calibum, metadata, k_n
 %                                       bayes_model_output
 %
 
+
+% Set up filter settings for trajectory data
+filt.min_frames = 1600; % DEFAULT
+     % filt.min_frames = 500; % Panoptes rebuild analysis
+     % filt.min_frames = 667; % Panoptes noise analysis (20s video)
+filt.xyzunits   = 'm';
+filt.calib_um   = calibum;
+
+metadata.filt = filt;
+
+metadata.models = {'N', 'D', 'DA', 'DR', 'V'};
+%msd_params = {'N', 'D', 'DA', 'DR', 'V', 'DV', 'DAV', 'DRV'};
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% 1. run engine of bayesian analysis wrapper
 %%% 2. create structure (MSD,tau,n,ns,window) for each model
