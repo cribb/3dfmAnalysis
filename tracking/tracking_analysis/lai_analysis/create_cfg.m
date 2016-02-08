@@ -1,4 +1,4 @@
-function [cfg_struct] = create_cfg(param_struct)
+function [cfg_struct] = create_cfg(param_struct,projectname)
 % param_struct is a structure containing several values for each parameter
 %   that you want to change
 % cfg will be the config file to be output/saved
@@ -18,6 +18,24 @@ function [cfg_struct] = create_cfg(param_struct)
 %varied - how do we know how many for loops we will need to set each
 %parameter? Another way to do this?
 
+if nargin < 1
+    error('No non-default parameters selected.');
+end
+
+if nargin < 2 || isempty(projectname)
+    projectname = [];
+end
+
+if strcmp(projectname,'lai')
+    param_struct.intensity_lost_tracking_sensitivity = 0.05;
+    param_struct.dead_zone_around_border = 5;
+    param_struct.dead_zone_around_trackers = 5;
+    param_struct.radius = 10;
+    param_struct.maintain_fluorescent_beads = 400;
+    param_struct.lost_behavior = 1;
+    param_struct.optimize = 1;
+    param_struct.check_bead_count_interval = 1;
+end
 
 
 thresh_values = param_struct.fluorescent_spot_threshold;
@@ -226,9 +244,12 @@ logentry('Set all specified paremeters.');
 end
 
 function [param_struct] = default_vst_params(param_struct)
-%Set parameters to default values
+%Make so that you can give it a string and it will give you default values
+%for that project default
+
+%Set parameters to default values - these are panoptes defaults
 if ~isfield(param_struct,'radius') || isempty(param_struct.radius)
-    param_struct.raduis = 'set radius 5';
+    param_struct.radius = 'set radius 5';
 end
 
 if ~isfield(param_struct,'exposure_millisecs') || isempty(param_struct.exposure_millisecs)
