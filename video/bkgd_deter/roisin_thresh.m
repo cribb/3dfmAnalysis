@@ -25,11 +25,11 @@ else
 end
 smoothedHist = medfilt1(pixelCounts, 3);
 
-subplot(2,2,1);
-bar(bins, smoothedHist);
-title('Smoothed Histogram');
-xlabel('intensity');
-ylabel('pixelCount');
+% subplot(2,2,1);
+% bar(bins, smoothedHist);
+% title('Smoothed Histogram');
+% xlabel('intensity');
+% ylabel('pixelCount');
 
 [peak_max, pos_peak] = max(smoothedHist); 
 topPoint=[pos_peak,peak_max];
@@ -68,26 +68,35 @@ end
   minPixel=double(min(imtemp(:)));
   threshold=(ints_cut)/((maxPixel-minPixel)+minPixel);
  
+  
 % possible adjustments
+if bit ==16
    flat_length=maxPixel/13.1-best_idx;
    new_idx=best_idx+flat_length*(adj);
    adj_threshold=(new_idx*13.1)/((maxPixel-minPixel)+minPixel);
+elseif bit ==8
+    flat_length=maxPixel-best_idx;
+    new_idx=best_idx+flat_length*adj;
+    adj_threshold=(new_idx)/((maxPixel-minPixel)+minPixel);
+end   
 % find mask
 
+param_struct.fluorescent_spot_threshold=adj_threshold;
+create_cfg(param_struct, 'lai');
 
  
- mask = im2bw(imtemp, level);
- mask = bwareaopen(mask, 4);
- subplot(2,2,2);
- im=imagesc(mask);
- colormap(gray(256));
- title('Mask');
- 
- subplot(2,2,3);
- imagesc(imtemp);
- colormap(gray(256));
- title('Original image');
- 
+%  mask = im2bw(imtemp, level);
+%  mask = bwareaopen(mask, 4);
+%  subplot(2,2,2);
+%  im=imagesc(mask);
+%  colormap(gray(256));
+%  title('Mask');
+%  
+%  subplot(2,2,3);
+%  imagesc(imtemp);
+%  colormap(gray(256));
+%  title('Original image');
+%  
  
 
  

@@ -62,6 +62,12 @@ for fr = 1:numframes %took away +1
     track_eff(fr) = matched_traj_fr/total_traj_man_fr;
 end
 
+subplot(2,2,1);
+plot(track_eff);
+title('Tracking Efficiency vs Frame Number');
+xlabel('Frame Number');
+ylabel('Tracking Efficiency');
+
 track_eff_frame = track_eff;
 track_eff_avg = mean(track_eff(:));
 track_eff_video = matched_traj_overall/total_traj_man_overall;
@@ -120,6 +126,12 @@ for fr = 1:numframes %took away +1
     artifactor(fr) = extraB_fr/total_traj_man_fr;
 end
     
+
+subplot(2,2,2);
+plot(artifactor);
+title('Artifactor vs Frame Number');
+xlabel('Frame Number');
+ylabel('Artifactor');
 artifactor_frame = artifactor;
 artifactor_avg = mean(artifactor(:));
 
