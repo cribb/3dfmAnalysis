@@ -6,7 +6,7 @@ def autotrack(startframe): #start must be a string that indicates the name of th
 	
 	autofindframename = 'autofind_frame'+filetype
 	startframename = start+filetype
-	print startframename
+	print(startframename)
 	findlist = []
 	files = []
 	for dirpath, dirnames, filenames in os.walk(rootdir):
@@ -16,10 +16,10 @@ def autotrack(startframe): #start must be a string that indicates the name of th
 			[root,ext] = os.path.splitext(filename)
 			if ext == '.cfg':
 				files.append(os.path.join(dirpath,filename))
-	print 'Found all start frames:'
-	print '\n' .join(findlist)
-	print 'Found these config files:'
-	print '\n' .join(files)
+	print('Found all start frames:')
+	print('\n' .join(findlist))
+	print('Found these config files:')
+	print('\n' .join(files))
 
 	widgets_tcl = 'C:\Program Files\CISMM/video_spot_tracker_v08.01_extra_output/russ_widgets.tcl'
 	vst_tcl = 'C:\Program Files\CISMM/video_spot_tracker_v08.01_extra_output/video_spot_tracker.tcl'
@@ -27,7 +27,7 @@ def autotrack(startframe): #start must be a string that indicates the name of th
 	new_vsttcl = os.path.join(rootdir,'video_spot_tracker.tcl')
 	shutil.copy(widgets_tcl,rootdir)
 	shutil.copy(vst_tcl,rootdir)
-	print 'Moved tcl files.'
+	print('Moved tcl files.')
 
 	for i in findlist:
 		thisvideodir = os.path.dirname(i)
@@ -49,9 +49,9 @@ def autotrack(startframe): #start must be a string that indicates the name of th
 
 	os.remove(new_widgets)
 	os.remove(new_vsttcl)
-	print 'Removed tcl files.'
+	print('Removed tcl files.')
 	os.chdir(rootdir)
-	print 'Done tracking with all states.'
+	print('Done tracking with all states.')
 
 
 def Run_VST(logname,startframename,autofindframe,cfg): #will take inputs autofindframe,startframe,logname
@@ -79,7 +79,7 @@ def Run_VST(logname,startframename,autofindframe,cfg): #will take inputs autofin
 			radius_line = p
 	r = re.findall('\d+',radius_line)
 	r = int(r[0])
-	print 'Tracker Radius = ' + str(r)
+	print('Tracker Radius = ' + str(r))
 
 	#autofind_vst = vst_path+' -nogui -enable_internal_values -lost_all_colliding_trackers -load_state "'+cfg+'" -tracker 0 0 '+str(r)+' -outfile '+temptraj+' '+autofindframe
 	#track =        vst_path+' -nogui -enable_internal_values -lost_all_colliding_trackers -load_state "'+cfg+'" -maintain_fluorescent_beads 0 -log_video 300 -tracker 0 0 '+str(r)+' -continue_from '+temptraj+'.csv -outfile '+trajoutfile+' '+startframename
@@ -94,7 +94,7 @@ def Run_VST(logname,startframename,autofindframe,cfg): #will take inputs autofin
 
 	os.remove(logname+'_tmp.csv')
 	os.remove(logname+'_tmp.vrpn')
-	print 'Removed temp files.'
+	print('Removed temp files.')
 	#remove temporary autofind files (temptraj)
 
-	print 'Done.'
+	print('Done.')
