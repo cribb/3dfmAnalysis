@@ -194,8 +194,11 @@ end
 
 B_IDs = transpose(B_IDs);
 orig_particleIDs = num2cell(orig_particleIDs);
+avg_particle_eff = mean(particle_eff(:));
+avg_particle_eff_mat = repmat(avg_particle_eff,size(orig_particleIDs));
+avg_particle_eff_mat = num2cell(avg_particle_eff_mat);
 particle_eff = num2cell(particle_eff);
 
-table = horzcat(orig_particleIDs,particle_eff,B_IDs);
+table = horzcat(orig_particleIDs,particle_eff,B_IDs,avg_particle_eff_mat);
 
 end
