@@ -6,20 +6,21 @@ def autotrack(startframe): #start must be a string that indicates the name of th
 	
 	autofindframename = 'autofind_frame'+filetype
 	startframename = start+filetype
-	print(startframename)
+	print('Searching for files with name %s' % startframename)
+	#findlist is the list of first video frames found in the current directory and its subdirectories
 	findlist = []
-	files = []
+	#files = []
 	for dirpath, dirnames, filenames in os.walk(rootdir):
 		for filename in [f for f in filenames if f.endswith(start+filetype)]:
 			findlist.append(os.path.join(dirpath,filename))
-		for filename in [c for c in filenames if c.endswith('.cfg')]:
-			[root,ext] = os.path.splitext(filename)
-			if ext == '.cfg':
-				files.append(os.path.join(dirpath,filename))
+		#for filename in [c for c in filenames if c.endswith('.cfg')]:
+		#	[root,ext] = os.path.splitext(filename)
+		#	if ext == '.cfg':
+		#		files.append(os.path.join(dirpath,filename))
 	print('Found all start frames:')
 	print('\n' .join(findlist))
-	print('Found these config files:')
-	print('\n' .join(files))
+	#print('Found these config files:')
+	#print('\n' .join(files))
 
 	widgets_tcl = 'C:\Program Files\CISMM/video_spot_tracker_v08.01_extra_output/russ_widgets.tcl'
 	vst_tcl = 'C:\Program Files\CISMM/video_spot_tracker_v08.01_extra_output/video_spot_tracker.tcl'
@@ -29,7 +30,8 @@ def autotrack(startframe): #start must be a string that indicates the name of th
 	shutil.copy(vst_tcl,rootdir)
 	print('Moved tcl files.')
 
-	for i in findlist:
+	for i in findlist: #For each video found
+		#Create autofind frame
 		thisvideodir = os.path.dirname(i)
 		source = os.path.join(thisvideodir,startframename)
 		dest = os.path.join(thisvideodir,autofindframename)
@@ -44,8 +46,18 @@ def autotrack(startframe): #start must be a string that indicates the name of th
 		current_directoryname = os.path.split(thisvideodir)[1]
 		logname = logpath+'\\'+current_directoryname
 
-		for cfg in files:
-			Run_VST(logname,abs_startframename,abs_autoframename,cfg)
+		#Find cfg files in this video's directory
+		states = []
+		for dirpath,dirnames,filenames in os.walk(thisvideodir):
+			for filename in [c for c in filenames if c.endswith('.cfg')]:
+				states.append(os.path.join(dirpath,filename))
+		if len(states) < 1:
+			print('No configuration files found for this video.')
+		else: 
+			print('Found these state files for %s :' % thisvideodir)
+
+			for cfg in states:
+				Run_VST(logname,abs_startframename,abs_autoframename,cfg)
 
 	os.remove(new_widgets)
 	os.remove(new_vsttcl)
