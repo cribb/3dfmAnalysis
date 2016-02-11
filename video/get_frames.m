@@ -1,20 +1,31 @@
-function outs=get_frames(filepath,filepath2)
+function get_frames()
 
-file_name=filepath;
-info=imfinfo(file_name);
-num_images=numel(info);
+rootdir=pwd;
+
+filelist=dir('*.tif');
+for j=1:length(filelist)
+    name=filelist(j).name;
+    noext=strsplit(name,'.');
+    
+    mkdir(noext{1});
+    movefile(name,noext{1});
+    cd(noext{1});
+    info=imfinfo(name);
+    num_images=numel(info);
+
 for k=1:num_images
-   cd(filepath2);
-   frame{k}=imread(file_name,k);
-   cd(filepath2);
-   s1='frame_';
-   s2=num2str(k);
-   s3='.tif';
-   s=strcat(s1,s2,s3);
-   imwrite(frame{k},s);
+   
+   frame{k}=imread(name,k);
+   number=num2str(k,'%04i');
+   newname=strcat('frame_',number,'.tif');
+   imwrite(frame{k}, newname);
    
    
 end
+
+cd(rootdir);
+end 
+
 
     
     
