@@ -65,7 +65,7 @@ for k = 1:Nfiles
     logentry(['FILTERED data for a minimum of ' num2str(filt.min_frames) ' frames.']);
 
 
-
+ 
     % Keep initialized form of bayes structure for the 'k'th file, which is 
     % empty, and immediately continue to next file. 
     if isempty(data_in) && isnan(data_in(1))

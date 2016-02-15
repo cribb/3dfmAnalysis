@@ -14,7 +14,7 @@ function dataout = bayes_process(filelist, metadata)
 %                                       bayes_model_output
 %
 
-
+ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% 0. check metadata before starting bayesian analysis
