@@ -1,10 +1,12 @@
-function msdout = pan_video_msd(filepath)
+function msdout = pan_video_msd(data_in, metadata)
 
 video_tracking_constants;
 pan_video_tracking_constants;
-% 
-% plate_type = '96well';
-% 
+
+plate_type = '96well';
+
+systemid = 'panoptes';
+
 % metadata = pan_load_metadata(filepath, systemid, plate_type);
 % 
 % frame_rate = metadata.instr.frame_rate;
@@ -14,24 +16,27 @@ pan_video_tracking_constants;
 % if ischar(filepath)
 %     data_in = pan_load_tracking(filepath, systemid, filetype, filt);
 % elseif isnumeric(filepath)
-    data_in = filepath;    
+%     data_in = filepath;    
 % end
 
 pass_list = unique(data_in(:,PANPASS))';
-frame_rate = 1e6/(12000+18700);
-duration = 60;
+
+frame_rate = metadata.instr.fps_fluo;
+duration = metadata.instr.seconds;
 Nframes = floor(frame_rate * duration);
+
 numtaus = 35;
 percent_duration = 1;
 winout = msd_gen_taus(Nframes, numtaus, percent_duration);
-calib_um = 0.152;
+
+
+mcuparams = metadata.mcuparams;
 
 msdout.pass = [];
 msdout.well = [];
 msdout.trackerID = [];
 msdout.tau = [];
 msdout.msd = [];
-% msdout.n = [];
 msdout.Nestimates = [];
 msdout.window = winout;
 
@@ -71,6 +76,11 @@ for p = 1:length(pass_list)
         vtdata(:,PASS)    = this_pass_and_well_data(:,PANPASS);
         vtdata(:,WELL)    = this_pass_and_well_data(:,PANWELL);
 
+        myMCU = mcuparams.mcu((mcuparams.pass == this_pass) & (mcuparams.well == this_well));
+
+        calib_um = pan_mcu2um(myMCU, systemid, this_well, metadata);
+        
+        vtdata(:,[X Y]) = vtdata(:,[X Y]) * calib_um * 1e-6;
         mymsd = video_msd(vtdata, winout, frame_rate, calib_um, 'n', 'n');
         
         
@@ -79,7 +89,6 @@ for p = 1:length(pass_list)
         msdout.trackerID  = [msdout.trackerID  mymsd.trackerID];        
         msdout.tau        = [msdout.tau        mymsd.tau];
         msdout.msd        = [msdout.msd        mymsd.msd];
-%         msdout.n         = [msdout.n         mymsd.n];
         msdout.Nestimates = [msdout.Nestimates mymsd.Nestimates];
         
 
