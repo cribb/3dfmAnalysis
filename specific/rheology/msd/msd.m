@@ -57,8 +57,10 @@ end
         end
         return;
     end
-         
-         
+    
+    % set tau early according to average time step 
+    tau = window * mean(diff(t));
+    
     for w = 1:length(window)
     
         if isnan(window(w))
@@ -88,7 +90,7 @@ end
         end
       end
       
-        tau(w, :)        = window(w) * mean(diff(t));        
+        
         msd(w, :)        = mean(r2);
         Nestimates(w, :) = n;        
 
