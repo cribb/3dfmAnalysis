@@ -1,8 +1,8 @@
-function dataout = bayes_process(num_subtraj, frame_rate, calibum, metadata, k_norm)
+function dataout = bayes_process(filelist, metadata)
 %
 %
 % Created:       02/06/14, Luke Osborne
-% Last modified: 03/11/14, Luke Osborne 
+% Last modified: 02/15/16, Jeremy Cribb
 %
 %
 % inputs:   num_subtraj         number of subtrajectories to use in analysis
@@ -14,31 +14,22 @@ function dataout = bayes_process(num_subtraj, frame_rate, calibum, metadata, k_n
 %                                       bayes_model_output
 %
 
-
-% Set up filter settings for trajectory data
-filt.min_frames = 1600; % DEFAULT
-     % filt.min_frames = 500; % Panoptes rebuild analysis
-     % filt.min_frames = 667; % Panoptes noise analysis (20s video)
-filt.xyzunits   = 'm';
-filt.calib_um   = calibum;
-
-metadata.filt = filt;
-
-metadata.models = {'N', 'D', 'DA', 'DR', 'V'};
-%msd_params = {'N', 'D', 'DA', 'DR', 'V', 'DV', 'DAV', 'DRV'};
-
+ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% 0. check metadata before starting bayesian analysis
 %%% 1. run engine of bayesian analysis wrapper
 %%% 2. create structure (MSD,tau,n,ns,window) for each model
 %%% 3. create plots and publish results
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-bayes_output = bayes_analyze(num_subtraj, frame_rate, calibum, metadata);
+metadata = bayes_check_metadata(metadata);
+
+bayes_output = bayes_analyze(filelist, metadata);
 
 bayes_model_output = bayes_model_analysis(bayes_output);
 
-bayes_pub = bayes_publish(bayes_output, bayes_model_output, k_norm);
+bayes_pub = bayes_publish(bayes_output, bayes_model_output, metadata.refdata);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

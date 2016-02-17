@@ -16,7 +16,7 @@ for j=1:length(filelist)
 for k=1:num_images
    
    frame{k}=imread(name,k);
-   number=num2str(k,'%04i');
+   number=num2str(k-1,'%04i');
    newname=strcat('frame_',number,'.tif');
    imwrite(frame{k}, newname);
    

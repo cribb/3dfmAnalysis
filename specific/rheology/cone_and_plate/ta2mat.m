@@ -124,7 +124,7 @@ for f = 1:numfiles
     end
 
     % Parse each specific procedure section for metadata
-    if ~exist('protocols')
+    if ~exist('protocols', 'var')
         protocols = struct;
     end
 
