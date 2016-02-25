@@ -14,22 +14,61 @@ end
 
 
 %get image depth and set histogram bins based on that
-
-imtemp=imread(filepath);
-picinfo = imfinfo(filepath);
-            bit = picinfo.BitDepth;
-if bit==16
-[pixelCounts bins] = imhist(imtemp,5000);
-else
- [pixelCounts bins] = imhist(imtemp,256);
+if isnumeric(filepath)
+    imtemp=filepath;
+    if isa(imtemp, 'uint8')
+        bit = 8;
+    elseif isa(imtemp, 'double')
+        imtemp = uint8(imtemp*255);
+        bit = 8;
+    elseif isa(imtemp, 'uint16')
+        bit = 16;
+    else
+        error('Image type or bit-depth unknown.');
+    end        
+else %is file
+    imtemp=imread(filepath);
+    picinfo = imfinfo(filepath);
+    bit = picinfo.BitDepth;
 end
-smoothedHist = medfilt1(pixelCounts, 3);
 
-% subplot(2,2,1);
-% bar(bins, smoothedHist);
-% title('Smoothed Histogram');
-% xlabel('intensity');
-% ylabel('pixelCount');
+% sometimes the input doesn't have a large enough dynamic range (or large
+% enough number of unique elements to extract a viable smoothed histogram.
+% To solve this issue, we add bits of noise until we can get non-zero
+% signale from the medfilt1 function
+trigger = 0;
+noise_level = 50;
+im_clean = imtemp;
+while ~trigger  
+    if bit==16
+      [pixelCounts bins] = imhist(imtemp,5000);
+    else
+      [pixelCounts bins] = imhist(imtemp,256);
+    end
+    
+%     pixelCounts( bins <= noise_level ) = 0;
+    
+    smoothedHist = medfilt1(pixelCounts, 3);
+    
+    if sum(smoothedHist) <= 0
+        noise_level = noise_level + 1
+
+        noise = uint8(randint(512,512, [0 noise_level]));
+        imtemp = im_clean + noise;
+%         imtemp( imtemp(:) < noise_level ) = 0;
+        
+        if noise_level >= 64 % arbitrarily setting it to 64 here to avoid infinite loop
+            error('Cannot generate a smoothed histogram.');
+        end
+    else
+        trigger = 1;
+    end
+    
+
+    
+end
+
+
 
 [peak_max, pos_peak] = max(smoothedHist); 
 topPoint=[pos_peak,peak_max];
@@ -58,8 +97,7 @@ if bit ==8
         level=ints_cut/256;
 elseif bit==16
         ints_cut=best_idx*13.1;
-        level=ints_cut/65537;
-   
+        level=ints_cut/65537;  
 end
 
 
@@ -84,19 +122,33 @@ end
 param_struct.fluorescent_spot_threshold=adj_threshold;
 create_cfg(param_struct, 'lai');
 
- 
-%  mask = im2bw(imtemp, level);
-%  mask = bwareaopen(mask, 4);
-%  subplot(2,2,2);
-%  im=imagesc(mask);
-%  colormap(gray(256));
-%  title('Mask');
-%  
-%  subplot(2,2,3);
-%  imagesc(imtemp);
-%  colormap(gray(256));
-%  title('Original image');
-%  
+% debug figure
+ mask = im2bw(imtemp, level);
+ mask = bwareaopen(mask, 4);
+
+figure;
+
+subplot(2,2,1);
+bar(bins, smoothedHist);
+title('Smoothed Histogram');
+xlabel('intensity');
+ylabel('pixelCount');
+
+subplot(2,2,2);
+im=imagesc(mask);
+colormap(gray(256));
+title('Mask');
+
+subplot(2,2,3);
+imagesc(im_clean);
+colormap(gray(256));
+title('Original image');
+
+subplot(2,2,4);
+imagesc(imtemp);
+colormap(gray(256));
+title('Orig image + noise');
+
  
 
  

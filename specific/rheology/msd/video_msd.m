@@ -190,7 +190,7 @@ if (nargin < 5) || isempty(make_plot) || strncmp(make_plot,'y',1)
     plot_msd(vmsd, [], 'me'); 
 end;
 
-fprintf('size(vmsd): %i,  %i\n',size(vmsd.msd));
+% fprintf('size(vmsd): %i,  %i\n',size(vmsd.msd));
 return;
 
 

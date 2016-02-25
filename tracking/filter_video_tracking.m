@@ -186,7 +186,14 @@ function [outs, filtout] = filter_video_tracking(data, filt)
             logentry(['Large, jerky displacements (larger than ' num2str(filt.jerk_limit) ') removed.']);
         end
     end
-    
+
+    if isfield(filt, 'stage_jerk_limit')
+        if ~isempty(filt.stage_jerk_limit) && filt.stage_jerk_limit < inf
+            [data,num_stage_jerks] = filter_remove_stage_jerk(data, filt.stage_jerk_limit);
+            filtout.num_jerks = num_stage_jerks;
+            logentry(['Large, jerky displacements in stage (larger than ' num2str(filt.stage_jerk_limit) ') removed.']);
+        end
+    end
     % Relabel trackers to have consecutive IDs
     beadlist = unique(data(:,ID));   
     if length(beadlist) == max(beadlist)+1
@@ -587,17 +594,87 @@ function [data,num_jerks] = filter_remove_tracker_jerk(data, jerk_limit)
         
         data(idx,X:Y) = new_xy;
         
-%         if ~isempty(jerk_idx)
-%             figure;
-%             subplot(2,1,1)
-%                 plot(data(idx,TIME), xy(:,1), 'b', data(idx,TIME), new_xy(:,1), 'r');
-%             subplot(2,1,2)
-%                 plot(data(idx,TIME), xy(:,2), 'b', data(idx,TIME), new_xy(:,2), 'r');        
-%             drawnow;
-%         end
+        if ~isempty(jerk_idx)
+            figure;
+            subplot(2,1,1)
+                plot(data(idx,TIME), xy(:,1), 'b', data(idx,TIME), new_xy(:,1), 'r');
+            subplot(2,1,2)
+                plot(data(idx,TIME), xy(:,2), 'b', data(idx,TIME), new_xy(:,2), 'r');        
+            drawnow;
+        end
 
         num_jerks = length(jerk_idx);
     end
     
 return;
+
+
+function [data,jerk_frames] = filter_remove_stage_jerk(data, stage_jerk_limit)
+    video_tracking_constants;
     
+    if isempty(data) 
+        jerk_frames = NaN;
+        return;
+    end
+    
+    tracker_list = unique(data(:,ID));
+    
+    jerk_frames = [];
+    
+    for k = 1:length(tracker_list)
+        idx = find(data(:,ID) == tracker_list(k));
+
+        t = data(idx, TIME);
+        f = data(idx, FRAME);
+        xy = data(idx, X:Y);    
+
+        dxdy = diff(xy);
+        
+        jerk_idxX = find(abs(dxdy(:,1)) > stage_jerk_limit);
+        jerk_idxY = find(abs(dxdy(:,2)) > stage_jerk_limit);        
+        jerk_idx = union(jerk_idxX, jerk_idxY);
+        
+        jerk_frames_this_tracker = f(jerk_idx);
+        
+        jerk_frames = union(jerk_frames, jerk_frames_this_tracker);
+        
+    end
+    
+    for m = 1:length(jerk_frames)
+        
+        myframe = jerk_frames(m);
+        
+        data1 = data( data(:,FRAME) ==  myframe,   :);
+        data2 = data( data(:,FRAME) ==  myframe+1, :);
+        
+        % which trackers exist in BOTH time points?
+        tlist = intersect(data1(:,ID), data2(:,ID));
+        
+        data1 = remove_uncommon_trackers(data1, tlist);
+        data2 = remove_uncommon_trackers(data2, tlist);
+        
+        xydiff = abs(data1(:, X:Y) - data2(:, X:Y));
+        avg_jerk = mean(xydiff,1);
+        
+        idx = find(data(:,FRAME) > myframe);
+        
+        data(idx,X) = data(idx,X) - avg_jerk(1);
+        data(idx,Y) = data(idx,Y) - avg_jerk(2);
+        
+    end
+    
+    return;
+    
+function data = remove_uncommon_trackers(data, master_list)
+    video_tracking_constants;
+
+    C = setdiff(data(:,ID), master_list);
+
+    if ~isempty(C)
+        for n = 1:length(C)
+            idx = find(data1(:,ID == C(n)));
+            data(idx,:) = [];
+        end
+    end
+
+    return;

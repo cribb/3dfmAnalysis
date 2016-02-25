@@ -35,6 +35,8 @@ if strcmp(projectname,'lai')
     param_struct.lost_behavior = 1;
     param_struct.optimize = 1;
     param_struct.check_bead_count_interval = 1;
+    param_struct.blur_lost_and_found = 0;
+    param_struct.center_surround = 0;
 end
 
 
