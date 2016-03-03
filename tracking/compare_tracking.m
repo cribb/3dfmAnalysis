@@ -78,12 +78,13 @@ if strfind(lower(firstonly), 'y') % only comparing the first frames.
 end
 
 q = [];
+count=0;
 for k = 1:length(framelist)
 
     % Pull the first tracker locations for each available ID.
     Aframe = pull_frame_from_table(A, framelist(k));
     Bframe = pull_frame_from_table(B, framelist(k));
-    
+    count=count+1;
     % Generate list of IDs that exist in (A), in (B), and in (A AND B)
     [pairedAB_IDs match_err] = gen_AB_tracker_list(Aframe, Bframe, id_error_thresh);
     

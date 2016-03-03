@@ -29,6 +29,8 @@ if nargin < 1 || isempty(vstdata)
     error('No tracking data to plot!');
 end
 
+vstdata = load_video_tracking(vstdata, [], 'pixels', 1, 'absolute', 'no', 'table');
+
     figure(figh);   
     
     if ~isempty(background_image)

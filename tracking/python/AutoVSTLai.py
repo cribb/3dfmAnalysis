@@ -1,10 +1,10 @@
 def autotrack(startframe): #start must be a string that indicates the name of the first frame of each video (all videos should have the same first frame name) including the file extension
 	#print 'Testing autotrack'
-	
+	import os, shutil
+
 	os.environ['TCL_LIBRARY'] = 'C:\Program Files\CISMM/video_spot_tracker_v08.01.03_extra_output/tcl8.3'
 	os.environ['TK_LIBRARY'] = 'C:\Program Files\CISMM/video_spot_tracker_v08.01_.03extra_output/tk8.3'
 
-	import os, shutil
 	rootdir = os.getcwd()
 	start,filetype = os.path.splitext(startframe)
 	
@@ -115,3 +115,94 @@ def Run_VST(logname,startframename,autofindframe,cfg): #will take inputs autofin
 	#remove temporary autofind files (temptraj)
 
 	print('Done.')
+
+
+
+def create_cfg(project,params_to_set_file):
+	#params_to_set_file can be tuples specifying [parameter,value] or existing file path and name
+	import os
+	import numpy as np
+
+	if not params_to_set_file: #if empty input is given
+		print('No parameters specified. Creating default configuration.')
+		presets = []
+
+	elif (not isinstance(params_to_set_file[0][1],(int,float))): 
+		print(not isinstance(params_to_set_file,(int,float)))
+		#there is an input and it is a text file
+		inparams = open(params_to_set_file,'r')
+		in_lines = inparams.readlines()
+		inparams.close()
+		length = len(in_lines)
+		presets = []
+
+		for line in in_lines:
+			wout_set = line[4:]
+			print(wout_set)
+			wout_nums = ''.join([i for i in wout_set if not i.isdigit() and not i=='.' and not i==' '])
+			print([wout_nums[0:-1]+'.'])
+			only_num = [n for n in wout_set if n.isdigit() or n=='.']
+			only_num = ''.join(only_num)
+			print(only_num)
+			presets.append([wout_nums[0:-1], only_num])
+
+		print('These parameters specified:')
+		for param in presets:
+			print(param)
+
+	elif isinstance(params_to_set_file[0][1],(int,float)): #there is an input and it is numeric
+		presets = params_to_set_file
+
+		print('These parameters specified:')
+		for param in presets:
+			print(param)
+
+
+	default_cfg(project,presets)
+
+
+
+
+def default_cfg(project,presets):
+
+	import os 
+	import numpy as np
+
+	if project == 'lai': # Note: If presets includes a parameter specified by "Lai", the preset will be overwritten by the "Lai" default
+		print('Adding default parameters for Lai Lab tracking to presets.')
+		presets.append(['intensity_lost_tracking_sensitivity',0.05])
+		presets.append(['dead_zone_around_border',5])
+		presets.append(['dead_zone_around_trackers',5])
+		presets.append(['radius',10])
+		presets.append(['maintain_fluorescent_beads',400])
+		presets.append(['lost_behavior',1])
+		presets.append(['optimize',1])
+		presets.append(['check_bead_count_interval',1])
+		presets.append(['blur_lost_and_found',0])
+		presets.append(['center_surround',0])
+
+	rootdir = os.getcwd()
+	
+	videos = []
+	for dirpath, dirnames, filenames in os.walk(rootdir):
+		for d in dirnames:
+			videos.append(os.path.join(dirpath,d))
+
+	for vid in videos:
+		vidpath,viddir = os.path.split(vid)
+		cfgname = viddir + '.cfg'
+		os.chdir(os.path.join(vidpath,viddir))
+		cfgfile = open(cfgname,'a')
+		print('Writing the following to cfg file called '+cfgname+':')
+
+		for param in presets:
+			p = 'set ' + param[0] + ' ' + str(param[1]) 
+			print(p)
+			cfgfile.write(p + '\n')
+
+		cfgfile.close()
+		os.chdir('..')
+
+	print('Created configuration file for each video.')
+
+

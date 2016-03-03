@@ -1,4 +1,4 @@
-function [ints_cut threshold adj_threshold]= roisin_thresh(filepath,adj)
+function [adj_threshold]= roisin_thresh(filepath,adj)
 
 %threshold image using roisin threshold technique
 %filepath is the location of the image to threshold,
