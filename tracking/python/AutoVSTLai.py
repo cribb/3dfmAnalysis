@@ -1,3 +1,6 @@
+
+
+
 def autotrack(startframe): #start must be a string that indicates the name of the first frame of each video (all videos should have the same first frame name) including the file extension
 	#print 'Testing autotrack'
 	import os, shutil
@@ -205,4 +208,92 @@ def default_cfg(project,presets):
 
 	print('Created configuration file for each video.')
 
+def get_frames(file,directory):
+	import os,shutil,PIL
+	from PIL import Image
+	
+	rtname=os.path.basename(file) 
+	rtname=rtname.split('.')
+	newfilepath=os.path.join(directory,rtname[0])  #naming and creation of new folder for individual videos
+	os.makedirs(newfilepath)
+	shutil.move(file,newfilepath)
+	os.chdir(newfilepath)
+	
+	im = Image.open(file)
+	imcount=im.n_frames
+	
+	for i in range(0,imcount): ##individual frames saved
+		im.save('frame_%04i.tif'%(i,))
 
+	print('done with frames')
+
+def roisin_thresh(adj):
+	import os,numpy 
+	import matplotlib.pyplot as plt
+	
+	im=plt.imread('frame_0000.tif')
+	if im.max()>256:
+		bit=16
+		pixelCount,bins=numpy.histogram(im,bins=numpy.arange(0,65536,13.1))
+	else:
+		bit=8
+		pixelCount,bins= numpy.histogram(im,range(257))
+
+	max_peak=numpy.max(pixelCount)
+	peak_coord=pixelCount.argmax()
+	topPoint=[peak_coord, max_peak]
+	ind_nonZero=numpy.nonzero(pixelCount)[-1]
+	last_zeroBin=ind_nonZero[-1]
+	bottomPoint=[last_zeroBin,pixelCount[last_zeroBin]]
+	best_idx=-1
+	max_dist=-1
+	for x0 in range(peak_coord, last_zeroBin):
+		y0=pixelCount[x0]
+		a=[topPoint[0]-bottomPoint[0],topPoint[1]-bottomPoint[1]]
+		b=[x0-bottomPoint[0],y0-bottomPoint[1]]
+		cross_ab = a[0]*b[1]-b[0]*a[1]
+		d=numpy.linalg.norm(cross_ab)/numpy.linalg.norm(a)
+		if d>max_dist:
+			best_idx=x0
+			max_dist=d
+	if bit==8:
+		ints_cut=best_idx
+		level=ints_cut/256
+	else:
+		ints_cut=best_idx*13.1
+		level=ints_cut/65537
+	maxPixel=numpy.max(im)
+	minPixel=numpy.min(im)
+	threshold=(ints_cut)/((maxPixel-minPixel)+minPixel)
+	if bit ==16:
+		flat_length=maxPixel/13.1-best_idx
+		new_idx=best_idx+flat_length*adj
+		adj_threshold=(new_idx*13.1)/((maxPixel-minPixel)+minPixel)
+	else:
+		flat_length=maxPixel-best_idx
+		new_idx=best_idx+flat_length*adj
+		adj_threshold[len(adj_threshold)]=(new_idx)/((maxPixel-minPixel)+minPixel)
+	return adj_threshold
+
+def removeframes():
+	import os
+	current=os.getcwd()
+	for root,dirs,files in os.walk(current):
+		for file in files:
+			if file.startswith('frame_'):
+				os.remove(file)
+			
+
+def main():
+	import os
+	directory=os.getcwd()
+	for root, dirs, files in os.walk(directory):
+		for file in files:
+			if file.endswith('.tif'):
+				get_frames(file,directory)
+				threshold=roisin_thresh(.1)
+				create_cfg('lai',['flourescent_spot_threshold',threshold])
+				autotrack('frame_0000.tif')
+				removeframes();
+				os.chdir(directory)
+				
