@@ -184,27 +184,18 @@ def default_cfg(project,presets):
 		presets.append(['blur_lost_and_found',0])
 		presets.append(['center_surround',0])
 
-	rootdir = os.getcwd()
-	
-	videos = []
-	for dirpath, dirnames, filenames in os.walk(rootdir):
-		for d in dirnames:
-			videos.append(os.path.join(dirpath,d))
+	rootdir=os.getcwd()	
+	fileparts=os.path.split(rootdir)
+	cfgname = rootdir+'\\'+fileparts[1] +'.cfg'
+	cfgfile = open(cfgname,'a')
+	print('Writing the following to cfg file called '+cfgname+':')
 
-	for vid in videos:
-		vidpath,viddir = os.path.split(vid)
-		cfgname = viddir + '.cfg'
-		os.chdir(os.path.join(vidpath,viddir))
-		cfgfile = open(cfgname,'a')
-		print('Writing the following to cfg file called '+cfgname+':')
+	for param in presets:
+		p = 'set ' + param[0] + ' ' + str(param[1]) 
+		print(p)
+		cfgfile.write(p + '\n')
 
-		for param in presets:
-			p = 'set ' + param[0] + ' ' + str(param[1]) 
-			print(p)
-			cfgfile.write(p + '\n')
-
-		cfgfile.close()
-		os.chdir('..')
+	cfgfile.close()
 
 	print('Created configuration file for each video.')
 
@@ -280,7 +271,7 @@ def removeframes():
 	current=os.getcwd()
 	for root,dirs,files in os.walk(current):
 		for file in files:
-			if file.startswith('frame_'):
+			if file.startswith('frame_') or file.starstwith('auto'):
 				os.remove(file)
 			
 
@@ -292,8 +283,8 @@ def main():
 			if file.endswith('.tif'):
 				get_frames(file,directory)
 				threshold=roisin_thresh(.1)
-				create_cfg('lai',['flourescent_spot_threshold',threshold])
+				create_cfg('lai',[('fluorescent_spot_threshold',threshold)])
 				autotrack('frame_0000.tif')
-				removeframes();
+				#removeframes();
 				os.chdir(directory)
 				
