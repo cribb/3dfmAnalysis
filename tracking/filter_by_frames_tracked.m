@@ -19,9 +19,13 @@ end
 
 TF1= data(:,SENS)<sensitivity;
      data(TF1,:)=[];
-     
+sz=size(data);
+orderData=zeros(sz(1),16);
+ orderData(:,1)=data(:,3);
+ orderData(:,2)=data(:,2);
+ orderData(:,3)=data(:,4);
+ orderData(:,4)=data(:,5);
 [path, name, ext]=fileparts(filepath);
-cd(path);
 newfile=[name '_filtered' ext];
-csvwrite(newfile,data);
+csvwrite(newfile,orderData);
    
