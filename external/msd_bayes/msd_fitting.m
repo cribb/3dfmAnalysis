@@ -39,7 +39,7 @@ msd_params.upper_b.E = 100;
 results.msd_params = msd_params;
 
 warning('off','MATLAB:nearlySingularMatrix')
-
+warning('off','MATLAB:singularMatrix')
 
 %%%%%% FITTING %%%%%%%
 
