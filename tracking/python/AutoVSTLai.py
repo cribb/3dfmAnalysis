@@ -214,7 +214,8 @@ def get_frames(file,directory):
 	imcount=im.n_frames
 	
 	for i in range(0,imcount): ##individual frames saved
-		im.save('frame_%04i.tif'%(i,))
+		im.seek(i)
+		im.save('frame_%04i.tif' %(i,))
 
 	print('done with frames')
 
