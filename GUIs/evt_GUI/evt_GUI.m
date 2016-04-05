@@ -1367,6 +1367,184 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
+% --- Executes on button press in checkbox_minFrames.
+function checkbox_minFrames_Callback(hObject, eventdata, handles)
+
+
+function edit_minFrames_Callback(hObject, eventdata, handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_minFrames_CreateFcn(hObject, eventdata, handles)
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+
+
+% --- Executes on button press in checkbox_minPixelRange.
+function checkbox_minPixelRange_Callback(hObject, eventdata, handles)
+
+
+function edit_minPixelRange_Callback(hObject, eventdata, handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_minPixelRange_CreateFcn(hObject, eventdata, handles)
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+
+
+% --- Executes on button press in checkbox_tCrop.
+function checkbox_tCrop_Callback(hObject, eventdata, handles)
+
+
+function edit_tCrop_Callback(hObject, eventdata, handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_tCrop_CreateFcn(hObject, eventdata, handles)
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+
+
+% --- Executes on button press in checkbox_xyCrop.
+function checkbox_xyCrop_Callback(hObject, eventdata, handles)
+
+
+function edit_xyCrop_Callback(hObject, eventdata, handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_xyCrop_CreateFcn(hObject, eventdata, handles)
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+
+
+% --- Executes on button press in checkbox_neutoffsets.
+function checkbox_neutoffsets_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
+
+
+% --- Executes on button press in checkbox_overlayxy.
+function checkbox_overlayxy_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
+
+
+% --- Executes on button press in checkbox_maxpixels.
+function checkbox_maxpixels_Callback(hObject, eventdata, handles)
+
+
+function edit_maxpixels_Callback(hObject, eventdata, handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_maxpixels_CreateFcn(hObject, eventdata, handles)
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+
+function edit_numtaus_Callback(hObject, eventdata, handles)
+    handles.recomputeMSD = 1;    
+    plot_data(hObject, eventdata, handles);    
+    guidata(hObject, handles);
+    
+    
+% --- Executes during object creation, after setting all properties.
+function edit_numtaus_CreateFcn(hObject, eventdata, handles)
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+
+
+
+function edit_temp_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_temp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_temp as text
+%        str2double(get(hObject,'String')) returns contents of edit_temp as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_temp_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_temp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_filename_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_filename (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_filename as text
+%        str2double(get(hObject,'String')) returns contents of edit_filename as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_filename_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_filename (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+
+% --- Executes on selection change in popupmenu2.
+function popupmenu2_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_chosentau_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
+
+% --- Executes during object creation, after setting all properties.
+function edit_chosentau_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_chosentau (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 
 % =========================================================================
@@ -1481,7 +1659,9 @@ function plot_data(hObject, eventdata, handles)
        strcmp(AUXtype, 'alpha histogram') || ...
        strcmp(AUXtype, 'Diffusivity vs. tau') || ...
        strcmp(AUXtype, 'MSD histogram') || ...
-       strcmp(AUXtype, 'RMS displacement')
+       strcmp(AUXtype, 'RMS displacement') || ...
+       strcmp(AUXtype, 'Bayesian Model Histogram') || ...
+       strcmp(AUXtype, 'Bayesian Model MSD')
         if handles.recomputeMSD % && get(handles.checkbox_msdmean, 'Value')
             if calib_um ~= 1
                 data(:,[X Y Z]) = data(:,[X Y Z]) * calib_um * 1e-6;
@@ -1698,13 +1878,10 @@ function plot_data(hObject, eventdata, handles)
 %             v = msdhist(mymsd, numbins);
 %             plot_msdhist(v, AUXfig, 's');
                        
-        case 'temporal MSD'
+            
+        case 'Diffusivity @ a tau'
             figure(handles.AUXfig);
-            set(AUXfig, 'Visible', 'on');
-            
-            [tau, m, time] = msdt(t(k), [x(k) y(k)], [], []);
-            
-            surf(m);
+            set(AUXfig, 'Visible', 'on');      
             
         case 'Diffusivity vs. tau'
             figure(handles.AUXfig);
@@ -1717,10 +1894,19 @@ function plot_data(hObject, eventdata, handles)
             grid on;
             pretty_plot;
             
-        case 'Diffusivity @ a tau'
+        case 'temporal MSD'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
             
+            [tau, m, time] = msdt(t(k), [x(k) y(k)], [], []);
+            
+            surf(m);
+            
+        case 'Bayesian Model Histogram'
+            run_bayes_model_selection(hObject, eventdata, handles);
+            
+        case 'Bayesian Model MSD'
+            run_bayes_model_selection(hObject, eventdata, handles);
             
         case 'GSER'
 
@@ -1878,11 +2064,10 @@ function plot_data(hObject, eventdata, handles)
     refresh(handles.AUXfig);
  end
     
-
     
 function delete_selected_dataset(hObject, eventdata, handles)
 
-global hand
+    global hand
     video_tracking_constants;
     
     table = handles.table;
@@ -2131,6 +2316,73 @@ function delete_data_after_time(hObject, eventdata, handles)
 
 % function set_active_figure(hObject, eventdata, handles);
 
+function run_bayes_model_selection(hObject, eventdata, handles)
+    video_tracking_constants;
+
+    vidtable = handles.table;
+
+    calibum = str2double(get(handles.edit_calib_um, 'String'));
+
+    % Set up filter settings for trajectory data
+    filt.min_frames = 1600; % DEFAULT
+    filt.xyzunits   = 'm';
+    filt.calib_um   = calibum;
+
+    metadata.num_subtraj = 60;
+    metadata.fps         = 32;
+    metadata.calibum     = calibum;
+    metadata.bead_radius = 1e-6;
+    metadata.numtaus     = 15;
+    metadata.sample_names= {' '};
+    metadata.models      = {'N', 'D', 'DA', 'DR', 'V'}; % avail. models are {'N', 'D', 'DA', 'DR', 'V', 'DV', 'DAV', 'DRV'};
+    metadata.refdata     = 1;
+
+    % set up text-box for 'remaining time' display
+    [timefig,timetext] = init_timerfig;
+
+    [vidtable, filtout] = filter_video_tracking(vidtable, filt); 
+
+    agg_msdcalc = handles.mymsd;
+    
+    tracker_IDlist = unique(vidtable(:,ID));
+    N = length(tracker_IDlist)
+     for k = 1:N
+            tic;
+         
+         single_curve = get_bead(vidtable, tracker_IDlist(k));
+         [subtraj_matrix, subtraj_duration] = break_into_subtraj(single_curve, ...
+                                             metadata.fps, metadata.num_subtraj); 
+         frame_max = max(subtraj_matrix(:,FRAME));
+         subtraj_framemax = floor(frame_max / metadata.num_subtraj); 
+         window = msd_gen_taus(subtraj_framemax, metadata.numtaus, 0.9);
+         msdcalc = video_msd(subtraj_matrix, window, metadata.fps, calibum, 'n'); 
+         
+         bayes_results(k) = msd_curves_bayes(msdcalc.tau(:,1), ...
+                                          msdcalc.msd*1e12, metadata);
+         [model{k}, prob(k)] = bayes_assign_model(bayes_results(k)); 
+         
+            % handle timer
+            itertime = toc;
+            if k == 1
+                totaltime = itertime;
+            else
+                totaltime = totaltime + itertime;
+            end    
+            meantime = totaltime / k;
+            timeleft = (N-k) * meantime;
+            outs = [num2str(timeleft, '%5.0f') ' sec.'];
+            set(timetext, 'String', outs);
+            drawnow;
+
+     end
+     
+     close(timefig)
+     
+     handles.bayes.model = model;
+     handles.bayes.prob = prob;
+     
+return;
+
 function logentry(txt)
     logtime = clock;
     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
@@ -2144,181 +2396,4 @@ function logentry(txt)
      fprintf('%s%s\n', headertext, txt);
    
 
-% --- Executes on button press in checkbox_minFrames.
-function checkbox_minFrames_Callback(hObject, eventdata, handles)
 
-
-function edit_minFrames_Callback(hObject, eventdata, handles)
-
-
-% --- Executes during object creation, after setting all properties.
-function edit_minFrames_CreateFcn(hObject, eventdata, handles)
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-
-
-% --- Executes on button press in checkbox_minPixelRange.
-function checkbox_minPixelRange_Callback(hObject, eventdata, handles)
-
-
-function edit_minPixelRange_Callback(hObject, eventdata, handles)
-
-
-% --- Executes during object creation, after setting all properties.
-function edit_minPixelRange_CreateFcn(hObject, eventdata, handles)
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-
-
-% --- Executes on button press in checkbox_tCrop.
-function checkbox_tCrop_Callback(hObject, eventdata, handles)
-
-
-function edit_tCrop_Callback(hObject, eventdata, handles)
-
-
-% --- Executes during object creation, after setting all properties.
-function edit_tCrop_CreateFcn(hObject, eventdata, handles)
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-
-
-% --- Executes on button press in checkbox_xyCrop.
-function checkbox_xyCrop_Callback(hObject, eventdata, handles)
-
-
-function edit_xyCrop_Callback(hObject, eventdata, handles)
-
-
-% --- Executes during object creation, after setting all properties.
-function edit_xyCrop_CreateFcn(hObject, eventdata, handles)
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-
-
-% --- Executes on button press in checkbox_neutoffsets.
-function checkbox_neutoffsets_Callback(hObject, eventdata, handles)
-    plot_data(hObject, eventdata, handles);
-
-
-% --- Executes on button press in checkbox_overlayxy.
-function checkbox_overlayxy_Callback(hObject, eventdata, handles)
-    plot_data(hObject, eventdata, handles);
-
-
-% --- Executes on button press in checkbox_maxpixels.
-function checkbox_maxpixels_Callback(hObject, eventdata, handles)
-
-
-function edit_maxpixels_Callback(hObject, eventdata, handles)
-
-
-% --- Executes during object creation, after setting all properties.
-function edit_maxpixels_CreateFcn(hObject, eventdata, handles)
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-
-function edit_numtaus_Callback(hObject, eventdata, handles)
-    handles.recomputeMSD = 1;    
-    plot_data(hObject, eventdata, handles);    
-    guidata(hObject, handles);
-    
-    
-% --- Executes during object creation, after setting all properties.
-function edit_numtaus_CreateFcn(hObject, eventdata, handles)
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-
-
-
-function edit_temp_Callback(hObject, eventdata, handles)
-% hObject    handle to edit_temp (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit_temp as text
-%        str2double(get(hObject,'String')) returns contents of edit_temp as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit_temp_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_temp (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit_filename_Callback(hObject, eventdata, handles)
-% hObject    handle to edit_filename (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit_filename as text
-%        str2double(get(hObject,'String')) returns contents of edit_filename as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit_filename_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_filename (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-
-% --- Executes on selection change in popupmenu2.
-function popupmenu2_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu2
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenu2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit_chosentau_Callback(hObject, eventdata, handles)
-    plot_data(hObject, eventdata, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit_chosentau_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_chosentau (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
