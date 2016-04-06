@@ -1,4 +1,4 @@
-function [timefig, timetext] = init_timerfig;
+function [timefig, timetext] = init_timerfig
 
 	timefig = figure;
 	set(timefig, 'DoubleBuffer', 'on', ...

@@ -1,4 +1,4 @@
-function varargout = sim_video_diff_expt_new(filename, in_struct, grid)
+function varargout = sim_video_diff_expt(filename, in_struct, grid)
 % SIM_VIDEO_DIFF_EXPT simulates a bead diffusion experiment for a Newtonian fluid
 %
 % 3DFM function
