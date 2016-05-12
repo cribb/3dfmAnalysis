@@ -98,8 +98,8 @@ close(heatmapfig);
 
 % myparam = 'metadata.plate.solution.molar_concentration';
 % myparam = 'metadata.plate.well_map';
-% myparam = 'metadata.plate.cell.name';
-myparam = 'metadata.plate.solution.name';
+myparam = 'metadata.plate.cell.name';
+% myparam = 'metadata.plate.solution.name';
 
 % compute the MSD for each condition defined by 'myparam'
 [msds molar_conc] = pan_combine_data(metadata, myparam);
