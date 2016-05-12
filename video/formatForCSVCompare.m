@@ -1,5 +1,10 @@
 function formattedData=formatForCSVCompare(filename)
-  XLdata=xlsread(filename,3);
+  [pa,name,ext]=fileparts(filename);
+  if(strcmp(ext,'.xlsx'))
+    XLdata=xlsread(filename,3);
+  else
+    XLdata=csvread(filename);
+  end
   sz=size(XLdata);
   formattedData=zeros(sz(1),16);
   formattedData(:,1)=XLdata(:,2);

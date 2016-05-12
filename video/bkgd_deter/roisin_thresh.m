@@ -1,7 +1,7 @@
 function [adj_threshold]= roisin_thresh(filepath,adj)
 
 %threshold image using roisin threshold technique
-%filepath is the location of the image to threshold,
+%filepath is the location of the image to threshold, or an image item,
 %adj is the fraction of the tail length (a value between 0 and 1) that will
 %be added to the threshold
 %outputs: ints_cut is the intensity that is determined as a cut off,
