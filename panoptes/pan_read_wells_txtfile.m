@@ -68,26 +68,37 @@ ndlim = ndlim(1:beg_offsets-1);
 % Handle a collection of scaling parameters
 count = 1;
 SCALElocs = strfind(outl, 'scale');
-for k = 1:length(SCALElocs)
-    if ~isempty(SCALElocs{k})
-        [str myscale] = strtok(outl{k}, dlim);
-        scales(count,:) = str2num(myscale);
-        if count == 1
-            beg_scales = k;
-        end
-        count = count + 1;
-    end
-end
 
-if ~isempty('scales')
-    outs.scales = scales;
+
+
+if ~nansum(cell2num(SCALElocs))
+    warning('No scales defined in ExperimentConfig file, using values in codebase.');
+    temp = load('pan_scales.mat');
+    outs.scales = temp.scales;
 else
-    error('No scales defined. Update the ExperimentConfig file.');
+    for k = 1:length(SCALElocs)
+        if ~isempty(SCALElocs{k})
+            [str myscale] = strtok(outl{k}, dlim);
+            scales(count,:) = str2num(myscale);
+            if count == 1
+                beg_scales = k;
+            end
+            count = count + 1;
+        end
+    end
+    outs.scales = scales;    
+    outl = outl(1:beg_scales-1);
+    ndlim = ndlim(1:beg_scales-1);
 end
 
+% if ~isempty('scales')
+%     outs.scales = scales;
+% else
+%     error('No scales defined. Update the ExperimentConfig file.');
+% end
 
-outl = outl(1:beg_scales-1);
-ndlim = ndlim(1:beg_scales-1);
+
+
 
 % everything else should just be a parameter/value pair
 for k = 1:length(outl)
