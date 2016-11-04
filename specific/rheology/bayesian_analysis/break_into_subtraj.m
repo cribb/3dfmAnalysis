@@ -9,31 +9,31 @@ video_tracking_constants;
 extra_frames = mod(size(single_curve, 1), num_subtraj);                    
 
 % takes out extra frames to make curve divisible by num_subtraj
-single_curve = single_curve(1:(end-extra_frames), :);                       
+cropped_sc = single_curve(1:(end-extra_frames), :);                       
     
 % frame column now starts at 1 and ends with last frame
-single_curve(:,FRAME) = single_curve(:,FRAME) - min(single_curve(:,FRAME)) + 1;                                
+cropped_sc(:,FRAME) = cropped_sc(:,FRAME) - min(cropped_sc(:,FRAME)) + 1;                                
     
 % resets bead ID to zero
-single_curve(:,ID) = 0;                                              
+cropped_sc(:,ID) = 0;                                              
 
 % determines number of frames per subtrajectory
-num_frames_per_subtraj = (max(single_curve(:,FRAME))) / num_subtraj;        
+num_frames_per_subtraj = (max(cropped_sc(:,FRAME))) / num_subtraj;        
     
-for i = 1:num_subtraj
+for k = 1:num_subtraj
    
     % determines the frames which go to each subtrajectory
-    row_index = single_curve(:,FRAME)>((i-1)*num_frames_per_subtraj) ...
-              & single_curve(:,FRAME)<=(i*num_frames_per_subtraj);          
+    row_index = cropped_sc(:,FRAME)>((k-1)*num_frames_per_subtraj) ...
+              & cropped_sc(:,FRAME)<=(k*num_frames_per_subtraj);          
     
     % assigns each subtrajectory a new bead ID
-    single_curve(row_index,ID) = i;                                         
+    cropped_sc(row_index,ID) = k;                                         
 
 end
 
 subtraj_dur = num_frames_per_subtraj / frame_rate;
 
-subtraj_matrix = single_curve;
+subtraj_matrix = cropped_sc;
 
 
 end
