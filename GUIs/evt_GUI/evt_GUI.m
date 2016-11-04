@@ -1673,6 +1673,9 @@ function plot_data(hObject, eventdata, handles)
             handles.myve  = myve;
             handles.myD   = myD;
             handles.recomputeMSD = 0;
+            if isfield(handles, 'bayes')
+                handles = rmfield(handles, 'bayes');
+            end
             guidata(hObject, handles);
         end
 
@@ -1903,10 +1906,30 @@ function plot_data(hObject, eventdata, handles)
             surf(m);
             
         case 'Bayesian Model Histogram'
-            run_bayes_model_selection(hObject, eventdata, handles);
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            clf;
+            
+            if ~isfield(handles, 'bayes')
+                bayes = run_bayes_model_selection_general(hObject, eventdata, handles);
+            else
+                bayes = handles.bayes;
+            end
+            
+            bayes_plot_bar_model_freq(bayes.results, handles.AUXfig);
             
         case 'Bayesian Model MSD'
-            run_bayes_model_selection(hObject, eventdata, handles);
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            clf;
+            
+            if ~isfield(handles, 'bayes')
+                bayes = run_bayes_model_selection_general(hObject, eventdata, handles);
+            else
+                bayes = handles.bayes;
+            end
+            
+            bayes_plot_msd_by_color_jac(bayes, handles.AUXfig);
             
         case 'GSER'
 
@@ -2316,27 +2339,39 @@ function delete_data_after_time(hObject, eventdata, handles)
 
 % function set_active_figure(hObject, eventdata, handles);
 
-function run_bayes_model_selection(hObject, eventdata, handles)
+function bayes = run_bayes_model_selection(hObject, eventdata, handles)
     video_tracking_constants;
 
+    global hand
+    
+    hand = handles;
+    
     vidtable = handles.table;
 
     calibum = str2double(get(handles.edit_calib_um, 'String'));
 
     % Set up filter settings for trajectory data
-    filt.min_frames = 1600; % DEFAULT
+    
+    filt.min_frames = 800; % DEFAULT
     filt.xyzunits   = 'm';
     filt.calib_um   = calibum;
 
     metadata.num_subtraj = 60;
-    metadata.fps         = 32;
+    metadata.fps         = str2double(get(handles.edit_frame_rate, 'String'));
     metadata.calibum     = calibum;
-    metadata.bead_radius = 1e-6;
-    metadata.numtaus     = 15;
+    metadata.bead_radius = str2double(get(handles.edit_bead_diameter_um, 'String'))*1e-6/2;
+    metadata.numtaus     = str2num(get(handles.edit_numtaus, 'String'));
+%     metadata.numtaus     = 15;
     metadata.sample_names= {' '};
     metadata.models      = {'N', 'D', 'DA', 'DR', 'V'}; % avail. models are {'N', 'D', 'DA', 'DR', 'V', 'DV', 'DAV', 'DRV'};
     metadata.refdata     = 1;
 
+     opened_file = get(handles.edit_outfile, 'String');
+     [~,myfile,~] = fileparts(opened_file);
+
+     prd    = strfind(myfile,'.');
+     myname = myfile(1:prd-1);
+     
     % set up text-box for 'remaining time' display
     [timefig,timetext] = init_timerfig;
 
@@ -2345,9 +2380,14 @@ function run_bayes_model_selection(hObject, eventdata, handles)
     agg_msdcalc = handles.mymsd;
     
     tracker_IDlist = unique(vidtable(:,ID));
-    N = length(tracker_IDlist)
-     for k = 1:N
-            tic;
+
+    bayes_output.name = myname;
+    bayes_output.filename = myfile;
+
+    
+    N = length(tracker_IDlist);
+    for k = 1:N
+         tic;
          
          single_curve = get_bead(vidtable, tracker_IDlist(k));
          [subtraj_matrix, subtraj_duration] = break_into_subtraj(single_curve, ...
@@ -2355,12 +2395,22 @@ function run_bayes_model_selection(hObject, eventdata, handles)
          frame_max = max(subtraj_matrix(:,FRAME));
          subtraj_framemax = floor(frame_max / metadata.num_subtraj); 
          window = msd_gen_taus(subtraj_framemax, metadata.numtaus, 0.9);
+         
          msdcalc = video_msd(subtraj_matrix, window, metadata.fps, calibum, 'n'); 
          
-         bayes_results(k) = msd_curves_bayes(msdcalc.tau(:,1), ...
-                                          msdcalc.msd*1e12, metadata);
-         [model{k}, prob(k)] = bayes_assign_model(bayes_results(k)); 
+         bayes_results = msd_curves_bayes(msdcalc.tau(:,1), ...
+                                          msdcalc.msd*1e12, metadata); % computes Bayesian statistics on MSDs of matrix of subtrajectories         
+         [model, prob] = bayes_assign_model(bayes_results);      % assigns each single curve a model and assocaited probability
+
          
+         bayes_output.trackerID(k,:) = tracker_IDlist(k);
+         bayes_output.model{k,:} = model;
+         bayes_output.prob(k,:) = prob;
+         bayes_output.results(k,:) = bayes_results;
+         bayes_output.num_subtraj = metadata.num_subtraj;
+         bayes_output.subtraj_msd(k,:) = msdcalc;
+         bayes_output.orig_msd = agg_msdcalc;
+    
             % handle timer
             itertime = toc;
             if k == 1
@@ -2374,14 +2424,180 @@ function run_bayes_model_selection(hObject, eventdata, handles)
             set(timetext, 'String', outs);
             drawnow;
 
-     end
+%             model_curve_struct.N_curve_struct = 
+%                 N  = model_curve_struct.N_curve_struct;
+%                 D  = model_curve_struct.D_curve_struct;
+%                 DA = model_curve_struct.DA_curve_struct;
+%                 DR = model_curve_struct.DR_curve_struct;
+%                 V  = model_curve_struct.V_curve_struct;
+    end
      
+
      close(timefig)
      
-     handles.bayes.model = model;
-     handles.bayes.prob = prob;
+%      [bayes_model_output] = bayes_model_analysis(bayes_output);    
+
+     handles.bayes = struct;
+     guidata(hObject, handles);
      
+     handles.bayes.metadata = metadata;
+     handles.bayes.filt = filt;
+     handles.bayes.results = bayes_output;
+     handles.bayes.name = myfile;     
+     guidata(hObject, handles);
+     
+     bayes = handles.bayes;
+     
+     hand = handles;
+         
 return;
+
+function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
+    video_tracking_constants;
+
+    global hand; hand = handles;
+    
+    % % original settings
+    % num_subtraj  = 60;
+    % filt.min_frames = 800; % DEFAULT
+    % metadata.numtaus     = 15;
+
+    % set up text-box for 'remaining time' display
+    [timefig,timetext] = init_timerfig;
+    
+    % % USER INPUTS FOR FUNCTION
+    
+    vidtable = handles.table;
+
+    % max_tau_s is the maximum time scale the user wants the bayesian
+    % modeling code to consider when binning MSD curves.
+    max_tau_s = 1;
+        
+    % fraction_for_subtrajectories provides the shortest total trajectory
+    % length we can get away with for the number of subtrajectories we
+    % want.
+    fraction_for_subtraj = 0.75;
+
+    fps = str2double(get(handles.edit_frame_rate, 'String'));
+    bead_radius = str2double(get(handles.edit_bead_diameter_um, 'String'))*1e-6/2;
+    calibum = str2double(get(handles.edit_calib_um, 'String'));
+    num_taus = str2num(get(handles.edit_numtaus, 'String'));
+    opened_file = get(handles.edit_outfile, 'String');
+    
+    % %  DERIVED VALUES
+    
+    tracksum = summarize_tracking(vidtable);    
+    frame_max = tracksum.framemax;
+
+    % tag for data comes out of the filename
+    [~,myfile,~] = fileparts(opened_file);
+    prd    = strfind(myfile,'.');
+    myname = myfile(1:prd-1);
+     
+    agg_msdcalc = handles.mymsd;
+
+    % The shortest trajectory we will want to consider depends on the
+    % longest time scale (max_tau_s) we want to see in the MSD and the 
+    % amount of sampling we want for that longest time scale 
+    % (fraction_for_subtraj)
+    max_tau_frames = floor(max_tau_s * fps);
+    shortest_traj_s = max_tau_s / fraction_for_subtraj;
+    shortest_traj_frames = floor(shortest_traj_s * fps);
+    
+    num_subtraj = floor(frame_max / max_tau_frames);
+    
+    logentry(['Minimum frames in Bayesian model selection set to ' num2str(shortest_traj_frames) ' frames.']);
+
+%     min_frames = floor( fraction_for_subtraj * frame_max);    
+%     num_subtraj = floor( (frame_max - min_frames - 1 ) * 0.5);
+    
+%     if num_subtraj > 60 %i.e. max_N_subtraj
+%         num_subtraj = 60;
+%     end
+    
+    % Set up filter settings for trajectory data
+    filt.min_frames = floor(max_tau_frames * num_subtraj);
+    filt.xyzunits   = 'm';
+    filt.calib_um   = calibum;
+
+    metadata.num_subtraj = num_subtraj;
+    metadata.fps         = fps;
+    metadata.calibum     = calibum;
+    metadata.bead_radius = bead_radius; 
+    metadata.numtaus     = num_taus;
+    metadata.sample_names= {' '};
+    metadata.models      = {'N', 'D', 'DA', 'DR', 'V'}; % avail. models are {'N', 'D', 'DA', 'DR', 'V', 'DV', 'DAV', 'DRV'};
+    metadata.refdata     = 1;
+
+    bayes_output.name = myname;
+    bayes_output.filename = myfile;
+
+    % EVERYTHING is all set. Now we can get down to business...
+    [filtvidtable, filtout] = filter_video_tracking(vidtable, filt); 
+    filt_tracksum = summarize_tracking(filtvidtable);
+    N = filt_tracksum.Ntrackers;
+    tracker_IDlist = filt_tracksum.IDs;
+
+    for k = 1:N
+         tic;
+         
+         single_curve = get_bead(filtvidtable, tracker_IDlist(k));
+         [subtraj_matrix, subtraj_duration] = break_into_subtraj(single_curve, ...
+                                             metadata.fps, metadata.num_subtraj); 
+         st_frame_max = max(subtraj_matrix(:,FRAME));
+         subtraj_framemax = floor(st_frame_max / metadata.num_subtraj); 
+         mywindow = msd_gen_taus(subtraj_framemax, metadata.numtaus, 0.9);
+         
+         msdcalc = video_msd(subtraj_matrix, mywindow, metadata.fps, calibum, 'n'); 
+         
+         bayes_results = msd_curves_bayes(msdcalc.tau(:,1), ...
+                                          msdcalc.msd*1e12, metadata); % computes Bayesian statistics on MSDs of matrix of subtrajectories         
+         [model, prob] = bayes_assign_model(bayes_results);      % assigns each single curve a model and assocaited probability
+
+         
+         bayes_output.trackerID(k,:) = tracker_IDlist(k);
+         bayes_output.model{k,:} = model;
+         bayes_output.prob(k,:) = prob;
+         bayes_output.results(k,:) = bayes_results;
+         bayes_output.num_subtraj = metadata.num_subtraj;
+         bayes_output.subtraj_msd(k,:) = msdcalc;
+         bayes_output.orig_msd = agg_msdcalc;
+    
+            % handle timer
+            itertime = toc;
+            if k == 1
+                totaltime = itertime;
+            else
+                totaltime = totaltime + itertime;
+            end    
+            meantime = totaltime / k;
+            timeleft = (N-k) * meantime;
+            outs = [num2str(timeleft, '%5.0f') ' sec.'];
+            set(timetext, 'String', outs);
+            drawnow;
+
+    end
+     
+
+     close(timefig)
+     
+%      [bayes_model_output] = bayes_model_analysis(bayes_output);    
+
+     handles.bayes = struct;
+     guidata(hObject, handles);
+     
+     handles.bayes.metadata = metadata;
+     handles.bayes.filt = filt;
+     handles.bayes.results = bayes_output;
+     handles.bayes.name = myfile;     
+     guidata(hObject, handles);
+     
+%      bayes = handles.bayes;
+%      
+%      hand = handles;
+         
+return;
+
 
 function logentry(txt)
     logtime = clock;
