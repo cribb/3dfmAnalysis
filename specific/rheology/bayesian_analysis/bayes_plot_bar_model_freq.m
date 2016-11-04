@@ -1,4 +1,4 @@
-function bar_fig = bayes_plot_bar_model_freq(q)
+function bar_fig = bayes_plot_bar_model_freq(q, h)
 %BAYES_PLOT_BAYES_MODEL_FREQ plots the bar graph of count versus Bayesian model 
 %                     for curves inside q
 %
@@ -10,6 +10,10 @@ function bar_fig = bayes_plot_bar_model_freq(q)
 % outputs:  h       bar plot
 %
 % 
+
+if nargin < 2 || isempty(h)
+    h = figure; 
+end
 
 
 models = {'N', 'D', 'DA', 'DR', 'V'};
@@ -76,7 +80,7 @@ model_freq_list = model_count_list / total_count;
 
 
 
-bar_fig = figure;
+bar_fig = figure(h);
 bar_model_freq = bar(diag(model_freq_list), 'stacked');
 title(q.name)
 ylim([0 1])
