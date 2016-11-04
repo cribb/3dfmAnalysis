@@ -7,6 +7,14 @@ function winout = msd_gen_taus(framemax, numtaus, percent_duration)
         percent_duration = 1;
     end
     
+    if nargin < 2 || isempty(numtaus)
+        error('Number of time scales desired is undefined.');
+    end
+    
+    if nargin < 1 || isempty(framemax)
+        error('Framemax is empty or does not exist.')
+    end
+    
     newFRAMEmax = floor(framemax*percent_duration);
     
     if numtaus >= newFRAMEmax
