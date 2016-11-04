@@ -67,6 +67,7 @@ end
             continue;
         end
         
+
       % for x,y,z (k = 1,2,3) directions  
       for k = 1:cols(data)
   
@@ -90,7 +91,10 @@ end
         end
       end
       
-        
+        if w==length(window) && size(A,1) == 1
+            r2 = NaN;
+        end
+                    
         msd(w, :)        = mean(r2);
         Nestimates(w, :) = n;        
 
