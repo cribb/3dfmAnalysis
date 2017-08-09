@@ -91,9 +91,9 @@ end
         end
       end
       
-        if w==length(window) && size(A,1) == 1
-            r2 = NaN;
-        end
+%         if w==length(window) && size(A,1) == 1
+%             r2 = NaN;
+%         end
                     
         msd(w, :)        = mean(r2);
         Nestimates(w, :) = n;        
