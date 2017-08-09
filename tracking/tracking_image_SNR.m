@@ -25,8 +25,8 @@ for fid = 1:length(files)
     im = im(:,:,1);
     
 
-  this will determine if image is 16-bit or 8-bit. If 16-bit, will reduce
-  to 8-bit. If aready 8-bit, nothing happens. 
+%  this will determine if image is 16-bit or 8-bit. If 16-bit, will reduce
+%  to 8-bit. If aready 8-bit, nothing happens. 
     picinfo = imfinfo(filename);
     bit = picinfo.BitDepth;
 
