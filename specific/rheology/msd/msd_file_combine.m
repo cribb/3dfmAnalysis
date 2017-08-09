@@ -58,7 +58,7 @@ else
 end
 
 % fps = 30;
-win = msd_gen_taus(47, 1);
+mywin = msd_gen_taus(47, 1);
 % calibum = 0.157;
 % tau_target = 1;
 
@@ -73,7 +73,7 @@ for k = 1:M
         error('File not found.');
     end
     
-    vmsd = video_msd(thisfile.name, win, fps(k), calibum(k), 'n', 'n');
+    vmsd = video_msd(thisfile.name, mywin, fps(k), calibum(k), 'n', 'n');
         
     vmsd_at_tau = msd_at_tau(vmsd, tau_target(k));
     
