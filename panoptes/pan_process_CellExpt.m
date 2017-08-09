@@ -16,7 +16,8 @@ function dataout = pan_process_CellExpt(filepath, systemid, exityn)
 %
 % Notes:
 % - This function is designed to work within the PanopticNerve software
-% chain but can also be used manually from the matlab command line interface.
+% chain but can also be used manually from the matlab command line
+% interface.
 %
 
 % First, set up default values for input parameters in case they are empty 
@@ -131,7 +132,9 @@ filt.dead_spots = [0 0 0 0];
 % subtraction should never be used on freely diffusing data.  It, however,
 % can be used on beads actuated by an external force like a magnetic field.
 % filt.drift_method = 'none';
-filt.drift_method = 'center-of-mass';
+% filt.drift_method = 'center-of-mass';
+filt.drift_method = 'common-mode';
+
 
 % The 'remove jerks' filter will search through the data and find extreme
 % changes in the image due to varioptic jerk and remove them.  The value

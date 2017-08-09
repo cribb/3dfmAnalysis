@@ -70,7 +70,7 @@ for k = 1:length(filelist)
                 drift_vectors.pass(k,1) = mypass;
                 drift_vectors.well(k,1) = mywell;
 
-                if ~isempty(filtout.drift_vector)
+                if ~isempty(filtout.drift_vector) && ~isstruct(filtout.drift_vector)
                     drift_vectors.xvel(k,1) = filtout.drift_vector(1,1);
                     drift_vectors.yvel(k,1) = filtout.drift_vector(1,2);
                 else
