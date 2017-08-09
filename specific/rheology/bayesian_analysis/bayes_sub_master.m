@@ -63,19 +63,19 @@ for i = 1:length(tracker_IDlist)
     num_taus = unique(floor(logspace(0,round(log10(duration*frame_rate)), num_taus)));
     num_taus = num_taus(:);
     
-    % Prepares the window vector for msd calculations.
+    % Prepares the win vector for msd calculations.
     taus = num_taus * (1/frame_rate);                                       % turns the vector of frames into a vector of times                       
     index = taus(:) < duration;                                             % finds the taus that are smaller than the duration of the subtrajectory
-    win = taus(index,:);                                                    % creates a window vector
-    window = taus(index,:) * frame_rate;                                    % creates a window vector in terms of frames, for input into video_msd
+    win = taus(index,:);                                                    % creates a win vector
+    win = taus(index,:) * frame_rate;                                    % creates a win vector in terms of frames, for input into video_msd
     
     
     
-    sc_msdcalc = video_msd(single_curve, window, frame_rate, 0.152, 'n');   % calculates the MSD of the single curve
-                                                                            % and stores in struc with: tau, MSD, n, n, window 
+    sc_msdcalc = video_msd(single_curve, win, frame_rate, 0.152, 'n');   % calculates the MSD of the single curve
+                                                                            % and stores in struc with: tau, MSD, n, n, win 
      
-    msdcalc = video_msd(subtraj_matrix, window, frame_rate, 0.152, 'n');    % calculates the MSD of the matrix of subtrajectories
-                                                                            % and stores in struct with: tau, MSD, n, ns, window
+    msdcalc = video_msd(subtraj_matrix, win, frame_rate, 0.152, 'n');    % calculates the MSD of the matrix of subtrajectories
+                                                                            % and stores in struct with: tau, MSD, n, ns, win
     
     
     bayes_results = msd_curves_bayes(msdcalc.tau(:,1), ...
