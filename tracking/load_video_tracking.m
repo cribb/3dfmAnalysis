@@ -149,7 +149,7 @@ for fid = 1:length(filelist)
         % root 'calib_um'.
         if isfield(dd.tracking, 'calib_um')
             if ~isempty(calib_um(fid)) && dd.tracking.calib_um ~= calib_um(fid)
-                warning('The inputted calib_um at function call does not equal calib_um in the tracking data structure, using data structure version.');
+                logentry('The inputted calib_um at function call does not equal calib_um in the tracking data structure, using data structure version.');
             end
             calib_um(fid) = dd.tracking.calib_um;
         elseif ~isempty(calib_um(fid))
@@ -313,6 +313,12 @@ for fid = 1:length(filelist)
 end
 
 data = glommed_d;
+
+% in some cases, from God knows where, the FRAMEs are starting at zero,
+% which makes no damned sense. Fixing that here.
+if min(data(:,FRAME)) == 0
+    data(:,FRAME) = data(:,FRAME) + 1;
+end
 
 
 % now, settle our outputs, and move on....
