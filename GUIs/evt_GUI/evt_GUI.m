@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 19-Jul-2013 13:51:48
+% Last Modified by GUIDE v2.5 30-Mar-2017 16:26:01
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -184,10 +184,20 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     filename = get(handles.edit_infile, 'String');
     
     if(isempty(filename))
-		[fname, pname, fidx] = uigetfile({'*.mat';'*.csv';'*.*'}, ...
+		[fname, pname, fidx] = uigetfile({'*.mat;*.csv';'*.mat';'*.csv';'*.*'}, ...
                         'Select File(s) to Open', ...
                         'MultiSelect', 'on');
         
+% [filename, pathname] = uigetfile( ...
+% {'*.m;*.fig;*.mat;*.slx;*.mdl',...
+%  'MATLAB Files (*.m,*.fig,*.mat,*.slx,*.mdl)';
+%    '*.m',  'Code files (*.m)'; ...
+%    '*.fig','Figures (*.fig)'; ...
+%    '*.mat','MAT-files (*.mat)'; ...
+%    '*.mdl;*.slx','Models (*.slx, *.mdl)'; ...
+%    '*.*',  'All Files (*.*)'}, ...
+%    'Pick a file');                    
+
         if sum(length(fname), length(pname)) <= 1
             logentry('No tracking file selected. No tracking file loaded.');
             return;
@@ -459,7 +469,7 @@ end
     set(handles.edit_arb_origin                     , 'Enable', 'on');
     set(handles.radio_com                           , 'Enable', 'on');
     set(handles.radio_linear                        , 'Enable', 'on');
-    set(handles.radio_linearmean                    , 'Enable', 'on');
+    set(handles.radio_commonmode                    , 'Enable', 'on');
     set(handles.pushbutton_select_drift_region      , 'Enable', 'on');
     set(handles.pushbutton_remove_drift             , 'Enable', 'on');
     set(handles.radio_pixels                        , 'Enable', 'on');
@@ -772,19 +782,19 @@ function pushbutton_select_drift_region_Callback(hObject, eventdata, handles)
 function radio_com_Callback(hObject, eventdata, handles)
 	set(handles.radio_com, 'Value', 1);
 	set(handles.radio_linear, 'Value', 0);
-    set(handles.radio_linearmean, 'Value', 0);
+    set(handles.radio_commonmode, 'Value', 0);
 
 % --- Executes on button press in radio_linear.
 function radio_linear_Callback(hObject, eventdata, handles)
 	set(handles.radio_com, 'Value', 0);
 	set(handles.radio_linear, 'Value', 1);
-    set(handles.radio_linearmean, 'Value', 0);
+    set(handles.radio_commonmode, 'Value', 0);
 
-    % --- Executes on button press in radio_linearmean.
-function radio_linearmean_Callback(hObject, eventdata, handles)
+    % --- Executes on button press in radio_commonmode.
+function radio_commonmode_Callback(hObject, eventdata, handles)
 	set(handles.radio_com, 'Value', 0);
 	set(handles.radio_linear, 'Value', 0);
-    set(handles.radio_linearmean, 'Value', 1);
+    set(handles.radio_commonmode, 'Value', 1);
 
 
 
@@ -876,9 +886,9 @@ function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
     elseif get(handles.radio_com, 'Value')
         logentry('Removing Drift via center-of-mass method.');
         [v,q] = remove_drift(handles.table, start_time, end_time, 'center-of-mass');
-    elseif get(handles.radio_linearmean, 'Value')
-        logentry('Removing Drift via linear mean method.');
-        [v,q] = remove_drift(handles.table, start_time, end_time, 'linearMean');
+    elseif get(handles.radio_commonmode, 'Value')
+        logentry('Removing Drift via common-mode method.');
+        [v,q] = remove_drift(handles.table, start_time, end_time, 'common-mode');
     end
     
     handles.table = v;
@@ -1911,7 +1921,8 @@ function plot_data(hObject, eventdata, handles)
             clf;
             
             if ~isfield(handles, 'bayes')
-                bayes = run_bayes_model_selection_general(hObject, eventdata, handles);
+                bayes = run_bayes_model_selection(hObject, eventdata, handles);
+%                 bayes = run_bayes_model_selection_general(hObject, eventdata, handles);
             else
                 bayes = handles.bayes;
             end
@@ -1924,7 +1935,8 @@ function plot_data(hObject, eventdata, handles)
             clf;
             
             if ~isfield(handles, 'bayes')
-                bayes = run_bayes_model_selection_general(hObject, eventdata, handles);
+                bayes = run_bayes_model_selection(hObject, eventdata, handles);
+%                 bayes = run_bayes_model_selection_general(hObject, eventdata, handles);
             else
                 bayes = handles.bayes;
             end
@@ -2352,11 +2364,12 @@ function bayes = run_bayes_model_selection(hObject, eventdata, handles)
 
     % Set up filter settings for trajectory data
     
-    filt.min_frames = 800; % DEFAULT
+    filt.min_frames = 300; % DEFAULT
     filt.xyzunits   = 'm';
     filt.calib_um   = calibum;
 
-    metadata.num_subtraj = 60;
+%     metadata.num_subtraj = 60;
+    metadata.num_subtraj = 30;
     metadata.fps         = str2double(get(handles.edit_frame_rate, 'String'));
     metadata.calibum     = calibum;
     metadata.bead_radius = str2double(get(handles.edit_bead_diameter_um, 'String'))*1e-6/2;
