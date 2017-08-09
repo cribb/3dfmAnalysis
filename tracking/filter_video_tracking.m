@@ -175,7 +175,12 @@ function [outs, filtout] = filter_video_tracking(data, filt)
         if ~strcmp(filt.drift_method, 'none')
             [data,drift_vector] = filter_subtract_drift(data, filt.drift_method);
             filtout.drift_vector = drift_vector;
-            logentry(['Removed drift of ' num2str(drift_vector*filt.calib_um) ' um/s from data.']);
+            if isstruct(drift_vector)
+                mydrift = mean(drift_vector.xy);
+            else
+                mydrift = mean(drift_vector);
+            end
+            logentry(['Removed drift of ' num2str(mydrift*filt.calib_um) ' um/s from data.']);
         end        
     end    
 
@@ -629,6 +634,9 @@ function [data,jerk_frames] = filter_remove_stage_jerk(data, stage_jerk_limit)
         xy = data(idx, X:Y);    
 
         dxdy = diff(xy);
+        
+        [max_diff_xy, max_diff_xy_idx] = max(abs(dxdy),[],1);
+%         dbg_output(k,:) = 
         
         jerk_idxX = find(abs(dxdy(:,1)) > stage_jerk_limit);
         jerk_idxY = find(abs(dxdy(:,2)) > stage_jerk_limit);        
