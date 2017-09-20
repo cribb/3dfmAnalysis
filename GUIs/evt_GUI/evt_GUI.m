@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 18-Sep-2017 09:52:37
+% Last Modified by GUIDE v2.5 18-Sep-2017 15:07:51
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -1048,6 +1048,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
             
         case 'radial vector'
             set(handles.radio_relative    ,  'Visible', 'on', 'Enable', 'on');
@@ -1066,6 +1068,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
 
         case 'PSD'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
@@ -1084,6 +1088,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
         
         case 'Integrated Disp'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
@@ -1102,6 +1108,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+
 %         case 'displacement hist'
 %             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
 %             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1133,6 +1142,8 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'on', 'Enable', 'on');
+            set(handles.checkbox_2Mmsd   , 'Visible', 'on', 'Enable', 'on');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'on', 'Enable', 'on');
         
         case 'alpha vs tau'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
@@ -1153,7 +1164,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
-            set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'on');
+            set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            
         case 'alpha histogram'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1174,7 +1188,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_chosentau       , 'Visible', 'on', 'Enable', 'on');
             set(handles.text_chosentau_value , 'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-       case 'MSD histogram'
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+
+        case 'MSD histogram'
             set(handles.radio_relative       ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin     ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin      ,  'Visible', 'off', 'Enable', 'off');
@@ -1194,7 +1211,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_chosentau       , 'Visible', 'on', 'Enable', 'on');
             set(handles.text_chosentau_value , 'Visible', 'on', 'Enable', 'on');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-       case 'Diffusivity @ a tau'
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+
+        case 'Diffusivity @ a tau'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
@@ -1214,7 +1234,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-       case 'Diffusivity vs. tau'
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+
+        case 'Diffusivity vs. tau'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
@@ -1234,7 +1257,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-       case 'temporal MSD'
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+
+        case 'temporal MSD'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
@@ -1254,7 +1280,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-       case 'GSER'
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+
+        case 'GSER'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
@@ -1274,6 +1303,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+
         case 'pole locator'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1294,6 +1326,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+
         case 'tracker avail'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1314,6 +1349,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+
         case '2pt MSD ~~not implemented yet~~'
             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
@@ -1334,6 +1372,9 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
+            set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
+
     end
     
     plot_data(hObject, eventdata, handles);
@@ -1577,6 +1618,15 @@ end
 % --- Executes on button press in checkbox_watermsd.
 function checkbox_watermsd_Callback(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
+
+% --- Executes on button press in checkbox_2p5Mmsd.
+function checkbox_2p5Mmsd_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
+
+% --- Executes on button press in checkbox_2Mmsd.
+function checkbox_2Mmsd_Callback(hObject, eventdata, handles)
+    plot_data(hObject, eventdata, handles);
+
 
 % =========================================================================
 % Everything below this point are functions related to computation and data
@@ -1864,20 +1914,37 @@ function plot_data(hObject, eventdata, handles)
                 plot_msd(mymsd, AUXfig, 'me');                
             end
             
-            if get(handles.checkbox_watermsd, 'Value')
-                kB = 1.3806e-23; % [m^2 kg s^-2 K^-1];
-                viscosity_water = 0.001; % [Pa s]
-                temp_water_K = 298; % [K]
-                bead_radius_water_um = get(handles.edit_bead_diameter_um, 'String');
-                bead_radius_water_m = str2num(bead_radius_water_um) * 1e-6; % 
-                waterD = kB * temp_water_K / (6 * pi * viscosity_water * bead_radius_water_m);
-                waterMSD = 4 * waterD * tau(:,q);
-                
-                figure(AUXfig);
-                hold on;
-                    plot(log10(tau(:,q)), log10(waterMSD), 'k--', 'DisplayName', 'water');
-                hold off;
+            kB = 1.3806e-23; % [m^2 kg s^-2 K^-1];
+            temp_K = 296; % [K]
+
+            % visc.water = 0.001; % [Pa s]
+            visc.water = sucrose_viscosity(0, temp_K, 'K');
+            visc.sucrose_2M = sucrose_viscosity(2, temp_K, 'K');
+            visc.sucrose_2p5M = sucrose_viscosity(2.5, temp_K, 'K');
+
+            bead_diameter_um = get(handles.edit_bead_diameter_um, 'String');
+            bead_radius_m = str2num(bead_diameter_um)/2 * 1e-6; % 
+
+            D.water = kB * temp_K / (6 * pi * visc.water * bead_radius_m);
+            D.sucrose_2M = kB * temp_K / (6 * pi * visc.sucrose_2M * bead_radius_m);
+            D.sucrose_2p5M = kB * temp_K / (6 * pi * visc.sucrose_2p5M * bead_radius_m);
+
+            stdMSD.water = 4 * D.water * tau(:,q);
+            stdMSD.sucrose_2M = 4 * D.sucrose_2M * tau(:,q);
+            stdMSD.sucrose_2p5M = 4 * D.sucrose_2p5M * tau(:,q);
+
+            figure(AUXfig);
+            hold on;
+            if get(handles.checkbox_watermsd, 'Value')               
+                    plot(log10(tau(:,q)), log10(stdMSD.water), 'b--', 'DisplayName', 'water');
             end
+            if get(handles.checkbox_2Mmsd, 'Value')               
+                    plot(log10(tau(:,q)), log10(stdMSD.sucrose_2M), 'r--', 'DisplayName', '2M sucrose');
+            end
+            if get(handles.checkbox_2p5Mmsd, 'Value')               
+                    plot(log10(tau(:,q)), log10(stdMSD.sucrose_2p5M), 'k--', 'DisplayName', '2p5M sucrose');
+            end           
+            hold off;
             
             grid on;
             
@@ -2666,3 +2733,6 @@ function logentry(txt)
 
     
     
+
+
+
