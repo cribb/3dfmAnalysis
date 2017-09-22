@@ -61,8 +61,8 @@ function [outs, filtout] = filter_video_tracking(data, filt)
         filt.dead_spots      = [];
         filt.jerk_limit      = [];
         filt.min_intensity   = 0;
-        filt.deadzone = 0; % deadzone around trackers [pixels]
-        filt.overlapthresh = 0.1;
+        filt.deadzone        = 0; % deadzone around trackers [pixels]
+        filt.overlapthresh  = 0.1;
     end
 
     filtout = filt;
@@ -102,7 +102,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     if isfield(filt, 'deadzone')
         if filt.deadzone > 0
             logentry(['deadzone- Removing trackers that get closer than ' num2str(filt.deadzone) ' pixels for more than ' num2str(ceil(filt.overlapthresh*100)) '% of their trajectory.']);
-            data = filter_dead_zone_around_trackers(data, filt.deadzone);
+            data = filter_dead_zone_around_trackers(data, filt.deadzone, filt.overlapthresh);
         end
     end
     
@@ -286,7 +286,7 @@ function data = filter_dead_zone_around_trackers(data, deadzone, freq_thresh)
     video_tracking_constants;
 
     if nargin < 3 || isempty(freq_thresh)
-        freq_thresh = 0.3;
+        freq_thresh = 0.1;
     end
     
     v = summarize_tracking(data);
