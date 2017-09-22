@@ -4,7 +4,7 @@ if nargin < 1 || isempty(vst_tracking) || ~isnumeric(vst_tracking)
     logentry('Not tracking input, returning empty tracking summary structure.');
     
     v.framemax = [];
-    v.IDs = [];
+    v.idlist = [];
     v.Ntrackers = [];
     v.tracker_lengths = [];
     v.e2edist = [];
@@ -16,18 +16,24 @@ video_tracking_constants;
 % Total number of frames
 v.framemax = max( vst_tracking(:,FRAME) );
 
-% Tracker List of IDs
-v.IDs = unique( vst_tracking(:,ID) );
+% List of Tracker IDs
+v.idlist = unique( vst_tracking(:,ID) );
+% v.IDs = v.IDs(:);
+
+% List of frames in the dataset
+v.framelist = unique(vst_tracking(:,FRAME));
 
 % Total number of trackers
-v.Ntrackers = length( v.IDs );
+v.Ntrackers = length( v.idlist );
 
 % Tracker Lengths
 for k = 1:v.Ntrackers
-    this_bead = get_bead(vst_tracking, v.IDs(k));
+    this_bead = get_bead(vst_tracking, v.idlist(k));
     
     % Tracker Lengths
-    v.tracker_length(k,1) = size(this_bead, 1);
+    v.tracker_length(k,1) = size(this_bead, 1);    
+    v.first_frame(k,1) = min(this_bead(:,FRAME)); 
+    v.last_frame(k,1)  = max(this_bead(:,FRAME));
     
     % end-to-end distances    
     v.e2edist(k,1) = sqrt( (this_bead(1,X) - this_bead(end,X)).^2 + ...
