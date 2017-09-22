@@ -51,7 +51,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
         filt.min_frames      = 0;
         filt.min_pixels      = 0;
         filt.max_pixels      = Inf;
-        filt.max_region_size = 50000;
+        filt.max_region_size = Inf;
         filt.min_sens        = 0;
         filt.tcrop           = 0;
         filt.xycrop          = 0;
@@ -61,6 +61,8 @@ function [outs, filtout] = filter_video_tracking(data, filt)
         filt.dead_spots      = [];
         filt.jerk_limit      = [];
         filt.min_intensity   = 0;
+        filt.deadzone = 0; % deadzone around trackers [pixels]
+        filt.overlapthresh = 0.1;
     end
 
     filtout = filt;
@@ -92,19 +94,29 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     %  Handle filters    
     if isfield(filt, 'tcrop')
         if filt.tcrop > 0
+            logentry(['tcrop- Removing first and last ' num2str(filt.tcrop) ' time points from each trajectory.']);
             data = filter_tcrop(data, filt.tcrop);    
+        end
+    end
+    
+    if isfield(filt, 'deadzone')
+        if filt.deadzone > 0
+            logentry(['deadzone- Removing trackers that get closer than ' num2str(filt.deadzone) ' pixels for more than ' num2str(ceil(filt.overlapthresh*100)) '% of their trajectory.']);
+            data = filter_dead_zone_around_trackers(data, filt.deadzone);
         end
     end
     
     % 'minframes' the minimum number of frames required to keep a tracker
     if isfield(filt, 'min_frames')
         if filt.min_frames > 0
+            logentry(['min_frames- Removing trackers existing for less than ' num2str(filt.min_frames) ' frames.']);
             data = filter_min_frames(data, filt.min_frames);
         end
     end
     
     if isfield(filt, 'min_intensity')
         if filt.min_intensity>0
+            logentry(['min_intensity- Removing trackers existing with less than ' num2str(filt.min_intensity) ' intensity.']);
             data=filter_min_intensity(data,filt.min_intensity);
         end
     end
@@ -113,6 +125,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     % Minimum sensitivity given the first XY datapoint of the trajectory
     if isfield(filt, 'min_sens')
         if filt.min_sens > 0
+            logentry(['min_sens- Removing trackers existing with sensitivities (image-SNR) lower than ' num2str(filt.min_frames) '.']);
             data = filter_min_sens(data, filt.min_sens);
         end
     end
@@ -121,12 +134,14 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     % maxarea given the first XY datapoint of the trajectory
     if isfield(filt, 'max_region_size')
         if filt.max_region_size < Inf
+            logentry(['max_region_size- Removing trackers with region sizes (tracker area) larger than ' num2str(filt.max_region_size) ' pixels^2.']);
             data = filter_max_region_size(data, filt.max_region_size);
         end
     end
     
     if isfield(filt, 'min_pixels')
         if filt.min_pixels > 0
+            logentry(['min_pixels- Removing trackers with extents smaller than ' num2str(filt.min_pixels) ' pixels.']);
             % going to assume pixels
             data = filter_pixel_range('min', data, filt.min_pixels);
         end
@@ -134,6 +149,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
 
     if isfield(filt, 'max_pixels')
         if filt.max_pixels < Inf
+            logentry(['max_pixels- Removing trackers with extents larger than ' num2str(filt.max_pixels) ' pixels.']);
             % going to assume pixels
             data = filter_pixel_range('max', data, filt.max_pixels);
         end
@@ -141,6 +157,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     
     if isfield(filt, 'min_visc') && isfield(filt, 'bead_radius')
         if filt.min_visc > 0
+            logentry(['min_visc- Removing trackers with viscosities smaller than ' num2str(filt.min_pixels) ' [Pa s].']);
             % assuming pixels
             data = filter_viscosity_range('min', data, filt.min_visc, filt.bead_radius, filt.xyzunits, filt.calib_um);
         end
@@ -148,6 +165,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     
     if isfield(filt, 'max_visc') && isfield(filt, 'bead_radius')
         if filt.max_visc > 0
+            logentry(['max_visc- Removing trackers with viscosities larger than ' num2str(filt.min_pixels) ' [Pa s].']);
             % assuming pixels
             data = filter_viscosity_range('max', data, filt.max_visc, filt.bead_radius, filt.xyzunits, filt.calib_um);
         end
@@ -155,18 +173,20 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     
     if isfield(filt, 'xycrop')
         if filt.xycrop > 0
+            logentry(['xycrop- Removing trackers along outer ' num2str(filt.xycrop) ' pixels in the frame.']);
             data = filter_xycrop(data, filt.xycrop);
         end
     end
 
-    if isfield(filt, 'max_area')
-        if filt.max_area < Inf
-            data = filter_max_area(data, filt.max_area);
-        end
-    end
+%     if isfield(filt, 'max_area')
+%         if filt.max_area < Inf
+%             data = filter_max_area(data, filt.max_area);
+%         end
+%     end
     
     if isfield(filt, 'dead_spots')
         if ~isempty(filt.dead_spots);
+            logentry(['dead_spots- Removing trackers from camera deadspots.']);
             data = filter_dead_spots(data, filt.dead_spots);
         end
     end
@@ -180,7 +200,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
             else
                 mydrift = mean(drift_vector);
             end
-            logentry(['Removed drift of ' num2str(mydrift*filt.calib_um) ' um/s from data.']);
+            logentry(['drift_method- Removed ' num2str(mydrift*filt.calib_um) ' um/s from data.']);
         end        
     end    
 
@@ -261,6 +281,107 @@ function data = filter_min_frames(data, minFrames)
     return;
 
     
+function data = filter_dead_zone_around_trackers(data, deadzone, freq_thresh)
+
+    video_tracking_constants;
+
+    if nargin < 3 || isempty(freq_thresh)
+        freq_thresh = 0.3;
+    end
+    
+    v = summarize_tracking(data);
+    
+    thresh = deadzone;
+        
+    idlist = v.idlist;
+    framelist = unique(data(:,FRAME));
+    
+    ntrackers = length(idlist);
+    
+    master_list = cell(1,length(framelist));
+    for k = 1 : length(framelist)
+        this_frame_num = framelist(k);
+        
+        idx = find(data(:,FRAME) == this_frame_num);
+       
+        this_frame = data(idx,:);
+ 
+        ids = this_frame(:,ID); ids = ids(:)';
+        x = this_frame(:,X); x = x(:);
+        y = this_frame(:,Y); y = y(:);
+
+        % get square matrices for idlist, x, & y positions
+        ids = repmat(ids, 1, length(ids));
+        x   = repmat(x,   1, length(x));
+        y   = repmat(y,   1, length(y));
+
+        % to get the distance between pairs transpose and subtract and put
+        % into distance formula
+        dist = sqrt( (x - x').^2 + (y - y').^2 );        
+        distu = triu(dist); 
+        
+        % distances mirror the bottom-left triangle and we don't count the
+        % zero distance between a particle and itself. Populate a nan
+        % matrix & extract the lower triangle.
+        nanmatrix = nan(size(distu));        
+        nanl = tril(nanmatrix);
+        
+        % get the distances matrix we want by adding upper distances to
+        % lower nans.
+        distu = distu + nanl;        
+       
+        % particle pairs whose distances are less than the separation 
+        % distance threshold (supposed to be in pixels).
+        too_close = (distu < thresh);
+
+        % need a way to identify reference and test tracker IDs 
+        idst = ids'; 
+        refbead   = ids( too_close );
+        testbead  = idst( too_close );
+        too_close_list = [refbead(:) testbead(:) ];
+        sorted = sortrows(too_close_list,1);
+        
+        % Now, attach them to the current frame number
+        this_frame_num = repmat(this_frame_num,size(sorted,1),1);
+        
+        % store everything into a cell array to handle preallocation
+        % 'issue' (also saves a few seconds processing time on large datasets)
+        master_list{1,k} = [this_frame_num sorted];                
+    end
+    
+    % Turn the master_list into an actual 'list'
+    master_list = vertcat(master_list{:});
+    
+    % Now it's time to tabulate how much overlap there is between trackers
+    accumulating_trackers_to_delete = cell(1,length(framelist));
+    for k = 1 : length(framelist)
+        thisbead = master_list( master_list(:,2) == framelist(k), :);
+
+        if ~isempty(thisbead)            
+            freqdata = tabulate(thisbead(:,3));
+            freq_of_occurence = freqdata(:,2) ./ length(framelist);
+
+            above_thresh = (freq_of_occurence > freq_thresh);
+            accumulating_trackers_to_delete{1,k} = freqdata(above_thresh,1);
+        end
+    end    
+    
+    accumulating_trackers_to_delete = vertcat(accumulating_trackers_to_delete{:});
+    
+    % reduce the instances to a list of unique IDs to remove
+    trackers_to_delete = unique(accumulating_trackers_to_delete);
+    
+    % remove trackers identified as being too close
+    for k = 1:length(trackers_to_delete)
+        idxd = find(data(:,ID) ~= trackers_to_delete(k));
+        data = data(idxd,:);
+    end
+    
+    logentry(['Deleted ' num2str(length(trackers_to_delete)) ' trackers that failed dead zone filter.']);
+    
+    return;
+
+    
 function data = filter_max_region_size(data, max_region_size)
     video_tracking_constants;
     beadlist = unique(data(:,ID));
@@ -325,9 +446,6 @@ function data = filter_min_intensity(data, min_intensity)
     data(midx,:) = [];
     
 return;
-
-
-
 
 
 function data = filter_pixel_range(mode, data, PixelRange, xyzunits, calib_um)
