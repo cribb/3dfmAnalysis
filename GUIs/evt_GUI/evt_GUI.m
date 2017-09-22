@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 18-Sep-2017 15:07:51
+% Last Modified by GUIDE v2.5 22-Sep-2017 10:52:18
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -254,6 +254,14 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         handles.filt.xycrop = str2num(get(handles.edit_xyCrop, 'String'));
     else
         handles.filt.xycrop = 0;
+    end
+    
+    if get(handles.checkbox_deadzone, 'Value')
+        handles.filt.deadzone = str2num(get(handles.edit_deadzone, 'String'));
+        handles.filt.overlapthresh = str2num(get(handles.edit_overlapthresh, 'String'));
+    else
+        handles.filt.deadzone = 0;
+        handles.filt.overlapthresh = 0.1;        
     end
     
     handles.filt.xyzunits = 'pixels';
@@ -2736,3 +2744,58 @@ function logentry(txt)
 
 
 
+
+
+% --- Executes on button press in checkbox_deadzone.
+function checkbox_deadzone_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_deadzone (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_deadzone
+
+
+
+function edit_deadzone_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_deadzone (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_deadzone as text
+%        str2double(get(hObject,'String')) returns contents of edit_deadzone as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_deadzone_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_deadzone (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_overlapthresh_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_overlapthresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_overlapthresh as text
+%        str2double(get(hObject,'String')) returns contents of edit_overlapthresh as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_overlapthresh_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_overlapthresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
