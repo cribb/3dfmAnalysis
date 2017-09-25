@@ -62,7 +62,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
         filt.jerk_limit      = [];
         filt.min_intensity   = 0;
         filt.deadzone        = 0; % deadzone around trackers [pixels]
-        filt.overlapthresh  = 0.1;
+        filt.overlapthresh  = 0;
     end
 
     filtout = filt;
@@ -100,10 +100,18 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     end
     
     if isfield(filt, 'deadzone')
-        if filt.deadzone > 0
+        if filt.deadzone > 0 && filt.overlapthresh > 0
             logentry(['deadzone- Removing trackers that get closer than ' num2str(filt.deadzone) ' pixels for more than ' num2str(ceil(filt.overlapthresh*100)) '% of their trajectory.']);
             data = filter_dead_zone_around_trackers(data, filt.deadzone, filt.overlapthresh);
         end
+    end
+    
+    
+    if isfield(filt, 'deadzone')
+        if filt.deadzone > 0
+            logentry(['deadzone-simple- Removing trackers that get closer than ' num2str(filt.deadzone) ' pixels for more than ' num2str(ceil(filt.overlapthresh*100)) '% of their trajectory.']);
+            data = filter_dead_zone_simple(data, filt.deadzone);
+        end            
     end
     
     % 'minframes' the minimum number of frames required to keep a tracker
@@ -381,7 +389,91 @@ function data = filter_dead_zone_around_trackers(data, deadzone, freq_thresh)
     
     return;
 
+
+function data = filter_dead_zone_simple(data, deadzone)
+
+    video_tracking_constants;
+
+    if nargin < 3 || isempty(freq_thresh)
+        freq_thresh = 0.1;
+    end
     
+    v = summarize_tracking(data);
+    
+    thresh = deadzone;
+        
+    idlist = v.idlist;
+    framelist = unique(data(:,FRAME));
+    
+    ntrackers = length(idlist);
+    
+    master_list = cell(1,length(framelist));
+    newdata = {};
+    
+    for k = 1 : length(framelist)
+        this_frame_num = framelist(k);
+        
+        idx = find(data(:,FRAME) == this_frame_num);
+       
+        this_frame = data(idx,:);
+ 
+        ids = this_frame(:,ID); ids = ids(:)';
+        x = this_frame(:,X); x = x(:);
+        y = this_frame(:,Y); y = y(:);
+
+        % get square matrices for idlist, x, & y positions
+        ids = repmat(ids, length(ids), 1);
+        x   = repmat(x,   1, length(x));
+        y   = repmat(y,   1, length(y));
+
+        % to get the distance between pairs transpose and subtract and put
+        % into distance formula
+        dist = sqrt( (x - x').^2 + (y - y').^2 );        
+        distu = triu(dist); 
+        
+        % distances mirror the bottom-left triangle and we don't count the
+        % zero distance between a particle and itself. Populate a nan
+        % matrix & extract the lower triangle.
+        nanmatrix = nan(size(distu));        
+        nanl = tril(nanmatrix);
+        
+        % get the distances matrix we want by adding upper distances to
+        % lower nans.
+        distu = distu + nanl;        
+       
+        % particle pairs whose distances are less than the separation 
+        % distance threshold (supposed to be in pixels).
+        too_close = (distu < thresh);
+
+        % need a way to identify reference and test tracker IDs 
+        idst = ids'; 
+        refbead   = idst( too_close );
+        testbead  = ids( too_close );
+%         too_close_list = [refbead(:) testbead(:) ];
+%         sorted = sortrows(too_close_list,1);
+        beads_to_remove = unique(testbead);
+        ids = unique(ids);
+        beads_to_keep = setdiff(ids, beads_to_remove);
+        
+        new_frame = {};
+        for m = 1:length(beads_to_keep)
+            kidx = find(this_frame(:,ID) == beads_to_keep(m));
+            new_frame{m} = this_frame(kidx,:);
+        end
+        
+        new_data{k} = vertcat(new_frame{:});        
+        
+    end
+    
+    new_data = vertcat(new_data{:});
+    
+    data = new_data;
+    
+    logentry(['Deleted trackers that failed simple dead zone filter.']);
+    
+    return;
+    
+
 function data = filter_max_region_size(data, max_region_size)
     video_tracking_constants;
     beadlist = unique(data(:,ID));
