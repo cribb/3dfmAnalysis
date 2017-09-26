@@ -447,27 +447,24 @@ function data = filter_dead_zone_simple(data, deadzone)
 
         % need a way to identify reference and test tracker IDs 
         idst = ids'; 
-        refbead   = idst( too_close );
+        ids = ids + nanl;
+        idst = idst + nanl;
+        
+        refbead   = idst( too_close ); % earlier tracker to which the test testbead comes too close.
         testbead  = ids( too_close );
-%         too_close_list = [refbead(:) testbead(:) ];
-%         sorted = sortrows(too_close_list,1);
         beads_to_remove = unique(testbead);
-        ids = unique(ids);
-        beads_to_keep = setdiff(ids, beads_to_remove);
-        
-        new_frame = {};
-        for m = 1:length(beads_to_keep)
-            kidx = find(this_frame(:,ID) == beads_to_keep(m));
-            new_frame{m} = this_frame(kidx,:);
+
+        % this just deletes the testbead's id from this frame to the end.
+        % You could squeeze more data out of this by giving later points a
+        % new tracker ID number and test for closeness again at a later
+        % frame.
+        for m = 1:length(beads_to_remove)
+            kidx = find(data(:,ID) == beads_to_remove(m) & data(:,FRAME) >= this_frame_num);
+            data(kidx,:) = [];
         end
-        
-        new_data{k} = vertcat(new_frame{:});        
         
     end
     
-    new_data = vertcat(new_data{:});
-    
-    data = new_data;
     
     logentry(['Deleted trackers that failed simple dead zone filter.']);
     
