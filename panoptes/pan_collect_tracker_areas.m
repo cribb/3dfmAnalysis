@@ -82,8 +82,10 @@ for k = 1:Nfiles
         for m = 1:length(tracker_list)
             idx = ( frame1(:,ID) == tracker_list(m) );
             tmpdata = d(idx,:);
-            tmparea(m,1) = tmpdata(1,AREA);
-            tmpsens(m,1) = tmpdata(1,SENS);
+            if ~isempty(tmpdata)
+                tmparea(m,1) = tmpdata(1,AREA);
+                tmpsens(m,1) = tmpdata(1,SENS);
+            end
         end                
         
         FLfile = [FLburst_dir '\frame0001.pgm'];
