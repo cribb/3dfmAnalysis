@@ -23,10 +23,19 @@ function new_vid_table = traj_subtract_common_motion(vid_table, traj_common)
         commonidx_end = find(traj_common.frame == frameend);
         
         my_common_xy = traj_common.xy(commonidx_one:commonidx_end,:);
+        c_offset = repmat(my_common_xy(1,:),size(my_common_xy,1),1);
+        
         q_subtraj = q(:,X:Y);
         
+        q_offset = repmat(q_subtraj(1,:),size(q_subtraj,1),1);
+        
+        q_subtraj = q_subtraj - q_offset;        
+        c_subtraj = my_common_xy - c_offset;
+        
+        new_subtraj = q_subtraj - c_subtraj;
+        
         subtracted_traj = q;
-        subtracted_traj(:,X:Y) = q_subtraj - my_common_xy;
+        subtracted_traj(:,X:Y) = new_subtraj + q_offset;
         
         new_vid_table = [new_vid_table ; subtracted_traj];
     end;
