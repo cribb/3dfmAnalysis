@@ -15,6 +15,11 @@ end
 if nargin < 2
     error('Not enough inputs.');
 end
+
+if nargin < 1 || isempty(vid_table)
+   mystack = [];
+   newarea = [];
+end
     
 % check that we have only one frame in the data
 if length(unique(vid_table(:,FRAME))) > 1
@@ -123,7 +128,7 @@ end
     tracker_stack.trackerID = tracker_list(:);
     tracker_stack.newarea = newarea;
     
-if findstr(lower(reportyn), 'y')
+if findstr(lower(reportyn), 'y') %&& ~isempty(vid_table)
     h = plot_tracker_images(tracker_stack, 'id');
 end
 
