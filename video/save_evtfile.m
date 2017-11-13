@@ -158,7 +158,7 @@ function outs = save_csvfile(data, filename)
     filename = strrep(filename, '.evt', '');
     filename = strrep(filename, '.mat', '');
     filename = strrep(filename, '.csv', '');    
-    outfile = [filename '.vrpn.csv'];
+    outfile = [filename '.evt.csv'];
 
     fid = fopen(outfile, 'w');
     fprintf(fid, '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n',csv_header{:});
