@@ -1,4 +1,4 @@
-function common_xy = traj_common_motion(vid_table)
+function [common_xy] = traj_common_motion(vid_table)
 % at each time point, average all beads x, y, and z values to determine
 % center of mass vector and subtract that from each bead's position.
 % This routine is insensitive to the disapperance of old trackers or the 
@@ -66,29 +66,77 @@ function common_xy = traj_common_motion(vid_table)
         outv(k,:) = [thisFRAME comv];
     end
 
-    % computing the mean center-of-mass velocity for x and y directions 
-    % will allow us to subtract an *average* displacement per time-stamp.
-    % This may be sufficient if the velocity itself is constant.
-    mean_com_vel_x = nanmean(outv(:,2));
-    mean_com_vel_y = nanmean(outv(:,3));
-
-    % Another way to deal with this is to fit the center-of-mass
-    % displacement function and subtract out a drift of arbitrary
-    % polynomial order. Any order of polynomial and drift subtraction is
-    % going to generate artifacts in diffusion data, and the higher the
-    % order, the more extreme the artifact. However, it may be useful to be
-    % able to subtract out drifts that change direction during the video
-    % collection.
+    % Fit the center-of-mass displacement function and subtract out a drift 
+    % of arbitrary polynomial order. Any order of polynomial and drift 
+    % subtraction is going to generate artifacts in diffusion data, and the 
+    % higher the order, the more extreme the artifact. However, it may be 
+    % useful to be able to subtract out drifts that change direction during
+    % 
+    % the video collection.
     
     % First, get a list of the frames that DO and DO NOT contribute to the 
     % generation of the center-of-mass definition.
     full_frame_list = (firstframe:lastframe)';
     [missing_frames, idx_for_missing_frames] = setdiff(full_frame_list, outv(:,1));
-%     weights = ones(size(full_frame_list));
-%     weights(idx_for_missing_frames) = 0;
-    interp_velocities = interp1(outv(:,1),outv(:,2:3),full_frame_list, 'pchip', 'extrap');  
+    weights = ones(size(full_frame_list));
+    weights(idx_for_missing_frames) = 0;
+    
+    % Need to interpolate for the values where the weights are otherwise
+    % zero. However, it might be wise to EXTRAPOLATE over the displacement
+    % function INSTEAD of the velocity function, so consider breaking this
+    % into two interpolation runs.
+    interp_velocities = interp1(outv(:,1),outv(:,2:3),full_frame_list);
+
+    noisemag = nanstd(interp_velocities);
+    noisemag = repmat(noisemag, size(interp_velocities,1),1);
+    noisevals =  noisemag .* randn(size(interp_velocities));
+
+    missingvel = isnan(interp_velocities);
+
+    noise_filler = missingvel .* noisevals;
+    
+    x_filled = fillnans(interp_velocities(:,1)) + noise_filler(:,1);
+    y_filled = fillnans(interp_velocities(:,2)) + noise_filler(:,2);    
+
+        if sum(missingvel(:)) > 16
+            h = figure; 
+            pos = get(h, 'Position');
+            pos(3) = 2 * pos(3);
+            set(h, 'Position', pos);
+            
+            subplot(1,2,1);
+            plot(full_frame_list, x_filled, 'b', ...
+                 full_frame_list, interp_velocities(:,1), 'k', ...
+                 full_frame_list, y_filled, 'r', ...
+                 full_frame_list, interp_velocities(:,2), 'k');
+            legend('x filled-in NaNs', 'x original', 'y filled-in NaNs', 'y original');
+            title('center-of-mass velocity');
+            xlabel('frame');
+            ylabel('velocity [px/frame]');
+            drawnow;
+        end
+
+    interp_velocities = [x_filled y_filled];
+    
+    xy = cumsum(interp_velocities);        
+
+        if sum(missingvel(:)) > 16
+            figure(h);
+            subplot(1,2,2);
+            plot(full_frame_list, xy(:,1), 'bo', ...
+                 full_frame_list(~missingvel(:,1)), xy(~missingvel(:,1),1), 'ko', ...
+                 full_frame_list, xy(:,2), 'ro', ...
+                 full_frame_list(~missingvel(:,2)), xy(~missingvel(:,2),2), 'ko');
+            legend('x filled-in NaNs', 'x original', 'y filled-in NaNs', 'y original');
+            title('center-of-mass displacement');
+            xlabel('frame');
+            ylabel('displacement [px]');
+            drawnow;
+        end
     
     common_xy.frame = full_frame_list;
-    common_xy.xy = cumsum(interp_velocities);
+    common_xy.xy = xy;
+    common_xy.weights = weights;
+    common_xy.missing_frames = missing_frames;
     
     return;
