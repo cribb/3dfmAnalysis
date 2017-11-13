@@ -4,7 +4,7 @@ function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
 % [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
 % 
 % v = data minus drift
-% q = drift vector
+% q = drift vector/struct
 % type = 'linear' or 'center-of-mass'
 %
 
@@ -61,185 +61,24 @@ function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
         
     return
 
-function [cleaned_v,common_v] = common_mode(v, drift_start_time, drive_end_time)
+function [cleaned_v,common_v] = common_mode(v, drift_start_time, drift_end_time)
     common_v = traj_common_motion(v);
     cleaned_v  = traj_subtract_common_motion(v, common_v);        
 return
 
 
-function [v,q] = center_of_mass(v, drift_start_time, drift_end_time)
-% at each time point, average all beads x, y, and z values to determine
-% center of mass vector and subtract that from each bead's position.
-% This routine is insensitive to the disapperance of old trackers or the 
-% sudden existence of new trackers that would otherwise cause sudden 
-% jumps in the center-of-mass, so a polyfit of the center-of-mass should be
-% used.
-
-        video_tracking_constants;   
-
-        % clip data to desired time points
-    %     t_idx = find( v(:,TIME) >= drift_start_time & v(:,TIME) <= drift_end_time);
-    %     v = v(t_idx,:);
-
-        % DRIFT SUBTRACTION
-%        
-%        figh = figure;
-%        plot(v(:,X), v(:,Y), '.');
-%        xlabel('x [px]');
-%        ylabel('y [px]');
-%        axis([0 648 0 484]);
-%        
-    firstframe = min(v(:,FRAME));
-    lastframe  = max(v(:,FRAME));
-
-    id_list = unique(v(:,ID));
-
-
-    % % % % % % % % % % % % % % figh = figure; 
-    % % % % % % % % % % % % % % subplot(2,3,1); 
-    % % % % % % % % % % % % % % plot(v(:,X), v(:,Y), '.');
-    % % % % % % % % % % % % % % xlabel('x [px]');
-    % % % % % % % % % % % % % % ylabel('y [px]');
-    % % % % % % % % % % % % % % axis([0 648 0 484]);
-
-
-    % Identify the first and last "frames of existence" for every tracker and
-    % place the list as 'frameone' and 'frameend' variables
-    for k = 1:length(id_list); 
-        q = v(  v(:,ID) == id_list(k) , FRAME); 
-        frameone(1,k) = q(1,1); 
-        frameend(1,k) = q(end,1); 
-        
-        time_pts = v( v(:,ID) == id_list(k), TIME);
-        frame_rates(1,k) = mean(1./diff(time_pts));
-
-    end;
-
-    % 'C=setdiff(A,B)' returns for C the values in A that are not in B.  Here we use
-    % setdiff to identify the frames where no "popping in and out of existence"
-    % occurs.
-    C = setdiff([firstframe:lastframe]', [frameone frameend]');
-
-
-    % Next we want to identify regions of stable tracking in the set of frames,
-    % i.e. those regions in the dataset where we can find chunks of contiguous 
-    % frames
-    dC = diff(C);
-    contig_list = C(dC == 1);
-
-    % Algorithm:  Iterate through frames where stable bead IDs and 1-frame 
-    % jumps are guaranteed.  At each frame, compute the center of mass for x 
-    % and y at each frame.  From the two positions, compute the x and y 
-    % velocities as a forward difference.  NOTE: Must retain the frame 
-    % identification for each estimate in order to re-attach the computation 
-    % to the global clock.
-    count = 1;
-    for k = 1:length(contig_list)
-        thisFRAME = contig_list(k);
-
-        idx1 = find(v(:,FRAME) == thisFRAME);
-        idx2 = find(v(:,FRAME) == thisFRAME+1);
-        
-        table1 = v(idx1,:);
-        table2 = v(idx2,:);
-
-        mean1 = mean(table1(:,X:Y),1);
-        mean2 = mean(table2(:,X:Y),1);
-
-        comv = mean2 - mean1;
-
-        outv(k,:) = [thisFRAME comv];
-    end
-
-    if firstframe < min(contig_list)
-        firstframe = min(contig_list);
-    end
-
-    if lastframe > max(contig_list)
-        lastframe = max(contig_list);
-    end
-
-    % computing the mean center-of-meass velocity for x and y directions 
-    % will allow us to subtract an *average* displacement per time-stamp.
-    % This may be sufficient if the velocity itself is constant.
-    mean_com_vel_x = nanmean(outv(:,2));
-    mean_com_vel_y = nanmean(outv(:,3));
-
-    % Another way to deal with this is to fit the center-of-mass
-    % displacement function and subtract out a drift of arbitrary
-    % polynomial order. Any order of polynomial and drift subtraction is
-    % going to generate artifacts in diffusion data, and the higher the
-    % order, the more extreme the artifact. However, it may be useful to be
-    % able to subtract out drifts that change direction during the video
-    % collection.
+function [cleaned_v,com_v] = center_of_mass(v, drift_start_time, drift_end_time)
+    common_v = traj_common_motion(v);
+    [cleaned_v, com_v] = traj_subtract_centmass_motion(v, common_v);
     
-    % First, get a list of the frames that DO and DO NOT contribute to the 
-    % generation of the center-of-mass definition.
-    full_frame_list = (firstframe:lastframe)';
-    [missing_frames, idx_for_missing_frames] = setdiff(full_frame_list, outv(:,1));
-    weights = ones(size(full_frame_list));
-    weights(idx_for_missing_frames) = 0;
-    
-    
-    interp_displacements = cumsum(interp1(outv(:,1),outv(:,2:3),full_frame_list));
-    
-    order = 2;
-    
-    px = polyfitw(full_frame_list, interp_displacements(:,1),order,[],weights);
-    py = polyfitw(full_frame_list, interp_displacements(:,2),order,[],weights);
-    
-    driftx = polyval(px,full_frame_list);
-    drifty = polyval(py,full_frame_list);
-    
-% %         figh = figure; 
-% %         set(figh, 'Units', 'Normalized');
-% %         set(figh, 'Position', [0.1 0.1 0.3 0.6]);
-% %         
-% %         subplot(2,1,1);
-% %         hold on;
-% %         plot( full_frame_list, interp_displacements(:,1), '.', 'MarkerEdgeColor', [0 1 0])
-% %         plot( full_frame_list, interp_displacements(:,2), '.', 'MarkerEdgeColor', [0 0.5 0])
-% %         plot( full_frame_list, [driftx drifty], 'k');
-% %         plot( full_frame_list(idx_for_missing_frames), [interp_displacements(idx_for_missing_frames,1) interp_displacements(idx_for_missing_frames,2)], 'or');
-% %         legend('x com', 'y com', 'x fit', 'y fit', 'missing');
-% %         title(['Center-of-mass for tracking data, order=' num2str(order)]);
-% %         grid on;
-% %         xlabel('Frame Number');
-% %         ylabel('Pixels');
-% %         pretty_plot;
-% %         
-% %         subplot(2,1,2);
-% %         plot(interp_displacements-[driftx drifty], '.');
-% %         Title('Residuals from center-of-mass fit');
-% %         grid on;
-% %         xlabel('Frame Number');
-% %         ylabel('Pixels');
-% %         pretty_plot;
-       
-    % subtract out drift vector from each tracker
-     for k = 1:length(id_list)
-        idx = (  v(:,ID) == id_list(k)  );
-        tmp = v(idx,:);
+     % q.method = 'center-of-mass'
+     % q.order = 
+     % q.frame
+     % q.xcoeffs
+     % q.ycoeffs
+     % q.xy
+return
 
-        dt = diff(tmp(:,FRAME));  % labeled as 'dt' here for 'velocity' sake, but actually it's 'dFRAME'
-
-        my_frame_list = ( min(tmp(:,FRAME)):max(tmp(:,FRAME)) )';
-        my_driftx = polyval(px,my_frame_list);
-        my_drifty = polyval(py,my_frame_list);               
-
-        v(idx,X) = tmp(:,X) - my_driftx;
-        v(idx,Y) = tmp(:,Y) - my_drifty;    
-    
-%         figure; 
-%         plot(tmp(:,TIME), tmp(:,X:Y), 'or', v(idx,TIME), v(idx,X:Y), '.b');
-%         drawnow;
-     end
-    
-     % output average velocities for x and y (not sure what else to do
-     % here, maybe polynomial coefficients?)
-     q = [mean(diff(driftx)), mean(diff(drifty))];    % px/sec
-
-    return;
 
 function [v,drift_vectors] = linear(data, drift_start_time, drift_end_time)
 
