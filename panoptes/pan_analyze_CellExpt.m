@@ -42,7 +42,7 @@ for k = 1:length(filelist)
 %     metadata.filt.xyzunits = 'm';
     mycalibum = pan_MCU2um(myMCU, systemid, mywell, metadata);
 
-    bead_radius = str2double(metadata.plate.bead.diameter(mywell)) .* 1e-6 ./ 2;
+    bead_radius = (metadata.plate.bead.diameter(mywell)) .* 1e-6 ./ 2;
     
     % logentry(['Loading ' filelist(k).name]);
     
@@ -54,7 +54,7 @@ for k = 1:length(filelist)
 
     % switching over (momentarily, I think) to CSV files for AREA and SENS data
     myfilename = filelist(k).name;
-%     myfilename = strrep(myfilename, '.vrpn.mat', '.vrpn.csv');
+    myfilename = strrep(myfilename, '.vrpn.mat', '.vrpn.csv');
     
     d = load_video_tracking(myfilename, ...
                             metadata.instr.fps_imagingmode, ...
@@ -73,9 +73,11 @@ for k = 1:length(filelist)
                 if ~isempty(filtout.drift_vector) && ~isstruct(filtout.drift_vector)
                     drift_vectors.xvel(k,1) = filtout.drift_vector(1,1);
                     drift_vectors.yvel(k,1) = filtout.drift_vector(1,2);
-                else
-                    drift_vectors.xvel(k,1) = NaN;
-                    drift_vectors.yvel(k,1) = NaN;
+                elseif ~isempty(filtout.drift_vector) && isstruct(filtout.drift_vector)
+                    drift_vectors.frame{k,1} = filtout.drift_vector.frame;
+                    drift_vectors.xy{k,1} = filtout.drift_vector.xy;
+                    drift_vectors.xvel(k,1) = mean(diff(filtout.drift_vector.xy(:,1)))/max(filtout.drift_vector.frame)*myfps;
+                    drift_vectors.yvel(k,1) = mean(diff(filtout.drift_vector.xy(:,2)))/max(filtout.drift_vector.frame)*myfps;
                 end
             end
     

@@ -77,12 +77,14 @@ for k = 1:length(filelist)
                 drift_vectors.pass(k,1) = mypass;
                 drift_vectors.well(k,1) = mywell;
 
-                if ~isempty(filtout.drift_vector)
+                if ~isempty(filtout.drift_vector) && ~isstruct(filtout.drift_vector)
                     drift_vectors.xvel(k,1) = filtout.drift_vector(1,1);
                     drift_vectors.yvel(k,1) = filtout.drift_vector(1,2);
-                else
-                    drift_vectors.xvel(k,1) = NaN;
-                    drift_vectors.yvel(k,1) = NaN;
+                elseif ~isempty(filtout.drift_vector) && isstruct(filtout.drift_vector)
+                    drift_vectors.frame{k} = filtout.drift_vector.frame;
+                    drift_vectors.xy{k} = filtout.drift_vector.xy;
+                    drift_vectors.xvel(k,1) = mean(diff(filtout.drift_vector.xy(:,1)))/max(filtout.drift_vector.frame)*myfps;
+                    drift_vectors.yvel(k,1) = mean(diff(filtout.drift_vector.xy(:,2)))/max(filtout.drift_vector.frame)*myfps;
                 end
         end
         
