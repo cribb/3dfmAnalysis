@@ -69,8 +69,10 @@ for k = 1:Nfiles
                               'absolute', ...
                               'no', ...
                               'table');
-                               
-    [d_in, newfilt] = filter_video_tracking(d_in, filt);
+    video_tracking_constants;                           
+    if nargin >= 4 && ~isempty(filt)
+        [d_in, newfilt] = filter_video_tracking(d_in, filt);        
+    end
     
     % OLD SPEC
     % These constants come from 'video_tracking_constants' specification but
