@@ -106,7 +106,7 @@ filt.min_pixels = 0;
 % freely diffusing beads from a collection of trajectories
 filt.max_pixels = Inf;
 
-filt.min_sens = 0.5;
+filt.min_sens = 3;
 
 % The 'min_visc' filter defines the minimum viscosity allowed for a 
 % trajectory.  This filter uses the 'bead_radius' parameter from the 
@@ -140,8 +140,9 @@ filt.dead_spots = [0 0 0 0];
 % values are 'none;', 'center-of-mass', and 'linear.'  Note:  Linear drift
 % subtraction should never be used on freely diffusing data.  It, however,
 % can be used on beads actuated by an external force like a magnetic field.
-filt.drift_method = 'center-of-mass';
+% filt.drift_method = 'center-of-mass';
 % filt.drift_method = 'none';
+filt.drift_method = 'common-mode';
 
 % The 'remove jerks' filter will search through the data and find extreme
 % changes in the image due to varioptic jerk and remove them.  The value
