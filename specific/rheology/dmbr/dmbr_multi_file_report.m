@@ -103,7 +103,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
     end
     % check all files for breakpoints data
     while counter <= size(files,1);
-        [pathname, filename_root, ext, versn] = fileparts(files(counter,:));
+        [pathname, filename_root, ext] = fileparts(files(counter,:));
         cd(pathname);
         filename_root = strtrim(filename_root);
         metadatafile = strcat(filename_root, '.vfd.mat');

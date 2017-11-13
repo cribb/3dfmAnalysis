@@ -39,7 +39,7 @@ rheo = 2;
 dmbr_constants;                                               
 
 %%%%%%%%%%%% parameter check %%%%%%%%%%%%
-[pathname, filename_root, ext, versn] = fileparts(filename);
+[pathname, filename_root, ext] = fileparts(filename);
 
 if(nargin < 2)
     excel_name = filename_root;
@@ -53,7 +53,6 @@ end
 [~, excel_root, ~] = fileparts(excel_name);
 figfolder = strcat(main_directory, excel_root, '_html_images');
 local_figures = [excel_root '_html_images'];
-
 
 if(nargin < 4)
     headerheight = 1;
@@ -131,6 +130,9 @@ calibfile = 'NULL';
 if(plot_select(2) || plot_select(3) || plot_select(4))
     % load calibration 
     filelist = dir('*.vfc.mat');
+    if isempty(filelist);
+        error('No calibration file found.');
+    end
     calibfile = filelist.name;
     c = load(calibfile);
 end
@@ -305,14 +307,17 @@ for b = 1 : length(beads)
 
         
         idx = find(ftable(:,VOLTS) > 0);
-
+        
+        fprintf('s= %g\n', s);
         
         % displacement vs. time plot: stacked
         if(plot_select(1))
-            if ~exist('txFig');    txFig   = figure; end
-            if ~exist('txFig2');   txFig2  = figure; end
-            if ~exist('txcFig');   txcFig  = figure; end
-            if ~exist('txcFig2');  txcFig2  = figure; end
+            
+            
+            if ~isgraphics('txFig');    txFig   = figure; end
+            if ~isgraphics('txFig2');   txFig2  = figure; end
+            if ~isgraphics('txcFig');   txcFig  = figure; end
+            if ~isgraphics('txcFig2');  txcFig2  = figure; end
             
             figure(txFig);
             hold on;
@@ -369,10 +374,10 @@ for b = 1 : length(beads)
         end
 
         if(plot_select(2))
-            if ~exist('tJxFig');   tJxFig  = figure; end        
-            if ~exist('tJxFig2');  tJxFig2 = figure; end
-            if ~exist('tJxcFig');  tJxcFig  = figure; end
-            if ~exist('tJxcFig2'); tJxcFig2  = figure; end
+            if ~isgraphics('tJxFig');   tJxFig  = figure; end        
+            if ~isgraphics('tJxFig2');  tJxFig2 = figure; end
+            if ~isgraphics('tJxcFig');  tJxcFig  = figure; end
+            if ~isgraphics('tJxcFig2'); tJxcFig2  = figure; end
             
 
             
@@ -432,8 +437,8 @@ for b = 1 : length(beads)
         % Fit plot (Jeffrey)
         if(plot_select(3))
             
-            if ~exist('tJxcfFig');  tJxcfFig  = figure; end
-            if ~exist('tJxcfFig2'); tJxcfFig2  = figure; end
+            if ~isgraphics('tJxcfFig');  tJxcfFig  = figure; end
+            if ~isgraphics('tJxcfFig2'); tJxcfFig2  = figure; end
             
             Jx = vertcat(gaps(2,1), Jx);
             tcont = vertcat(gaps(3,2), tcont);

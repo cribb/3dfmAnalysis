@@ -29,7 +29,7 @@ function replace_breakpoint (filename)
     end
     
 
-    [pathname, filename_root, ext, versn] = fileparts(filename);
+    [pathname, filename_root, ext] = fileparts(filename);
     cd(pathname);
     filename_root = strtrim(filename_root);
     metadatafile = strcat(filename_root, '.mat');

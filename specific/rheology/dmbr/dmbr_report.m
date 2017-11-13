@@ -22,7 +22,7 @@ dmbr_constants;
 
 % general
 % pathname = pwd;
-[pathname, filename, ext, versn] = fileparts(filename);
+[pathname, filename, ext] = fileparts(filename);
 close all;
 
 % load metadata
