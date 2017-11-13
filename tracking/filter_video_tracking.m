@@ -133,7 +133,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     % Minimum sensitivity given the first XY datapoint of the trajectory
     if isfield(filt, 'min_sens')
         if filt.min_sens > 0
-            logentry(['min_sens- Removing trackers existing with sensitivities (image-SNR) lower than ' num2str(filt.min_frames) '.']);
+            logentry(['min_sens- Removing trackers existing with sensitivities (image-SNR) lower than ' num2str(filt.min_sens) '.']);
             data = filter_min_sens(data, filt.min_sens);
         end
     end
@@ -202,7 +202,10 @@ function [outs, filtout] = filter_video_tracking(data, filt)
     if isfield(filt, 'drift_method')
         if ~strcmp(filt.drift_method, 'none')
             [data,drift_vector] = filter_subtract_drift(data, filt.drift_method);
+            % outputted drift_vector here is in [pixels] regardless of the
+            % requested output scaling.
             filtout.drift_vector = drift_vector;
+            filtout.drift_vector_units = 'pixels';
             if isstruct(drift_vector)
                 mydrift = mean(drift_vector.xy);
             else
