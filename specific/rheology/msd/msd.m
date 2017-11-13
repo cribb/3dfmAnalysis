@@ -72,8 +72,8 @@ end
       for k = 1:cols(data)
   
         % for all frames
-        A = data(1:end-window(w), k);
-        B = data(window(w)+1:end, k);
+        A = data(1:end-floor(window(w)), k);
+        B = data(floor(window(w))+1:end, k);
     
         r = (B - A);
         % var_r = sum((mean(r) - r).^2) / size(r,1);
