@@ -16,18 +16,18 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
     end
     
     if plot_opts.plot_mean
-        table = meantable;
+        mytable = meantable;
         logentry('Plotting mean.');  
     else
-        table = dmbr_struct.raw.rheo_table;
+        mytable = dmbr_struct.raw.rheo_table;
     end
     
-    table = dmbr_filter_table(table, ...
+    mytable = dmbr_filter_table(mytable, ...
                               selection.beadID, ...
                               selection.seqID, ...
                               selection.voltage);
     
-    if isempty(table)
+    if isempty(mytable)
         clf(figure_handle);
         figure(figure_handle);
         text(0.445,0.5, 'No Data.');
@@ -40,17 +40,17 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
         offsets = dmbr_struct.offsets;
         cols = [TIME X Y Z ROLL PITCH YAW J SX SY SJ DX DY DJ SDX SDY SDJ];
     
-        for b = unique(table(:,ID))'
-            for s = unique(table(:,SEQ))'
+        for b = unique(mytable(:,ID))'
+            for s = unique(mytable(:,SEQ))'
 
-                idx = find(table(:,ID) == b & ...
-                           table(:,SEQ) == s );
+                idx = find(mytable(:,ID) == b & ...
+                           mytable(:,SEQ) == s );
                 oidx = find(offsets(:,ID) == b & ...
                             offsets(:,SEQ) == s );
                 
-                foo = table(idx,cols);
+                foo = mytable(idx,cols);
                 bar = repmat(offsets(oidx,cols), rows(foo), 1);
-                table(idx,cols) = foo - bar;
+                mytable(idx,cols) = foo - bar;
 
             end            
         end
@@ -58,20 +58,20 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
         logentry('Plotting without offsets');
     end
     
-    t     = table(:,TIME);
-    seq   = table(:,SEQ);
-    force = table(:,FORCE);
+    t     = mytable(:,TIME);
+    seq   = mytable(:,SEQ);
+    force = mytable(:,FORCE);
     
 
     
     % Process options to determine what to load
     if plot_opts.plot_smoothed    
-        x = table(:,SX);
-        y = table(:,SY);
-        j = table(:,SJ);
-       dx = table(:,SDX);
-       dy = table(:,SDY);        
-       dj = table(:,SDJ);
+        x = mytable(:,SX);
+        y = mytable(:,SY);
+        j = mytable(:,SJ);
+       dx = mytable(:,SDX);
+       dy = mytable(:,SDY);        
+       dj = mytable(:,SDJ);
 %        mx = meantable(:,SX);
 %        my = meantable(:,SY);
 %        mj = meantable(:,SJ);
@@ -79,12 +79,12 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
 %        mdy = meantable(:,SDY);
 %        mdj = meantable(:,SDJ);
     else
-        x = table(:,X);
-        y = table(:,Y);
-        j = table(:,J);
-       dx = table(:,DX);
-       dy = table(:,DY);        
-       dj = table(:,DJ);
+        x = mytable(:,X);
+        y = mytable(:,Y);
+        j = mytable(:,J);
+       dx = mytable(:,DX);
+       dy = mytable(:,DY);        
+       dj = mytable(:,DJ);
 %        mx = meantable(:,X);
 %        my = meantable(:,Y);
 %        mj = meantable(:,J);
