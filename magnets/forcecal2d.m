@@ -73,9 +73,10 @@ function v = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granul
     %% Computation of Forces %%
     
     % for each beadID, compute its velocity:magnitude and force:magnitude.
-	for k = 0 : get_beadmax(d)
+    trackerlist = unique(d(:,ID));
+	for k = 1 : length(trackerlist)
 
-        temp = get_bead(d, k);
+        temp = get_bead(d, trackerlist(k));
 
         % NOTE: Can edit out calculation of "Force", as it's depricated by
         % component calculations
