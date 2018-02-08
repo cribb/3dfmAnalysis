@@ -208,8 +208,13 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
             xlabel([logstring1 'time [s]' logstring2]);
             ylabel([logstring1 'displacement [\mum]' logstring2]);
             
-            %text(0.75*max(t), 0.25*max(xyr), num2str(mean(xyr(end-10:end))));
-            title(num2str(mean(xyr(end-10:end))));
+            %text(0.75*max(t), 0.25*max(xyr), num2str(mean(xyr(end-5:end))));
+            if size(xyr,1) < 5
+                mean_xyr = mean(xyr);
+            else
+                mean_xyr = mean(xyr(end-5:end));
+                title(['mean, last 5 pts: ' num2str(mean_xyr)]);
+            end
             
         case 'disp/force'
             subplot(2,1,1);
