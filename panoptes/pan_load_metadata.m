@@ -21,7 +21,8 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
     outs.files.layout    = dir('*WELL_LAYOUT*.csv');
     outs.files.MCUparams = dir('*MCUparams*.txt');
     outs.files.FLburst   = dir('*FLburst*');
-
+    outs.files.mip       = dir('*.mip.pgm');
+    
     % other file lists
     outs.files.video    = dir('*video*.vrpn');
     outs.files.tracking = dir('*_TRACKED.csv');
