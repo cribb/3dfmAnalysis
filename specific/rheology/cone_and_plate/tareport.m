@@ -33,7 +33,7 @@ outf = strrep(outf, '#', '_');
 
 for k = 1:length(figs)
     gen_pub_plotfiles(outf, figs(k), 'normal');
-    if ~isnan(figs(k))
+    if ~isempty(figs(k))
         close(figs(k));
     end
 end

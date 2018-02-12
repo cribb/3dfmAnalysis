@@ -1,4 +1,4 @@
-rootdir = 'K:\data\material\PEO\2016.07__PEO_Study\2016.07.18__CAP_PEO_5MD_0p91pct_dH2O';
+rootdir = 'K:\data\material\HA_crosslinked_hydrogels\2018.02.09__HA_hydrogels';
 cd(rootdir);
 
 rsl_file_list = importdata([rootdir '\rsl_file_list.txt']);
@@ -13,7 +13,7 @@ for k = 1:length(rsl_file_list)
     [pathstr filename ext] = fileparts(rsl_file_list{k});
     cd(pathstr);
     
-    cap = tareport([filename ' exp.txt'], 'PEO 5MD 0.91%');
+    cap = tareport([filename ' exp.txt'], 'HA hydrogels');
     
 end
 

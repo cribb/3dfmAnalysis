@@ -151,6 +151,16 @@ for k = 1 : length(fn)
 %             set(ser, 'DisplayName', strain);
         end
         
+        if sum(strfind(exptype, 'time sweep'))
+            time = result.data.time;
+            gp = result.data.G_prime;
+            gpp= result.data.G_double_prime;
+            delta = result.data.delta;  
+            figh(count) = plot_cap_tsweep(time, [gp, gpp], [], mytitle);
+            set(figh(count), 'Name', figname(fn{k}, 'tsweep'));
+            ser = get(gca, 'Children');
+        end
+        
         if isempty(strfind(exptype, 'equilibration step')) && ...
            isempty(strfind(exptype, 'dissipation step')) && ...
            isempty(strfind(exptype, 'pre-stress')) && ...
@@ -164,9 +174,10 @@ for k = 1 : length(fn)
            isempty(strfind(exptype, 'temperature')) && ...
            isempty(strfind(exptype, 'peak hold')) && ... 
            isempty(strfind(exptype, 'relax')) && ...
-           isempty(strfind(exptype, 'TTS'))
+           isempty(strfind(exptype, 'TTS')) && ...
+           isempty(strfind(exptype, 'time sweep'))
        
-            figh(count) = NaN;
+            figh(count) = [];
         end
 
         count = count + 1;        
