@@ -24,9 +24,10 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
     outs.files.mip       = dir('*.mip.pgm');
     
     % other file lists
-    outs.files.video    = dir('*video*.vrpn');
-    outs.files.tracking = dir('*_TRACKED.csv');
-    outs.files.evt      = dir('*.vrpn.evt.mat');
+    outs.files.video        = dir('*video*.vrpn');
+    outs.files.tracking.mat = dir('*_TRACKED.vrpn.mat')
+    outs.files.tracking.csv = dir('*_TRACKED.csv');
+    outs.files.tracking.evt = dir('*.vrpn.evt.mat');
 
 %     outs.files.tracking = dir('*_TRACKED.vrpn.mat');
 %     outs.files.tracking = dir('*_TRACKED.vrpn.csv');
