@@ -33,8 +33,8 @@ else
     error('No FLburst files to be found.');
 end
 
-if ~isempty(metadata.files.tracking)
-    traj_filelist = metadata.files.tracking;
+if ~isempty(metadata.files.tracking.mat)
+    traj_filelist = metadata.files.tracking.csv;
 else
     error('No tracking files found');
 end

@@ -26,10 +26,10 @@ logentry('Loaded metadata');
 % if there are no 'evt' files then no filtering/editing has happened so
 % we'll filter now according to the values set in the filt structure
 % (defined in the help text for filter_video_tracking)
-if length(metadata.files.evt) == length(metadata.files.tracking)
-    filelist = metadata.files.evt;
+if length(metadata.files.tracking.evt) == length(metadata.files.tracking.csv)
+    filelist = metadata.files.tracking.evt;
 else
-    filelist = metadata.files.tracking;
+    filelist = metadata.files.tracking.csv;
 end
 
 
@@ -70,7 +70,7 @@ for k = 1:length(filelist)
 %     end
     
     % only have to filter if we need to process .vrpn.mat to .vrpn.evt.mat
-    if length(metadata.files.evt) ~= length(metadata.files.tracking)
+    if length(metadata.files.tracking.evt) ~= length(metadata.files.tracking.csv)
         [d, filtout] = filter_video_tracking(d, filt);
 
         if isfield(filtout, 'drift_vector') 
