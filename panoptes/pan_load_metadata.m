@@ -16,23 +16,12 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
 
     filelist = dir(filepath);
 
-    % dictionary for loading appropriate files
+    % dictionary for loading experiment metadata
     outs.files.wells     = dir('*ExperimentConfig*.txt');
     outs.files.layout    = dir('*WELL_LAYOUT*.csv');
     outs.files.MCUparams = dir('*MCUparams*.txt');
-    outs.files.FLburst   = dir('*FLburst*');
-    outs.files.mip       = dir('*.mip.pgm');
     
-    % other file lists
-    outs.files.video        = dir('*video*.vrpn');
-    outs.files.tracking.mat = dir('*_TRACKED.vrpn.mat')
-    outs.files.tracking.csv = dir('*_TRACKED.csv');
-    outs.files.tracking.evt = dir('*.vrpn.evt.mat');
-
-%     outs.files.tracking = dir('*_TRACKED.vrpn.mat');
-%     outs.files.tracking = dir('*_TRACKED.vrpn.csv');
-
-    outs = check_file_inputs(outs);
+%     outs = check_file_inputs(outs);
 
     % if isempty(outs.files)
     %     % insufficient metadata
@@ -62,14 +51,14 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
         
         % if the instrument is panoptes (rather than monoptes) then expand
         % the wellIDs that were defined in the wells.txt file
-        if findstr(systemid,'panoptes');
-            for k = 1:length(outs.instr.well_list)
-                new_well_list(k,1:12) = outs.instr.well_list(k) + [0:11];
+        if strfind(systemid,'panoptes');
+            for k = 1:length(outs.instr.wells)
+                new_well_list(k,1:12) = outs.instr.wells(k) + [0:11];
             end
             
             new_well_list = new_well_list';
             new_well_list = unique(new_well_list);
-            outs.instr.well_list = unique(new_well_list(:));
+            outs.instr.wells = unique(new_well_list(:));
         end
         outs.instr.systemid = systemid;
     else
@@ -106,15 +95,22 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
         end
         
         outs.plate.bead.diameter = bead_diameter;
-
     else
         error('No bead data defined.');
     end
+    
+    % other file lists
+    outs.files.FLburst   = dir('*FLburst*');
+    outs.files.mip       = dir('*.mip.pgm');
+    outs.files.video        = dir('*video*.vrpn');
+    outs.files.tracking.mat = dir('*_TRACKED.vrpn.mat');
+    outs.files.tracking.csv = dir('*_TRACKED.csv');
+    outs.files.tracking.evt = dir('*.vrpn.evt.mat');
 
-    if ~isempty(outs.files.tracking)
-        tmp = outs.files.tracking;
-    elseif ~isempty(outs.files.evt)
-        tmp = outs.files.evt;
+    if ~isempty(outs.files.tracking.csv)
+        tmp = outs.files.tracking.csv;
+    elseif ~isempty(outs.files.tracking.evt)
+        tmp = outs.files.tracking.evt;
     else
         warning('There are no tracking or evt files to analyze.');
         return;
@@ -148,15 +144,15 @@ function outs = check_file_inputs(ins)
         logentry('No MCUparams file.');
     end
 
-    if isempty(ins.files.tracking)
+    if isempty(ins.files.tracking.csv)
         logentry('No tracking data.');
     end   
     
     if isempty(ins.files.video)
-        logentry('No video files.  Data can not be retracked (from here).');
+        logentry('No video files.  Data can not be retracked (from this data directory).');
     end
     
-    if isempty(ins.files.evt)
+    if isempty(ins.files.tracking.evt)
         logentry('No evt files.  Will need to filter tracking data first.');
         ins.flags.filter = 1;
     end
@@ -164,7 +160,7 @@ function outs = check_file_inputs(ins)
 %     if isempty(ins.files.wells)     || ...
 %        isempty(ins.files.layout)    || ...
 %        isempty(ins.files.MCUparams) || ...
-%        isempty(ins.files.tracking)
+%        isempty(ins.files.tracking.csv)
 %         outs = [];
 %     else
 %         outs = ins;
