@@ -1,18 +1,29 @@
-function outs = vst_loadcfg(cfgfile)
+function outs = vst_loadcfg(cfgfiles)
+% VST_LOADCFG Loads tracking configuration files for Video Spot Tracker
+%
+% CISMM function
+% Tracking
+%  
+% Loads and aggregates tracking configurations from VST config files
+% 
+%  config = vst_loadcfg(cfgfiles)
+%   
+% 'cfgfiles' is a list of configuration files as strings
+%
 
-if nargin < 1 || isempty(cfgfile)
+if nargin < 1 || isempty(cfgfiles)
     error('Must provide input file');
 end
 
-cfgfile = dir(cfgfile);
+cfgfiles = dir(cfgfiles);
 
 this = struct;
 outs = struct;
-for f = 1:length(cfgfile)
-    A = importdata(cfgfile(f).name, ' ');
+for f = 1:length(cfgfiles)
+    A = importdata(cfgfiles(f).name, ' ');
     
     if isempty(A)
-        warning(['File ' cfgfile(f).name ' not found. Continuing.']);
+        warning(['File ' cfgfiles(f).name ' not found. Continuing.']);
         continue;
     end
 
