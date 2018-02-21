@@ -20,6 +20,8 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
     outs.files.wells     = dir('*ExperimentConfig*.txt');
     outs.files.layout    = dir('*WELL_LAYOUT*.csv');
     outs.files.MCUparams = dir('*MCUparams*.txt');
+    outs.files.tracking.config_find = dir('*_find.cfg');
+    outs.files.tracking.config_track = dir('*_track.cfg');
     
 %     outs = check_file_inputs(outs);
 
@@ -73,11 +75,18 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
         error('No WELL_LAYOUT file.');
     end
 
-    % read in the mcu parameters
+    % Read in the mcu parameters
     if ~isempty(outs.files.MCUparams)
         outs.mcuparams = pan_read_MCUparamsfile( outs.files.MCUparams.name );
     else
         error('No MCU parameter file.');
+    end
+    
+    % Read in the tracking parameters, if they exist
+    if ~isempty(outs.files.tracking.config_track)
+        outs.vstparams = vst_loadcfg(outs.files.tracking.config_track.name);
+    else
+        warning('No tracking parameters defined.');
     end
 
     % Need to convert bead diameters from cell of strings to numerical
