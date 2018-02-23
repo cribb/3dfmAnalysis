@@ -9,7 +9,7 @@ function varargout = msd(t, data, taulist)
 %
 % where "t" is the time
 %       "data" is the input matrix of data
-%       "taulist" is a vector containing taulist sizes of tau when computing MSD. 
+%       "taulist" is a vector containing window-lagtime sizes of tau when computing MSD. 
 %
 
 %initializing arguments
