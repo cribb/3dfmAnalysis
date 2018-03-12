@@ -25,6 +25,7 @@ well_list = metadata.instr.wells;
 fidmax = length(pass_list) * length(well_list);
 
 % Initialize data types so Matlab doesn't complain
+Tag  = cell(fidmax, 1);
 Path = cell(fidmax, 1);
 File = cell(fidmax, 1);
 Pass = NaN(fidmax,1);
@@ -59,6 +60,8 @@ for p = 1:length(pass_list)
             File{fid,1} = '';
         end
         
+        % Set the Tag (this is going to need better specification
+        Tag{fid,1} = metadata.plate.solution.name{well};
 
         % calibum conversions
         MCUparam = metadata.mcuparams.mcu(metadata.mcuparams.well == well & ...
@@ -113,5 +116,5 @@ end
 
 Fid = (1:fid-1)';
 
-VidTable = table(Fid, Path, File, Fps, Calibum, Width, Height, Firstframes, Mips);
+VidTable = table(Fid, Path, File, Pass, Well, Tag, Fps, Calibum, Width, Height, Firstframes, Mips);
 % v = table(Fid, Path, File, Pass, Well, Fps, Calibum, Width, Height, Firstframes, Mips);
