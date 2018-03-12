@@ -177,11 +177,12 @@ close(ksfig);
 
 barfig = figure('Visible', 'off');
 barwitherr( (10.^(mylogmsd+mylogerr))-(10.^(mylogmsd)),  (10 .^ mylogmsd));
-set(gca,'XTickLabel',molar_conc)
-xlabel('cell type');
-ylabel('log_{10}(<r^2> [m^2])');
+set(gca,'XTickLabel', molar_conc);
+% set(gco, 'Interpreter', 'none');
+% xlabel('cell type');
+% ylabel('log_{10}(<r^2> [m^2])');
 barfile = [metadata.instr.experiment '_molar_concentration_ALL' '.bar'];
-gen_pub_plotfiles(barfile, barfig, 'normal');
+% gen_pub_plotfiles(barfile, barfig, 'normal');
 close(barfig);
 
 % create plot with mean msd data for all values of 'myparam' across ALL taus
