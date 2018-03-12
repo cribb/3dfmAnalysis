@@ -1,4 +1,4 @@
-function v = load_vst_tracking(VidTable)
+function TrackingTable = load_vst_tracking(VidTable)
 % LOAD_VST_TRACKING Loads csv-format datasets from Video Spot Tracker v8+
 %
 % CISMM function
@@ -16,7 +16,7 @@ filelist = VidTable.File;
 
 
 % pre-initialize the output so Matlab doesn't have a cow.
-v = table;
+TrackingTable = table;
 
 % Matlab disapproves some of the column-headings in Spot Tracker's 
 % csv-outfile. This turns off the warning.
@@ -53,13 +53,13 @@ for f = 1:length(fid)
     % tack on the Fid value
     dd = [Fid dd];
 
-    v = [v;dd];
+    TrackingTable = [TrackingTable;dd];
 end
 warning('on', 'MATLAB:table:ModifiedVarnames');
 
 % There should be a better way than this. I don't like how it's unhinged
 % from the columnTitles.
-v.Properties.VariableUnits = {'', '', '', 'pixels', 'pixels', 'pixels', 'Intensity-16-bit', 'pixels^2', '', 'pixels^2'};
+TrackingTable.Properties.VariableUnits = {'', '', '', 'pixels', 'pixels', 'pixels', 'Intensity-16-bit', 'pixels^2', '', 'pixels^2'};
     
         
 
