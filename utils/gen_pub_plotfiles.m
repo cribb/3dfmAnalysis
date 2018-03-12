@@ -73,7 +73,7 @@ set(h, 'units', 'normalized');
 saveas(h, [outf '.fig'], 'fig');
 % print(h, '-r0', [outf '.eps'], '-depsc'); 
 % print(h, '-r0', [outf '.png'], '-dpng'); 
-print('-dpng', ['test' '.png'], '-zopengl','-r300');
+print('-dpng', ['test' '.png'], '-opengl','-r300');
 % print(h, '-r0', [outf '.jpg'], '-djpg'); 
 saveas(h, [outf '.png'], 'png');
 % plot2svg_2d([outf '.svg'], h);
