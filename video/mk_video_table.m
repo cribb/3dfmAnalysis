@@ -54,7 +54,7 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
         error('No length scale calibration defined.');
     end
     
-    % If the inputs were simple scalers, assume that means the values are
+    % If the inputs were simple scalars, assume that means the values are
     % identical for all the filenames in L and tile them out for the table.
     if size(P,1) == 1
         P = repmat(P, size(L));
@@ -64,13 +64,13 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
         C = repmat(C, size(L));
     end
     
-    if size(X,1) == 1
-        X = repmat(X, size(L));
-    end
-    
-    if size(Y,1) == 1
-        Y = repmat(Y, size(L));
-    end
+%     if size(X,1) == 1
+%         X = repmat(X, size(L));
+%     end
+%     
+%     if size(Y,1) == 1
+%         Y = repmat(Y, size(L));
+%     end
     
     % Check to make sure the length of the filename list is consistent with
     % the entered values for time- and length-scales.
@@ -102,7 +102,7 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
         Height(k,1) = 0;
     end
 
-
+% Need Firstframe and mip Mip to be FILE NAMES?
 filetable = table(Fid, Path, Vidfile, Trackfile, Fps, Calibum, Width, Height, Firstframe, Mip);
  
 
