@@ -80,7 +80,7 @@ set(gca, 'YTickLabel', {'A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'});
 cbticks = get(cb, 'YTick')';
 cbtick_labels = cellstr([repmat('10^{', size(cbticks)) num2str(cbticks) repmat('}', size(cbticks))]);
 set(cb, 'YTickLabel', cbtick_labels);
-title('Viscosity (in log_{10} Pa s})');
+title('Viscosity (in log_{10} [Pa s])');
     alpha = ones(8,12);
     alpha(isnan(heatmap_msds)) = 0.5;
     im = get(gca, 'Children');
@@ -177,12 +177,11 @@ close(ksfig);
 
 barfig = figure('Visible', 'off');
 barwitherr( (10.^(mylogmsd+mylogerr))-(10.^(mylogmsd)),  (10 .^ mylogmsd));
-set(gca,'XTickLabel', molar_conc);
-% set(gco, 'Interpreter', 'none');
-% xlabel('cell type');
-% ylabel('log_{10}(<r^2> [m^2])');
+set(gca,'XTickLabel', molar_conc, 'TickLabelInterpreter', 'none');
+xlabel('cell type');
+ylabel('log_{10}(<r^2> [m^2])');
 barfile = [metadata.instr.experiment '_molar_concentration_ALL' '.bar'];
-% gen_pub_plotfiles(barfile, barfig, 'normal');
+gen_pub_plotfiles(barfile, barfig, 'normal');
 close(barfig);
 
 % create plot with mean msd data for all values of 'myparam' across ALL taus
@@ -190,7 +189,7 @@ aggMSDfig = figure('Visible', 'off');
 errorbar(all_logtaus, all_logmsds, all_logerrs, 'LineWidth', 2)
 xlabel('time scale, \tau [s]');
 ylabel('<r^2> [m^2]');
-legend(molar_conc, 'Location', 'SouthEast');
+legend(molar_conc, 'Location', 'SouthEast', 'Interpreter', 'none');
 aggMSDfile = [metadata.instr.experiment '_molar_concentration_ALL' '.aggmsd'];
 gen_pub_plotfiles(aggMSDfile, aggMSDfig, 'normal');
 close(aggMSDfig);
@@ -200,6 +199,7 @@ for k = 1:length(molar_conc)
     MSDfile{k} = [metadata.instr.experiment '_molar_concentration_' molar_conc{k} '.msd'];
     MSDfig  = figure('Visible', 'off');
     plot_msd(msds(k), MSDfig, 'ame');
+    legend('off');
     gen_pub_plotfiles(MSDfile{k}, MSDfig, 'normal'); 
     close(MSDfig);    
 end
@@ -328,9 +328,9 @@ fprintf(fid, '<hr/> \n\n');
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <b> Summary: Cell Types </b> <br/> \n');
 fprintf(fid, '    <a href="%s">', [barfile '.fig']);
-fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [barfile '.svg']);
+fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [barfile '.png']);
 fprintf(fid, '    </a>');
-% fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', barfile);
+% fprintf(fid, '   <iframe src="%s.png" width="400" height="300" border="0"></iframe> <br/> \n', barfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 
@@ -340,9 +340,9 @@ fprintf(fid, '</p> \n\n');
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <b> Summary: Cell Types, PDF </b> <br/> \n');
 fprintf(fid, '    <a href="%s">', [ksdensity_file '.fig']);
-fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [ksdensity_file '.svg']);
+fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [ksdensity_file '.png']);
 fprintf(fid, '    </a>');
-% fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', ksdensity_file);
+% fprintf(fid, '   <iframe src="%s.png" width="400" height="300" border="0"></iframe> <br/> \n', ksdensity_file);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 
@@ -353,9 +353,9 @@ fprintf(fid, '</p> \n\n');
 fprintf(fid, '<p> \n');
 fprintf(fid, '   <b> Summary: Mean Squared Displacement (MSD) </b> <br/> \n');
 fprintf(fid, '    <a href="%s">', [aggMSDfile '.fig']);
-fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [aggMSDfile '.svg']);
+fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [aggMSDfile '.png']);
 fprintf(fid, '    </a>');
-% fprintf(fid, '   <iframe src="%s.svg" width="400" height="300" border="0"></iframe> <br/> \n', aggMSDfile);
+% fprintf(fid, '   <iframe src="%s.png" width="400" height="300" border="0"></iframe> <br/> \n', aggMSDfile);
 fprintf(fid, '   <br/> \n\n');
 fprintf(fid, '</p> \n\n');
 
@@ -385,9 +385,9 @@ for k = 1 : length(molar_conc)
    fprintf(fid, '    <tr>\n  <td align="left" width="200">\n     <b> %s </b> <br/> \n', molar_conc{k});
    fprintf(fid, '     </td>\n  <td align="center" width="425">\n');
    fprintf(fid, '    <a href="%s">', [MSDfile{k} '.fig']);
-   fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [MSDfile{k} '.svg']);
+   fprintf(fid, '      <img src="%s" width="400" height="300" border="0"></img> \n', [MSDfile{k} '.png']);
    fprintf(fid, '    </a>');
-%    fprintf(fid, '       <iframe src="%s.svg" width="400" height="300" border="0"></iframe> \n', MSDfile{k});
+%    fprintf(fid, '       <iframe src="%s.png" width="400" height="300" border="0"></iframe> \n', MSDfile{k});
    fprintf(fid, '     </td>\n </tr>\n\n');   
 end
 
