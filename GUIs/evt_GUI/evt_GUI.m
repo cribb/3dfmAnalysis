@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 22-Sep-2017 10:52:18
+% Last Modified by GUIDE v2.5 14-Mar-2018 11:19:09
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -188,16 +188,6 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
                         'Select File(s) to Open', ...
                         'MultiSelect', 'on');
         
-% [filename, pathname] = uigetfile( ...
-% {'*.m;*.fig;*.mat;*.slx;*.mdl',...
-%  'MATLAB Files (*.m,*.fig,*.mat,*.slx,*.mdl)';
-%    '*.m',  'Code files (*.m)'; ...
-%    '*.fig','Figures (*.fig)'; ...
-%    '*.mat','MAT-files (*.mat)'; ...
-%    '*.mdl;*.slx','Models (*.slx, *.mdl)'; ...
-%    '*.*',  'All Files (*.*)'}, ...
-%    'Pick a file');                    
-
         if sum(length(fname), length(pname)) <= 1
             logentry('No tracking file selected. No tracking file loaded.');
             return;
@@ -273,14 +263,15 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 
     
     if ~isempty(calout)
-        if length(unique(calout)) == 1
+        if ~get(handles.checkbox_lockum, 'Value') && length(unique(calout)) == 1
             set(handles.edit_calib_um, 'String', num2str(calout(1)));
+        elseif get(handles.checkbox_lockum, 'Value')
+            logentry(['Calib Lock set when loading new files. Overriding calibum set in file.']);            
         else
             msgbox('evt_GUI cannot load multiple files with multiple calibration factors at this time.', 'Error.', 'error');
             return;
         end        
-    end
-    
+    end    
 
     if isempty(d)
         msgbox('No data exists in this fileset!');
@@ -386,10 +377,15 @@ end
     beadID = table(:,ID);
 
     % update fps editbox so there is an indicator of real timesteps
-    idx = find(beadID == 0);
-    tsfps = round(1/mean(diff(table(idx,TIME))));
-    logentry(['Setting frame rate to ' num2str(tsfps) ' fps.']);
-    set(handles.edit_frame_rate, 'String', num2str(tsfps));
+    if get(handles.checkbox_lockfps, 'Value')
+        logentry(['FPS Lock set when loading new files. Overriding FPS set in file.']);
+        tsfps = str2double(get(handles.edit_frame_rate, 'String'));
+    else
+        idx = find(beadID == 0);
+        tsfps = round(1/mean(diff(table(idx,TIME))));
+        logentry(['Setting frame rate to ' num2str(tsfps) ' fps.']);
+        set(handles.edit_frame_rate, 'String', num2str(tsfps));
+    end
     
     % construct figure handles if they don't already exist
     if isfield(handles, 'XYfig')
@@ -457,6 +453,7 @@ end
     % Enable some controls now that data is loaded
     set(handles.checkbox_frame_rate                 , 'Enable', 'on');
     set(handles.text_frame_rate                     , 'Enable', 'on');
+    set(handles.checkbox_lockfps                    , 'Enable', 'on');
     set(handles.edit_BeadID                         , 'Enable', 'on');
     set(handles.slider_BeadID                       , 'Enable', 'on');
     set(handles.pushbutton_Select_Closest_xydataset , 'Enable', 'on');
@@ -484,6 +481,7 @@ end
     set(handles.radio_microns                       , 'Enable', 'on');
     set(handles.edit_calib_um                       , 'Enable', 'on');
     set(handles.text_calib_um                       , 'Enable', 'on');
+    set(handles.checkbox_lockum                     , 'Enable', 'on');
     set(handles.pushbutton_export_all_beads         , 'Enable', 'on');
     set(handles.pushbutton_export_bead              , 'Enable', 'on');
     set(handles.pushbutton_measure_distance         , 'Enable', 'on');
@@ -2799,3 +2797,21 @@ function edit_overlapthresh_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in checkbox_lockfps.
+function checkbox_lockfps_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_lockfps (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_lockfps
+
+
+% --- Executes on button press in checkbox_lockum.
+function checkbox_lockum_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_lockum (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_lockum
