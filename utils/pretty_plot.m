@@ -48,7 +48,7 @@ function plot_figure_for_screen(fig)
 
         try
             titl = get(axes(k), 'Title');
-            legd = legend;
+            legd = findobj(fig, 'Type', 'Legend');
             xlab = get(axes(k), 'Xlabel');
             ylab = get(axes(k), 'Ylabel');
 

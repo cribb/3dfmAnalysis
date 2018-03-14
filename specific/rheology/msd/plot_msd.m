@@ -75,6 +75,7 @@ else
     ylabel('log_{10}(MSD) [m^2]');
 end
 grid on;
+% legend('off');
 pretty_plot;
 refresh(h);    
 
