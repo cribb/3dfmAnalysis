@@ -9,10 +9,14 @@ for k = 1 : length(files)
     
     [d, ~] = load_video_tracking(fname, fps, 'pixels', calibum, 'absolute', 'no', 'table');
     
-    d = filter_video_tracking(d, filt);
+    [d, filtout] = filter_video_tracking(d, filt);
+    
+    filtout.name = fname;
+    filtout.fps  = fps;
+    
+    v(k) = filtout;
     
     save_evtfile(fname, d, 'pixels', calibum, fps, 'mat');
     
 end
 
-v = 0;
