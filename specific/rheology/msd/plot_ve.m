@@ -185,7 +185,7 @@ full_ylabel = ['log_{10}(' full_ylabel ') ' unit_label];
 
   xlabel(freq_label);
   ylabel(full_ylabel);
-  legend(leg, 0);
+  legend(leg);
   grid on;
   pretty_plot;
 
