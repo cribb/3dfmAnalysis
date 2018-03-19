@@ -5,7 +5,7 @@ function varargout = evt_GUI(varargin)
 % GUIs/evt_GUI
 % last modified 08/26/10
 %
-% evt_GUI M-file for evt_GUI.fig
+% evt_GUI M-filemenu for evt_GUI.fig
 %      evt_GUI, by itself, creates a new evt_GUI or raises the existing
 %      singleton*.
 %
@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 14-Mar-2018 11:19:09
+% Last Modified by GUIDE v2.5 16-Mar-2018 10:32:02
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -292,7 +292,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         logentry(['Dataset, ' filename ', successfully loaded...']);
     end
     
-    % try loading the MIP file
+    % try loading the MIP filemenu
 try
         MIPfile = [filenameroot, '.pgm'];
         MIPfile = strrep(MIPfile, '_TRACKED', '');
@@ -2815,3 +2815,119 @@ function checkbox_lockum_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_lockum
+
+
+% --------------------------------------------------------------------
+function FileMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    
+    
+
+
+% --------------------------------------------------------------------
+function FileMenuOpen_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuOpen (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    pushbutton_loadfile_Callback(hObject, eventdata, handles);
+
+
+% --------------------------------------------------------------------
+function EditMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to EditMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_6_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_3_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function EditMenuFilter_Callback(hObject, eventdata, handles)
+% hObject    handle to EditMenuFilter (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function FileMenuAdd_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuAdd (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function FileMenuClose_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuClose (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_7_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function ExportMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to ExportMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function FileMenuQuit_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuQuit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    if isfield(handles, 'XYfig')
+        try
+            close(handles.XYfig);
+        catch
+        end
+    end
+
+    if isfield(handles, 'XTfig')
+        try
+            close(handles.XTfig);
+        catch
+        end
+    end
+
+    if isfield(handles, 'AUXfig')
+        try
+            close(handles.AUXfig);
+        catch
+        end
+    end
+
+	close(evt_GUI);
+
+
+% --------------------------------------------------------------------
+function FileMenuSaveAs_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuSaveAs (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function FileMenuSave_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuSave (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
