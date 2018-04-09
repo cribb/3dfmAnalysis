@@ -10,10 +10,13 @@ function VidTable = pan_mk_video_table(filepath, systemid, plate_type)
 % VidTable is the subsequent input for pan_load_tracking,
 % load_vst_tracking, etc.
 % 
-% VidTable = pan_sim_run(filepath, systemid, plate_type) 
+% VidTable = pan_mk_video_table(filepath, systemid, plate_type) 
 %
 
 mypath = fullfile(pwd, filepath);
+
+[~,host] = system('hostname');
+host = strip(host);
 
 metadata = pan_load_metadata(filepath, systemid, plate_type);
 
@@ -25,9 +28,13 @@ well_list = metadata.instr.wells;
 fidmax = length(pass_list) * length(well_list);
 
 % Initialize data types so Matlab doesn't complain
-Tag  = cell(fidmax, 1);
+Hostname = repmat({host},fidmax,1);
+SampleName  = cell(fidmax, 1);
+VideoFiles = cell(fidmax, 1);
+FirstFrameFiles = cell(fidmax, 1);
+Mipfiles = cell(fidmax, 1);
 Path = cell(fidmax, 1);
-File = cell(fidmax, 1);
+TrackingFiles = cell(fidmax, 1);
 Pass = NaN(fidmax,1);
 Well = NaN(fidmax,1);
 Calibum = NaN(fidmax,1);
@@ -46,22 +53,25 @@ for p = 1:length(pass_list)
         
         Path{fid,1} = mypath;
         
-        % which files are the tracking files?
-        basename_tracking = [exptname ...
-                          '_video_pass' num2str(pass) ...
-                          '_well' num2str(well) ...
-                          '_TRACKED.csv'];
+        basename = [exptname ...
+                    '_video_pass' num2str(pass) ...
+                    '_well' num2str(well)];
+
+        VideoFiles{fid,1} = basename;
+        
+                      % which files are the tracking files?
+        basename_tracking = [basename '_TRACKED.csv'];
                       
         basename_tracking = dir(basename_tracking);
         
         if ~isempty(basename_tracking)
-            File{fid,1} = basename_tracking.name;
+            TrackingFiles{fid,1} = basename_tracking.name;
         else
-            File{fid,1} = '';
+            TrackingFiles{fid,1} = '';
         end
         
-        % Set the Tag (this is going to need better specification
-        Tag{fid,1} = metadata.plate.solution.name{well};
+        % Set the SampleName (this is going to need better specification)
+        SampleName{fid,1} = metadata.plate.solution.name{well};
 
         % calibum conversions
         MCUparam = metadata.mcuparams.mcu(metadata.mcuparams.well == well & ...
@@ -78,6 +88,8 @@ for p = 1:length(pass_list)
                       
         fframe_name = [basename_fframes '\' 'frame0001.pgm'];
         
+        FirstFrameFiles{fid,1} = fframe_name;
+        
         if isdir(basename_fframes) && ~isempty(dir(fframe_name))
             Firstframes{fid,1} = imread(fframe_name);     
            % width/height of images
@@ -88,7 +100,6 @@ for p = 1:length(pass_list)
             Height(fid,1) = NaN;
         end        
         
-
         % load the mips
         basename_mips = [exptname ...
                           '_video_pass' num2str(pass) ...
@@ -107,14 +118,19 @@ for p = 1:length(pass_list)
             Width(fid,1) = NaN;
             Height(fid,1) = NaN;
         end 
+        
+        MipFiles{fid,1} = basename_mips.name;
                 
         Pass(fid,1) = pass;
         Well(fid,1) = well;
         fid = fid + 1;
     end
+    
 end
 
 Fid = (1:fid-1)';
 
-VidTable = table(Fid, Path, File, Pass, Well, Tag, Fps, Calibum, Width, Height, Firstframes, Mips);
-% v = table(Fid, Path, File, Pass, Well, Fps, Calibum, Width, Height, Firstframes, Mips);
+
+VidTable = table(Fid, SampleName, Path, Hostname, VideoFiles, TrackingFiles, FirstFrameFiles, MipFiles, Width, Height, Fps, Calibum);
+% ImagingTable = table(Fid, Firstframes, Mips);
+
