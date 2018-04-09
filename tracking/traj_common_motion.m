@@ -1,4 +1,4 @@
-function [common_xy] = traj_common_motion(vid_table)
+function [common_xy] = traj_common_motion(vid_table, plotyn)
 % at each time point, average all beads x, y, and z values to determine
 % center of mass vector and subtract that from each bead's position.
 % This routine is insensitive to the disapperance of old trackers or the 
@@ -8,6 +8,10 @@ function [common_xy] = traj_common_motion(vid_table)
 
     video_tracking_constants;   
 
+    if nargin < 2 || isempty(plotyn)
+        plotyn = 'n';
+    end
+    
     %     clip data to desired time points
     %     t_idx = find( vid_table(:,TIME) >= drift_start_time & vid_table(:,TIME) <= drift_end_time);
     %     vid_table = vid_table(t_idx,:);
@@ -98,7 +102,7 @@ function [common_xy] = traj_common_motion(vid_table)
     x_filled = fillnans(interp_velocities(:,1)) + noise_filler(:,1);
     y_filled = fillnans(interp_velocities(:,2)) + noise_filler(:,2);    
 
-        if sum(missingvel(:)) > 16
+        if sum(missingvel(:)) > 16 && contains(plotyn, 'y')
             h = figure; 
             pos = get(h, 'Position');
             pos(3) = 2 * pos(3);
@@ -120,7 +124,7 @@ function [common_xy] = traj_common_motion(vid_table)
     
     xy = cumsum(interp_velocities);        
 
-        if sum(missingvel(:)) > 16
+        if sum(missingvel(:)) > 16 && contains(plotyn, 'y')
             figure(h);
             subplot(1,2,2);
             plot(full_frame_list, xy(:,1), 'bo', ...
