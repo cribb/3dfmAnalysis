@@ -9,6 +9,18 @@ function outs = vst_collect_fileinfo(mypath, basename_prefix, fps, calibum, vara
 % removes one level of automation/globbing, but makes this function more
 % serviceable in the long run.
 
+% RegExp, example: hbe4pct_hetcheck_video_pass\d{1,2}_well\d{1,2}
+
+% Example usage (names were loosely modeled after a panoptes run):
+% foo = vst_collect_fileinfo('D:\Dropbox\prof\Lab\Superfine Lab\expts\mucus_sugar_rheo\2018.02.26__dbhill_syscheck\monoptes\noise_floors_manual', ...
+% 'NFmanual_video_pass\d_well\d\d', ...
+% 45.04, ...
+% 0.157, ...
+% 'SampleName', 'noise', ...
+% 'TrackingSuffix', '_TRACKED.csv', ...
+% 'FirstFrameSuffix', '.0001.pgm', ...
+% 'MipSuffix', '.mip.pgm');
+
 defaultVideoSuffix = '.avi';
 % defaultVideoType = 'folder';
 defaultTrackingSuffix = '_TRACKED.csv';
@@ -130,8 +142,6 @@ for k = 1:N
     end
 end
 
-
-% outs.VideoIsdir = video_isdir;
 outs.SampleName = samplename_list;
 outs.Path = path_list;
 outs.Hostname = hostname_list;
