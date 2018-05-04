@@ -193,11 +193,13 @@ analysis_dir = ['./matlab_analysis/PM_rheology'];
 mkdir(analysis_dir);
 copyfile('*.txt', analysis_dir);
 [s,mess,messid] = movefile('*.html', analysis_dir);
-movefile('*.fig', analysis_dir);
-movefile('*.png', analysis_dir);
-movefile('*.svg', analysis_dir);
-movefile('*.evt.mat', analysis_dir);
-if ~isempty(dir('*.drift.mat')); movefile('*.drift.mat', analysis_dir); end;
+[s,mess,messid] = movefile('*.fig', analysis_dir);
+[s,mess,messid] = movefile('*.png', analysis_dir);
+[s,mess,messid] = movefile('*.svg', analysis_dir);
+[s,mess,messid] = movefile('*.evt.mat', analysis_dir);
+if ~isempty(dir('*.drift.mat')); 
+    [s,mess,messid] = movefile('*.drift.mat', analysis_dir); 
+end
 [status,message,messageid] = movefile([outf '.mat'], analysis_dir);
 
 % Elapsed time
