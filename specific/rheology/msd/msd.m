@@ -15,15 +15,16 @@ function varargout = msd(t, data, taulist)
 %initializing arguments
 if (nargin < 3) || isempty(taulist)  
     taulist = [1 2 5 10 20 50 100 200 500 1000 1001]; 
-end;
+end
 
 if (nargin < 1) || isempty(t) || isempty(data)
     logentry('Input data needed, returning empty set'); 
     tau        = NaN(length(taulist),1);
     msd        = NaN(length(taulist),1);
     Nestimates = NaN(length(taulist),1);
-end;
+end
 
+taulist = taulist(:);
 
 % for every taulist size (or tau)
 warning('off', 'MATLAB:divideByZero');
