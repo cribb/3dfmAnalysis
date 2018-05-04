@@ -30,13 +30,13 @@ fidmax = length(pass_list) * length(well_list);
 % Initialize data types so Matlab doesn't complain
 Hostname = repmat({host},fidmax,1);
 SampleName  = cell(fidmax, 1);
+SampleInstance = cell(fidmax,1);   % Well = NaN(fidmax,1);
+FovID = cell(fidmax,1);        % Pass = NaN(fidmax,1);
 VideoFiles = cell(fidmax, 1);
 FirstFrameFiles = cell(fidmax, 1);
 Mipfiles = cell(fidmax, 1);
 Path = cell(fidmax, 1);
 TrackingFiles = cell(fidmax, 1);
-Pass = NaN(fidmax,1);
-Well = NaN(fidmax,1);
 Calibum = NaN(fidmax,1);
 Fps = NaN(fidmax,1);
 Width = NaN(fidmax,1);
@@ -50,6 +50,9 @@ for p = 1:length(pass_list)
         
         pass = pass_list(p);
         well = well_list(w);
+        
+        SampleInstance{fid,1} = ['well' num2str(well, '%02i')];
+        FovID{fid,1} = ['pass' num2str(pass, '%02i')];
         
         Path{fid,1} = mypath;
         
@@ -130,7 +133,10 @@ end
 
 Fid = (1:fid-1)';
 
+SampleName = categorical(SampleName);
+SampleInstance = categorical(SampleInstance);
+FovID = categorical(FovID);
 
-VidTable = table(Fid, SampleName, Path, Hostname, VideoFiles, TrackingFiles, FirstFrameFiles, MipFiles, Width, Height, Fps, Calibum);
+VidTable = table(Fid, SampleName, SampleInstance, FovID, Path, Hostname, VideoFiles, TrackingFiles, FirstFrameFiles, MipFiles, Width, Height, Fps, Calibum);
 % ImagingTable = table(Fid, Firstframes, Mips);
 
