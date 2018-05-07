@@ -14,7 +14,7 @@ function new_vid_table = traj_subtract_common_motion(vid_table, traj_common)
   
 %     new_vid_table = zeros(size(vid_table));
     new_vid_table = [];
-    for k = 1:length(id_list); 
+    for k = 1:length(id_list)
         q = vid_table(  vid_table(:,ID) == id_list(k) , :); 
         frameone = q(1,FRAME); 
         frameend = q(end,FRAME); 
@@ -38,6 +38,6 @@ function new_vid_table = traj_subtract_common_motion(vid_table, traj_common)
         subtracted_traj(:,X:Y) = new_subtraj + q_offset;
         
         new_vid_table = [new_vid_table ; subtracted_traj];
-    end;
+    end
 
-    return;
+    return

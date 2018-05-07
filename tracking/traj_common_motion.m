@@ -7,11 +7,26 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
 % used.
 
     video_tracking_constants;   
-
+    
     if nargin < 2 || isempty(plotyn)
         plotyn = 'n';
     end
+
+    if nargin < 1 || isempty(vid_table)
+        error('No data inputted.'); 
+    end
     
+    if istable(vid_table)
+        tmptable = NaN(size(vid_table,1), size(NULLTRACK,2));
+        tmptable(:,ID)    = vid_table.ID;
+        tmptable(:,FRAME) = vid_table.Frame;
+        tmptable(:,X)     = vid_table.X;
+        tmptable(:,Y)     = vid_table.Y;
+        
+        vid_table = tmptable;       
+    end
+    
+
     %     clip data to desired time points
     %     t_idx = find( vid_table(:,TIME) >= drift_start_time & vid_table(:,TIME) <= drift_end_time);
     %     vid_table = vid_table(t_idx,:);
@@ -25,11 +40,11 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
     % place the list as 'frameone' and 'frameend' variables
     frameone = NaN(1,length(id_list));
     frameend = NaN(1,length(id_list));    
-    for k = 1:length(id_list); 
+    for k = 1:length(id_list)
         q = vid_table(  vid_table(:,ID) == id_list(k) , FRAME); 
-        frameone(1,k) = q(1,1); 
+        frameone(1,k) = q(1,1);  
         frameend(1,k) = q(end,1); 
-    end;
+    end
 
     % 'C=setdiff(A,B)' returns for C the values in A that are not in B.  Here we use
     % setdiff to identify the frames where no "popping in and out of existence"
