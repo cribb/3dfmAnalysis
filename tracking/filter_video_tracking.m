@@ -896,3 +896,20 @@ function data = remove_uncommon_trackers(data, master_list)
     end
 
     return;
+       
+    
+% Prints out a log message complete with timestamp.
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'filter_video_tracking: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+    return
+    
