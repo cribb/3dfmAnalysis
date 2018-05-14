@@ -67,6 +67,8 @@ for f = 1:length(fid)
 end
 warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
 
+TrackingTable.CenterIntensity = floor(TrackingTable.CenterIntensity * (2^8/2^16));
+
 TrackingTable.Properties.VariableUnits{'Fid'} = '';
 TrackingTable.Properties.VariableUnits{'Frame'} = '';
 TrackingTable.Properties.VariableUnits{'ID'} = '';
@@ -75,7 +77,7 @@ TrackingTable.Properties.VariableUnits{'Y'} = 'pixels';
 TrackingTable.Properties.VariableUnits{'Xo'} = 'pixels';
 TrackingTable.Properties.VariableUnits{'Yo'} = 'pixels';
 TrackingTable.Properties.VariableUnits{'Radius'} = 'pixels';
-TrackingTable.Properties.VariableUnits{'CenterIntensity'} = 'Intensity-16-bit';
+TrackingTable.Properties.VariableUnits{'CenterIntensity'} = 'Intensity-8-bit';
 TrackingTable.Properties.VariableUnits{'RegionSize'} = 'pixels^2';
 TrackingTable.Properties.VariableUnits{'Sensitivity'} = '';
 TrackingTable.Properties.VariableUnits{'ForegroundSize'} = 'pixels^2';
