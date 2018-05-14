@@ -130,8 +130,8 @@ for k = 1:length(beads)
                        rheo_table(:,SEQ)   == sequences(m)  & ...
                        rheo_table(:,VOLTS) == voltages(n)   );
                    
-           fprintf('beadID: %g, unique_beads: %g, seqID: %g, voltage: %g length(idx): %g\n', ...
-                    beads(k), length(unique(rheo_table(:,ID))), sequences(m), voltages(n), length(idx));
+%            fprintf('beadID: %g, unique_beads: %g, seqID: %g, voltage: %g length(idx): %g\n', ...
+%                     beads(k), length(unique(rheo_table(:,ID))), sequences(m), voltages(n), length(idx));
 
             v.beadID(count,:) = beads(k);
             v.seqID(count,:)  = sequences(m);   
@@ -142,7 +142,7 @@ for k = 1:length(beads)
                 v.recovery(count,:) = dmbr_percent_recovery(rheo_table(idx,:));
 
                 % compute the relaxation times for the zero voltage regions
-                v.taus(count,:) = dmbr_relaxation_time(rheo_table(idx,:), params);
+%                 v.taus(count,:) = dmbr_relaxation_time(rheo_table(idx,:), params);
             end
 
             if ~isempty(idx)
@@ -151,9 +151,9 @@ for k = 1:length(beads)
 
             if voltages(n) ~= 0
                 % fit the data to a model type
-                 [v.G(count,:), v.eta(count,:), ct, v.Rsquare(count,:)] = dmbr_fit(rheo_table(idx,:), params.fit_type);
-                 fprintf('eta value: ');
-                 fprintf('%f\n', v.eta(count,:));
+%                  [v.G(count,:), v.eta(count,:), ct, v.Rsquare(count,:)] = dmbr_fit(rheo_table(idx,:), params.fit_type);
+%                  fprintf('eta value: ');
+%                  fprintf('%f\n', v.eta(count,:));
     %             [G_, eta_, ct, Rsquare_] = dmbr_fit(rheo_table(idx,:), params.fit_type);
     %             v.G(count,:) = G_;
     %             v.eta(count,:) = eta_;
