@@ -1,266 +1,179 @@
-function [outs, filtout] = filter_vst_tracking(VidTable, filt)
+function [outs, filtout] = filter_vst_tracking(DataIn, filtin)
 % FILTER_VIDEO_TRACKING    Filters video tracking datasets
 % CISMM function
 % video
+%
 % 
-% This function reads in a Video Tracking dataset, saved in the 
-% matlab workspace file (*.mat) format and filters it using filter types
-% defined below.
+% This function reads in a TrackingTable dataset/structure and filters it 
+% using filter types defined below.
 % 
-% function filter_video_tracking(data, filt)
+% function [outs, filtout] = filter_video_tracking(data, filtin)
 %
 % where 
 %       "data" 
-%       "filt"
+%       "filtin"
 %	    "min_frames" 
 %       "min_pixels"
 %       "max_pixels" 
 %       "tcrop" 
 %       "xycrop" 
-%       "minFrames"
-%       "tCrop" 
-%       "xyCrop" 
 %       "jerk_limit"
 %       "min_intensity"
 %
 % Notes:
 % - This function is designed to work under default conditions with
 %   only the filename as an input argument.
-%
-%Filters data from trackers that have few than minFrames datapoints
-%less than minPixelRange in either x OR y.
-%from the edge of each tracker in time by tCrop
-%from the edge of the field of view by xyCrop
-%
-%USAGE:
-%   function data = prune_data_table(data, minFrames, minPixelRange, units, calib_um, tCrop, xyCrop)
-%
-%   where:
-%   'data' is the video table
-%   'min_PixelRange' is the minimum range a tracker must move in either x OR Y if it is to be kept
-%   'units' is either 'pixel' or 'um', refering to the position columns in 'data'
-%   'calib_um' is the microns per pixel calibration of the image.
-%
-%   Note that x and y ranges are converted to pixels if and only if 'units'
-%   is 'um'. In this case, then 'calib_um' must be supplied.
-   
-    video_tracking_constants;
 
     %  Handle inputs
-    if (nargin < 2) || isempty(filt)
-        filt.min_frames      = 0;
-        filt.min_pixels      = 0;
-        filt.max_pixels      = Inf;
-        filt.max_region_size = Inf;
-        filt.min_sens        = 0;
-        filt.tcrop           = 0;
-        filt.xycrop          = 0;
-        filt.xyzunits        = 'pixels';
-        filt.calib_um        = 1;
-        filt.drift_method    = 'none';
-        filt.dead_spots      = [];
-        filt.jerk_limit      = [];
-        filt.min_intensity   = 0;
-        filt.deadzone        = 0; % deadzone around trackers [pixels]
-        filt.overlapthresh  = 0;
+    if (nargin < 2) || isempty(filtin)
+        filtin.min_frames      = 0;
+        filtin.min_pixels      = 0;
+        filtin.max_pixels      = Inf;
+        filtin.max_region_size = Inf;
+        filtin.min_sens        = 0;
+        filtin.tcrop           = 0;
+        filtin.xycrop          = 0;
+        filtin.xyzunits        = 'pixels';
+        filtin.calib_um        = 1;
+        filtin.drift_method    = 'none';
+        filtin.dead_spots      = [];
+        filtin.jerk_limit      = [];
+        filtin.min_intensity   = 0;
+        filtin.deadzone        = 0; % deadzone around trackers [pixels]
+        filtin.overlapthresh  = 0;
     end
 
-    filtout = filt;
+    filtout = filtin;
     
-    if (nargin < 1) || isempty(VidTable); 
+    if (nargin < 1) || isempty(DataIn) 
         logentry('No data inputs set. Exiting filter_video_tracking now.');
         outs = [];
         filtout.drift_vector = [NaN NaN];
         return;
     end
+    
+TrackingTable = DataIn.TrackingTable;
+TrackingSummary = DataIn.TrackingSummary;
 
-%     % convert everything to pixel units
-%     if isempty(VidTable)
-%         logentry('Saving empty dataset.');
-%         data = ones(0,10);    
-%     elseif strcmp(filt.xyzunits,'m')
-%         data(:,X:Z) = data(:,X:Z) ./ filt.calib_um * 1e6;  % convert video coords from pixels to meters
-%     elseif strcmp(filt.xyzunits,'um')
-%         data(:,X:Z) = data(:,X:Z) ./ filt.calib_um;  % convert video coords from pixels to meters
-%     elseif strcmp(filt.xyzunits,'nm')
-%         data(:,X:Z) = data(:,X:Z) ./ filt.calib_um * 1e-3;  % convert video coords from pixels to nm
-%     elseif strcmp(filt.xyzunits, 'pixels')
-%         % do nothing
-%     else
-%         units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
-%     end
+vars = {'Fid', 'ID'};
+TrackingTable = sortrows(TrackingTable,vars);
+[gid, GroupsTable] = findgroups(TrackingTable(:,vars));
 
+%
+% Inputted TrackingTable needs editing, so how?
+%
+% When data are filtered, replace the X and Y values with NaN. The Xo and
+% Yo data will remain untouched. Perhaps, to eliminate coding issue for
+% datasets where entire trajectories are removed, those rows can be moved
+% to a "Trash" or "Filtered" table for reference later.
+%
+
+% Need to establish (or PASS IN) the variable groups 
+% GroupTable = TrackingTable(:,{'Fid', 'ID'});
 
     %  Handle filters    
-    if isfield(filt, 'tcrop')
-        if filt.tcrop > 0
-            logentry(['tcrop- Removing first and last ' num2str(filt.tcrop) ' time points from each trajectory.']);
-            VidTable = filter_tcrop(VidTable, filt.tcrop);    
+    if isfield(filtin, 'tcrop')
+        if filtin.tcrop > 0
+            logentry(['tcrop- Removing first and last ' num2str(filtin.tcrop) ' time points from each trajectory.']);
+            
+            temp = splitapply(@(x){filter_tcrop(x,filtin.tcrop)}, [TrackingTable.X, TrackingTable.Y], gid);
+            temp = cell2mat(temp);
+            TrackingTable.X = temp(:,1);
+            TrackingTable.Y = temp(:,2);         
+        end
+    end    
+
+    % 'minframes' the minimum number of frames required to keep a tracker
+    if isfield(filtin, 'min_frames')
+        if filtin.min_frames > 0
+            logentry(['min_frames- Removing trackers existing for less than ' num2str(filtin.min_frames) ' frames.']);
+
+            temp = splitapply(@(x){filter_min_frames(x,filtin.min_frames)}, [TrackingTable.X, TrackingTable.Y], gid);
+            temp = cell2mat(temp);
+            TrackingTable.X = temp(:,1);
+            TrackingTable.Y = temp(:,2);
+        end
+    end
+
+    % Minimum sensitivity given the first XY datapoint of the trajectory
+    if isfield(filtin, 'min_sens')
+        if filtin.min_sens > 0
+            logentry(['min_sens- Removing trackers existing with minimum sensitivities (image-SNR) lower than ' num2str(filtin.min_sens) '.']);
+
+            temp = splitapply(@(x,y){filter_min_sens(x,y,filtin.min_sens)}, [TrackingTable.X, TrackingTable.Y], TrackingTable.Sensitivity, gid);
+            temp = cell2mat(temp);
+            TrackingTable.X = temp(:,1);
+            TrackingTable.Y = temp(:,2);
+        end
+    end
+
+    % maxarea given the first XY datapoint of the trajectory
+    if isfield(filtin, 'max_region_size')
+        if filtin.max_region_size < Inf
+            logentry(['max_region_size- Removing trackers with region sizes (tracker area) larger than ' num2str(filtin.max_region_size) ' pixels^2.']);
+
+            temp = splitapply(@(x,y){filter_max_region_size(x,y,filtin.max_region_size)}, [TrackingTable.X, TrackingTable.Y], TrackingTable.RegionSize, gid);
+            temp = cell2mat(temp);
+            TrackingTable.X = temp(:,1);
+            TrackingTable.Y = temp(:,2);
         end
     end
     
-%     if isfield(filt, 'deadzone')
-%         if filt.deadzone > 0 && filt.overlapthresh > 0
-%             logentry(['deadzone- Removing trackers that get closer than ' num2str(filt.deadzone) ' pixels for more than ' num2str(ceil(filt.overlapthresh*100)) '% of their trajectory.']);
-%             data = filter_dead_zone_around_trackers(data, filt.deadzone, filt.overlapthresh);
-%         end
-%     end
-%     
-%     
-%     if isfield(filt, 'deadzone')
-%         if filt.deadzone > 0
-%             logentry(['deadzone-simple- Removing trackers that get closer than ' num2str(filt.deadzone) ' pixels for more than ' num2str(ceil(filt.overlapthresh*100)) '% of their trajectory.']);
-%             data = filter_dead_zone_simple(data, filt.deadzone);
-%         end            
-%     end
-%     
-%     % 'minframes' the minimum number of frames required to keep a tracker
-%     if isfield(filt, 'min_frames')
-%         if filt.min_frames > 0
-%             logentry(['min_frames- Removing trackers existing for less than ' num2str(filt.min_frames) ' frames.']);
-%             data = filter_min_frames(data, filt.min_frames);
-%         end
-%     end
-%     
-%     if isfield(filt, 'min_intensity')
-%         if filt.min_intensity>0
-%             logentry(['min_intensity- Removing trackers existing with less than ' num2str(filt.min_intensity) ' intensity.']);
-%             data=filter_min_intensity(data,filt.min_intensity);
-%         end
-%     end
-%     
-%     
-%     % Minimum sensitivity given the first XY datapoint of the trajectory
-%     if isfield(filt, 'min_sens')
-%         if filt.min_sens > 0
-%             logentry(['min_sens- Removing trackers existing with sensitivities (image-SNR) lower than ' num2str(filt.min_sens) '.']);
-%             data = filter_min_sens(data, filt.min_sens);
-%         end
-%     end
-%     
-%     
-%     % maxarea given the first XY datapoint of the trajectory
-%     if isfield(filt, 'max_region_size')
-%         if filt.max_region_size < Inf
-%             logentry(['max_region_size- Removing trackers with region sizes (tracker area) larger than ' num2str(filt.max_region_size) ' pixels^2.']);
-%             data = filter_max_region_size(data, filt.max_region_size);
-%         end
-%     end
-%     
-%     if isfield(filt, 'min_pixels')
-%         if filt.min_pixels > 0
-%             logentry(['min_pixels- Removing trackers with extents smaller than ' num2str(filt.min_pixels) ' pixels.']);
-%             % going to assume pixels
-%             data = filter_pixel_range('min', data, filt.min_pixels);
-%         end
-%     end
-% 
-%     if isfield(filt, 'max_pixels')
-%         if filt.max_pixels < Inf
-%             logentry(['max_pixels- Removing trackers with extents larger than ' num2str(filt.max_pixels) ' pixels.']);
-%             % going to assume pixels
-%             data = filter_pixel_range('max', data, filt.max_pixels);
-%         end
-%     end
-%     
-%     if isfield(filt, 'min_visc') && isfield(filt, 'bead_radius')
-%         if filt.min_visc > 0
-%             logentry(['min_visc- Removing trackers with viscosities smaller than ' num2str(filt.min_pixels) ' [Pa s].']);
-%             % assuming pixels
-%             data = filter_viscosity_range('min', data, filt.min_visc, filt.bead_radius, filt.xyzunits, filt.calib_um);
-%         end
-%     end
-%     
-%     if isfield(filt, 'max_visc') && isfield(filt, 'bead_radius')
-%         if filt.max_visc > 0
-%             logentry(['max_visc- Removing trackers with viscosities larger than ' num2str(filt.min_pixels) ' [Pa s].']);
-%             % assuming pixels
-%             data = filter_viscosity_range('max', data, filt.max_visc, filt.bead_radius, filt.xyzunits, filt.calib_um);
-%         end
-%     end
-%     
-%     if isfield(filt, 'xycrop')
-%         if filt.xycrop > 0
-%             logentry(['xycrop- Removing trackers along outer ' num2str(filt.xycrop) ' pixels in the frame.']);
-%             data = filter_xycrop(data, filt.xycrop);
-%         end
-%     end
-%
-%     if isfield(filt, 'max_area')
-%         if filt.max_area < Inf
-%             data = filter_max_area(data, filt.max_area);
-%         end
-%     end
-%     
-%     if isfield(filt, 'dead_spots')
-%         if ~isempty(filt.dead_spots);
-%             logentry(['dead_spots- Removing trackers from camera deadspots.']);
-%             data = filter_dead_spots(data, filt.dead_spots);
-%         end
-%     end
-%         
-%     if isfield(filt, 'drift_method')
-%         if ~strcmp(filt.drift_method, 'none')
-%             [data,drift_vector] = filter_subtract_drift(data, filt.drift_method);
-%             % outputted drift_vector here is in [pixels] regardless of the
-%             % requested output scaling.
-%             filtout.drift_vector = drift_vector;
-%             filtout.drift_vector_units = 'pixels';
-%             if isstruct(drift_vector)
-%                 mydrift = mean(drift_vector.xy);
-%             else
-%                 mydrift = mean(drift_vector);
-%             end
-%             logentry(['drift_method- Removed ' num2str(mydrift*filt.calib_um) ' um/s from data.']);
-%         end        
-%     end    
-% 
-%     if isfield(filt, 'jerk_limit')
-%         if ~isempty(filt.jerk_limit) && filt.jerk_limit < inf
-%             [data,num_jerks] = filter_remove_tracker_jerk(data, filt.jerk_limit);
-%             filtout.num_jerks = num_jerks;
-%             logentry(['Large, jerky displacements (larger than ' num2str(filt.jerk_limit) ') removed.']);
-%         end
-%     end
-% 
-%     if isfield(filt, 'stage_jerk_limit')
-%         if ~isempty(filt.stage_jerk_limit) && filt.stage_jerk_limit < inf
-%             [data,num_stage_jerks] = filter_remove_stage_jerk(data, filt.stage_jerk_limit);
-%             filtout.num_jerks = num_stage_jerks;
-%             logentry(['Large, jerky displacements in stage (larger than ' num2str(filt.stage_jerk_limit) ') removed.']);
-%         end
-%     end
-%     % Relabel trackers to have consecutive IDs
-%     beadlist = unique(data(:,ID));   
-%     if length(beadlist) == max(beadlist)+1
-%     %     logentry('No empty trackers, so no need to redefine tracker IDs.');
-%     else
-%         logentry('Removing empty trackers, tracker IDs are redefined.');
-%         for k = 1:length(beadlist)
-%             idx = find(data(:,ID) == beadlist(k));
-%             data(idx,ID) = k-1;
-%         end
-%     end
-% 
-%     % convert everything back to original units
-%     if isempty(data)
-%         logentry('Saving empty dataset.');
-%         data = ones(0,10);    
-%     elseif strcmp(filt.xyzunits,'m')
-%         data(:,X:Z) = data(:,X:Z) .* filt.calib_um * 1e-6;  % convert video coords from pixels to meters
-%     elseif strcmp(filt.xyzunits,'um')
-%         data(:,X:Z) = data(:,X:Z) .* filt.calib_um;  % convert video coords from pixels to meters
-%     elseif strcmp(filt.xyzunits,'nm')
-%         data(:,X:Z) = data(:,X:Z) .* filt.calib_um * 1e3;  % convert video coords from pixels to nm
-%     elseif strcmp(filt.xyzunits, 'pixels')
-%         % do nothing
-%     else
-%         units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
-%     end
-    
-    outs = VidTable;
+    % maxarea given the first XY datapoint of the trajectory
+    if isfield(filtin, 'min_intensity')
+        if filtin.max_region_size < Inf
+            logentry(['min_intensity- Removing trackers with average intensities less than ' num2str(filtin.min_intensity) ' pixels^2.']);
 
-return;
+            temp = splitapply(@(x,y){filter_min_intensity(x,y,filtin.min_intensity)}, [TrackingTable.X, TrackingTable.Y], TrackingTable.CenterIntensity, gid);
+            temp = cell2mat(temp);
+            TrackingTable.X = temp(:,1);
+            TrackingTable.Y = temp(:,2);
+        end
+    end
+        
+    % NOW that all of the trajectory specific DATA REMOVAL type filters are
+    % out of the way, remove the NaN position data from the TrackingTable and 
+    % put it into another table for later reference. The two tables can
+    % always be reconnected later.
+    BadData =  isnan(TrackingTable.X);
+    
+    Trash = TrackingTable(BadData,:);
+    TrackingTable = TrackingTable(~BadData,:);
+    
+    
+% %     % Now, deal with drift. Does it make sense to do this here? Should this
+% %     % be a completely different function?
+% %     if isfield(filtin, 'drift_method')
+% %         if ~strcmp(filtin.drift_method, 'none')
+% %             [data,drift_vector] = filter_subtract_drift(data, filtin.drift_method);
+% %             % outputted drift_vector here is in [pixels] regardless of the
+% %             % requested output scaling.
+% %             filtout.drift_vector = drift_vector;
+% %             filtout.drift_vector_units = 'pixels';
+% %             if isstruct(drift_vector)
+% %                 mydrift = mean(drift_vector.xy);
+% %             else
+% %                 mydrift = mean(drift_vector);
+% %             end
+% %             logentry(['drift_method- Removed ' num2str(mydrift*filtin.calib_um) ' um/s from data.']);
+% %         end        
+% %     end    
+
+
+    outs = DataIn;
+    outs.TrackingTable = TrackingTable;
+    outs.Trash = Trash;
+
+    
+%
+% Filters data from trackers that have few than minFrames datapoints
+% less than minPixelRange in either x OR y.
+% from the edge of each tracker in time by tCrop
+% from the edge of the field of view by xyCrop
+%
+
+
+
 
 
 
@@ -269,27 +182,73 @@ return;
 % FILTER FUNCTIONS BELOW
 % %%%%%%
 
-   
-% function data = filter_min_frames(data, minFrames)
-% %   'minFrames' is the minimum number of frames required to keep a tracker
-% 
+%   'minFrames' is the minimum number of frames required to keep a tracker   
+function XYcoords = filter_min_frames(XYcoords, minFrames)
+
+    if size(XYcoords,1) < minFrames
+        XYcoords = NaN(size(XYcoords));
+    end
+    
+    return;
+
+    
+function XYcoords = filter_tcrop(XYcoords, tCrop)
+    
+
+    if size(XYcoords,1) <= tCrop*2
+        XYcoords = NaN(size(XYcoords));
+    else
+        XYcoords(1:tCrop,:) = NaN;
+        XYcoords(end-tCrop+1:end,:) = NaN;
+    end
+       
+    return
+
+    
+function XYcoords = filter_min_sens(XYcoords, sensitivity, min_sens)    
+    
+    if min(sensitivity) < min_sens
+        XYcoords = NaN(size(XYcoords));
+    end
+    
+return
+    
+
+function XYcoords = filter_max_region_size(XYcoords, RegionSize, max_region_size)
+
+    if mean(RegionSize) > max_region_size
+        XYcoords = NaN(size(XYcoords));
+    end
+
+return
+
+
+function XYcoords = filter_min_intensity(XYcoords, Intensity, min_intensity)
+
+    if mean(Intensity) < min_intensity
+        XYcoords = NaN(size(XYcoords));
+    end
+    
+return;
+
+
+%Perform xyCrop
+% function data = filter_xycrop(data, xycrop)
 %     video_tracking_constants;
-%     beadlist = unique(data(:,ID));
-% 
-%     for i = 1:length(beadlist)                  %Loop over all beadIDs.
-%         idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
-%         numFrames = length(idx);
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-%         % Remove trackers that are too short in time
-%         if(numFrames < minFrames)             %If this bead has too few datapoints
-%             idx = find(data(:, ID) ~= beadlist(i)); %Get the rest of the data
-%             data = data(idx, :);                    %Recreate data without this bead
-%             continue                                %Move on to next bead now
-%         end
-%     end
 %     
+%     minX = min(data(:,X)); maxX = max(data(:,X));
+%     minY = min(data(:,Y)); maxY = max(data(:,Y));
+% 
+%     xIDXmin = find(data(:,X) < (minX+xycrop)); xIDXmax = find(data(:,X) > (maxX-xycrop));
+%     yIDXmin = find(data(:,Y) < (minY+xycrop)); yIDXmax = find(data(:,Y) > (maxY-xycrop));
+% 
+%     DeleteRowsIDX = unique([xIDXmin; yIDXmin; xIDXmax; yIDXmax]);
+% 
+%     data(DeleteRowsIDX,:) = [];
+% 
 %     return;
+% 
+
 % 
 %     
 % function data = filter_dead_zone_around_trackers(data, deadzone, freq_thresh)
@@ -474,70 +433,8 @@ return;
 %     return;
 %     
 % 
-% function data = filter_max_region_size(data, max_region_size)
-%     video_tracking_constants;
-%     beadlist = unique(data(:,ID));
-% 
-%     for i = 1:length(beadlist)                  %Loop over all beadIDs.
-%         idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
-%         numFrames = length(idx);
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-%         % Remove trackers that have too much area
-%         if(data(idx(1),AREA) > max_region_size)            %If this bead has too much area
-%             idx = (data(:, ID) ~= beadlist(i));     %Get the rest of the data
-%             data = data(idx, :);                    %Recreate data without this bead
-%             continue                                %Move on to next bead now
-%         end
-%     end
-% return;
 % 
 % 
-% function data = filter_min_sens(data, min_sens)
-%     video_tracking_constants;
-%     
-%     beadlist = unique(data(:,ID));
-%     
-%     lowsens_data = ( data(:, SENS) < min_sens );
-%     
-%     ids_to_remove = unique( data(lowsens_data,ID) );
-%     
-%     if isempty(ids_to_remove)
-%         return;
-%     end
-%     
-%     midx = zeros(size(data,1),1);
-%     for k = 1:length(ids_to_remove)
-%         idx = ( data(:,ID) == ids_to_remove(k) );
-%         midx = or(midx, idx);
-%     end
-%     
-%     data(midx,:) = [];
-%     
-% return;
-% 
-% function data = filter_min_intensity(data, min_intensity)
-%     video_tracking_constants;
-%     
-%     beadlist = unique(data(:,ID));
-%     
-%     lowintens_data = ( data(:, CENTINTS) < min_intensity );
-%     
-%     ids_to_remove = unique( data(lowintens_data,ID) );
-%     
-%     if isempty(ids_to_remove)
-%         return;
-%     end
-%     
-%     midx = zeros(size(data,1),1);
-%     for k = 1:length(ids_to_remove)
-%         idx = ( data(:,ID) == ids_to_remove(k) );
-%         midx = or(midx, idx);
-%     end
-%     
-%     data(midx,:) = [];
-%     
-% return;
 % 
 % 
 % function data = filter_pixel_range(mode, data, PixelRange, xyzunits, calib_um)
@@ -594,131 +491,8 @@ return;
 %     return;
 % 
 %     
-% function data = filter_viscosity_range(mode, data, ViscRange, bead_radius, xyzunits, calib_um)
-%     video_tracking_constants;
-%     beadlist = unique(data(:,ID));
-%     
-%     if nargin < 6 || isempty(calib_um)
-%         xyzunits = 'pixels';
-%         calib_um = 1;
-%     end
-%     
-% 
-% 
-%     
-%     for i = 1:length(beadlist)                  %Loop over all beadIDs.
-%         idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
-%         numFrames = length(idx);    
-% 
-%         mydata = data(idx,:);
-%         
-%         if isempty(mydata)
-%             continue;
-%         end
-%                 
-%         longest_frame = max(mydata(:,FRAME)) - min(mydata(:,FRAME));
-%         shortest_frame = min(diff(mydata(:,FRAME)));
-%         
-%         windows = [shortest_frame floor(longest_frame/2)];
-%         windows = windows(:);
-%         time_scales = windows .* mean(diff(mydata(:,TIME)));
-%         
-%         % 2D MSD in pixels
-%         [tau mymsd_px] = msd(mydata(:,TIME), mydata(:,X:Y), windows);
-%         mymsd_px = mymsd_px(:);
-%         
-%         kb = 1.3806e-23;
-%         T = 298;
-%         
-%         % Calculate range limits for bead diffusing in 2D
-%         Rrange_px = sqrt((2*kb*T)/(3*pi*bead_radius*ViscRange) .* time_scales) ./ (calib_um*1e-6);
-%                         
-%         %Delete this bead iff necesary
-%         switch mode
-%             case 'max' % delete any tracker that exceeds max visc threshold
-%                 % large msd means small viscosity
-%                 if(mymsd_px < Rrange_px)
-%                     idx  = find(data(:, ID) ~= beadlist(i)); %Get all data rows for this bead
-%                     data = data(idx, :);                     %Recreate data without this bead
-%                     logentry('deleted tracker with TOO HIGH viscosity.');
-%                 end
-%             case 'min' % delete any tracker that has a lower viscosity than min visc threshold
-%                 if(mymsd_px > Rrange_px)
-%                     idx  = find(data(:, ID) ~= beadlist(i)); %Get all data rows for this bead
-%                     data = data(idx, :);                     %Recreate data without this bead
-%                     logentry('deleted tracker with TOO LOW viscosity.');
-%                 end
-%         end                
-%     end    
-%     
-%     return;
 
 
-function TrackingTable = filter_tcrop(TrackingTable, tCrop)
-    
-    IDlist = unique(TrackingTable.ID);
-    
-    for k = 1:length(IDlist)                  %Loop over all beadIDs.
-        idx = (TrackingTable.ID == IDlist(k)); %Get all data rows for this bead
-        numFrames = length(idx);
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %Remove the frames before and after tCrop
-        if(numFrames <= 2*tCrop)
-            TrackingTable(idx,:) = [];
-            continue
-        elseif(tCrop >= 1)
-            firstFrames = 1:tCrop;
-            lastFrames  = ceil(1+numFrames-tCrop):numFrames;
-            TrackingTable(idx([firstFrames lastFrames]),:) = [];         %Delete these rows
-            % Update rows index
-            idx = find(TrackingTable(:, ID) == IDlist(k)); %Get all data rows for this bead
-            numFrames = length(idx);
-        end
-    end
-    
-    return;
-
-
-%Perform xyCrop
-% function data = filter_xycrop(data, xycrop)
-%     video_tracking_constants;
-%     
-%     minX = min(data(:,X)); maxX = max(data(:,X));
-%     minY = min(data(:,Y)); maxY = max(data(:,Y));
-% 
-%     xIDXmin = find(data(:,X) < (minX+xycrop)); xIDXmax = find(data(:,X) > (maxX-xycrop));
-%     yIDXmin = find(data(:,Y) < (minY+xycrop)); yIDXmax = find(data(:,Y) > (maxY-xycrop));
-% 
-%     DeleteRowsIDX = unique([xIDXmin; yIDXmin; xIDXmax; yIDXmax]);
-% 
-%     data(DeleteRowsIDX,:) = [];
-% 
-%     return;
-% 
-% % % % %Perform xyCrop
-% % % % function data = filter_max_region_size(data, max_region_size)
-% % % % %   'max_area' is the maximum allowable pixel area (signal) for a tracker 
-% % % % 
-% % % %     video_tracking_constants;
-% % % %     beadlist = unique(data(:,ID));
-% % % % 
-% % % %     for i = 1:length(beadlist)                  %Loop over all beadIDs.
-% % % %         idx = find(data(:, ID) == beadlist(i)); %Get all data rows for this bead
-% % % % 
-% % % %         
-% % % %         numFrames = length(idx);
-% % % % 
-% % % %         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-% % % %         % Remove trackers that are too short in time
-% % % %         if(numFrames < minFrames)             %If this bead has too few datapoints
-% % % %             idx = find(data(:, ID) ~= beadlist(i)); %Get the rest of the data
-% % % %             data = data(idx, :);                    %Recreate data without this bead
-% % % %             continue                                %Move on to next bead now
-% % % %         end
-% % % %     end
-    
-%     return;
 
     
 % % perform "dead spot" crop
@@ -883,16 +657,3 @@ function TrackingTable = filter_tcrop(TrackingTable, tCrop)
 %     
 %     return;
 %     
-% function data = remove_uncommon_trackers(data, master_list)
-%     video_tracking_constants;
-% 
-%     C = setdiff(data(:,ID), master_list);
-% 
-%     if ~isempty(C)
-%         for n = 1:length(C)
-%             idx = find(data1(:,ID == C(n)));
-%             data(idx,:) = [];
-%         end
-%     end
-% 
-%     return;
