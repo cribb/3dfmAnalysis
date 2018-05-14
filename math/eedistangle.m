@@ -11,6 +11,7 @@ function [d,a] = eedistangle(XYcoords)
                   (XYcoords(end,2) - XYcoords(1,2)) .^2 );
         a = atan2( XYcoords(end,2) - XYcoords(1,2), ...
                    XYcoords(end,1) - XYcoords(1,1) );
+        a(a<0) = a(a<0) + 2*pi;
     end
 
     return;
