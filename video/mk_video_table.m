@@ -13,19 +13,14 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
 
     fpslist = fpslist(:);
     calibumlist = calibumlist(:);
-    W = width(:);
-    H = height(:);
+    width = width(:);
+    height = height(:);
     firstframefiles = firstframefiles(:);
     mipfiles = mipfiles(:); 
     
     % Handle whether or not the filename situation is what we need. 
     
-    % First, the case where there are no files defined. XXX Update this
-    % such that the return is an empty table with the proper table
-    % headings.
-    if isempty(filelist)
-        error('No filenames defined.');
-    end
+    % First, the case where there are no files defined. 
 
     % Is filelist a string with just a filename in it? If not, is filelist 
     % a list of filenames embedded as a cell array? If so, get directory
@@ -37,11 +32,56 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
             tmp(k) = dir(filelist{k});
         end        
         filelist = tmp;
+    elseif isempty(filelist)
+        error('No tracking filenames defined.');
+        % XXX Update this such that the return is an empty table 
+        % with the proper table headings.
+    else
+        error('Unknown error.');
     end
+    
+    
+    % Is firstframefiles a string with just a filename in it? If not, is firstframefiles
+    % a list of filenames embedded as a cell array? If so, get directory
+    % listing for it.
+    if isempty(firstframefiles)
+        warning('No first frame filenames defined. Removing column from VideoTable.');
+        % XXX Update this to remove the firstframe column from the VideoTable
+    elseif ischar(firstframefiles)
+        firstframefiles = dir(firstframefiles);
+    elseif iscell(firstframefiles)
+        for k = 1:length(firstframefiles)
+            tmp(k,1) = dir(firstframefiles{k});
+        end        
+        firstframefiles = tmp;
+    else
+        error('Unknown error.');
+    end
+    
+    % Is mipfiles a string with just a filename in it? If not, is mipfiles
+    % a list of filenames embedded as a cell array? If so, get directory
+    % listing for it.
+    if isempty(mipfiles)
+        warning('No MIP filenames defined. Removing column from VideoTable.');
+        % XXX Update this to remove the mipfiles column from the VideoTable
+    elseif ischar(mipfiles)
+        mipfiles = dir(mipfiles);
+    elseif iscell(mipfiles)
+        for k = 1:length(mipfiles)
+            tmp{k,1} = dir(mipfiles{k});
+        end        
+        mipfiles = tmp;
+    else
+        error('Unknown error.');
+    end        
     
     % If it's an incorrectly formed structure...
     if isstruct(filelist) && ~isfield(filelist, 'name')
         error('File structure, filelist, is constructed incorrectly. Consult help for dir command.');
+    elseif isstruct(firstframefiles) && ~isfield(firstframefiles, 'name')
+        error('File structure, firstframefiles, is constructed incorrectly. Consult help for dir command.');
+    elseif isstruct(mipfiles) && ~isfield(mipfiles, 'name')
+        error('File structure, firstframefiles, is constructed incorrectly. Consult help for dir command.');
     end
     
     % The time- and length-scales for the videos MUST be defined here for the table to
@@ -62,6 +102,14 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
 
     if size(calibumlist,1) == 1
         calibumlist = repmat(calibumlist, size(filelist));
+    end
+    
+    if size(width,1) == 1
+        width = repmat(width, size(filelist));
+    end
+    
+    if size(height,1) == 1
+        height = repmat(height, size(filelist));
     end
     
 %     if size(X,1) == 1
@@ -114,13 +162,15 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
     % Now that all the inputs are handled...
     for k = 1:length(filelist)
         Fid(k,1) = k;
-        Path{k,1} = 0;
+        Path{k,1} = filelist(k).folder;
         Vidfile{k,1} = 0;
-        Trackfile{k,1} = 0;
+        Trackfile{k,1} = filelist(k).name;
         Fps(k,1) = fpslist(k);
         Calibum(k,1) = calibumlist(k);
-        Width(k,1) = 0;
-        Height(k,1) = 0;
+        Width(k,1) = width(k);
+        Height(k,1) = height(k);
+        Firstframefile{k,1} = 0;
+        Mipfile{k,1} = 0;
     end
 
 % Need Firstframe and mip Mip to be FILE NAMES?
