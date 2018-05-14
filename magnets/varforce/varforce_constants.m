@@ -17,8 +17,8 @@
     video_tracking_constants;
     
     % new columns/labels.
-    VID    = 14;
-    SEQ    = 15;
-    DEGAUSS= 16;
+    VID    = 15;
+    SEQ    = 16;
+    DEGAUSS= 17;
 
     
