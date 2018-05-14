@@ -70,13 +70,6 @@ return
 function [cleaned_v,com_v] = center_of_mass(v, drift_start_time, drift_end_time)
     common_v = traj_common_motion(v);
     [cleaned_v, com_v] = traj_subtract_centmass_motion(v, common_v);
-    
-     % q.method = 'center-of-mass'
-     % q.order = 
-     % q.frame
-     % q.xcoeffs
-     % q.ycoeffs
-     % q.xy
 return
 
 
