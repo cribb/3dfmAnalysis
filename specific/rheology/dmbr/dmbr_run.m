@@ -39,10 +39,10 @@ dmbr_constants;
 input_params = dmbr_check_input_params(input_params);
 
 % Let's get started by making shorter variable names
-trackfile         = input_params.trackfile;
+trackfile         = input_params.trackfile; %#ok<NASGU>
 metafile          = input_params.metafile;
 calibfile         = input_params.calibfile;
-poleloc           = input_params.poleloc;
+poleloc           = input_params.poleloc; %#ok<NASGU>
 force_type        = input_params.force_type;
 tau               = input_params.tau;
 scale             = input_params.scale;
@@ -60,8 +60,8 @@ end
 % during the driveGUI and second through the analysisGUI) we have to merge
 % the two structures together.
 fnames = fieldnames(input_params);
-for k = 1:length(fnames); 
-    params = setfield(params, fnames{k}, getfield(input_params, fnames{k})); 
+for k = 1:length(fnames)
+    params = setfield(params, fnames{k}, getfield(input_params, fnames{k}));  %#ok<GFLD,SFLD>
 end
 
 % dmbr_init: initializes and loads experimental parameters and video
@@ -103,13 +103,13 @@ voltages  = unique(rheo_table(:,VOLTS))';
 % seed some matrices
 % offsetcols = [TIME X Y Z ROLL PITCH YAW J];
 % v.offsets = zeros(length(beads), length(sequences), length(offsetcols))*NaN;
-rheo_table(:,[J:SDJ]) = 0;
+rheo_table(:,[J:SDJ]) = 0; %#ok<NBRAK>
 
 count = 1;
-nextBead = 0;
+nextBead = 0; %#ok<NASGU>
 bIndex = 0;
 for k = 1:length(beads)
-    idxB = find(rheo_table(:,ID) == beads(k));
+    idxB = find(rheo_table(:,ID) == beads(k)); %#ok<NASGU>
     nextBead = 1;            
     for m = 1:length(sequences)
         bIndex = bIndex + 1;
@@ -202,7 +202,7 @@ return;
 %%%%%%%%%%%%%%%%
 
 %% Prints out a log message complete with timestamp.
-function logentry(txt)
+function logentry(txt) %#ok<DEFNU>
     logtime = clock;
     logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
                    num2str(logtime(2),        '%02i') '.' ...
