@@ -208,6 +208,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     end   
 
     filenameroot = strrep(filename,     '.raw', '');
+    filenameroot = strrep(filenameroot, '.csv', '');
     filenameroot = strrep(filenameroot, '.vrpn', '');
     filenameroot = strrep(filenameroot, '.mat', '');
     filenameroot = strrep(filenameroot, '.evt', '');
