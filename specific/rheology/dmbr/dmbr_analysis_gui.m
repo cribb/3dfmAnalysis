@@ -145,12 +145,12 @@ function listbox_seqID_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
         set(hObject,'BackgroundColor','white');
     end
 
-function listbox_voltages_CreateFcn(hObject, eventdata, handles)
+function listbox_voltages_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
 
-function popup_plottype_CreateFcn(hObject, eventdata, handles)
+function popup_plottype_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -160,129 +160,129 @@ function popupmenu_fit_type_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DE
         set(hObject,'BackgroundColor','white');
     end
 
-function edit_tau_CreateFcn(hObject, eventdata, handles)
+function edit_tau_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
     
-function edit_scale_CreateFcn(hObject, eventdata, handles)
+function edit_scale_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
       
-function pushbutton_metafile_CreateFcn(hObject, eventdata, handles)
+function pushbutton_metafile_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
     
     
-function pushbutton_trackerfile_CreateFcn(hObject, eventdata, handles)
+function pushbutton_trackerfile_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
     
     
-function pushbutton_calibfile_CreateFcn(hObject, eventdata, handles)
+function pushbutton_calibfile_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
     
-function buffer_point_text_CreateFcn(hObject, eventdata, handles)
+function buffer_point_text_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
 
-function pole_location_CreateFcn(hObject, eventdata, handles)
+function pole_location_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
 
-function text19_CreateFcn(hObject, eventdata, handles)
+function text19_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
 
-function text17_CreateFcn(hObject, eventdata, handles)
+function text17_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
 
-function text18_CreateFcn(hObject, eventdata, handles)
+function text18_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function uipanel5_CreateFcn(hObject, eventdata, handles)
+function uipanel5_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function radio_use_avg_force_CreateFcn(hObject, eventdata, handles)
+function radio_use_avg_force_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function radio_use_disp_force_CreateFcn(hObject, eventdata, handles)
+function radio_use_disp_force_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_export_to_ws_CreateFcn(hObject, eventdata, handles)
+function pushbutton_export_to_ws_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function checkbox_plot_mean_creep_CreateFcn(hObject, eventdata, handles)
+function checkbox_plot_mean_creep_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_delete_selected_time_CreateFcn(hObject, eventdata, handles)
+function pushbutton_delete_selected_time_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_attach_CAP_CreateFcn(hObject, eventdata, handles)
+function pushbutton_attach_CAP_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_fit_CreateFcn(hObject, eventdata, handles)
+function pushbutton_fit_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_fit_all_CreateFcn(hObject, eventdata, handles)
+function pushbutton_fit_all_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_plot_thinning_CreateFcn(hObject, eventdata, handles)
+function pushbutton_plot_thinning_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_quickfit_CreateFcn(hObject, eventdata, handles)
+function pushbutton_quickfit_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_compute_CreateFcn(hObject, eventdata, handles)
+function pushbutton_compute_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_close_CreateFcn(hObject, eventdata, handles)
+function pushbutton_close_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
 
-function pushbutton_savefile_CreateFcn(hObject, eventdata, handles)
+function pushbutton_savefile_CreateFcn(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
     if isunix
         set(hObject, 'BackgroundColor', [0.925 0.914 0.851]);
     end
@@ -306,19 +306,19 @@ function edit_save_filename_Callback(hObject, eventdata, handles) %#ok<INUSD,DEF
 function edit_calibfile_Callback(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     
 
-function checkbox_plotx_Callback(hObject, eventdata, handles)
+function checkbox_plotx_Callback(hObject, eventdata, handles) %#ok<DEFNU>
       plot_data(hObject, eventdata, handles);
 
-function checkbox_ploty_Callback(hObject, eventdata, handles)
+function checkbox_ploty_Callback(hObject, eventdata, handles) %#ok<DEFNU>
       plot_data(hObject, eventdata, handles);
 
-function checkbox_plotr_Callback(hObject, eventdata, handles)
+function checkbox_plotr_Callback(hObject, eventdata, handles) %#ok<DEFNU>
       plot_data(hObject, eventdata, handles);
 
 % function edit_window_size_Callback(hObject, eventdata, handles)
 %       plot_data(hObject, eventdata, handles);
 
-function edit_scale_Callback(hObject, eventdata, handles)
+function edit_scale_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 
 % % iterate across beads and sequences
 % beads     = unique(rheo_table(:,ID))';
@@ -328,28 +328,28 @@ function edit_scale_Callback(hObject, eventdata, handles)
     % blah
     plot_data(hObject, eventdata, handles);
 
-function edit_tau_Callback(hObject, eventdata, handles)
+function edit_tau_Callback(hObject, eventdata, handles) %#ok<DEFNU>
       plot_data(hObject, eventdata, handles);
     
     
 % --- Executes on button press in pushbutton_close.
-function pushbutton_close_Callback(hObject, eventdata, handles)  %#ok<INUSL,INUSD,DEFNU>
+function pushbutton_close_Callback(hObject, eventdata, handles)  %#ok<INUSL,DEFNU>
 
-    if isfield(handles, 'mainfig');
+    if isfield(handles, 'mainfig')
         try
             close(handles.mainfig);
         catch
         end
     end
 
-    if isfield(handles, 'meanJfig');
+    if isfield(handles, 'meanJfig')
         try
             close(handles.meanJfig);
         catch
         end
     end
 
-    if isfield(handles, 'meandispfig');
+    if isfield(handles, 'meandispfig')
         try
             close(handles.meandispfig);
         catch
@@ -359,7 +359,7 @@ function pushbutton_close_Callback(hObject, eventdata, handles)  %#ok<INUSL,INUS
     close(dmbr_analysis_gui);
 
 
-function edit_poleloc_x_Callback(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
+function edit_poleloc_x_Callback(hObject, eventdata, handles)   %#ok<DEFNU,INUSL>
 
     px = str2num(get(handles.edit_poleloc_x, 'String')); %#ok<ST2NM>
     py = str2num(get(handles.edit_poleloc_y, 'String')); %#ok<ST2NM>
@@ -369,7 +369,7 @@ function edit_poleloc_x_Callback(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
     end
     
 
-function edit_poleloc_y_Callback(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
+function edit_poleloc_y_Callback(hObject, eventdata, handles) %#ok<DEFNU,INUSL>
     px = str2num(get(handles.edit_poleloc_x, 'String')); %#ok<ST2NM>
     py = str2num(get(handles.edit_poleloc_y, 'String')); %#ok<ST2NM>
 
@@ -379,8 +379,7 @@ function edit_poleloc_y_Callback(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
 
 
 % --- Executes on button press in pushbutton_metafile.
-function pushbutton_metafile_Callback(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
-
+function pushbutton_metafile_Callback(hObject, eventdata, handles)  %#ok<DEFNU,INUSL>
 	warning off MATLAB:deblank:NonStringInput
 
     try
@@ -427,7 +426,7 @@ function pushbutton_metafile_Callback(hObject, eventdata, handles)  %#ok<INUSD,D
     end
     
     if isfield(params, 'trackfile')
-        [pname, fname, ext] = fileparts(params.trackfile);
+        [~, fname, ext] = fileparts(params.trackfile);
         trackfile = [fname,ext];
         set(handles.edit_trackerfile, 'String', trackfile);
         handles.trackfile = trackfile;
@@ -435,7 +434,7 @@ function pushbutton_metafile_Callback(hObject, eventdata, handles)  %#ok<INUSD,D
     end
     
     if isfield(params, 'calibfile')
-        [pname, fname, ext] = fileparts(params.calibfile);
+        [~, fname, ext] = fileparts(params.calibfile);
         calibfile = [fname,ext];
         set(handles.edit_calibfile, 'String', calibfile);
         handles.calibfile = calibfile;
@@ -446,7 +445,7 @@ function pushbutton_metafile_Callback(hObject, eventdata, handles)  %#ok<INUSD,D
 
     
 % --- Executes on button press in pushbutton_trackerfile.
-function pushbutton_trackerfile_Callback(hObject, eventdata, handles)  %#ok<INUSL,INUSD,DEFNU>
+function pushbutton_trackerfile_Callback(hObject, eventdata, handles) %#ok<INUSL,DEFNU>
 
 	warning off MATLAB:deblank:NonStringInput
 
@@ -528,53 +527,53 @@ function pushbutton_savefile_Callback(hObject, eventdata, handles) %#ok<INUSL,DE
 
         end
         
-        v = handles.v;
+        v = handles.v; %#ok<NASGU>
         save(outsfile, '-struct', 'v');
         logentry(['Saved calibration file to:  ' outsfile]);
 
         
 % --- Executes on button press in pushbutton_compute.
-function pushbutton_compute_Callback(hObject, eventdata, handles)  %#ok<INUSD,DEFNU>
+function pushbutton_compute_Callback(hObject, eventdata, handles)   %#ok<DEFNU>
 
-    if isfield(handles, 'edit_buffer_points');
-        input_params.num_buffer_points = str2num(get(handles.edit_buffer_points, 'String'));
+    if isfield(handles, 'edit_buffer_points')
+        input_params.num_buffer_points = str2double(get(handles.edit_buffer_points, 'String'));
     else
         logentry('no buffer point number specified. Varforce_run will default to removing zero points');
     end  
     
-    if isfield(handles, 'edit_poleloc_x');
-        input_params.poleloc(:,1) = str2num(get(handles.edit_poleloc_x, 'String'));
+    if isfield(handles, 'edit_poleloc_x')
+        input_params.poleloc(:,1) = str2double(get(handles.edit_poleloc_x, 'String'));
     else
         logentry('no pole location specified. dmbr will not work without one');
     end
 
-    if isfield(handles, 'edit_poleloc_y');
-        input_params.poleloc(:,2) = str2num(get(handles.edit_poleloc_y, 'String'));
+    if isfield(handles, 'edit_poleloc_y')
+        input_params.poleloc(:,2) = str2double(get(handles.edit_poleloc_y, 'String'));
     else
         logentry('no pole location specified. dmbr will not work without one');
     end
     
-    if isfield(handles, 'popupmenu_fit_type');
+    if isfield(handles, 'popupmenu_fit_type')
         contents = get(handles.popupmenu_fit_type,'String');
         input_params.fit_type = contents{get(hObject,'Value')};
     else 
         logentry('no fitting type entered.');
     end
     
-    if isfield(handles, 'edit_scale');
-        input_params.scale = str2num(get(handles.edit_scale, 'String'));
+    if isfield(handles, 'edit_scale')
+        input_params.scale = str2double(get(handles.edit_scale, 'String'));
     else         
         logentry('no scale selected.  defaulting to 0.5 stdev.');
         input_params.scale = 0.5;
         set(handles.edit_scale, 'String', num2str(input_params.scale));
     end
     
-    if isfield(handles, 'edit_tau');
-        tau = str2num(get(handles.edit_tau, 'String'));
+    if isfield(handles, 'edit_tau')
+        tau = str2double(get(handles.edit_tau, 'String'));
         input_params.tau  = tau;
     end
     
-    if isfield(handles, 'trackfile');
+    if isfield(handles, 'trackfile')
         input_params.trackfile = handles.trackfile;
     else
          logentry('no trackfile entered. dmbr will not work without it');
@@ -583,7 +582,7 @@ function pushbutton_compute_Callback(hObject, eventdata, handles)  %#ok<INUSD,DE
     
     input_params.metafile = handles.metafile;    
     input_params.calibfile = handles.calibfile;
-    input_params.poletip_radius = str2num(get(handles.edit_poletip_radius, 'String'));
+    input_params.poletip_radius = str2double(get(handles.edit_poletip_radius, 'String'));
     
     if get(handles.radio_use_avg_force, 'Value')
         input_params.force_type = 'avg';
@@ -606,11 +605,11 @@ function pushbutton_compute_Callback(hObject, eventdata, handles)  %#ok<INUSD,DE
     set(handles.dmbr, 'Units', 'Normalized');
     guipos = get(handles.dmbr, 'Position');
     
-    if ~isfield(handles, 'mainfig');
+    if ~isfield(handles, 'mainfig')
         handles.mainfig = figure;
     end
     
-    if ~isfield(handles, 'plot_type');
+    if ~isfield(handles, 'plot_type')
         handles.plot_type = 'displacement';
     end
     
@@ -648,7 +647,7 @@ function pushbutton_compute_Callback(hObject, eventdata, handles)  %#ok<INUSD,DE
     
 
 % --- Executes on change in listbox value.
-function listbox_beadID_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+function listbox_beadID_Callback(hObject, eventdata, handles) 
 % Hints: contents = get(hObject,'String') returns listbox_beadID contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_beadID
 
@@ -686,19 +685,19 @@ function listbox_seqID_Callback(hObject, eventdata, handles)
 % --- Executes on selection change in listbox_voltages.
 function listbox_voltages_Callback(hObject, eventdata, handles)
 
-    voltages = str2num(get(hObject, 'String'));
+    voltages = str2double(get(hObject, 'String'));
     volt_idx = get(hObject,'Value');
     
     plot_data(hObject, eventdata, handles);
     
     
 % --- Executes on button press in checkbox_plot_mean_creep.
-function checkbox_plot_mean_creep_Callback(hObject, eventdata, handles)
+function checkbox_plot_mean_creep_Callback(hObject, eventdata, handles) %#ok<DEFNU>
     plot_data(hObject, eventdata, handles); 
 
     
 % --- Executes on button press in checkbox_beadfilt.
-function checkbox_beadfilt_Callback(hObject, eventdata, handles)
+function checkbox_beadfilt_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 
     if get(hObject, 'Value')
         set(handles.listbox_beadID, 'Enable', 'on');
@@ -712,7 +711,7 @@ function checkbox_beadfilt_Callback(hObject, eventdata, handles)
 
     
 % --- Executes on button press in checkbox_seqfilt.
-function checkbox_seqfilt_Callback(hObject, eventdata, handles)
+function checkbox_seqfilt_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 
     if get(hObject, 'Value')
         set(handles.listbox_seqID, 'Enable', 'on');
@@ -726,7 +725,7 @@ function checkbox_seqfilt_Callback(hObject, eventdata, handles)
     
     
 % --- Executes on button press in checkbox_voltfilt.
-function checkbox_voltfilt_Callback(hObject, eventdata, handles)
+function checkbox_voltfilt_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 
     if get(hObject, 'Value')
         set(handles.listbox_voltages, 'Enable', 'on');
@@ -740,13 +739,13 @@ function checkbox_voltfilt_Callback(hObject, eventdata, handles)
     
     
 % --- Executes on button press in radio_use_avg_force.
-function radio_use_avg_force_Callback(hObject, eventdata, handles)
+function radio_use_avg_force_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
     return;
 
 
 
 % --- Executes on selection change in popup_plottype.
-function popup_plottype_Callback(hObject, eventdata, handles)
+function popup_plottype_Callback(hObject, eventdata, handles)%#ok<DEFNU>
     contents = get(hObject,'String');
     
     handles.plot_type = contents{get(hObject,'Value')};
@@ -756,17 +755,17 @@ function popup_plottype_Callback(hObject, eventdata, handles)
     
     
 % --- Executes on button press in radio_logspace.
-function radio_logspace_Callback(hObject, eventdata, handles)
+function radio_logspace_Callback(hObject, eventdata, handles)%#ok<DEFNU>
     plot_data(hObject, eventdata, handles); 
 
     
 % --- Executes on button press in radio_lin_space.
-function radio_lin_space_Callback(hObject, eventdata, handles)
+function radio_lin_space_Callback(hObject, eventdata, handles) %#ok<DEFNU>
     plot_data(hObject, eventdata, handles); 
 
 
 % --- Executes on button press in pushbutton_fit.
-function pushbutton_fit_Callback(hObject, eventdata, handles)
+function pushbutton_fit_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 % hObject    handle to pushbutton_fit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -817,7 +816,7 @@ function pushbutton_export_to_ws_Callback(hObject, eventdata, handles) %#ok<INUS
 
     
 % --- Executes on button press in checkbox_plot_smoothed.
-function checkbox_plot_smoothed_Callback(hObject, eventdata, handles)
+function checkbox_plot_smoothed_Callback(hObject, eventdata, handles) %#ok<DEFNU>
       plot_data(hObject, eventdata, handles);
 
 
@@ -830,24 +829,24 @@ function popupmenu_fit_type_Callback(hObject, eventdata, handles) %#ok<INUSL,DEF
 
     
 % --- Executes on button press in pushbutton_quickfit.
-function pushbutton_quickfit_Callback(hObject, eventdata, handles)
+function pushbutton_quickfit_Callback(hObject, eventdata, handles) %#ok<DEFNU>
     dmbr_constants;
     
     table = filter_table(hObject, eventdata, handles);
 
-    [t, ct, idx] = select_data_in_box(handles.mainfig);
+    [t, ~, ~] = select_data_in_box(handles.mainfig);
     num_points = length(t);
 
     rel_t_start = min(t)/(max(table(:,TIME))-min(table(:,TIME)));
     
-    [r,c] = size(table);
+    r = size(table,1);
     min_idx = 1 + floor(rel_t_start * r);
     max_idx = min_idx + num_points - 1;
    
     table = table(min_idx:max_idx,:);
     
     % get max shear rate
-    [vd, shear_max] = dmbr_max_shear(table, handles.params);
+    [~, shear_max] = dmbr_max_shear(table, handles.params);
     
     % rheology fit
     [G, eta, ct_fit, R_square] = dmbr_fit(table, handles.fit_type);
@@ -856,7 +855,7 @@ function pushbutton_quickfit_Callback(hObject, eventdata, handles)
     
     if length(eta) == 1
         eta(2) = NaN;
-    end;
+    end
     
     fprintf('%g\t%g\t%g\t%g, shear rate max: %g\n', G, eta(1), eta(2), R_square, shear_max);
     
@@ -869,7 +868,7 @@ function pushbutton_quickfit_Callback(hObject, eventdata, handles)
 
 
 % --- Executes on button press in pushbutton_plot_thinning.
-function pushbutton_plot_thinning_Callback(hObject, eventdata, handles)
+function pushbutton_plot_thinning_Callback(hObject, eventdata, handles) %#ok<INUSL,DEFNU>
 % hObject    handle to pushbutton_plot_thinning (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -882,18 +881,20 @@ function pushbutton_plot_thinning_Callback(hObject, eventdata, handles)
     pretty_plot;
 
 
+    
+    
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %    
 %    sub functions
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 
-function v = filter_table(hObject, eventdata, handles)
+function v = filter_table(hObject, eventdata, handles) %#ok<INUSL>
 
     dmbr_constants;    
     
     %
     if get(handles.checkbox_beadfilt, 'Value')
-        contents_bead = str2num(get(handles.listbox_beadID,'String'));
+        contents_bead = str2double(get(handles.listbox_beadID,'String'));
         selected_beadID = contents_bead(get(handles.listbox_beadID,'Value'));
     else
         selected_beadID = [];
@@ -909,9 +910,9 @@ function v = filter_table(hObject, eventdata, handles)
     
     %
     if get(handles.checkbox_voltfilt, 'Value')
-        contents_voltages = str2num(get(handles.listbox_voltages, 'String')); %#ok<NASGU,ST2NM>
+        contents_voltages = str2num(get(handles.listbox_voltages, 'String')); %#ok<ST2NM>
         Vidx = get(handles.listbox_voltages,'Value');
-        selected_voltage = contents_voltages(Vidx); %#ok<NASGU>
+        selected_voltage = contents_voltages(Vidx); 
     else
         selected_voltage = [];        
     end
@@ -922,7 +923,7 @@ function v = filter_table(hObject, eventdata, handles)
 
 
 % sets up interaction between GUI and plotting code.
-function plot_data(hObject, eventdata, handles)
+function plot_data(hObject, eventdata, handles) %#ok<INUSL>
     dmbr_constants;    
 
     % 
@@ -992,7 +993,7 @@ function logentry(txt)
 
 
 % --- Executes on button press in checkbox_seqstack.
-function checkbox_seqstack_Callback(hObject, eventdata, handles)
+function checkbox_seqstack_Callback(hObject, eventdata, handles) %#ok<DEFNU>
     plot_data(hObject, eventdata, handles);
 
 
@@ -1000,12 +1001,12 @@ function checkbox_seqstack_Callback(hObject, eventdata, handles)
 
 
 % --- Executes on button press in pushbutton_delete_selected_time.
-function pushbutton_delete_selected_time_Callback(hObject, eventdata, handles)
+function pushbutton_delete_selected_time_Callback(hObject, eventdata, handles) %#ok<INUSL,DEFNU>
 
     params = load(handles.metafile);
     
     if isfield(params, 'time_selected')        
-        params = rmfield(params, 'time_selected');        
+        params = rmfield(params, 'time_selected');         %#ok<NASGU>
         save(handles.metafile, '-struct', 'params');      
         logentry('Removed time break-point between sequences.');
     end
@@ -1013,7 +1014,7 @@ function pushbutton_delete_selected_time_Callback(hObject, eventdata, handles)
 
 
 % --- Executes on button press in pushbutton_attach_CAP.
-function pushbutton_attach_CAP_Callback(hObject, eventdata, handles)
+function pushbutton_attach_CAP_Callback(hObject, eventdata, handles)  %#ok<DEFNU,INUSD>
 % hObject    handle to pushbutton_attach_CAP (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
