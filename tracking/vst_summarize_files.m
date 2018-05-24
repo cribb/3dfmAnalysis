@@ -23,5 +23,4 @@ function FileSummary = vst_summarize_files(TrackingSummary)
     FileSummary = struct2table(file);
 
     
-
-    
+return
