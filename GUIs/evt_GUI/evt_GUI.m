@@ -1779,7 +1779,8 @@ function plot_data(hObject, eventdata, handles)
     
     switch AUXtype
         case 'OFF'
-            figure(handles.AUXfig);
+            
+%             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'off');
             
         case 'radial vector'
