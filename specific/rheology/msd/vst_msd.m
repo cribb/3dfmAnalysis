@@ -47,7 +47,7 @@ fids = unique(VidTable.Fid);
 
 for f = 1:length(fids)
 
-    v = load_vst_tracking(VidTable(VidTable.Fid==fids(f),:));
+    v = vst_load_tracking(VidTable(VidTable.Fid==fids(f),:));
 
     % We want to identify a set of strides to step across for a given set of 
     % images (frames).  We would like them to be spread evenly across the 
