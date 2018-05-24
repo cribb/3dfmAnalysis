@@ -8,7 +8,7 @@ function VidTable = pan_mk_video_table(filepath, systemid, plate_type)
 % convert units, and visualize the initial and image-projection
 % video-frames, provided all that data exists in the path. The outputted
 % VidTable is the subsequent input for pan_load_tracking,
-% load_vst_tracking, etc.
+% vst_load_tracking, etc.
 % 
 % VidTable = pan_mk_video_table(filepath, systemid, plate_type) 
 %
