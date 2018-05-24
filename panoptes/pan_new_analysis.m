@@ -11,16 +11,23 @@ d.VidTable = pan_mk_video_table(filepath, systemid, platetype);
 d.ImageTable = vst_mk_ImageTable(d.VidTable);
 
 % (3) Load in the tracking data
-d.TrackingTable = load_vst_tracking(d.VidTable);
+d.TrackingTable = vst_load_tracking(d.VidTable);
 
 % (4) Summarize Tracking information
-[d.TrackingSummary, d.FileSummary] = vst_summarize(TrackingTable);
-
+d.TrackingSummary = vst_summarize_traj(d.TrackingTable);
+d.FileSummary = vst_summarize_files(d.TrackingSummary);
 
 % (5) Filter tracking data and put eliminated data into a "Trash" table.
-d = filter_vst_tracking(d, filtin);
+filtin.tcrop      = 3;
+filtin.min_frames = floor(d.metadata.instr.fps_fluo/2);
+
+[FilteredTrackingTable, Trash] = vst_filter_tracking(d.TrackingTable, filtin);
+
+d.TrackingTable = FilteredTrackingTable;
+d.Trash = Trash;
 
 % (6) Deal with drift separately from traditional "filtering" operation.
+com = vst_common_motion(d.TrackingTable); %%% REMEMBER THIS IS FILTERED TRACKING
 
 % (7) Identify salient groups in the dataset: beadGroups, fileGroups,
 % SampleNameGroups, SampleInstanceGroups, FovIDGroups
@@ -35,12 +42,11 @@ d = filter_vst_tracking(d, filtin);
 
 DataOut = d;
 
-clear Dout kdens gS groups
+bigTable = join(d.TrackingTable, d.VidTable);
 
-myTable = bigTable;
-myTable.RegionSize = log10(myTable.RegionSize);
-myTable.Sensitivity = log10(myTable.Sensitivity);
-myTable.ForegroundSize = log10(myTable.ForegroundSize);
+bigTable.RegionSize = log10(bigTable.RegionSize);
+bigTable.Sensitivity = log10(bigTable.Sensitivity);
+bigTable.ForegroundSize = log10(bigTable.ForegroundSize);
 
 column_names = {'X', 'Y', 'CenterIntensity', 'Sensitivity', 'ForegroundSize', 'RegionSize'};
 
@@ -48,24 +54,25 @@ column_names = {'X', 'Y', 'CenterIntensity', 'Sensitivity', 'ForegroundSize', 'R
 % groups = cellstr(char(groups(:,1)));
 
 % to compress back to a single group tag (not really what we want)
-[gS, groups(:,1), groups(:,2), groups(:,3), groups(:,4)] = findgroups(myTable.SampleName, myTable.SampleInstance, myTable.FovID, myTable.ID);
+[gS, groups(:,1), groups(:,2), groups(:,3), groups(:,4)] = findgroups(bigTable.SampleName, bigTable.SampleInstance, bigTable.FovID, bigTable.ID);
 foo = [cellstr(char(groups(:,1))), cellstr(char(groups(:,2))), cellstr(char(groups(:,3))), cellstr(char(groups(:,4)))];
 for k = 1:size(foo,1)
     tmp{k,1} = [foo{k,1} '_' foo{k,2} '_' foo{k,3} '_' foo{k,4}]; 
 end
 groups = tmp;
 
-panmet = pan_load_metadata('./2018.04.05__hbe4pct_hetcheck', 'monoptes', '96well');
-Fps = panmet.instr.fps_fluo;
+Fps = d.metadata.instr.fps_fluo;
 
 Ngroups = length(groups);
 Ncolumns = length(column_names);
+
 % repmat(42,size(gS))
 % msd1sec = splitapply(@(x1,x2,x3){msd(x1,x2,x3)}, myTable.Frame.*Fps, [myTable.X myTable.Y].*myTable.Calibum, [], gS);
-msd1sec = splitapply(@(x1,x2){msd(x1,x2)}, myTable.Frame.*Fps, [myTable.X myTable.Y].*myTable.Calibum, gS);
+msd1sec = splitapply(@(x1,x2){msd(x1,x2)}, bigTable.Frame.*Fps, [bigTable.X bigTable.Y].*bigTable.Calibum, gS);
 % taulist = msd_gen_taus(max(myTable.Frame), 
+
 for c = 1:Ncolumns
-    [say, sax] = splitapply(@ksdensity, myTable(:,column_names{c}), gS);
+    [say, sax] = splitapply(@ksdensity, bigTable(:,column_names{c}), gS);
     
     
     
