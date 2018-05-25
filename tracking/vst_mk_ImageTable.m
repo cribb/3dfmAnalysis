@@ -1,4 +1,4 @@
-function outs = vst_collect_images(VidTable)
+function outs = vst_mk_ImageTable(VidTable)
 
 N = size(VidTable,1);
 
