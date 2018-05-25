@@ -29,6 +29,8 @@ ins.poletip_radius = 0;
 ins.drift_remove    = 'off';
 ins.plot_results    = 'off';
 ins.degauss         = 'off';
+ins.force_type      = 'disp';
+ins.fps             = 120;
 
 v = dmbr_run(ins);
 

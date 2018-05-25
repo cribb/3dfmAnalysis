@@ -3,7 +3,6 @@ function [F,e] = varforce_get_force(calib, rad_pos, voltage)
 %
 % 3DFM function  
 % Magnetics/varforce
-% last modified 11/17/08 (krisford)
 %  
 % varforce_getforce takes a varforce calibration file, a radial position and 
 % a voltage and returns the force +/- most likely error at that voltage and 
@@ -13,7 +12,6 @@ function [F,e] = varforce_get_force(calib, rad_pos, voltage)
 % [F,e] = varforce_get_force(calib, rad_pos, voltage)
 %
 
-
 volts      = calib.volts;
 fit        = calib.fit;
 fit_err    = calib.fiterror;
@@ -22,8 +20,8 @@ fit_err    = calib.fiterror;
 % distance for the poletip.
 dVolts = abs(voltage - volts);
 dVolts = dVolts(find(dVolts > 0));
-smallest_dVolts = min(abs(dVolts));
 
+smallest_dVolts = min(abs(dVolts));
 smallest_dVolts = 0.001;
 
 interp_volts(:,1) = min(volts) : smallest_dVolts : max(volts);
@@ -33,7 +31,7 @@ interp_fiterr     = interp1(volts, fit_err, interp_volts);
 
 idx = find(single(voltage) == single(interp_volts));
 
-if length(idx) > 0
+if ~isempty(idx)
     
     N = length(rad_pos);
 

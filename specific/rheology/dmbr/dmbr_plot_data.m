@@ -60,6 +60,7 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
     
     t     = mytable(:,TIME);
     seq   = mytable(:,SEQ); %#ok<NASGU>
+    id    = mytable(:,ID);
     force = mytable(:,FORCE);
     
 
@@ -198,119 +199,151 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
     
     
 
-    figure(plot_opts.figure_handle);
+    seqList = unique(seq);    
+    defaultcolorlist = [0 1 0];
+    if length(seqList) == 1
+        seqColorList = defaultcolorlist;
+    else
+        rcolor = [0; defaultcolorlist(1,1)];
+        gcolor = [0; defaultcolorlist(1,2)];
+        bcolor = [0; defaultcolorlist(1,3)];
 
-    switch plot_opts.plot_type
-
-        case 'displacement'
-            subplot(1,1,1);
-            plot(t, xyr, '.');
-            xlabel([logstring1 'time [s]' logstring2]);
-            ylabel([logstring1 'displacement [\mum]' logstring2]);
-            
-            %text(0.75*max(t), 0.25*max(xyr), num2str(mean(xyr(end-5:end))));
-            if size(xyr,1) < 5
-                mean_xyr = mean(xyr); %#ok<NASGU>
-            else
-                mean_xyr = mean(xyr(end-5:end));
-                title(['mean, last 5 pts: ' num2str(mean_xyr)]);
-            end
-            
-        case 'disp/force'
-            subplot(2,1,1);
-            plot(t, xyr, '-');
-            xlabel([logstring1 'time [s]' logstring2]);
-            ylabel([logstring1 'displacement [\mum]' logstring2]);
-
-            subplot(2,1,2);
-            plot(t, force, '.')
-            xlabel([logstring1 'time [s]' logstring2]);
-            ylabel([logstring1 'force [pN]' logstring2])
-            
-            fprintf('average force= %g\n', mean(force)');
-        
-        case 'velocity'
-            subplot(1,1,1);
-            plot(t, dxyrdt, '.');
-            xlabel([logstring1 'time [s]' logstring2])
-            ylabel([logstring1 'velocity [\mum/s]' logstring2]);
-            title(['time window, size= ' num2str(params.scale,0)*mean(diff(t)) ' [s].']);            
-
-        case 'max shear rate'                      
-            subplot(1,1,1);
-            plot(t, max_shear_rate, '.');
-            xlabel([logstring1 'time [s]' logstring2]);
-            ylabel([logstring1 'maximum shear rate [1/s]' logstring2]);
-
-        case 'Weissenberg #'
-            subplot(1,1,1);
-            plot(t, Wi, '.');
-            xlabel([logstring1 'time [s]' logstring2]);
-            ylabel([logstring1 'Weissenberg Number' logstring2]);
-
-        case 'compliance'
-            subplot(1,1,1);
-            plot(t, j, '.');
-            xlabel([logstring1 'time [s]' logstring2]);
-            ylabel([logstring1 'compliance, J [Pa^{-1}]' logstring2]);     
-            
-        case 'inst. viscosity'
-            subplot(1,1,1);
-            plot(t, visc, '.');
-            xlabel([logstring1 'time [s]' logstring2])
-            ylabel([logstring1 '\eta [Pa s]' logstring2]);
-            title(['time window, size= ' num2str(params.scale,0)*mean(diff(t)) ' [s].']);            
-            
-        case 'strain thickening'
-            subplot(1,1,1);
-            plot(3*xyr/(2*params.bead_radius), visc, '.');            
-            xlabel([logstring1 'max strain' logstring2]);
-            ylabel([logstring1 'viscosity, \eta [Pa s]' logstring2]);
-
-        case 'inst. viscosity vs. max shear rate'
-            subplot(1,1,1);
-            plot(max_shear_rate(:,3), visc, '.');
-            hold on;
-                text(max_shear_rate(1,3), visc(1,1), 'S', 'FontWeight', 'Demi');
-                text(max_shear_rate(end,3), visc(end,1), 'E', 'FontWeight', 'Demi');
-            hold off;
-            
-            if isfield(dmbr_struct, 'cap')
-               hold on;
-               plot(cap_srate, cap_viscPa, 'k-');
-               hold off;
-            end
-                        
-            xlabel([logstring1 'maximum shear rate [1/s]' logstring2]);
-            ylabel([logstring1 'inst. viscosity [Pa s]' logstring2]);
-            
-            pause(0.1);
-            
-        case 'inst. viscosity vs. Weissenburg #'
-            subplot(1,1,1);
-            plot(Wi, visc, '.');
-            xlabel([logstring1 'Weissenburg Number' logstring2]);
-            ylabel([logstring1 'inst. viscosity [Pa s]' logstring2]);
-            
-        case 'storage and loss moduli'
-            
-    
-        GData=dmbr_direct_moduli(t,j,1000,'n');
-            % Plot the moduli    
-        subplot(1,1,1);
-        loglog(GData(:,1),GData(:,2),'b.-');
-        hold on
-        loglog(GData(:,1),GData(:,3),'r.-');
-        legend('G''','G''''','Location','NorthWest');
-        xlabel('\omega [s^{-1}]');
-        ylabel('Moduli [Pa]');
-        hold off
-            
+        colorgrad = @(y){interp1([0;length(seqList)], y, seqList)};
+        seqColorList = [colorgrad(rcolor) colorgrad(gcolor) colorgrad(bcolor)];
+        seqColorList = cell2mat(seqColorList);
     end
     
-    pretty_plot;
-    drawnow;
+    figure(plot_opts.figure_handle);
+    clf;
+    
 
+    
+%     for b = 1:length(idList)
+    for s = 1:length(seqList)
+    
+        
+        hold on;
+        
+        pidx = find(seq == seqList(s));
+        
+        switch plot_opts.plot_type
+
+            case 'displacement'
+                subplot(1,1,1);
+                plot(t(pidx), xyr(pidx,:), '.', 'Color', seqColorList(s,:));
+                xlabel([logstring1 'time [s]' logstring2]);
+                ylabel([logstring1 'displacement [\mum]' logstring2]);
+
+                %text(0.75*max(t), 0.25*max(xyr), num2str(mean(xyr(end-5:end))));
+                if size(xyr,1) < 5
+                    mean_xyr = mean(xyr); %#ok<NASGU>
+                else
+                    mean_xyr = mean(xyr(end-5:end));
+                    title(['mean, last 5 pts: ' num2str(mean_xyr)]);
+                end
+
+            case 'disp/force'
+                subplot(2,1,1);
+                plot(t(pidx), xyr(pidx,:), '-', 'Color', seqColorList(s,:));
+                xlabel([logstring1 'time [s]' logstring2]);
+                ylabel([logstring1 'displacement [\mum]' logstring2]);
+
+                subplot(2,1,2);
+                plot(t(pidx), force(pidx,:), '.', 'Color', seqColorList(s,:));
+                xlabel([logstring1 'time [s]' logstring2]);
+                ylabel([logstring1 'force [pN]' logstring2])
+
+                fprintf('average force= %g\n', mean(force)');
+
+            case 'relative max. disp.'
+                subplot(1,1,1);
+                plot();
+                xlabel('Sequence#');
+                ylabel('Displacement Relative to Pull 1');
+                
+            case 'velocity'
+                subplot(1,1,1);
+                plot(t(pidx), dxyrdt(pidx,:), '.', 'Color', seqColorList(s,:));
+                xlabel([logstring1 'time [s]' logstring2])
+                ylabel([logstring1 'velocity [\mum/s]' logstring2]);
+                title(['time window, size= ' num2str(params.scale,0)*mean(diff(t)) ' [s].']);            
+
+            case 'max shear rate'                      
+                subplot(1,1,1);
+                plot(t(pidx), max_shear_rate(pidx,:), '.', 'Color', seqColorList(s,:));
+                xlabel([logstring1 'time [s]' logstring2]);
+                ylabel([logstring1 'maximum shear rate [1/s]' logstring2]);
+
+            case 'Weissenberg #'
+                subplot(1,1,1);
+                plot(t(pidx), Wi(pidx,:), '.', 'Color', seqColorList(s,:));
+                xlabel([logstring1 'time [s]' logstring2]);
+                ylabel([logstring1 'Weissenberg Number' logstring2]);
+
+            case 'compliance'
+                subplot(1,1,1);
+                plot(t(pidx), j(pidx,:), '.', 'Color', seqColorList(s,:));
+                xlabel([logstring1 'time [s]' logstring2]);
+                ylabel([logstring1 'compliance, J [Pa^{-1}]' logstring2]);     
+
+            case 'inst. viscosity'
+                subplot(1,1,1);
+                plot(t(pidx), visc(pidx,:), '.', 'Color', seqColorList(s,:));
+                xlabel([logstring1 'time [s]' logstring2])
+                ylabel([logstring1 '\eta [Pa s]' logstring2]);
+                title(['time window, size= ' num2str(params.scale,0)*mean(diff(t)) ' [s].']);            
+
+            case 'strain thickening'
+                subplot(1,1,1);
+                plot(3*xyr(pidx,:)/(2*params.bead_radius), visc(pidx,:), '.', 'Color', seqColorList(s,:));          
+                xlabel([logstring1 'max strain' logstring2]);
+                ylabel([logstring1 'viscosity, \eta [Pa s]' logstring2]);
+
+            case 'inst. viscosity vs. max shear rate'
+                subplot(1,1,1);
+                plot(max_shear_rate(pidx,3), visc(pidx), '.');
+                hold on;
+                    text(max_shear_rate(1,3), visc(1,1), 'S', 'FontWeight', 'Demi');
+                    text(max_shear_rate(end,3), visc(end,1), 'E', 'FontWeight', 'Demi');
+                hold off;
+
+                if isfield(dmbr_struct, 'cap')
+                   hold on;
+                   plot(cap_srate, cap_viscPa, 'k-');
+                   hold off;
+                end
+
+                xlabel([logstring1 'maximum shear rate [1/s]' logstring2]);
+                ylabel([logstring1 'inst. viscosity [Pa s]' logstring2]);
+
+                pause(0.1);
+
+            case 'inst. viscosity vs. Weissenburg #'
+                subplot(1,1,1);
+                plot(Wi(pidx), visc(pidx), '.');
+                xlabel([logstring1 'Weissenburg Number' logstring2]);
+                ylabel([logstring1 'inst. viscosity [Pa s]' logstring2]);
+
+            case 'storage and loss moduli'
+
+
+            GData=dmbr_direct_moduli(t,j,1000,'n');
+                % Plot the moduli    
+            subplot(1,1,1);
+            loglog(GData(:,1),GData(:,2),'b.-');
+            hold on
+            loglog(GData(:,1),GData(:,3),'r.-');
+            legend('G''','G''''','Location','NorthWest');
+            xlabel('\omega [s^{-1}]');
+            ylabel('Moduli [Pa]');
+            hold off
+
+        end
+
+        pretty_plot;
+        drawnow;
+        hold off;
+    end
     v = 0;
     
 %%%%%%%%%%%%%%%%

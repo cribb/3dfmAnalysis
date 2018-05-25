@@ -54,8 +54,8 @@ end
             
             for myVID = unique(tablein(:,VID))'
 
-                if ~exist('count')
-                    count = 1;
+                if ~exist('mycount')
+                    mycount = 1;
                 end
                 
                 idx = find( tablein(:,ID) == trackers(myTracker) ...
@@ -132,18 +132,18 @@ end
                     
                     if (xerrpct < error_tol) && (yerrpct < error_tol)
                         
-                        out.trackerid(count,1)   = myTracker;
-                        out.seqid(count,1)       = mySeq;
+                        out.trackerid(mycount,1)   = myTracker;
+                        out.seqid(mycount,1)       = mySeq;
                         % myVID
-                        out.volts(count,1)       = voltages(myVID+1);
-                        out.xy(count,:)          = xy;
-                        out.xyslope(count,:)     = [vxfit(1) vyfit(1)];
-                        out.xyintercept(count,:) = [vxfit(2) vyfit(2)];
-                        out.xyres(count,:)       = xyres;
-                        out.Fxy(count,:)         = Fxy;
-                        out.Fxyerr(count,:)      = Fxyerr;
+                        out.volts(mycount,1)       = voltages(myVID+1);
+                        out.xy(mycount,:)          = xy;
+                        out.xyslope(mycount,:)     = [vxfit(1) vyfit(1)];
+                        out.xyintercept(mycount,:) = [vxfit(2) vyfit(2)];
+                        out.xyres(mycount,:)       = xyres;
+                        out.Fxy(mycount,:)         = Fxy;
+                        out.Fxyerr(mycount,:)      = Fxyerr;
 
-                        count = count + 1;
+                        mycount = mycount + 1;
                     end
                 end
 
@@ -167,7 +167,7 @@ end
     close(timefig);
     
     % comment on why we have to do this
-    if count <= 1 
+    if mycount <= 1 
         error('Analysis Error: No points within error tolerance for linefit estimates.');
         return;
     end
