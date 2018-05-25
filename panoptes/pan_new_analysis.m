@@ -27,7 +27,8 @@ d.TrackingTable = FilteredTrackingTable;
 d.Trash = Trash;
 
 % (6) Deal with drift separately from traditional "filtering" operation.
-com = vst_common_motion(d.TrackingTable); %%% REMEMBER THIS IS FILTERED TRACKING
+COMtable = vst_common_motion(d.TrackingTable); %%% REMEMBER THIS IS FILTERED TRACKING
+d.TrackingTable = join(d.TrackingTable, COMtable);
 
 % (7) Identify salient groups in the dataset: beadGroups, fileGroups,
 % SampleNameGroups, SampleInstanceGroups, FovIDGroups
