@@ -7,8 +7,17 @@ function new_vid_table = traj_subtract_common_motion(vid_table, traj_common)
 % used.
 
     video_tracking_constants;   
-
     
+    if istable(vid_table)
+        tmptable = NaN(size(vid_table,1), size(NULLTRACK,2));
+        tmptable(:,ID)    = vid_table.ID;
+        tmptable(:,FRAME) = vid_table.Frame;
+        tmptable(:,X)     = vid_table.X;
+        tmptable(:,Y)     = vid_table.Y;
+        
+        vid_table = tmptable;       
+    end
+
     id_list = unique(vid_table(:,ID));
 
   
@@ -16,13 +25,13 @@ function new_vid_table = traj_subtract_common_motion(vid_table, traj_common)
     new_vid_table = [];
     for k = 1:length(id_list)
         q = vid_table(  vid_table(:,ID) == id_list(k) , :); 
+        
         frameone = q(1,FRAME); 
         frameend = q(end,FRAME); 
         
-        commonidx_one = find(traj_common.frame == frameone);
-        commonidx_end = find(traj_common.frame == frameend);
+%         common_frames = traj_common(:,1);
         
-        my_common_xy = traj_common.xy(commonidx_one:commonidx_end,:);
+        my_common_xy = traj_common(frameone:frameend,2:3);
         c_offset = repmat(my_common_xy(1,:),size(my_common_xy,1),1);
         
         q_subtraj = q(:,X:Y);
