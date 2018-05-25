@@ -13,7 +13,9 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
     end
 
     if nargin < 1 || isempty(vid_table)
-        error('No data inputted.'); 
+        logentry('No input data. Returning an empty vector'); 
+        common_xy = zeros(0,3);
+        return;
     end
     
     if istable(vid_table)
@@ -25,17 +27,37 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
         
         vid_table = tmptable;       
     end
-    
-
-    %     clip data to desired time points
-    %     t_idx = find( vid_table(:,TIME) >= drift_start_time & vid_table(:,TIME) <= drift_end_time);
-    %     vid_table = vid_table(t_idx,:);
 
     firstframe = min(vid_table(:,FRAME));
     lastframe  = max(vid_table(:,FRAME));
     
     id_list = unique(vid_table(:,ID));
-
+    full_frame_list(:,1) = [firstframe:lastframe];
+    headerrows = NaN(length([1:firstframe-1]),2);
+    
+    % Check to see if there's only one id. My intuition is to just delete
+    % this file altogether, but we can use a linear-fit as the estimate for
+    % the case of a single tracker without imparting too much error or bias
+    % into the computation, so that's what I'm doing here. Return after
+    % collecting this estimate.
+    if length(id_list) == 1
+        myx = vid_table(:,X);
+        myy = vid_table(:,Y);
+        
+        [px, Sx] = polyfit(full_frame_list, vid_table(:,X), 1);
+        [py, Sy] = polyfit(full_frame_list, vid_table(:,Y), 1);
+        
+        x = polyval(px, full_frame_list);
+        y = polyval(py, full_frame_list);
+        
+        common_xy = [x(:) y(:)];           
+        common_xy = [headerrows; common_xy];
+        
+        logentry('WARNING: Only one tracker available. Resorting to linear-fit as common mode vector for this specific field-of-view/video.');
+        
+        return;
+    end
+    
     % Identify the first and last "frames of existence" for every tracker and
     % place the list as 'frameone' and 'frameend' variables
     frameone = NaN(1,length(id_list));
@@ -49,7 +71,7 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
     % 'C=setdiff(A,B)' returns for C the values in A that are not in B.  Here we use
     % setdiff to identify the frames where no "popping in and out of existence"
     % occurs.
-    C = setdiff([firstframe:lastframe]', [frameone frameend]');
+    C = setdiff(full_frame_list, [frameone frameend]');
 
     % I'm going to add 'frame 1' back into C (because it's an edge case, it
     % doesn't count as a "pop-in" for this algorithm)
@@ -67,7 +89,7 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
     % velocities as a forward difference.  NOTE: Must retain the frame 
     % identification for each estimate in order to re-attach the computation 
     % to the global clock.
-    count = 1;
+    outv = NaN(length(contig_list),3);
     for k = 1:length(contig_list)
         thisFRAME = contig_list(k);
 
@@ -90,12 +112,10 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
     % subtraction is going to generate artifacts in diffusion data, and the 
     % higher the order, the more extreme the artifact. However, it may be 
     % useful to be able to subtract out drifts that change direction during
-    % 
     % the video collection.
     
-    % First, get a list of the frames that DO and DO NOT contribute to the 
+    % First, get lists of the frames that DO and DO NOT contribute to the 
     % generation of the center-of-mass definition.
-    full_frame_list = (firstframe:lastframe)';
     [missing_frames, idx_for_missing_frames] = setdiff(full_frame_list, outv(:,1));
     weights = ones(size(full_frame_list));
     weights(idx_for_missing_frames) = 0;
@@ -117,45 +137,71 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
     x_filled = fillnans(interp_velocities(:,1)) + noise_filler(:,1);
     y_filled = fillnans(interp_velocities(:,2)) + noise_filler(:,2);    
 
-        if sum(missingvel(:)) > 16 && contains(plotyn, 'y')
-            h = figure; 
-            pos = get(h, 'Position');
-            pos(3) = 2 * pos(3);
-            set(h, 'Position', pos);
-            
-            subplot(1,2,1);
-            plot(full_frame_list, x_filled, 'b', ...
-                 full_frame_list, interp_velocities(:,1), 'k', ...
-                 full_frame_list, y_filled, 'r', ...
-                 full_frame_list, interp_velocities(:,2), 'k');
-            legend('x filled-in NaNs', 'x original', 'y filled-in NaNs', 'y original');
-            title('center-of-mass velocity');
-            xlabel('frame');
-            ylabel('velocity [px/frame]');
-            drawnow;
-        end
+%         if sum(missingvel(:)) > 16 && contains(plotyn, 'y')
+%             h = figure; 
+%             pos = get(h, 'Position');
+%             pos(3) = 2 * pos(3);
+%             set(h, 'Position', pos);
+%             
+%             subplot(1,2,1);
+%             plot(full_frame_list, x_filled, 'b', ...
+%                  full_frame_list, interp_velocities(:,1), 'k', ...
+%                  full_frame_list, y_filled, 'r', ...
+%                  full_frame_list, interp_velocities(:,2), 'k');
+%             legend('x filled-in NaNs', 'x original', 'y filled-in NaNs', 'y original');
+%             title('center-of-mass velocity');
+%             xlabel('frame');
+%             ylabel('velocity [px/frame]');
+%             drawnow;
+%         end
 
     interp_velocities = [x_filled y_filled];
     
     xy = cumsum(interp_velocities);        
 
-        if sum(missingvel(:)) > 16 && contains(plotyn, 'y')
-            figure(h);
-            subplot(1,2,2);
-            plot(full_frame_list, xy(:,1), 'bo', ...
-                 full_frame_list(~missingvel(:,1)), xy(~missingvel(:,1),1), 'ko', ...
-                 full_frame_list, xy(:,2), 'ro', ...
-                 full_frame_list(~missingvel(:,2)), xy(~missingvel(:,2),2), 'ko');
-            legend('x filled-in NaNs', 'x original', 'y filled-in NaNs', 'y original');
-            title('center-of-mass displacement');
-            xlabel('frame');
-            ylabel('displacement [px]');
-            drawnow;
-        end
+%         if sum(missingvel(:)) > 16 && contains(plotyn, 'y')
+%             figure(h);
+%             subplot(1,2,2);
+%             plot(full_frame_list, xy(:,1), 'bo', ...
+%                  full_frame_list(~missingvel(:,1)), xy(~missingvel(:,1),1), 'ko', ...
+%                  full_frame_list, xy(:,2), 'ro', ...
+%                  full_frame_list(~missingvel(:,2)), xy(~missingvel(:,2),2), 'ko');
+%             legend('x filled-in NaNs', 'x original', 'y filled-in NaNs', 'y original');
+%             title('center-of-mass displacement');
+%             xlabel('frame');
+%             ylabel('displacement [px]');
+%             drawnow;
+%         end
     
-    common_xy.frame = full_frame_list;
-    common_xy.xy = xy;
-    common_xy.weights = weights;
-    common_xy.missing_frames = missing_frames;
+    
+%     common_xy.frame = full_frame_list;
+%     common_xy.xy = xy;
+%     common_xy.weights = weights;
+%     common_xy.missing_frames = missing_frames;
+    
+    mynans = ~weights;
+    
+    blah(:,1) = [0; mynans(1:end-1)];
+    blah(:,2) = [mynans(2:end); 0];
+    
+    blah = double(blah);
+    num_neighbors = sum(blah,2);
+    
+    NumNeed2NaN = sum(num_neighbors>1);
+    
+    xy(num_neighbors>1,:) = NaN(NumNeed2NaN,2);
+    
+%     fxy = [full_frame_list(:) xy];
+    
+
+
+    
+    
+% %     headerNaNs = NaN(full_frame_list(1)-1,1);   
+% %     xy(self_and_neighbors==3,:) = NaN;   
+% %     allframes = [headerNaNs ; full_frame_list];
+% %     xy = [headerNaNs headerNaNs ; xy];    
+    common_xy = [headerrows; xy];
     
     return;
+    
