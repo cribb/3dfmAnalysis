@@ -89,7 +89,7 @@ for p = 1:length(pass_list)
                           '_FLburst_pass' num2str(pass) ...
                           '_well' num2str(well)];
                       
-        fframe_name = [basename_fframes '\' 'frame0001.pgm'];
+        fframe_name = [basename_fframes filesep 'frame0001.pgm'];
         
         FirstFrameFiles{fid,1} = fframe_name;
         
