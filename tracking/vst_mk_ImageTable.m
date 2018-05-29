@@ -9,8 +9,18 @@ mip_files = fullfile(VidTable.Path, VidTable.MipFiles);
 for f = 1:N
     
         Fid(f,1) = VidTable.Fid(f);
-        FirstFrames{f,1} = imread(fframe_files{f});
-        Mips{f,1} = imread(mip_files{f});
+        
+        if ~isempty(dir(fframe_files{f}))
+            FirstFrames{f,1} = imread(fframe_files{f});
+        else
+            FirstFrames{f,1} = [];
+        end
+        
+        if ~isempty(dir(mip_files{f}))
+            Mips{f,1} = imread(mip_files{f});
+        else
+            Mips{f,1} = [];
+        end
         
 end
 

@@ -27,8 +27,15 @@ fid = 1:size(VidTable,1);
 for f = 1:length(fid)    
     
     % Handle the incoming data for whatever type it is...
-    % First, check if it's a csv file
+    % First, check if the tracking file exists
+    if isempty(VidTable.TrackingFiles{f})
+        logentry(['No tracking file found for fid: ' num2str(fid(f))]);
+        continue
+    end
+    
+
     myfile = fullfile(VidTable.Path{f}, VidTable.TrackingFiles{f});
+    
     
     dd = readtable(myfile);
 
