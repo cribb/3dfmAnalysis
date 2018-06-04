@@ -132,7 +132,7 @@ for p = 1:length(pass_list)
 end
 
 Fid = (1:fid-1)';
-
+% Fid = categorical(Fid);
 SampleName = categorical(SampleName);
 SampleInstance = categorical(SampleInstance);
 FovID = categorical(FovID);
