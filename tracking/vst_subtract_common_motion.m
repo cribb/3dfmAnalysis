@@ -1,34 +1,54 @@
-function outs = vst_subtract_common_motion(TrackingTable, FileSummary)
+function outs = vst_subtract_common_motion(TrackingTable)
 
-    [ngid,nglist] = findgroups(TrackingTable.Fid);    
+    TrackingTable.Fid = double(TrackingTable.Fid); 
+    TrackingTable.ID  = double(TrackingTable.ID);
 
-    common_modes = splitapply(@(x1,x2,x3,x4,x5){subtract_common_mode(x1,x2,x3,x4,x5)}, ...
-                                         TrackingTable.ID, ...
+    [g,gFid,gID] = findgroups(TrackingTable.Fid, TrackingTable.ID);
+    
+    drift_free = splitapply(@(x1,x2,x3,x4,x5,x6,x7){subtract_common_mode(x1,x2,x3,x4,x5,x6,x7)}, ...
+                                         TrackingTable.Fid, ...
                                          TrackingTable.Frame, ...
+                                         TrackingTable.ID, ...
                                          TrackingTable.X, ...
                                          TrackingTable.Y, ...
-                                         common_mode, ...
-                                         ngid);
+                                         TrackingTable.Xcom, ...
+                                         TrackingTable.Ycom, ...
+                                         g);    
 
-    outs.Fid = nglist;
-    outs.COM = common_modes;
+    drift_free = cell2mat(drift_free);
 
-    outs = struct2table(outs);
+    tmp.Fid = categorical(drift_free(:,1));
+    tmp.Frame = drift_free(:,2);
+    tmp.ID = categorical(drift_free(:,3));
+    tmp.X = drift_free(:,4);
+    tmp.Y = drift_free(:,5);
+    
+    tmpT = struct2table(tmp);
+
+    TrackingTable.Fid = categorical(TrackingTable.Fid);
+    TrackingTable.ID  = categorical(TrackingTable.ID);
+    TrackingTable.X   = [];
+    TrackingTable.Y   = [];
+    
+    outs = join(tmpT, TrackingTable);
 
 return;
 
 
-function df = subtract_common_mode(id, frames, x, y, common_mode)
+function outs = subtract_common_mode(fid, frame, id, x, y, xcom, ycom)
 
-    video_tracking_constants;       
+        xy = [x(:) y(:)];
+        common_xy = [xcom(:) ycom(:)];
 
-    vidtable = NaN(size(id,1), size(NULLTRACK,2));
-    
-    vidtable(:,ID)    = id;
-    vidtable(:,FRAME) = frames;
-    vidtable(:,X)     = x;
-    vidtable(:,Y)     = y;
-
-    df = traj_subtract_common_motion(vidtable, common_mode);
-    
-    return
+        xy_offset = xy(1,:);
+        c_offset = common_xy(1,:);
+        
+        xy = xy - xy_offset;        
+        common_xy = common_xy - c_offset;
+        
+        new_xy = xy - common_xy;
+        
+        new_xy = new_xy + xy_offset;
+        
+        outs = [fid, frame, id, new_xy];
+return
