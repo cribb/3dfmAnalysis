@@ -157,8 +157,11 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
 
     interp_velocities = [x_filled y_filled];
     
-    xy = cumsum(interp_velocities);        
-
+    xy_offset = vid_table( vid_table(:,FRAME) == full_frame_list(1), X:Y);
+    xy_offset = mean(xy_offset);
+    
+    xy_tmp = cumsum(interp_velocities);        
+    xy = xy_tmp + xy_offset;
 %         if sum(missingvel(:)) > 16 && contains(plotyn, 'y')
 %             figure(h);
 %             subplot(1,2,2);
@@ -181,15 +184,16 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
     
     mynans = ~weights;
     
-    blah(:,1) = [0; mynans(1:end-1)];
-    blah(:,2) = [mynans(2:end); 0];
+    blah(:,1) = mynans(:);
+    blah(:,2) = [0; mynans(1:end-1)];   
+    blah(:,3) = [mynans(2:end); 0];
     
     blah = double(blah);
     num_neighbors = sum(blah,2);
     
-    NumNeed2NaN = sum(num_neighbors>1);
+    NumNeed2NaN = sum(num_neighbors>2);
     
-    xy(num_neighbors>1,:) = NaN(NumNeed2NaN,2);
+%     xy(num_neighbors>2,:) = NaN(NumNeed2NaN,2);
     
 %     fxy = [full_frame_list(:) xy];
     
