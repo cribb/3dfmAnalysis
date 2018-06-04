@@ -24,4 +24,6 @@ for f = 1:N
         
 end
 
+% Fid = categorical(Fid);
+
 outs = table(Fid, FirstFrames, Mips);
