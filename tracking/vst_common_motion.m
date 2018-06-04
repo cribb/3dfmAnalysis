@@ -1,14 +1,14 @@
-function outs = vst_common_motion(TrackingTable)
+function TrackingTableOut = vst_common_motion(TrackingTableIn)
 
 % TrackingTable = DataIn.TrackingTable;
 
-[ngid,nglist] = findgroups(TrackingTable.Fid);    
+[ngid,nglist] = findgroups(TrackingTableIn.Fid);    
 
 common_modes = splitapply(@(x1,x2,x3,x4){common_mode(x1,x2,x3,x4)}, ...
-                                         TrackingTable.ID, ...
-                                         TrackingTable.Frame, ...
-                                         TrackingTable.X, ...
-                                         TrackingTable.Y, ...
+                                         TrackingTableIn.ID, ...
+                                         TrackingTableIn.Frame, ...
+                                         TrackingTableIn.X, ...
+                                         TrackingTableIn.Y, ...
                                          ngid);
 N = size(cell2mat(common_modes),1);
 all_common_modes = NaN(0,4);
@@ -21,12 +21,14 @@ for k = 1:length(nglist)
     all_common_modes = [all_common_modes; this_com_table];
 end
 
-outs.Fid   = all_common_modes(:,1);
-outs.Frame = all_common_modes(:,2);
-outs.Xcom  = all_common_modes(:,3);
-outs.Ycom  = all_common_modes(:,4);
+tmp.Fid   = all_common_modes(:,1);
+tmp.Frame = all_common_modes(:,2);
+tmp.Xcom  = all_common_modes(:,3);
+tmp.Ycom  = all_common_modes(:,4);
 
-outs = struct2table(outs);
+tmp = struct2table(tmp);
+
+TrackingTableOut = join(TrackingTableIn, tmp, 'Keys', {'Fid', 'Frame'});
 
 return;
 
