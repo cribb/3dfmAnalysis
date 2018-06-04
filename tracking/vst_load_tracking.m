@@ -79,7 +79,7 @@ warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
 % (1) Categorize metadata/grouping variables
 TrackingTable.ID = categorical(TrackingTable.ID);
 % TrackingTable.Frame = categorical(TrackingTable.Frame);
-TrackingTable.Radius = categorical(TrackingTable.Radius); % because this is technically a tracking parameter
+% TrackingTable.Radius = categorical(TrackingTable.Radius); % because this is technically a tracking parameter
 
 % (2) convert CenterIntensity to an 8-bit value since Video Spot Tracker
 % returns a 16-bit number by default for some odd reason.
