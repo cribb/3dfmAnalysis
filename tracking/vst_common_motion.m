@@ -11,20 +11,24 @@ common_modes = splitapply(@(x1,x2,x3,x4){common_mode(x1,x2,x3,x4)}, ...
                                          TrackingTableIn.Y, ...
                                          ngid);
 N = size(cell2mat(common_modes),1);
-all_common_modes = NaN(0,4);
+
+[all_fid, all_framelist, all_cm] = deal(NaN(0,1));
+% all_fid = categorical(all_fid);
+
 for k = 1:length(nglist)
     this_cm  = common_modes{k};
     this_fid = repmat(nglist(k), size(this_cm,1),1);
     this_framelist = transpose(1:size(this_cm,1));
     
-    this_com_table = [this_fid, this_framelist, this_cm];
-    all_common_modes = [all_common_modes; this_com_table];
+    all_fid =       [all_fid; this_fid];
+    all_framelist = [all_framelist; this_framelist];
+    all_cm =        [all_cm; this_cm];
 end
 
-tmp.Fid   = all_common_modes(:,1);
-tmp.Frame = all_common_modes(:,2);
-tmp.Xcom  = all_common_modes(:,3);
-tmp.Ycom  = all_common_modes(:,4);
+tmp.Fid   = all_fid;
+tmp.Frame = all_framelist;
+tmp.Xcom  = all_cm(:,1);
+tmp.Ycom  = all_cm(:,2);
 
 tmp = struct2table(tmp);
 
