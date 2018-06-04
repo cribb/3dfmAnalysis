@@ -77,6 +77,7 @@ warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
 % Housekeeping on data: 
 %
 % (1) Categorize metadata/grouping variables
+% TrackingTable.Fid = categorical(TrackingTable.Fid);
 TrackingTable.ID = categorical(TrackingTable.ID);
 % TrackingTable.Frame = categorical(TrackingTable.Frame);
 % TrackingTable.Radius = categorical(TrackingTable.Radius); % because this is technically a tracking parameter
