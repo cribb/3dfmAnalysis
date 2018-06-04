@@ -9,20 +9,23 @@ d.metadata = pan_load_metadata(filepath, systemid, platetype);
 logentry('Constructing video table from metadata and file directory info.');
 d.VidTable = pan_mk_video_table(filepath, systemid, platetype);
 
-% (3) Load in the tracking data
+% (2) Load in the tracking data
 logentry('Loading trajectory data...');
 d.TrackingTable = vst_load_tracking(d.VidTable);
 
-% (2) Load in imaging data
+% (3) Load in imaging data
 logentry('Loading Imaging support data...');
 d.ImageTable = vst_mk_ImageTable(d.VidTable);
 
-% (4) Summarize Tracking information
+% (4) Pull out the trajectory images, both first frames and MIPs
+d.TrajImageTable = vst_compile_tracker_images(d);
+
+% (5) Summarize Tracking information
 logentry('Generating Statistical summaries on raw trajectory information...');
 d.TrackingSummary = vst_summarize_traj(d.TrackingTable);
 d.FileSummary = vst_summarize_files(d.TrackingSummary);
 
-% (5) Filter tracking data and put eliminated data into a "Trash" table.
+% (6) Filter tracking data and put eliminated data into a "Trash" table.
 filtin.tcrop      = 3;
 filtin.min_frames = floor(d.metadata.instr.fps_fluo/2);
 
@@ -32,29 +35,33 @@ logentry('Filtering trajectories based on prescribed settings...');
 d.TrackingTable = FilteredTrackingTable;
 d.Trash = Trash;
 
-% (6) Deal with drift separately from traditional "filtering" operation.
-d.COMtable = vst_common_motion(d.TrackingTable); %%% REMEMBER THIS IS FILTERED TRACKING
-d.TrackingTable = join(d.TrackingTable, d.COMtable);
+% (7) Deal with drift separately from traditional "filtering" operation.
+ComTable = vst_common_motion(d.TrackingTable); %%% REMEMBER THIS IS FILTERED TRACKING
+d.TrackingTable = ComTable;
 
-% (7) Identify salient groups in the dataset: beadGroups, fileGroups,
+DriftFreeTable = vst_subtract_common_motion(d.TrackingTable);
+d.TrackingTable = DriftFreeTable;
+
+
+% (8) Identify salient groups in the dataset: beadGroups, fileGroups,
 % SampleNameGroups, SampleInstanceGroups, FovIDGroups
 
-% (8) Calculate basic statistics & put into data structure
+% (9) Calculate basic statistics & put into data structure
 
-% (9) Calculate displacements & put into data structure
+% (10) Calculate displacements & put into data structure
 
-% (10) Calculate MSD on beadGroups and put into data structure
+% (11) Calculate MSD on beadGroups and put into data structure
 
-% (11) Save dataset
+% (12) Save dataset
 
 DataOut = d;
 
-bigTable = join(d.TrackingTable, d.VidTable);
-
-bigTable.RegionSize = log10(bigTable.RegionSize);
-bigTable.Sensitivity = log10(bigTable.Sensitivity);
-bigTable.ForegroundSize = log10(bigTable.ForegroundSize);
-
+% bigTable = join(d.TrackingTable, d.VidTable);
+% 
+% bigTable.RegionSize = log10(bigTable.RegionSize);
+% bigTable.Sensitivity = log10(bigTable.Sensitivity);
+% bigTable.ForegroundSize = log10(bigTable.ForegroundSize);
+%
 % column_names = {'X', 'Y', 'CenterIntensity', 'Sensitivity', 'ForegroundSize', 'RegionSize'};
 % 
 % % [gS, groups] = findgroups(myTable.SampleName);
