@@ -37,11 +37,11 @@ if (nargin < 1) || isempty(VidTable) || ~istable(VidTable)
     vmsd.Nestimates = empty_set;
     vmsd.taus = empty_set;
     return;
-end;
+end
 
 if (nargin < 2) || isempty(taulist)  
     taulist = 50;  
-end;
+end
 
 fids = unique(VidTable.Fid);
 
@@ -67,7 +67,7 @@ for f = 1:length(fids)
     mymsd  = NaN(length(taulist), length(beadIDs));
     Nestimates = NaN(length(taulist), length(beadIDs));
 
-    for k = 1 : length(beadIDs);
+    for k = 1 : length(beadIDs)
 
         b = v( v.ID == beadIDs(k) , : );    
 
@@ -103,7 +103,7 @@ vmsd.taus = taulist;
 % creation of the plot MSD vs. tau
 if (nargin < 3) || isempty(make_plot) || strncmp(make_plot,'y',1)  
     plot_msd(vmsd, [], 'me'); 
-end;
+end
 
 % fprintf('size(vmsd): %i,  %i\n',size(vmsd.msd));
 return;
