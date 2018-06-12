@@ -4,18 +4,27 @@ function DataOut = vst_compile_tracker_images(DataIn)
     
     [g,gFid,gID] = findgroups(BigData.Fid, BigData.ID);
     
-    trackim  = splitapply(@(x1,x2,x3,x4){get_image_areas(x1,x2,x3,x4)}, ...
-                                         BigData.Xo, ...
-                                         BigData.Yo, ...
-                                         BigData.FirstFrames, ...
-                                         floor(BigData.Radius*1.5), ...
-                                         g);
-                                     
-%     drift_free = cell2mat(drift_free);
+    trackimFF = splitapply(@(x1,x2,x3,x4){get_image_areas(x1,x2,x3,x4, 'FF')}, ...
+                                          BigData.Xo, ...
+                                          BigData.Yo, ...
+                                          BigData.FirstFrames, ...
+                                          floor(BigData.Radius*1.5), ...
+                                          g);
+
+
+    
+    trackimMIP = splitapply(@(x1,x2,x3,x4){get_image_areas(x1,x2,x3,x4,'MIP')}, ...
+                                           BigData.Xo, ...
+                                           BigData.Yo, ...
+                                           BigData.Mips, ...
+                                           floor(BigData.Radius*1.5), ...
+                                           g);
+
 
     tmp.Fid = gFid;
     tmp.ID = gID;
-    tmp.beadImageFF = trackim;
+    tmp.beadImageFF = trackimFF;
+    tmp.beadImageMIP = trackimMIP;
     
     tmpT = struct2table(tmp);
 
@@ -27,28 +36,51 @@ function DataOut = vst_compile_tracker_images(DataIn)
 
 
 
-function ia = get_image_areas(x, y, im, tracker_halfsize)
+function ia = get_image_areas(x, y, im, tracker_halfsize, fm)
+    if nargin < 5 || isempty(fm)
+        error('FM not defined as ''FF'' or ''MIP''');
+    end
     
+    fm = upper(fm);
+
     im = im{1};
-    
+   
     width = size(im, 2);
     height = size(im, 1);
+
+    tracker_halfsize = unique(tracker_halfsize);            
     
-    tracker_halfsize = unique(tracker_halfsize);
-    
-    
-    
-    tfs = 2*tracker_halfsize;
+    switch fm
+        case 'FF'
+            x = x(1);
+            y = y(1);
+            
+        case 'MIP'
+            
+            d = ceil(max([range(x) range(y)]) + tracker_halfsize);
+            
+            tracker_halfsize = d;
+
+            x = mean(x);
+            y = mean(y);
+            
+        otherwise
+            error('FM input must be ''FF'' or ''MIP''');                    
+    end
     
     % extract x and y locations
     x = round(x);
     y = round(y);
     
+    
+    tfs = 2*tracker_halfsize;
+    
+    
     % determine boundaries for mini_image
-    xmin = x(1) - tracker_halfsize;
-    xmax = x(1) + tracker_halfsize;
-    ymin = y(1) - tracker_halfsize;
-    ymax = y(1) + tracker_halfsize;
+    xmin = x - tracker_halfsize;
+    xmax = x + tracker_halfsize;
+    ymin = y - tracker_halfsize;
+    ymax = y + tracker_halfsize;
     
     % determine boundaries in full inputted image
     if xmin <= 0
