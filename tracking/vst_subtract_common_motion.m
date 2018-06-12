@@ -17,16 +17,17 @@ function outs = vst_subtract_common_motion(TrackingTable)
 
     drift_free = cell2mat(drift_free);
 
-    tmp.Fid = categorical(drift_free(:,1));
+%     tmp.Fid = categorical(drift_free(:,1));
+    tmp.Fid = drift_free(:,1);
     tmp.Frame = drift_free(:,2);
-    tmp.ID = categorical(drift_free(:,3));
+    tmp.ID = drift_free(:,3);
     tmp.X = drift_free(:,4);
     tmp.Y = drift_free(:,5);
     
     tmpT = struct2table(tmp);
 
-    TrackingTable.Fid = categorical(TrackingTable.Fid);
-    TrackingTable.ID  = categorical(TrackingTable.ID);
+%     TrackingTable.Fid = categorical(TrackingTable.Fid);
+%     TrackingTable.ID  = categorical(TrackingTable.ID);
     TrackingTable.X   = [];
     TrackingTable.Y   = [];
     
