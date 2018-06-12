@@ -11,6 +11,10 @@ function diffout = difftau(data, taulist)
 %            agnostic of coordinate identification
 %         "taulist" is a vector containing integer frame-window lag "times"
 %
+% output: diffout will be an F x N x T matrix, where the rows, F, demarcate 
+% the frame nth-timepoint, the columns, N, mark the dataset/trajectory 
+% (could even be X/Y coords), and T is the time-window-step-difference, tau.
+%
 
 if nargin < 2 || isempty(taulist) || isempty(data)
     logentry('No taulist or input data defined. Returning empty set.');
