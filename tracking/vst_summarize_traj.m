@@ -27,7 +27,7 @@ function TrackingSummary = vst_summarize_traj(TrackingTable)
     traj.MaxSens = splitapply(@max, TrackingTable.Sensitivity, gid);
     
     % end-to-end distances and angles
-    [traj.EndDist, traj.EndAngl] = splitapply(@eedistangle, [TrackingTable.Xo TrackingTable.Yo], gid);
+    [traj.EndDist, traj.EndAngl] = splitapply(@eedistangle, [TrackingTable.X TrackingTable.Y], gid);
 
     TrackingSummary = struct2table(traj);
 
