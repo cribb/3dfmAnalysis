@@ -20,10 +20,10 @@ d.ImageTable = vst_mk_ImageTable(d.VidTable);
 % (4) Pull out the trajectory images, both first frames and MIPs
 d.TrajImageTable = vst_compile_tracker_images(d);
 
-% (5) Summarize Tracking information
+% (5) Summarize Raw Tracking information
 logentry('Generating Statistical summaries on raw trajectory information...');
-d.TrackingSummary = vst_summarize_traj(d.TrackingTable);
-d.FileSummary = vst_summarize_files(d.TrackingSummary);
+d.summary.RawTracking = vst_summarize_traj(d.TrackingTable);
+d.summary.RawFiles = vst_summarize_files(d.summary.RawTracking);
 
 % (6) Filter tracking data and put eliminated data into a "Trash" table.
 filtin.tcrop      = 3;
@@ -42,17 +42,33 @@ d.TrackingTable = ComTable;
 DriftFreeTable = vst_subtract_common_motion(d.TrackingTable);
 d.TrackingTable = DriftFreeTable;
 
+% (8) Summarize Filtered Tracking information
+logentry('Generating Statistical summaries on filtered trajectory information...');
+d.summary.FilteredTracking = vst_summarize_traj(d.TrackingTable);
+d.summary.FilteredFiles = vst_summarize_files(d.summary.FilteredTracking);
 
-% (8) Identify salient groups in the dataset: beadGroups, fileGroups,
-% SampleNameGroups, SampleInstanceGroups, FovIDGroups
-
-% (9) Calculate basic statistics & put into data structure
+% (9) Calculate list of taus (lagtimes) based on experiment sampling information
+Nframes = floor(d.metadata.instr.fps_imagingmode * d.metadata.instr.seconds);
+Ntaus = 35;
+use_fraction = 0.75;
+taulist = msd_gen_taus(Nframes, Ntaus, use_fraction);
 
 % (10) Calculate displacements & put into data structure
+diffTable = vst_difftau(d, taulist);
 
 % (11) Calculate MSD on beadGroups and put into data structure
+msdTable = vst_msd(d, taulist);
 
-% (12) Save dataset
+d.MsdTable = join(diffTable, msdTable);
+
+% (12) Identify salient groups in the dataset: beadGroups, fileGroups,
+% SampleNameGroups, SampleInstanceGroups, FovIDGroups
+d.PlateDefTable = d.metadata.plateT;
+
+
+% (13) Calculate basic statistics & put into data structure
+
+% (14) Save dataset
 
 DataOut = d;
 
