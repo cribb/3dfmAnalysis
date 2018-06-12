@@ -112,7 +112,8 @@ for k = 1:length(objids)
         foo = strcmp(datatable(:,FIELDNAME), fnames(m));
         midx = find( str2double(datatable(:,OBJID)) == objids(k)  & foo);
         
-        q.(objname{k})(index).(fnames{m}) = values(midx);
+        tmp = values(midx);
+        q.(objname{k})(index).(fnames{m}) = tmp(:);
     end        
 end
 
