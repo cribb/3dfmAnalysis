@@ -34,7 +34,7 @@ SampleInstance = cell(fidmax,1);   % Well = NaN(fidmax,1);
 FovID = cell(fidmax,1);        % Pass = NaN(fidmax,1);
 VideoFiles = cell(fidmax, 1);
 FirstFrameFiles = cell(fidmax, 1);
-Mipfiles = cell(fidmax, 1);
+MipFiles = cell(fidmax, 1);
 Path = cell(fidmax, 1);
 TrackingFiles = cell(fidmax, 1);
 Calibum = NaN(fidmax,1);
@@ -73,7 +73,7 @@ for p = 1:length(pass_list)
             TrackingFiles{fid,1} = '';
         end
         
-        % Set the SampleName (this is going to need better specification)
+        % Set the SampleName (XXX TODO this is going to need better specification)
         SampleName{fid,1} = metadata.plate.solution.name{well};
 
         % calibum conversions
