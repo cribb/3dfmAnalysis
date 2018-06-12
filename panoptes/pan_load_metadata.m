@@ -71,6 +71,7 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
     % Read in the well layout file, if we have one
     if ~isempty(outs.files.layout)
         outs.plate = pan_read_well_layout( outs.files.layout.name , plate_type );
+        outs.plateT = pan_plate_metadata(outs.files.layout.name);
     else
         error('No WELL_LAYOUT file.');
     end
@@ -97,9 +98,9 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
             this_diameter = str2num(outs.plate.bead.diameter{k});
 
             if ~isempty(this_diameter)
-                bead_diameter(1,k) =  this_diameter;
+                bead_diameter(k,1) =  this_diameter;
             else
-                bead_diameter(1,k) = NaN;           
+                bead_diameter(k,1) = NaN;           
             end
         end
         
