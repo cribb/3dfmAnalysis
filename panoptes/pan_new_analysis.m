@@ -65,7 +65,7 @@ d.MsdTable = join(diffTable, msdTable);
 % SampleNameGroups, SampleInstanceGroups, FovIDGroups
 d.PlateDefTable = d.metadata.plateT;
 
-
+foo = join(hbe4pct.MsdTable, hbe4pct.VidTable(:, {'Fid', 'Fps', 'Calibum'}));
 % (13) Calculate basic statistics & put into data structure
 
 % (14) Save dataset
