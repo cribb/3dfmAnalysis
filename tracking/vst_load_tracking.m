@@ -50,7 +50,7 @@ for f = 1:length(fid)
 
     % Z data and remaining values are nonexistant (These can be added back if needed in a
     % later version
-    dd.Z = [];
+%     dd.Z = [];
     dd.Orientation_ifMeaningful_ = [];
     dd.Length_ifMeaningful_ = [];
     dd.FitBackground_forFIONA_ = [];
@@ -66,6 +66,7 @@ for f = 1:length(fid)
     % 
     dd.Xo = dd.X;
     dd.Yo = dd.Y;
+    dd.Zo = dd.Z;
     
     % tack on the Fid value
     dd = [Fid dd];
@@ -92,8 +93,10 @@ TrackingTable.Properties.VariableUnits{'Frame'} = '';
 TrackingTable.Properties.VariableUnits{'ID'} = '';
 TrackingTable.Properties.VariableUnits{'X'} = 'pixels';
 TrackingTable.Properties.VariableUnits{'Y'} = 'pixels';
+TrackingTable.Properties.VariableUnits{'Z'} = 'step size';
 TrackingTable.Properties.VariableUnits{'Xo'} = 'pixels';
 TrackingTable.Properties.VariableUnits{'Yo'} = 'pixels';
+TrackingTable.Properties.VariableUnits{'Zo'} = 'step size';
 TrackingTable.Properties.VariableUnits{'Radius'} = 'pixels';
 TrackingTable.Properties.VariableUnits{'CenterIntensity'} = 'Intensity-8-bit';
 TrackingTable.Properties.VariableUnits{'RegionSize'} = 'pixels^2';
@@ -103,10 +106,5 @@ TrackingTable.Properties.VariableUnits{'ForegroundSize'} = 'pixels^2';
 
 % (4) This hacks the Xo and Yo columns to be next to the X and Y columns. 
 % XXX TODO: Upgrade to >2018a and use new addvars or movevars table functions
-TrackingTable = TrackingTable(:,[1:5 11 12 6:end-2]);
+TrackingTable = TrackingTable(:,[1:6 12:14 7:end-2]);
 
-
-
-    
-
-    
