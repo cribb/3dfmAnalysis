@@ -1,10 +1,12 @@
-function outs = save_bin_on_nvme(data, basefilename)
+function save_bin_on_nvme(data, basefilename)
 % SAVE_BIN_ON_NVME should be used for saving video data as bin file
 %
-%  outs = save_bin_on_nvme(data, basefilename)
+%  save_bin_on_nvme(data, basefilename)
 %
 %  where data = video data in XxYx1xFRAMES shape
+% 
 
+% function outs = save_bin_on_nvme(data, basefilename)
     machinefmt = 'ieee-le';
     
     [rows, cols, rgb, frames] = size(data);
@@ -14,21 +16,24 @@ function outs = save_bin_on_nvme(data, basefilename)
         error('Incorrect format for input. Must be X x Y x RGB x FRAMES, RGB = 1.');
     end
    
-    switch datatype
-        case 'uint8'
-            depth = '8';
-            encodingOut = 'US-ASCII';
-        case 'uint16'
-            depth = '16';
-            encodingOut = '';
-        otherwise
-            error('Type not found.');
-    end 
+%     switch datatype
+%         case 'uint8'
+%             depth = '8';
+%         case 'uint16'
+%             depth = '16';
+%         otherwise
+%             error('Type not found.');
+%     end 
    
-    [mypath, myname, myext] = fileparts(basefilename);
+    [mypath, myname, ~] = fileparts(basefilename);
    
     rootpath = pwd;
-    filepath = cd(mypath);
+    
+    if isempty(mypath)
+        mypath = rootpath;
+    end
+    
+    cd(mypath);
                   
     filename = strcat([myname, '_', ...
                        num2str(cols), 'x', ...
@@ -43,7 +48,9 @@ function outs = save_bin_on_nvme(data, basefilename)
     fclose(fid);
    
     disp(['Saved ' mypath filesep filename '.']);
+    
     cd(rootpath);
-    outs = filename;
+
+%     outs = filename;
 
 return
