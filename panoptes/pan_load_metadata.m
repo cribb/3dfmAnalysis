@@ -53,7 +53,7 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
         
         % if the instrument is panoptes (rather than monoptes) then expand
         % the wellIDs that were defined in the wells.txt file
-        if strfind(systemid,'panoptes');
+        if strfind(systemid,'panoptes')
             for k = 1:length(outs.instr.wells)
                 new_well_list(k,1:12) = outs.instr.wells(k) + [0:11];
             end
