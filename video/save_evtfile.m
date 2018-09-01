@@ -1,4 +1,4 @@
-function outfile = save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, outtype)
+function save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, outtype)
 % SAVE_EVTFILE saves tracking data to the evt.vrpn.mat format 
 %
 % 3DFM function
