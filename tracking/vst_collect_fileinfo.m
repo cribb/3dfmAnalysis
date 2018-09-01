@@ -1,4 +1,7 @@
 function outs = vst_collect_fileinfo(mypath, basename_prefix, fps, calibum, varargin)
+%
+% This function is deprecated (more or less) and has been replaced by video/mk_video_table
+%
 % Given filename tags, this function confirms existence of data for
 % tracking experiment and outputs table structure with info. This should
 % work for -optes datasets at the moment.
@@ -141,7 +144,7 @@ for k = 1:N
         [height(k,1), width(k,1)] = NaN(1,2);
     end
 end
-
+% VidTable = table(Fid, SampleName, SampleInstance, FovID, Path, Hostname, VideoFiles, TrackingFiles, FirstFrameFiles, MipFiles, Width, Height, Fps, Calibum);
 outs.SampleName = samplename_list;
 outs.Path = path_list;
 outs.Hostname = hostname_list;
