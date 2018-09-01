@@ -1,6 +1,5 @@
 function DataOut = pan_new_analysis(filepath, systemid, platetype)
 
-
 % (0) Load in the experiment's metadata
 logentry('Loading in experiment''s metadata.');
 d.metadata = pan_load_metadata(filepath, systemid, platetype);
@@ -47,6 +46,14 @@ logentry('Generating Statistical summaries on filtered trajectory information...
 d.summary.FilteredTracking = vst_summarize_traj(d.TrackingTable);
 d.summary.FilteredFiles = vst_summarize_files(d.summary.FilteredTracking);
 
+% Save the base output
+logentry('Saving base results file...');
+thispath = pwd; 
+seplocs = regexp(thispath, filesep);
+newname = thispath(seplocs(end)+1:end);
+newname = ['..' filesep newname '.base.mat'];
+save(newname, '-struct', 'd');
+
 % (9) Calculate list of taus (lagtimes) based on experiment sampling information
 Nframes = floor(d.metadata.instr.fps_imagingmode * d.metadata.instr.seconds);
 Ntaus = 35;
@@ -65,11 +72,10 @@ d.MsdTable = join(diffTable, msdTable);
 % SampleNameGroups, SampleInstanceGroups, FovIDGroups
 d.PlateDefTable = d.metadata.plateT;
 
-foo = join(hbe4pct.MsdTable, hbe4pct.VidTable(:, {'Fid', 'Fps', 'Calibum'}));
+foo = join(d.MsdTable, d.VidTable(:, {'Fid', 'Fps', 'Calibum'}));
 % (13) Calculate basic statistics & put into data structure
 
 % (14) Save dataset
-
 DataOut = d;
 
 % bigTable = join(d.TrackingTable, d.VidTable);
