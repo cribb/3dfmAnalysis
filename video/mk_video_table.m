@@ -164,7 +164,7 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
         Fid(k,1) = k;
         Path{k,1} = filelist(k).folder;
         Vidfile{k,1} = 0;
-        Trackfile{k,1} = filelist(k).name;
+        TrackingFiles{k,1} = filelist(k).name;
         Fps(k,1) = fpslist(k);
         Calibum(k,1) = calibumlist(k);
         Width(k,1) = width(k);
@@ -174,7 +174,7 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
     end
 
 % Need Firstframe and mip Mip to be FILE NAMES?
-filetable = table(Fid, Path, Vidfile, Trackfile, Fps, Calibum, Width, Height, Firstframefile, Mipfile);
+filetable = table(Fid, Path, Vidfile, TrackingFiles, Fps, Calibum, Width, Height, Firstframefile, Mipfile);
  
 
 return;
