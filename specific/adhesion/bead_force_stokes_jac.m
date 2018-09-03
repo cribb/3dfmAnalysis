@@ -32,6 +32,8 @@ if nargin < 2 || isempty(fps)
 	error('FPS not defined.');
 end
 
+clear calcZvel_jac;
+
 filelist = dir(filelist);
 filelist = {filelist.name};
 
@@ -66,7 +68,7 @@ jTable.Properties.VariableUnits{'Time'} = 's';
 
 [g, grpTable] = findgroups(jTable(:,{'Fid', 'ID'}));
 
-tmpVels = splitapply(@(x1,x2)calcZvel_jac(x1, x2, lolim, hilim), ...
+tmpVels = splitapply(@(x1,x2)calcZvel(x1, x2, lolim, hilim), ...
                     jTable.Time, ...
                     jTable.Z, ...
                     g);
@@ -76,6 +78,7 @@ T.Zvel      = tmpVels(:,2);
 T.ZfitRmse  = tmpVels(:,3);
 T.ZposMean  = tmpVels(:,4);
 T.ZposRange = tmpVels(:,5);
+T.CVerr     = tmpVels(:,6);
 
 T = struct2table(T);
 
@@ -99,52 +102,87 @@ T(:,{'BeadDiameter', 'StdViscosity'}) = [];
 
 d.ZforceTable = T;
 
-figure; 
-gscatter(jTable.Time, jTable.Z, g);
-xlabel('Time [s]');
-ylabel('Z pos [um]');
-
-
-figure;
-gscatter(jTable.Time, CreateGaussScaleSpace(jTable.Z, 1, 8).*jTable.Fps, g);
-xlabel('Time [s]');
-ylabel('Z velocity [um/s], s=8');
+% figure; 
+% gscatter(jTable.Time, jTable.Z, g);
+% xlabel('Time [s]');
+% ylabel('Z pos [um]');
+% 
+% 
+% figure;
+% gscatter(jTable.Time, CreateGaussScaleSpace(jTable.Z, 1, 8).*jTable.Fps, g);
+% xlabel('Time [s]');
+% ylabel('Z velocity [um/s], s=8');
 
 return
 
 function outs = calcZvel_jac(frames, zpos, lowlim, highlim)
-%     [uZ, Ff] = unique(zpos, 'first');
-    uZ = unique(round(zpos));
-    
-    medianuZ   = median(uZ);
-    [~,pos_medianuZ] = min(abs(zpos-medianuZ));
 
+%     first = find(zpos >  lowlim, 1);
+%     last  = find(zpos > highlim, 1);
+%     
+%     if isempty(last)
+%         frames = frames(first:end);
+%         zpos = zpos(first:end);
+%     else
+%         frames = frames(first:last-1);
+%         zpos = zpos(first:last-1);
+%     end
+    
+    [~,low] = min(zpos);
+    if low ~= 1
+        zpos(1:low) = [];
+        frames(1:low) = [];
+    end
+    
+    [~,high] = max(zpos);
+    if high ~= length(zpos)
+        zpos(high+1:end) = [];
+        frames(high+1:end) = [];
+    end
+
+    
+    persistent gcount    
+    
+    if isempty(gcount)
+        gcount = 1;
+    else
+        gcount = gcount + 1;
+    end
+    
+    fprintf('gcount=%d\n', gcount);
+
+        
+    [uZ, Ff] = unique(round(zpos), 'first');
     midrangeuZ = mean(range(uZ));
-
-    targetuZ = midrangeuZ;
-%     targetuZ = medianuZ;
-    
 %     targetuZ = median(uZ) - 0.5*std(uZ);
-
+    targetuZ = midrangeuZ;
 
     [~,pos_targetuZ] = min(abs(zpos-targetuZ));
 
-    CVerr = 0; Pstep = 2; Nstep = 2; count = 1;
-    while CVerr < 0.2 && ...
+    CVlim = 0.2;
+    CVerr = 0; 
+    Pstep = 2; 
+    Nstep = 2;
+    count = 1;
+    
+    [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange, myframes, fitZ] = deal(NaN);    
+    
+    while CVerr < CVlim && ...
           pos_targetuZ + Pstep < length(zpos) && ...
           pos_targetuZ - Nstep >= 1
 
-        fitframes = frames(pos_targetuZ - Nstep : pos_targetuZ + Pstep);
-        fitzpos   =   zpos(pos_targetuZ - Nstep : pos_targetuZ + Pstep);
 
-        fit = polyfit(fitframes(:), fitzpos(:), 1);
-        fitZ = polyval(fit, fitframes(:));
+        myframes = frames(pos_targetuZ - Nstep : pos_targetuZ + Pstep);
+        myzpos   =   zpos(pos_targetuZ - Nstep : pos_targetuZ + Pstep);
 
-        firstframe = fitframes(1);
+        fit  = polyfit(myframes(:), myzpos(:), 1);
+        fitZ = polyval(fit, myframes(:));
+
+        firstframe = myframes(1);
         Zvel = fit(1); % [stepsize/frame]    
-        ZfitRmse = sqrt(sum((fitzpos-fitZ).^2));
-        ZposMean = mean(fitzpos);
-        ZposRange = range(fitzpos);
+        ZfitRmse = sqrt(sum((myzpos-fitZ).^2));
+        ZposMean = mean(myzpos);
+        ZposRange = range(myzpos);
 
         CVerr = ZfitRmse / ZposMean;
 
@@ -156,15 +194,19 @@ function outs = calcZvel_jac(frames, zpos, lowlim, highlim)
             Nstep = Nstep + 1;
         end
 
+        count = count + 1;
+        
     end
 
-    outs = [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange];
+    outs = [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange, CVerr];
+    
     
     figure;
     plot(frames, zpos, '.b', ...
-         fitframes, fitZ, '-r', ...
-         frames(pos_targetuZ), targetuZ, 'ok', ...
-         frames(pos_medianuZ), medianuZ, 'ok');
+         frames(Ff), uZ, 'ok', ...
+         myframes, fitZ, '-r', ...
+         frames(pos_targetuZ), targetuZ, 'xc');
+    legend('All Z-pos', 'Unique Z', 'Fitted Z', 'Mid-Range uZ');
     
     % outs = {x, y, coef};
     
@@ -192,8 +234,9 @@ function outs = calcZvel(frames, zpos, lowlim, highlim)
     ZfitRmse = sqrt(sum((zpos-fitZ).^2));
     ZposMean = mean(zpos);
     ZposRange = range(zpos);
+    CVerr = ZfitRmse / ZposMean;
     
-    outs = [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange];
+    outs = [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange, CVerr];
     
 %     figure;
 %     plot(frames, zpos, 'o')
