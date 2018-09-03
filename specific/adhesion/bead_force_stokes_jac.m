@@ -106,12 +106,69 @@ ylabel('Z pos [um]');
 
 
 figure;
-gscatter(jTable.Time, CreateGaussScaleSpace(jTable.Z, 1, 4).*jTable.Fps, g);
+gscatter(jTable.Time, CreateGaussScaleSpace(jTable.Z, 1, 8).*jTable.Fps, g);
 xlabel('Time [s]');
-ylabel('Z velocity [um/s], s=4');
+ylabel('Z velocity [um/s], s=8');
 
 return
 
+function outs = calcZvel_jac(frames, zpos, lowlim, highlim)
+%     [uZ, Ff] = unique(zpos, 'first');
+    uZ = unique(round(zpos));
+    
+    medianuZ   = median(uZ);
+    [~,pos_medianuZ] = min(abs(zpos-medianuZ));
+
+    midrangeuZ = mean(range(uZ));
+
+    targetuZ = midrangeuZ;
+%     targetuZ = medianuZ;
+    
+%     targetuZ = median(uZ) - 0.5*std(uZ);
+
+
+    [~,pos_targetuZ] = min(abs(zpos-targetuZ));
+
+    CVerr = 0; Pstep = 2; Nstep = 2; count = 1;
+    while CVerr < 0.2 && ...
+          pos_targetuZ + Pstep < length(zpos) && ...
+          pos_targetuZ - Nstep >= 1
+
+        fitframes = frames(pos_targetuZ - Nstep : pos_targetuZ + Pstep);
+        fitzpos   =   zpos(pos_targetuZ - Nstep : pos_targetuZ + Pstep);
+
+        fit = polyfit(fitframes(:), fitzpos(:), 1);
+        fitZ = polyval(fit, fitframes(:));
+
+        firstframe = fitframes(1);
+        Zvel = fit(1); % [stepsize/frame]    
+        ZfitRmse = sqrt(sum((fitzpos-fitZ).^2));
+        ZposMean = mean(fitzpos);
+        ZposRange = range(fitzpos);
+
+        CVerr = ZfitRmse / ZposMean;
+
+        fprintf('count= %i, CVerr= %0.2g\n', count, CVerr);
+
+        if mod(count,2)
+            Pstep = Pstep + 1;
+        else
+            Nstep = Nstep + 1;
+        end
+
+    end
+
+    outs = [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange];
+    
+    figure;
+    plot(frames, zpos, '.b', ...
+         fitframes, fitZ, '-r', ...
+         frames(pos_targetuZ), targetuZ, 'ok', ...
+         frames(pos_medianuZ), medianuZ, 'ok');
+    
+    % outs = {x, y, coef};
+    
+return
 
 
 function outs = calcZvel(frames, zpos, lowlim, highlim)
@@ -142,44 +199,5 @@ function outs = calcZvel(frames, zpos, lowlim, highlim)
 %     plot(frames, zpos, 'o')
 %     xlabel('Time [s]');
 %     ylabel('Zpos [um]');
-    
-return
-
-function outs = calcZvel_jac(frames, zpos, lowlim, highlim)
-%     [uZ, Ff] = unique(zpos, 'first');
-    uZ = unique(round(zpos));
-    
-    medianuZ   = median(uZ);
-    [~,pos_medianuZ] = min(abs(zpos-medianuZ));
-    
-%     targetuZ = median(uZ) - 0.5*std(uZ);
-    targetuZ = median(uZ);
-
-    [~,pos_targetuZ] = min(abs(zpos-targetuZ));
-
-    frames = frames(pos_targetuZ-4:pos_targetuZ+4);
-    zpos = zpos(pos_targetuZ-4:pos_targetuZ+4);
-
-%     x = frames(pos_targetuZ:end);
-%     y = zpos(pos_targetuZ:end);
-    
-    fit = polyfit(frames(:), zpos(:), 1);
-    fitZ = polyval(fit, frames(:));
-    
-    firstframe = frames(1);
-    Zvel = fit(1); % [stepsize/frame]    
-    ZfitRmse = sqrt(sum((zpos-fitZ).^2));
-    ZposMean = mean(zpos);
-    ZposRange = range(zpos);
-    
-    outs = [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange];
-    
-%     figure;
-%     plot(x, y, '.b', ...
-%          x, fity, '-r', ...
-%          pos_targetuZ, targetuZ, 'ok', ...
-%          pos_medianuZ, medianuZ, 'ok');
-    
-    % outs = {x, y, coef};
     
 return
