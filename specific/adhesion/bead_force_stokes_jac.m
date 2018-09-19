@@ -1,4 +1,5 @@
 function d = bead_force_stokes_jac(filelist, fps, calibum, bead_diameter_um, std_viscosity_Pas, width, height, lolim, hilim)
+% how this works
 
 if nargin < 9 || isempty(hilim)
     hilim = 250;
@@ -238,9 +239,9 @@ function outs = calcZvel(frames, zpos, lowlim, highlim)
     
     outs = [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange, CVerr];
     
-%     figure;
-%     plot(frames, zpos, 'o')
-%     xlabel('Time [s]');
-%     ylabel('Zpos [um]');
+    figure;
+    plot(frames, zpos, 'ko', frames, fitZ, 'r-');
+    xlabel('Time [s]');
+    ylabel('Zpos [um]');
     
 return
