@@ -1658,7 +1658,8 @@ function plot_data(hObject, eventdata, handles)
     x      = handles.table(:,X) * calib_um;
     y      = handles.table(:,Y) * calib_um;
     t      = handles.table(:,TIME);
-    
+    sens   = handles.table(:,SENS);
+    cent   = handles.table(:,CENTINTS);
     if size(im,1) > 1
         [imy imx imc] = size(im);
     else
@@ -1743,6 +1744,8 @@ function plot_data(hObject, eventdata, handles)
 
     if strcmp(AUXtype, 'MSD')  || ...
        strcmp(AUXtype, 'GSER') || ...
+       strcmp(AUXtype, 'sensitivity (SNR)') || ...
+       strcmp(AUXtype, 'center intensity') || ...
        strcmp(AUXtype, 'alpha vs tau') || ...
        strcmp(AUXtype, 'alpha histogram') || ...
        strcmp(AUXtype, 'Diffusivity vs. tau') || ...
@@ -1811,6 +1814,21 @@ function plot_data(hObject, eventdata, handles)
             set(handles.AUXfig, 'DoubleBuffer', 'on');
             set(handles.AUXfig, 'BackingStore', 'off');    
             drawnow;
+                        
+        case 'sensitivity (SNR)'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            plot(t(k) - mintime, sens(k), '.-');
+            xlabel('time (s)');
+            ylabel('Tracking Sensitivity');
+            
+        case 'center intensity'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            plot(t(k) - mintime, cent(k)./max(cent(k)), '.-');
+            xlabel('time (s)');
+            ylabel('Center Intensity (frac of max)');
+            
             
         case 'velocity'
             figure(handles.AUXfig);
