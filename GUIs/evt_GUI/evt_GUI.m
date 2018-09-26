@@ -1657,6 +1657,7 @@ function plot_data(hObject, eventdata, handles)
     frame  = handles.table(:,FRAME);
     x      = handles.table(:,X) * calib_um;
     y      = handles.table(:,Y) * calib_um;
+    z      = handles.table(:,Z);
     t      = handles.table(:,TIME);
     sens   = handles.table(:,SENS);
     cent   = handles.table(:,CENTINTS);
@@ -1713,13 +1714,13 @@ function plot_data(hObject, eventdata, handles)
     
     figure(handles.XTfig);
     if get(handles.checkbox_neutoffsets, 'Value')
-        plot(t(k) - mintime, [x(k)-x(k(1)) y(k)-y(k(1))], '.-');        
+        plot(t(k) - mintime, [x(k)-x(k(1)) y(k)-y(k(1)) z(k)-z(k(1))], '.-');        
     else
-        plot(t(k) - mintime, [x(k) y(k)], '.');
+        plot(t(k) - mintime, [x(k) y(k) z(k)], '.');
     end
     xlabel('time [s]');
     ylabel(['displacement [' ylabel_unit ']']);
-    legend('x', 'y');    
+    legend('x', 'y', 'z', 'Location', 'northwest');    
     set(handles.XTfig, 'Units', 'Normalized');
     set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
     set(handles.XTfig, 'DoubleBuffer', 'on');
@@ -1792,19 +1793,22 @@ function plot_data(hObject, eventdata, handles)
 
             if get(handles.radio_relative, 'Value')
                 xinit = x(k); xinit = xinit(1);
-                yinit = y(k); yinit = yinit(1);        
+                yinit = y(k); yinit = yinit(1);      
+                zinit = z(k); zinit = zinit(1);
             elseif get(handles.radio_arb_origin, 'Value')            
                 xinit = arb_origin(1);
                 yinit = arb_origin(2);
+                zinit = arb_origin(3);
 
                 % handle the case where 'microns' are selected
                 if get(handles.radio_microns, 'Value');
                     xinit = xinit * calib_um;
                     yinit = yinit * calib_um;                
+                    zinit = zinit * calib_um;
                 end                        
             end
 
-            r = magnitude(x(k) - xinit, y(k) - yinit);
+            r = magnitude(x(k) - xinit, y(k) - yinit, z(k) - zinit);
 
             plot(t(k) - mintime, r, '.-');
             xlabel('time (s)');
