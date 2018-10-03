@@ -46,7 +46,7 @@ end
     count = 0;
 %     for k = 1:10
     for k = 1:frames
-        myframe = fread(fid, width*height, depth);
+        myframe = fread(fid, width*height, ['*' depth]);
         framename = ['frame' num2str(k,'%05u') '.pgm'];
         myframe = reshape(myframe, height, width);
 
