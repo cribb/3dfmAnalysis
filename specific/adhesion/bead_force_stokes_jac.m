@@ -69,8 +69,9 @@ jTable.Properties.VariableUnits{'Time'} = 's';
 
 [g, grpTable] = findgroups(jTable(:,{'Fid', 'ID'}));
 
-tmpVels = splitapply(@(x1,x2)calcZvel(x1, x2, lolim, hilim), ...
+tmpVels = splitapply(@(x1,x2,x3)calcZvel_easy(x1, x2, x3, lolim, hilim), ...
                     jTable.Time, ...
+                    jTable.ID, ...
                     jTable.Z, ...
                     g);
 
@@ -80,6 +81,7 @@ T.ZfitRmse  = tmpVels(:,3);
 T.ZposMean  = tmpVels(:,4);
 T.ZposRange = tmpVels(:,5);
 T.CVerr     = tmpVels(:,6);
+T.Nframes   = tmpVels(:,7);
 
 T = struct2table(T);
 
@@ -103,20 +105,20 @@ T(:,{'BeadDiameter', 'StdViscosity'}) = [];
 
 d.ZforceTable = T;
 
-% figure; 
-% gscatter(jTable.Time, jTable.Z, g);
-% xlabel('Time [s]');
-% ylabel('Z pos [um]');
-% 
-% 
-% figure;
-% gscatter(jTable.Time, CreateGaussScaleSpace(jTable.Z, 1, 8).*jTable.Fps, g);
-% xlabel('Time [s]');
-% ylabel('Z velocity [um/s], s=8');
+figure; 
+gscatter(jTable.Time, jTable.Z, g);
+xlabel('Time [s]');
+ylabel('Z pos [um]');
+
+
+figure;
+gscatter(jTable.Time, CreateGaussScaleSpace(jTable.Z, 1, 8).*jTable.Fps, g);
+xlabel('Time [s]');
+ylabel('Z velocity [um/s], s=8');
 
 return
 
-function outs = calcZvel_jac(frames, zpos, lowlim, highlim)
+function outs = calcZvel_jac(frames, trackerid, zpos, lowlim, highlim)
 
 %     first = find(zpos >  lowlim, 1);
 %     last  = find(zpos > highlim, 1);
@@ -214,34 +216,192 @@ function outs = calcZvel_jac(frames, zpos, lowlim, highlim)
 return
 
 
-function outs = calcZvel(frames, zpos, lowlim, highlim)
+function outs = calcZvel(frames, trackerid, zpos, lowlim, highlim)
 
-    first = find(zpos >  lowlim, 1);
-    last  = find(zpos > highlim, 1);
+%     first = find(zpos >  lowlim, 1);
+%     last  = find(zpos > highlim, 1);
+    
+    first = 1;
+    last = length(zpos);
+    
+    myID = unique(trackerid);
     
     if isempty(last)
         frames = frames(first:end);
         zpos = zpos(first:end);
     else
-        frames = frames(first:last-1);
-        zpos = zpos(first:last-1);
+        frames = frames(first:last(1)-1);
+        zpos = zpos(first:last(1)-1);
     end
     
-    fit = polyfit(frames, zpos, 1);
-    fitZ = polyval(fit, frames);
+    [~, midx] = max(zpos);
+    [minz, ~] = min(zpos);
     
-    firstframe = frames(1);
-    Zvel = fit(1); % [stepsize/frame]
-    ZfitRmse = sqrt(sum((zpos-fitZ).^2));
-    ZposMean = mean(zpos);
-    ZposRange = range(zpos);
-    CVerr = ZfitRmse / ZposMean;
+    if midx ~= length(zpos)
+        zpos = zpos(1:midx);
+        frames = frames(1:midx);
+    end
     
-    outs = [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange, CVerr];
+    midrange = ceil(range(zpos)/2 + minz);   % Middle of the range
+    [midz, mid_zidx] = min(abs(zpos - midrange));
+    lowerflat = mode(zpos(1:mid_zidx));
+    
+    
+    [~, idxF] = unique(zpos, 'first');
+    [~, idxL] = unique(zpos, 'last');
+    
+    idx = union(idxF,idxL);
+    idxD = (diff(idx) <= 2);
+    idxD = logical([0;idxD]);
+    idxU = idx( idxD );
+    
+    zpos_for_fitting = zpos(idxU);
+    frames_for_fitting = frames(idxU);
+    Nframes = length(idxU);
+    
+    order = 1;
+
+    if length(frames_for_fitting) < order + 2
+        outs = NaN(1,7);
+        return;
+    end        
+    
+    CVerr = inf;
+    
+   while CVerr > 0.5 && length(frames_for_fitting) >= order + 2 % magic number, 50% RMSE CVerr
+
+       if isfinite(CVerr)
+          frames_for_fitting = frames_for_fitting(2:end);
+          zpos_for_fitting = zpos_for_fitting(2:end);
+          Nframes = Nframes - 1;
+       end
+       
+        fit = polyfit(frames_for_fitting, zpos_for_fitting, order);
+        fitZ = polyval(fit, frames_for_fitting);
+
+        firstframe = frames(1);
+        Zvel = fit(1); % [stepsize/frame]
+    %     Zvel = 2*fit(1)*frames(end) + fit(2);
+        ZfitRmse = sqrt(sum((zpos_for_fitting-fitZ).^2));
+        ZposMean = mean(zpos_for_fitting);
+        ZposRange = range(zpos_for_fitting);
+        CVerr = ZfitRmse / ZposMean;
+    end
+    outs = [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange, CVerr, Nframes];
     
     figure;
-    plot(frames, zpos, 'ko', frames, fitZ, 'r-');
+    hold on;
+    plot(frames,             zpos,             'Marker', 'o', 'MarkerEdgeColor', [0.75 0.75 0.75], 'MarkerFaceColor', 'none', 'LineStyle', 'none');
+    plot(frames(idx),        zpos(idx),        'Marker', 'x', 'MarkerSize', 14, 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'none', 'LineStyle', 'none');
+    plot(frames_for_fitting, zpos_for_fitting, 'Marker', 'o', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'k', 'LineStyle', 'none');
+    plot(frames_for_fitting, fitZ, 'Marker', 'x', 'MarkerEdgeColor', 'r', 'LineStyle', '-', 'Color', 'r');
+    hold off;
     xlabel('Time [s]');
     ylabel('Zpos [um]');
+    legend('zpos', 'first&lastUniq', 'UsedInFit', 'fit', 'Location','northwest');
+    title(['trackerID = ' num2str(myID)]);
+    xlim([min(frames_for_fitting)-4*mean(diff(frames)) max(frames_for_fitting)+mean(diff(frames))]);
+return
+
+
+function outs = calcZvel_easy(frames, trackerid, zpos, lowlim, highlim)
+    first = 1;
+    last = length(zpos);
+        
+    myID = unique(trackerid);
     
+    % Choose how long the dataset needs to be before we consider it. If
+    % it's too short, return NaN for this tracker.
+    if length(zpos) > 100
+        initZ = max(zpos(1:10));
+    else
+        outs = NaN(1,7);
+        disp('Not enough points to run algorithm.');
+    end
+    
+
+%     if isempty(last)
+%         frames = frames(first:end);
+%         zpos = zpos(first:end);
+%     else
+%         frames = frames(first:last(1)-1);
+%         zpos = zpos(first:last(1)-1);
+%     end
+
+    % Next, where is the maximum z for this tracker located? If a tracker
+    % is moving down, it's not one we want to measure velocity for.
+    % Consider drawing out this part of the process into a different
+    % function.    
+    [~, maxidx] = max(zpos);
+    [minz, ~] = min(zpos);    
+    
+    if maxidx < ceil(length(zpos)*0.1)
+        outs = NaN(1,7);
+        disp('This tracker does not appear to leave the substrate.');
+    end
+    
+    % Is the maximum z-value the last value in the trajectory? If not, make
+    % it so.
+    if maxidx ~= length(zpos)
+        zpos = zpos(1:maxidx);
+        frames = frames(1:maxidx);
+    end
+    
+    
+    midrange = ceil(range(zpos(zpos>=initZ))/2 + minz);   % Middle of the range
+    [midz, mid_zidx] = min(abs(zpos - midrange));
+    lowerflat = mode(zpos(1:mid_zidx));    
+    
+    extent = 3;
+    dist_far_edge = length(zpos) - (mid_zidx+extent);
+    while dist_far_edge < 0
+        extent = extent - 1;
+        dist_far_edge = length(zpos) - (mid_zidx+extent);
+    end
+    
+    if length(zpos) >= 2*extent + 1
+        Nframes = 2*extent + 1;
+        zpos_for_fitting = zpos(mid_zidx-extent:mid_zidx+extent);
+        frames_for_fitting = frames(mid_zidx-extent:mid_zidx+extent);
+    else zpos_for_fitting = zpos;
+        frames_for_fitting = frames;
+        Nframes = length(zpos);
+    end
+    
+    order = 1;
+
+    if length(frames_for_fitting) < order + 2
+        outs = NaN(1,7);
+        return;
+    end  
+    
+    fit = polyfit(frames_for_fitting, zpos_for_fitting, order);
+    fitZ = polyval(fit, frames_for_fitting);
+        
+    firstframe = fit(1) * lowerflat + fit(2);
+    Zvel = fit(1); % [stepsize/frame]
+    ZfitRmse = sqrt(sum((zpos_for_fitting-fitZ).^2));
+    ZposMean = mean(zpos_for_fitting);
+    ZposRange = range(zpos_for_fitting);
+    CVerr = ZfitRmse / ZposMean;
+    
+    outs = [firstframe, Zvel, ZfitRmse, ZposMean, ZposRange, CVerr, Nframes];    
+    
+    smooth_dzdt = CreateGaussScaleSpace(zpos, 1, 4) ./ mean(diff(frames));
+    [maxdzdt, maxdzdt_idx] = max(smooth_dzdt);
+    
+    figure;
+    hold on;
+    plot(frames,             zpos,             'Marker', 'o', 'MarkerEdgeColor', [0.75 0.75 0.75], 'MarkerFaceColor', 'none', 'LineStyle', 'none');
+    plot(frames_for_fitting, zpos_for_fitting, 'Marker', 'o', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'k', 'LineStyle', 'none');
+    plot(frames_for_fitting, fitZ, 'Marker', 'x', 'MarkerEdgeColor', 'r', 'LineStyle', '-', 'Color', 'r');
+    plot(frames(maxdzdt_idx), zpos(maxdzdt_idx), 'Marker', '^', 'MarkerSize', 16);
+    plot(frames(mid_zidx), midrange, 'Marker', 'diamond', 'MarkerSize', 16);
+    
+    hold off;
+    xlabel('Time [s]');
+    ylabel('Zpos [um]');
+    legend('zpos', 'UsedInFit', 'fit', 'max deriv.', 'midrange', 'Location','northwest');
+    title(['trackerID = ' num2str(myID), ', CVerr= ', num2str(CVerr,'%2.2f')]);
+    xlim([min(frames_for_fitting)-40*mean(diff(frames)) max(frames_for_fitting)+mean(diff(frames))]);
 return
