@@ -36,9 +36,17 @@ for f = 1:length(fid)
 
     myfile = fullfile(VidTable.Path{f}, VidTable.TrackingFiles{f});
     
-    
-    dd = readtable(myfile);
 
+    if contains(myfile, '.evt.mat')
+        dd = load_evtfile(myfile);
+    elseif contains(myfile, '.vrpn.mat')
+        error('Do not know how to do this yet.');
+    elseif contains(myfile, '.csv')
+        dd = readtable(myfile);
+    else
+        error('Not familiar with file type.')
+    end
+    
     Fid = table(repmat(fid(f), size(dd,1), 1));
     Fid.Properties.VariableNames{'Var1'} = 'Fid';
 
