@@ -49,7 +49,12 @@ function varargout = evt_GUI(varargin)
         gui_mainfcn(gui_State, varargin{:});
 	end
 	% End initialization code - DO NOT EDIT
-    
+
+% Matlab lint ignores for this file    
+%#ok<*INUSL>
+%#ok<*DEFNU>
+%#ok<*INUSD>
+%#ok<*ASGLU>
 
 function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
@@ -73,22 +78,22 @@ function varargout = evt_GUI_OutputFcn(hObject, eventdata, handles)
 
     
 % --- Executes on button press in pushbutton_close.
-function pushbutton_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
-    if isfield(handles, 'XYfig');
+function pushbutton_close_Callback(hObject, eventdata, handles) 
+    if isfield(handles, 'XYfig')
         try
             close(handles.XYfig);
         catch
         end
     end
 
-    if isfield(handles, 'XTfig');
+    if isfield(handles, 'XTfig')
         try
             close(handles.XTfig);
         catch
         end
     end
 
-    if isfield(handles, 'AUXfig');
+    if isfield(handles, 'AUXfig')
         try
             close(handles.AUXfig);
         catch
@@ -99,7 +104,7 @@ function pushbutton_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 
     
 % --- Executes on button press in radio_selected_dataset.
-function radio_selected_dataset_Callback(hObject, eventdata, handles)
+function radio_selected_dataset_Callback(hObject, eventdata, handles) 
 	set(handles.radio_selected_dataset, 'Value', 1);
 	set(handles.radio_insideboundingbox, 'Value', 0);
     set(handles.radio_outsideboundingbox, 'Value', 0);
@@ -107,7 +112,7 @@ function radio_selected_dataset_Callback(hObject, eventdata, handles)
 	set(handles.radio_deletetimeafter, 'Value', 0);
     
 % --- Executes on button press in radio_insideboundingbox.
-function radio_insideboundingbox_Callback(hObject, eventdata, handles)
+function radio_insideboundingbox_Callback(hObject, eventdata, handles)  
 	set(handles.radio_selected_dataset, 'Value', 0);
 	set(handles.radio_insideboundingbox, 'Value', 1);
     set(handles.radio_outsideboundingbox, 'Value', 0);
@@ -162,7 +167,7 @@ function radio_AUXfig_Callback(hObject, eventdata, handles)
     set(handles.radio_AUXfig, 'Value', 1);    
     
 % --- Executes during object creation, after setting all properties.
-function edit_infile_CreateFcn(hObject, eventdata, handles)
+function edit_infile_CreateFcn(hObject, eventdata, handles) 
 	if ispc
         set(hObject,'BackgroundColor','white');
 	else
@@ -218,38 +223,38 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     % assign "filter by" values if they're selected
     if get(handles.checkbox_minFrames, 'Value')
-        handles.filt.min_frames = str2num(get(handles.edit_minFrames, 'String'));
+        handles.filt.min_frames = str2double(get(handles.edit_minFrames, 'String'));
     else
         handles.filt.min_frames = 0;
     end
         
     if get(handles.checkbox_minPixelRange, 'Value')
-        handles.filt.min_pixels = str2num(get(handles.edit_minPixelRange, 'String'));
+        handles.filt.min_pixels = str2double(get(handles.edit_minPixelRange, 'String'));
     else
         handles.filt.min_pixels = 0;
     end
 
     if get(handles.checkbox_maxpixels, 'Value')
-        handles.filt.max_pixels = str2num(get(handles.edit_maxpixels, 'String'));
+        handles.filt.max_pixels = str2double(get(handles.edit_maxpixels, 'String'));
     else
         handles.filt.max_pixels = Inf;
     end
     
     if get(handles.checkbox_tCrop, 'Value')
-        handles.filt.tcrop = str2num(get(handles.edit_tCrop, 'String'));
+        handles.filt.tcrop = str2double(get(handles.edit_tCrop, 'String'));
     else
         handles.filt.tcrop = 0;
     end
     
     if get(handles.checkbox_xyCrop, 'Value')
-        handles.filt.xycrop = str2num(get(handles.edit_xyCrop, 'String'));
+        handles.filt.xycrop = str2double(get(handles.edit_xyCrop, 'String'));
     else
         handles.filt.xycrop = 0;
     end
     
     if get(handles.checkbox_deadzone, 'Value')
-        handles.filt.deadzone = str2num(get(handles.edit_deadzone, 'String'));
-        handles.filt.overlapthresh = str2num(get(handles.edit_overlapthresh, 'String'));
+        handles.filt.deadzone = str2double(get(handles.edit_deadzone, 'String'));
+        handles.filt.overlapthresh = str2double(get(handles.edit_overlapthresh, 'String'));
     else
         handles.filt.deadzone = 0;
         handles.filt.overlapthresh = 0.1;        
@@ -818,7 +823,7 @@ function pushbutton_export_bead_Callback(hObject, eventdata, handles)
     bead.t      = bead.t - min(handles.table(:,TIME));
     bead.x      = handles.table(k,X);
     bead.y      = handles.table(k,Y);
-    if isfield(bead, 'yaw');
+    if isfield(bead, 'yaw')
         bead.yaw    = handles.table(idx,YAW);
     end
     
@@ -841,8 +846,8 @@ function radio_pixels_Callback(hObject, eventdata, handles)
 
     diststr = get(handles.text_distance, 'String');
     
-    if findstr(diststr, 'um')
-    elseif findstr(diststr, 'pixels')
+    if contains(diststr, 'um')
+    elseif contains(diststr, 'pixels')
     else
     end
     
@@ -892,7 +897,7 @@ function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
         [v,q] = remove_drift(handles.table, start_time, end_time, 'linear');
     elseif get(handles.radio_com, 'Value')
         logentry('Removing Drift via center-of-mass method.');
-        [v,q] = remove_drift(handles.table, start_time, end_time, 'center-of-mass');
+        [v,q] = remove_drift(handles.table, start_time, end_time, 'center-of-mass'); 
     elseif get(handles.radio_commonmode, 'Value')
         logentry('Removing Drift via common-mode method.');
         [v,q] = remove_drift(handles.table, start_time, end_time, 'common-mode');
@@ -949,7 +954,7 @@ function edit_frame_rate_Callback(hObject, eventdata, handles)
 
     table = handles.table;
 
-    if get(handles.checkbox_frame_rate, 'Value');
+    if get(handles.checkbox_frame_rate, 'Value')
         table(:,TIME) = table(:,FRAME) / str2double(get(hObject, 'String'));
         mintime = min(table(:,TIME));
         maxtime = max(table(:,TIME));
@@ -992,7 +997,7 @@ function radio_arb_origin_Callback(hObject, eventdata, handles)
 
 
 function edit_arb_origin_Callback(hObject, eventdata, handles)
-    arb_origin = str2num(get(hObject, 'String'));
+    arb_origin = str2double(get(hObject, 'String'));
 
     if length(arb_origin) ~= 2
         logentry('Origin value is not valid.  Not plotting.')
@@ -1644,10 +1649,10 @@ function plot_data(hObject, eventdata, handles)
     video_tracking_constants;
     COMPUTED = 0;
 
-    if get(handles.radio_pixels, 'Value');
+    if get(handles.radio_pixels, 'Value')
         calib_um = 1;
         ylabel_unit = 'pixels';
-    elseif get(handles.radio_microns, 'Value');
+    elseif get(handles.radio_microns, 'Value')
         calib_um = str2double(get(handles.edit_calib_um, 'String')); 
         ylabel_unit = '\mum';
     end
@@ -1662,11 +1667,11 @@ function plot_data(hObject, eventdata, handles)
     sens   = handles.table(:,SENS);
     cent   = handles.table(:,CENTINTS);
     if size(im,1) > 1
-        [imy imx imc] = size(im);
+        [imy, imx, imc] = size(im);
     else
         imy = max(y) * 1.1;
         imx = max(x) * 1.1;
-    end;
+    end
     
     currentBead = round(get(handles.slider_BeadID, 'Value'));
     
@@ -1691,7 +1696,7 @@ function plot_data(hObject, eventdata, handles)
         poley = handles.poleloc(2);
         circradius = 50;
         
-        if get(handles.radio_microns, 'Value');
+        if get(handles.radio_microns, 'Value')
             polex = polex * calib_um;
             poley = poley * calib_um;
             circradius = circradius * calib_um;
@@ -1727,17 +1732,17 @@ function plot_data(hObject, eventdata, handles)
     set(handles.XTfig, 'BackingStore', 'off');    
     drawnow;
     
-    arb_origin = str2num(get(handles.edit_arb_origin, 'String'));
-    calib_um = str2double(get(handles.edit_calib_um, 'String'));     
+    arb_origin = str2double(get(handles.edit_arb_origin, 'String'));
+%     calib_um = str2double(get(handles.edit_calib_um, 'String'));     
     
     AUXfig = handles.AUXfig;         
     AUXtype = handles.AUXtype;
     
     data = handles.table;
-    frame_rate = str2num(get(handles.edit_frame_rate, 'String'));
-    calib_um   = str2num(get(handles.edit_calib_um, 'String'));
-    bead_diameter_um = str2num(get(handles.edit_bead_diameter_um, 'String'));
-    numtaus = round(str2num(get(handles.edit_numtaus, 'String')));
+    frame_rate = str2double(get(handles.edit_frame_rate, 'String'));
+    calib_um   = str2double(get(handles.edit_calib_um, 'String'));
+    bead_diameter_um = str2double(get(handles.edit_bead_diameter_um, 'String'));
+    numtaus = round(str2double(get(handles.edit_numtaus, 'String')));
     dt = 1 ./ frame_rate;
     
 %     win = unique(floor(logspace(0,log10(max(frame)),numtaus)));
@@ -1801,7 +1806,7 @@ function plot_data(hObject, eventdata, handles)
                 zinit = arb_origin(3);
 
                 % handle the case where 'microns' are selected
-                if get(handles.radio_microns, 'Value');
+                if get(handles.radio_microns, 'Value')
                     xinit = xinit * calib_um;
                     yinit = yinit * calib_um;                
                     zinit = zinit * calib_um;
@@ -1846,7 +1851,7 @@ function plot_data(hObject, eventdata, handles)
                 yinit = arb_origin(2);
 
                 % handle the case where 'microns' are selected
-                if get(handles.radio_microns, 'Value');
+                if get(handles.radio_microns, 'Value')
                     xinit = xinit * calib_um;
                     yinit = yinit * calib_um;                
                 end                        
@@ -1874,7 +1879,7 @@ function plot_data(hObject, eventdata, handles)
             
             vr = magnitude(velx, vely);    
             
-            plot(t(k) - mintime, [vr(:)], '.-');
+            plot(t(k) - mintime, vr(:), '.-');
             xlabel('time (s)');
             ylabel(['velocity [' ylabel_unit '/s]']);
             legend('r');    
@@ -1937,7 +1942,7 @@ function plot_data(hObject, eventdata, handles)
                 hold on;
                     plot(log10(tau(:,q)), log10(msd(:,q)), 'r.-');
                     [rows,cols] = size(tau);
-                    legend({num2str([0:cols-1]')});
+                    legend({num2str(transpose(0:cols-1))});
                     legend off
                 hold off;
             elseif plot_mean
@@ -1953,7 +1958,7 @@ function plot_data(hObject, eventdata, handles)
             visc.sucrose_2p5M = sucrose_viscosity(2.5, temp_K, 'K');
 
             bead_diameter_um = get(handles.edit_bead_diameter_um, 'String');
-            bead_radius_m = str2num(bead_diameter_um)/2 * 1e-6; % 
+            bead_radius_m = str2double(bead_diameter_um)/2 * 1e-6; % 
 
             D.water = kB * temp_K / (6 * pi * visc.water * bead_radius_m);
             D.sucrose_2M = kB * temp_K / (6 * pi * visc.sucrose_2M * bead_radius_m);
@@ -1989,7 +1994,7 @@ function plot_data(hObject, eventdata, handles)
             plot_alphavstau(myve, AUXfig);
             
         case 'alpha histogram'
-            mytauidx = str2num(get(handles.edit_chosentau, 'String'));
+            mytauidx = str2double(get(handles.edit_chosentau, 'String'));
             
             A = mymsd.tau(1:end-1,:);
             B = mymsd.tau(2:end,:);
@@ -2005,7 +2010,7 @@ function plot_data(hObject, eventdata, handles)
             plot_alphadist(myalpha, AUXfig);
             
         case 'MSD histogram'
-            mytauidx = str2num(get(handles.edit_chosentau, 'String'));
+            mytauidx = str2double(get(handles.edit_chosentau, 'String'));
             numbins = 51;
             
             mymsd_at_mytau = mymsd.msd(mytauidx, :);
@@ -2225,7 +2230,7 @@ function plot_data(hObject, eventdata, handles)
                 plot_ve_2pt(myve, 'f', AUXfig, 'Nn');
             end
     end
- %      hihi;
+ 
  if COMPUTED ~= 1
     refresh(handles.XYfig);
     refresh(handles.XTfig);
@@ -2630,7 +2635,7 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
     fps = str2double(get(handles.edit_frame_rate, 'String'));
     bead_radius = str2double(get(handles.edit_bead_diameter_um, 'String'))*1e-6/2;
     calibum = str2double(get(handles.edit_calib_um, 'String'));
-    num_taus = str2num(get(handles.edit_numtaus, 'String'));
+    num_taus = str2double(get(handles.edit_numtaus, 'String'));
     opened_file = get(handles.edit_outfile, 'String');
     
     % %  DERIVED VALUES
