@@ -2355,6 +2355,7 @@ function delete_outside_boundingbox(hObject, eventdata, handles)
     t = table(:,TIME) - handles.mintime;
     x = table(:,X);
     y = table(:,Y);
+    z = table(:,Z);
     currentbead = get(handles.slider_BeadID, 'Value');
     
     [xm, ym] = ginput(2);
@@ -2366,7 +2367,9 @@ function delete_outside_boundingbox(hObject, eventdata, handles)
             xm = xm / calib_um;
             ym = ym / calib_um;
         elseif(get(handles.radio_XTfig, 'Value'))
-            ym = ym / calib_um;
+            xm = xm / calib_um;
+            ym = ym / calib_um;            
+            %%% XXX add separate z-step calibration value.
         end
         
     end
@@ -2383,7 +2386,7 @@ function delete_outside_boundingbox(hObject, eventdata, handles)
         handles.tstamp_times = handles.tstamp_times(k);
 
     elseif get(handles.radio_XTfig, 'Value')
-        k = find( ~( ( (x > ylo & x < yhi) | (y > ylo & y < yhi) ) & ...
+        k = find( ~( ( (x > ylo & x < yhi) | (y > ylo & y < yhi) | (z > ylo & z < yhi)  ) & ...
                        (t > xlo & t < xhi) ) & beadID == currentbead );
 
         table(k,:) = [];
