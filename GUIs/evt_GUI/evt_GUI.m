@@ -272,7 +272,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         if ~get(handles.checkbox_lockum, 'Value') && length(unique(calout)) == 1
             set(handles.edit_calib_um, 'String', num2str(calout(1)));
         elseif get(handles.checkbox_lockum, 'Value')
-            logentry(['Calib Lock set when loading new files. Overriding calibum set in file.']);            
+            logentry('Calib Lock set when loading new files. Overriding calibum set in file.');            
         else
             msgbox('evt_GUI cannot load multiple files with multiple calibration factors at this time.', 'Error.', 'error');
             return;
@@ -305,19 +305,19 @@ try
         MIPfile = strrep(MIPfile, 'video', 'FLburst');
         im = imread(MIPfile, 'PGM');
         logentry('Successfully loaded FLburst image from a Panoptes run...');
-        MIPexists = 1;
+%         MIPexists = 1;
 catch
     try 
         MIPfile = [filenameroot, '.MIP.bmp'];
         im = imread(MIPfile, 'BMP');
         logentry('Successfully loaded MIP image...');
-        MIPexists = 1;
+%         MIPexists = 1;
     catch
         try 
             MIPfile = [filenameroot, '.vrpn.composite.tif'];
             im = imread(MIPfile, 'tif');
             logentry('Successfully loaded MIP image...');
-            MIPexists = 1;
+%             MIPexists = 1;
         catch        
             logentry('MIP file was not found.  Trying to load first frame...');
 
@@ -384,10 +384,10 @@ end
 
     % update fps editbox so there is an indicator of real timesteps
     if get(handles.checkbox_lockfps, 'Value')
-        logentry(['FPS Lock set when loading new files. Overriding FPS set in file.']);
+        logentry('FPS Lock set when loading new files. Overriding FPS set in file.');
         tsfps = str2double(get(handles.edit_frame_rate, 'String'));
     else
-        idx = find(beadID == 0);
+        idx = (beadID == 0);
         tsfps = round(1/mean(diff(table(idx,TIME))));
         logentry(['Setting frame rate to ' num2str(tsfps) ' fps.']);
         set(handles.edit_frame_rate, 'String', num2str(tsfps));
@@ -1844,21 +1844,25 @@ function plot_data(hObject, eventdata, handles)
             set(AUXfig, 'Visible', 'on');
             
             if get(handles.radio_relative, 'Value')
-                xinit = x(k); xinit = xinit(1);
-                yinit = y(k); yinit = yinit(1);        
+                xinit = x(k); 
+                xinit = xinit(1);
+                
+                yinit = y(k); 
+                yinit = yinit(1);        
             elseif get(handles.radio_arb_origin, 'Value')            
                 xinit = arb_origin(1);
                 yinit = arb_origin(2);
-
-                % handle the case where 'microns' are selected
-                if get(handles.radio_microns, 'Value')
-                    xinit = xinit * calib_um;
-                    yinit = yinit * calib_um;                
-                end                        
             end
+            
+            % handle the case where 'microns' are selected
+            if get(handles.radio_microns, 'Value')
+                xinit = xinit * calib_um;
+                yinit = yinit * calib_um;                
+            end                        
 
-            velx = CreateGaussScaleSpace(x(k), 1, 0.5)/dt;
-            vely = CreateGaussScaleSpace(y(k), 1, 0.5)/dt;
+
+            velx = CreateGaussScaleSpace(x(k)-xinit, 1, 0.5)/dt;
+            vely = CreateGaussScaleSpace(y(k)-yinit, 1, 0.5)/dt;
                       
             plot(t(k) - mintime, [velx(:) vely(:)], '.-');
             xlabel('time (s)');
@@ -2136,8 +2140,9 @@ function plot_data(hObject, eventdata, handles)
             handles.poleloc = pole_locator(handles.table, handles.im, 'y', AUXfig);
             guidata(hObject, handles);
 
-            poleloctxt = [num2str(handles.poleloc(1)) ', ' num2str(handles.poleloc(2))]
+            poleloctxt = [num2str(handles.poleloc(1)) ', ' num2str(handles.poleloc(2))];
             set(handles.edit_arb_origin, 'String', poleloctxt);
+            fprintf('Pole location [pixels]: X = %5.2f, Y = %5.2f\n', handles.poleloc(1), handles.poleloc(2)); 
             
         case 'tracker avail'
             figure(handles.AUXfig);
@@ -2226,8 +2231,10 @@ function plot_data(hObject, eventdata, handles)
                 plot_ve_2pt(myve, 'f', AUXfig, 'GgNn');
             elseif plotG
                 plot_ve_2pt(myve, 'f', AUXfig, 'Gg');
-            elseif ploteta
+            elseif ploteta %#ok<UNRCH>
                 plot_ve_2pt(myve, 'f', AUXfig, 'Nn');
+            else
+                error('Unknown plotting condition for 2 pt.');
             end
     end
  
@@ -2249,14 +2256,14 @@ function delete_selected_dataset(hObject, eventdata, handles)
     
     bead_max = max(table(:,ID));
 
-	k = find(table(:,ID) ~= bead_to_remove);
+	k = (table(:,ID) ~= bead_to_remove);
     
     table = table(k,:);
     
     if (bead_max ~= bead_to_remove) % otherwise I don't have to rearrange beadIDs
         for m = (bead_to_remove + 1) : bead_max
-            k = find(table(:,ID) == m);
-            table(k,ID) = m-1;
+            q = (table(:,ID) == m);
+            table(q,ID) = m-1;
         end
     end
     
