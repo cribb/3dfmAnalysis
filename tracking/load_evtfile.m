@@ -12,6 +12,12 @@ function outs = load_evtfile(filename, outtype)
     
     if isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         trk = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
+        calibum = dd.tracking.calib_um;
+        fps = dd.tracking.fps;
+        if ischar(fps)
+            fps = str2double(fps);
+        end
+        
         zerocol = zeros(size(trk,1), 1);
         
         outs.FrameNumber = trk(:,FRAME);
@@ -30,6 +36,9 @@ function outs = load_evtfile(filename, outtype)
         outs.RegionSize    = zerocol;
         outs.Sensitivity    = zerocol;
         outs.ForegroundSize= zerocol;
+        outs.Calibum = repmat(calibum, size(zerocol));
+        outs.Fps     = repmat(fps, size(zerocol));
+        
     else
         outs = [];
     end    

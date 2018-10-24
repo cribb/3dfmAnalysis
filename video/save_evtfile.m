@@ -39,7 +39,7 @@ function save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, outtype)
     
     if isstruct(tracking_in)
         data = tracking_in.spot3DSecUsecIndexFramenumXYZRPY;
-        if isfield(tracking_in, 'info');
+        if isfield(tracking_in, 'info')
             myinfo = tracking_in.info;
         else
             myinfo = NaN;
