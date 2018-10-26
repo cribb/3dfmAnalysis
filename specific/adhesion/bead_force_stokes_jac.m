@@ -23,6 +23,7 @@ end
 
 if nargin < 5 || isempty(bead_diameter_um)
     bead_diameter_um = 24;   
+    
 end
 
 if nargin < 4 || isempty(zstep)
@@ -76,7 +77,7 @@ jTable.Properties.VariableUnits{'Y'} = 'um';
 jTable.Z = jTable.Z .* jTable.Calibum; % [stepsize] -> [um]
 jTable.Properties.VariableUnits{'Z'} = 'um';
 
-jTable.Time = jTable.Frame ./ jTable.Fps; % [frame #] -> [sec]
+jTable.Time = jTable.Frame ./ jTable.Fps; % [frame #] -> [sec] 
 jTable.Properties.VariableUnits{'Time'} = 's';
 
 [g, grpTable] = findgroups(jTable(:,{'Fid', 'ID'}));
@@ -499,6 +500,10 @@ function outs = calcZvel_xyz(frames, trackerid, xpos, ypos, zpos, lowlim, highli
     
     if extent > max_extent
         extent = max_extent;
+    end
+    
+    if mid_zidx <= extent
+        extent = mid_zidx-1;
     end
     
     dist_far_edge = length(zpos) - (mid_zidx+extent);
