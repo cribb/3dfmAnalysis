@@ -4,7 +4,7 @@ video_tracking_constants;
 
 if nargin < 1 || isempty(filepath)
     filepath = '.';
-end;
+end
 
 metadata = pan_load_metadata(filepath, systemid, plate_type);
 
