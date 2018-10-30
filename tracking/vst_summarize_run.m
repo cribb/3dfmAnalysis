@@ -19,7 +19,7 @@ function outs = vst_summarize_run(DataIn)
     [gL2, gSampleName, gSampleInstance] = findgroups(T.SampleName, T.SampleInstance);
     
     % The number of Fields of View for all Instances of one SampleName
-    NFov = splitapply(@(x1,x2)length(unique(join(x1,x2))), string(T.SampleInstance), string(T.FovID), gL1);
+    NFov = splitapply(@(x1)length(unique(x1, 'rows')), [T.SampleInstance, T.FovID], gL1);
 
     % First, pass along the SampleNames to the output
     sn.SampleName = [gSampleName ; sd];
