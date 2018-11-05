@@ -3,67 +3,71 @@ function outs = vst_summarize_run(DataIn)
     T = join(DataIn.TrackingTable(:,{'Fid', 'Frame', 'ID'}), ...
              DataIn.VidTable(:,{'Fid', 'SampleName', 'SampleInstance', 'FovID'}));
     
-    [gL1, gSampleName] = findgroups(T.SampleName);
+    [gL1, g1SampleName] = findgroups(T.SampleName);
              
-    sd = setdiff(unique(DataIn.VidTable.SampleName), gSampleName);
-    emptyset = zeros(length(sd), 1);
+    empty_SampleNames = setdiff(unique(DataIn.VidTable.SampleName), g1SampleName);
+    zeroset = zeros(length(empty_SampleNames), 1);
 
 %     foo = splitapply(@(x1,x2,x3,x4,x5)summarize_samplename(x1,x2,x3,x4,x5), ...
-%       T.SampleName, T.SampleInstance, T.FovID, T.Frame, T.ID, gL1);
-         
+%           T.SampleName, T.SampleInstance, T.FovID, T.Frame, T.ID, gL1);
+
     % I want the number of Instances for each SampleName (like how many replicate 
     % *wells* or number of different samplevolumes for each SampleName)
-    NInstances = splitapply(@(x1)length(unique(x1)), T.SampleInstance, gL1);
-    sn.NInstances = NInstances;
+    NInstances = splitapply(@(x1)length(unique(x1, 'rows')), T.SampleInstance, gL1);
 
-    [gL2, gSampleName, gSampleInstance] = findgroups(T.SampleName, T.SampleInstance);
-    
     % The number of Fields of View for all Instances of one SampleName
     NFov = splitapply(@(x1)length(unique(x1, 'rows')), [T.SampleInstance, T.FovID], gL1);
 
+    % NFrames
+    NFrames = splitapply(@(x1)length(unique(x1, 'rows')), [T.SampleInstance, T.FovID, categorical(T.Frame)], gL1);
+    
+    % NTrackers
+    NTrackers = splitapply(@(x1)length(unique(x1, 'rows')), [T.SampleInstance, T.FovID, categorical(T.ID)], gL1);
+    
     % First, pass along the SampleNames to the output
-    sn.SampleName = [gSampleName ; sd];
+    s1.SampleName = [g1SampleName ; empty_SampleNames];    
+    s1.NInstances = [NInstances; zeroset];
+    s1.NFov = [NFov; zeroset];
+    s1.NFrames = [NFrames; zeroset];
+    s1.NTrackers = [NTrackers; zeroset];
     
-%     sn.NInstances = [foo(:,1); emptyset];
-%     sn.NFov = [foo(:,2); emptyset];
-%     sn.NFrames = [foo(:,3); emptyset];
-%     sn.NTrackers = [foo(:,4); emptyset];
+    s1 = sortrows(struct2table(s1));
     
-    sn = sortrows(struct2table(sn));
+    
+    % % %
+    % Now, we're going to dig to level 2, the SampleInstance level....
+    [gL2, g2SampleName, g2SampleInstance] = findgroups(T.SampleName, T.SampleInstance);
         
-    [gL2, gSampleName, gSampleInstance] = findgroups(T.SampleName, T.SampleInstance);
-    
-    
-    foo = splitapply(@(x1,x2,x3,x4,x5)summarize_samplename(x1,x2,x3,x4,x5), ...
-          T.SampleName, T.SampleInstance, T.FovID, T.Frame, T.ID, gL2);
+%     foo = splitapply(@(x1,x2,x3,x4,x5)summarize_samplename(x1,x2,x3,x4,x5), ...
+%           T.SampleName, T.SampleInstance, T.FovID, T.Frame, T.ID, gL2);
       
-    sd = setdiff(unique(DataIn.VidTable.SampleName), gSampleName);
-    emptyset = zeros(length(sd), 1);
+    empty_SampleNames = setdiff(unique(DataIn.VidTable.SampleName), g2SampleName);    
+    zeroset = zeros(length(empty_SampleNames), 1);
     
-    si.SampleName = gSampleName;
-    si.SampleInstance = gSampleInstance;
-    si.NFov = foo(:,2);
-    si.NFrames = foo(:,3);
-    si.NTrackers = foo(:,4);
+    s2.SampleName = g2SampleName;
+    s2.SampleInstance = g2SampleInstance;
+    s2.NFov = foo(:,2);
+    s2.NFrames = foo(:,3);
+    s2.NTrackers = foo(:,4);
     
-    si = struct2table(si);
+    s2 = struct2table(s2);
     
-    [gL3, gSampleName, gSampleInstance, gFovID] = findgroups(T.SampleName, T.SampleInstance, T.FovID);
+    [gL3, g3SampleName, g3SampleInstance, g3FovID] = findgroups(T.SampleName, T.SampleInstance, T.FovID);
 
-    sf.SampleName = gSampleName;
-    sf.SampleInstance = gSampleInstance;
-    sf.NFov = gFovID;
-    sf.NFrames = foo(:,3);
-    sf.NTrackers = foo(:,4);
+    s3.SampleName = g3SampleName;
+    s3.SampleInstance = g3SampleInstance;
+    s3.NFov = gFovID;
+    s3.NFrames = foo(:,3);
+    s3.NTrackers = foo(:,4);
     
     return
 
 function outs = summarize_samplename(samplename, sampleinstance, fovid, frame, id)
 
-    NInstances = length(unique(sampleinstance));
-    NFov = length(unique(fovid));
-    NFrames = length(unique(frame));
-    NTrackers = length(unique(id));
+    NInstances = length(unique(sampleinstance, 'rows'));
+    NFov = length(unique(fovid, 'rows'));
+    NFrames = length(unique(frame, 'rows'));
+    NTrackers = length(unique(id, 'rows'));
 
     outs = [NInstances, NFov, NFrames, NTrackers];
 

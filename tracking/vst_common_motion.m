@@ -1,4 +1,4 @@
-function TrackingTableOut = vst_common_motion(TrackingTableIn)
+function [TrackingTableOut,ComTableOut] = vst_common_motion(TrackingTableIn)
 
 % TrackingTable = DataIn.TrackingTable;
 
@@ -25,14 +25,14 @@ for k = 1:length(nglist)
     all_cm =        [all_cm; this_cm];
 end
 
-tmp.Fid   = all_fid;
-tmp.Frame = all_framelist;
-tmp.Xcom  = all_cm(:,1);
-tmp.Ycom  = all_cm(:,2);
+ComTableOut.Fid   = all_fid;
+ComTableOut.Frame = all_framelist;
+ComTableOut.Xcom  = all_cm(:,1);
+ComTableOut.Ycom  = all_cm(:,2);
 
-tmp = struct2table(tmp);
+ComTableOut = struct2table(ComTableOut);
 
-TrackingTableOut = join(TrackingTableIn, tmp, 'Keys', {'Fid', 'Frame'});
+TrackingTableOut = join(TrackingTableIn, ComTableOut, 'Keys', {'Fid', 'Frame'});
 
 return;
 
