@@ -1,13 +1,14 @@
 function v = run_vst_from_matlab(filename, configfile)
 
-filetotrack = 'D:\jcribb\sandbox\z-tracking\stack\4-11-psfstack.opt.0000.tif';
-ins.VSTdir = 'C:\Program Files\CISMM\video_spot_tracker_v08.01.03_extra_output';
+filetotrack = '\\nsrg\nanodata2\cribb\expts\mucus_adhesion_assay\MucusBeads1\frame00001.pgm';
+
+ins.VSTdir = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.12.1\';
 ins.VSTfile = 'video_spot_tracker.bat';
 ins.burstimage = '';
 ins.firstframe = '';
 ins.absfile = '';
-ins.configFind = 'C:\Program Files\CISMM\video_spot_tracker_v08.01.03_extra_output\test.cfg';
-ins.configTrack = '';
+ins.configFind = 'D:\jcribb\optimize_z_test.cfg';
+ins.configTrack = 'D:\jcribb\optimize_z_test.cfg';
 ins.os = '';
 
 envpath = getenv('PATH');
@@ -16,18 +17,25 @@ nsrgpath = 'C:\NSRG\external\pc_win32\bin\';
 javapath = 'C:\Program Files (x86)\Java\jre7\bin\client';
 mypath = [impath, ';', nsrgpath, ';', javapath, ';', envpath];
 
-tclpath = 'C:\Program Files\CISMM\video_spot_tracker_v08.01.03_extra_output\tcl8.3\';
- tkpath = 'C:\Program Files\CISMM\video_spot_tracker_v08.01.03_extra_output\tk8.3\';
+tclpath = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.12.1\tcl8.3';
+ tkpath = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.12.1\tk8.3';
 
-command = 'C:\Program Files\CISMM\video_spot_tracker_v08.01.03_extra_output\video_spot_tracker.exe';
+command = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.12.1\video_spot_tracker.exe';
+outfile = 'D:\jcribb\test_tmp';
 
-commandopts = ['-enable_internal_values ' ...
-               '-lost_all_colliding_trackers ' ...
-               '-load_state "' ins.configFind '" ' ...
+% commandopts = ['-enable_internal_values ' ...
+%                '-lost_all_colliding_trackers ' ...
+%                '-load_state "' ins.configFind '" ' ...
+%                '-tracker 0 0 12 ' ...
+%                '-outfile "' outfile '" ' ...
+%                '"' filetotrack '" '];
+
+commandopts = ['-load_state "' ins.configFind '" ' ...
                '-tracker 0 0 12 ' ...
-               '-outfile "test_tmp" ' ...
-               '"' filetotrack '"'];
-
+               '-outfile "' outfile '" ' ...
+               '"' filetotrack '" '];
+           
+           
 fullcommand = ['"' command '" ' commandopts];
 fullcommandj = join(fullcommand);
 
