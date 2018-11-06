@@ -1,4 +1,4 @@
-function v = run_vst_from_matlab(filename, configfile)
+function v = vst_run_from_matlab(filename, configfile)
 
 filetotrack = '\\nsrg\nanodata2\cribb\expts\mucus_adhesion_assay\MucusBeads1\frame00001.pgm';
 
