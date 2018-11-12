@@ -1,56 +1,44 @@
-function v = vst_run_from_matlab(filename, configfile)
+function v = vst_run_from_matlab(filetotrack, ins)
 
-filetotrack = '\\nsrg\nanodata2\cribb\expts\mucus_adhesion_assay\MucusBeads1\frame00001.pgm';
+filetotrack = 'D:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\sample_video\MucusBeads1\frame00001.pgm';
 
-ins.VSTdir = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.12.1\';
-ins.VSTfile = 'video_spot_tracker.bat';
+ins.VSTdir = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.13.0\';
+ins.VSTcuda = 'video_spot_tracker_local.bat';
+ins.VSTexe = 'video_spot_tracker.exe';
+% ins.VSTexe = 'video_spot_tracker_nogui.exe';
 ins.burstimage = '';
 ins.firstframe = '';
 ins.absfile = '';
-ins.configFind = 'D:\jcribb\optimize_z_test.cfg';
-ins.configTrack = 'D:\jcribb\optimize_z_test.cfg';
+ins.configFind = 'D:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\optimize_z_test.cfg';
+ins.configTrack = 'D:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\optimize_z_test.cfg';
 ins.os = '';
+ins.logdir = 'D:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\';
 
-envpath = getenv('PATH');
-impath = 'C:\NSRG\external\pc_win32\bin\ImageMagick-5.5.7-Q16';
-nsrgpath = 'C:\NSRG\external\pc_win32\bin\';
-javapath = 'C:\Program Files (x86)\Java\jre7\bin\client';
-mypath = [impath, ';', nsrgpath, ';', javapath, ';', envpath];
+tclpath = join([ins.VSTdir, 'tcl8.3'], '');
+ tkpath = join([ins.VSTdir, 'tk8.3'], '');
+command = join([ins.VSTdir, filesep, ins.VSTexe], '');
+logfile = join([ins.logdir, 'test_tmp'], '');
 
-tclpath = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.12.1\tcl8.3';
- tkpath = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.12.1\tk8.3';
-
-command = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.12.1\video_spot_tracker.exe';
-outfile = 'D:\jcribb\test_tmp';
-
-% commandopts = ['-enable_internal_values ' ...
-%                '-lost_all_colliding_trackers ' ...
-%                '-load_state "' ins.configFind '" ' ...
-%                '-tracker 0 0 12 ' ...
-%                '-outfile "' outfile '" ' ...
-%                '"' filetotrack '" '];
-
-commandopts = ['-load_state "' ins.configFind '" ' ...
-               '-tracker 0 0 12 ' ...
-               '-outfile "' outfile '" ' ...
+commandopts = ['-enable_internal_values ' ...
+               '-lost_all_colliding_trackers ' ...
+               '-load_state "' ins.configFind '" ' ...
+               '-tracker 0 0 50 ' ...
+               '-outfile "' logfile '" ' ...
                '"' filetotrack '" '];
            
-           
 fullcommand = ['"' command '" ' commandopts];
-fullcommandj = join(fullcommand);
+systemSTR = join(fullcommand);
+disp(systemSTR);
 
-setenv('PATH', mypath);
+% setenv('PATH', mypath);
 setenv('TCL_LIBRARY', tclpath);
 setenv('TK_LIBRARY', tkpath);
 
-systemSTR= fullcommandj;
-         
-systemSTRj = join(systemSTR, '');
 
-disp(systemSTRj);
 cd(ins.VSTdir);
-system(systemSTRj);
- return
+system(systemSTR);
+
+return
  
 % 
 % function v = create_vstbat(ins)
