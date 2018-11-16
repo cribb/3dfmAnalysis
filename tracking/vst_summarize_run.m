@@ -40,25 +40,27 @@ function outs = vst_summarize_run(DataIn)
         
 %     foo = splitapply(@(x1,x2,x3,x4,x5)summarize_samplename(x1,x2,x3,x4,x5), ...
 %           T.SampleName, T.SampleInstance, T.FovID, T.Frame, T.ID, gL2);
-      
-    empty_SampleNames = setdiff(unique(DataIn.VidTable.SampleName), g2SampleName);    
-    zeroset = zeros(length(empty_SampleNames), 1);
+%       
+%     empty_SampleNames = setdiff(unique(DataIn.VidTable.SampleName), g2SampleName);    
+%     zeroset = zeros(length(empty_SampleNames), 1);
+%     
+%     s2.SampleName = g2SampleName;
+%     s2.SampleInstance = g2SampleInstance;
+%     s2.NFov = foo(:,2);
+%     s2.NFrames = foo(:,3);
+%     s2.NTrackers = foo(:,4);
+%     
+%     s2 = struct2table(s2);
+%     
+%     [gL3, g3SampleName, g3SampleInstance, g3FovID] = findgroups(T.SampleName, T.SampleInstance, T.FovID);
+% 
+%     s3.SampleName = g3SampleName;
+%     s3.SampleInstance = g3SampleInstance;
+%     s3.NFov = gFovID;
+%     s3.NFrames = foo(:,3);
+%     s3.NTrackers = foo(:,4);
     
-    s2.SampleName = g2SampleName;
-    s2.SampleInstance = g2SampleInstance;
-    s2.NFov = foo(:,2);
-    s2.NFrames = foo(:,3);
-    s2.NTrackers = foo(:,4);
-    
-    s2 = struct2table(s2);
-    
-    [gL3, g3SampleName, g3SampleInstance, g3FovID] = findgroups(T.SampleName, T.SampleInstance, T.FovID);
-
-    s3.SampleName = g3SampleName;
-    s3.SampleInstance = g3SampleInstance;
-    s3.NFov = gFovID;
-    s3.NFrames = foo(:,3);
-    s3.NTrackers = foo(:,4);
+    outs = s1;
     
     return
 
