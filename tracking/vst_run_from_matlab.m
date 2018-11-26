@@ -25,6 +25,9 @@ if isfield(ins, 'continue_from')
     tmp = dir(ins.continue_from);
     disp(['Continuing from: ' tmp.name]);
     commandopts = [commandopts '-continue_from "' ins.continue_from '" '];
+else
+    disp('');
+    disp('Initiating tracking: ');
 end
 
 if nargin < 2 || isempty(logfile)
@@ -45,7 +48,6 @@ copyfile([ins.VSTdir filesep 'video_spot_tracker.tcl'], startpath);
 fullcommand = ['"' ins.VSTexe '" ' commandopts];
 
 systemSTR = join(fullcommand);
-disp(systemSTR);
 
 oldpath = getenv('PATH');
 if ~contains(oldpath, ins.VSTdir)
@@ -60,7 +62,8 @@ setenv('TK_LIBRARY', ins.tkpath);
 setenv('PATH', newpath);
 
 % cd(ins.VSTdir);
-system(systemSTR);
+disp(systemSTR);
+% system(systemSTR);
 % cd(startpath);
 
 delete('russ_widgets.tcl');

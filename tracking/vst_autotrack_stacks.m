@@ -32,13 +32,11 @@ cd(exptpath);
 findcfg = [findcfg, fext];
 trackcfg = [trackcfg, text];
 
-vc = vst_config_init;    
-
 configFind = [exptpath filesep findcfg];
 configTrack = [exptpath filesep trackcfg];
 
-copyfile(cfgfiles.find, configFind );
-copyfile(cfgfiles.track, configTrack );
+[fooa, foob, fooc] = copyfile(cfgfiles.find, configFind );
+[bara, barb, barc] = copyfile(cfgfiles.track, configTrack );
 
 filelist = dir(['**/' filename]);
 
@@ -61,7 +59,8 @@ filelist = dir(['**/' filename]);
         logfile = filelist(k).folder;
         findlog = [logfile '_tmp'];
         
-        
+%         disp('');
+        vc = vst_config_init; 
         vst_check_config(vc);
         vst_run_from_matlab(findframefilename, findlog, configFind, vc);
         
@@ -69,13 +68,15 @@ filelist = dir(['**/' filename]);
         vc.continue_from = [findlog '.csv'];
         vst_run_from_matlab(firstframe, logfile, configTrack, vc);
         
-        delete(findframefilename);
-        delete([findlog '.vrpn']);
-        delete([findlog '.csv']);
-        delete(findcfg);
-        delete(trackcfg);
-    end    
+%         delete(findframefilename);
+%         delete([findlog '.vrpn']);
+%         delete([findlog '.csv']);
 
+    end
+    
+    delete(configFind);
+    delete(configTrack);
+    
     cd(startpath);
         
     v = 0;
