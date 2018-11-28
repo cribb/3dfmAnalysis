@@ -1,0 +1,82 @@
+Usage: video_spot_tracker_nogui.exe [-nogui] [-gui] [-kernel disc|cone|symmetric|FIONA|image|imageor]
+Starting VRPN logging thread
+           [-dark_spot] [-follow_jumps] [-rod3 LENGTH ORIENT] [-image FRAMES] [-imageor ORIENT FRAMES]
+           [-outfile NAME] [-precision P] [-sample_spacing S] [-show_lost_and_found]
+           [-lost_behavior B] [-lost_tracking_sensitivity L] [-blur_lost_and_found B]
+           [-center_surround R] [-optimization_off]
+           [-intensity_lost_sensitivity IL] [-dead_zone_around_border DB]
+           [-first_frame_autofind] [-maintain_fluorescent_beads M]
+           [-fluorescent_spot_threshold FT] [-fluorescent_max_regions FR]
+           [-maintain_this_many_beads M] [-dead_zone_around_trackers DT]
+           [-candidate_spot_threshold T] [-sliding_window_radius SR]
+           [-radius R] [-tracker X Y R] [-tracker X Y R] ...
+           [-FIONA_background BG]
+           [-raw_camera_params sizex sizey bitdepth channels headersize frameheadersize]
+           [-load_state FILE] [-log_video N] [-continue_from FILE] [-append_from FILE]
+           [roper|cooke|edt|diaginc|directx|directx640x480|filename]
+           [-enable_internal_values]
+           [-lost_all_colliding_trackers]
+       -nogui: Run without the video display window (no Glut/OpenGL)
+       -gui: Run with the video display window (no Glut/OpenGL)
+       -kernel: Use kernels of the specified type (default symmetric).
+       -rod3: Make a rod3 kernel of specified LENGTH(pixels) & ORIENT(degrees)
+       -image: set averaged test image over a number of FRAMES (default 0, which
+               only uses the initial test image, not changing it at each frame)
+       -imageor: set orientation of tracker to specified ORIENT(degrees)
+               and averaged test image over a number of FRAMES (default 0, which
+               only uses the initial test image, not changing it at each frame)
+       -dark_spot: Track a dark spot (default is bright spot)
+       -follow_jumps: Set the follow_jumps flag
+       -outfile: Save the track to the file 'name' (.vrpn will be appended)
+       -precision: Set the precision for created trackers to P (default 0.05)
+       -sample_spacing: Set the sample spacing for trackers to S (default 1)
+       -show_lost_and_found: Show the lost_and_found window on startup
+       -lost_behavior: Set lost tracker behavior: 0:stop; 1:delete; 2:hover
+       -blur_lost_and_found: Set blur_lost_and_found to B (default 0, which is off)
+       -center_surround: Set center_surround behavior radius for lost and found to R (default 0, which is off)
+       -optimization_off: turn off optimization (optimization is allowed by default)
+       -lost_tracking_sensitivity: Set lost_tracking_sensitivity to L
+       -intensity_lost_sensitivity:Set intensity_lost_tracking_sensitivity to L
+       -dead_zone_around_border: Set a dead zone around the region of interest
+                 edge within which new trackers will not be found
+       -dead_zone_around_trackers: Set a dead zone around all current trackers
+                 within which new trackers will not be found
+       -first_frame_autofind: Autofind beads in first frame, then not afterwards
+       -maintain_fluorescent_beads: Try to autofind up to M fluorescent beads at every
+                 if there are not that many already.
+       -fluorescent_spot_threshold: Set the threshold for possible spots when
+                 autofinding.  0 means the minimum intensity in the image, 1 means the max.
+                 Setting this lower will not miss as many spots,
+                 but will also find garbage (default 0.5)
+       -fluorescent_max_regions: Only check up to FR connected regions per frame
+       -maintain_this_many_beads: Try to autofind up to M beads at every frame
+                 if there are not that many already.
+       -candidate_spot_threshold: Set the threshold for possible spots when
+                 autofinding.  Setting this lower will not miss as many spots,
+                 but will also find garbage (default 5)
+       -sliding_window_radius: Set the radius of the global SMD sliding window
+                 neighborhood.  Higher values of SR may cause some spots to
+                 take longer before they are detected, but will greatly
+                 increase the running speed (default 9)
+       -radius: Set the radius to use for new trackers to R (default 5)
+       -tracker: Create a tracker with radius R at pixel X,Y and initiate
+                 optimization.  Multiple trackers can be created
+       -FIONA_background: Set the default background for FIONA trackers to BG
+                 (default 0)
+       -raw_camera_params: Set parameters in case we're opening a raw file
+                 (default throws a dialog box to ask you for them)
+       -load_state: Load program state from FILE
+       -log_video: Log every Nth frame of video (in addition to every tracker every frame)
+       -continue_from: Load trackers from last frame in the specified CSV FILE and continue tracking
+       -append_from: Load trackers from last frame in the specified CSV FILE with
+                 ability to continue tracking and to add further log data to the
+                 same file.
+       -check_bead_count_interval: Interaval in frames to check whether the current bead count is low.
+       -enable_internal_values: Output the regions sizes (pixels) and the sensitivity values for each tracker used in fluorescent autofind to the .csv file.
+       -lost_all_colliding_trackers: When trackers get too close, mark all of them lost instead of leaving one behind.
+       source: The source file for tracking can be specified here (default is
+                 a dialog box)
+Exiting...Exiting VRPN logging thread
+logging thread done...trackers removed...objects deleted and files closed.
+
+c:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.13.0>
