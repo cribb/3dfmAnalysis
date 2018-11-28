@@ -68,14 +68,14 @@ filelist = dir(['**/' filename]);
         vc.continue_from = [findlog '.csv'];
         vst_run_from_matlab(firstframe, logfile, configTrack, vc);
         
-%         delete(findframefilename);
-%         delete([findlog '.vrpn']);
-%         delete([findlog '.csv']);
+        delete(findframefilename);
+        delete([findlog '.vrpn']);
+        delete([findlog '.csv']);
 
     end
     
-    delete(configFind);
-    delete(configTrack);
+%     delete(configFind);
+%     delete(configTrack);
     
     cd(startpath);
         
