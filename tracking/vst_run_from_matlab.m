@@ -63,7 +63,7 @@ setenv('PATH', newpath);
 
 % cd(ins.VSTdir);
 disp(systemSTR);
-% system(systemSTR);
+system(systemSTR);
 % cd(startpath);
 
 delete('russ_widgets.tcl');
