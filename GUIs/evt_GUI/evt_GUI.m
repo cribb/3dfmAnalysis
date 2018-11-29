@@ -323,8 +323,8 @@ catch
 
             % or, try loading the first frame        
             try
-                fimfile = [filenameroot, '.0001.bmp'];
-                im = imread(fimfile, 'BMP');
+                fimfile = [filenameroot, '.00001.pgm'];
+                im = imread(fimfile, 'PGM');
                 logentry('Successfully loaded first frame image...');            
             catch
                 logentry('first frame image was not found. Trying to extract first frame...');
