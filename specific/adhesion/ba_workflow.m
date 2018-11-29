@@ -44,22 +44,25 @@ for b = 1:B
     cd(binpath);
     
     % Convert .bin file to stack of pgms
-    bin2pgm(binfile);
+    ba_bin2stack(binfile);
     
     % Create a mini-video of each stack using MP4 format
     ba_minivideo(stackdir);
-
+    
     % Track the beads in each stack
     ba_trackstack(stackdir);
 
+    % Copy the firstframe and give it an expected filename
+    ba_copyfirstframe(stackdir);
+    
     % Compress each stack into a zip file for later use if necessary
     ba_zipstack(stackdir);
     
     % Delete the stack
-    rmdir(stackdir, 's');
+%     rmdir(stackdir, 's');
     
     % Delete the bin file
-    delete(binfile);
+%     delete(binfile);
     
     % Return to our original experiment directory
     cd(exptdir);
