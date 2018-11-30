@@ -31,8 +31,8 @@ if nargin < 3 || isempty(outfile)
 end
 
 if nargin < 4 || isempty(cfgfiles)
-    cfgfiles.find = 'D:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\optimize_z_find.cfg';
-    cfgfiles.track = 'D:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\optimize_z_track.cfg';
+    cfgfiles.find = which('optimize_z_find.cfg');
+    cfgfiles.track = which('optimize_z_track.cfg');
 end
 
 startpath = pwd;
@@ -47,8 +47,17 @@ trackcfg = [trackcfg, text];
 configFind = [destination_folder filesep findcfg];
 configTrack = [destination_folder filesep trackcfg];
 
-[successF, ~, ~] = copyfile(cfgfiles.find, configFind );
-[successT, ~, ~] = copyfile(cfgfiles.track, configTrack );
+if ~strcmp(cfgfiles.find, configFind)
+    [successF, msga, msgIDa] = copyfile(cfgfiles.find, configFind ); %#ok<ASGLU>
+else
+    successF = true;
+end
+
+if ~strcmp(cfgfiles.track, configTrack)
+    [successT, msgb, msgIDb] = copyfile(cfgfiles.track, configTrack ); %#ok<ASGLU>
+else
+    successT = true;
+end
 
 if ~successF || ~successT
     error('One or more tracking configuration files not copied.');
@@ -74,14 +83,15 @@ vst_run_from_matlab(findframefilename, findlog, configFind, vc);
 vc.continue_from = [findlog '.csv'];
 vst_run_from_matlab(firstframe, logfile, configTrack, vc);
 
-delete(findframefilename);
-delete([findlog '.vrpn']);
-% Delete the vrpn files (we want to keep the csv files, though)
-delete([logfile '.vrpn']);
-delete([findlog '.csv']);
-
-delete(configFind);
-delete(configTrack);
+% delete(findframefilename);
+% delete([findlog '.vrpn']);
+% 
+% % Delete the vrpn files (we want to keep the csv files, though)
+% delete([logfile '.vrpn']);
+% delete([findlog '.csv']);
+% 
+% delete(configFind);
+% delete(configTrack);
 
 return
 
