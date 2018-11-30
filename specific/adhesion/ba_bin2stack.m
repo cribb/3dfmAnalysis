@@ -1,4 +1,4 @@
-function ba_bin2pgm(filename, stackpath, showTF)
+function ba_bin2stack(filename, stackpath, showTF)
 % function outs = bin2pgm(filename, outputpath, showTF)
 
 % Check to see if a filename string was provided.
@@ -44,10 +44,10 @@ if expected_filesize_bytes ~= fntmp.bytes
     disp('Expected file size differs from actual file. Attempting to compensate.');
 
     if mod(fntmp.bytes,width*height*depth/8)
-        error('Expected frame size or depth is wrong');
-    end
-
-    if ~mod(fntmp.bytes,expected_framesize_bytes)
+        disp('Expected frame width, height, depth or number of frames is wrong.');
+        disp('Assuming partial frame and moving on...');
+        frames = floor(fntmp.bytes/expected_framesize_bytes);
+    elseif ~mod(fntmp.bytes,expected_framesize_bytes)
         newframes = fntmp.bytes/expected_framesize_bytes;
         disp(['Expected ' num2str(frames) ...
               ' frames, got ' num2str(newframes) ...
