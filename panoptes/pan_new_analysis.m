@@ -35,8 +35,9 @@ d.TrackingTable = FilteredTrackingTable;
 d.Trash = Trash;
 
 % (7) Deal with drift separately from traditional "filtering" operation.
-ComTable = vst_common_motion(d.TrackingTable); %%% REMEMBER THIS IS FILTERED TRACKING
-d.TrackingTable = ComTable;
+[ComTrackingTable, ComTable] = vst_common_motion(d.TrackingTable); %%% REMEMBER THIS IS FILTERED TRACKING
+d.TrackingTable = ComTrackingTable;
+d.ComTable = ComTable;
 
 DriftFreeTable = vst_subtract_common_motion(d.TrackingTable);
 d.TrackingTable = DriftFreeTable;
@@ -65,6 +66,7 @@ diffTable = vst_difftau(d, taulist);
 
 % (11) Calculate MSD on beadGroups and put into data structure
 msdTable = vst_msd(d, taulist);
+viscTable = vst_gser(msdTable, taulist);
 
 d.MsdTable = join(diffTable, msdTable);
 
