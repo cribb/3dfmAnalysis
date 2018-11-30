@@ -36,7 +36,6 @@ else
     commandopts = [commandopts ' -outfile "' logfile '" '];
 end
 
-
 commandopts = [commandopts '"' filetotrack '" '];
 
 % disp(commandopts);     
