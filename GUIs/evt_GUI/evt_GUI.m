@@ -300,7 +300,12 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     % try loading the MIP filemenu
 try
+    if ~contains(filenameroot, '.pgm', 'IgnoreCase', true)
         MIPfile = [filenameroot, '.pgm'];
+    else
+        MIPfile = filenameroot;
+    end
+    
         MIPfile = strrep(MIPfile, '_TRACKED', '');
         MIPfile = strrep(MIPfile, 'video', 'FLburst');
         im = imread(MIPfile, 'PGM');
@@ -1669,8 +1674,8 @@ function plot_data(hObject, eventdata, handles)
     if size(im,1) > 1
         [imy, imx, imc] = size(im);
     else
-        imy = max(y) * 1.1;
-        imx = max(x) * 1.1;
+        imy = max(y);% * 1.1;
+        imx = max(x);% * 1.1;
     end
     
     currentBead = round(get(handles.slider_BeadID, 'Value'));
@@ -1681,7 +1686,7 @@ function plot_data(hObject, eventdata, handles)
 	nk = find(beadID ~= (currentBead));
 
     figure(handles.XYfig);   
-        imagesc(0:imx * calib_um, 0:imy * calib_um, im);
+    imagesc([0 imx] * calib_um, [0 imy] * calib_um, im);
     colormap(gray);
     
     
@@ -1710,7 +1715,8 @@ function plot_data(hObject, eventdata, handles)
     
     xlabel(['displacement [' ylabel_unit ']']);
     ylabel(['displacement [' ylabel_unit ']']);    
-    axis([0 imx 0 imy] .* calib_um);
+    xlim([0 imx] .* calib_um);
+    ylim([0 imy] .* calib_um);
     set(handles.XYfig, 'Units', 'Normalized');
     set(handles.XYfig, 'Position', [0.1 0.05 0.4 0.4]);
     set(handles.XYfig, 'DoubleBuffer', 'on');
