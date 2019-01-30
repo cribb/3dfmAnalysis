@@ -300,15 +300,15 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     % try loading the MIP filemenu
 try
-    if ~contains(filenameroot, '.pgm', 'IgnoreCase', true)
-        MIPfile = [filenameroot, '.pgm'];
+    if ~contains(filenameroot, '.png', 'IgnoreCase', true)
+        MIPfile = [filenameroot, '.png'];
     else
         MIPfile = filenameroot;
     end
     
         MIPfile = strrep(MIPfile, '_TRACKED', '');
         MIPfile = strrep(MIPfile, 'video', 'FLburst');
-        im = imread(MIPfile, 'PGM');
+        im = imread(MIPfile, 'PNG');
         logentry('Successfully loaded FLburst image from a Panoptes run...');
 %         MIPexists = 1;
 catch
@@ -341,7 +341,6 @@ catch
                     logentry('Successfully extracted first frame image...');
                 catch
                     logentry('Could not extract image; RAW file not found.  Giving up...');
-                    im = 0;
                 end
             end        
         end
@@ -351,7 +350,7 @@ end
     if exist('im', 'var')
         handles.im = im;
     else
-        handles.im = [];
+        handles.im = 0.5 * ones(ceil(max(d(:,Y))),ceil(max(d(:,X))));
     end
     
 %     if exist('MIPexists', 'var') && get(handles.checkbox_lumicrop, 'Value')
@@ -1645,6 +1644,22 @@ function checkbox_2Mmsd_Callback(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
 
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 % =========================================================================
 % Everything below this point are functions related to computation and data
 % handling/display, and not the gui (though the handles structure is used).
@@ -1674,8 +1689,8 @@ function plot_data(hObject, eventdata, handles)
     if size(im,1) > 1
         [imy, imx, imc] = size(im);
     else
-        imy = max(y);% * 1.1;
-        imx = max(x);% * 1.1;
+        imy = ceil(max(y));% * 1.1;
+        imx = ceil(max(x));% * 1.1;
     end
     
     currentBead = round(get(handles.slider_BeadID, 'Value'));
@@ -1754,6 +1769,22 @@ function plot_data(hObject, eventdata, handles)
 %     win = unique(floor(logspace(0,log10(max(frame)),numtaus)));
     win = numtaus;
 
+    velx = zeros(size(beadID));
+    vely = zeros(size(beadID));
+    
+    beadlist = unique(beadID);
+    for b = 1:length(beadlist)        
+        foo = find(beadID == beadlist(b));
+        velx(foo,1) = CreateGaussScaleSpace(x(foo), 1, 1)/dt;
+        vely(foo,1) = CreateGaussScaleSpace(y(foo), 1, 1)/dt;
+    end
+    
+    vr = magnitude(velx, vely);
+    normvr = vr ./ max(vr);
+    vals = floor(normvr * 255);
+    heatmap = colormap(hot(256));
+    velclr = heatmap(vals+1,:);
+    
     if strcmp(AUXtype, 'MSD')  || ...
        strcmp(AUXtype, 'GSER') || ...
        strcmp(AUXtype, 'sensitivity (SNR)') || ...
@@ -1867,10 +1898,7 @@ function plot_data(hObject, eventdata, handles)
             end                        
 
 
-            velx = CreateGaussScaleSpace(x(k)-xinit, 1, 0.5)/dt;
-            vely = CreateGaussScaleSpace(y(k)-yinit, 1, 0.5)/dt;
-                      
-            plot(t(k) - mintime, [velx(:) vely(:)], '.-');
+            plot(t(k) - mintime, [velx(k,1) vely(k,1)], '.-');
             xlabel('time (s)');
             ylabel(['velocity [' ylabel_unit '/s]']);
             legend('x', 'y');    
@@ -1884,12 +1912,7 @@ function plot_data(hObject, eventdata, handles)
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
             
-            velx = CreateGaussScaleSpace(x(k), 1, 0.5)/dt;
-            vely = CreateGaussScaleSpace(y(k), 1, 0.5)/dt;
-            
-            vr = magnitude(velx, vely);    
-            
-            plot(t(k) - mintime, vr(:), '.-');
+            plot(t(k) - mintime, vr(k), '.-');
             xlabel('time (s)');
             ylabel(['velocity [' ylabel_unit '/s]']);
             legend('r');    
@@ -1899,22 +1922,69 @@ function plot_data(hObject, eventdata, handles)
             set(handles.AUXfig, 'BackingStore', 'off');    
             drawnow;
             
-        case 'PSD'
+        case 'velocity scatter (all)'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
             clf(AUXfig);
+
+            hold on;
+                imagesc([0 imx], [0 imy], im);
+                colormap(gray);
+                scatter(x, y, [], velclr, 'filled');
+            hold off;
+            
+            set(gca, 'YDir', 'reverse');
+        
+        case 'velocity scatter (active)'            
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            clf(AUXfig);
+
+            imagesc([0 imx], [0 imy], im);
+            colormap(gray);
+    
+            hold on;
+                plot(x(nk), y(nk), 'b.');
+                scatter(x(k), y(k), [], velclr(k,:), 'filled');
+                set(gca, 'YDir', 'reverse');
+            hold off;
+            
+            xlabel(['displacement [' ylabel_unit ']']);
+            ylabel(['displacement [' ylabel_unit ']']);    
+            
+        case 'velocity vectorfield'
+            NGridX = 45;
+            NGridY = 45;
+            xgrid = (1:NGridX)*(video.xDim/NGridX/video.pixelsPerMicron);
+            ygrid = (1:NGridY)*(video.yDim/NGridY/video.pixelsPerMicron);
+            foo = vel_field(evt_filename, NGridX, NGridY, video);
+            Xvel = reshape(foo.sectorX, NGridX, NGridY);
+            Yvel = reshape(foo.sectorY, NGridX, NGridY);
+            Vmag = sqrt(Xvel.^2 + Yvel.^2);
+
+            figure; 
+            imagesc(xgrid, ygrid, Vmag'); 
+            colormap(hot);
+            xlabel('\mum')
+            ylabel('\mum')
+            title('Vel. [\mum/s]');
+            pretty_plot;
+
+        case 'PSD'
             
             [p, f, id] = mypsd([x(k) y(k)]*1e-6, frame_rate, frame_rate/100, 'rectangle');
 
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            clf(AUXfig);
             loglog(f, p);
             xlabel('frequency [Hz]');
 			ylabel('power [m^2/Hz]');
-
-            
             set(handles.AUXfig, 'Units', 'Normalized');
             set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
             set(handles.AUXfig, 'DoubleBuffer', 'on');
             set(handles.AUXfig, 'BackingStore', 'off');    
+
         case 'Integrated Disp'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
