@@ -10,14 +10,16 @@ else
     return;
 end
 
-for k = 0:max(beadID)
+beadlist = unique(beadID);
+
+for k = 1:length(beadlist)
 
     idx = find(beadID == k);
 
-    beadstruct(k+1).t      = vidtable(idx,TIME) - min(vidtable(:,TIME));
-    beadstruct(k+1).x      = vidtable(idx,X);
-    beadstruct(k+1).y      = vidtable(idx,Y);
-    beadstruct(k+1).yaw    = vidtable(idx,YAW);
+    beadstruct(k).t      = vidtable(idx,TIME) - min(vidtable(:,TIME));
+    beadstruct(k).x      = vidtable(idx,X);
+    beadstruct(k).y      = vidtable(idx,Y);
+    beadstruct(k).yaw    = vidtable(idx,YAW);
 
 end
     
