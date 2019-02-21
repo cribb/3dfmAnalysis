@@ -17,18 +17,28 @@ end
 
 cfgfiles = dir(cfgfiles);
 
+if isempty(cfgfiles)
+        error(['File ' cfgfiles(f).name ' not found. Continuing.']);
+        outs = [];
+        return
+end
+
 this = struct;
 outs = struct;
-for f = 1:length(cfgfiles)
-    A = importdata(cfgfiles(f).name, ' ');
-    
-    if isempty(A)
-        warning(['File ' cfgfiles(f).name ' not found. Continuing.']);
-        continue;
-    end
 
-    for k = 1:length(A.textdata)
-        this = setfield(this, A.textdata{k,2}, A.data(k));
+for f = 1:length(cfgfiles)
+    
+    fid = fopen(cfgfiles(f).name);
+    
+    A = textscan(fid, '%s %s %s');        
+
+    fnames = A{:,2};
+    values = A{:,3};
+    
+    values = cellfun(@str2num, values, 'UniformOutput', false);
+    
+    for k = 1:length(fnames)
+        this = setfield(this, fnames{k,1}, values{k,1});
     end
     
     % don't know why, but Matlab doesn't like fields assigned to a
@@ -39,6 +49,8 @@ for f = 1:length(cfgfiles)
     else
         outs(f) = this;
     end
+    
+    fclose(fid);
 end   
 
-return;
+return
