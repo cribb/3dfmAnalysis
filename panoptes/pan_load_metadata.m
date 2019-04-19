@@ -1,5 +1,8 @@
-function outs = pan_load_metadata(filepath, systemid, plate_type)
-   
+function outs = pan_load_metadata(filepath, systemid, plate_type, tracking_style)
+    if nargin < 4 || isempty(tracking_style)
+        tracking_style = 'vst';
+    end
+    
     if nargin < 3 || isempty(plate_type)
         plate_type = '96well';
     end
@@ -114,7 +117,15 @@ function outs = pan_load_metadata(filepath, systemid, plate_type)
     outs.files.mip       = dir('*.mip.pgm');
     outs.files.video        = dir('*video*.vrpn');
     outs.files.tracking.mat = dir('*_TRACKED.vrpn.mat');
-    outs.files.tracking.csv = dir('*_TRACKED.csv');
+    
+    if contains(lower(tracking_style), 'vst')
+        outs.files.tracking.csv = dir('*_TRACKED.csv');
+    elseif contains(lower(tracking_style), 'ait')
+        outs.files.tracking.csv = dir('*.tif.csv');
+    else
+        error('This tracking style is undefined.');
+    end       
+
     outs.files.tracking.evt = dir('*.vrpn.evt.mat');
 
     if ~isempty(outs.files.tracking.csv)
