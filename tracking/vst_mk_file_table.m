@@ -61,14 +61,14 @@ function filetable = vst_mk_file_table(filelist, fpslist, calibumlist, width, he
     if size(C,1) == 1
         C = repmat(C, size(F));
     end
-    
-    if size(X,1) == 1
-        X = repmat(X, size(F));
-    end
-    
-    if size(Y,1) == 1
-        Y = repmat(Y, size(F));
-    end
+%     
+%     if size(X,1) == 1
+%         X = repmat(X, size(F));
+%     end
+%     
+%     if size(Y,1) == 1
+%         Y = repmat(Y, size(F));
+%     end
     
     % Check to make sure the length of the filename list is consistent with
     % the entered values for time- and length-scales.
