@@ -46,11 +46,11 @@ fclose(fileID);
 
 
 %% Create output variable
-platedef = table(dataArray{1:end-1}, 'VariableNames', {'Row','Column','Well_ID','Object_ID','Object_name','Field_name','Value'});
+platedef = table(dataArray{1:end-1}, 'VariableNames', {'PlateRow','PlateColumn','Well_ID','Object_ID','Object_name','Field_name','Value'});
 
 
-platedef.Row = [];
-platedef.Column = [];
+platedef.PlateRow = [];
+platedef.PlateColumn = [];
 platedef.Object_name = platedef.Object_name+platedef.Object_ID+'_'+platedef.Field_name;
 % platedef.Object_name = categorical(platedef.Object_name);
 platedef.Object_ID = [];
