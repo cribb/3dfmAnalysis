@@ -1,4 +1,4 @@
-function ba_bin2stack(filename, stackpath, showTF)
+function ba_bin2stack(filename, stackpath, statTF, showTF)
 % function outs = bin2pgm(filename, outputpath, showTF)
 
 % Check to see if a filename string was provided.
@@ -24,7 +24,12 @@ if nargin < 2 || isempty(stackpath)
 end
 
 % Display the frames as they're converted? Assume false ('no') as default.
-if nargin < 3 || isempty(showTF)
+if nargin < 3 || isempty(statTF)
+    ststTF = false;
+end
+
+% Display the frames as they're converted? Assume false ('no') as default.
+if nargin < 4 || isempty(showTF)
     showTF = false;
 end
 
@@ -74,7 +79,11 @@ end
     end    
 
     depthtype = ['uint' num2str(depth)];    
-
+    
+    if statTF
+        [vmax, vmin, vmean, vsd] = deal(NaN(frames,1));
+    end
+    
 %     for k = 1:10
 %     for k = 1:100
     for k = 1:frames
@@ -90,6 +99,16 @@ end
             drawnow;
         end
         
+
+        
+        if statTF
+            tmpframe  = double(myframe(:));
+            vmax(k)  = max(tmpframe);
+            vmin(k)  = min(tmpframe);
+            vmean(k) = mean(tmpframe);
+            vsd(k)   = std(tmpframe);
+        end
+        
         imwrite(myframe, framename);
         
 
@@ -100,6 +119,13 @@ end
     
     fclose(fid);
     cd(startdir);
+    
+    if statTF
+        VidStats = table([1:frames]', vmax, vmin, vmean, vsd);
+        VidStats.Properties.VariableNames = {'Frame', 'Max', 'Mean', 'StDev', 'Min'};
+        save([filename(1:end-4), '.vidstats.mat'], 'VidStats');
+    end
+    
 
 %     outs = {width, height, frames, depth};
 return
