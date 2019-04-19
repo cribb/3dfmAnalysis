@@ -4,15 +4,23 @@ function [TrackingTableOut,ComTableOut] = vst_common_motion(TrackingTableIn)
 
 [ngid,nglist] = findgroups(TrackingTableIn.Fid);    
 
-common_modes = splitapply(@(x1,x2,x3,x4){common_mode(x1,x2,x3,x4)}, ...
-                                         TrackingTableIn.ID, ...
-                                         TrackingTableIn.Frame, ...
-                                         TrackingTableIn.X, ...
-                                         TrackingTableIn.Y, ...
-                                         ngid);
-N = size(cell2mat(common_modes),1);
+global cnt
+cnt = 0;
 
-[all_fid, all_framelist, all_cm] = deal(NaN(0,1));
+% if ~isempty(TrackingTableIn)
+    common_modes = splitapply(@(x1,x2,x3,x4){common_mode(x1,x2,x3,x4)}, ...
+                                             TrackingTableIn.ID, ...
+                                             TrackingTableIn.Frame, ...
+                                             TrackingTableIn.X, ...
+                                             TrackingTableIn.Y, ...
+                                             ngid);
+    N = size(cell2mat(common_modes),1);
+% else
+%     common_modes = common_mode(TrackingTableIn.ID, TrackingTableIn.Frame, TrackingTableIn.X, TrackingTableIn.Y);
+% end
+
+% [all_fid, all_framelist] = deal(NaN(0,1));
+% all_cm = NaN(0,2);
 % all_fid = categorical(all_fid);
 
 for k = 1:length(nglist)
@@ -32,15 +40,18 @@ ComTableOut.Ycom  = all_cm(:,2);
 
 ComTableOut = struct2table(ComTableOut);
 
-TrackingTableOut = join(TrackingTableIn, ComTableOut, 'Keys', {'Fid', 'Frame'});
+TrackingTableOut = innerjoin(TrackingTableIn, ComTableOut, 'Keys', {'Fid', 'Frame'});
 
 return;
 
 
 function common_mode = common_mode(id, frames, x, y)
 
-    video_tracking_constants;       
+    global cnt;
+    cnt = cnt + 1;
 
+    video_tracking_constants;       
+    
     vidtable = NaN(size(id,1), size(NULLTRACK,2));
     
     vidtable(:,ID)    = id;
