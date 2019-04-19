@@ -14,7 +14,7 @@ function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
     % handle the argument list
     if nargin < 1 
         data = [];
-    end;
+    end
     
 
     if isempty(data) || sum(isnan(data(:))) == length(data(:))
@@ -22,22 +22,22 @@ function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
         v = data;
         q = [];
         return;
-    end;
+    end
 
-    if nargin < 2 || isempty(drift_start_time); 
+    if nargin < 2 || isempty(drift_start_time)
         drift_start_time = min(data(:,TIME)); 
 %         logentry('No start_time specified.  Choosing first time in dataset.');
-    end;
-    
-    if nargin < 3 || isempty(drift_end_time); 
+    end
+   
+    if nargin < 3 || isempty(drift_end_time)
         drift_end_time = max(data(:,TIME)); 
 %         logentry('No end_time specified.  Choosing last time in dataset.');
-    end;
+    end
 
-    if nargin < 4 || isempty(type); 
+    if nargin < 4 || isempty(type)
         type = 'linear'; 
         logentry('No drift type specified.  Choosing linear method.');
-    end;
+    end
 
 %     if nargin < 5 | isempty(plotOption); 
 %         type = 'y'; 
