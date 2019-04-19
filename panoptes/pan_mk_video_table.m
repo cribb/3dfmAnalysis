@@ -1,4 +1,4 @@
-function VidTable = pan_mk_video_table(filepath, systemid, plate_type)
+function VidTable = pan_mk_video_table(filepath, systemid, plate_type, tracking_style)
 % PAN_MK_VIDEO_TABLE Generates VidTable from a Panoptes dataset path
 %
 % Panoptes function 
@@ -12,6 +12,10 @@ function VidTable = pan_mk_video_table(filepath, systemid, plate_type)
 % 
 % VidTable = pan_mk_video_table(filepath, systemid, plate_type) 
 %
+
+if nargin < 4 || isempty(tracking_style)
+    tracking_style = 'vst';
+end
 
 mypath = fullfile(pwd, filepath);
 
@@ -62,9 +66,15 @@ for p = 1:length(pass_list)
 
         VideoFiles{fid,1} = basename;
         
-                      % which files are the tracking files?
-        basename_tracking = [basename '_TRACKED.csv'];
-                      
+        % which files are the tracking files?
+        if contains(lower(tracking_style), 'vst')
+            basename_tracking = [basename '_TRACKED.csv'];
+        elseif contains(lower(tracking_style), 'ait')
+            basename_tracking = [basename '.tif.csv'];
+        else
+            error('This tracking style is undefined.');
+        end
+        
         basename_tracking = dir(basename_tracking);
         
         if ~isempty(basename_tracking)
@@ -85,12 +95,17 @@ for p = 1:length(pass_list)
         
         
         % load the first frames
+%         basename_fframes = [exptname ...
+%                           '_FLburst_pass' num2str(pass) ...
+%                           '_well' num2str(well)];
+%                       
+%         fframe_name = [basename_fframes filesep 'frame0001.pgm'];
         basename_fframes = [exptname ...
-                          '_FLburst_pass' num2str(pass) ...
-                          '_well' num2str(well)];
+                           '_video_pass' num2str(pass) ...
+                           '_well' num2str(well)];
                       
-        fframe_name = [basename_fframes filesep 'frame0001.pgm'];
-        
+        fframe_name = [basename_fframes '.0001.pgm'];   
+
         FirstFrameFiles{fid,1} = fframe_name;
         
         if isdir(basename_fframes) && ~isempty(dir(fframe_name))
@@ -109,10 +124,10 @@ for p = 1:length(pass_list)
                           '_well' num2str(well) ...
                           '.mip.pgm'];
                       
-        basename_mips = dir(basename_mips);
+        mipname = dir(basename_mips);
         
-        if ~isempty(basename_mips)
-            Mips{fid,1} = imread(basename_mips.name);     
+        if ~isempty(mipname)
+            Mips{fid,1} = imread(mipname.name);     
            
             % width/height of images
             [Height(fid,1), Width(fid,1)] = size(Mips{fid,1});
@@ -122,7 +137,7 @@ for p = 1:length(pass_list)
             Height(fid,1) = NaN;
         end 
         
-        MipFiles{fid,1} = basename_mips.name;
+        MipFiles{fid,1} = mipname.name;
                 
         Pass(fid,1) = pass;
         Well(fid,1) = well;

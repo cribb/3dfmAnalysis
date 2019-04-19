@@ -1,16 +1,26 @@
-function DataOut = pan_new_analysis(filepath, systemid, platetype)
+function DataOut = pan_new_analysis(filepath, systemid, platetype, tracking_style)
+
+if nargin < 4 || isempty(tracking_style)
+    tracking_style = 'vst';
+end
 
 % (0) Load in the experiment's metadata
 logentry('Loading in experiment''s metadata.');
-d.metadata = pan_load_metadata(filepath, systemid, platetype);
+d.metadata = pan_load_metadata(filepath, systemid, platetype, tracking_style);
 
 % (1) Load in run metadata and tracking data from a panoptes directory. 
 logentry('Constructing video table from metadata and file directory info.');
-d.VidTable = pan_mk_video_table(filepath, systemid, platetype);
+d.VidTable = pan_mk_video_table(filepath, systemid, platetype, tracking_style);
 
 % (2) Load in the tracking data
 logentry('Loading trajectory data...');
-d.TrackingTable = vst_load_tracking(d.VidTable);
+if contains(lower(tracking_style), 'vst')
+    d.TrackingTable = vst_load_tracking(d.VidTable);
+elseif contains(lower(tracking_style), 'ait')
+    d.TrackingTable = ait_load_tracking(d.VidTable);
+else
+    error('This tracking style is undefined.');
+end
 
 % (3) Load in imaging data
 logentry('Loading Imaging support data...');
@@ -25,7 +35,9 @@ d.summary.RawTracking = vst_summarize_traj(d.TrackingTable);
 d.summary.RawFiles = vst_summarize_files(d.summary.RawTracking);
 
 % (6) Filter tracking data and put eliminated data into a "Trash" table.
+
 filtin.tcrop      = 3;
+filtin.min_trackers = 2;
 filtin.min_frames = floor(d.metadata.instr.fps_fluo/2);
 
 logentry('Filtering trajectories based on prescribed settings...');
@@ -35,6 +47,7 @@ d.TrackingTable = FilteredTrackingTable;
 d.Trash = Trash;
 
 % (7) Deal with drift separately from traditional "filtering" operation.
+logentry('Handling drift...');
 [ComTrackingTable, ComTable] = vst_common_motion(d.TrackingTable); %%% REMEMBER THIS IS FILTERED TRACKING
 d.TrackingTable = ComTrackingTable;
 d.ComTable = ComTable;
@@ -53,7 +66,7 @@ thispath = pwd;
 seplocs = regexp(thispath, filesep);
 newname = thispath(seplocs(end)+1:end);
 newname = ['..' filesep newname '.base.mat'];
-save(newname, '-struct', 'd');
+save(newname, '-struct', 'd', '-v7.3', '-nocompression');
 
 % (9) Calculate list of taus (lagtimes) based on experiment sampling information
 Nframes = floor(d.metadata.instr.fps_imagingmode * d.metadata.instr.seconds);
@@ -69,6 +82,7 @@ msdTable = vst_msd(d, taulist);
 viscTable = vst_gser(msdTable, taulist);
 
 d.MsdTable = join(diffTable, msdTable);
+% d.ViscTable = join(diffTable, viscTable);
 
 % (12) Identify salient groups in the dataset: beadGroups, fileGroups,
 % SampleNameGroups, SampleInstanceGroups, FovIDGroups
