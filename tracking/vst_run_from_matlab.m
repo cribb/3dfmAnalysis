@@ -16,10 +16,18 @@ vst_check_config(ins);
 
 % logfile = join([ins.logdir, 'test_tmp'], '');
 
+if isempty(dir(configfile))
+    error('No tracking configuration file found.');
+end
+
+% configdata = readfile(configfile);
+
+config_radius = 50;
+
 commandopts = ['-enable_internal_values ' ...
                '-lost_all_colliding_trackers ' ...
                '-load_state "' configfile '" ' ...
-               '-tracker 0 0 50 '];
+               '-tracker 0 0 ' num2str(config_radius) ' '];
 
 if isfield(ins, 'continue_from')
     tmp = dir(ins.continue_from);
