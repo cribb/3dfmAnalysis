@@ -25,11 +25,19 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
     % Is filelist a string with just a filename in it? If not, is filelist 
     % a list of filenames embedded as a cell array? If so, get directory
     % listing for it.
-    if ischar(filelist)
+    if isstruct(filelist) && ...
+       isfield(filelist, 'name') && ...
+       isfield(filelist, 'folder') && ...
+       isfield(filelist, 'date') && ...
+       isfield(filelist, 'bytes') && ...
+       isfield(filelist, 'isdir') && ...
+       isfield(filelist, 'datenum')
+       % do nothing. It is what it needs to be
+    elseif ischar(filelist)
         filelist = dir(filelist);
     elseif iscell(filelist)
         for k = 1:length(filelist)
-            tmp(k) = dir(filelist{k});
+            tmp(k,1) = dir(filelist{k});
         end        
         filelist = tmp;
     elseif isempty(filelist)
@@ -47,6 +55,14 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
     if isempty(firstframefiles)
         warning('No first frame filenames defined. Removing column from VideoTable.');
         % XXX Update this to remove the firstframe column from the VideoTable
+    elseif isstruct(firstframefiles) && ...
+           isfield(firstframefiles, 'name') && ...
+           isfield(firstframefiles, 'folder') && ...
+           isfield(firstframefiles, 'date') && ...
+           isfield(firstframefiles, 'bytes') && ...
+           isfield(firstframefiles, 'isdir') && ...
+           isfield(firstframefiles, 'datenum')
+       % do nothing, it's already in the right state
     elseif ischar(firstframefiles)
         firstframefiles = dir(firstframefiles);
     elseif iscell(firstframefiles)
@@ -64,6 +80,14 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
     if isempty(mipfiles)
         warning('No MIP filenames defined. Removing column from VideoTable.');
         % XXX Update this to remove the mipfiles column from the VideoTable
+    elseif isstruct(mipfiles) && ...
+           isfield(mipfiles, 'name') && ...
+           isfield(mipfiles, 'folder') && ...
+           isfield(mipfiles, 'date') && ...
+           isfield(mipfiles, 'bytes') && ...
+           isfield(mipfiles, 'isdir') && ...
+           isfield(mipfiles, 'datenum')
+       % Do nothing, they are in the correct format
     elseif ischar(mipfiles)
         mipfiles = dir(mipfiles);
     elseif iscell(mipfiles)
@@ -78,9 +102,13 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
     % If it's an incorrectly formed structure...
     if isstruct(filelist) && ~isfield(filelist, 'name')
         error('File structure, filelist, is constructed incorrectly. Consult help for dir command.');
-    elseif isstruct(firstframefiles) && ~isfield(firstframefiles, 'name')
+    end
+    
+    if isstruct(firstframefiles) && ~isfield(firstframefiles, 'name')
         error('File structure, firstframefiles, is constructed incorrectly. Consult help for dir command.');
-    elseif isstruct(mipfiles) && ~isfield(mipfiles, 'name')
+    end
+    
+    if isstruct(mipfiles) && ~isfield(mipfiles, 'name')
         error('File structure, firstframefiles, is constructed incorrectly. Consult help for dir command.');
     end
     
@@ -146,19 +174,7 @@ function filetable = mk_video_table(filelist, fpslist, calibumlist, width, heigh
         Firstframefile = [];
     end
     
-    
-%     % Tricky part here, dealing with the MIPs and First Frames.
-%     if ~isempty(mipfiles) && iscell(mipfiles) && length(mipfiles) == size(filelist,1)
-%         Mip = mipfiles;  
-%     elseif ~isempty(mipfiles) && isnumeric(mipfiles) && size(mipfiles,3) == length(filelist)
-%         Mip(k,:,:) = mipfiles(:,:,k); % table wants transpose
-%     elseif ~isempty(mipfiles) && ~iscell(mipfiles)
-%         error('MIP images are not properly structured in a cell array. Consult documentation.');
-%     elseif isempty(mipfiles)
-%         logentry('No mip defined.');
-%         Mip = [];
-%     end
-    
+   
     % Now that all the inputs are handled...
     for k = 1:length(filelist)
         Fid(k,1) = k;
