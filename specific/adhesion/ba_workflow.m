@@ -50,13 +50,13 @@ for b = 1:B
     ba_minivideo(stackdir);
     
     % Track the beads in each stack
-    ba_trackstack(stackdir);
+%     ba_trackstack(stackdir);
 
     % Copy the firstframe and give it an expected filename
-    ba_copyfirstframe(stackdir);
+%     ba_copyfirstframe(stackdir);
     
     % Compress each stack into a zip file for later use if necessary
-    ba_zipstack(stackdir);
+    %ba_zipstack(stackdir);
     
     % Delete the stack
 %     rmdir(stackdir, 's');
