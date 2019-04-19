@@ -19,7 +19,7 @@ end
 if length(gridXY(:)) == 1
     NGridX = gridXY;
     NGridY = gridXY;
-elseif length(gridXY(:) == 2)
+elseif length(gridXY(:)) == 2
     NGridX = gridXY(1);
     NGridY = gridXY(2);
 end
@@ -27,14 +27,16 @@ end
 xgrid = (1:NGridX)*(video.xDim/NGridX/video.pixelsPerMicron);
 ygrid = (1:NGridY)*(video.yDim/NGridY/video.pixelsPerMicron);
 
-foo = vel_field(evt_filename, NGridX, NGridY, video);
+v = vel_field(evt_filename, NGridX, NGridY, video);
 
-Xvel = reshape(foo.sectorX, NGridX, NGridY);
-Yvel = reshape(foo.sectorY, NGridX, NGridY);
-Vmag = sqrt(Xvel.^2 + Yvel.^2);
+Xvel = reshape(v.sectorX, NGridX, NGridY);
+Yvel = reshape(v.sectorY, NGridX, NGridY);
+
+v.Vmag = sqrt(Xvel.^2 + Yvel.^2);
+v.Vangle = atan2(Yvel, Xvel);
 
 % figure; 
-% surf(xgrid, ygrid, Vmag);
+% surf(ygrid(:), xgrid(:), v.Vmag);
 % colormap(hot);
 % xlabel('X \mum')
 % ylabel('Y \mum')
@@ -42,14 +44,15 @@ Vmag = sqrt(Xvel.^2 + Yvel.^2);
 % pretty_plot;
 
 figure; 
-imagesc(xgrid, ygrid, Vmag'); 
+imagesc(xgrid, ygrid, v.Vmag'); 
 colormap(hot);
 xlabel('\mum')
 ylabel('\mum')
 title('Vel. [\mum/s]');
 pretty_plot;
-
+set(gca, 'YDir', 'normal');
 cb = colorbar;
+
 % cb_label = get(cb, 'TickLabels');
 % for k = 1:length(cb_label)
 %     cb_new{k,1} = ['10^{', cb_label{k}, '}']; 
@@ -57,8 +60,31 @@ cb = colorbar;
 % set(cb, 'TickLabels', cb_new);
 
 
-plot_vel_field(foo, video);
 
-v = foo;
+figure; 
+ksdensity(v.Vmag(v.Vmag ~= 0)); legend('30^o');
+legend(evt_filename, 'Interpreter', 'none');
+xlabel('V_{mag} [\mum/s]');
+ylabel('ksdensity');
+grid on;
+
+figure; 
+ksdensity(v.Vangle(v.Vmag ~= 0)); legend('30^o');
+legend(evt_filename, 'Interpreter', 'none');
+xlabel('V_{angle} [\mum/s]');
+ylabel('ksdensity');
+xlim([-5*pi/4,5*pi/4])
+set(gca, 'XTick', [-pi, -pi/2, 0, pi/2, pi])
+set(gca, 'XTickLabel', {'-\pi', '-\pi/2', '0', '\pi/2', '\pi'})
+grid on;
+
+figure;
+quiver(v.xPosVal,v.yPosVal,v.sectorX,v.sectorY,0);
+title(evt_filename, 'Interpreter', 'none');
+% set(gca,'YDir','reverse'); 
+xlim([0 video.xDim]);
+ylim([0 video.yDim]);
+
+
 
 return
