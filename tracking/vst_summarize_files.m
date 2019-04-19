@@ -19,7 +19,8 @@ function FileSummary = vst_summarize_files(TrackingSummary)
     file.stderr_eedist = splitapply(@stderr, TrackingSummary.EndDist, g);
     file.mean_eeangl = splitapply(@mean, TrackingSummary.EndAngl, g);
     file.stderr_eeangl = splitapply(@stderr, TrackingSummary.EndAngl, g);
-
+    file.mean_sens = splitapply(@mean, TrackingSummary.MeanSens, g);
+    
     FileSummary = struct2table(file);
 
     
