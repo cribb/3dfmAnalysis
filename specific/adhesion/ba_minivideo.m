@@ -29,6 +29,15 @@ if isempty(filelist)
     error('No images found. Bad directory name?');
 end
 
+vidstatsfile = dir([stack_folder '.vidstats.mat']);
+
+if ~isempty(vidstatsfile)
+    VidStats = load(vidstatsfile.name);
+    VidStats = VidStats.VidStats;
+    maxintens = VidStats.Max(1);
+    disp(['Max intens is: ' num2str(maxintens)]);
+end
+
 v = VideoWriter(outfile, 'MPEG-4');
 v.FrameRate = 60;
 
@@ -38,7 +47,14 @@ for k = 1:4:length(filelist)
     im = imread(myfile);
 %     im = imresize(im, [640 NaN]);
     im = imresize(im, 0.5);
-    imrgb = insertText(im, [5 5], k, 'AnchorPoint', 'LeftTop', ...
+    
+    if ~isempty(vidstatsfile)
+        im = double(im);
+        im = im ./ maxintens;
+    end
+    
+    imrgb = insertText(im, [5 5], ['f=' num2str(k)], ...
+                                     'AnchorPoint', 'LeftTop', ...
                                      'BoxColor', 'black', ...
                                      'BoxOpacity', 0.4, ...
                                      'TextColor', 'white', ...
