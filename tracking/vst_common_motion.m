@@ -2,41 +2,40 @@ function [TrackingTableOut,ComTableOut] = vst_common_motion(TrackingTableIn)
 
 % TrackingTable = DataIn.TrackingTable;
 
-[ngid,nglist] = findgroups(TrackingTableIn.Fid);    
+[ngid,nglist] = findgroups(TrackingTableIn.Fid, TrackingTableIn.ID);    
 
 global cnt
 cnt = 0;
 
 % if ~isempty(TrackingTableIn)
-    common_modes = splitapply(@(x1,x2,x3,x4){common_mode(x1,x2,x3,x4)}, ...
+    dxy = splitapply(@(x1,x2,x3,x4){compute_dxy(x1,x2,x3,x4)}, ...
                                              TrackingTableIn.ID, ...
                                              TrackingTableIn.Frame, ...
                                              TrackingTableIn.X, ...
                                              TrackingTableIn.Y, ...
                                              ngid);
-    N = size(cell2mat(common_modes),1);
-% else
-%     common_modes = common_mode(TrackingTableIn.ID, TrackingTableIn.Frame, TrackingTableIn.X, TrackingTableIn.Y);
-% end
+    dxy = cell2mat(dxy);
+    N = size(dxy, 1);
 
-% [all_fid, all_framelist] = deal(NaN(0,1));
-% all_cm = NaN(0,2);
-% all_fid = categorical(all_fid);
 
-for k = 1:length(nglist)
-    this_cm  = common_modes{k};
-    this_fid = repmat(nglist(k), size(this_cm,1),1);
-    this_framelist = transpose(1:size(this_cm,1));
+    TrackingTableIn.dX = dxy(:,1);
+    TrackingTableIn.dY = dxy(:,2);
     
-    all_fid =       [all_fid; this_fid];
-    all_framelist = [all_framelist; this_framelist];
-    all_cm =        [all_cm; this_cm];
-end
+    [ngf,ngf_fid, ngf_frame] = findgroups(TrackingTableIn.Fid, TrackingTableIn.Frame);
+    
+    cm = splitapply(@(x1,x2,x3,x4){compute_cm(x1,x2,x3,x4)}, ...
+                                             TrackingTableIn.ID, ...
+                                             TrackingTableIn.Frame, ...
+                                             TrackingTableIn.dX, ...
+                                             TrackingTableIn.dY, ...
+                                             ngf);
+    cm = cell2mat(cm);
 
-ComTableOut.Fid   = all_fid;
-ComTableOut.Frame = all_framelist;
-ComTableOut.Xcom  = all_cm(:,1);
-ComTableOut.Ycom  = all_cm(:,2);
+                                        
+ComTableOut.Fid   = ngf_fid;
+ComTableOut.Frame = ngf_frame;
+ComTableOut.Xcom  = cm(:,1);
+ComTableOut.Ycom  = cm(:,2);
 
 ComTableOut = struct2table(ComTableOut);
 
@@ -45,20 +44,19 @@ TrackingTableOut = innerjoin(TrackingTableIn, ComTableOut, 'Keys', {'Fid', 'Fram
 return;
 
 
-function common_mode = common_mode(id, frames, x, y)
+function dxy = compute_dxy(id, frames, x, y)
 
-    global cnt;
-    cnt = cnt + 1;
+    dx = CreateGaussScaleSpace(x, 1, 0.5);
+    dy = CreateGaussScaleSpace(y, 1, 0.5);
+    
+    dxy = [dx(:), dy(:)];
+    
+return
 
-    video_tracking_constants;       
-    
-    vidtable = NaN(size(id,1), size(NULLTRACK,2));
-    
-    vidtable(:,ID)    = id;
-    vidtable(:,FRAME) = frames;
-    vidtable(:,X)     = x;
-    vidtable(:,Y)     = y;
 
-    common_mode = traj_common_motion(vidtable, 'n');
+function cm = compute_cm(id, frames, dx, dy)
+
+    cm = [mean(dx), mean(dy)];
+%     cm = repmat(cm, length(id(:)), 1);
     
-    return
+return
