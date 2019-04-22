@@ -48,7 +48,7 @@ function ia = get_image_areas(x, y, im, tracker_halfsize, fm)
     width = size(im, 2);
     height = size(im, 1);
 
-    tracker_halfsize = unique(tracker_halfsize);            
+    tracker_halfsize = max(unique(tracker_halfsize));
     
     switch fm
         case 'FF'
@@ -149,17 +149,17 @@ function ia = get_image_areas(x, y, im, tracker_halfsize, fm)
     
     return;
     
-
-
-
-
-
-function tracker_stack = get_tracker_images(vid_table, im, tracker_halfsize, reportyn)
-% tracker locations embedded in video_tracking_constants format
-
-if findstr(lower(reportyn), 'y') %&& ~isempty(vid_table)
-    h = plot_tracker_images(tracker_stack, 'id');
-end
-
-return
+% 
+% 
+% 
+% 
+% 
+% function tracker_stack = get_tracker_images(vid_table, im, tracker_halfsize, reportyn)
+% % tracker locations embedded in video_tracking_constants format
+% 
+% if findstr(lower(reportyn), 'y') %&& ~isempty(vid_table)
+%     h = plot_tracker_images(tracker_stack, 'id');
+% end
+% 
+% return
 
