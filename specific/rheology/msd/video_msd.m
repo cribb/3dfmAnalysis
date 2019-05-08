@@ -67,19 +67,19 @@ if (nargin < 1) || isempty(files)
     vmsd.Nestimates = empty_set;
     vmsd.window = empty_set;
     return;
-end;
+end
 
 if (nargin < 2) || isempty(window)  
     window = 50;  
-end;
+end
 
 if (nargin < 3) || isempty(frame_rate)  
     frame_rate = []; 
-end;
+end
 
 if (nargin < 4) || isempty(calib_um)  
     calib_um = 0.152; 
-end;
+end
 
 
 
@@ -127,9 +127,9 @@ Nestimates = NaN(length(window), length(beadIDs));
         elseif calc_r
             % the 2 here refers to the number of coordinates,being just X and Y
             myr    = NaN(max(v(:,FRAME)+1), 2, length(window), length(beadIDs));   
-        end;
+        end
                 
-for k = 1 : length(beadIDs);
+for k = 1 : length(beadIDs)
     
     b = get_bead(v, beadIDs(k));    
     
@@ -157,7 +157,7 @@ for k = 1 : length(beadIDs);
         myr2 = r.^2;
         myr2 = squeeze(sum(myr2,2));
     end
-end;
+end
 
 
 % trim the data by removing window sizes that returned no data
@@ -188,7 +188,7 @@ vmsd.window = window;
 % creation of the plot MSD vs. tau
 if (nargin < 5) || isempty(make_plot) || strncmp(make_plot,'y',1)  
     plot_msd(vmsd, [], 'me'); 
-end;
+end
 
 % fprintf('size(vmsd): %i,  %i\n',size(vmsd.msd));
 return;
