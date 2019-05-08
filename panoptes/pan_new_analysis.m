@@ -60,6 +60,34 @@ logentry('Generating Statistical summaries on filtered trajectory information...
 d.summary.FilteredTracking = vst_summarize_traj(d.TrackingTable);
 d.summary.FilteredFiles = vst_summarize_files(d.summary.FilteredTracking);
 
+% 
+% % (9) Calculate list of taus (lagtimes) based on experiment sampling information
+Nframes = floor(d.metadata.instr.fps_imagingmode * d.metadata.instr.seconds);
+Ntaus = 5;
+use_fraction = 0.75;
+taulist = msd_gen_taus(Nframes, Ntaus, use_fraction);
+
+% (10) Calculate displacements & put into data structure
+diffTable = vst_difftau(d, taulist);
+
+% (11) Calculate MSD on beadGroups and put into data structure
+msdTable = vst_msd(d, taulist);
+% viscTable = vst_gser(msdTable, taulist);
+
+d.MsdTable = join(diffTable, msdTable);
+% d.ViscTable = join(diffTable, viscTable);
+
+
+d.summary.msdEnsembleTable = vst_msdEnsemble(d);
+
+% % 
+% % % (12) Identify salient groups in the dataset: beadGroups, fileGroups,
+% % % SampleNameGroups, SampleInstanceGroups, FovIDGroups
+% % d.PlateDefTable = d.metadata.plateT;
+% % 
+% % foo = join(d.MsdTable, d.VidTable(:, {'Fid', 'Fps', 'Calibum'}));
+% % % (13) Calculate basic statistics & put into data structure
+
 % Save the base output
 logentry('Saving base results file...');
 thispath = pwd; 
@@ -67,29 +95,6 @@ seplocs = regexp(thispath, filesep);
 newname = thispath(seplocs(end)+1:end);
 newname = ['..' filesep newname '.base.mat'];
 save(newname, '-struct', 'd', '-v7.3', '-nocompression');
-% 
-% % (9) Calculate list of taus (lagtimes) based on experiment sampling information
-% Nframes = floor(d.metadata.instr.fps_imagingmode * d.metadata.instr.seconds);
-% Ntaus = 35;
-% use_fraction = 0.75;
-% taulist = msd_gen_taus(Nframes, Ntaus, use_fraction);
-% 
-% % (10) Calculate displacements & put into data structure
-% diffTable = vst_difftau(d, taulist);
-% 
-% % (11) Calculate MSD on beadGroups and put into data structure
-% msdTable = vst_msd(d, taulist);
-% viscTable = vst_gser(msdTable, taulist);
-% 
-% d.MsdTable = join(diffTable, msdTable);
-% % d.ViscTable = join(diffTable, viscTable);
-% 
-% % (12) Identify salient groups in the dataset: beadGroups, fileGroups,
-% % SampleNameGroups, SampleInstanceGroups, FovIDGroups
-% d.PlateDefTable = d.metadata.plateT;
-% 
-% foo = join(d.MsdTable, d.VidTable(:, {'Fid', 'Fps', 'Calibum'}));
-% % (13) Calculate basic statistics & put into data structure
 
 % (14) Save dataset
 DataOut = d;
