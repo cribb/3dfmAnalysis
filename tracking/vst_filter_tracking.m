@@ -167,39 +167,7 @@ TrackingTable = sortrows(TrackingTable,vars);
     Trash = TrackingTable(BadData,:);
     
     return
-    
-% %     % Now, deal with drift. Does it make sense to do this here? Should this
-% %     % be a completely different function?
-% %     if isfield(filtin, 'drift_method')
-% %         if ~strcmp(filtin.drift_method, 'none')
-% %             [data,drift_vector] = filter_subtract_drift(data, filtin.drift_method);
-% %             % outputted drift_vector here is in [pixels] regardless of the
-% %             % requested output scaling.
-% %             filtout.drift_vector = drift_vector;
-% %             filtout.drift_vector_units = 'pixels';
-% %             if isstruct(drift_vector)
-% %                 mydrift = mean(drift_vector.xy);
-% %             else
-% %                 mydrift = mean(drift_vector);
-% %             end
-% %             logentry(['drift_method- Removed ' num2str(mydrift*filtin.calib_um) ' um/s from data.']);
-% %         end        
-% %     end    
-
-
-%
-% Filters data from trackers that have few than minFrames datapoints
-% less than minPixelRange in either x OR y.
-% from the edge of each tracker in time by tCrop
-% from the edge of the field of view by xyCrop
-%
-
-
-
-
-
-
-
+ 
 % %%%%%%
 % FILTER FUNCTIONS BELOW
 % %%%%%%
