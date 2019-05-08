@@ -128,16 +128,17 @@ for p = 1:length(pass_list)
         
         if ~isempty(mipname)
             Mips{fid,1} = imread(mipname.name);     
-           
+            MipFiles{fid,1} = mipname.name;           
             % width/height of images
             [Height(fid,1), Width(fid,1)] = size(Mips{fid,1});
         else
             Mips{fid,1} = '';
+            MipFiles{fid,1} = '';
             Width(fid,1) = NaN;
             Height(fid,1) = NaN;
         end 
         
-        MipFiles{fid,1} = mipname.name;
+
                 
         Pass(fid,1) = pass;
         Well(fid,1) = well;
@@ -146,12 +147,38 @@ for p = 1:length(pass_list)
     
 end
 
-Fid = (1:fid-1)';
+% Fid = (1:fid-1)'; % change this to random uint64
+Fid = randi(2^50,fid-1,1);
 % Fid = categorical(Fid);
 SampleName = categorical(SampleName);
 SampleInstance = categorical(SampleInstance);
 FovID = categorical(FovID);
 
 VidTable = table(Fid, SampleName, SampleInstance, FovID, Path, Hostname, VideoFiles, TrackingFiles, FirstFrameFiles, MipFiles, Width, Height, Fps, Calibum);
-% ImagingTable = table(Fid, Firstframes, Mips);
 
+VidTable.Properties.Description = 'Table of files comprising Monoptes/Panoptes single-plate study';
+VidTable.Properties.VariableDescriptions{'Fid'} = 'FileID (key)';
+VidTable.Properties.VariableDescriptions{'SampleName'} = 'Sample name found in Well Layout';
+VidTable.Properties.VariableDescriptions{'SampleInstance'} = 'ID/Number/Instance of Sample Name';
+VidTable.Properties.VariableDescriptions{'FovID'} = 'Field-of-view ID/Number';
+VidTable.Properties.VariableDescriptions{'Path'} = 'Path for File ID';
+VidTable.Properties.VariableDescriptions{'Hostname'} = 'Systemname where File ID is loaded';
+VidTable.Properties.VariableDescriptions{'VideoFiles'} = 'Orig. filename of video or path containing stack of images';
+VidTable.Properties.VariableDescriptions{'TrackingFiles'} = 'Files containing trajectory/tracking data';
+VidTable.Properties.VariableDescriptions{'FirstFrameFiles'} = 'First image filename for File ID';
+VidTable.Properties.VariableDescriptions{'MipFiles'} = 'Max/min/mean Inensity Projection filename for File ID';
+
+VidTable.Properties.VariableDescriptions{'Width'} = 'Horizontal video resolution';
+VidTable.Properties.VariableUnits{'Width'} = 'pixels';
+
+VidTable.Properties.VariableDescriptions{'Height'} = 'Vertical video resolution';
+VidTable.Properties.VariableUnits{'Height'} = 'pixels';
+
+VidTable.Properties.VariableDescriptions{'Fps'} = 'Frames per second for video';
+VidTable.Properties.VariableUnits{'Fps'} = 'frames/sec';
+
+VidTable.Properties.VariableDescriptions{'Calibum'} = 'Calibration scale for pixel size in microns';
+VidTable.Properties.VariableUnits{'Calibum'} = 'um/pixel';
+
+
+return
