@@ -26,10 +26,13 @@ function DataOut = vst_compile_tracker_images(DataIn)
     tmp.beadImageFF = trackimFF;
     tmp.beadImageMIP = trackimMIP;
     
-    tmpT = struct2table(tmp);
-
-%     outs = join(tmpT, TrackingTable);
-     DataOut = tmpT;
+    DataOut= struct2table(tmp);
+%     DataOut= join(DataOut, TrackingTable);
+    DataOut.Properties.VariableDescriptions{'Fid'} = BigData.Properties.VariableDescriptions{'Fid'};
+    DataOut.Properties.VariableDescriptions{'ID'} = BigData.Properties.VariableDescriptions{'ID'};
+    DataOut.Properties.VariableDescriptions{'beadImageFF'} = 'First-frame image for this bead/trajectory';
+    DataOut.Properties.VariableDescriptions{'beadImageMIP'} = 'Intensity-projection image for this bead/trajectory';
+    
      
     return;
                                      
