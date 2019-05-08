@@ -1,15 +1,21 @@
 function DiffTauTable = vst_difftau(DataIn, taulist)
 
-    TrackingTable = DataIn.TrackingTable;
+    TrackingTable = innerjoin(DataIn.TrackingTable, DataIn.VidTable(:,{'Fid', 'Calibum'}));
+
+    [g,~] = findgroups(TrackingTable(:, {'Fid', 'ID'}));
     
-    [g,gFid,gID] = findgroups(TrackingTable.Fid, TrackingTable.ID);
-    
-%     taulist = repmat(taulist, length(g), 1);
+
+    % HERE, LENGTH SCALES ARE CONVERTED INTO [PIXELS] INTO [UM]
+    XYXoYo_pix =  [TrackingTable.X, TrackingTable.Y, ...
+                  TrackingTable.Xo, TrackingTable.Yo];
+    XYXoYo_um =  XYXoYo_pix .* repmat(TrackingTable.Calibum,1,4);
+
     difftauset =  splitapply(@(x1,x2,x3){split_apply_difftau(x1,x2,x3,taulist)}, ...
                                         TrackingTable.Fid, ...
                                         TrackingTable.ID, ...
-                                         [TrackingTable.X, TrackingTable.Y TrackingTable.Xo TrackingTable.Yo], ...
-                                         g);    
+                                        XYXoYo_um, ...
+                                        g);    
+                                    
     difftauset = vertcat(difftauset{:});
     
     DiffTauTable.Fid = cell2mat(difftauset(:,1));
@@ -22,6 +28,22 @@ function DiffTauTable = vst_difftau(DataIn, taulist)
  
     DiffTauTable = struct2table(DiffTauTable);
     
+    tmpT = innerjoin(DiffTauTable, DataIn.VidTable(:,{'Fid', 'Fps'}));
+    DiffTauTable.Tau_s = DiffTauTable.Tau ./ tmpT.Fps;
+
+    DiffTauTable = movevars(DiffTauTable, 'Tau_s', 'after', 'Tau');
+    
+    DiffTauTable.Properties.Description = 'Displacements in microns over Tau';
+    DiffTauTable.Properties.VariableDescriptions = { 'FileID (key)', ...
+                                                     'Trajectory ID',...
+                                                     'Time scale, frames', ...
+                                                     'Time scale, seconds', ...
+                                                     'Displacements over Tau, X (filtered)', ...
+                                                     'Displacements over Tau, Y (filtered)', ...
+                                                     'Displacements over Tau, X (original)', ...
+                                                     'Displacements over Tau, Y (original)'};
+                                                 
+    DiffTauTable.Properties.VariableUnits = {'', '', 'frames', 'sec', 'um', 'um', 'um', 'um'};
 return
    
    
