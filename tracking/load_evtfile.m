@@ -12,8 +12,19 @@ function outs = load_evtfile(filename, outtype)
     
     if isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         trk = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
+
+    if isfield(dd.tracking, 'calibum')
         calibum = dd.tracking.calib_um;
+    else
+        calibum = NaN;
+    end
+
+    if isfield(dd.tracking, 'fps')
         fps = dd.tracking.fps;
+    else
+        fps = NaN;
+    end
+
         if ischar(fps)
             fps = str2double(fps);
         end
