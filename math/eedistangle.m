@@ -14,4 +14,4 @@ function [d,a] = eedistangle(XYcoords)
         a(a<0) = a(a<0) + 2*pi;
     end
 
-    return;
+    return
