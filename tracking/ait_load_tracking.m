@@ -21,7 +21,7 @@ TrackingTable = table;
 
 warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
 
-fid = 1:size(VidTable,1);
+fid = VidTable.Fid;
 F = length(fid);
 dcell = cell(F,1);
 for f = 1:F
@@ -89,6 +89,7 @@ for f = 1:F
     dcell{f,1} = dd;
 %     TrackingTable = [TrackingTable;dd];
 end
+
 TrackingTable = vertcat(dcell{:});
 clear dcell;
 warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
@@ -102,34 +103,61 @@ TrackingTable.Sensitivity = TrackingTable.SNR .^2;
 % TrackingTable.Frame = categorical(TrackingTable.Frame);
 % TrackingTable.Radius = categorical(TrackingTable.Radius); % because this is technically a tracking parameter
 
-% (2) Set Variable Units for each table column
+% (2) Set some Table properties
+TrackingTable.Properties.Description = 'Table of trajectories for AItracker.net data';
+
+
+% (3) Set Variable Descriptions and Units for each table column (i.e. Variable)
+TrackingTable.Properties.VariableDescriptions{'Fid'} = 'FileID (key)';
 TrackingTable.Properties.VariableUnits{'Fid'} = '';
+
+TrackingTable.Properties.VariableDescriptions{'Frame'} = 'Frame Number';
 TrackingTable.Properties.VariableUnits{'Frame'} = '';
+
+TrackingTable.Properties.VariableDescriptions{'ID'} = 'Trajectory ID';
 TrackingTable.Properties.VariableUnits{'ID'} = '';
+
+TrackingTable.Properties.VariableDescriptions{'X'} = 'x-location, filtered';
 TrackingTable.Properties.VariableUnits{'X'} = 'pixels';
+
+TrackingTable.Properties.VariableDescriptions{'Y'} = 'y-location, filtered';
 TrackingTable.Properties.VariableUnits{'Y'} = 'pixels';
+
+TrackingTable.Properties.VariableDescriptions{'Z'} = 'z-location, filtered';
 TrackingTable.Properties.VariableUnits{'Z'} = 'step size';
+
+TrackingTable.Properties.VariableDescriptions{'Xo'} = 'x-location, orig.';
 TrackingTable.Properties.VariableUnits{'Xo'} = 'pixels';
+
+TrackingTable.Properties.VariableDescriptions{'Yo'} = 'y-location, orig.';
 TrackingTable.Properties.VariableUnits{'Yo'} = 'pixels';
+
+TrackingTable.Properties.VariableDescriptions{'Zo'} = 'z-location, orig.';
 TrackingTable.Properties.VariableUnits{'Zo'} = 'step size';
+
+TrackingTable.Properties.VariableDescriptions{'Radius'} = 'Tracker radius';
 TrackingTable.Properties.VariableUnits{'Radius'} = 'pixels';
-TrackingTable.Properties.VariableUnits{'CenterIntensity'} = 'Intensity-8-bit';
-TrackingTable.Properties.VariableUnits{'BkgdIntensity'} = 'Intensity-8-bit';
+
+TrackingTable.Properties.VariableDescriptions{'CenterIntensity'} = 'Intensity at Tracker center.';
+TrackingTable.Properties.VariableUnits{'CenterIntensity'} = 'Intensity';
+
+TrackingTable.Properties.VariableDescriptions{'BkgdIntensity'} = 'Intensity of surrounding background.';
+TrackingTable.Properties.VariableUnits{'BkgdIntensity'} = 'Intensity';
+
+% TrackingTable.Properties.VariableDescriptions{'RegionSize'} = 'Size of Image region that exceeds threshold.';
 % TrackingTable.Properties.VariableUnits{'RegionSize'} = 'pixels^2';
+
+TrackingTable.Properties.VariableDescriptions{'Sensitivity'} = 'A measure of signal-to-noise ratio for Tracker in image';
 TrackingTable.Properties.VariableUnits{'Sensitivity'} = '';
+
+% TrackingTable.Properties.VariableDescriptions{'ForegroundSize'} = '';
 % TrackingTable.Properties.VariableUnits{'ForegroundSize'} = 'pixels^2';
 
 
 % (3) This hacks the Xo and Yo columns to be next to the X and Y columns. 
-TrackingTable = movevars(TrackingTable, 'Frame', 'After', 'Fid');
-TrackingTable = movevars(TrackingTable, 'ID', 'After', 'Frame');
-TrackingTable = movevars(TrackingTable, 'Radius', 'After', 'ID');
-TrackingTable = movevars(TrackingTable, 'X', 'After', 'Radius');
-TrackingTable = movevars(TrackingTable, 'Y', 'After', 'X');
-TrackingTable = movevars(TrackingTable, 'Z', 'After', 'Y');
-TrackingTable = movevars(TrackingTable, 'Xo', 'After', 'Z');
-TrackingTable = movevars(TrackingTable, 'Yo', 'After', 'Xo');
-TrackingTable = movevars(TrackingTable, 'Zo', 'After', 'Yo');
-TrackingTable = movevars(TrackingTable, 'CenterIntensity', 'After', 'Zo');
-TrackingTable = movevars(TrackingTable, 'BkgdIntensity', 'After', 'CenterIntensity');
-TrackingTable = movevars(TrackingTable, 'Sensitivity', 'After', 'BkgdIntensity');
+TrackingTable = movevars(TrackingTable, {'Frame', 'ID', 'Radius', ...
+                                         'X', 'Y', 'Z', 'Xo', 'Yo', 'Zo', ...
+                                         'CenterIntensity', 'BkgdIntensity', ...
+                                         'Sensitivity'}, 'After', 'Fid');
+
+return
