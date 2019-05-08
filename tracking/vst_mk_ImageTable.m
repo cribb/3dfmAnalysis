@@ -28,4 +28,12 @@ end
 
 outs = table(Fid, FirstFrames, Mips);
 
+% Table properties
+outs.Properties.Description = '';
+
+% Variable Properties
+outs.Properties.VariableDescriptions{'Fid'} = VidTable.Properties.VariableDescriptions{'Fid'};
+outs.Properties.VariableDescriptions{'FirstFrames'} = 'First image in collected video.';
+outs.Properties.VariableDescriptions{'Mips'} = 'Intensity projections for collected video.';
+
 return
