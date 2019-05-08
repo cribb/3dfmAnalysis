@@ -1,11 +1,10 @@
-function [TrackingTableOut,ComTableOut] = vst_common_motion(TrackingTableIn)
+function [TrackingTableOut,ComTable] = vst_common_motion(TrackingTableIn)
 
-% TrackingTable = DataIn.TrackingTable;
+    idGroupsTable = TrackingTableIn(:,{'Fid', 'ID'});
+    [gid,~] = findgroups(idGroupsTable);    
 
-[ngid,nglist] = findgroups(TrackingTableIn.Fid, TrackingTableIn.ID);    
-
-global cnt
-cnt = 0;
+    global cnt
+    cnt = 0;
 
 % if ~isempty(TrackingTableIn)
     dxy = splitapply(@(x1,x2,x3,x4){compute_dxy(x1,x2,x3,x4)}, ...
@@ -13,7 +12,7 @@ cnt = 0;
                                              TrackingTableIn.Frame, ...
                                              TrackingTableIn.X, ...
                                              TrackingTableIn.Y, ...
-                                             ngid);
+                                             gid);
     dxy = cell2mat(dxy);
     N = size(dxy, 1);
 
@@ -21,7 +20,9 @@ cnt = 0;
     TrackingTableIn.dX = dxy(:,1);
     TrackingTableIn.dY = dxy(:,2);
     
-    [ngf,ngf_fid, ngf_frame] = findgroups(TrackingTableIn.Fid, TrackingTableIn.Frame);
+    
+    idFramesTable = TrackingTableIn(:,{'Fid', 'Frame'});
+    [ngf,ComTable] = findgroups(idFramesTable);
     
     cm = splitapply(@(x1,x2,x3,x4){compute_cm(x1,x2,x3,x4)}, ...
                                              TrackingTableIn.ID, ...
@@ -32,14 +33,16 @@ cnt = 0;
     cm = cell2mat(cm);
 
                                         
-ComTableOut.Fid   = ngf_fid;
-ComTableOut.Frame = ngf_frame;
-ComTableOut.Xcom  = cm(:,1);
-ComTableOut.Ycom  = cm(:,2);
+    ComTable.Xcom  = cm(:,1);
+    ComTable.Properties.VariableDescriptions{'Xcom'} = 'X-component in [pixels] of common trajectory motion (instantaneous center-of-mass).';
+    ComTable.Properties.VariableUnits{'Xcom'} = '[pixels]';
 
-ComTableOut = struct2table(ComTableOut);
 
-TrackingTableOut = innerjoin(TrackingTableIn, ComTableOut, 'Keys', {'Fid', 'Frame'});
+    ComTable.Ycom  = cm(:,2);
+    ComTable.Properties.VariableDescriptions{'Ycom'} = 'X-component in [pixels] of common trajectory motion (instantaneous center-of-mass).';
+    ComTable.Properties.VariableUnits{'Ycom'} = '[pixels]';
+
+    TrackingTableOut = innerjoin(TrackingTableIn, ComTable, 'Keys', {'Fid', 'Frame'});
 
 return;
 
@@ -57,6 +60,5 @@ return
 function cm = compute_cm(id, frames, dx, dy)
 
     cm = [mean(dx), mean(dy)];
-%     cm = repmat(cm, length(id(:)), 1);
     
 return

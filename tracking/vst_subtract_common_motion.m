@@ -1,9 +1,7 @@
 function outs = vst_subtract_common_motion(TrackingTable)
 
-    TrackingTable.Fid = double(TrackingTable.Fid); 
-    TrackingTable.ID  = double(TrackingTable.ID);
-
-    [g,gFid,gID] = findgroups(TrackingTable.Fid, TrackingTable.ID);
+    idGroupsTable = TrackingTable(:,{'Fid', 'ID'});
+    [g,~] = findgroups(idGroupsTable);
     
     if ~isempty(TrackingTable)
         drift_free = splitapply(@(x1,x2,x3,x4,x5,x6,x7){subtract_common_mode(x1,x2,x3,x4,x5,x6,x7)}, ...
@@ -21,24 +19,20 @@ function outs = vst_subtract_common_motion(TrackingTable)
     end
 
     drift_free = cell2mat(drift_free);
-
-%     tmp.Fid = categorical(drift_free(:,1));
-    tmp.Fid = drift_free(:,1);
-    tmp.Frame = drift_free(:,2);
-    tmp.ID = drift_free(:,3);
-    tmp.X = drift_free(:,4);
-    tmp.Y = drift_free(:,5);
-
+    drift_free = num2cell(drift_free, 1);
     
-    tmpT = struct2table(tmp);
+    tmpT = table(drift_free{:},'VariableNames', {'Fid', 'Frame', 'ID', 'X', 'Y'});
 
-%     TrackingTable.Fid = categorical(TrackingTable.Fid);
-%     TrackingTable.ID  = categorical(TrackingTable.ID);
     TrackingTable.X   = [];
     TrackingTable.Y   = [];
     
     outs = join(tmpT, TrackingTable);
 
+    outs.Properties.VariableDescriptions{'X'} = 'x-location';
+    outs.Properties.VariableUnits{'X'} = 'pixels';
+    outs.Properties.VariableDescriptions{'Y'} = 'y-location';
+    outs.Properties.VariableUnits{'Y'} = 'pixels';
+    
 return;
 
 
