@@ -22,7 +22,7 @@ TrackingTable = table;
 
 warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
 
-fid = 1:size(VidTable,1);
+fid = VidTable.Fid;
 
 for f = 1:length(fid)    
     
@@ -95,24 +95,62 @@ warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
 % returns a 16-bit number by default for some odd reason.
 TrackingTable.CenterIntensity = floor(TrackingTable.CenterIntensity * (2^8/2^16));
 
-% (3) Set Variable Units for each table column
+% (3) Set some Table properties
+TrackingTable.Properties.Description = 'Table of trajectories for Video Spot Tracking data';
+
+% (3) Set Variable Descriptions and Units for each table column (i.e. Variable)
+TrackingTable.Properties.VariableDescriptions{'Fid'} = 'FileID (key)';
 TrackingTable.Properties.VariableUnits{'Fid'} = '';
+
+TrackingTable.Properties.VariableDescriptions{'Frame'} = 'Frame Number';
 TrackingTable.Properties.VariableUnits{'Frame'} = '';
+
+TrackingTable.Properties.VariableDescriptions{'ID'} = 'Trajectory ID';
 TrackingTable.Properties.VariableUnits{'ID'} = '';
+
+TrackingTable.Properties.VariableDescriptions{'X'} = 'x-location';
 TrackingTable.Properties.VariableUnits{'X'} = 'pixels';
+
+TrackingTable.Properties.VariableDescriptions{'Y'} = 'y-location';
 TrackingTable.Properties.VariableUnits{'Y'} = 'pixels';
+
+TrackingTable.Properties.VariableDescriptions{'Z'} = 'z-location';
 TrackingTable.Properties.VariableUnits{'Z'} = 'step size';
+
+TrackingTable.Properties.VariableDescriptions{'Xo'} = 'x-location, orig.';
 TrackingTable.Properties.VariableUnits{'Xo'} = 'pixels';
+
+TrackingTable.Properties.VariableDescriptions{'Yo'} = 'y-location, orig.';
 TrackingTable.Properties.VariableUnits{'Yo'} = 'pixels';
+
+TrackingTable.Properties.VariableDescriptions{'Zo'} = 'z-location, orig.';
 TrackingTable.Properties.VariableUnits{'Zo'} = 'step size';
+
+TrackingTable.Properties.VariableDescriptions{'Radius'} = 'Tracker radius';
 TrackingTable.Properties.VariableUnits{'Radius'} = 'pixels';
-TrackingTable.Properties.VariableUnits{'CenterIntensity'} = 'Intensity-8-bit';
+
+TrackingTable.Properties.VariableDescriptions{'CenterIntensity'} = 'Intensity at Tracker center.';
+TrackingTable.Properties.VariableUnits{'CenterIntensity'} = 'Intensity';
+
+% TrackingTable.Properties.VariableDescriptions{'BkgdIntensity'} = 'Intensity of surrounding background.';
+% TrackingTable.Properties.VariableUnits{'BkgdIntensity'} = 'Intensity';
+
+TrackingTable.Properties.VariableDescriptions{'RegionSize'} = 'Size of Image region that exceeds threshold.';
 TrackingTable.Properties.VariableUnits{'RegionSize'} = 'pixels^2';
+
+TrackingTable.Properties.VariableDescriptions{'Sensitivity'} = 'A measure of signal-to-noise ratio for Tracker in image';
 TrackingTable.Properties.VariableUnits{'Sensitivity'} = '';
+
+TrackingTable.Properties.VariableDescriptions{'ForegroundSize'} = '';
 TrackingTable.Properties.VariableUnits{'ForegroundSize'} = 'pixels^2';
 
 
-% (4) This hacks the Xo and Yo columns to be next to the X and Y columns. 
-% XXX TODO: Upgrade to >2018a and use new addvars or movevars table functions
-TrackingTable = TrackingTable(:,[1:6 12:14 7:end-2]);
+% (3) This hacks the Xo and Yo columns to be next to the X and Y columns. 
+TrackingTable = movevars(TrackingTable, {'Frame', 'ID', ...
+                                         'X', 'Y', 'Z', 'Xo', 'Yo', 'Zo', ...
+                                         'Sensitivity', 'CenterIntensity', ...
+                                         'ForegroundSize', 'RegionSize', ...
+                                         'Radius'}, ...
+                                         'After', 'Fid');
 
+return
