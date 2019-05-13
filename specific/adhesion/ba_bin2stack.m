@@ -25,7 +25,7 @@ end
 
 % Display the frames as they're converted? Assume false ('no') as default.
 if nargin < 3 || isempty(statTF)
-    ststTF = false;
+    statTF = false;
 end
 
 % Display the frames as they're converted? Assume false ('no') as default.
