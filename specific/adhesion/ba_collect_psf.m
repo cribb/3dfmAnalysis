@@ -12,7 +12,7 @@ f = figure('Position', fpos,'Menu','None','Name','APT GUI');
 
 % Create ActiveX Controller
 % !regsvr64 /s C:\Program Files (x86)\Thorlabs\APT\APT Server\MG17Motor.ocx
-h = actxcontrol('MGMOTOR.MGMotorCtrl.1',[20 20 600 400 ], f);
+h = actxcontrol('MGMOTOR.MGMotorCtrl.1',[20 20 600 400], f);
 h.StartCtrl;
 SN = 83829797; %Set Serial number
 set(h,'HWSerialNum', SN);
@@ -23,14 +23,19 @@ pause(5);
 vid = videoinput('pointgrey', 1,'F7_Raw16_1024x768_Mode2');
 vid.ReturnedColorspace = 'grayscale';
 
-myprops.vid = propinfo(vid)
+myprops.vid = propinfo(vid);
 
-% Following code found in apps -> image acquisition
+% This only works if all of the modes are set before Matlab gets ahold of
+% the camera object. To make sure this is the case, run FLIR's (Point
+% Gray) Flycap software and set the ExposureMode and FrameRateMode to "off"
+% and the ShutterMode to 'manual'. To some extent, Matlab setting these
+% particular properties is merely a "formality" until a bug is fixed in
+% Matlab that doesn't allow changes to these modes to persist after setting
+% them.
 src = getselectedsource(vid); 
 src.ExposureMode = 'off'; 
 src.FrameRateMode = 'off';
 src.ShutterMode = 'manual';
-% src.FrameRate = 60;
 src.Gain = 10;
 src.Gamma=1.15;
 src.Brightness=5.8594;
@@ -42,9 +47,8 @@ pause(0.1);
 
 src.Shutter = exptime;
 
-myprops.shutterpost = propinfo(src,'Shutter')
-trigconf = triggerconfig(vid)
-triggerconfig(vid, 'manual');
+myprops.shutterpost = propinfo(src,'Shutter');
+trigconf = triggerconfig(vid, 'manual');
 vid.FramesPerTrigger = Inf;
 % preview(vid);
 pause(.2)
