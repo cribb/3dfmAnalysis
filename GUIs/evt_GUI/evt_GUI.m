@@ -1739,7 +1739,7 @@ function plot_data(hObject, eventdata, handles)
     xlim([0 imx] .* calib_um);
     ylim([0 imy] .* calib_um);
     set(handles.XYfig, 'Units', 'Normalized');
-    set(handles.XYfig, 'Position', [0.1 0.05 0.4 0.4]);
+%     set(handles.XYfig, 'Position', [0.1 0.05 0.4 0.4]);
     set(handles.XYfig, 'DoubleBuffer', 'on');
     set(handles.XYfig, 'BackingStore', 'off');
     drawnow;
@@ -1754,7 +1754,7 @@ function plot_data(hObject, eventdata, handles)
     ylabel(['displacement [' ylabel_unit ']']);
     legend('x', 'y', 'z', 'Location', 'northwest');    
     set(handles.XTfig, 'Units', 'Normalized');
-    set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
+%     set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
     set(handles.XTfig, 'DoubleBuffer', 'on');
     set(handles.XTfig, 'BackingStore', 'off');    
     drawnow;
