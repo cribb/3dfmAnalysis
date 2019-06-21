@@ -1745,11 +1745,18 @@ function plot_data(hObject, eventdata, handles)
     drawnow;
     
     figure(handles.XTfig);
-    if get(handles.checkbox_neutoffsets, 'Value')
-        plot(t(k) - mintime, [x(k)-x(k(1)) y(k)-y(k(1)) z(k)-z(k(1))], '.-');        
+    if get(handles.checkbox_neutoffsets, 'Value') && ~isempty(k)
+        xk1 = x(k(1));
+        yk1 = y(k(1));
+        zk1 = z(k(1));        
     else
-        plot(t(k) - mintime, [x(k) y(k) z(k)], '.');
+        xk1 = 0;
+        yk1 = 0;
+        zk1 = 0;
     end
+    handles.xyzk1 = [xk1, yk1, zk1];
+    
+    plot(t(k) - mintime, [x(k)-xk1 y(k)-yk1 z(k)-zk1], '.-');
     xlabel('time [s]');
     ylabel(['displacement [' ylabel_unit ']']);
     legend('x', 'y', 'z', 'Location', 'northwest');    
@@ -2431,9 +2438,15 @@ function delete_outside_boundingbox(hObject, eventdata, handles)
     global hand;
     
     video_tracking_constants;
+    
+    % xyzk1 = the neutralization offsets for the XT plot
+    if ~isfield(handles, 'xyzk1')
+        xyzk1 = [ 0 0 0 ];
+    end
 
     if(get(handles.radio_XYfig, 'Value'))
         active_fig = handles.XYfig;
+        xyzk1 = [ 0 0 0 ];
     elseif(get(handles.radio_XTfig, 'Value'))
         active_fig = handles.XTfig;
     else
@@ -2453,6 +2466,12 @@ function delete_outside_boundingbox(hObject, eventdata, handles)
     currentbead = get(handles.slider_BeadID, 'Value');
     
     [xm, ym] = ginput(2);
+    
+    if get(handles.checkbox_neutoffsets, 'Value')
+        xm = xm + xyzk1(1);
+        ym = ym + xyzk1(2);
+%         zm = zm + xyzk1(3);
+    end
     
     if get(handles.radio_microns, 'Value')
         calib_um = str2double(get(handles.edit_calib_um, 'String'));
