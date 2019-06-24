@@ -1,8 +1,8 @@
-function [vid,src] = ba_impreview
+function [vid, src] = ba_impreview
 
     imaqmex('feature', '-previewFullBitDepth', true);
     % imaqmex('feature', '-previewFullBitDepth', false);
-    vid = videoinput('pointgrey', 1, 'F7_Raw16_1024x768_Mode2');
+    vid = videoinput('mwpointgreyimaq', 1, 'F7_Raw16_1024x768_Mode2');
     
     vid.ReturnedColorspace = 'grayscale';
     
@@ -17,7 +17,7 @@ function [vid,src] = ba_impreview
     % src.Exposure   = 0.016;
 
     disp('Before doing anything: ');
-    propinfo(src,'Shutter')
+    propinfo(src,'Shutter');
     
     src.Brightness = 5.8594;
    
