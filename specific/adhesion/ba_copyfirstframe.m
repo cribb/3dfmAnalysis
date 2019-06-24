@@ -30,14 +30,23 @@ if nargin < 3 || isempty(outfile)
     outfile = [stackdir '.00001.pgm'];
 end
 
-firstframe = 'frame00001.pgm';
-fullfirstframe = fullfile(stackdir, firstframe);
+framelist = dir([stackdir filesep 'frame*.pgm']);
+firstframe = framelist(1).name;
+lastframe = framelist(end).name;
 
+fullfirstframe = fullfile(stackdir, firstframe);
+fulllastframe = fullfile(stackdir, lastframe);
 
 if isempty(dir(fullfirstframe))
     error('First frame file not found.');
 else
     copyfile(fullfirstframe, outfile);    
+end
+
+if isempty(dir(fullfirstframe))
+    error('Last frame file not found.');
+else
+    copyfile(fulllastframe, [stackdir '.07625.pgm']);    
 end
 
 return
