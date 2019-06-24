@@ -1,4 +1,4 @@
-function ba_workflow(exptdir)
+function ba_workflow(filemask)
 % 
 %
 % Given an experiment directory of bin files, perform automated analysis
@@ -9,20 +9,19 @@ function ba_workflow(exptdir)
 %    exptdir- directory of bin files
 % 
 
-if nargin < 1 || isempty(exptdir)
-    error('No experiment directory defined.');
+if nargin < 1 || isempty(filemask)
+    error('No files to work on.');
 end
+
+filelist = dir(filemask); 
+
+if isempty(filelist)
+    error('This directory does not contain files in filemask.');
+end
+
+exptdir = filelist(1).folder;
 
 startdir = pwd;
-
-exptdir = dir(exptdir);
-
-if isempty(exptdir)
-    error('Experiment directory not found.');
-else
-    exptdir = exptdir.folder;
-end
-
 cd(exptdir);
 
 binfilelist = dir('**/*.bin');
@@ -44,26 +43,33 @@ for b = 1:B
     
     cd(binpath);
     
-%     disp('Converting bin file to stack of pgms...')
-%     ba_bin2stack(binfile, [], true);
-    
-%     disp('Creating mini-video of each stack using MP4 format
-%     ba_minivideo(stackdir);
-    
-    disp('Tracking beads in this stack...');
-    ba_trackstack(stackdir);
+    logentry('Converting bin file to stack of pgms...')
+    ba_bin2stack(binfile, [], true);
 
-%     disp('Copying the first frame (used for first locating beads).');
-%     ba_copyfirstframe(stackdir);
+    logentry('Deleting original bin file...');
+    delete(binfile);
+
+    logentry('Loading frame extraction times and motor z-positions');
+    tz = load([stackdir '.meta.mat']);
     
-%     disp('Compressing stack into smaller zip file.');
+    logentry('Retrieving first & last frames (used for first locating beads).');
+    ba_copyfirstframe(stackdir);
+    
+    logentry('Creating mini-video of stack using MP4 format');
+    ba_minivideo(stackdir);
+    
+    logentry('Tracking beads in this stack...');
+    ba_trackstack(stackdir);
+    
+%     logentry('Finding beads in first and last frames.');
+%     ba_discoverbeads(
+%     logentry('Compressing stack into smaller zip file.');
 %     ba_zipstack(stackdir);
     
-%     disp('Deleting stack...');
+%     logentry('Deleting stack...');
 %     rmdir(stackdir, 's');
     
-%     disp('Deleting original bin file...');
-%     delete(binfile);
+
     
     % Return to our original experiment directory
     cd(exptdir);
@@ -75,3 +81,17 @@ cd(startdir);
 return
 
     
+% function for writing out stderr log messages
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(floor(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'ba_workflow: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+     return;  
