@@ -118,7 +118,8 @@ function outs = pan_load_metadata(filepath, systemid, plate_type, tracking_style
     outs.files.video        = dir('*video*.vrpn');
     outs.files.tracking.mat = dir('*_TRACKED.vrpn.mat');
     
-    if contains(lower(tracking_style), 'vst')
+    if contains(lower(tracking_style), 'vst') || ...
+       contains(lower(tracking_style), 'sim')
         outs.files.tracking.csv = dir('*_TRACKED.csv');
     elseif contains(lower(tracking_style), 'ait')
         outs.files.tracking.csv = dir('*.tif.csv');
