@@ -33,9 +33,11 @@ d.TrajImageTable = vst_compile_tracker_images(d);
 logentry('Generating Statistical summaries on raw trajectory information...');
 d.summary.RawTracking = vst_summarize_traj(d.TrackingTable);
 d.summary.RawFiles = vst_summarize_files(d.summary.RawTracking);
+TrackerCountsByFrame = vst_summarize_frames(d.TrackingTable);
+d.summary.RawFiles = innerjoin(d.summary.RawFiles, TrackerCountsByFrame);
+d.summary.RawFiles = movevars(d.summary.RawFiles, 'AvgTrackerCount', 'after', 'Ntraj');
 
 % (6) Filter tracking data and put eliminated data into a "Trash" table.
-
 filtin.tcrop      = 3;
 filtin.min_trackers = 2;
 filtin.min_frames = floor(d.metadata.instr.fps_fluo/2);
