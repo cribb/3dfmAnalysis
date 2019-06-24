@@ -35,7 +35,7 @@ end
 
 
 cnt = 1;
-starting_height = 3;
+starting_height = 12;
 abstime{1,1} = [];
 framenumber{1,1} = [];
 TotalFrames = 0;
@@ -43,12 +43,14 @@ motor_velocity = 0.2; % [mm/sec]
 
 Nsec = starting_height/motor_velocity + 1;
 Fps = 1 / (exptime/1000);
-NFrames = Fps * Nsec;
+% NFrames = ceil(Fps * Nsec);
+NFrames = 7625;
 
 height = NaN(NFrames,1);
 height(1,1) = starting_height;
 
-vid = videoinput('pointgrey', 1,'F7_Raw16_1024x768_Mode2');
+imaqmex('feature', '-previewFullBitDepth', true);
+vid = videoinput('mwpointgreyimaq', 1,'F7_Raw16_1024x768_Mode2');
 vid.ReturnedColorspace = 'grayscale';
 triggerconfig(vid, 'manual');
 vid.FramesPerTrigger = NFrames;
@@ -64,7 +66,22 @@ src.Gamma = 1.15;
 src.Brightness = 5.8594;
 src.Shutter = exptime;
 
-% preview(vid);
+vidRes = vid.VideoResolution;
+imagetype = 'uint16';
+
+imageRes = fliplr(vidRes);
+
+filename = [filename, '_', num2str(vidRes(1)), 'x', ...
+                           num2str(vidRes(2)), 'x', ...
+                           num2str(NFrames), '_uint16'];
+
+f = figure;%('Visible', 'off');
+pImage = imshow(uint16(zeros(imageRes)));
+axis image
+setappdata(pImage, 'UpdatePreviewWindowFcn', @ba_pulloffview)
+p = preview(vid, pImage);
+set(p, 'CDataMapping', 'scaled');
+
 
 % ----------------
 % Controlling the Hardware and running the experiment
@@ -77,7 +94,15 @@ pause(2);
 
 NFramesAvailable = 0;
 
-fid = fopen('tempvid.bin', 'w');
+% XXX TODO: Change bin filename to include frame width, height, depth, Nframes
+binfilename = [filename,'.bin'];
+if ~isempty(dir(binfilename))
+    delete(vid);
+    clear vid
+    close(f)
+    error('That file already exists. Change the filename and try again.');
+end
+fid = fopen(binfilename, 'w');
 
 % set motor velocity to .2 mm/sec
 h.SetVelParams(0, 0, 1, motor_velocity); 
@@ -96,7 +121,7 @@ trigger(vid);
 t1=tic; 
 
 % Check and store the motor position every 100 ms until it reaches zero. 
-pause(1/Fps);
+pause(4/Fps);
 while(vid.FramesAvailable > 0)
     cnt = cnt + 1;
     height(cnt) = h.GetPosition_Position(0); 
@@ -110,9 +135,13 @@ while(vid.FramesAvailable > 0)
 %     TotalFrames = TotalFrames + NFramesAvailable;   
     [rows, cols, rgb, frames] = size(data);
 
-    datatype = class(data);
-    fwrite(fid, data, datatype);
-    logentry(['Wrote ' num2str(NFramesAvailable(cnt,1)) ' frames.']);
+
+    fwrite(fid, data, imagetype);
+%     logentry(['Wrote ' num2str(NFramesAvailable(cnt,1)) ' frames.']);
+    if ~mod(cnt,5)
+        drawnow;
+    end
+%     drawnow limitrate
 end
 
 elapsed_time = toc(t1);
@@ -120,22 +149,11 @@ elapsed_time = toc(t1);
 logentry('Stopping video collection...');
 stop(vid);
 pause(1);
-% 
-% NFramesAvailable = vid.FramesAvailable;
-% [data, ~, meta] = getdata(vid, NFramesAvailable);    
-% logentry(['Wrote ' num2str(NFramesAvailable) ' final frames.']);
-%     
-% TotalFrames = TotalFrames + NFramesAvailable;   
-% 
-% datatype = class(data);
-% fwrite(fid, data, datatype);
     
-% Last two numbers describe acceleration and velocity [mm/sec]
-h.SetVelParams(0, 0, 4, 2); 
-h.SetAbsMovePos(0, starting_height); 
-h.MoveAbsolute(0, 1==0);  
+% Quickly move the ThorLabs z-motor to the starting height
+ba_movez(h, starting_height, 'fast')
 
-
+% Close the video .bin file
 fclose(fid);
 
 height(cnt+1:end) = [];
@@ -144,17 +162,62 @@ AbsFrameNumber = cumsum(NFramesAvailable);
 
 logentry(['Total Frame count: ' num2str(NFramesCollected)]);
 
+% The z-position of the Thorlabs motor is not queried at every frame, so to
+% put the measurements on the same "clock", I'm going to interpolate motor
+% position between the frame clusters grabbed from the vid object and
+% combine time and z-position into a single table.
 interp_heights(:,1) = interp1(AbsFrameNumber, height, 0:NFramesCollected-1);
-
-
 time = cellfun(@(x)seconds(days(datenum(x))), abstime, 'UniformOutput', false);
 time = vertcat(time{:});
 
-TimeHeightTable = table(time, interp_heights);
+Fid = randi(2^50,1,1);
+[~,host] = system('hostname');
+
+
+m.Camera.Fid = Fid;
+m.Camera.ExposureTimeSet = exptime;
+m.Camera.ExposureTimeCam = src.Shutter;
+m.Camera.ExposureMode = src.ExposureMode; 
+m.Camera.FrameRateMode = src.FrameRateMode;
+m.Camera.ShutterMode = src.ShutterMode;
+m.Camera.Gain = src.Gain;
+m.Camera.Gamma = src.Gamma;
+m.Camera.Brightness = src.Brightness;
+m.Camera.Shutter = src.Shutter;
+
+m.Zmotor.Fid = Fid;
+m.Zmotor.StartingHeight = starting_height;
+m.Zmotor.Velocity = motor_velocity;
+
+m.Video.Fid = Fid;
+m.Video.SampleName = '';
+m.Video.SampleInstance = 1;
+m.Video.BeadDiameter = 24;
+m.Video.BeadChemistry = 'TEST';
+m.Video.SubstrateChemistry = 'TEST';
+m.Video.IncubationTime = 120;
+m.Video.MediumViscosity = 0.010;
+m.Video.Width = 1024;
+m.Video.Height = 768;
+m.Video.Depth = 16;
+m.Video.Format = vid.VideoFormat;
+m.Video.Calibum = 0.346;
+m.Video.Magnification = 10;
+m.Video.Magnifier = 1;
+m.Video.PointSpreadFunctionFilename = '';
+% m.Video.PointSpreadFunction;
+m.Video.ElapsedTime = elapsed_time;
+m.Video.TimeHeightTable = table(time, interp_heights);
+m.Video.Binfile = binfilename; 
+m.Video.Binpath = pwd;
+m.Video.Hostname = strip(host);
+
+save([filename, '.meta.mat'], '-STRUCT', 'm');
 
 delete(vid);
 clear vid
 
+close(f)
 logentry('Done!');
 
 return
@@ -173,4 +236,4 @@ function logentry(txt)
      
      fprintf('%s%s\n', headertext, txt);
      
-     return;    
+     return
