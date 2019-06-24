@@ -67,7 +67,8 @@ for p = 1:length(pass_list)
         VideoFiles{fid,1} = basename;
         
         % which files are the tracking files?
-        if contains(lower(tracking_style), 'vst')
+        if contains(lower(tracking_style), 'vst') || ...
+           contains(lower(tracking_style), 'sim')
             basename_tracking = [basename '_TRACKED.csv'];
         elseif contains(lower(tracking_style), 'ait')
             basename_tracking = [basename '.tif.csv'];
