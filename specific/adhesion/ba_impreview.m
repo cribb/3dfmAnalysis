@@ -2,7 +2,7 @@ function [vid, src] = ba_impreview
 
     imaqmex('feature', '-previewFullBitDepth', true);
     % imaqmex('feature', '-previewFullBitDepth', false);
-    vid = videoinput('mwpointgreyimaq', 1, 'F7_Raw16_1024x768_Mode2');
+    vid = videoinput('pointgrey', 1, 'F7_Raw16_1024x768_Mode2');
     
     vid.ReturnedColorspace = 'grayscale';
     

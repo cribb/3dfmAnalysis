@@ -50,7 +50,7 @@ height = NaN(NFrames,1);
 height(1,1) = starting_height;
 
 imaqmex('feature', '-previewFullBitDepth', true);
-vid = videoinput('mwpointgreyimaq', 1,'F7_Raw16_1024x768_Mode2');
+vid = videoinput('pointgreyim', 1,'F7_Raw16_1024x768_Mode2');
 vid.ReturnedColorspace = 'grayscale';
 triggerconfig(vid, 'manual');
 vid.FramesPerTrigger = NFrames;
