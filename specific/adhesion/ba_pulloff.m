@@ -50,7 +50,7 @@ height = NaN(NFrames,1);
 height(1,1) = starting_height;
 
 imaqmex('feature', '-previewFullBitDepth', true);
-vid = videoinput('pointgreyim', 1,'F7_Raw16_1024x768_Mode2');
+vid = videoinput('pointgrey', 1,'F7_Raw16_1024x768_Mode2');
 vid.ReturnedColorspace = 'grayscale';
 triggerconfig(vid, 'manual');
 vid.FramesPerTrigger = NFrames;
@@ -173,10 +173,29 @@ time = vertcat(time{:});
 Fid = randi(2^50,1,1);
 [~,host] = system('hostname');
 
+m.File.Fid = Fid;
+m.File.SampleName = '';
+m.File.SampleInstance = 1;
+m.File.Binfile = binfilename; 
+m.File.Binpath = pwd;
+m.File.Hostname = strip(host);
 
-m.Camera.Fid = Fid;
-m.Camera.ExposureTimeSet = exptime;
-m.Camera.ExposureTimeCam = src.Shutter;
+m.Bead.Diameter = 24;
+m.Bead.SurfaceChemistry = 'TEST';
+m.Bead.PointSpreadFunction = '';
+m.Bead.PointSpreadFunctionFilename = '';
+
+m.Substrate.SurfaceChemistry = 'TEST';
+
+m.Medium.Name = '';
+m.Medium.ManufactureDate = '';
+m.Medium.Viscosity = 0.010;
+m.Medium.Components = '';
+m.Medium.IncubationStartTime = 120;
+
+m.Zmotor.StartingHeight = starting_height;
+m.Zmotor.Velocity = motor_velocity;
+
 m.Camera.ExposureMode = src.ExposureMode; 
 m.Camera.FrameRateMode = src.FrameRateMode;
 m.Camera.ShutterMode = src.ShutterMode;
@@ -184,19 +203,8 @@ m.Camera.Gain = src.Gain;
 m.Camera.Gamma = src.Gamma;
 m.Camera.Brightness = src.Brightness;
 m.Camera.Shutter = src.Shutter;
+m.Camera.ExposureTime = src.Shutter;
 
-m.Zmotor.Fid = Fid;
-m.Zmotor.StartingHeight = starting_height;
-m.Zmotor.Velocity = motor_velocity;
-
-m.Video.Fid = Fid;
-m.Video.SampleName = '';
-m.Video.SampleInstance = 1;
-m.Video.BeadDiameter = 24;
-m.Video.BeadChemistry = 'TEST';
-m.Video.SubstrateChemistry = 'TEST';
-m.Video.IncubationTime = 120;
-m.Video.MediumViscosity = 0.010;
 m.Video.Width = 1024;
 m.Video.Height = 768;
 m.Video.Depth = 16;
@@ -204,13 +212,9 @@ m.Video.Format = vid.VideoFormat;
 m.Video.Calibum = 0.346;
 m.Video.Magnification = 10;
 m.Video.Magnifier = 1;
-m.Video.PointSpreadFunctionFilename = '';
-% m.Video.PointSpreadFunction;
 m.Video.ElapsedTime = elapsed_time;
 m.Video.TimeHeightTable = table(time, interp_heights);
-m.Video.Binfile = binfilename; 
-m.Video.Binpath = pwd;
-m.Video.Hostname = strip(host);
+
 
 save([filename, '.meta.mat'], '-STRUCT', 'm');
 
