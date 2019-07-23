@@ -13,8 +13,8 @@ search_radius_high = 26;
 
 evtfilelist = dir('*.vrpn.evt.mat');
 
-m = cell(length(evtfilelist));
-b = cell(length(evtfilelist));
+m = cell(length(evtfilelist),1);
+b = cell(length(evtfilelist),1);
 
 for k = 1:length(evtfilelist)
 
