@@ -33,8 +33,21 @@ if nargin < 3 || isempty(exptime)
     exptime = 8; % [ms]
 end
 
+PSF_filename = 'D:\jcribb\src\3dfmAnalysis\specific\adhesion\psf\mag_10x_bead_24umdiaYG_stepsize_1um.psf.tif';
+impsf = imread(PSF_filename);
 
-cnt = 1;
+Name = {'Lactose', 'Galactose', 'GalNAc', 'GlcNac', 'Sialic Acid', 'PEG20k'}';
+Conc = {0.0365, 0.0365, 0.0365, 0.0365, 0.0365, 0.2}';
+ConcUnits = {'mol/L', 'mol/L', 'mol/L', 'mol/L', 'mol/L', 'mass fraction'}';
+Int25k = table(Name, Conc, ConcUnits);
+clear Name Conc ConcUnits
+
+Name = {'PEG20k'}';
+Conc = {0.2}';
+ConcUnits = {'mass fraction'}';
+NoInt = table(Name, Conc, ConcUnits);
+clear Name Conc ConcUnits
+
 starting_height = 12;
 abstime{1,1} = [];
 framenumber{1,1} = [];
@@ -115,6 +128,7 @@ h.MoveAbsolute(0, 1==0);
 
 
 logentry('Triggering video collection...');
+cnt = 0;
 trigger(vid);
 
 % start timer for video timestamps
@@ -136,13 +150,19 @@ while(vid.FramesAvailable > 0)
     [rows, cols, rgb, frames] = size(data);
 
 
+    if cnt == 1
+        firstframe = data(:,:,1,1);
+    end
+        
     fwrite(fid, data, imagetype);
-%     logentry(['Wrote ' num2str(NFramesAvailable(cnt,1)) ' frames.']);
+
     if ~mod(cnt,5)
         drawnow;
     end
-%     drawnow limitrate
+
 end
+
+lastframe = data(:,:,1,end);
 
 elapsed_time = toc(t1);
 
@@ -173,47 +193,76 @@ time = vertcat(time{:});
 Fid = randi(2^50,1,1);
 [~,host] = system('hostname');
 
+[a,b] = regexpi(filename,'(\d*)_B-([a-zA-Z0-9]*)_S-([a-zA-Z0-9]*)_([a-zA-Z0-9]*)_(\d*)x(\d*)x(\d*)_(\w*)', 'match', 'tokens');
+b = b{1};
+SampleInstance = b{1};
+BeadChemistry = b{2};
+SubstrateChemistry = b{3};
+MediumName = b{4};
+
 m.File.Fid = Fid;
-m.File.SampleName = '';
-m.File.SampleInstance = 1;
+m.File.SampleName = filename;
+m.File.SampleInstance = SampleInstance;
 m.File.Binfile = binfilename; 
 m.File.Binpath = pwd;
 m.File.Hostname = strip(host);
+switch MediumName
+    case 'NoInt'
+        m.File.IncubationStartTime = '07/18/2019 12:15 pm';
+    case 'Int'
+        m.File.IncubationStartTime = '07/18/2019 12:30 pm';
+end
 
 m.Bead.Diameter = 24;
-m.Bead.SurfaceChemistry = 'TEST';
-m.Bead.PointSpreadFunction = '';
-m.Bead.PointSpreadFunctionFilename = '';
+m.Bead.SurfaceChemistry = BeadChemistry;
+m.Bead.PointSpreadFunction = impsf;
+m.Bead.PointSpreadFunctionFilename = PSF_filename;
 
-m.Substrate.SurfaceChemistry = 'TEST';
+m.Substrate.SurfaceChemistry = SubstrateChemistry;
+m.Substrate.Size = '50x75x1 mm';
 
-m.Medium.Name = '';
-m.Medium.ManufactureDate = '';
-m.Medium.Viscosity = 0.010;
-m.Medium.Components = '';
-m.Medium.IncubationStartTime = 120;
+m.Medium.Name = MediumName;
+m.Medium.ManufactureDate = '07-10-2019';   
+switch m.Medium.Name
+    case 'Int'
+        % 07.11.2019 Data (SNA, WGA, PEG beads on BSM-slides)
+        m.Medium.Viscosity = 0.0605;  
+        m.Medium.Components = Int25k;
+    case 'NoInt'
+        % 07.11.2019 Data (SNA, WGA, PEG beads on BSM-slides)
+        m.Medium.Viscosity = 0.0527;  
+        m.Medium.Components = NoInt;
+    otherwise
+        logentry('Unknown Case for Medium.');
+end    
+m.Medium.Buffer = 'PBS';
+
 
 m.Zmotor.StartingHeight = starting_height;
 m.Zmotor.Velocity = motor_velocity;
 
-m.Camera.ExposureMode = src.ExposureMode; 
-m.Camera.FrameRateMode = src.FrameRateMode;
-m.Camera.ShutterMode = src.ShutterMode;
-m.Camera.Gain = src.Gain;
-m.Camera.Gamma = src.Gamma;
-m.Camera.Brightness = src.Brightness;
-m.Camera.Shutter = src.Shutter;
-m.Camera.ExposureTime = src.Shutter;
+m.Scope.Name = 'Olympus IX-71';
+m.Scope.CodeName = 'Ixion';
+m.Scope.Magnification = 10;
+m.Scope.Magnifier = 1;
+m.Scope.Calibum = 0.346;
 
-m.Video.Width = 1024;
-m.Video.Height = 768;
-m.Video.Depth = 16;
+m.Video.ExposureMode = src.ExposureMode; 
+m.Video.FrameRateMode = src.FrameRateMode;
+m.Video.ShutterMode = src.ShutterMode;
+m.Video.Gain = src.Gain;
+m.Video.Gamma = src.Gamma;
+m.Video.Brightness = src.Brightness;
 m.Video.Format = vid.VideoFormat;
-m.Video.Calibum = 0.346;
-m.Video.Magnification = 10;
-m.Video.Magnifier = 1;
-m.Video.ElapsedTime = elapsed_time;
-m.Video.TimeHeightTable = table(time, interp_heights);
+m.Video.Height = 768;
+m.Video.Width = 1024;
+m.Video.Depth = 16;
+m.Video.ExposureTime = src.Shutter;
+
+m.Results.ElapsedTime = elapsed_time;
+m.Results.TimeHeightVidStatsTable = table(time, interp_heights);
+m.Results.FirstFrame = firstframe;
+m.Results.LastFrame = lastframe;
 
 
 save([filename, '.meta.mat'], '-STRUCT', 'm');
