@@ -104,7 +104,7 @@ function [vid, src] = ba_impreview(zhand)
 
 h = ba_initz;
 a = num2str(ba_getz(h));
-figure;
+% figure;
 text(0.5, 0.5, a);
 
     % % pause(30)
