@@ -1,8 +1,14 @@
-function [vid, src] = ba_impreview
+function [vid, src] = ba_impreview(zhand)
 
+    if nargin < 1 || isempty(zhand)
+        zhand = ba_initz;
+        pause(3);
+    end
+    
     imaqmex('feature', '-previewFullBitDepth', true);
+    
     % imaqmex('feature', '-previewFullBitDepth', false);
-    vid = videoinput('mwpointgreyimaq', 1, 'F7_Raw16_1024x768_Mode2');
+    vid = videoinput('pointgrey', 1, 'F7_Raw16_1024x768_Mode2');
     
     vid.ReturnedColorspace = 'grayscale';
     
@@ -55,18 +61,25 @@ function [vid, src] = ba_impreview
 
 
     vidRes = vid.VideoResolution;
-
+    
     f = figure('Visible', 'off');
 
     imageRes = fliplr(vidRes);
+    
 
-    subplot(2,1,1);
+    ax = subplot(2, 1, 1);
+    set(ax, 'Units', 'normalized');
+    set(ax, 'Position', [0.05, 0.4515, .9, 0.59]); 
+    
     hImage = imshow(uint16(zeros(imageRes)));
     axis image
 
-    text_exptime = uicontrol('Style', 'text', 'String', 'Exp. time');
     edit_exptime = uicontrol('Style', 'edit', 'String', num2str(src.Shutter), 'Callback', @change_exptime);
 
+%     hImage.UserData = ['z = ' num2str(ba_getz(zhand)) ' [mm]'];
+    hImage.UserData = zhand;
+    
+%     setappdata(hImage, 'UpdatePreviewWindowFcn', @ba_livehist);
     setappdata(hImage, 'UpdatePreviewWindowFcn', @ba_livehist);
 
     h = preview(vid, hImage);
@@ -76,10 +89,6 @@ function [vid, src] = ba_impreview
 
         exptime = str2num(source.String);
         fprintf('New exposure time is: %4.2g\n', exptime);
-        
-%         new_fps = 1 ./ (exptime/1000);
-%         fprintf('New frame-rate is: %4.2g\n', new_fps);
-
         
 %         fprintf('Old frame-rate of src: %4.2g\n', src.FrameRate);
 %         fprintf('Old Shutter time of src: %4.2g\n', src.Shutter);
@@ -93,6 +102,10 @@ function [vid, src] = ba_impreview
         
     end
 
+h = ba_initz;
+a = num2str(ba_getz(h));
+% figure;
+text(0.5, 0.5, a);
 
     % % pause(30)
     % f = figure('Visible', 'off');

@@ -4,11 +4,18 @@ function ba_livehist(obj,event,hImage)
 % Copyright 2007-2017 The MathWorks, Inc.
 %
 
+
 % Display the current image frame.
 set(hImage, 'CData', event.Data);
 
+zhand = hImage.UserData;
+
+zpos_str = ['z = ' num2str(ba_getz(zhand)) ' [mm]'];
+
 % Select the second subplot on the figure for the histogram.
-subplot(2,1,2);
+ax = subplot(2,1,2);
+set(ax, 'Units', 'normalized');
+set(ax, 'Position', [0.28, 0.05, 0.4, 0.17]);
 
 D = double(event.Data(:));
 avgD = round(mean(D));
@@ -22,11 +29,14 @@ stdD = num2str(stdD, '%u');
 maxD = num2str(maxD, '%u');
 minD = num2str(minD, '%u');
 
+
+
 % Plot the histogram. Choose 128 bins for faster update of the display.
 imhist(event.Data, 32768);
-set(gca,'YScale','log')
-title([avgD, ' \pm ', stdD, ' [', minD ', ', maxD, ']']);
 
+set(gca,'YScale','log');
+xlim([0 66500]);
+title([avgD, ' \pm ', stdD, ' [', minD ', ', maxD, '], ', zpos_str]);
 
 % Modify the following numbers to reflect the actual limits of the data returned by the camera.
 
