@@ -13,13 +13,8 @@ search_radius_high = 26;
 
 evtfilelist = dir('*.vrpn.evt.mat');
 
-<<<<<<< HEAD
-ForceTable = cell(length(evtfilelist));
-BeadInfoTable = cell(length(evtfilelist));
-=======
 m = cell(length(evtfilelist),1);
 b = cell(length(evtfilelist),1);
->>>>>>> 3bb89ce0d4a85f1f541dd8878c2ba5606af0fe74
 
 for k = 1:length(evtfilelist)
 
