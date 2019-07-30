@@ -30,6 +30,7 @@ if isempty(filelist)
 end
 
 vidstatsfile = dir([stack_folder '.vidstats.mat']);
+metadatafile = dir([stack_folder '.meta.mat']);
 
 if ~isempty(vidstatsfile)
     VidStats = load(vidstatsfile.name);
@@ -37,6 +38,8 @@ if ~isempty(vidstatsfile)
     maxintens = VidStats.Max(1);
     disp(['Max intens is: ' num2str(maxintens)]);
 end
+
+metadata = load(metadatafile.name);
 
 v = VideoWriter(outfile, 'MPEG-4');
 v.FrameRate = 60;
@@ -53,12 +56,15 @@ for k = 1:4:length(filelist)
         im = im ./ maxintens;
     end
     
-    imrgb = insertText(im, [5 5], ['f=' num2str(k)], ...
+    height = metadata.Video.TimeHeightTable.interp_heights(k);
+    roundedHeight = height - rem(height, .1);
+    imrgb = insertText(im, [5 5], ['f=' num2str(k) ', h=' num2str(roundedHeight)], ...
                                      'AnchorPoint', 'LeftTop', ...
                                      'BoxColor', 'black', ...
                                      'BoxOpacity', 0.4, ...
                                      'TextColor', 'white', ...
                                      'FontSize', 14);
+   
     im = im2uint8(imrgb);
     writeVideo(v, im); 
 end
