@@ -74,9 +74,9 @@ end
     
     cd(stackpath);        
 
-    if showTF
-        h = figure;
-    end    
+%     if showTF
+%         h = figure;
+%     end    
 
     depthtype = ['uint' num2str(depth)];    
     
@@ -92,12 +92,12 @@ end
         framename = ['frame' num2str(k,'%05u') '.pgm'];
         myframe = reshape(myframe, height, width);
 
-        if showTF
-            figure(h);
-            imagesc(myframe); 
-            colormap(gray);
-            drawnow;
-        end
+%         if showTF
+%             figure(h);
+%             imagesc(myframe); 
+%             colormap(gray);
+%             drawnow;
+%         end
         
 
         
