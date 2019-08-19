@@ -54,13 +54,10 @@ framenumber{1,1} = [];
 TotalFrames = 0;
 motor_velocity = 0.2; % [mm/sec]
 
-Nsec = starting_height/motor_velocity + 1;
+Nsec = starting_height/motor_velocity + 1
 Fps = 1 / (exptime/1000);
 % NFrames = ceil(Fps * Nsec);
 NFrames = 7625;
-
-height = NaN(NFrames,1);
-height(1,1) = starting_height;
 
 imaqmex('feature', '-previewFullBitDepth', true);
 vid = videoinput('pointgrey', 1,'F7_Raw16_1024x768_Mode2');
@@ -135,10 +132,10 @@ trigger(vid);
 t1=tic; 
 
 % Check and store the motor position every 100 ms until it reaches zero. 
-pause(4/Fps);
+pause(6/Fps);
 while(vid.FramesAvailable > 0)
     cnt = cnt + 1;
-    height(cnt) = h.GetPosition_Position(0); 
+    height(cnt,1) = h.GetPosition_Position(0);
     
     NFramesAvailable(cnt,1) = vid.FramesAvailable;
     [data, ~, meta] = getdata(vid, NFramesAvailable(cnt,1));    
@@ -146,12 +143,18 @@ while(vid.FramesAvailable > 0)
     abstime{cnt,1} = vertcat(meta(:).AbsTime);
     framenumber{cnt,1} = meta(:).FrameNumber;
 
-%     TotalFrames = TotalFrames + NFramesAvailable;   
     [rows, cols, rgb, frames] = size(data);
 
-
+%     numdata = double(squeeze(data));
+% 
+%     squashedstack = reshape(numdata,[],frames);
+%     meanval{cnt,1} = transpose(mean(squashedstack));
+%     stdval{cnt,1}  = transpose(std(squashedstack));
+%     maxval{cnt,1}  = transpose(max(squashedstack));
+%     minval{cnt,1}  = transpose(min(squashedstack));
+    
     if cnt == 1
-        firstframe = data(:,:,1,1);
+        firstframe = data(:,:,1);
     end
         
     fwrite(fid, data, imagetype);
@@ -176,29 +179,36 @@ ba_movez(h, starting_height, 'fast')
 % Close the video .bin file
 fclose(fid);
 
-height(cnt+1:end) = [];
 NFramesCollected = sum(NFramesAvailable);
-AbsFrameNumber = cumsum(NFramesAvailable);
+AbsFrameNumber = cumsum([1 ; NFramesAvailable(:)]);
+AbsFrameNumber = AbsFrameNumber(1:end-1);
 
 logentry(['Total Frame count: ' num2str(NFramesCollected)]);
+
+Time = cellfun(@datenum, abstime, 'UniformOutput', false);
+Time = vertcat(Time{:});
 
 % The z-position of the Thorlabs motor is not queried at every frame, so to
 % put the measurements on the same "clock", I'm going to interpolate motor
 % position between the frame clusters grabbed from the vid object and
 % combine time and z-position into a single table.
-interp_heights(:,1) = interp1(AbsFrameNumber, height, 0:NFramesCollected-1);
-time = cellfun(@(x)seconds(days(datenum(x))), abstime, 'UniformOutput', false);
-time = vertcat(time{:});
+ZHeight(:,1) = interp1(AbsFrameNumber, height, 1:NFramesCollected, 'linear', 'extrap');
+ZHeight(1:AbsFrameNumber(1),1) = height(1);
+% Max = vertcat(maxval{:});
+% Mean = vertcat(meanval{:});
+% StDev = vertcat(stdval{:});
+% Min = vertcat(minval{:});
 
-Fid = randi(2^50,1,1);
+Fid = ba_makeFid;
 [~,host] = system('hostname');
 
-[a,b] = regexpi(filename,'(\d*)_B-([a-zA-Z0-9]*)_S-([a-zA-Z0-9]*)_([a-zA-Z0-9]*)_(\d*)x(\d*)x(\d*)_(\w*)', 'match', 'tokens');
+[a,b] = regexpi(filename,'(\d*)_B-([a-zA-Z0-9]*)_S-([a-zA-Z0-9]*)_([a-zA-Z0-9]*)_Lot([a-zA-Z0-9-]*)_(\d*)x(\d*)x(\d*)_(\w*)', 'match', 'tokens');
 b = b{1};
 SampleInstance = b{1};
 BeadChemistry = b{2};
 SubstrateChemistry = b{3};
 MediumName = b{4};
+SubstrateLot = b{5};
 
 m.File.Fid = Fid;
 m.File.SampleName = filename;
@@ -208,9 +218,9 @@ m.File.Binpath = pwd;
 m.File.Hostname = strip(host);
 switch MediumName
     case 'NoInt'
-        m.File.IncubationStartTime = '07/18/2019 12:15 pm';
+        m.File.IncubationStartTime = '08/16/2019 2:30 pm';
     case 'Int'
-        m.File.IncubationStartTime = '07/18/2019 12:30 pm';
+        m.File.IncubationStartTime = 'N/A';
 end
 
 m.Bead.Diameter = 24;
@@ -220,18 +230,20 @@ m.Bead.PointSpreadFunctionFilename = PSF_filename;
 
 m.Substrate.SurfaceChemistry = SubstrateChemistry;
 m.Substrate.Size = '50x75x1 mm';
+m.Substrate.LotNumber = SubstrateLot;
 
 m.Medium.Name = MediumName;
-m.Medium.ManufactureDate = '07-10-2019';   
 switch m.Medium.Name
     case 'Int'
         % 07.11.2019 Data (SNA, WGA, PEG beads on BSM-slides)
         m.Medium.Viscosity = 0.0605;  
         m.Medium.Components = Int25k;
+        m.Medium.ManufactureDate = '07-25-2019';   
     case 'NoInt'
         % 07.11.2019 Data (SNA, WGA, PEG beads on BSM-slides)
         m.Medium.Viscosity = 0.0527;  
         m.Medium.Components = NoInt;
+        m.Medium.ManufactureDate = '07-10-2019';   
     otherwise
         logentry('Unknown Case for Medium.');
 end    
@@ -260,7 +272,8 @@ m.Video.Depth = 16;
 m.Video.ExposureTime = src.Shutter;
 
 m.Results.ElapsedTime = elapsed_time;
-m.Results.TimeHeightVidStatsTable = table(time, interp_heights);
+% m.Results.TimeHeightVidStatsTable = table(Time, ZHeight, Max, Mean, StDev, Min);
+m.Results.TimeHeightVidStatsTable = table(Time, ZHeight);
 m.Results.FirstFrame = firstframe;
 m.Results.LastFrame = lastframe;
 
