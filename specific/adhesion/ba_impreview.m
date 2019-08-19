@@ -37,7 +37,8 @@ function ba_impreview(zhand)
     axis image
 
     edit_exptime = uicontrol('Style', 'edit', 'String', num2str(src.Shutter), 'Callback', @change_exptime);
-
+    btn_grabframe = uicontrol('Style', 'pushbutton', 'String', 'Grab Frame', 'Callback', @grab_frame);
+    
     hImage.UserData = zhand;
     
     setappdata(hImage, 'UpdatePreviewWindowFcn', @ba_livehist);
@@ -55,5 +56,11 @@ function ba_impreview(zhand)
         edit_exptime.String = num2str(src.Shutter);
         
     end
+
+    function grab_frame(source, event)
+        imwrite(hImage.CData, 'grabframe.png');
+        disp('Frame grabbewd to grabframe.png');
+    end
+
 
 end
