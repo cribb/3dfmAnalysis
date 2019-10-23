@@ -20,6 +20,7 @@ function ba_impreview(zhand)
     src.GammaMode = 'manual';
     src.Gamma      = 1.15;
     src.FrameRateMode  = 'off';
+%     src.FrameRate = 125;
     src.ShutterMode = 'manual';
     src.Shutter = 8;
 
@@ -28,7 +29,7 @@ function ba_impreview(zhand)
     vidRes = vid.VideoResolution;
     imageRes = fliplr(vidRes);   
     
-    figure('Visible', 'off');
+    f = figure('Visible', 'off', 'Units', 'normalized');
     ax = subplot(2, 1, 1);
     set(ax, 'Units', 'normalized');
     set(ax, 'Position', [0.05, 0.4515, .9, 0.53]); 
@@ -36,13 +37,21 @@ function ba_impreview(zhand)
     hImage = imshow(uint16(zeros(imageRes)));
     axis image
 
-    edit_exptime = uicontrol('Style', 'edit', 'String', num2str(src.Shutter), 'Callback', @change_exptime);
-    btn_grabframe = uicontrol('Style', 'pushbutton', 'String', 'Grab Frame', 'Callback', @grab_frame);
+    edit_exptime = uicontrol(f, 'Position', [20 20 60 20], ...
+                                'Style', 'edit', ...
+                                'String', num2str(src.Shutter), ...
+                                'Callback', @change_exptime);
+    btn_grabframe = uicontrol(f, 'Position', [20 40 60 20], ...
+                                 'Style', 'pushbutton', ...
+                                 'String', 'Grab Frame', ...
+                                 'Callback', @grab_frame);
+    edit_exptime.Position
+    btn_grabframe.Position
     
     hImage.UserData = zhand;
     
     setappdata(hImage, 'UpdatePreviewWindowFcn', @ba_livehist);
-
+%     hImage.CData = log10(double(hImage.CData));
     h = preview(vid, hImage);
     set(h, 'CDataMapping', 'scaled');
 
@@ -59,7 +68,7 @@ function ba_impreview(zhand)
 
     function grab_frame(source, event)
         imwrite(hImage.CData, 'grabframe.png');
-        disp('Frame grabbewd to grabframe.png');
+        disp('Frame grabbed to grabframe.png');
     end
 
 
