@@ -1,4 +1,4 @@
-function ba_pulloff(h, filename, exptime)
+function ba_pulloff(zhand, filename, exptime)
 % Prior to starting experiment, make sure the magnet is centered.  Lower
 % the magnet to 0 and use the vertical micrometer to ensure the tips of the
 % magnet will touch the top of a glass slide (to apply maximum force to
@@ -15,10 +15,10 @@ function ba_pulloff(h, filename, exptime)
 % each other or an edge will probably not work well when tracking. Focus the region, then
 % close image acquisition again.  Run the script.
 
-if nargin < 1 || isempty(h)
+if nargin < 1 || isempty(zhand)
     disp('No z-controller object. Connecting to z-motor now...');
     try
-        h = ba_initz;
+        zhand = ba_initz;
     catch
         error('No connection. Is motor connected and running?');
     end
@@ -53,8 +53,10 @@ abstime{1,1} = [];
 framenumber{1,1} = [];
 TotalFrames = 0;
 motor_velocity = 0.2; % [mm/sec]
+znow = starting_height;
 
-Nsec = starting_height/motor_velocity + 1
+
+Nsec = starting_height/motor_velocity + 1;
 Fps = 1 / (exptime/1000);
 % NFrames = ceil(Fps * Nsec);
 NFrames = 7625;
@@ -87,6 +89,8 @@ filename = [filename, '_', num2str(vidRes(1)), 'x', ...
 
 f = figure;%('Visible', 'off');
 pImage = imshow(uint16(zeros(imageRes)));
+pImage.UserData = znow;
+
 axis image
 setappdata(pImage, 'UpdatePreviewWindowFcn', @ba_pulloffview)
 p = preview(vid, pImage);
@@ -115,14 +119,13 @@ end
 fid = fopen(binfilename, 'w');
 
 % set motor velocity to .2 mm/sec
-h.SetVelParams(0, 0, 1, motor_velocity); 
+zhand.SetVelParams(0, 0, 1, motor_velocity); 
 
 % move from starting position in mm down to 0 mm
-h.SetAbsMovePos(0, 0); 
+zhand.SetAbsMovePos(0, 0); 
 pause(2);
 logentry('Moving motor...');
-h.MoveAbsolute(0, 1==0);
-
+zhand.MoveAbsolute(0, 1==0);
 
 logentry('Triggering video collection...');
 cnt = 0;
@@ -132,12 +135,19 @@ trigger(vid);
 t1=tic; 
 
 % Check and store the motor position every 100 ms until it reaches zero. 
-pause(6/Fps);
-while(vid.FramesAvailable > 0)
+pause(4/Fps);
+NFramesTaken = 0;
+% while(vid.FramesAvailable > 0)
+while(NFramesTaken < NFrames)
     cnt = cnt + 1;
-    height(cnt,1) = h.GetPosition_Position(0);
+    znow = zhand.GetPosition_Position(0);
+    zheight(cnt,1) = znow;
+    pImage.UserData = znow;
     
     NFramesAvailable(cnt,1) = vid.FramesAvailable;
+    NFramesTaken = NFramesTaken + NFramesAvailable(cnt,1);
+%     disp(['Num Grabbed Frames: ' num2str(NFramesAvailable(cnt,1)) '/' num2str(NFramesTaken)]);
+
     [data, ~, meta] = getdata(vid, NFramesAvailable(cnt,1));    
     
     abstime{cnt,1} = vertcat(meta(:).AbsTime);
@@ -174,7 +184,7 @@ stop(vid);
 pause(1);
     
 % Quickly move the ThorLabs z-motor to the starting height
-ba_movez(h, starting_height, 'fast')
+ba_movez(zhand, starting_height, 'fast')
 
 % Close the video .bin file
 fclose(fid);
@@ -184,6 +194,7 @@ AbsFrameNumber = cumsum([1 ; NFramesAvailable(:)]);
 AbsFrameNumber = AbsFrameNumber(1:end-1);
 
 logentry(['Total Frame count: ' num2str(NFramesCollected)]);
+logentry(['Total Elapsed time: ' num2str(elapsed_time)]);
 
 Time = cellfun(@datenum, abstime, 'UniformOutput', false);
 Time = vertcat(Time{:});
@@ -192,8 +203,8 @@ Time = vertcat(Time{:});
 % put the measurements on the same "clock", I'm going to interpolate motor
 % position between the frame clusters grabbed from the vid object and
 % combine time and z-position into a single table.
-ZHeight(:,1) = interp1(AbsFrameNumber, height, 1:NFramesCollected, 'linear', 'extrap');
-ZHeight(1:AbsFrameNumber(1),1) = height(1);
+ZHeight(:,1) = interp1(AbsFrameNumber, zheight, 1:NFramesCollected, 'linear', 'extrap');
+ZHeight(1:AbsFrameNumber(1),1) = zheight(1);
 % Max = vertcat(maxval{:});
 % Mean = vertcat(meanval{:});
 % StDev = vertcat(stdval{:});
@@ -202,13 +213,16 @@ ZHeight(1:AbsFrameNumber(1),1) = height(1);
 Fid = ba_makeFid;
 [~,host] = system('hostname');
 
-[a,b] = regexpi(filename,'(\d*)_B-([a-zA-Z0-9]*)_S-([a-zA-Z0-9]*)_([a-zA-Z0-9]*)_Lot([a-zA-Z0-9-]*)_(\d*)x(\d*)x(\d*)_(\w*)', 'match', 'tokens');
+[a,b] = regexpi(filename,'(\d*)_B-([a-zA-Z0-9]*)_S-([a-zA-Z0-9]*)_M-([a-zA-Z0-9]*)_([a-zA-Z0-9]*)_(\d*)x(\d*)x(\d*)_(\w*)', 'match', 'tokens');
+% [a,b] = regexpi(filename,'(\d*)_B-([a-zA-Z0-9]*)_S-([a-zA-Z0-9]*)_([a-zA-Z0-9]*)_(\d*)x(\d*)x(\d*)_(\w*)', 'match', 'tokens');
+% [a,b] = regexpi(filename,'(\d*)_C-([a-zA-Z0-9]*)_L-([a-zA-Z0-9]*)_([a-zA-Z0-9]*)_(\d*)x(\d*)x(\d*)_(\w*)', 'match', 'tokens');
 b = b{1};
 SampleInstance = b{1};
 BeadChemistry = b{2};
 SubstrateChemistry = b{3};
 MediumName = b{4};
 SubstrateLot = b{5};
+MagnetGeometry = b{6};
 
 m.File.Fid = Fid;
 m.File.SampleName = filename;
@@ -216,11 +230,18 @@ m.File.SampleInstance = SampleInstance;
 m.File.Binfile = binfilename; 
 m.File.Binpath = pwd;
 m.File.Hostname = strip(host);
-switch MediumName
-    case 'NoInt'
-        m.File.IncubationStartTime = '08/16/2019 2:30 pm';
-    case 'Int'
-        m.File.IncubationStartTime = 'N/A';
+% switch MediumName
+%     case 'NoInt'
+%         m.File.IncubationStartTime = '10/03/2019 3:15 pm';
+%     case 'Int'
+%         m.File.IncubationStartTime = '';
+% end
+
+switch lower(MagnetGeometry)
+    case 'cone'
+        m.File.IncubationStartTime = '10/17/2019 12:40 pm';
+    case 'softironcone'
+        m.File.IncubationStartTime = '10/17/2019 1:40 pm';
 end
 
 m.Bead.Diameter = 24;
@@ -238,7 +259,7 @@ switch m.Medium.Name
         % 07.11.2019 Data (SNA, WGA, PEG beads on BSM-slides)
         m.Medium.Viscosity = 0.0605;  
         m.Medium.Components = Int25k;
-        m.Medium.ManufactureDate = '07-25-2019';   
+        m.Medium.ManufactureDate = '09-25-2019';   
     case 'NoInt'
         % 07.11.2019 Data (SNA, WGA, PEG beads on BSM-slides)
         m.Medium.Viscosity = 0.0527;  
@@ -252,6 +273,32 @@ m.Medium.Buffer = 'PBS';
 
 m.Zmotor.StartingHeight = starting_height;
 m.Zmotor.Velocity = motor_velocity;
+
+switch lower(MagnetGeometry)
+    case 'cone'
+        m.Magnet.Geometry = 'cone';
+        m.Magnet.Size = '0.25 inch radius';
+        m.Magnet.Material = 'rare-earth magnet (neodymium)';
+        m.Magnet.PartNumber = 'Cone0050N';
+        m.Magnet.Supplier = 'www.supermagnetman.com';
+        m.Magnet.Notes = 'Right-angle cone, radius 0.25 inch, north-pole at tip';
+    case 'softironcone'
+        m.Magnet.Geometry = 'softironcone';
+        m.Magnet.Size = '0.25 inch radius';
+        m.Magnet.Material = 'softiron';
+        m.Magnet.PartNumber = 'N/A';
+        m.Magnet.Supplier = 'UNC physics shop';
+        m.Magnet.Notes = 'Right-angle cone, radius 0.25 inch, softiron';        
+    case 'pincer'
+        m.Magnet.Geometry = 'orig';
+        m.Magnet.Size = 'gap is approx 2 mm';
+        m.Magnet.Material = 'soft-iron';
+        m.Magnet.PartNumber = 'N/A';
+        m.Magnet.Supplier = 'UNC physics shop';
+        m.Magnet.Notes = 'Original magnet design by Max DeJong with softiron pincer-stylt tips and rare-earth magnet (neodymium) rectangular prism magnets on the back end.';
+end        
+
+
 
 m.Scope.Name = 'Olympus IX-71';
 m.Scope.CodeName = 'Ixion';
