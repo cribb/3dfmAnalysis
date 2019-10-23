@@ -46,9 +46,6 @@ for b = 1:B
     logentry('Converting bin file to stack of pgms...')
     ba_bin2stack(binfile, [], true);
 
-    logentry('Deleting original bin file...');
-    delete(binfile);
-
     logentry('Loading frame extraction times and motor z-positions');
     tz = load([stackdir '.meta.mat']);
     
@@ -60,7 +57,10 @@ for b = 1:B
     
     logentry('Tracking beads in this stack...');
     ba_trackstack(stackdir);
-    
+
+    logentry('Deleting original bin file...');
+    delete(binfile);
+
 %     logentry('Finding beads in first and last frames.');
 %     ba_discoverbeads(
 %     logentry('Compressing stack into smaller zip file.');
