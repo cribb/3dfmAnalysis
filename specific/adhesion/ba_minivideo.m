@@ -56,7 +56,7 @@ for k = 1:4:length(filelist)
         im = im ./ maxintens;
     end
     
-    height = metadata.Video.TimeHeightTable.interp_heights(k);
+    height = metadata.Results.TimeHeightVidStatsTable.ZHeight(k);
     roundedHeight = height - rem(height, .1);
     imrgb = insertText(im, [5 5], ['f=' num2str(k) ', h=' num2str(roundedHeight)], ...
                                      'AnchorPoint', 'LeftTop', ...
