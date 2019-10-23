@@ -7,6 +7,9 @@ function ba_pulloffview(obj,event,hImage)
 % Display the current image frame.
 set(hImage, 'CData', event.Data);
 
+znow = hImage.UserData;
+zpos_str = ['z = ' num2str(znow, '%4.1f')];
+
 % disp('Inside callback.');
 
 D = double(event.Data(:));
@@ -22,7 +25,8 @@ maxD = num2str(maxD, '%u');
 minD = num2str(minD, '%u');
 
 % Plot the histogram. Choose 128 bins for faster update of the display.
-title([avgD, ' \pm ', stdD, ' [', minD ', ', maxD, ']']);
+title([avgD, ' \pm ', stdD, ' [', minD ', ', maxD, '], ', zpos_str]);
+
 
 a = ancestor(hImage, 'axes');
 
