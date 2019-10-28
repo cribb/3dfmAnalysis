@@ -17,12 +17,9 @@ function ba_plot_forcehist(ba_process_data, aggregating_variables, plotorder)
 
     [gF, grpF] = findgroups(FTable(:,aggVars));
     
-    for k = 1:length(aggVars)
-    end
-    
-    ystrings = string(grpF.BeadChemistry) + '_' + string(grpF.SubstrateLotNumber);
-%     ystrings = string(grpF.BeadChemistry) + '_' + string(grpF.Media);
-    
+    grpFstr = string(table2array(grpF));
+    ystrings = join(grpFstr, '_');
+
     maxforce = 90e-9;
 
     grpF.Force = splitapply(@(x1,x2){sa_attach_stuck_beads(x1,x2,maxforce)}, FTable.Force, ...
@@ -54,9 +51,10 @@ function h = mysubplot(force, condition_label, subplotn, subplotN)
 
     logforce = log10(force{1}*1e9);
     
-    h = subplot(subplotN,1,subplotn);     
-    ax1 = histogram(logforce, 24, 'Normalization', 'probability');
+    BinEdges = [-10.5 : 0.1 : -7] + 9;
     
+    h = subplot(subplotN,1,subplotn);     
+    ax1 = histogram(logforce, 24, 'BinEdges', BinEdges, 'Normalization', 'probability');
     if subplotn ~= subplotN
         h.XTickLabels = [];
     end
