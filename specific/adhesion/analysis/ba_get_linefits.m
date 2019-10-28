@@ -6,6 +6,11 @@ t = d.FrameNumber ./ d.Fps;
 
 [g, ID] = findgroups(d.SpotID);
 
+if isempty(g)
+    m = struct;
+    return
+end
+
 foo = splitapply(@(x,y)mylinfit(x,y,1), t, d.Z, g);
 sp = splitapply(@(x,y)get_startpos(x,y), d.X, d.Y, g);
 
