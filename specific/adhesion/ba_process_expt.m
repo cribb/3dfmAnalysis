@@ -40,7 +40,7 @@ for k = 1:length(evtfilelist)
    
    BeadInfoTable{k} = ba_discoverbeads(firstframe, lastframe, search_radius_low, search_radius_high, Fid);   
       
-   ForceTable{k} = get_evt_linfits(evtfilelist(k).name, calibum, visc_Pas, bead_diameter_um, Fid);
+   ForceTable{k} = ba_get_linefits(evtfilelist(k).name, calibum, visc_Pas, bead_diameter_um, Fid);
    ForceTable{k}.ZmotorPos = interp1(Ztable.Time, Ztable.ZHeight, ForceTable{k}.Mean_time);
 end
 
