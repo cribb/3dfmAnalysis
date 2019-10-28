@@ -1,4 +1,4 @@
-function m = get_evt_linfits(evtfile, calibum, visc_Pas, bead_diameter_um, Fid)
+function m = ba_get_linefits(evtfile, calibum, visc_Pas, bead_diameter_um, Fid)
 
 d = load_evtfile(evtfile);
 
