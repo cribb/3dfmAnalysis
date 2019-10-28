@@ -1,4 +1,4 @@
-function DataOut = ba_combine_run(DataInA, DataInB)
+function DataOut = ba_combine_runs(DataInA, DataInB)
 
 repeatFID = intersect(DataInA.FileTable.Fid, DataInB.FileTable.Fid);
 
