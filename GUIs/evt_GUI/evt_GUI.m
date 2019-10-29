@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 12-Apr-2019 11:51:01
+% Last Modified by GUIDE v2.5 26-Aug-2019 15:27:38
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -112,7 +112,7 @@ function radio_selected_dataset_Callback(hObject, eventdata, handles)
 	set(handles.radio_deletetimeafter, 'Value', 0);
     
 % --- Executes on button press in radio_insideboundingbox.
-function radio_insideboundingbox_Callback(hObject, eventdata, handles)  
+function radio_insideboundingbox_Callback(hObject, eventdata, handles)
 	set(handles.radio_selected_dataset, 'Value', 0);
 	set(handles.radio_insideboundingbox, 'Value', 1);
     set(handles.radio_outsideboundingbox, 'Value', 0);
@@ -707,7 +707,7 @@ function pushbutton_Select_Closest_xydataset_Callback(hObject, eventdata, handle
         bead_to_select = beadID(find(dist == min(dist)));
 
         set(handles.slider_BeadID, 'Value', round(bead_to_select));
-        set(handles.edit_BeadID, 'String', round(num2str(bead_to_select)));
+        set(handles.edit_BeadID, 'String', num2str(round(bead_to_select)));
     end
     
     if get(handles.radio_AUXfig, 'Value')
@@ -1713,7 +1713,7 @@ function plot_data(hObject, eventdata, handles)
     
     if get(handles.checkbox_overlayxy, 'Value')
         hold on;
-            plot(x(nk), y(nk), '.', x(k), y(k), 'r.'); 
+            plot(x(nk), y(nk), '.', x(k), y(k), 'r.');
         hold off;
     end
     
@@ -1847,9 +1847,9 @@ function plot_data(hObject, eventdata, handles)
             set(AUXfig, 'Visible', 'on');
 
             if get(handles.radio_relative, 'Value')
-                xinit = x(k); xinit = xinit(1);
-                yinit = y(k); yinit = yinit(1);      
-                zinit = z(k); zinit = zinit(1);
+                xinit = x(k); if ~isempty(xinit); xinit = xinit(1); end
+                yinit = y(k); if ~isempty(yinit); yinit = yinit(1); end
+                zinit = z(k); if ~isempty(zinit); zinit = zinit(1); end
             elseif get(handles.radio_arb_origin, 'Value')            
                 xinit = arb_origin(1);
                 yinit = arb_origin(2);
@@ -1869,7 +1869,7 @@ function plot_data(hObject, eventdata, handles)
             xlabel('time (s)');
             ylabel(['radial dispacement [' ylabel_unit ']']);
             set(handles.AUXfig, 'Units', 'Normalized');
-            set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
+%             set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
             set(handles.AUXfig, 'DoubleBuffer', 'on');
             set(handles.AUXfig, 'BackingStore', 'off');    
             drawnow;
@@ -2364,9 +2364,9 @@ function delete_selected_dataset(hObject, eventdata, handles)
         set(handles.edit_BeadID, 'String', num2str(bead_to_remove-1));        
     end
     
-    if bead_max ~= 1
+    if bead_max <= 1
         set(handles.slider_BeadID, 'Max', bead_max-1);
-        set(handles.slider_BeadID, 'SliderStep', [1/(bead_max-1) 1/(bead_max-1)]);
+        set(handles.slider_BeadID, 'SliderStep', [0 1]);
     else
         set(handles.slider_BeadID, 'Max', bead_max);
         set(handles.slider_BeadID, 'SliderStep', [1/(bead_max) 1/(bead_max)]);
@@ -2493,14 +2493,13 @@ function delete_outside_boundingbox(hObject, eventdata, handles)
     yhi = max(ym);
     
     if get(handles.radio_XYfig, 'Value')
-        k = find( (x > xlo & x < xhi & y > ylo & y < yhi ));
+        k = find( (x > xlo & x < xhi & y > ylo & y < yhi ) & beadID == currentbead);
 
         handles.table = table(k,:);
         handles.tstamp_times = handles.tstamp_times(k);
 
     elseif get(handles.radio_XTfig, 'Value')
-        k = find( ~( ( (x > ylo & x < yhi) | (y > ylo & y < yhi) | (z > ylo & z < yhi)  ) & ...
-                       (t > xlo & t < xhi) ) & beadID == currentbead );
+        k = find( ~(t > xlo & t < xhi ) & beadID == currentbead );
 
         table(k,:) = [];
         handles.tstamp_times(k) = [];
