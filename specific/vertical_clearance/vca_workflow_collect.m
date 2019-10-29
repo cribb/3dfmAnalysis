@@ -53,7 +53,7 @@ for b = 1:B
     ba_trackstack(stackdir);
 
     % Copy the firstframe and give it an expected filename
-    ba_copyfirstframe(stackdir);
+    ba_extract_keyframes(stackdir);
     
     % Compress each stack into a zip file for later use if necessary
     ba_zipstack(stackdir);

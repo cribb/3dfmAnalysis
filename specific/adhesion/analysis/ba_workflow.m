@@ -50,7 +50,7 @@ for b = 1:B
     tz = load([stackdir '.meta.mat']);
     
     logentry('Retrieving first & last frames (used for first locating beads).');
-    ba_copyfirstframe(stackdir);
+    ba_extract_keyframes(stackdir);
     
     logentry('Creating mini-video of stack using MP4 format');
     ba_minivideo(stackdir);
