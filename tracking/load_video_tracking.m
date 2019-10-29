@@ -31,20 +31,20 @@ function [v, calout] = load_video_tracking(filemask, frame_rate, xyzunits, calib
 video_tracking_constants;
 
 % handle the argument list
-if (nargin > 7); error('use filter_video_tracking to filter datasets!'); end;
-if (nargin < 7 || isempty(table));          table = 'struct';          end;
-if (nargin < 6 || isempty(tstamps));        tstamps  = 'no';	       end;
-if (nargin < 5 || isempty(absolute_pos));   absolute_pos = 'relative'; end;
-if (nargin < 4 || isempty(calib_um));       calib_um = 1;              end;
-if (nargin < 3 || isempty(xyzunits));       xyzunits  = 'pixels';      end;
-if (nargin < 2 || isempty(frame_rate) || frame_rate == 0); frame_rate = 120; end;
+if (nargin > 7); error('use filter_video_tracking to filter datasets!'); end
+if (nargin < 7 || isempty(table));          table = 'struct';          end
+if (nargin < 6 || isempty(tstamps));        tstamps  = 'no';	       end
+if (nargin < 5 || isempty(absolute_pos));   absolute_pos = 'relative'; end
+if (nargin < 4 || isempty(calib_um));       calib_um = 1;              end
+if (nargin < 3 || isempty(xyzunits));       xyzunits  = 'pixels';      end
+if (nargin < 2 || isempty(frame_rate) || frame_rate == 0); frame_rate = 120; end
 
 % deal with different ways to list files
 if isstruct(filemask)
     filelist = filemask;
 elseif iscell(filemask)
     for k = 1:length(filemask)
-        filelist(k) = dir(filemask{k});
+        filelist(k) = dir(filemask{k}); %#ok<AGROW>
     end    
 elseif isempty(filemask)
     filelist = [];
@@ -62,11 +62,11 @@ orig_directory = pwd;
 % on the input then it won't hurt anything.
 % 
 try
-    [pathstr, name, ext] = fileparts(filemask);
+    [pathstr, ~, ~] = fileparts(filemask);
 catch
 end
 
-if exist('pathstr') && ~isempty(pathstr)
+if exist('pathstr','var') && ~isempty(pathstr)
     cd(pathstr);
 end
 
@@ -93,7 +93,7 @@ for fid = 1:length(filelist)
     % What if we want to use the csv file provided by video spot tracker?
     % We have to make a decision here, and we'll base it on the filename
     % extension...
-    if ~isempty(strfind(file, '.csv')) && isempty(strfind(file, '.mat'))
+    if contains(file, '.csv') && ~contains(file, '.mat')
         % assume csv file is the input and load accordingly
 %         dd = csvread(file, 1, 0);
           dd = importdata(file, ',', 1);
@@ -115,7 +115,7 @@ for fid = 1:length(filelist)
 
     % Handle the incoming data for whatever type it is...
     % First, check if it's a csv file
-    if ~isempty(strfind(file, '.csv')) && isempty(strfind(file, '.mat'))
+    if contains(file, '.csv') && ~contains(file, '.mat')
         
         data = convert_csv(dd);
                 
@@ -133,7 +133,7 @@ for fid = 1:length(filelist)
         continue;
         
     % Is it an EVT (edited video tracking) file?
-    elseif ~isempty(strfind(file, '.evt.')) && isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
+    elseif contains(file, '.evt.') && isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         data = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
         
         % need to handle the presence and absence of a calibration factor inside the
@@ -177,8 +177,8 @@ for fid = 1:length(filelist)
         tstamps = 'no';
 
     elseif length(dd.tracking) > 1
-        data = dd.tracking;
-        ch = NaN;
+        data = dd.tracking; %#ok<NASGU>
+        ch = NaN; %#ok<NASGU>
         error(['CONGRATULATIONS! You have stumbled upon an OLD video-tracking VRPN format. ' ...
               '\nYou will have to edit load_video_tracking and include a filter for this format.']);
     else
@@ -195,7 +195,7 @@ for fid = 1:length(filelist)
     if size(data,2) < 13 || (sum(data(:,PASS)) == 0 && sum(data(:,WELL)) == 0)
         [well, pass] = pan_wellpass(file);
         if well == 0
-            well = fid; % use the 'well' heading as a placeholder for "filenumber" when there's no Panoptes data
+            well = fid; %#ok<NASGU> % use the 'well' heading as a placeholder for "filenumber" when there's no Panoptes data
         else
             data(:,WELL) = well;
         end
@@ -203,15 +203,15 @@ for fid = 1:length(filelist)
     end
     
     % handle the physical units
-    units{X} = xyzunits;  units{Y} = xyzunits;  units{Z} = xyzunits;
-	if strcmp(xyzunits,'m')
+    units{X} = xyzunits;  units{Y} = xyzunits;  units{Z} = xyzunits; %#ok<AGROW>
+    if strcmp(xyzunits,'m')
 		data(:,X:Z) = data(:,X:Z) .* calib_um(fid) * 1e-6;  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'um')
 		data(:,X:Z) = data(:,X:Z) .* calib_um(fid);  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'nm')
 		data(:,X:Z) = data(:,X:Z) .* calib_um(fid) * 1e3;  % convert video coords from pixels to nm
     else 
-        units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
+        units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels'; %#ok<AGROW>
     end
 
     trackerID = data(:,ID);
@@ -245,9 +245,9 @@ for fid = 1:length(filelist)
         
         % handle the case for which a trackerID was used, but no points
         % were retained in the dataset.
-        if(isempty(this_tracker)); 
+        if(isempty(this_tracker))
             continue;
-        end;
+        end
 
         % select x&y coords for only the kth bead
         this_x = x(idx);
@@ -278,7 +278,7 @@ for fid = 1:length(filelist)
             if sum(this_tracker(:,FRAME)) > 0
                 data(idx,TIME) = data(idx,FRAME) * 1/frame_rate;
             else
-                frames = [0 : rows(this_tracker)-1]';
+                frames = (0 : rows(this_tracker)-1)';
                 data(idx,TIME) = frames * 1/frame_rate;
             end
             
@@ -304,11 +304,11 @@ for fid = 1:length(filelist)
         glommed_d = data;
         clear data;
     elseif ~isempty(data) && ~isempty(glommed_d)
-        glommed_d = [glommed_d ; data];
+        glommed_d = [glommed_d ; data]; %#ok<AGROW>
         clear data;
     end
     
-    calout(fid,1) = calib_um(fid);
+    calout(fid,1) = calib_um(fid); %#ok<AGROW>
 %     fprintf('The size of glommed_d is: %i, %i\n', size(glommed_d,1), size(glommed_d,2));
 end
 
@@ -333,14 +333,14 @@ if ~isempty(data)
             v.x = data(:,X);
             v.y = data(:,Y);
             v.z = data(:,Z);		
-            if exist('ROLL');    v.roll = data(:,ROLL);    end;
-            if exist('PITCH');   v.pitch= data(:,PITCH);   end;
-            if exist('YAW');     v.yaw  = data(:,YAW);     end;    
-            if exist('AREA');    v.area = data(:,AREA);    end;
-            if exist('SENS');    v.sens = data(:,SENS);    end;
-            if exist('CENTINTS');v.centints = data(:,CENTINTS);  end;           
-            if exist('WELL');    v.well = data(:,WELL);    end;
-            if exist('PASS');    v.pass = data(:,PASS);    end;
+            if exist('ROLL','var');    v.roll = data(:,ROLL);    end
+            if exist('PITCH','var');   v.pitch= data(:,PITCH);   end
+            if exist('YAW','var');     v.yaw  = data(:,YAW);     end  
+            if exist('AREA','var');    v.area = data(:,AREA);    end
+            if exist('SENS','var');    v.sens = data(:,SENS);    end
+            if exist('CENTINTS','var');v.centints = data(:,CENTINTS);  end         
+            if exist('WELL','var');    v.well = data(:,WELL);    end
+            if exist('PASS','var');    v.pass = data(:,PASS);    end
 %             if size(dd,2) == 14
 %                 v.area = data(:,AREA);
 %             end
@@ -462,3 +462,18 @@ function data = convert_spot2DSecUsecIndexXYZ(dd)
     
     return;
     
+    
+%% Prints out a log message complete with timestamp.
+function logentry(txt)
+    logtime = clock;
+    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
+                   num2str(logtime(2),        '%02i') '.' ...
+                   num2str(logtime(3),        '%02i') ', ' ...
+                   num2str(logtime(4),        '%02i') ':' ...
+                   num2str(logtime(5),        '%02i') ':' ...
+                   num2str(round(logtime(6)), '%02i') ') '];
+     headertext = [logtimetext 'load_video_tracking: '];
+     
+     fprintf('%s%s\n', headertext, txt);
+     
+    return

@@ -1,4 +1,4 @@
-function outfile = save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, outtype)
+function save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, outtype)
 % SAVE_EVTFILE saves tracking data to the evt.vrpn.mat format 
 %
 % 3DFM function
@@ -39,7 +39,7 @@ function outfile = save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, 
     
     if isstruct(tracking_in)
         data = tracking_in.spot3DSecUsecIndexFramenumXYZRPY;
-        if isfield(tracking_in, 'info');
+        if isfield(tracking_in, 'info')
             myinfo = tracking_in.info;
         else
             myinfo = NaN;
@@ -119,6 +119,7 @@ function outs = save_csvfile(data, filename)
      CSVSUMMED = 13;
      CSVAREA   = 14;
      CSVSENS   = 15;
+     CSVFORE   = 16;
 
      dummyzeros = zeros(size(data,1),1);
 
@@ -135,8 +136,24 @@ function outs = save_csvfile(data, filename)
      csv_data(:,CSVGAUSS)    = dummyzeros; 
      csv_data(:,CSVMEAN)     = dummyzeros; 
      csv_data(:,CSVSUMMED)   = dummyzeros; 
-     csv_data(:,CSVAREA)     = data(:, AREA);
-     csv_data(:,CSVSENS)     = data(:, SENS);             
+    if size(data,2) < CSVAREA
+         csv_data(:,CSVAREA) = dummyzeros;
+    else
+         csv_data(:,CSVAREA)     = data(:, AREA);
+    end
+
+    if size(data,2) < CSVSENS
+        csv_data(:,CSVSENS)     = dummyzeros;
+    else
+        csv_data(:,CSVSENS)     = data(:, SENS);
+    end
+
+
+    if size(data,2) < CSVFORE
+        csv_data(:,CSVFORE)     = dummyzeros;
+    else
+        csv_data(:,CSVFORE)     = data(:, SENS);
+    end
 
      csv_header = { 'FrameNumber' ...
                     'Spot ID' ...
@@ -152,7 +169,8 @@ function outs = save_csvfile(data, filename)
                     'Mean Background (FIONA)' ...
                     'Summed Value (for FIONA)' ...
                     'Region Size' ...
-                    'Sensitivity'};
+                    'Sensitivity' ...
+                    'Foreground Size'};
 
     filename = strrep(filename, '.vrpn', '');
     filename = strrep(filename, '.evt', '');
@@ -161,7 +179,7 @@ function outs = save_csvfile(data, filename)
     outfile = [filename '.evt.csv'];
 
     fid = fopen(outfile, 'w');
-    fprintf(fid, '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n',csv_header{:});
+    fprintf(fid, '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n',csv_header{:});
     fclose(fid);
     
 %     if ~isempty(csv_data) &&  length(csv_data(:)) ~= sum(isnan(csv_data(:)))

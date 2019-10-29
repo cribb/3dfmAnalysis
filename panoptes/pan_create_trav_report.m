@@ -42,7 +42,7 @@ tid = tic;
 metadata = pan_load_metadata(filepath, systemid, '96well');
 
 
-filelist = metadata.files.tracking;
+filelist = metadata.files.tracking.csv;
 duration = metadata.instr.seconds;
 fps = metadata.instr.fps_fluo;
 numframes = duration * fps;

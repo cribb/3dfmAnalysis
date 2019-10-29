@@ -20,6 +20,11 @@ if nargin < 2 || isempty(video)
     video.xDim = 656;
     video.yDim = 494;
 end
+
+if nargin < 1 || isempty(map)
+    error('First parameter is missing. Needs a vector map from vel_field');
+end
+
 quiver(map.xPosVal,map.yPosVal,map.sectorX,map.sectorY,0);
 set(gca,'YDir','reverse'); 
 xlim([0 video.xDim]);

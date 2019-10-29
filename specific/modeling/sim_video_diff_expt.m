@@ -41,6 +41,9 @@ function varargout = sim_video_diff_expt(filename, in_struct, grid)
 
 video_tracking_constants; 
 
+if nargin < 3 || isempty(grid)
+    grid = 'n';
+end
 if nargin < 2 || isempty(in_struct)
     logentry('Model parameters are not set.  Will create the default simulation.');
     in_struct = [];
@@ -170,14 +173,14 @@ logentry(['Parameters indicate a ' model_type ' model type.']);
 %             simout(:,Y) <= field_height  );
 % simout = simout(idx,:);
 
-for k = 1:numpaths;     
+for k = 1:numpaths 
     % vector of tracker ID's
     id = ones(frame_rate*duration,1)*k;     
 
     % add this tracker's data to the output table
     simout = [simout; t, id,  fr,  xy(:,:,k), zrpy];
     
-end;
+end
 
 % convert physical locations to pixel locations to simulate expt
 %if grid == 'n'
@@ -199,7 +202,7 @@ switch nargout
     case 2
         varargout{1} = simout;
         varargout{2} = in_struct;            
-end;
+end
 
 return;
 

@@ -5,7 +5,7 @@ function varargout = evt_GUI(varargin)
 % GUIs/evt_GUI
 % last modified 08/26/10
 %
-% evt_GUI M-file for evt_GUI.fig
+% evt_GUI M-filemenu for evt_GUI.fig
 %      evt_GUI, by itself, creates a new evt_GUI or raises the existing
 %      singleton*.
 %
@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 22-Sep-2017 10:52:18
+% Last Modified by GUIDE v2.5 26-Aug-2019 15:27:38
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -49,7 +49,12 @@ function varargout = evt_GUI(varargin)
         gui_mainfcn(gui_State, varargin{:});
 	end
 	% End initialization code - DO NOT EDIT
-    
+
+% Matlab lint ignores for this file    
+%#ok<*INUSL>
+%#ok<*DEFNU>
+%#ok<*INUSD>
+%#ok<*ASGLU>
 
 function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
@@ -73,22 +78,22 @@ function varargout = evt_GUI_OutputFcn(hObject, eventdata, handles)
 
     
 % --- Executes on button press in pushbutton_close.
-function pushbutton_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
-    if isfield(handles, 'XYfig');
+function pushbutton_close_Callback(hObject, eventdata, handles) 
+    if isfield(handles, 'XYfig')
         try
             close(handles.XYfig);
         catch
         end
     end
 
-    if isfield(handles, 'XTfig');
+    if isfield(handles, 'XTfig')
         try
             close(handles.XTfig);
         catch
         end
     end
 
-    if isfield(handles, 'AUXfig');
+    if isfield(handles, 'AUXfig')
         try
             close(handles.AUXfig);
         catch
@@ -99,7 +104,7 @@ function pushbutton_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 
     
 % --- Executes on button press in radio_selected_dataset.
-function radio_selected_dataset_Callback(hObject, eventdata, handles)
+function radio_selected_dataset_Callback(hObject, eventdata, handles) 
 	set(handles.radio_selected_dataset, 'Value', 1);
 	set(handles.radio_insideboundingbox, 'Value', 0);
     set(handles.radio_outsideboundingbox, 'Value', 0);
@@ -162,7 +167,7 @@ function radio_AUXfig_Callback(hObject, eventdata, handles)
     set(handles.radio_AUXfig, 'Value', 1);    
     
 % --- Executes during object creation, after setting all properties.
-function edit_infile_CreateFcn(hObject, eventdata, handles)
+function edit_infile_CreateFcn(hObject, eventdata, handles) 
 	if ispc
         set(hObject,'BackgroundColor','white');
 	else
@@ -188,16 +193,6 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
                         'Select File(s) to Open', ...
                         'MultiSelect', 'on');
         
-% [filename, pathname] = uigetfile( ...
-% {'*.m;*.fig;*.mat;*.slx;*.mdl',...
-%  'MATLAB Files (*.m,*.fig,*.mat,*.slx,*.mdl)';
-%    '*.m',  'Code files (*.m)'; ...
-%    '*.fig','Figures (*.fig)'; ...
-%    '*.mat','MAT-files (*.mat)'; ...
-%    '*.mdl;*.slx','Models (*.slx, *.mdl)'; ...
-%    '*.*',  'All Files (*.*)'}, ...
-%    'Pick a file');                    
-
         if sum(length(fname), length(pname)) <= 1
             logentry('No tracking file selected. No tracking file loaded.');
             return;
@@ -218,6 +213,7 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     end   
 
     filenameroot = strrep(filename,     '.raw', '');
+    filenameroot = strrep(filenameroot, '.csv', '');
     filenameroot = strrep(filenameroot, '.vrpn', '');
     filenameroot = strrep(filenameroot, '.mat', '');
     filenameroot = strrep(filenameroot, '.evt', '');
@@ -227,38 +223,44 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
     
     % assign "filter by" values if they're selected
     if get(handles.checkbox_minFrames, 'Value')
-        handles.filt.min_frames = str2num(get(handles.edit_minFrames, 'String'));
+        handles.filt.min_frames = str2double(get(handles.edit_minFrames, 'String'));
     else
         handles.filt.min_frames = 0;
     end
         
     if get(handles.checkbox_minPixelRange, 'Value')
-        handles.filt.min_pixels = str2num(get(handles.edit_minPixelRange, 'String'));
+        handles.filt.min_pixels = str2double(get(handles.edit_minPixelRange, 'String'));
     else
         handles.filt.min_pixels = 0;
     end
 
     if get(handles.checkbox_maxpixels, 'Value')
-        handles.filt.max_pixels = str2num(get(handles.edit_maxpixels, 'String'));
+        handles.filt.max_pixels = str2double(get(handles.edit_maxpixels, 'String'));
     else
         handles.filt.max_pixels = Inf;
     end
     
     if get(handles.checkbox_tCrop, 'Value')
-        handles.filt.tcrop = str2num(get(handles.edit_tCrop, 'String'));
+        handles.filt.tcrop = str2double(get(handles.edit_tCrop, 'String'));
     else
         handles.filt.tcrop = 0;
     end
     
     if get(handles.checkbox_xyCrop, 'Value')
-        handles.filt.xycrop = str2num(get(handles.edit_xyCrop, 'String'));
+        handles.filt.xycrop = str2double(get(handles.edit_xyCrop, 'String'));
     else
         handles.filt.xycrop = 0;
     end
+            
+    if get(handles.checkbox_min_sens, 'Value')
+        handles.filt.min_sens = str2double(get(handles.edit_min_sens, 'String'));
+    else
+        handles.filt.min_sens = 0;
+    end
     
     if get(handles.checkbox_deadzone, 'Value')
-        handles.filt.deadzone = str2num(get(handles.edit_deadzone, 'String'));
-        handles.filt.overlapthresh = str2num(get(handles.edit_overlapthresh, 'String'));
+        handles.filt.deadzone = str2double(get(handles.edit_deadzone, 'String'));
+        handles.filt.overlapthresh = str2double(get(handles.edit_overlapthresh, 'String'));
     else
         handles.filt.deadzone = 0;
         handles.filt.overlapthresh = 0.1;        
@@ -273,14 +275,15 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
 
     
     if ~isempty(calout)
-        if length(unique(calout)) == 1
+        if ~get(handles.checkbox_lockum, 'Value') && length(unique(calout)) == 1
             set(handles.edit_calib_um, 'String', num2str(calout(1)));
+        elseif get(handles.checkbox_lockum, 'Value')
+            logentry('Calib Lock set when loading new files. Overriding calibum set in file.');            
         else
             msgbox('evt_GUI cannot load multiple files with multiple calibration factors at this time.', 'Error.', 'error');
             return;
         end        
-    end
-    
+    end    
 
     if isempty(d)
         msgbox('No data exists in this fileset!');
@@ -301,33 +304,38 @@ function pushbutton_loadfile_Callback(hObject, eventdata, handles)
         logentry(['Dataset, ' filename ', successfully loaded...']);
     end
     
-    % try loading the MIP file
+    % try loading the MIP filemenu
 try
-        MIPfile = [filenameroot, '.pgm'];
+    if ~contains(filenameroot, '.png', 'IgnoreCase', true)
+        MIPfile = [filenameroot, '.png'];
+    else
+        MIPfile = filenameroot;
+    end
+    
         MIPfile = strrep(MIPfile, '_TRACKED', '');
         MIPfile = strrep(MIPfile, 'video', 'FLburst');
-        im = imread(MIPfile, 'PGM');
+        im = imread(MIPfile, 'PNG');
         logentry('Successfully loaded FLburst image from a Panoptes run...');
-        MIPexists = 1;
+%         MIPexists = 1;
 catch
     try 
         MIPfile = [filenameroot, '.MIP.bmp'];
         im = imread(MIPfile, 'BMP');
         logentry('Successfully loaded MIP image...');
-        MIPexists = 1;
+%         MIPexists = 1;
     catch
         try 
             MIPfile = [filenameroot, '.vrpn.composite.tif'];
             im = imread(MIPfile, 'tif');
             logentry('Successfully loaded MIP image...');
-            MIPexists = 1;
+%             MIPexists = 1;
         catch        
             logentry('MIP file was not found.  Trying to load first frame...');
 
             % or, try loading the first frame        
             try
-                fimfile = [filenameroot, '.0001.bmp'];
-                im = imread(fimfile, 'BMP');
+                fimfile = [filenameroot, '.00001.pgm'];
+                im = imread(fimfile, 'PGM');
                 logentry('Successfully loaded first frame image...');            
             catch
                 logentry('first frame image was not found. Trying to extract first frame...');
@@ -339,7 +347,6 @@ catch
                     logentry('Successfully extracted first frame image...');
                 catch
                     logentry('Could not extract image; RAW file not found.  Giving up...');
-                    im = 0;
                 end
             end        
         end
@@ -349,7 +356,7 @@ end
     if exist('im', 'var')
         handles.im = im;
     else
-        handles.im = [];
+        handles.im = 0.5 * ones(ceil(max(d(:,Y))),ceil(max(d(:,X))));
     end
     
 %     if exist('MIPexists', 'var') && get(handles.checkbox_lumicrop, 'Value')
@@ -386,10 +393,15 @@ end
     beadID = table(:,ID);
 
     % update fps editbox so there is an indicator of real timesteps
-    idx = find(beadID == 0);
-    tsfps = round(1/mean(diff(table(idx,TIME))));
-    logentry(['Setting frame rate to ' num2str(tsfps) ' fps.']);
-    set(handles.edit_frame_rate, 'String', num2str(tsfps));
+    if get(handles.checkbox_lockfps, 'Value')
+        logentry('FPS Lock set when loading new files. Overriding FPS set in file.');
+        tsfps = str2double(get(handles.edit_frame_rate, 'String'));
+    else
+        idx = (beadID == 0);
+        tsfps = round(1/mean(diff(table(idx,TIME))));
+        logentry(['Setting frame rate to ' num2str(tsfps) ' fps.']);
+        set(handles.edit_frame_rate, 'String', num2str(tsfps));
+    end
     
     % construct figure handles if they don't already exist
     if isfield(handles, 'XYfig')
@@ -457,6 +469,7 @@ end
     % Enable some controls now that data is loaded
     set(handles.checkbox_frame_rate                 , 'Enable', 'on');
     set(handles.text_frame_rate                     , 'Enable', 'on');
+    set(handles.checkbox_lockfps                    , 'Enable', 'on');
     set(handles.edit_BeadID                         , 'Enable', 'on');
     set(handles.slider_BeadID                       , 'Enable', 'on');
     set(handles.pushbutton_Select_Closest_xydataset , 'Enable', 'on');
@@ -484,6 +497,7 @@ end
     set(handles.radio_microns                       , 'Enable', 'on');
     set(handles.edit_calib_um                       , 'Enable', 'on');
     set(handles.text_calib_um                       , 'Enable', 'on');
+    set(handles.checkbox_lockum                     , 'Enable', 'on');
     set(handles.pushbutton_export_all_beads         , 'Enable', 'on');
     set(handles.pushbutton_export_bead              , 'Enable', 'on');
     set(handles.pushbutton_measure_distance         , 'Enable', 'on');
@@ -507,7 +521,7 @@ function pushbutton_savefile_Callback(hObject, eventdata, handles)
     
 %     tracking.spot3DSecUsecIndexFramenumXYZRPY = handles.table;
     calib_um = str2double(get(handles.edit_calib_um, 'String'));
-    fps = get(handles.edit_frame_rate, 'String');
+    fps = str2double(get(handles.edit_frame_rate, 'String'));
     save_evtfile(outfile, handles.table, 'pixels', calib_um, fps, 'mat');
 %     save(outfile, 'tracking');
     logentry(['New tracking file, ' outfile ', saved...']);
@@ -693,7 +707,7 @@ function pushbutton_Select_Closest_xydataset_Callback(hObject, eventdata, handle
         bead_to_select = beadID(find(dist == min(dist)));
 
         set(handles.slider_BeadID, 'Value', round(bead_to_select));
-        set(handles.edit_BeadID, 'String', round(num2str(bead_to_select)));
+        set(handles.edit_BeadID, 'String', num2str(round(bead_to_select)));
     end
     
     if get(handles.radio_AUXfig, 'Value')
@@ -819,7 +833,7 @@ function pushbutton_export_bead_Callback(hObject, eventdata, handles)
     bead.t      = bead.t - min(handles.table(:,TIME));
     bead.x      = handles.table(k,X);
     bead.y      = handles.table(k,Y);
-    if isfield(bead, 'yaw');
+    if isfield(bead, 'yaw')
         bead.yaw    = handles.table(idx,YAW);
     end
     
@@ -842,8 +856,8 @@ function radio_pixels_Callback(hObject, eventdata, handles)
 
     diststr = get(handles.text_distance, 'String');
     
-    if findstr(diststr, 'um')
-    elseif findstr(diststr, 'pixels')
+    if contains(diststr, 'um')
+    elseif contains(diststr, 'pixels')
     else
     end
     
@@ -893,7 +907,7 @@ function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
         [v,q] = remove_drift(handles.table, start_time, end_time, 'linear');
     elseif get(handles.radio_com, 'Value')
         logentry('Removing Drift via center-of-mass method.');
-        [v,q] = remove_drift(handles.table, start_time, end_time, 'center-of-mass');
+        [v,q] = remove_drift(handles.table, start_time, end_time, 'center-of-mass'); 
     elseif get(handles.radio_commonmode, 'Value')
         logentry('Removing Drift via common-mode method.');
         [v,q] = remove_drift(handles.table, start_time, end_time, 'common-mode');
@@ -950,7 +964,7 @@ function edit_frame_rate_Callback(hObject, eventdata, handles)
 
     table = handles.table;
 
-    if get(handles.checkbox_frame_rate, 'Value');
+    if get(handles.checkbox_frame_rate, 'Value')
         table(:,TIME) = table(:,FRAME) / str2double(get(hObject, 'String'));
         mintime = min(table(:,TIME));
         maxtime = max(table(:,TIME));
@@ -993,7 +1007,7 @@ function radio_arb_origin_Callback(hObject, eventdata, handles)
 
 
 function edit_arb_origin_Callback(hObject, eventdata, handles)
-    arb_origin = str2num(get(hObject, 'String'));
+    arb_origin = str2double(get(hObject, 'String'));
 
     if length(arb_origin) ~= 2
         logentry('Origin value is not valid.  Not plotting.')
@@ -1636,6 +1650,22 @@ function checkbox_2Mmsd_Callback(hObject, eventdata, handles)
     plot_data(hObject, eventdata, handles);
 
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 % =========================================================================
 % Everything below this point are functions related to computation and data
 % handling/display, and not the gui (though the handles structure is used).
@@ -1645,10 +1675,10 @@ function plot_data(hObject, eventdata, handles)
     video_tracking_constants;
     COMPUTED = 0;
 
-    if get(handles.radio_pixels, 'Value');
+    if get(handles.radio_pixels, 'Value')
         calib_um = 1;
         ylabel_unit = 'pixels';
-    elseif get(handles.radio_microns, 'Value');
+    elseif get(handles.radio_microns, 'Value')
         calib_um = str2double(get(handles.edit_calib_um, 'String')); 
         ylabel_unit = '\mum';
     end
@@ -1658,14 +1688,16 @@ function plot_data(hObject, eventdata, handles)
     frame  = handles.table(:,FRAME);
     x      = handles.table(:,X) * calib_um;
     y      = handles.table(:,Y) * calib_um;
+    z      = handles.table(:,Z);
     t      = handles.table(:,TIME);
-    
+    sens   = handles.table(:,SENS);
+    cent   = handles.table(:,CENTINTS);
     if size(im,1) > 1
-        [imy imx imc] = size(im);
+        [imy, imx, imc] = size(im);
     else
-        imy = max(y) * 1.1;
-        imx = max(x) * 1.1;
-    end;
+        imy = ceil(max(y));% * 1.1;
+        imx = ceil(max(x));% * 1.1;
+    end
     
     currentBead = round(get(handles.slider_BeadID, 'Value'));
     
@@ -1675,13 +1707,13 @@ function plot_data(hObject, eventdata, handles)
 	nk = find(beadID ~= (currentBead));
 
     figure(handles.XYfig);   
-        imagesc(0:imx * calib_um, 0:imy * calib_um, im);
+    imagesc([0 imx] * calib_um, [0 imy] * calib_um, im);
     colormap(gray);
     
     
     if get(handles.checkbox_overlayxy, 'Value')
         hold on;
-            plot(x(nk), y(nk), '.', x(k), y(k), 'r.'); 
+            plot(x(nk), y(nk), '.', x(k), y(k), 'r.');
         hold off;
     end
     
@@ -1690,7 +1722,7 @@ function plot_data(hObject, eventdata, handles)
         poley = handles.poleloc(2);
         circradius = 50;
         
-        if get(handles.radio_microns, 'Value');
+        if get(handles.radio_microns, 'Value')
             polex = polex * calib_um;
             poley = poley * calib_um;
             circradius = circradius * calib_um;
@@ -1704,46 +1736,72 @@ function plot_data(hObject, eventdata, handles)
     
     xlabel(['displacement [' ylabel_unit ']']);
     ylabel(['displacement [' ylabel_unit ']']);    
-    axis([0 imx 0 imy] .* calib_um);
+    xlim([0 imx] .* calib_um);
+    ylim([0 imy] .* calib_um);
     set(handles.XYfig, 'Units', 'Normalized');
-    set(handles.XYfig, 'Position', [0.1 0.05 0.4 0.4]);
+%     set(handles.XYfig, 'Position', [0.1 0.05 0.4 0.4]);
     set(handles.XYfig, 'DoubleBuffer', 'on');
     set(handles.XYfig, 'BackingStore', 'off');
     drawnow;
     
     figure(handles.XTfig);
-    if get(handles.checkbox_neutoffsets, 'Value')
-        plot(t(k) - mintime, [x(k)-x(k(1)) y(k)-y(k(1))], '.-');        
+    if get(handles.checkbox_neutoffsets, 'Value') && ~isempty(k)
+        xk1 = x(k(1));
+        yk1 = y(k(1));
+        zk1 = z(k(1));        
     else
-        plot(t(k) - mintime, [x(k) y(k)], '.');
+        xk1 = 0;
+        yk1 = 0;
+        zk1 = 0;
     end
+    handles.xyzk1 = [xk1, yk1, zk1];
+    
+    plot(t(k) - mintime, [x(k)-xk1 y(k)-yk1 z(k)-zk1], '.-');
     xlabel('time [s]');
     ylabel(['displacement [' ylabel_unit ']']);
-    legend('x', 'y');    
+    legend('x', 'y', 'z', 'Location', 'northwest');    
     set(handles.XTfig, 'Units', 'Normalized');
-    set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
+%     set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
     set(handles.XTfig, 'DoubleBuffer', 'on');
     set(handles.XTfig, 'BackingStore', 'off');    
     drawnow;
     
-    arb_origin = str2num(get(handles.edit_arb_origin, 'String'));
-    calib_um = str2double(get(handles.edit_calib_um, 'String'));     
+    arb_origin = str2double(get(handles.edit_arb_origin, 'String'));
+%     calib_um = str2double(get(handles.edit_calib_um, 'String'));     
     
     AUXfig = handles.AUXfig;         
     AUXtype = handles.AUXtype;
     
     data = handles.table;
-    frame_rate = str2num(get(handles.edit_frame_rate, 'String'));
-    calib_um   = str2num(get(handles.edit_calib_um, 'String'));
-    bead_diameter_um = str2num(get(handles.edit_bead_diameter_um, 'String'));
-    numtaus = round(str2num(get(handles.edit_numtaus, 'String')));
+    frame_rate = str2double(get(handles.edit_frame_rate, 'String'));
+    calib_um   = str2double(get(handles.edit_calib_um, 'String'));
+    bead_diameter_um = str2double(get(handles.edit_bead_diameter_um, 'String'));
+    numtaus = round(str2double(get(handles.edit_numtaus, 'String')));
     dt = 1 ./ frame_rate;
     
 %     win = unique(floor(logspace(0,log10(max(frame)),numtaus)));
     win = numtaus;
 
+    velx = zeros(size(beadID));
+    vely = zeros(size(beadID));
+    
+    beadlist = unique(beadID);
+    for b = 1:length(beadlist)        
+        foo = find(beadID == beadlist(b));
+        velx(foo,1) = CreateGaussScaleSpace(x(foo), 1, 1)/dt;
+        vely(foo,1) = CreateGaussScaleSpace(y(foo), 1, 1)/dt;
+    end
+    
+    vr = magnitude(velx, vely);
+    normvr = vr ./ max(vr);
+    vals = floor(normvr * 255);
+    heatmap = colormap(hot(256));
+    velclr = heatmap(vals+1,:);
+    
     if strcmp(AUXtype, 'MSD')  || ...
        strcmp(AUXtype, 'GSER') || ...
+       strcmp(AUXtype, 'sensitivity (SNR)') || ...
+       strcmp(AUXtype, 'center intensity') || ...
        strcmp(AUXtype, 'alpha vs tau') || ...
        strcmp(AUXtype, 'alpha histogram') || ...
        strcmp(AUXtype, 'Diffusivity vs. tau') || ...
@@ -1780,7 +1838,8 @@ function plot_data(hObject, eventdata, handles)
     
     switch AUXtype
         case 'OFF'
-            figure(handles.AUXfig);
+            
+%             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'off');
             
         case 'radial vector'
@@ -1788,52 +1847,71 @@ function plot_data(hObject, eventdata, handles)
             set(AUXfig, 'Visible', 'on');
 
             if get(handles.radio_relative, 'Value')
-                xinit = x(k); xinit = xinit(1);
-                yinit = y(k); yinit = yinit(1);        
+                xinit = x(k); if ~isempty(xinit); xinit = xinit(1); end
+                yinit = y(k); if ~isempty(yinit); yinit = yinit(1); end
+                zinit = z(k); if ~isempty(zinit); zinit = zinit(1); end
             elseif get(handles.radio_arb_origin, 'Value')            
                 xinit = arb_origin(1);
                 yinit = arb_origin(2);
+                zinit = arb_origin(3);
 
                 % handle the case where 'microns' are selected
-                if get(handles.radio_microns, 'Value');
+                if get(handles.radio_microns, 'Value')
                     xinit = xinit * calib_um;
                     yinit = yinit * calib_um;                
+                    zinit = zinit * calib_um;
                 end                        
             end
 
-            r = magnitude(x(k) - xinit, y(k) - yinit);
+            r = magnitude(x(k) - xinit, y(k) - yinit, z(k) - zinit);
 
             plot(t(k) - mintime, r, '.-');
             xlabel('time (s)');
             ylabel(['radial dispacement [' ylabel_unit ']']);
             set(handles.AUXfig, 'Units', 'Normalized');
-            set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
+%             set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
             set(handles.AUXfig, 'DoubleBuffer', 'on');
             set(handles.AUXfig, 'BackingStore', 'off');    
             drawnow;
+                        
+        case 'sensitivity (SNR)'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            plot(t(k) - mintime, sens(k), '.-');
+            xlabel('time (s)');
+            ylabel('Tracking Sensitivity');
+            
+        case 'center intensity'
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            plot(t(k) - mintime, cent(k)./max(cent(k)), '.-');
+            xlabel('time (s)');
+            ylabel('Center Intensity (frac of max)');
+            
             
         case 'velocity'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
             
             if get(handles.radio_relative, 'Value')
-                xinit = x(k); xinit = xinit(1);
-                yinit = y(k); yinit = yinit(1);        
+                xinit = x(k); 
+                xinit = xinit(1);
+                
+                yinit = y(k); 
+                yinit = yinit(1);        
             elseif get(handles.radio_arb_origin, 'Value')            
                 xinit = arb_origin(1);
                 yinit = arb_origin(2);
-
-                % handle the case where 'microns' are selected
-                if get(handles.radio_microns, 'Value');
-                    xinit = xinit * calib_um;
-                    yinit = yinit * calib_um;                
-                end                        
             end
+            
+            % handle the case where 'microns' are selected
+            if get(handles.radio_microns, 'Value')
+                xinit = xinit * calib_um;
+                yinit = yinit * calib_um;                
+            end                        
 
-            velx = CreateGaussScaleSpace(x(k), 1, 0.5)/dt;
-            vely = CreateGaussScaleSpace(y(k), 1, 0.5)/dt;
-                      
-            plot(t(k) - mintime, [velx(:) vely(:)], '.-');
+
+            plot(t(k) - mintime, [velx(k,1) vely(k,1)], '.-');
             xlabel('time (s)');
             ylabel(['velocity [' ylabel_unit '/s]']);
             legend('x', 'y');    
@@ -1847,12 +1925,7 @@ function plot_data(hObject, eventdata, handles)
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
             
-            velx = CreateGaussScaleSpace(x(k), 1, 0.5)/dt;
-            vely = CreateGaussScaleSpace(y(k), 1, 0.5)/dt;
-            
-            vr = magnitude(velx, vely);    
-            
-            plot(t(k) - mintime, [vr(:)], '.-');
+            plot(t(k) - mintime, vr(k), '.-');
             xlabel('time (s)');
             ylabel(['velocity [' ylabel_unit '/s]']);
             legend('r');    
@@ -1862,22 +1935,69 @@ function plot_data(hObject, eventdata, handles)
             set(handles.AUXfig, 'BackingStore', 'off');    
             drawnow;
             
-        case 'PSD'
+        case 'velocity scatter (all)'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
             clf(AUXfig);
+
+            hold on;
+                imagesc([0 imx], [0 imy], im);
+                colormap(gray);
+                scatter(x, y, [], velclr, 'filled');
+            hold off;
+            
+            set(gca, 'YDir', 'reverse');
+        
+        case 'velocity scatter (active)'            
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            clf(AUXfig);
+
+            imagesc([0 imx], [0 imy], im);
+            colormap(gray);
+    
+            hold on;
+                plot(x(nk), y(nk), 'b.');
+                scatter(x(k), y(k), [], velclr(k,:), 'filled');
+                set(gca, 'YDir', 'reverse');
+            hold off;
+            
+            xlabel(['displacement [' ylabel_unit ']']);
+            ylabel(['displacement [' ylabel_unit ']']);    
+            
+        case 'velocity vectorfield'
+            NGridX = 45;
+            NGridY = 45;
+            xgrid = (1:NGridX)*(video.xDim/NGridX/video.pixelsPerMicron);
+            ygrid = (1:NGridY)*(video.yDim/NGridY/video.pixelsPerMicron);
+            foo = vel_field(evt_filename, NGridX, NGridY, video);
+            Xvel = reshape(foo.sectorX, NGridX, NGridY);
+            Yvel = reshape(foo.sectorY, NGridX, NGridY);
+            Vmag = sqrt(Xvel.^2 + Yvel.^2);
+
+            figure; 
+            imagesc(xgrid, ygrid, Vmag'); 
+            colormap(hot);
+            xlabel('\mum')
+            ylabel('\mum')
+            title('Vel. [\mum/s]');
+            pretty_plot;
+
+        case 'PSD'
             
             [p, f, id] = mypsd([x(k) y(k)]*1e-6, frame_rate, frame_rate/100, 'rectangle');
 
+            figure(handles.AUXfig);
+            set(AUXfig, 'Visible', 'on');
+            clf(AUXfig);
             loglog(f, p);
             xlabel('frequency [Hz]');
 			ylabel('power [m^2/Hz]');
-
-            
             set(handles.AUXfig, 'Units', 'Normalized');
             set(handles.AUXfig, 'Position', [0.51 0.525 0.4 0.4]);
             set(handles.AUXfig, 'DoubleBuffer', 'on');
             set(handles.AUXfig, 'BackingStore', 'off');    
+
         case 'Integrated Disp'
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
@@ -1915,7 +2035,7 @@ function plot_data(hObject, eventdata, handles)
                 hold on;
                     plot(log10(tau(:,q)), log10(msd(:,q)), 'r.-');
                     [rows,cols] = size(tau);
-                    legend({num2str([0:cols-1]')});
+                    legend({num2str(transpose(0:cols-1))});
                     legend off
                 hold off;
             elseif plot_mean
@@ -1931,7 +2051,7 @@ function plot_data(hObject, eventdata, handles)
             visc.sucrose_2p5M = sucrose_viscosity(2.5, temp_K, 'K');
 
             bead_diameter_um = get(handles.edit_bead_diameter_um, 'String');
-            bead_radius_m = str2num(bead_diameter_um)/2 * 1e-6; % 
+            bead_radius_m = str2double(bead_diameter_um)/2 * 1e-6; % 
 
             D.water = kB * temp_K / (6 * pi * visc.water * bead_radius_m);
             D.sucrose_2M = kB * temp_K / (6 * pi * visc.sucrose_2M * bead_radius_m);
@@ -1967,7 +2087,7 @@ function plot_data(hObject, eventdata, handles)
             plot_alphavstau(myve, AUXfig);
             
         case 'alpha histogram'
-            mytauidx = str2num(get(handles.edit_chosentau, 'String'));
+            mytauidx = str2double(get(handles.edit_chosentau, 'String'));
             
             A = mymsd.tau(1:end-1,:);
             B = mymsd.tau(2:end,:);
@@ -1983,7 +2103,7 @@ function plot_data(hObject, eventdata, handles)
             plot_alphadist(myalpha, AUXfig);
             
         case 'MSD histogram'
-            mytauidx = str2num(get(handles.edit_chosentau, 'String'));
+            mytauidx = str2double(get(handles.edit_chosentau, 'String'));
             numbins = 51;
             
             mymsd_at_mytau = mymsd.msd(mytauidx, :);
@@ -2109,8 +2229,9 @@ function plot_data(hObject, eventdata, handles)
             handles.poleloc = pole_locator(handles.table, handles.im, 'y', AUXfig);
             guidata(hObject, handles);
 
-            poleloctxt = [num2str(handles.poleloc(1)) ', ' num2str(handles.poleloc(2))]
+            poleloctxt = [num2str(handles.poleloc(1)) ', ' num2str(handles.poleloc(2))];
             set(handles.edit_arb_origin, 'String', poleloctxt);
+            fprintf('Pole location [pixels]: X = %5.2f, Y = %5.2f\n', handles.poleloc(1), handles.poleloc(2)); 
             
         case 'tracker avail'
             figure(handles.AUXfig);
@@ -2199,11 +2320,13 @@ function plot_data(hObject, eventdata, handles)
                 plot_ve_2pt(myve, 'f', AUXfig, 'GgNn');
             elseif plotG
                 plot_ve_2pt(myve, 'f', AUXfig, 'Gg');
-            elseif ploteta
+            elseif ploteta %#ok<UNRCH>
                 plot_ve_2pt(myve, 'f', AUXfig, 'Nn');
+            else
+                error('Unknown plotting condition for 2 pt.');
             end
     end
- %      hihi;
+ 
  if COMPUTED ~= 1
     refresh(handles.XYfig);
     refresh(handles.XTfig);
@@ -2222,14 +2345,14 @@ function delete_selected_dataset(hObject, eventdata, handles)
     
     bead_max = max(table(:,ID));
 
-	k = find(table(:,ID) ~= bead_to_remove);
+	k = (table(:,ID) ~= bead_to_remove);
     
     table = table(k,:);
     
     if (bead_max ~= bead_to_remove) % otherwise I don't have to rearrange beadIDs
         for m = (bead_to_remove + 1) : bead_max
-            k = find(table(:,ID) == m);
-            table(k,ID) = m-1;
+            q = (table(:,ID) == m);
+            table(q,ID) = m-1;
         end
     end
     
@@ -2241,9 +2364,9 @@ function delete_selected_dataset(hObject, eventdata, handles)
         set(handles.edit_BeadID, 'String', num2str(bead_to_remove-1));        
     end
     
-    if bead_max ~= 1
+    if bead_max <= 1
         set(handles.slider_BeadID, 'Max', bead_max-1);
-        set(handles.slider_BeadID, 'SliderStep', [1/(bead_max-1) 1/(bead_max-1)]);
+        set(handles.slider_BeadID, 'SliderStep', [0 1]);
     else
         set(handles.slider_BeadID, 'Max', bead_max);
         set(handles.slider_BeadID, 'SliderStep', [1/(bead_max) 1/(bead_max)]);
@@ -2315,9 +2438,15 @@ function delete_outside_boundingbox(hObject, eventdata, handles)
     global hand;
     
     video_tracking_constants;
+    
+    % xyzk1 = the neutralization offsets for the XT plot
+    if ~isfield(handles, 'xyzk1')
+        xyzk1 = [ 0 0 0 ];
+    end
 
     if(get(handles.radio_XYfig, 'Value'))
         active_fig = handles.XYfig;
+        xyzk1 = [ 0 0 0 ];
     elseif(get(handles.radio_XTfig, 'Value'))
         active_fig = handles.XTfig;
     else
@@ -2333,9 +2462,16 @@ function delete_outside_boundingbox(hObject, eventdata, handles)
     t = table(:,TIME) - handles.mintime;
     x = table(:,X);
     y = table(:,Y);
+    z = table(:,Z);
     currentbead = get(handles.slider_BeadID, 'Value');
     
     [xm, ym] = ginput(2);
+    
+    if get(handles.checkbox_neutoffsets, 'Value')
+        xm = xm + xyzk1(1);
+        ym = ym + xyzk1(2);
+%         zm = zm + xyzk1(3);
+    end
     
     if get(handles.radio_microns, 'Value')
         calib_um = str2double(get(handles.edit_calib_um, 'String'));
@@ -2344,7 +2480,9 @@ function delete_outside_boundingbox(hObject, eventdata, handles)
             xm = xm / calib_um;
             ym = ym / calib_um;
         elseif(get(handles.radio_XTfig, 'Value'))
-            ym = ym / calib_um;
+            xm = xm / calib_um;
+            ym = ym / calib_um;            
+            %%% XXX add separate z-step calibration value.
         end
         
     end
@@ -2355,14 +2493,13 @@ function delete_outside_boundingbox(hObject, eventdata, handles)
     yhi = max(ym);
     
     if get(handles.radio_XYfig, 'Value')
-        k = find( (x > xlo & x < xhi & y > ylo & y < yhi ));
+        k = find( (x > xlo & x < xhi & y > ylo & y < yhi ) & beadID == currentbead);
 
         handles.table = table(k,:);
         handles.tstamp_times = handles.tstamp_times(k);
 
     elseif get(handles.radio_XTfig, 'Value')
-        k = find( ~( ( (x > ylo & x < yhi) | (y > ylo & y < yhi) ) & ...
-                       (t > xlo & t < xhi) ) & beadID == currentbead );
+        k = find( ~(t > xlo & t < xhi ) & beadID == currentbead );
 
         table(k,:) = [];
         handles.tstamp_times(k) = [];
@@ -2605,7 +2742,7 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
     fps = str2double(get(handles.edit_frame_rate, 'String'));
     bead_radius = str2double(get(handles.edit_bead_diameter_um, 'String'))*1e-6/2;
     calibum = str2double(get(handles.edit_calib_um, 'String'));
-    num_taus = str2num(get(handles.edit_numtaus, 'String'));
+    num_taus = str2double(get(handles.edit_numtaus, 'String'));
     opened_file = get(handles.edit_outfile, 'String');
     
     % %  DERIVED VALUES
@@ -2791,6 +2928,172 @@ function edit_overlapthresh_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function edit_overlapthresh_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit_overlapthresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in checkbox_lockfps.
+function checkbox_lockfps_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_lockfps (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_lockfps
+
+
+% --- Executes on button press in checkbox_lockum.
+function checkbox_lockum_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_lockum (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_lockum
+
+
+% --------------------------------------------------------------------
+function FileMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    
+    
+
+
+% --------------------------------------------------------------------
+function FileMenuOpen_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuOpen (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    pushbutton_loadfile_Callback(hObject, eventdata, handles);
+
+
+% --------------------------------------------------------------------
+function EditMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to EditMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_6_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_3_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function EditMenuFilter_Callback(hObject, eventdata, handles)
+% hObject    handle to EditMenuFilter (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function FileMenuAdd_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuAdd (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function FileMenuClose_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuClose (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_7_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function ExportMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to ExportMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function FileMenuQuit_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuQuit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    if isfield(handles, 'XYfig')
+        try
+            close(handles.XYfig);
+        catch
+        end
+    end
+
+    if isfield(handles, 'XTfig')
+        try
+            close(handles.XTfig);
+        catch
+        end
+    end
+
+    if isfield(handles, 'AUXfig')
+        try
+            close(handles.AUXfig);
+        catch
+        end
+    end
+
+	close(evt_GUI);
+
+
+% --------------------------------------------------------------------
+function FileMenuSaveAs_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuSaveAs (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function FileMenuSave_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenuSave (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in checkbox_min_sens.
+function checkbox_min_sens_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_min_sens (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_min_sens
+
+
+
+function edit_min_sens_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_min_sens (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_min_sens as text
+%        str2double(get(hObject,'String')) returns contents of edit_min_sens as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_min_sens_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_min_sens (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

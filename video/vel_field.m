@@ -45,14 +45,14 @@ function map = vel_field(filename, xCol, yRow, video)
 
 %% Manage Input Parameters, declarations,set constants 
 video_tracking_constants;
-if (nargin < 4 || isempty(video));  
+if (nargin < 4 || isempty(video))
    video.xDim = 656;
    video.yDim = 494;
    video.fps = 90;
    video.pixelsPerMicron = .542;
-end;
-if (nargin < 3 || isempty(yRow));       yRow=5;              end;
-if (nargin < 2 || isempty(xCol));       xCol=5;              end;
+end
+if (nargin < 3 || isempty(yRow));       yRow=5;              end
+if (nargin < 2 || isempty(xCol));       xCol=5;              end
 
 xBinSize = video.xDim/xCol;
 yBinSize = video.yDim/yRow;
@@ -93,23 +93,26 @@ for i = 1:length(beads)
     xBinVal = ceil(beads(i).x/xBinSize);
     yBinVal = floor(beads(i).y/yBinSize);
     beads(i).sector = yBinVal*xCol + xBinVal; 
-    
+        
     %Convert pixel values to microns
     beads(i).xmicron = beads(i).x/video.pixelsPerMicron;
     beads(i).ymicron = beads(i).y/video.pixelsPerMicron;
-   % beads(i).xvel = CreateGaussScaleSpace(beads(i).xmicron,1,.5).*framesPerSecond;
-   % beads(i).yvel = CreateGaussScaleSpace(beads(i).ymicron,1,.5).*framesPerSecond;
     
-    beads(i).xmicron = smooth(beads(i).xmicron,50);
-    beads(i).ymicron = smooth(beads(i).ymicron,50);
-    beads(i).xvel = [];
-    beads(i).yvel = [];
-    beads(i).xvel = diff(beads(i).xmicron)*video.fps; 
-    beads(i).yvel = diff(beads(i).ymicron)*video.fps; 
+%     beads(i).xmicron = smooth(beads(i).xmicron,50);
+%     beads(i).ymicron = smooth(beads(i).ymicron,50);
+%     
+    beads(i).xvel = CreateGaussScaleSpace(beads(i).xmicron,1,4).*video.fps;
+    beads(i).yvel = CreateGaussScaleSpace(beads(i).ymicron,1,4).*video.fps;
+
+%     beads(i).xvel = [];
+%     beads(i).yvel = [];
     
-    %kludgy hack to keep the vector the same size
-    beads(i).xvel = [beads(i).xvel(2);  beads(i).xvel];
-    beads(i).yvel = [beads(i).yvel(2);  beads(i).yvel]; 
+%     beads(i).xvel = diff(beads(i).xmicron)*video.fps; 
+%     beads(i).yvel = diff(beads(i).ymicron)*video.fps; 
+%     
+%     %kludgy hack to keep the vector the same size
+%     beads(i).xvel = [beads(i).xvel(2);  beads(i).xvel];
+%     beads(i).yvel = [beads(i).yvel(2);  beads(i).yvel]; 
 
 end
 

@@ -16,11 +16,11 @@ function get_mips(rawfiles, stride, start, stop, type)
 %        "stop" is the frame number where the mip should stop computing
 %
 
-if nargin < 5 | isempty(type);      type = 'min';        end;
-if nargin < 4 | isempty(stop);      stop = [];           end;
-if nargin < 3 | isempty(start);     start = 1;           end;
-if nargin < 2 | isempty(stride);    stride = 8;          end;
-if nargin < 1 | isempty(rawfiles);  rawfiles = '*.raw';  end;
+if nargin < 5 || isempty(type);      type = 'min';        end
+if nargin < 4 || isempty(stop);      stop = [];           end
+if nargin < 3 || isempty(start);     start = 1;           end
+if nargin < 2 || isempty(stride);    stride = 4;          end
+if nargin < 1 || isempty(rawfiles);  rawfiles = '*.raw';  end
 
 if ~strcmp(type, 'min') && ~strcmp(type, 'max') && ~strcmp(type, 'mean')
     warning('MIP type unknown, defaulting to minimum.');

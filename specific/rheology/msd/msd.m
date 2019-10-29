@@ -1,50 +1,44 @@
-function varargout = msd(t, data, window)
+function varargout = msd(t, data, taulist)
 % MSD computes the mean-square displacements (via the Stokes-Einstein relation) for a single bead
 %
-% 3DFM function
+% CISMM function
 % specific\rheology\msd
-% last modified 11/20/08 (krisford)
 %  
 %  
-% [tau, msd] = msd(t, data, window);   
+% [tau, msd] = msd(t, data, taulist);   
 %
 % where "t" is the time
 %       "data" is the input matrix of data
-%       "window" is a vector containing window sizes of tau when computing MSD. 
+%       "taulist" is a vector containing window-lagtime sizes of tau when computing MSD. 
 %
-% Notes: - No arguments will run a 2D msd on all .mat files in the current
-%          directory and use default window sizes.
-%        - Use empty matrices to substitute default values.
-%        - default window = [1 2 5 10 20 50 100 200 500 1000]
-%
-% [tau, msd, r2out] = msd
 
 %initializing arguments
-if (nargin < 3) || isempty(window)  
-    window = [1 2 5 10 20 50 100 200 500 1000 1001]; 
-end;
+if (nargin < 3) || isempty(taulist)  
+    taulist = [1 2 5 10 20 50 100 200 500 1000 1001]; 
+end
 
 if (nargin < 1) || isempty(t) || isempty(data)
     logentry('Input data needed, returning empty set'); 
-    tau        = NaN(length(window),1);
-    msd        = NaN(length(window),1);
-    Nestimates = NaN(length(window),1);
-end;
+    tau        = NaN(length(taulist),1);
+    msd        = NaN(length(taulist),1);
+    Nestimates = NaN(length(taulist),1);
+end
 
+taulist = taulist(:);
 
-% for every window size (or tau)
+% for every taulist size (or tau)
 warning('off', 'MATLAB:divideByZero');
 
 % preinitialize all output variables to maintain sizein == sizeout
-tau        = NaN(length(window),1);
-msd        = NaN(length(window),1);
-Nestimates = NaN(length(window),1);
+tau        = NaN(length(taulist),1);
+msd        = NaN(length(taulist),1);
+Nestimates = NaN(length(taulist),1);
 
 if nargout == 4
-    r2out = NaN(length(window),1);
+    r2out = NaN(length(taulist),1);
 end
     
-    Rout = NaN(size(data,1),size(data,2),length(window));
+    Rout = NaN(size(data,1),size(data,2),length(taulist));
     numpoints = size(data,1);
 
     if numpoints == 1
@@ -59,11 +53,11 @@ end
     end
     
     % set tau early according to average time step 
-    tau = window * mean(diff(t));
+    tau = taulist * mean(diff(t));
     
-    for w = 1:length(window)
+    for w = 1:length(taulist)
     
-        if isnan(window(w))
+        if isnan(taulist(w))
             continue;
         end
         
@@ -72,8 +66,8 @@ end
       for k = 1:cols(data)
   
         % for all frames
-        A = data(1:end-floor(window(w)), k);
-        B = data(floor(window(w))+1:end, k);
+        A = data(1:end-floor(taulist(w)), k);
+        B = data(floor(taulist(w))+1:end, k);
     
         r = (B - A);
         % var_r = sum((mean(r) - r).^2) / size(r,1);
@@ -91,7 +85,7 @@ end
         end
       end
       
-%         if w==length(window) && size(A,1) == 1
+%         if w==length(taulist) && size(A,1) == 1
 %             r2 = NaN;
 %         end
                     

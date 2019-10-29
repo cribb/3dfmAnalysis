@@ -28,7 +28,7 @@ mymsd      = msdin.msd;
 Nestimates = msdin.Nestimates;
 
 % compatibility issues with old msd.m
-if isfield(msdin, 'Ntrackers');
+if isfield(msdin, 'Ntrackers')
     Ntrackers = msdin.Ntrackers;
 else
     Ntrackers = sum( (Nestimates > 0) ,2);

@@ -43,9 +43,9 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
         for b = unique(mytable(:,ID))'
             for s = unique(mytable(:,SEQ))'
 
-                idx = find(mytable(:,ID) == b & ...
+                idx = (mytable(:,ID) == b & ...
                            mytable(:,SEQ) == s );
-                oidx = find(offsets(:,ID) == b & ...
+                oidx = (offsets(:,ID) == b & ...
                             offsets(:,SEQ) == s );
                 
                 foo = mytable(idx,cols);
@@ -59,7 +59,7 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
     end
     
     t     = mytable(:,TIME);
-    seq   = mytable(:,SEQ);
+    seq   = mytable(:,SEQ); %#ok<NASGU>
     force = mytable(:,FORCE);
     
 
@@ -103,7 +103,7 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
 %     mr = magnitude(mx, my);
 %     mdr= magnitude(mdx, mdy);
     
-    if plot_opts.plotx;
+    if plot_opts.plotx
           xdata  =   x;
          dxdata  =  dx;       
 %          mxdata  =  mx;
@@ -115,7 +115,7 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
 %        mdxdata = zeros(length(mx),1)*NaN;
     end
 
-    if plot_opts.ploty;
+    if plot_opts.ploty
          ydata =  y;
         dydata = dy;
 %         mydata = my;
@@ -127,7 +127,7 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
 %        mdydata = zeros(length(my),1)*NaN;
     end
 
-    if plot_opts.plotr;
+    if plot_opts.plotr
          rdata =  r;
         drdata = dr;
 %         mrdata = mr;
@@ -167,7 +167,7 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
 %     mdxyrdt= mdxyrdt * 1e6;  % m -> um           
     
     % handle the log/lin space choice
-    if plot_opts.logspace;
+    if plot_opts.logspace
         warning off MATLAB:log:logOfZero;
                  t = log10(t);
                xyr = log10(xyr);
@@ -180,7 +180,7 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
                  j = log10(j);
               visc = log10(visc);
             dxyrdt = log10(dxyrdt);
-                dj = log10(dj);
+%                 dj = log10(dj);
 
             if isfield(dmbr_struct, 'cap')
                cap_srate = log10(cap_srate);
@@ -210,7 +210,7 @@ function v = dmbr_plot_data(dmbr_struct, params, selection, plot_opts)
             
             %text(0.75*max(t), 0.25*max(xyr), num2str(mean(xyr(end-5:end))));
             if size(xyr,1) < 5
-                mean_xyr = mean(xyr);
+                mean_xyr = mean(xyr); %#ok<NASGU>
             else
                 mean_xyr = mean(xyr(end-5:end));
                 title(['mean, last 5 pts: ' num2str(mean_xyr)]);

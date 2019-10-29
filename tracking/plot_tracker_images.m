@@ -75,8 +75,8 @@ tick_values_for_x = [1:length(centered_locations_in_x)]*5;
 centered_locations_in_y = [fullsize/2:fullsize:(N_sheet_rows)-fullsize/2]+1;
 tick_values_for_y = sort_values_matrix(:,1);
 
-ff = figure;
-figure(ff);
+f = figure;
+figure(f);
     imagesc(bead_sheet);
     title([sort_by ': ' title_text], 'Interpreter', 'None');
     colormap(gray(256));
@@ -89,8 +89,8 @@ figure(ff);
     ylabel([sort_by ' in first column']);
     drawnow;
 
-f = figure;
-figure(f);
+fs = figure;
+figure(fs);
     imagesc(scaled_bead_sheet);
     title([sort_by ' (scaled): ' title_text], 'Interpreter', 'None');
     colormap(gray(256));
@@ -103,7 +103,7 @@ figure(f);
     ylabel([sort_by ' in first column']);
     drawnow;
 
-h = 0;
+h = [f fs];
 
 % set(h, 'Units', 'Normalized');
 
