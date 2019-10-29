@@ -1,4 +1,6 @@
 function outs = ba_beadImageAnalysis(bigT, g)
+% BA_BEADIMAGEANALYSIS extracts the max pixel "line" from bead images
+%
 
     fooT = sortrows(bigT, {'BeadChemistry', 'Media', 'LastImageMax'});
     

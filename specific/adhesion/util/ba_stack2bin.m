@@ -1,3 +1,7 @@
+function ba_stack2bin
+% BA_STACK2BIN (incomplete) function that converts an image stack into a bin file.
+%
+
 startdir = pwd;
 filelist = dir('*_uint16');
 for k = 1:length(filelist)

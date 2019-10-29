@@ -1,7 +1,5 @@
 function ba_livehist(obj,event,hImage)
-% This callback function updates the displayed frame and the histogram.
-
-% Copyright 2007-2017 The MathWorks, Inc.
+% BA_LIVEHIST is a callback function for ba_impreview.
 %
 
 

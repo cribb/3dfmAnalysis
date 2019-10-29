@@ -1,4 +1,7 @@
 function ba_movez(h, targetpos, zspeed)
+% BA_MOVEZ moves the Thorlabs z-motor to the target position.
+%
+
 % Moves the Thorlabs z-motor, h, to target z-position. Get h by running
 % ba_initz.
 %

@@ -1,4 +1,6 @@
 function m = ba_checkmetadata(m)
+% BA_CHECKMETADATA ensures the metadata structure matches the specification.
+%
 
     % Order everything so it can be aggregated later
     m = orderfields(m, {'File', 'Bead', 'Substrate', 'Medium', 'Zmotor', 'Scope', 'Video', 'Results'});

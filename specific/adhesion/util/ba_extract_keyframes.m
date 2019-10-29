@@ -1,4 +1,6 @@
 function ba_extract_keyframes(stackdir, destination_folder, outfile)
+% BA_EXTRACT_KEYFRAMES pulls selected images from the image stacks
+%
 
 if nargin < 1 || isempty(stackdir)
     error('No Stack folder defined.');

@@ -1,4 +1,6 @@
 function ba_minivideo(stack_folder, destination_folder, outfile)
+% BA_MINIVIDEO creates a compressed and annotated mp4 for an image stack
+%
 
 if nargin < 1 || isempty(stack_folder)
     error('No Stack folder defined.');

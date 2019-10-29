@@ -1,4 +1,7 @@
 function hnd = ba_initz(visibleUI_TF)
+% BA_INITZ initializes the handle to the Thorlabs z-motor
+% 
+
 % Prior to starting experiment, make sure the magnet is centered.  Lower
 % the magnet to 0 and use the vertical micrometer to ensure the tips of the
 % magnet will touch the top of a glass slide (to apply maximum force to

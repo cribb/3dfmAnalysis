@@ -1,3 +1,7 @@
+function reply_final = ba_magfield_sandbox
+% BA_MAGFIELD_SANDBOX receives header info for the gauss-meter (test function)
+%
+
 % % Instrument Connection
 
 % Codes

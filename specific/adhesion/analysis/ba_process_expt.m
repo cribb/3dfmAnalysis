@@ -1,4 +1,7 @@
 function outs = ba_process_expt(filepath)
+% BA_PROCESS_EXPT analzes the output of a bead adhesion experiment.
+%
+
 % This function begins the process of analyzing the output of the bead
 % adhesion experiment where the bead detaches from the surface and moves
 % through z while being tracked by vst. The z-velocity is then used to back

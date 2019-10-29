@@ -1,4 +1,6 @@
 function m = ba_get_linefits(evtfile, calibum, visc_Pas, bead_diameter_um, Fid)
+% BA_GET_LINEFITS calculates bead velocity and force from displacement line fits.
+%
 
 d = load_evtfile(evtfile);
 

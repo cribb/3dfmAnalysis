@@ -1,4 +1,7 @@
 function outs = ba_unpack_tiff(tif_filename, stack_path)
+% BA_UNPACK_TIFF converts a multi-page tiff into an image stack
+%
+
 
     if nargin < 1 || isempty(tif_filename) || ~contains(tif_filename, '.tif')
         error('No file defined or file does not end with a ".tif" extension.');

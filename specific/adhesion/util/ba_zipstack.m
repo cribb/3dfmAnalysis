@@ -1,4 +1,6 @@
 function ba_zipstack(stack_folder, destination_folder, outfile)
+% BA_ZIPSTACK compresses a stack of images into a zipfile for archiving.
+%
 
 if nargin < 1 || isempty(stack_folder)
     error('No Stack folder defined.');

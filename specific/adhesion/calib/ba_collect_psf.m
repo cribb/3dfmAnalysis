@@ -1,4 +1,6 @@
 function ba_collect_psf(outputFileName, exptime)
+% BA_COLLECT_PSF drives the hardware when collecting point-spread functions
+% 
 
 % Make h a global variable so it can be used outside the main
 % function. Useful when you do event handling and sequential           

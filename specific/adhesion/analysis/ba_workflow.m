@@ -1,4 +1,7 @@
 function ba_workflow(filemask)
+% BA_WORKFLOW analyzes a suite of bead-adhesion videos in the experiment path.
+%
+
 % 
 %
 % Given an experiment directory of bin files, perform automated analysis

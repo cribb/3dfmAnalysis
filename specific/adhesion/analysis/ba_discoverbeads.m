@@ -1,4 +1,7 @@
 function outs = ba_discoverbeads(firstframe, lastframe, search_radius_low, search_radius_high, Fid)
+% BA_DISCOVERBEADS finds beads in the first frame for the bead-adhesion assay.
+%
+
 % 
 % calibum = 0.346; % [um/pixel]
 % width = 1024;

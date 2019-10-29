@@ -1,4 +1,6 @@
 function ba_trackstack(stackdir, destination_folder, outfile, cfgfiles)
+% BA_TRACKSTACK wraps Video Spot Tracker in the bead adhesion assay workflow.
+%
 
 if nargin < 1 || isempty(stackdir)
     error('No Stack folder defined.');

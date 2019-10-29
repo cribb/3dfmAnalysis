@@ -1,5 +1,7 @@
 function varargout = ba_collectUI(varargin)
-% BA_COLLECTUI MATLAB code for ba_collectUI.fig
+% BA_COLLECTUI User-interface for collecting video during a bead-adhesion experiment.
+%
+%
 %      BA_COLLECTUI, by itself, creates a new BA_COLLECTUI or raises the existing
 %      singleton*.
 %

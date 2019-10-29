@@ -1,4 +1,7 @@
 function zpos = ba_getz(h)
+% BA_GETZ returns the current z-position of the Thorlabs z-motor
+%
+
 % Returns the current z-position of the Thorlabs z-motor, h. Get h by running
 % ba_initz.
 %

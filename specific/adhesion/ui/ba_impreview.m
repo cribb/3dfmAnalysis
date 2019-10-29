@@ -1,5 +1,6 @@
 function ba_impreview(zhand)
-
+% BA_IMPREVIEW UI for previewing the microscope's camera image.
+%
     if nargin < 1 || isempty(zhand)
         zhand = ba_initz;
         pause(3);

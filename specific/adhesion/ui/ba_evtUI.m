@@ -1,9 +1,5 @@
 function varargout = ba_evtUI(varargin)
-% ba_evtUI creates a new ba_evtUI or raises the existing singleton
-%
-% 3DFM function
-% GUIs/ba_evtUI
-% last modified 08/26/10
+% BA_EVTUI User Interface for editing trajectories in the bead adhesion assay. 
 %
 % ba_evtUI M-filemenu for ba_evtUI.fig
 %      ba_evtUI, by itself, creates a new ba_evtUI or raises the existing
