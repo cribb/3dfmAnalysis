@@ -30,10 +30,10 @@ for f = 1:length(cfgfiles)
     
     fid = fopen(cfgfiles(f).name);
     
-    A = textscan(fid, '%s %s %s');        
+    A = textscan(fid, 'set %s %s');        
 
-    fnames = A{:,2};
-    values = A{:,3};
+    fnames = A{:,1};
+    values = A{:,2};
     
     values = cellfun(@str2num, values, 'UniformOutput', false);
     
