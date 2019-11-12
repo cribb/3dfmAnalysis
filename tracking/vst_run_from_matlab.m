@@ -2,7 +2,7 @@ function v = vst_run_from_matlab(filetotrack, logfile, configfile, ins)
 
 % filetotrack = 'D:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\sample_video\MucusBeads1\frame00001.pgm';
 
-if nargin < 3 || isempty(ins)
+if nargin < 4 || isempty(ins)
     error('Video Spot Tracker configuration empty or not found.');
 end
 
@@ -20,9 +20,9 @@ if isempty(dir(configfile))
     error('No tracking configuration file found.');
 end
 
-% configdata = readfile(configfile);
+Cfg = vst_loadcfg(configfile);
 
-config_radius = 50;
+config_radius = Cfg.radius;
 
 commandopts = ['-enable_internal_values ' ...
                '-lost_all_colliding_trackers ' ...
