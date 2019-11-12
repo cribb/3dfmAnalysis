@@ -507,7 +507,6 @@ end
     plot_data(hObject, eventdata, handles);
     guidata(hObject, handles);
 
-    
 % --- Executes on button press in pushbutton_savefile.
 function pushbutton_savefile_Callback(hObject, eventdata, handles)
     video_tracking_constants;
@@ -1443,6 +1442,9 @@ function checkbox_etastar_Callback(hObject, eventdata, handles)
     
     
 function edit_bead_diameter_um_Callback(hObject, eventdata, handles)
+    handles.recomputeMSD = 1;     
+    guidata(hObject, handles);
+
     plot_data(hObject, eventdata, handles);
 
 
@@ -1538,9 +1540,9 @@ function edit_maxpixels_CreateFcn(hObject, eventdata, handles)
     end
 
 function edit_numtaus_Callback(hObject, eventdata, handles)
-    handles.recomputeMSD = 1;    
-    plot_data(hObject, eventdata, handles);    
+    handles.recomputeMSD = 1;     
     guidata(hObject, handles);
+    plot_data(hObject, eventdata, handles);   
     
     
 % --- Executes during object creation, after setting all properties.
@@ -1639,14 +1641,23 @@ end
 
 % --- Executes on button press in checkbox_watermsd.
 function checkbox_watermsd_Callback(hObject, eventdata, handles)
+    handles.recomputeMSD = 1;
+    guidata(hObject, handles);
+
     plot_data(hObject, eventdata, handles);
 
 % --- Executes on button press in checkbox_2p5Mmsd.
 function checkbox_2p5Mmsd_Callback(hObject, eventdata, handles)
+    handles.recomputeMSD = 1;
+    guidata(hObject, handles);
+
     plot_data(hObject, eventdata, handles);
 
 % --- Executes on button press in checkbox_2Mmsd.
 function checkbox_2Mmsd_Callback(hObject, eventdata, handles)
+    handles.recomputeMSD = 1;
+    guidata(hObject, handles);
+
     plot_data(hObject, eventdata, handles);
 
 
@@ -1793,15 +1804,16 @@ function plot_data(hObject, eventdata, handles)
     end
     
     vr = magnitude(velx, vely);
+    vr(isnan(vr)) = 0;
     normvr = vr ./ max(vr);
-    vals = floor(normvr * 255);
+    vals = floor(normvr * 254);
     heatmap = colormap(hot(256));
     velclr = heatmap(vals+1,:);
     
     if strcmp(AUXtype, 'MSD')  || ...
        strcmp(AUXtype, 'GSER') || ...
        strcmp(AUXtype, 'sensitivity (SNR)') || ...
-       strcmp(AUXtype, 'center intensity') || ...
+       strcmp(AUXtype, 'center intensity') || ...20
        strcmp(AUXtype, 'alpha vs tau') || ...
        strcmp(AUXtype, 'alpha histogram') || ...
        strcmp(AUXtype, 'Diffusivity vs. tau') || ...
@@ -2051,7 +2063,7 @@ function plot_data(hObject, eventdata, handles)
             visc.sucrose_2p5M = sucrose_viscosity(2.5, temp_K, 'K');
 
             bead_diameter_um = get(handles.edit_bead_diameter_um, 'String');
-            bead_radius_m = str2double(bead_diameter_um)/2 * 1e-6; % 
+            bead_radius_m = str2double(bead_diameter_um)/2 * 1e-6;
 
             D.water = kB * temp_K / (6 * pi * visc.water * bead_radius_m);
             D.sucrose_2M = kB * temp_K / (6 * pi * visc.sucrose_2M * bead_radius_m);
