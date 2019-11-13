@@ -27,9 +27,13 @@ function [v,rho] = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units
     if (temp_units == 'K')
         temperature = temperature - 273.15;
     end
+
+    if (temp_units == 'F')
+        temperature = (5/9)*(temperature - 32);
+    end
     
     % Check the temperature input value for sanity.
-    if temperature < 0 | temperature > 100
+    if temperature < 0 || temperature > 100
         error('This model is valid for temperature values between 0 and 100 degrees Celsius.');
     end
 
@@ -60,8 +64,10 @@ function [v,rho] = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units
     if sucrose_conc_percent > sol
         warning('The input sucrose concentration exceeds sucrose solubility at the input temperature. Setting NaN.');
         v = NaN;
-    end;
+    end
     
+end
+
 % The solution_density function determines the sucrose concentration in
 % percent and the solution density in kg/m^3.  The model used to do this
 % was obtained from: Sugar Technologists Manual; Z. Bubnik, P. Kadlek, 
@@ -182,6 +188,8 @@ function [sc, rho] = solution_density(sucrose_molar_conc, t)
 	end
     
 	rho = d;
+    
+end
 
 % This function determines the maximum solubility of sucrose in percent given 
 % an input sucrose concentration in percent and an input temperature in 
@@ -198,3 +206,4 @@ function sol = sucrose_solubility(sc, t)
           - 4.63e-8   * t^4;
 
           
+end
