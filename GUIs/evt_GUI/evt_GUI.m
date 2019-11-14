@@ -1803,9 +1803,25 @@ function plot_data(hObject, eventdata, handles)
         vely(foo,1) = CreateGaussScaleSpace(y(foo), 1, 1)/dt;
     end
     
-    vr = magnitude(velx, vely);
+    for b = 1:length(beadlist)        
+        foo = find(beadID == beadlist(b));
+        fooONE = foo(1);
+        beadID(foo(1)) = [];
+        x(foo(1)) = [];
+        y(foo(1)) = [];
+        velx(foo(1)) = [];
+        vely(foo(1)) = [];
+    end
+    
+    
+    vr = magnitude(velx, vely);    
     vr(isnan(vr)) = 0;
-    normvr = vr ./ max(vr);
+%     vr(vr==0) = 1;
+    lvr = log10(vr);
+    lvr = lvr + min(abs(lvr));
+    lvr = lvr - min(lvr);
+    
+    normvr = lvr ./ max(lvr);
     vals = floor(normvr * 254);
     heatmap = colormap(hot(256));
     velclr = heatmap(vals+1,:);
@@ -1953,9 +1969,11 @@ function plot_data(hObject, eventdata, handles)
             clf(AUXfig);
 
             hold on;
+                
+%                 c = colorbar;
                 imagesc([0 imx], [0 imy], im);
+                scatter(x, y, 10, velclr, 'filled');
                 colormap(gray);
-                scatter(x, y, [], velclr, 'filled');
             hold off;
             
             set(gca, 'YDir', 'reverse');
