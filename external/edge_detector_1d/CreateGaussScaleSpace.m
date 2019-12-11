@@ -35,6 +35,6 @@ for i = 1:length(scales)
     fData = fData(offset:offset+length(data)-1);
     space(:,i) = fData;
 
-end;
+end
 
     
