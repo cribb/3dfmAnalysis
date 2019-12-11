@@ -1,4 +1,3 @@
-
 function [vid_table,q] = traj_subtract_centmass_motion(vid_table, traj_common)
 % at each time point, average all beads x, y, and z values to determine
 % center of mass vector and subtract that from each bead's position.
