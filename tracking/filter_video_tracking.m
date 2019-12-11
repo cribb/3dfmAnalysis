@@ -67,7 +67,7 @@ function [outs, filtout] = filter_video_tracking(data, filt)
 
     filtout = filt;
     
-    if (nargin < 1) || isempty(data); 
+    if (nargin < 1) || isempty(data) 
         logentry('No data inputs set. Exiting filter_video_tracking now.');
         outs = [];
         filtout.drift_vector = [NaN NaN];
@@ -193,8 +193,8 @@ function [outs, filtout] = filter_video_tracking(data, filt)
 %     end
     
     if isfield(filt, 'dead_spots')
-        if ~isempty(filt.dead_spots);
-            logentry(['dead_spots- Removing trackers from camera deadspots.']);
+        if ~isempty(filt.dead_spots)
+            logentry('dead_spots- Removing trackers from camera deadspots.');
             data = filter_dead_spots(data, filt.dead_spots);
         end
     end
