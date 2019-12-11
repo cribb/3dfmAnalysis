@@ -1969,15 +1969,28 @@ function plot_data(hObject, eventdata, handles)
             clf(AUXfig);
 
             hold on;
-                
-%                 c = colorbar;
+%               c = colorbar;
+
+            if get(handles.radio_microns, 'Value')
+                imx = imx * calib_um;
+                imy = imy * calib_um;                
+            end 
                 imagesc([0 imx], [0 imy], im);
+
+            
+                bIDlist = unique(beadID);
+                for bl = 1:length(bIDlist)
+                    cb = find(beadID == bIDlist(bl));
+                    plot(x(cb), y(cb), 'w-');                    
+                end
+%                 plot(x, y, 'k--');
                 scatter(x, y, 10, velclr, 'filled');
                 colormap(gray);
+                axis([0 imx 0 imy]);
             hold off;
             
             set(gca, 'YDir', 'reverse');
-        
+            pause(0.1);
         case 'velocity scatter (active)'            
             figure(handles.AUXfig);
             set(AUXfig, 'Visible', 'on');
