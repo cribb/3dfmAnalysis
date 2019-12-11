@@ -3,7 +3,6 @@ function varargout = mypsd(s, rate, res, window_type, style, obsoletearg)
 %
 % 3DFM function  
 % DSP 
-% last modified 11/14/08 (krisford)
 %  
 % This function computes the power spectral density for input.
 % Function signature:
@@ -45,13 +44,13 @@ if (size(s,1) < size(s,2))
     disp('I will transpose the input and then compute columnwise psd.');
     s = s';
 end
-if(nargin < 5 | isempty(style))
+if(nargin < 5 || isempty(style))
 	style = '-';
 end
-if(nargin < 4 | isempty(window_type))
+if(nargin < 4 || isempty(window_type))
    	window_type = 'blackman';
 end
-if(nargin < 3 | isempty(res))
+if(nargin < 3 || isempty(res))
   res = ceil(rate/size(s,1));%the finest possible resolution with given data
 end
 
