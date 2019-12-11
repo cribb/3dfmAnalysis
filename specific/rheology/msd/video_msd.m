@@ -32,13 +32,13 @@ function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, xtra_o
 %
 
 % initializing arguments
-if nargin < 6 || isempty(xtra_output) || ~isempty(strfind(xtra_output, 'n'))
+if nargin < 6 || isempty(xtra_output) || ~contains(xtra_output, 'n'))
     calc_r2 = 0;
     calc_r = 0;
-elseif strfind(xtra_output, 'r2')
+elseif contains(xtra_output, 'r2')
     calc_r2 = 1;
     calc_r = 0;
-elseif strfind(xtra_output, 'r')
+elseif contains(xtra_output, 'r')
     calc_r = 1;
     calc_r2 = 0;
 else
@@ -138,9 +138,9 @@ for k = 1 : length(beadIDs)
     
     % call up the MSD kernel-function to compute the MSD for each bead    
     if calc_r2 || calc_r
-        [tau_ msd_ nest_ r]  = msd(b(:, TIME), b(:, X:Y), window(~isnan(window)));
+        [tau_, msd_, nest_, r]  = msd(b(:, TIME), b(:, X:Y), window(~isnan(window)));
     else
-        [tau_ msd_ nest_]    = msd(b(:, TIME), b(:, X:Y), window(~isnan(window)));
+        [tau_, msd_, nest_]    = msd(b(:, TIME), b(:, X:Y), window(~isnan(window)));
     end
     
     tau(1:length(tau_),k) = tau_; 
