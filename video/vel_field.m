@@ -100,9 +100,14 @@ for i = 1:length(beads)
     
 %     beads(i).xmicron = smooth(beads(i).xmicron,50);
 %     beads(i).ymicron = smooth(beads(i).ymicron,50);
-%     
-    beads(i).xvel = CreateGaussScaleSpace(beads(i).xmicron,1,4).*video.fps;
-    beads(i).yvel = CreateGaussScaleSpace(beads(i).ymicron,1,4).*video.fps;
+
+    if ~isempty(beads(i).xmicron)
+        beads(i).xvel = CreateGaussScaleSpace(beads(i).xmicron,1,4).*video.fps;
+        beads(i).yvel = CreateGaussScaleSpace(beads(i).ymicron,1,4).*video.fps;
+    else
+        beads(i).xvel = [];
+        beads(i).yvel = [];
+    end
 
 %     beads(i).xvel = [];
 %     beads(i).yvel = [];
