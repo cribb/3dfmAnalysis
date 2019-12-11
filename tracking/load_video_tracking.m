@@ -71,7 +71,7 @@ if exist('pathstr','var') && ~isempty(pathstr)
 end
 
 if length(filelist) < 1
-    logentry(['No files found matching ' filemask ', returning empty set.']);
+    logentry(['No files found matching the input, returning empty set.']);
     v = NULLTRACK;
     calout = NaN;
     return;
