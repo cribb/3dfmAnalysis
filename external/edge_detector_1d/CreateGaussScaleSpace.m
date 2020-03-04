@@ -3,7 +3,7 @@ function [ space ] = CreateGaussScaleSpace( data, deriv, scales )
 % Computes the Gaussian scale space of a 1D data set.  (Scale parameters
 % are in data-spacing units.)
 % Input:
-%   data        A 1D data set
+%   data        One or more sets of equally-sampled 1D data, separated column-wise 
 %   deriv       The order of Gaussian scale space to compute (e.g. 0 is a
 %               smoothing scale space; 1 is an edge detecting scale space)
 %   scales      A list (vector) of scales to compute
@@ -19,22 +19,23 @@ if (nargin < 2)
     deriv = 0;
 end
 
-for i = 1:length(scales)
-    scale = scales(i);
+for j = 1:size(data,2)
+    for i = 1:length(scales)
+        scale = scales(i);
 
-    % Find the gaussian kernel, convolve
-    g = GaussianKernel1D(scale, deriv);
- 
-    % we have to pad the data to avoid the derivative blowing up at the
-    % boundaries
-    padData = [data(1)*ones(length(g),1); data; data(end)*ones(length(g),1)];
-    fData = conv(padData, g);
+        % Find the gaussian kernel, convolve
+        g = GaussianKernel1D(scale, deriv);
 
-    % Resize the filtered data
-    offset = (length(fData) - length(data)) / 2;
-    fData = fData(offset:offset+length(data)-1);
-    space(:,i) = fData;
+        % we have to pad the data to avoid the derivative blowing up at the
+        % boundaries
+        padData = [data(1,j)*ones(length(g),1); data(:,j); data(end,j)*ones(length(g),1)];
+        fData = conv(padData, g);
 
+        % Resize the filtered data
+        offset = (length(fData) - size(data,1)) / 2;
+        fData = fData(offset:offset+size(data,1)-1);
+        space(:,j,i) = fData;
+    end
 end
 
-    
+space = squeeze(space);
