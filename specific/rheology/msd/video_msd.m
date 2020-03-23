@@ -32,7 +32,7 @@ function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, xtra_o
 %
 
 % initializing arguments
-if nargin < 6 || isempty(xtra_output) || ~contains(xtra_output, 'n'))
+if nargin < 6 || isempty(xtra_output) || ~contains(xtra_output, 'n')
     calc_r2 = 0;
     calc_r = 0;
 elseif contains(xtra_output, 'r2')
