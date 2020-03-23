@@ -1,4 +1,4 @@
-function h = plot_vel_field(map ,video, h )
+function h = plot_vel_field(map, video, h )
 %   function h = plot_vel_field(map ,video, h )
 %
 %    This function takes the output of the vel_field program and plots it
@@ -25,7 +25,8 @@ if nargin < 1 || isempty(map)
     error('First parameter is missing. Needs a vector map from vel_field');
 end
 
-quiver(map.xPosVal,map.yPosVal,map.sectorX,map.sectorY,0);
+figure(h);
+quiver(map.xPosVal,map.yPosVal,map.sectorX,map.sectorY,1);
 set(gca,'YDir','reverse'); 
 xlim([0 video.xDim]);
 ylim([0 video.yDim]);
