@@ -1,10 +1,10 @@
-function winout = msd_gen_taus(framemax, numtaus, percent_duration)
+function winout = msd_gen_taus(framemax, numtaus, duration_fraction)
 
 
-    % percent_duration refers to proportion of data used in determining the
-    % msd (1 = all data, 0.5 half data)
-    if nargin < 3 || isempty(percent_duration)
-        percent_duration = 1;
+    % duration_fraction refers to proportion of data used in determining the
+    % msd (1 = difference across full duration, 0.5 half data duration)
+    if nargin < 3 || isempty(duration_fraction)
+        duration_fraction = 1;
     end
     
     if nargin < 2 || isempty(numtaus)
@@ -15,7 +15,7 @@ function winout = msd_gen_taus(framemax, numtaus, percent_duration)
         error('Framemax is empty or does not exist.')
     end
     
-    newFRAMEmax = floor(framemax*percent_duration);
+    newFRAMEmax = floor(framemax*duration_fraction);
     
     if numtaus >= newFRAMEmax
         logentry('Too many windows for the available number of frames. Reducing to every instance of best case.');
