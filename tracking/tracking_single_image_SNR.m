@@ -1,4 +1,5 @@
-function [avgSNR, mean_max_sig, image_background, image_noise, intensities]=  tracking_single_image_SNR(image,err_thresh, report,thresh,bit)
+function [avgSNR, mean_max_sig, image_background, image_noise, intensities]= ...
+                 tracking_single_image_SNR(image,err_thresh, report,thresh,bit)
 
 
 
@@ -6,24 +7,22 @@ function [avgSNR, mean_max_sig, image_background, image_noise, intensities]=  tr
 if  nargin < 3 || isempty(report)
     report = 'n';    
 end
+
     im=image;
     
     %I_sig > Th * (I_max - I_min) + I_min
    
-    maxPixel=double(max(im(:)));
-    minPixel=double(min(im(:)));
-    medPixel=double(median(im(:)));
-    threshold =thresh;
-    signalLevel=threshold*(maxPixel-minPixel)+minPixel;
+    maxPixel = double(max(im(:)));
+    minPixel = double(min(im(:)));
+    medPixel = double(median(im(:)));
     
-    if bit ==8
-        level=signalLevel/256;
-    elseif bit==16
-        level=signalLevel/65537;
-   
-    end
-        
-        %[level EM(fid)] = graythresh(im);
+    
+    signalLevel = thresh * (maxPixel - minPixel) + minPixel;
+    
+    level = signalLevel/2^bit;
+    
+    
+    % [level EM(fid)] = graythresh(im);
     mask = im2bw(im, level);
     mask = bwareaopen(mask, 4);
     dil_mask = mask;
@@ -122,17 +121,18 @@ end
 %     hist(bead_sig);
 %     title('bead_sig');
 
-     mean_max_sig = mean(bead_sig);
-     max_bead_sig=max(bead_sig);
-     min_bead_sig=min(bead_sig);
-    signal_standard_error=std(bead_sig)/sqrt(length(bead_sig));
-    background_standard_error=std(mean_noise)/sqrt(length(mean_noise));
-    total_error=signal_standard_error+background_standard_error;
-    image_background=mean_noise(end);
-    image_noise=noise(end);
+    mean_max_sig = mean(bead_sig);
+    max_bead_sig = max(bead_sig);
+    min_bead_sig = min(bead_sig);
+    
+    signal_standard_error = std(bead_sig) / sqrt(length(bead_sig));
+    background_standard_error = std(mean_noise) / sqrt(length(mean_noise));
+    total_error = signal_standard_error + background_standard_error;
+    image_background = mean_noise(end);
+    image_noise = noise(end);
     avgSNR = (mean_max_sig - mean_noise(end)) / noise(end);
-    maxSNR=(max_bead_sig-mean_noise(end))/noise(end);
-    minSNR=(min_bead_sig-mean_noise(end))/noise(end);
+    maxSNR = (max_bead_sig - mean_noise(end)) / noise(end);
+    minSNR = (min_bead_sig - mean_noise(end)) / noise(end);
 
     if strcmp(report, 'y')
 
