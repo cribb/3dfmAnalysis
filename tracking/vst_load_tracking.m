@@ -66,6 +66,19 @@ for f = 1:length(fid)
     dd.MeanBackground_FIONA_ = [];
     dd.SummedValue_forFIONA_ = [];
 
+    if ~ismember('RegionSize', dd.Properties.VariableNames)
+        dd.RegionSize = zeros(height(dd),1);
+    end
+    
+    if ~ismember('Sensitivity', dd.Properties.VariableNames)
+        dd.Sensitivity = zeros(height(dd),1);
+    end
+    
+    if ~ismember('ForegroundSize', dd.Properties.VariableNames)
+        dd.ForegroundSize = zeros(height(dd),1);
+    end
+    
+    
     % Copy X and Y into "original" X and Y columns to Xo and Yo them use X and
     % Y as filtered and/or drift-corrected dataset. This creates a bifurcation 
     % in the plausible output (filter vs. unfiltered) and doubles the number of 
