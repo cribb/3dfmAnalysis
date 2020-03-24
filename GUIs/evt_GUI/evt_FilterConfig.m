@@ -86,6 +86,8 @@ function varargout = evt_FilterConfig_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 % varargout{1} = handles.output;
+varargout{1} = handles.evtFiltConfig;
+
 %     setappdata(0,'evtFiltConfig',handles.evtFiltConfig);
 %     close(evt_FilterConfig);
 %#ok<*INUSD>
