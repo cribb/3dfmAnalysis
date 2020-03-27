@@ -1108,8 +1108,11 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
 %     Path = '\\nsrg.cs.unc.edu\nanodata2\brooksjt\Data\QImaging Camera (Hercules)\12.19.2018 - varied passive posts in external fluorescent bead flow\Matlab Work\rect_corner';
 %     File = 'jakerectcorner2.csv';
     
-    Path = '\\nsrg.cs.unc.edu\nanodata2\sharavu\Diffusion and Flows- Feb- analysis';
-    File = 'diffusion1feb#2trial3.csv';
+%     Path = '\\nsrg.cs.unc.edu\nanodata2\sharavu\Diffusion and Flows- Feb- analysis';
+%     File = 'diffusion1feb#2trial3.csv';
+    
+    Path = 'C:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\data\adhesion\2020.03.12__MultiBead&MultiSurface_cone_lidded_plate2';
+    File = '02_B-PEG_S-BSA_NoInt_1024x768x7625_uint16.csv';
     
     filename = fullfile(Path, File);
     S.Fid = evt_makeFid;
@@ -1123,9 +1126,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     S.Firstframefile = '';
     S.Mipfile = '';
     
-
     VidTable = struct2table(S, 'AsArray', true);
- 
 
     logentry(['Setting Path to: ' Path]);
     cd(Path);
@@ -1163,11 +1164,36 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
             return;
         end        
     end    
-
-
-
     
     logentry(['Dataset(s) successfully loaded...']);
+    
+    % update fps editbox so there is an indicator of real timesteps
+    TrackingTable.Time = TrackingTable.Frame ./ VidTable.Fps;
+    beadID = TrackingTable.ID;
+%     if get(handles.checkbox_lockfps, 'Value')
+%         logentry('FPS Lock set when loading new files. Overriding FPS set in file.');
+%         tsfps = str2double(get(handles.edit_frame_rate, 'String'));
+%     else
+%         idx = (beadID == 0);
+%         tsfps = round(1/mean(diff(TrackingTable.Time(idx))));
+%         logentry(['Setting frame rate to ' num2str(tsfps) ' fps.']);
+%         set(handles.edit_frame_rate, 'String', num2str(tsfps));
+%     end
+    
+    
+    % handle peculiarities of sliders (still not perfected)
+	slider_max = max(beadID);
+	slider_min = min(beadID);
+    if slider_min == slider_max
+        slider_max = slider_min + 1;
+    end
+    
+	slider_step = 1/(slider_max - slider_min);
+    	
+	set(handles.slider_BeadID, 'Min', slider_min);
+	set(handles.slider_BeadID, 'Max', slider_max);
+	set(handles.slider_BeadID, 'SliderStep', [slider_step slider_step]);
+
     
     MIPfile = strrep(filenameroot, '_TRACKED', '');
     MIPfile = strrep(MIPfile, 'video', 'FLburst');
@@ -1187,32 +1213,6 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     end
     
     
-    % update fps editbox so there is an indicator of real timesteps
-    beadID = TrackingTable.ID;
-    TrackingTable.Time = TrackingTable.Frame ./ VidTable.Fps;
-%     if get(handles.checkbox_lockfps, 'Value')
-%         logentry('FPS Lock set when loading new files. Overriding FPS set in file.');
-%         tsfps = str2double(get(handles.edit_frame_rate, 'String'));
-%     else
-%         idx = (beadID == 0);
-%         tsfps = round(1/mean(diff(TrackingTable.Time(idx))));
-%         logentry(['Setting frame rate to ' num2str(tsfps) ' fps.']);
-%         set(handles.edit_frame_rate, 'String', num2str(tsfps));
-%     end
-    
-    
-    % handle peculiarities of sliders (still not perfected)
-	slider_max = max(beadID);
-	slider_min = 0;
-    if slider_min == slider_max
-        slider_max = slider_min + 1;
-    end
-    
-	slider_step = 1/(slider_max - slider_min);
-    	
-	set(handles.slider_BeadID, 'Min', slider_min);
-	set(handles.slider_BeadID, 'Max', slider_max);
-	set(handles.slider_BeadID, 'SliderStep', [slider_step slider_step]);
 
     % export important data to handles structure
     handles.Filename = filename;
@@ -1224,6 +1224,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     handles.recomputeMSD = 1;   
     handles.calibum = VidTable.Calibum;
     handles.rheo = calc_viscosity_stds(hObject, eventdata, handles);
+    handles.CurrentBead = min(beadID);
     handles.CurrentBeadIDX = filter_bead_selection(hObject, eventdata, handles);
     
     if get(handles.radio_pixels, 'Value')
