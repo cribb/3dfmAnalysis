@@ -3,6 +3,7 @@ function Fid  = evt_makeFid(rngseed)
 %
 
     if nargin < 1 || isempty(rngseed)
+        pause(0.05);
         rng('shuffle');
     else
         rng(rngseed);
