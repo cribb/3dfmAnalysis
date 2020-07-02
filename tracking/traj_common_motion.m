@@ -1,4 +1,4 @@
-function [common_xy] = traj_common_motion(vid_table, plotyn)
+function outs = traj_common_motion(vid_table, plotyn)
 % at each time point, average all beads x, y, and z values to determine
 % center of mass vector and subtract that from each bead's position.
 % This routine is insensitive to the disapperance of old trackers or the 
@@ -206,6 +206,10 @@ function [common_xy] = traj_common_motion(vid_table, plotyn)
 % %     allframes = [headerNaNs ; full_frame_list];
 % %     xy = [headerNaNs headerNaNs ; xy];    
     common_xy = [headerrows; xy];
+    
+    outs.frame = full_frame_list;
+    outs.xy = common_xy;
+    outs.weights = weights;
     
     return;
     
