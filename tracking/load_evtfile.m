@@ -1,4 +1,4 @@
-function outs = load_evtfile(filename, fps, calibum)
+function outs = load_evtfile(filename, fps, calib_um)
 
     dd = load(filename);
     
@@ -12,52 +12,51 @@ function outs = load_evtfile(filename, fps, calibum)
     
     if isfield(dd.tracking, 'spot3DSecUsecIndexFramenumXYZRPY')
         trk = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
+    else 
+        outs = [];
+        return
+    end
 
-    if isfield(dd.tracking, 'calibum')
-        logentry('Overriding calibum in function call with indiginous value in data file.')
-        calibum = dd.tracking.calib_um;
+    if isfield(dd.tracking, 'calib_um')
+        logentry('Overriding calib_um in function call with indiginous value in data file.')
+        calib_um = dd.tracking.calib_um;
+    elseif nargin < 3 || isempty(calib_um)
+        calib_um = NaN;
     end
 
     if isfield(dd.tracking, 'fps')
         logentry('Overriding fps in function call with indiginous value in data file.');
         fps = dd.tracking.fps;
+    elseif nargin < 2 || isempty(fps)
+        fps = NaN;
     end
 
-        if ischar(fps)
-            fps = str2double(fps);
-        end
-        
-        zerocol = zeros(size(trk,1), 1);
-        
-        outs.Frame = trk(:,FRAME);
-        outs.ID = trk(:,ID);
-        outs.X = trk(:,X);
-        outs.Y = trk(:,Y);
-        outs.Z = trk(:,Z);
-        outs.Radius = zerocol;
-        outs.CenterIntensity = zerocol;
-        outs.Orientation_ifMeaningful_ = zerocol;
-        outs.Length_ifMeaningful_= zerocol;
-        outs.FitBackground_forFIONA_= zerocol;
-        outs.GaussianSummedValue_forFIONA_= zerocol;
-        outs.MeanBackground_FIONA_    = zerocol;
-        outs.SummedValue_forFIONA_    = zerocol;
-        outs.RegionSize    = zerocol;
-        outs.Sensitivity    = zerocol;
-        outs.ForegroundSize= zerocol;
-        outs.Calibum = repmat(calibum, size(zerocol));
-        outs.Fps     = repmat(fps, size(zerocol));
-        
-    else
-        outs = [];
-    end    
+    if ischar(fps)
+        fps = str2double(fps);
+    end
+
+    zerocol = zeros(size(trk,1), 1);
+
+    outs.Frame = trk(:,FRAME);
+    outs.ID = trk(:,ID);
+    outs.X = trk(:,X);
+    outs.Y = trk(:,Y);
+    outs.Z = trk(:,Z);
+    outs.Radius = zerocol;
+    outs.CenterIntensity = zerocol;
+    outs.Orientation_ifMeaningful_ = zerocol;
+    outs.Length_ifMeaningful_= zerocol;
+    outs.FitBackground_forFIONA_= zerocol;
+    outs.GaussianSummedValue_forFIONA_= zerocol;
+    outs.MeanBackground_FIONA_    = zerocol;
+    outs.SummedValue_forFIONA_    = zerocol;
+    outs.RegionSize    = zerocol;
+    outs.Sensitivity    = zerocol;
+    outs.ForegroundSize= zerocol;
+    outs.calib_um = repmat(calib_um, size(zerocol));
+    outs.Fps     = repmat(fps, size(zerocol));
     
     outs = struct2table(outs);
     
-%     
-%                                 info: NaN
-%                             calib_um: 1
-%                                  fps: '1'
-
 return
 
