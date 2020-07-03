@@ -26,7 +26,7 @@ msd_params.models = {'N', 'D', 'DA', 'DR', 'V'};
 %msd_params = {'N', 'D', 'DA', 'DR', 'V', 'DV', 'DAV', 'DRV'};
 
 data = load_video_tracking(filename, frame_rate, 'm', 0.152, ...
-                           'absolute', 'no', 'table');                      % loads aggregate data set
+                           'absolute', 'no', 'matrix');                      % loads aggregate data set
 
 
 agg_msdcalc = video_msd(data, 35, frame_rate, 0.152, 'n');

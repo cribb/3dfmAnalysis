@@ -91,7 +91,7 @@ video_tracking_constants;
 % determine whether or not we have to load these data from disk or not
 if ~isnumeric(files)
     % load video data
-    v = load_video_tracking(files, frame_rate, 'm', calib_um, 'relative', 'yes', 'table');
+    v = load_video_tracking(files, frame_rate, 'm', calib_um, 'relative', 'yes', 'matrix');
 else
     % in this case, we assume that the incoming units are in their intended
     % form

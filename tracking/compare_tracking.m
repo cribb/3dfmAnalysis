@@ -55,8 +55,8 @@ end
 video_tracking_constants;
 
 % MUST ASSUME THAT FILE *A* IS THE BASE REFERENCE (GROUND TRUTH)
-A = load_video_tracking(fileA, [], 'pixels', 1, 'absolute', 'no', 'table');
-B = load_video_tracking(fileB, [], 'pixels', 1, 'absolute', 'no', 'table');
+A = load_video_tracking(fileA, [], 'pixels', 1, 'absolute', 'no', 'matrix');
+B = load_video_tracking(fileB, [], 'pixels', 1, 'absolute', 'no', 'matrix');
 
 % check file A for "no data" (just NaNs) and return if true
 if isempty(A)    

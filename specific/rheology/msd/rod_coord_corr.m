@@ -33,7 +33,7 @@ if (nargin < 1) | isempty(files)  files = '*.mat'; end
 video_tracking_constants;
 
 % load video data
-v = load_video_tracking(files, frame_rate, 'm', calib_um, 'relative', 'yes', 'table');
+v = load_video_tracking(files, frame_rate, 'm', calib_um, 'relative', 'yes', 'matrix');
 
 % for every bead
 for beadID = 0 : get_beadmax(v);

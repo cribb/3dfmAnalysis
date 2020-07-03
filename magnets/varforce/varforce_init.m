@@ -57,7 +57,7 @@ function [table_out,  params] = varforce_init(params)
     %%%%
     % Load in the video file.
     %%%%
-    table = load_video_tracking(trackfile, [], 'm', calib_um, 'absolute', 'yes', 'table');
+    table = load_video_tracking(trackfile, [], 'm', calib_um, 'absolute', 'yes', 'matrix');
     
     %%%%
     % Set the initial value for the additional columns to NaN.  This allows

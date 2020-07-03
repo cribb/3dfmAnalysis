@@ -68,7 +68,7 @@ sectorCount = zeros(1,xCol*yRow);
 %% Load Data
 if ~isnumeric(filename)
     % load video data
-    table_data = load_video_tracking(filename, video.fps, 'pixels', micronsPerPixel, 'absolute', 'no', 'table');
+    table_data = load_video_tracking(filename, video.fps, 'pixels', micronsPerPixel, 'absolute', 'no', 'matrix');
 
 else
     % in this case, we assume that the incoming units are in their intended

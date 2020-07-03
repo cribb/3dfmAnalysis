@@ -1,5 +1,5 @@
 function [v, calout] = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
-                                           absolute_pos, tstamps, table)
+                                           absolute_pos, tstamps, outtype)
 % LOAD_VIDEO_TRACKING Loads 3DFM video tracking dataset(s) into memory.
 %
 % 3DFM function  
@@ -10,9 +10,9 @@ function [v, calout] = load_video_tracking(filemask, frame_rate, xyzunits, calib
 % video_spot_tracker and prepares it for most data analysis functions.
 % 
 % function [v, calout] = load_video_tracking(filemask, frame_rate, xyzunits, calib_um,...
-%                                            absolute_pos, tstamps, table)
+%                                            absolute_pos, tstamps, outtype)
 %  
-% where "v" is the outputted data table
+% where "v" is the outputted data matrix
 %       "calout" is the outputted calibration factor
 %       "filemask" is the .mat filename(s) (i.e. wildcards ok)
 %       "frame_rate" (default 120fps) is the frame rate of the captured video sequence
@@ -20,7 +20,7 @@ function [v, calout] = load_video_tracking(filemask, frame_rate, xyzunits, calib
 %       "calib_um" is the calibration coefficient to convert pixels to microns
 %       "absolute_pos" is either 'relative' or 'absolute'
 %       "tstamps" is 'yes' when a timestamps file exists
-%       "table" is 'struct' or 'table', denoting the style of the output data
+%       "outtype" is 'matrix', {'struct'}, or 'table', denoting the style of the output data
 %       
 %
 % Notes:
@@ -32,7 +32,7 @@ video_tracking_constants;
 
 % handle the argument list
 if (nargin > 7); error('use filter_video_tracking to filter datasets!'); end
-if (nargin < 7 || isempty(table));          table = 'struct';          end
+if (nargin < 7 || isempty(outtype));          outtype = 'struct';          end
 if (nargin < 6 || isempty(tstamps));        tstamps  = 'no';	       end
 if (nargin < 5 || isempty(absolute_pos));   absolute_pos = 'relative'; end
 if (nargin < 4 || isempty(calib_um));       calib_um = 1;              end
@@ -239,7 +239,7 @@ for fid = 1:length(filelist)
     IDlist = unique(trackerID)';
     for k = 1 : length(IDlist)
         
-        % select rows in table that correspond only to the k-th bead
+        % select rows in matrix that correspond only to the k-th bead
         idx = find(trackerID == IDlist(k));
         this_tracker  = data(idx,:);
         
@@ -258,7 +258,7 @@ for fid = 1:length(filelist)
             this_x = this_x - this_x(1);
             this_y = this_y - this_y(1);
             
-            % enter the new locations into the data table
+            % enter the new locations into the data matrix
             data(idx,X) = this_x;
             data(idx,Y) = this_y;            
         end
@@ -323,10 +323,12 @@ end
 
 % now, settle our outputs, and move on....
 if ~isempty(data)
-    switch table
-        case 'table'
+    switch outtype
+        case 'matrix'
             v = data;
-        otherwise
+        case 'table'
+            v = convert_matrix2table(data);
+        case 'struct'
             v.id= data(:,ID);    
             v.t = data(:,TIME);
             v.frame = data(:,FRAME);
@@ -421,7 +423,7 @@ function data = convert_videoTrackingSecUsecZeroXYZ(dd)
     data = axe_vrpn_timestamps(data);
 
 
-    % set up variables for easy tracking of table's column headings
+    % set up variables for easy tracking of matrix's column headings
     myTIME = 1; myID = 2; myX = 3; myY = 4; myZ = 5; 
 
     data(:,TIME) = data(:,myTIME);
@@ -447,7 +449,7 @@ function data = convert_spot2DSecUsecIndexXYZ(dd)
 
     video_tracking_constants; 
 
-    % set up variables for easy tracking of table's column headings
+    % set up variables for easy tracking of matrix's column headings
     myTIME = 1; myID = 2; myX = 3; myY = 4; myZ = 5; 
 
     data(:,TIME) = mydata(:,myTIME);
@@ -462,6 +464,57 @@ function data = convert_spot2DSecUsecIndexXYZ(dd)
     
     return;
     
+
+function TrackingTable = convert_matrix2table(trackingmatrix)
+    video_tracking_constants;
+
+    d = trackingmatrix;
+    zerocol = zeros(size(d,1),1);
+
+    dd.Time = d(:,TIME);
+    dd.Frame = d(:,FRAME);
+    dd.ID = d(:,ID);
+    dd.X = d(:,X);
+    dd.Y = d(:,Y);
+    dd.Z = d(:,Z);
+    dd.Roll = d(:,ROLL);
+    dd.Pitch = d(:,PITCH);
+    dd.Yaw   = d(:,YAW);
+
+    if size(d,2) >= AREA
+        dd.RegionSize = d(:,AREA);
+    else
+        dd.RegionSize = zerocol;
+    end
+
+    if size(d,2) >= SENS
+        dd.Sensitivity = d(:,SENS);
+    else
+        dd.Sensitivity = zerocol;
+    end
+
+    if size(d,2) >= CENTINTS
+        dd.CenterIntensity = d(:,CENTINTS);
+    else
+        dd.CenterIntensity = zerocol;
+    end
+
+    if size(d,2) >= WELL
+        dd.Well = d(:,WELL);
+    else
+        dd.Well = zerocol;
+    end
+
+    if size(d,2) >= PASS
+        dd.Pass = d(:,PASS);
+    else
+        dd.Pass = zerocol;
+    end
+    
+    TrackingTable = struct2table(dd);
+
+    return
+
     
 %% Prints out a log message complete with timestamp.
 function logentry(txt)

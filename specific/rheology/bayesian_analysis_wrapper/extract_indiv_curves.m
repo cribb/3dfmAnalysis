@@ -18,7 +18,7 @@ function [idlist] = extract_indiv_curves (filename, expttype)
 
 video_tracking_constants;
 
-d = load_video_tracking(filename, 30, 'm', 0.152, 'absolute', 'no', 'table');
+d = load_video_tracking(filename, 30, 'm', 0.152, 'absolute', 'no', 'matrix');
 size(unique(d(:,FRAME)),1);
 
 vmsd = video_msd(filename, 40, 30, 0.152, 'n');

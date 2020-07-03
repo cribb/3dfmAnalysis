@@ -10,7 +10,7 @@ function [vid_table,q] = traj_subtract_centmass_motion(vid_table, traj_common)
     
     id_list = unique(vid_table(:,ID));
   
-    order = 2;
+    order = 1;
     
     weights = traj_common.weights;
     

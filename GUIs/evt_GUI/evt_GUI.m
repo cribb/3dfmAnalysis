@@ -530,34 +530,34 @@ function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
 
     plot_data(handles);
         
-
-function checkbox_frame_rate_Callback(hObject, eventdata, handles)
-
-    video_tracking_constants;
-    TrackingTable = handles.TrackingTable;
-    
-    if get(hObject, 'Value')      
-        set(handles.edit_frame_rate, 'Enable', 'on');
-
-        TrackingTable.Time = TrackingTable.Frame / str2double(get(handles.edit_frame_rate, 'String'));
-        mintime = min(TrackingTable.Time);
-        maxtime = max(TrackingTable.Time);
-	
-        handles.TrackingTable = TrackingTable;
-        handles.maxtime = maxtime;
-        handles.mintime = mintime;
-    else
-        set(handles.edit_frame_rate, 'Enable', 'off');
-
-        handles.TrackingTable.Time = handles.tstamp_times;
-        handles.mintime = min(handles.TrackingTable.Time);
-        handles.maxtime = max(handles.TrackingTable.Time);
-    end
-
-    handles.recomputeMSD = 1;
-	guidata(hObject, handles);
-    
-    plot_data(handles);
+% 
+% function checkbox_frame_rate_Callback(hObject, eventdata, handles)
+% 
+%     
+%     TrackingTable = handles.TrackingTable;
+%     
+%     if get(hObject, 'Value')      
+%         set(handles.edit_frame_rate, 'Enable', 'on');
+% 
+%         TrackingTable.Time = TrackingTable.Frame / str2double(get(handles.edit_frame_rate, 'String'));
+%         mintime = min(TrackingTable.Time);
+%         maxtime = max(TrackingTable.Time);
+% 	
+%         handles.TrackingTable = TrackingTable;
+%         handles.maxtime = maxtime;
+%         handles.mintime = mintime;
+%     else
+%         set(handles.edit_frame_rate, 'Enable', 'off');
+% 
+%         handles.TrackingTable.Time = handles.tstamp_times;
+%         handles.mintime = min(handles.TrackingTable.Time);
+%         handles.maxtime = max(handles.TrackingTable.Time);
+%     end
+% 
+%     handles.recomputeMSD = 1;
+% 	guidata(hObject, handles);
+%     
+%     plot_data(handles);
 
 
 function edit_frame_rate_CreateFcn(hObject, eventdata, handles)
@@ -569,24 +569,21 @@ function edit_frame_rate_CreateFcn(hObject, eventdata, handles)
 
 
 function edit_frame_rate_Callback(hObject, eventdata, handles)
-    video_tracking_constants;
+
+    fps = str2double(get(hObject, 'String'));
 
     TrackingTable = handles.TrackingTable;
+    TrackingTable.Time = TrackingTable.Frame / fps;
 
-    if get(handles.checkbox_frame_rate, 'Value')
-        TrackingTable.Time = TrackingTable.Frame / str2double(get(hObject, 'String'));
-        mintime = min(TrackingTable.Time);
-        maxtime = max(TrackingTable.Time);
+    handles.TrackingTable = TrackingTable;
+    handles.maxtime = max(TrackingTable.Time);
+    handles.mintime = min(TrackingTable.Time);
+    handles.fps = fps;
+    handles.recomputeMSD = 1;
+    guidata(hObject, handles);
 	
-        handles.TrackingTable = TrackingTable;
-        handles.maxtime = maxtime;
-        handles.mintime = mintime;
-        handles.recomputeMSD = 1;
-        guidata(hObject, handles);
-	
-        plot_data(handles);
-        drawnow;
-    end
+    plot_data(handles);
+
     
 
 function radio_relative_Callback(hObject, eventdata, handles)
@@ -781,17 +778,20 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     set(handles.edit_BeadID, 'String', '0');
     set(handles.slider_BeadID, 'Value', 1);   
     
-%     [File, Path, fidx] = uigetfile({'*.mat;*.csv';'*.mat';'*.csv';'*.*'}, ...
-%                                       'Select File(s) to Open', ...
-%                                       'MultiSelect', 'on');
+    [File, Path, fidx] = uigetfile({'*.mat;*.csv';'*.mat';'*.csv';'*.*'}, ...
+                                      'Select File(s) to Open', ...
+                                      'MultiSelect', 'on');
 % 
 %     if sum(length(File), length(Path)) <= 1
 %         logentry('No tracking file selected. No tracking file loaded.');
 %         return;
 %     end        
 
-    Path = 'C:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\data\adhesion\2020.03.12__MultiBead&MultiSurface_cone_lidded_plate2';
-    File = '02_B-PEG_S-BSA_NoInt_1024x768x7625_uint16.csv';
+%     Path = 'C:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\data\adhesion\2020.03.12__MultiBead&MultiSurface_cone_lidded_plate2';
+%     File = '02_B-PEG_S-BSA_NoInt_1024x768x7625_uint16.csv';
+%     Path = 'C:\Dropbox\prof\Lab\dev-sandbox';
+%     File = 'diff3 exp25 1.csv';
+
     
     filename = fullfile(Path, File);
     S.Fid = evt_makeFid;
@@ -873,7 +873,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
 
     
     % Enable some controls now that data is loaded
-    set(handles.checkbox_frame_rate                 , 'Enable', 'on');
+%     set(handles.checkbox_frame_rate                 , 'Enable', 'on');
+    set(handles.edit_frame_rate                     , 'Enable', 'on');
     set(handles.text_frame_rate                     , 'Enable', 'on');
     set(handles.checkbox_lockfps                    , 'Enable', 'on');
     set(handles.edit_BeadID                         , 'Enable', 'on');
@@ -1159,7 +1160,7 @@ function Plot_XTfig(handles)
         y1 = y(1);
         z1 = z(1);
     else
-        [x1, y1, z1] = deal(zeros(1,3));
+        [x1, y1, z1] = deal(0);
     end
         
     figure(handles.XTfig);

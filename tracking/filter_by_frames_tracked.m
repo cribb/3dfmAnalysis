@@ -5,7 +5,7 @@ if isempty(filepath)
 end
 
 video_tracking_constants;
-data = load_video_tracking(filepath, [], 'pixels', 1, 'absolute', 'no', 'table');
+data = load_video_tracking(filepath, [], 'pixels', 1, 'absolute', 'no', 'matrix');
 
 freqstats=tabulate(data(:,ID));
 for (i=1:length(freqstats(:,2)))

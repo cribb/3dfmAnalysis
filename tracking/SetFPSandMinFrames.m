@@ -23,7 +23,7 @@ for i = 1:length(files)
     
     logentry(['Loading ' num2str(i) ' of ' num2str(length(files)) '.'] );
     
-    d = load_video_tracking(filename, frameRate, [], [], 'absolute', 'no', 'table');
+    d = load_video_tracking(filename, frameRate, [], [], 'absolute', 'no', 'matrix');
     d = filter_video_tracking(d, filt);
     
     if ~isempty(d)

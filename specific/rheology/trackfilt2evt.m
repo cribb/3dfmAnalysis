@@ -22,7 +22,7 @@ function outs = trackfilt2evt(filelist, fps)
 
 for k = 1:length(filelist)
 
-    d = load_video_tracking(filelist(k).name, fps, 'pixels', 1, 'absolute', 'no', 'table');
+    d = load_video_tracking(filelist(k).name, fps, 'pixels', 1, 'absolute', 'no', 'matrix');
     d = filter_video_tracking(d, filt);
     
     if k==1

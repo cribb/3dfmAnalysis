@@ -45,7 +45,7 @@ function v = forcecal2d(files, viscosity, bead_radius, poleloc, calib_um, granul
         
     if exist('files') & ischar(files)
         % for every file, get its filename and reduce the dataset to a single table.
-        d = load_video_tracking(files,[],'m',calib_um,'absolute','yes','table');
+        d = load_video_tracking(files,[],'m',calib_um,'absolute','yes','matrix');
     else
         % This could be bad.  There is no check for what data are contained
         % in 'files.'  Weird errors may happen if the correct data

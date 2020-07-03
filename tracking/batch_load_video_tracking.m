@@ -69,7 +69,7 @@ for z = 1:num_files,
     filename = fu(z).name
 
     % call load video tracking to load the data
-    d = load_video_tracking(filename, fr,'um',con,rel,'yes','table');
+    d = load_video_tracking(filename, fr,'um',con,rel,'yes','matrix');
 
     % count the number of beads in a given tracking file
     n_beads = max(d(:,ID))+1;

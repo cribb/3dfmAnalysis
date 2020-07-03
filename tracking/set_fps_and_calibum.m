@@ -18,7 +18,7 @@ for i = 1:length(files)
     
     logentry(['Loading ' num2str(i) ' of ' num2str(length(files)) '.'] );
     
-    d = load_video_tracking(filename, frame_rate, [], [], 'absolute', 'no', 'table');
+    d = load_video_tracking(filename, frame_rate, [], [], 'absolute', 'no', 'matrix');
     d.frame_rate = frame_rate;
     d.calibum = calibum;
     

@@ -57,7 +57,7 @@ function [table_out,  params] = dmbr_init(params)
     %%%%
     % Load in that video file.
     %%%%
-    table = load_video_tracking(trackfile, fps, 'm', calib_um, 'absolute', 'yes', 'table');
+    table = load_video_tracking(trackfile, fps, 'm', calib_um, 'absolute', 'yes', 'matrix');
     
     
     %%%%

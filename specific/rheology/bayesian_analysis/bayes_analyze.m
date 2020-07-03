@@ -57,7 +57,7 @@ for k = 1:Nfiles
     
     % loads aggregate data set as trajectories
     data_in = load_video_tracking(filename, frame_rate, 'm', calibum, ...
-                           'absolute', 'no', 'table');                      
+                           'absolute', 'no', 'matrix');                      
     
     % Filter trajectories for minimum number of frames
     [data, filtout] = filter_video_tracking(data_in, filt);                   

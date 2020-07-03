@@ -123,7 +123,7 @@ frame_rate = m.fps;
 
 % fprintf(['HELLO: ' num2str(m.fps) '\n']);
 
-d = load_video_tracking(trackingfile, m.fps, 'pixels', calib_um, 'absolute', 'yes', 'table');
+d = load_video_tracking(trackingfile, m.fps, 'pixels', calib_um, 'absolute', 'yes', 'matrix');
 beadmax = get_beadmax(d);
 
 calibfile = 'NULL';

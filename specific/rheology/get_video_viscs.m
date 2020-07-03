@@ -23,7 +23,7 @@ function v = get_video_viscs(name, bead_radius_m, frame_rate, cutoff);
         
         file = files(k).name;
         
-        d = load_video_tracking(file, frame_rate, 'm', 0.152, 'relative', 'yes', 'table');
+        d = load_video_tracking(file, frame_rate, 'm', 0.152, 'relative', 'yes', 'matrix');
 
         for m = 0:get_beadmax(d)
             

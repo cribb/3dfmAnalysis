@@ -46,7 +46,7 @@ catch
     end
 end
 
-d = load_video_tracking(trackingfile, [], 'pixels', calib_um, 'absolute', 'yes', 'table');
+d = load_video_tracking(trackingfile, [], 'pixels', calib_um, 'absolute', 'yes', 'matrix');
 beadmax = get_beadmax(d);
 
 % load calibration 

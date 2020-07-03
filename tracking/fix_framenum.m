@@ -7,7 +7,7 @@ video_tracking_constants;
 for f = 1:length(files)
     file = files{f};
     
-    data = load_video_tracking(file,[],'pixels',1,'absolute','no','table');
+    data = load_video_tracking(file,[],'pixels',1,'absolute','no','matrix');
     framenum = data(:,FRAME);
     new_frame = framenum - 1;
     

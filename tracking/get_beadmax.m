@@ -16,10 +16,14 @@ function v = get_beadmax(data)
 
 video_tracking_constants;
 
+isTableCol = @(t, thisCol) ismember(thisCol, t.Properties.VariableNames);
+
 % determine whether the input data is in the table or structure of vectors
 % format...
-if isfield(data, 'id')
+if isstruct(data) && isfield(data, 'id')
     v = max(data.id);
+elseif istable(data) && isTableCol(data, 'ID')
+    v = max(data.ID);
 else
     v = max(data(:, ID));
 end

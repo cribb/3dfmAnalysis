@@ -35,12 +35,12 @@ for f = 1:length(fid)
     
 
     myfile = fullfile(VidTable.Path{f}, VidTable.TrackingFiles{f});
-    
+    fps = VidTable.Fps(f);
 
     if contains(myfile, '.evt.mat')
         dd = load_evtfile(myfile);
     elseif contains(myfile, '.vrpn.mat')
-        error('Do not know how to do this yet.');
+        dd = load_video_tracking(myfile, fps, 'pixels', 1, 'absolute', 'no', 'table');
     elseif contains(myfile, '.csv')
         dd = readtable(myfile);
     else
@@ -51,20 +51,68 @@ for f = 1:length(fid)
     Fid.Properties.VariableNames{'Var1'} = 'Fid';
 
     % rename the headers to something more easily coded/read
-    dd.Properties.VariableNames{'FrameNumber'} = 'Frame';
-    dd.Properties.VariableNames{'SpotID'}      = 'ID';
+%     dd.Properties.VariableNames{'FrameNumber'} = 'Frame';
+%     dd.Properties.VariableNames{'SpotID'}      = 'ID';
     
 %     logentry(['Loaded *' filelist{f} '* which contains ' num2str(length(unique((dd.ID)))) ' initial trackers.']);
 
     % Z data and remaining values are nonexistant (These can be added back if needed in a
     % later version
-%     dd.Z = [];
-    dd.Orientation_ifMeaningful_ = [];
-    dd.Length_ifMeaningful_ = [];
-    dd.FitBackground_forFIONA_ = [];
-    dd.GaussianSummedValue_forFIONA_ = [];
-    dd.MeanBackground_FIONA_ = [];
-    dd.SummedValue_forFIONA_ = [];
+
+    % if ~ismember('Z', dd.Properties.VariableNames)
+    %     dd.Z = [];
+    % end
+
+    if ismember('Roll', dd.Properties.VariableNames)
+        dd.Roll = [];
+    end
+
+    if ismember('Pitch', dd.Properties.VariableNames)
+        dd.Pitch = [];
+    end
+
+    if ismember('Yaw', dd.Properties.VariableNames)
+        dd.Yaw = [];
+    end
+
+    if ismember('Well', dd.Properties.VariableNames)
+        dd.Well = [];
+    end
+
+    if ismember('Pass', dd.Properties.VariableNames)
+        dd.Pass = [];
+    end
+    
+    if ismember('Orientation_ifMeaningful_', dd.Properties.VariableNames)
+        dd.Orientation_ifMeaningful_ = [];
+    end
+
+    if ismember('Length_ifMeaningful_', dd.Properties.VariableNames)
+        dd.Length_ifMeaningful_ = [];
+    end
+
+    if ismember('FitBackground_forFIONA_', dd.Properties.VariableNames)
+        dd.FitBackground_forFIONA_ = [];
+    end
+
+    if ismember('GaussianSummedValue_forFIONA_', dd.Properties.VariableNames)
+        dd.GaussianSummedValue_forFIONA_ = [];
+    end
+
+    if ismember('MeanBackground_FIONA_', dd.Properties.VariableNames)
+        dd.MeanBackground_FIONA_ = [];
+    end
+
+    if ismember('SummedValue_forFIONA_', dd.Properties.VariableNames)
+        dd.SummedValue_forFIONA_ = [];
+    end
+
+
+    % Handle variables we want to keep if we have them, and zero out if we
+    % don't
+    if ~ismember('Radius', dd.Properties.VariableNames)
+        dd.Radius = zeros(height(dd),1);
+    end
 
     if ~ismember('RegionSize', dd.Properties.VariableNames)
         dd.RegionSize = zeros(height(dd),1);

@@ -22,7 +22,7 @@ function v = bead_suscept(files, viscosity, bead_radius, calib_um, gradofBsquare
     % set up variables for easy tracking of table's column headings
     video_tracking_constants;
 
-    d = load_video_tracking(files, [], 'm', calib_um, 'relative', 'yes', 'table');
+    d = load_video_tracking(files, [], 'm', calib_um, 'relative', 'yes', 'matrix');
     
     N = length(unique(d(:,ID)));
 

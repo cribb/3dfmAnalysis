@@ -1,4 +1,4 @@
-function outs = load_evtfile(filename, outtype)
+function outs = load_evtfile(filename, fps, calibum)
 
     dd = load(filename);
     
@@ -14,15 +14,13 @@ function outs = load_evtfile(filename, outtype)
         trk = dd.tracking.spot3DSecUsecIndexFramenumXYZRPY;
 
     if isfield(dd.tracking, 'calibum')
+        logentry('Overriding calibum in function call with indiginous value in data file.')
         calibum = dd.tracking.calib_um;
-    else
-        calibum = NaN;
     end
 
     if isfield(dd.tracking, 'fps')
+        logentry('Overriding fps in function call with indiginous value in data file.');
         fps = dd.tracking.fps;
-    else
-        fps = NaN;
     end
 
         if ischar(fps)
@@ -31,8 +29,8 @@ function outs = load_evtfile(filename, outtype)
         
         zerocol = zeros(size(trk,1), 1);
         
-        outs.FrameNumber = trk(:,FRAME);
-        outs.SpotID = trk(:,ID);
+        outs.Frame = trk(:,FRAME);
+        outs.ID = trk(:,ID);
         outs.X = trk(:,X);
         outs.Y = trk(:,Y);
         outs.Z = trk(:,Z);

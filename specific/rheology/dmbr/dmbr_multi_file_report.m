@@ -138,7 +138,7 @@ function out = dmbr_multi_file_report(excel_name, seq_array, file_array, filter_
             if ~isfield(m, 'time_selected')
                 % identify location of a break between sequences by clicking on plot
                 video_tracking_constants;
-                table = load_video_tracking(m.trackfile, m.fps, 'm', m.calibum, 'absolute', 'yes', 'table');
+                table = load_video_tracking(m.trackfile, m.fps, 'm', m.calibum, 'absolute', 'yes', 'matrix');
                 poleloc = m.poleloc * m.calibum * 1e-6;
                 table(:,X) = table(:,X) - poleloc(1);
                 table(:,Y) = table(:,Y) - poleloc(2);

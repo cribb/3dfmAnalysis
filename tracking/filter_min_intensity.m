@@ -1,5 +1,5 @@
 function A = filter_min_intensity(data, min_intensity)
-    A = load_video_tracking(data, [], 'pixels', 1, 'absolute', 'no', 'table');
+    A = load_video_tracking(data, [], 'pixels', 1, 'absolute', 'no', 'matrix');
     video_tracking_constants;
     ids_to_remove=[];
     

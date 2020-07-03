@@ -7,7 +7,7 @@ for k = 1 : length(files)
     
     fname = files(k).name;
     
-    [d, ~] = load_video_tracking(fname, fps, 'pixels', calibum, 'absolute', 'no', 'table');
+    [d, ~] = load_video_tracking(fname, fps, 'pixels', calibum, 'absolute', 'no', 'matrix');
     
     [d, filtout] = filter_video_tracking(d, filt);
     

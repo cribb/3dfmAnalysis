@@ -15,7 +15,7 @@ function [] = generate_video_from_data( sim, orig_frame_dir, orig_video_file_nam
 % [sim, out_struct] = sim_video_diff_expt(filename, in_struct)
 %
 % where "sim" is the outputted simulation data in the traditional
-%             video_spot_tracker 'table' format (see load_video_tracking)
+%             video_spot_tracker 'matrix' format (see load_video_tracking)
 %             with the positions in pixel units.
 %       "out_struct" is a copy of the inputted simulation complete with
 %                    default vales that my not have been specified on the input

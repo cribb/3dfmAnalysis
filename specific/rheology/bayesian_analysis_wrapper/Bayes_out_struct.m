@@ -72,7 +72,7 @@ SE_Rc(:,1) = idlist;
 
 for i = 1:length(idlist)
     
-    d = load_video_tracking(['single_curve_ID'  num2str(idlist(i), '%03u') '_' num2str(filename)], 55, 'm', 0.152, 'absolute', 'no', 'table');
+    d = load_video_tracking(['single_curve_ID'  num2str(idlist(i), '%03u') '_' num2str(filename)], 55, 'm', 0.152, 'absolute', 'no', 'matrix');
     
     if size(d,1)>=792
         
