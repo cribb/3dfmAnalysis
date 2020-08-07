@@ -61,65 +61,20 @@ function [v,q] = remove_drift(data, drift_start_time, drift_end_time, type)
         
     return
 
+
 function [cleaned_v,common_v] = common_mode(v, drift_start_time, drift_end_time)
-    common_v = traj_common_motion(v);
+    common_v = traj_common_motion(v, 'y');
     cleaned_v  = traj_subtract_common_motion(v, common_v);        
 return
 
 
 function [cleaned_v,com_v] = center_of_mass(v, drift_start_time, drift_end_time)
-    common_v = traj_common_motion(v);
+    common_v = traj_common_motion(v, 'y');
     [cleaned_v, com_v] = traj_subtract_centmass_motion(v, common_v);
 return
 
 
-function [v,drift_vectors] = linear(data, drift_start_time, drift_end_time)
-
-
-    video_tracking_constants;
-
-    for k = unique(data(:,ID))'
-
-        bead = get_bead(data, k);
-
-        t = bead(:,TIME);
-        t0 = t(1);
-        t = t - t0;
-            
-        idx = find(t >= (drift_start_time - t0) & t <= (drift_end_time - t0));
-                
-        if ( length(idx) > 2 )            
-            
-            fitx = polyfit(t(idx), bead(idx,X), 1);
-            beadx = bead(:,X) - polyval(fitx, t) + fitx(2);
-	
-            fity = polyfit(t(idx), bead(idx,Y), 1);
-            beady = bead(:,Y) - polyval(fity, t) + fity(2);
-            
-            fitz = polyfit(t(idx), bead(idx,Z), 1);
-            beadz = bead(:,Z) - polyval(fitz, t) + fitz(2);
-
-%             logentry(['Bead ' num2str(k) ': Removed linear drift velocity of x=' num2str(fitx(1)) ', y=' num2str(fity(1)) ', z=' num2str(fitz(1)) '.']);
-
-            % implement fits for ROLL PITCH AND YAW later.
-            
-            tmp = bead;
-            tmp(:,X) = beadx;
-            tmp(:,Y) = beady;
-            tmp(:,Z) = beadz;
-            
-            if ~exist('newdata')                
-                newdata = tmp;
-                drift_vectors = [fitx, fity, fitz];
-            else
-                newdata = [newdata ; tmp];
-                drift_vectors = [drift_vectors ; fitx, fity, fitz];
-            end
-        else
-            logentry(['Not enough data in bead ' num2str(k) ' to do drift subtraction (empty tracker?).']);
-        end
-    end    
-
+a
     if exist('newdata')
         v = newdata;
     else

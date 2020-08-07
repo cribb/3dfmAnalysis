@@ -2,7 +2,6 @@
 %
 % 3DFM function  
 % Tracking 
-% last modified 2015.06.05 (jcribb)
 %   
 % script that creates column constants for video tracking data matrix.
 %
@@ -26,8 +25,9 @@
     CENTINTS = 12;
     WELL     = 13;
     PASS     = 14;
-    
-    NULLTRACK = zeros(0,14);
+    FID      = 15;
+
+    NULLTRACK = zeros(0,15);
     
     
     

@@ -126,8 +126,9 @@ function outs = traj_common_motion(vid_table, plotyn)
     % into two interpolation runs.
     interp_velocities = interp1(outv(:,1),outv(:,2:3),full_frame_list);
 
+    Nvels = size(interp_velocities,1);
     noisemag = nanstd(interp_velocities);
-    noisemag = repmat(noisemag, size(interp_velocities,1),1);
+    noisemag = repmat(noisemag, Nvels, 1);
     noisevals =  noisemag .* randn(size(interp_velocities));
 
     missingvel = isnan(interp_velocities);
@@ -137,23 +138,23 @@ function outs = traj_common_motion(vid_table, plotyn)
     x_filled = fillnans(interp_velocities(:,1)) + noise_filler(:,1);
     y_filled = fillnans(interp_velocities(:,2)) + noise_filler(:,2);    
 
-%         if sum(missingvel(:)) > 16 && contains(plotyn, 'y')
-%             h = figure; 
-%             pos = get(h, 'Position');
-%             pos(3) = 2 * pos(3);
-%             set(h, 'Position', pos);
-%             
-%             subplot(1,2,1);
-%             plot(full_frame_list, x_filled, 'b', ...
-%                  full_frame_list, interp_velocities(:,1), 'k', ...
-%                  full_frame_list, y_filled, 'r', ...
-%                  full_frame_list, interp_velocities(:,2), 'k');
-%             legend('x filled-in NaNs', 'x original', 'y filled-in NaNs', 'y original');
-%             title('center-of-mass velocity');
-%             xlabel('frame');
-%             ylabel('velocity [px/frame]');
-%             drawnow;
-%         end
+    if sum(missingvel(:))/Nvels > 0.1 || contains(plotyn, 'y')
+        h = figure; 
+        pos = get(h, 'Position');
+        pos(3) = 2 * pos(3);
+        set(h, 'Position', pos);
+
+        subplot(1,2,1);
+        plot(full_frame_list, x_filled, 'b', ...
+             full_frame_list, interp_velocities(:,1), 'k', ...
+             full_frame_list, y_filled, 'r', ...
+             full_frame_list, interp_velocities(:,2), 'k');
+        legend('x filled-in NaNs', 'x original', 'y filled-in NaNs', 'y original');
+        title('center-of-mass velocity');
+        xlabel('frame');
+        ylabel('velocity [px/frame]');
+        drawnow;
+    end
 
     interp_velocities = [x_filled y_filled];
     
@@ -162,19 +163,19 @@ function outs = traj_common_motion(vid_table, plotyn)
     
     xy_tmp = cumsum(interp_velocities);        
     xy = xy_tmp + xy_offset;
-%         if sum(missingvel(:)) > 16 && contains(plotyn, 'y')
-%             figure(h);
-%             subplot(1,2,2);
-%             plot(full_frame_list, xy(:,1), 'bo', ...
-%                  full_frame_list(~missingvel(:,1)), xy(~missingvel(:,1),1), 'ko', ...
-%                  full_frame_list, xy(:,2), 'ro', ...
-%                  full_frame_list(~missingvel(:,2)), xy(~missingvel(:,2),2), 'ko');
-%             legend('x filled-in NaNs', 'x original', 'y filled-in NaNs', 'y original');
-%             title('center-of-mass displacement');
-%             xlabel('frame');
-%             ylabel('displacement [px]');
-%             drawnow;
-%         end
+        if sum(missingvel(:))/Nvels > 0.1 || contains(plotyn, 'y')
+            figure(h);
+            subplot(1,2,2);
+            plot(full_frame_list, xy(:,1), 'bo', ...
+                 full_frame_list(~missingvel(:,1)), xy(~missingvel(:,1),1), 'ko', ...
+                 full_frame_list, xy(:,2), 'ro', ...
+                 full_frame_list(~missingvel(:,2)), xy(~missingvel(:,2),2), 'ko');
+            legend('x filled-in NaNs', 'x original', 'y filled-in NaNs', 'y original');
+            title('center-of-mass displacement');
+            xlabel('frame');
+            ylabel('displacement [px]');
+            drawnow;
+        end
     
     
 %     common_xy.frame = full_frame_list;
@@ -210,6 +211,7 @@ function outs = traj_common_motion(vid_table, plotyn)
     outs.frame = full_frame_list;
     outs.xy = common_xy;
     outs.weights = weights;
-    
-    return;
+    outs.missing_frames = missing_frames;
+
+    return
     

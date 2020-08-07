@@ -38,7 +38,7 @@ for f = 1:length(fid)
     fps = VidTable.Fps(f);
 
     if contains(myfile, '.evt.mat')
-        dd = load_evtfile(myfile);
+        dd = load_evtfile(myfile, fps, 1);
     elseif contains(myfile, '.vrpn.mat')
         dd = load_video_tracking(myfile, fps, 'pixels', 1, 'absolute', 'no', 'table');
     elseif contains(myfile, '.csv')

@@ -19,7 +19,7 @@ function new_vid_table = traj_subtract_common_motion(vid_table, traj_common)
     end
 
     id_list = unique(vid_table(:,ID));
-
+    comxy = traj_common.xy;
   
 %     new_vid_table = zeros(size(vid_table));
     new_vid_table = [];
@@ -31,7 +31,7 @@ function new_vid_table = traj_subtract_common_motion(vid_table, traj_common)
         
 %         common_frames = traj_common(:,1);
         
-        my_common_xy = traj_common(frameone:frameend,:);
+        my_common_xy = comxy(frameone:frameend,:);
         c_offset = repmat(my_common_xy(1,:),size(my_common_xy,1),1);
         
         q_subtraj = q(:,X:Y);
@@ -49,4 +49,7 @@ function new_vid_table = traj_subtract_common_motion(vid_table, traj_common)
         new_vid_table = [new_vid_table ; subtracted_traj];
     end
 
-    return
+    % reorder the rows based on what VST outputs originally
+    new_vid_table = sortrows(new_vid_table,[FRAME,ID]);
+    
+return
