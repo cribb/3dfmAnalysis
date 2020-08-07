@@ -137,13 +137,12 @@ function edit_MinSens_CreateFcn(hObject, eventdata, handles)
     
 function pushbutton_close_Callback(hObject, eventdata, handles) 
     setappdata(0,'evtFiltConfig',handles.evtFiltConfig);
-%     uiresume(evt_FilterConfig);
-    close(evt_FilterConfig);
+    closereq;
 
 
 
 function pushbutton_apply_Callback(hObject, eventdata, handles)
-    handles.evtFiltConfig
+    evt_GUI(filterdata)
 
 function checkbox_MinFrames_Callback(hObject, eventdata, handles)
     if get(hObject, 'Value')

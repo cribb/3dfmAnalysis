@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 27-Apr-2020 18:12:56
+% Last Modified by GUIDE v2.5 08-Jul-2020 14:21:09
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -57,20 +57,24 @@ function varargout = evt_GUI(varargin)
 %#ok<*ASGLU>
 
 
-function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
+function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)    
 
 	% Choose default command line output for evt_GUI
 	handles.output = hObject;
     
     % Set initial/default values for tracking-related data   
-	handles.CurrentBead = 0;
-    
+	handles.CurrentBead = 0;   
     handles.CurrentBeadRows = [];
     handles.TrackerList = [];
     handles.calibum = 1;
     handles.fps = 120;
     handles.numtaus = 30;
-    
+    handles.mintime = 0;
+    handles.XYZoffsets = [ 0 0 0 ];
+    handles.LengthUnits = 'pixels';
+    handles.TimeUnits = 'sec';
+
+
     % Assign initial "filter by" values 
     handles.filt.min_frames = 0;
     handles.filt.min_pixels = 0;
@@ -99,9 +103,14 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
                            'DoubleBuffer', 'on', ...
                            'BackingStore', 'off', ...
                            'Visible', 'off');
-    
+    handles.Activefig = handles.XYfig;
+
     handles.AUXtype = 'OFF';
     
+    set(handles.slider_BeadID, 'Min', 1);                
+    set(handles.slider_BeadID, 'Max', 2);
+    set(handles.slider_BeadID, 'SliderStep', [1 1]);                
+    set(handles.slider_BeadID, 'Value', 1);                
 
 	% Update handles structure
 	guidata(hObject, handles);
@@ -136,63 +145,34 @@ function evt_GUI_CloseRequestFcn(hObject, eventdata, handles)
 
         
 function radio_selected_dataset_Callback(hObject, eventdata, handles) 
-	set(handles.radio_selected_dataset, 'Value', 1);
-	set(handles.radio_insideboundingbox, 'Value', 0);
-    set(handles.radio_outsideboundingbox, 'Value', 0);
-	set(handles.radio_deletetimebefore, 'Value', 0);
-	set(handles.radio_deletetimeafter, 'Value', 0);
 
     
 function radio_insideboundingbox_Callback(hObject, eventdata, handles)
-	set(handles.radio_selected_dataset, 'Value', 0);
-	set(handles.radio_insideboundingbox, 'Value', 1);
-    set(handles.radio_outsideboundingbox, 'Value', 0);
-	set(handles.radio_deletetimebefore, 'Value', 0);
-	set(handles.radio_deletetimeafter, 'Value', 0);
 
     
 function radio_outsideboundingbox_Callback(hObject, eventdata, handles)
-	set(handles.radio_selected_dataset, 'Value', 0);
-	set(handles.radio_insideboundingbox, 'Value', 0);
-    set(handles.radio_outsideboundingbox, 'Value', 1);
-	set(handles.radio_deletetimebefore, 'Value', 0);
-	set(handles.radio_deletetimeafter, 'Value', 0);
 
     
 function radio_deletetimebefore_Callback(hObject, eventdata, handles)
-	set(handles.radio_selected_dataset, 'Value', 0);
-	set(handles.radio_insideboundingbox, 'Value', 0);
-    set(handles.radio_outsideboundingbox, 'Value', 0);
-	set(handles.radio_deletetimebefore, 'Value', 1);
-	set(handles.radio_deletetimeafter, 'Value', 0);
 
     
 function radio_deletetimeafter_Callback(hObject, eventdata, handles)
-	set(handles.radio_selected_dataset, 'Value', 0);
-	set(handles.radio_insideboundingbox, 'Value', 0);
-    set(handles.radio_outsideboundingbox, 'Value', 0);
-	set(handles.radio_deletetimebefore, 'Value', 0);
-	set(handles.radio_deletetimeafter, 'Value', 1);
 
     
 function radio_XYfig_Callback(hObject, eventdata, handles)
-    set(handles.radio_XYfig,  'Value', 1);
-    set(handles.radio_XTfig,  'Value', 0);    
-    set(handles.radio_AUXfig, 'Value', 0);
+    handles.Activefig = handles.XYfig;
+    guidata(hObject, handles);
 
     
 function radio_XTfig_Callback(hObject, eventdata, handles)
-    set(handles.radio_XYfig,  'Value', 0);
-    set(handles.radio_XTfig,  'Value', 1);
-    set(handles.radio_AUXfig, 'Value', 0);
+    handles.Activefig = handles.XTfig;
+    guidata(hObject, handles);
 
     
 function radio_AUXfig_Callback(hObject, eventdata, handles)
-    set(handles.radio_XYfig,  'Value', 0);
-    set(handles.radio_XTfig,  'Value', 0);
-    set(handles.radio_AUXfig, 'Value', 1);    
+    handles.Activefig = handles.AUXfig;
+    guidata(hObject, handles);
 
-      
 
 function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
 
@@ -209,8 +189,7 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
     
     set(handles.radio_XTfig, 'Enable', 'off');
     set(handles.radio_XYfig, 'Enable', 'off');
-    set(handles.radio_AUXfig,'Enable', 'off');
-	
+    set(handles.radio_AUXfig,'Enable', 'off');	
 
 	if handles.radio_selected_dataset.Value
         handles = delete_selected_dataset(handles);
@@ -261,14 +240,7 @@ function slider_BeadID_CreateFcn(hObject, eventdata, handles)
 	else
         set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
     end
-    
-    set(handles.slider_BeadID, 'Min', 1);                
-    set(handles.slider_BeadID, 'Max', 2);
-    set(handles.slider_BeadID, 'SliderStep', [1 1]);                
-    set(handles.slider_BeadID, 'Value', 1);                
-    
-    
-
+        
     
 function edit_BeadID_Callback(hObject, eventdata, handles)
 % Update the handles structure and beadID slider with the current bead 
@@ -296,8 +268,9 @@ function edit_BeadID_Callback(hObject, eventdata, handles)
 function slider_BeadID_Callback(hObject, eventdata, handles)
     
     Slider = handles.slider_BeadID;    
-    
-    beadList(:,1) = unique(handles.TrackingTable.ID);        
+    T = handles.TrackingTable;
+
+    beadList(:,1) = unique(sort(T.ID));
     N = numel(beadList);
 
     if Slider.Value <= 1
@@ -328,7 +301,8 @@ function slider_BeadID_Callback(hObject, eventdata, handles)
     % separate the currently selected bead vs not the selected bead
     handles.CurrentBead = CurrentBead;
     handles = filter_bead_selection(handles);
-    
+
+
     % Set the Slider changes into the handles structure
     handles.slider_BeadID = Slider;    
     guidata(hObject, handles);
@@ -423,19 +397,15 @@ function pushbutton_Select_Closest_xydataset_Callback(hObject, eventdata, handle
     
 
 function pushbutton_select_drift_region_Callback(hObject, eventdata, handles)
-    if(get(handles.radio_XYfig, 'Value'))
-        active_fig = handles.XTfig;
-    elseif(get(handles.radio_XTfig, 'Value'))
-        active_fig = handles.XTfig;
-    elseif(get(handles.radio_AUXfig, 'Value'))
-        active_fig = handles.XTfig;
-    end
+    active_fig = handles.XTfig;
+    handles.radio_XTfig.Value = 1;
+
     figure(active_fig);
 
     [xm, ym] = ginput(2);
    
-    xlo = min(xm) + handles.mintime;
-    xhi = max(xm) + handles.mintime;
+    xlo = min(xm); % + handles.mintime;
+    xhi = max(xm); % + handles.mintime;
 
     handles.drift_tzero = xlo;
 	handles.drift_tend = xhi;
@@ -443,40 +413,33 @@ function pushbutton_select_drift_region_Callback(hObject, eventdata, handles)
     
 
 function radio_com_Callback(hObject, eventdata, handles)
-	set(handles.radio_com, 'Value', 1);
-	set(handles.radio_linear, 'Value', 0);
-    set(handles.radio_commonmode, 'Value', 0);
-
 
 function radio_linear_Callback(hObject, eventdata, handles)
-	set(handles.radio_com, 'Value', 0);
-	set(handles.radio_linear, 'Value', 1);
-    set(handles.radio_commonmode, 'Value', 0);
-
 
 function radio_commonmode_Callback(hObject, eventdata, handles)
-	set(handles.radio_com, 'Value', 0);
-	set(handles.radio_linear, 'Value', 0);
-    set(handles.radio_commonmode, 'Value', 1);
 
 
 function radio_pixels_Callback(hObject, eventdata, handles)
-    set(handles.radio_pixels, 'Value', 1);
-    set(handles.radio_microns, 'Value', 0);
-    
     handles.LengthUnits = 'pixels';
 	guidata(hObject, handles);
-    
     plot_data(handles);
 
 
 function radio_microns_Callback(hObject, eventdata, handles)
-    set(handles.radio_pixels, 'Value', 0);
-    set(handles.radio_microns, 'Value', 1);
-
     handles.LengthUnits = 'microns';
 	guidata(hObject, handles);
-    
+    plot_data(handles);
+
+
+function radio_frames_Callback(hObject, eventdata, handles)
+    handles.TimeUnits = 'frames';
+	guidata(hObject, handles);    
+    plot_data(handles);
+
+
+function radio_seconds_Callback(hObject, eventdata, handles)
+    handles.TimeUnits = 'seconds';
+	guidata(hObject, handles);    
     plot_data(handles);
 
 
@@ -489,7 +452,7 @@ function edit_calibum_CreateFcn(hObject, eventdata, handles)
 
 
 function edit_calibum_Callback(hObject, eventdata, handles)
-    handles.calibum = str2double(get(handles.edit_calibum, 'String'));
+    handles.calibum = str2double(handles.edit_calibum.String);
     handles.recomputeMSD = 1;
 	guidata(hObject, handles);
     
@@ -507,58 +470,25 @@ function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
         end_time = [];
     else
         end_time = handles.drift_tend;
-    end
-    
-    oldmatrixdata = convert_Table_to_old_matrix(handles.TrackingTable);
+    end    
     
     if get(handles.radio_linear, 'Value')
         logentry('Removing Drift via linear method.');
-        [v,q] = remove_drift(oldmatrixdata, start_time, end_time, 'linear');
+        [v,q] = vst_remove_drift(handles.TrackingTable, start_time, end_time, 'linear');
     elseif get(handles.radio_com, 'Value')
         logentry('Removing Drift via center-of-mass method.');
-        [v,q] = remove_drift(oldmatrixdata, start_time, end_time, 'center-of-mass'); 
+        [v,q] = vst_remove_drift(handles.TrackingTable, start_time, end_time, 'center-of-mass'); 
     elseif get(handles.radio_commonmode, 'Value')
         logentry('Removing Drift via common-mode method.');
-        [v,q] = remove_drift(oldmatrixdata, start_time, end_time, 'common-mode');
+        [v,q] = vst_remove_drift(handles.TrackingTable, start_time, end_time, 'common-mode');
     end
     
-    TrackingTable = convert_old_matrix_to_Table(oldmatrixdata);
-    
-    handles.TrackingTable = TrackingTable;
+    handles.TrackingTable = v;
     handles.recomputeMSD = 1;
 	guidata(hObject, handles);
 
     plot_data(handles);
         
-% 
-% function checkbox_frame_rate_Callback(hObject, eventdata, handles)
-% 
-%     
-%     TrackingTable = handles.TrackingTable;
-%     
-%     if get(hObject, 'Value')      
-%         set(handles.edit_frame_rate, 'Enable', 'on');
-% 
-%         TrackingTable.Time = TrackingTable.Frame / str2double(get(handles.edit_frame_rate, 'String'));
-%         mintime = min(TrackingTable.Time);
-%         maxtime = max(TrackingTable.Time);
-% 	
-%         handles.TrackingTable = TrackingTable;
-%         handles.maxtime = maxtime;
-%         handles.mintime = mintime;
-%     else
-%         set(handles.edit_frame_rate, 'Enable', 'off');
-% 
-%         handles.TrackingTable.Time = handles.tstamp_times;
-%         handles.mintime = min(handles.TrackingTable.Time);
-%         handles.maxtime = max(handles.TrackingTable.Time);
-%     end
-% 
-%     handles.recomputeMSD = 1;
-% 	guidata(hObject, handles);
-%     
-%     plot_data(handles);
-
 
 function edit_frame_rate_CreateFcn(hObject, eventdata, handles)
 	if ispc
@@ -569,19 +499,17 @@ function edit_frame_rate_CreateFcn(hObject, eventdata, handles)
 
 
 function edit_frame_rate_Callback(hObject, eventdata, handles)
+    
+    % Rescale time in the tracking table
+    handles.fps = str2double(get(hObject, 'String'));
 
-    fps = str2double(get(hObject, 'String'));
-
-    TrackingTable = handles.TrackingTable;
-    TrackingTable.Time = TrackingTable.Frame / fps;
-
-    handles.TrackingTable = TrackingTable;
-    handles.maxtime = max(TrackingTable.Time);
-    handles.mintime = min(TrackingTable.Time);
-    handles.fps = fps;
+%     handles.TrackingTable.Time = handles.TrackingTable.Frame / handles.fps;
     handles.recomputeMSD = 1;
+
+    handles = filter_bead_selection(handles);
     guidata(hObject, handles);
 	
+    % Update the plots
     plot_data(handles);
 
     
@@ -638,7 +566,6 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
     guidata(hObject, handles);
     
     plot_data(handles);
-
     
 
 function popup_AUXplot_CreateFcn(hObject, eventdata, handles)
@@ -691,6 +618,15 @@ end
 
 
 function checkbox_neutoffsets_Callback(hObject, eventdata, handles)
+
+    handles = filter_bead_selection(handles);    
+
+    guidata(hObject, handles);
+    
+    plot_data(handles);
+
+
+function checkbox_plotz_Callback(hObject, eventdata, handles)
     plot_data(handles);
 
 
@@ -777,22 +713,25 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     % reset the Active Bead to 0
     set(handles.edit_BeadID, 'String', '0');
     set(handles.slider_BeadID, 'Value', 1);   
-    
+    set(handles.text_status, 'String', {''});
+
     [File, Path, fidx] = uigetfile({'*.mat;*.csv';'*.mat';'*.csv';'*.*'}, ...
                                       'Select File(s) to Open', ...
                                       'MultiSelect', 'on');
-% 
-%     if sum(length(File), length(Path)) <= 1
-%         logentry('No tracking file selected. No tracking file loaded.');
-%         return;
-%     end        
+
+    if sum(length(File), length(Path)) <= 1
+        logentry('No tracking file selected. No tracking file loaded.');
+        return;
+    end        
 
 %     Path = 'C:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\data\adhesion\2020.03.12__MultiBead&MultiSurface_cone_lidded_plate2';
 %     File = '02_B-PEG_S-BSA_NoInt_1024x768x7625_uint16.csv';
 %     Path = 'C:\Dropbox\prof\Lab\dev-sandbox';
 %     File = 'diff3 exp25 1.csv';
+%     Path = 'C:\Dropbox\prof\Lab\Hill Lab\Water';
+%     File = 'saltwater_0005.vrpn.mat';
+%     File = 'sim_beads.vrpn.mat';
 
-    
     filename = fullfile(Path, File);
     S.Fid = evt_makeFid;
     S.Path = Path;
@@ -829,7 +768,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
         return;
     end
 
-    logentry(['Dataset(s) successfully loaded...']);
+    logentry('Dataset(s) successfully loaded...');
     
     
     MIPfile = strrep(filenameroot, '_TRACKED', '');
@@ -855,25 +794,14 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     handles.VidTable = VidTable;
     handles.TrackingTable = TrackingTable;
     handles.Trash = Trash;    
-%     handles.mintime = min(TrackingTable.Time);
-%     handles.maxtime = max(TrackingTable.Time);
-%     handles.tstamp_times = TrackingTable.Time;
     handles.recomputeMSD = 1;   
     handles.calibum = VidTable.Calibum;
     handles.rheo = calc_viscosity_stds(hObject, eventdata, handles);
     handles.CurrentBead = min(TrackingTable.ID);           
     handles = filter_bead_selection(handles);    
     
-    if get(handles.radio_pixels, 'Value')
-        handles.LengthUnits = 'pixels';
-    elseif get(handles.radio_microns, 'Value')
-        handles.LengthUnits = 'microns';
-    end
-    
-
     
     % Enable some controls now that data is loaded
-%     set(handles.checkbox_frame_rate                 , 'Enable', 'on');
     set(handles.edit_frame_rate                     , 'Enable', 'on');
     set(handles.text_frame_rate                     , 'Enable', 'on');
     set(handles.checkbox_lockfps                    , 'Enable', 'on');
@@ -900,6 +828,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     set(handles.radio_commonmode                    , 'Enable', 'on');
     set(handles.pushbutton_select_drift_region      , 'Enable', 'on');
     set(handles.pushbutton_remove_drift             , 'Enable', 'on');
+    set(handles.radio_frames                        , 'Enable', 'on');
+    set(handles.radio_seconds                       , 'Enable', 'on'); 
     set(handles.radio_pixels                        , 'Enable', 'on');
     set(handles.radio_microns                       , 'Enable', 'on');
     set(handles.edit_calibum                        , 'Enable', 'on');
@@ -911,6 +841,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     slider_BeadID_Callback(hObject, eventdata, handles);
     guidata(hObject, handles);           
         
+    return
 
 
     
@@ -925,7 +856,6 @@ function FileMenuSaveAs_Callback(hObject, eventdata, handles)
 
     
 function FileMenuSave_Callback(hObject, eventdata, handles)
-    video_tracking_constants;
         
     outfile = handles.Filename;
 
@@ -940,7 +870,7 @@ function FileMenuSave_Callback(hObject, eventdata, handles)
     
     calibum = str2double(get(handles.edit_calibum, 'String'));
     fps = str2double(get(handles.edit_frame_rate, 'String'));
-    trajdata = convert_Table_to_old_matrix(handles.TrackingTable);
+    trajdata = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
     save_evtfile(outfile, trajdata, 'pixels', calibum, fps, 'mat');
     logentry(['New tracking file, ' outfile ', saved...']);
     
@@ -978,7 +908,6 @@ function MeasureMenu_Callback(hObject, eventdata, handles)
 
 
 function MeasureMenu_XYdistance_Callback(hObject, eventdata, handles)
-    video_tracking_constants;
 
     figure(handles.XYfig);
 	[xm, ym] = ginput(2);
@@ -1007,30 +936,40 @@ function ExportMenu_Callback(hObject, eventdata, handles)
 
 
 function ExportMenu_CurrentBead_Callback(hObject, eventdata, handles)
-    video_tracking_constants;
-% 
-%     CurrentBead = handles.CurrentBead;
-%     beadID = handles.TrackingTable.ID;
-%
-    idx = handles.CurrentBeadRows;
 
-    bead.t      = handles.TrackingTable.Time(idx);
-    bead.t      = bead.t - min(handles.TrackingTable.Time);
-    bead.x      = handles.TrackingTable.X(idx);
-    bead.y      = handles.TrackingTable.Y(idx);
-    if isfield(bead, 'yaw')
-        bead.yaw    = handles.TrackingTable.Yaw(idx);
-    end
-    
-    assignin('base', ['bead' num2str(CurrentBead)], bead);
+    if ~isfield(handles,'TrackingTable')
+        logentry('Error: No tracking data loaded yet to export.')
+        return
+    else
+        CurrentBead = handles.CurrentBead;
+        idx = handles.CurrentBeadRows;
 
+        bead.t      = handles.TrackingTable.Frame(idx) / handles.fps;
+        bead.t      = bead.t - min(bead.t);
+        bead.x      = handles.TrackingTable.X(idx);
+        bead.y      = handles.TrackingTable.Y(idx);
+        if isfield(bead, 'yaw')
+            bead.yaw    = handles.TrackingTable.Yaw(idx);
+        end
+    end    
+
+    beadname = ['bead' num2str(CurrentBead)];
+    assignin('base', beadname, bead);
+    logentry(['Bead ', num2str(CurrentBead), ' exported to base workspace as ''' beadname '''.']);
+    return
     
 function ExportMenu_AllBeads_Callback(hObject, eventdata, handles)
-    video_tracking_constants;    
-    vidtable = convert_Table_to_old_matrix(handles.TrackingTable);
-    bead = convert_vidtable_to_beadstruct(vidtable);    
-    assignin('base', 'beads', bead);
-    return
+
+    if ~isfield(handles,'TrackingTable')
+        logentry('Error: No tracking data loaded yet to export.')
+        return
+    else
+        vidtable = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
+        bead = convert_vidtable_to_beadstruct(vidtable);    
+        assignin('base', 'beads', bead);
+        logentry(['All beads exported to base workspace as ''beads''.']);
+        return
+    end
    
     
 function ConfigureMenu_Callback(hObject, eventdata, handles)
@@ -1040,7 +979,9 @@ function checkbox_min_sens_Callback(hObject, eventdata, handles)
 
     
 function pushbutton_FilterConfig_Callback(hObject, eventdata, handles)
-    handles.filtconfig = evt_FilterConfig;
+    h = evt_FilterConfig;
+    uiwait(gcf);
+    h
     guidata(hObject, handles);
     return
 
@@ -1057,34 +998,42 @@ function handles = filter_bead_selection(handles)
     beadID = handles.TrackingTable.ID;
     
     % separate the currently selected bead vs not the selected bead
-    handles.CurrentBeadRows = (beadID == CurrentBead);
+    idx = (beadID == CurrentBead);
+
+    Tbead = handles.TrackingTable(idx,:);
+
+    handles.CurrentBeadRows = idx;
+    handles.mintime = min(Tbead.Frame) / handles.fps;
+    handles.BeadTrackingTable = Tbead;
+
+    if handles.checkbox_neutoffsets.Value && ~isempty(Tbead)
+        handles.XYZoffsets = [Tbead.X(1), Tbead.Y(1) Tbead.Z(1)];
+    else
+        handles.XYZoffsets = zeros(1,3);
+    end
+
+
+
     
-    
+
 function Plot_XYfig(handles)
 
-    calibum = handles.calibum;
     ImageWidth = handles.ImageWidth;
     ImageHeight = handles.ImageHeight;
-    im = handles.im;
-    
-    
-    if get(handles.radio_pixels, 'Value')
-        x = handles.TrackingTable.X;
-        y = handles.TrackingTable.Y;
-        imx = [0 ImageWidth ];
-        imy = [0 ImageHeight];
-    elseif get(handles.radio_microns, 'Value')
-        x = handles.TrackingTable.X * calibum;
-        y = handles.TrackingTable.Y * calibum;
-        imx = [0 ImageWidth ] * calibum;
-        imy = [0 ImageHeight] * calibum;
-    end
-        
+    LengthUnits = handles.LengthUnits;
+    im = handles.im;    
+
+    x = handles.TrackingTable.X;
+    y = handles.TrackingTable.Y;
+    imx = [0 ImageWidth ];
+    imy = [0 ImageHeight];
+
+    if get(handles.radio_microns, 'Value')
+        [x, y, imx, imy] = pixel2um(x, y, imx, imy);
+    end        
     
     idx = handles.CurrentBeadRows;
-    
-    ylabel_unit = handles.LengthUnits;
-    
+           
     figure(handles.XYfig);
     imagesc(imx, imy, im);
         
@@ -1096,8 +1045,8 @@ function Plot_XYfig(handles)
         hold off;
     end
     
-    xlabel(['displacement [' ylabel_unit ']']);
-    ylabel(['displacement [' ylabel_unit ']']);    
+    xlabel(['displacement [' LengthUnits ']']);
+    ylabel(['displacement [' LengthUnits ']']);    
     xlim(imx);
     ylim(imy);
     set(handles.XYfig, 'Units', 'Normalized');
@@ -1130,52 +1079,64 @@ function Plot_XTfig(handles)
 % 
 % PLOTTING XY&Z vs T
 %
-    calibum = handles.calibum;
-    
-    t = handles.TrackingTable.Frame ./ handles.fps;
-    mintime = min(t);
-    
-    if get(handles.radio_pixels, 'Value')
-        x = handles.TrackingTable.X;
-        y = handles.TrackingTable.Y;
-        z = handles.TrackingTable.Z;
-    elseif get(handles.radio_microns, 'Value')
-        x = handles.TrackingTable.X * calibum;
-        y = handles.TrackingTable.Y * calibum;
-        z = handles.TrackingTable.Z;
-    end
-    
+
+    XYZoffsets = handles.XYZoffsets;
     idx = handles.CurrentBeadRows;
-    
-    t = t(idx);
-    x = x(idx); 
-    y = y(idx); 
-    z = z(idx);
-    
-    ylabel_unit = handles.LengthUnits;
-    
-    figure(handles.XYfig);
-    if get(handles.checkbox_neutoffsets, 'Value')
-        x1 = x(1);
-        y1 = y(1);
-        z1 = z(1);
-    else
-        [x1, y1, z1] = deal(0);
+
+    Tbead = handles.TrackingTable(idx,:);
+
+    frames = Tbead.Frame;
+    xyz = [Tbead.X, Tbead.Y, Tbead.Z];
+
+    L = size(xyz,1);
+
+    XYZoffsets = repmat(XYZoffsets, L, 1);
+
+    % XXX TODO Fix, as this assumes a length scale value for x, y, and z.
+    if get(handles.radio_microns, 'Value')        
+        [xyz, XYZoffsets] = pixel2um(xyz, XYZoffsets);
     end
-        
+
+    if get(handles.checkbox_plotz, 'Value')
+        displacements = xyz - XYZoffsets;
+        mylegend = {'x', 'y', 'z'};
+        yaxislabel = 'XYZ';
+    else
+        displacements = xyz(:,1:2) - XYZoffsets(:,1:2);
+        mylegend = {'x', 'y'};
+        yaxislabel = 'XY';
+    end
+    
+    yunits = handles.LengthUnits;
+
+    if get(handles.radio_frames, 'Value')
+        t = frames;
+        mintime = sec2frame(handles.mintime);
+        Xaxis_Label = 'Frame #';
+    elseif get(handles.radio_seconds, 'Value')
+        t = frame2sec(frames);
+        mintime = handles.mintime;
+        Xaxis_Label = 'time [s]';
+    end
+
     figure(handles.XTfig);
-    plot(t - mintime, [x-x1 y-y1 z-z1], '.-');
-    xlabel('time [s]');
-    ylabel(['displacement [' ylabel_unit ']']);
-    legend('x', 'y', 'z', 'Location', 'northwest');    
-    set(handles.XTfig, 'Units', 'Normalized');
-%     set(handles.XTfig, 'Position', [0.4039 0.5025 0.1474 0.1755]);
-    set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
+%     plot(t - mintime, displacements, '.-');
+    if ~isempty(t)
+        plot(t, displacements, '.-');
+        xlabel(Xaxis_Label);
+        ylabel([yaxislabel ' bead position [', yunits, ']']);
+        legend(mylegend, 'Location', 'northwest');    
+        set(handles.XTfig, 'Units', 'Normalized');
+    %     set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
+    else
+        clf;
+    end
+
     drawnow;
+
     
     
 function handles = delete_selected_dataset(handles)
-
     
     OldTrackingHeight = height(handles.TrackingTable);
     OldTrashHeight = height(handles.Trash);
@@ -1199,239 +1160,219 @@ function handles = delete_selected_dataset(handles)
          ', height(NewTrash)= ', num2str(NewTrashHeight), ...
          ', height(NewTrackingTable)= ', num2str(NewTrackingHeight), ...
          '. ']);
-         
-         
-%     if (bead_max ~= bead_to_remove) % otherwise I don't have to rearrange beadIDs
-%         for m = (bead_to_remove + 1) : bead_max
-%             q = (TrackingTable.ID == m);
-%             TrackingTable.ID(q) = m-1;
-%         end
-%     end
-%     
-%     if (bead_to_remove == 0)
-%         set(handles.slider_BeadID, 'Value', bead_to_remove+1);
-%         set(handles.edit_BeadID, 'String', num2str(bead_to_remove+1));
-%     else
-%     	set(handles.slider_BeadID, 'Value', bead_to_remove-1);
-%         set(handles.edit_BeadID, 'String', num2str(bead_to_remove-1));        
-%     end
-%     
-%     if bead_max <= 1
-%         set(handles.slider_BeadID, 'Max', bead_max-1);
-%         set(handles.slider_BeadID, 'SliderStep', [0 1]);
-%     else
-%         set(handles.slider_BeadID, 'Max', bead_max);
-%         set(handles.slider_BeadID, 'SliderStep', [1/(bead_max) 1/(bead_max)]);
-%     end
-    
 
-    
     return
 
+function selection = select_by_boundingbox(handles)
+
+    % First, determine which figure is active.
+    if(get(handles.radio_XYfig, 'Value'))
+        active_fig = handles.XYfig;
+    elseif(get(handles.radio_XTfig, 'Value'))
+        active_fig = handles.XTfig;
+    else
+        logentry('Deleting data from the AUXplot is not (yet) allowed.');
+        return
+    end
+         
+    % Select the active figure from which we will collect the mouse-locations
+    figure(active_fig);
+
+    % Extract the bounds of the box based on selected units
+    % xm, ym = xmouseclick, ymouseclick
+    [clickX, clickY] = ginput(2);
+    
+    % If the figures are in their default units t in [s] and xy in
+    % [pixels], then there is no need to scale the clicks.
+    Xedges = clickX;
+    Yedges = clickY;
+
+    %
+    % If we are using the XT fig, and its time units are in 'frames', 
+    % then covert the click to be in "seconds" (because, unfortunately, 
+    % that's the base unit in evt_GUI until someone changes it.
+    if handles.radio_XTfig.Value && handles.radio_frames.Value
+        Xedges = frame2sec(Xedges);
+    end
+
+% %     % If the XT plot's length units are in [microns], then scale them to be
+% %     % in default [pixels].
+% %     if handles.radio_XTfig.Value && handles.radio_microns.Value
+% %         Yedges = um2pixel(Yedges);
+% %     end
+% % 
+% %     % Back-apply the offsets subtracted off in the XT plot if neutralized    
+% %     if handles.radio_XTfig.Value && handles.checkbox_neutoffsets.Value
+% %         xyz0 = handles.XYZoffsets;
+% %         [x0, y0, z0] = deal(xyz0(1), xyz0(2), xyz0(3)); % [pixels]
+% %     else
+% %         [x0, y0, z0] = deal(0);
+% %     end
+% %     
+    
+    % In the XY plot, if the clicks are in [microns], convert them to
+    % [pixels].
+    if handles.radio_XYfig.Value && handles.radio_microns.Value
+        [Xedges, Yedges] = um2pixel(Xedges, Yedges);
+    end    
+
+    % Now that everything is scaled properly, we can deconstruct the edges
+    % of the box for proper selection
+    Xedge_lo = min(Xedges);
+    Xedge_hi = max(Xedges);
+    Yedge_lo = min(Yedges);
+    Yedge_hi = max(Yedges);
+    
+    % debug output
+    fprintf('clickX = [%4.1f, %4.1f], Xedges = [%4.1f, %4.1f]\n', clickX(1), clickX(2), Xedge_lo, Xedge_hi);
+    fprintf('clickX = [%4.1f, %4.1f], Xedges = [%4.1f, %4.1f]\n', clickY(1), clickY(2), Yedge_lo, Yedge_hi);
+
+    % At least for now, the selection should only apply to the current bead
+    currentbead = handles.CurrentBead;
+    
+    % The XT plot, uses neutralized time, so add back the offset
+    t = handles.TrackingTable.Frame / handles.fps; % [sec]
+    x = handles.TrackingTable.X; % [pixels]
+    y = handles.TrackingTable.Y; % [pixels]
+
+    if get(handles.radio_XYfig, 'Value')
+        k = ( x > Xedge_lo & x < Xedge_hi & ...
+              y > Yedge_lo & y < Yedge_hi & ...
+              handles.TrackingTable.ID == currentbead);
+    elseif get(handles.radio_XTfig, 'Value')
+        k = ( t > Xedge_lo & t < Xedge_hi )   & ...
+              handles.TrackingTable.ID == currentbead;
+% % % % % % %         k = (( (x-x0 > clickY_lo & x-x0 < clickY_hi)   | ...
+% % % % % % %                (y-y0 > clickY_lo & y-y0 < clickY_hi) ) & ...
+% % % % % % %                (t > clickX_lo & t < clickX_hi)   & ...
+% % % % % % %                handles.TrackingTable.ID == currentbead);
+    elseif get(handles.radio_AUXfig, 'Value')
+        logentry('Deleting data from AUX plot is not allowed.');
+        return
+    end
+
+    selection = k;
     
 function handles = delete_inside_boundingbox(handles)    
 
-    if(get(handles.radio_XYfig, 'Value'))
-        active_fig = handles.XYfig;
-    elseif(get(handles.radio_XTfig, 'Value'))
-        active_fig = handles.XTfig;
-    else
-        logentry('Deleting data from the AUXplot is not allowed.');
-        return
-    end
+    sel = select_by_boundingbox(handles);
     
-    
-    figure(active_fig);
-    
-    currentbead = handles.CurrentBead;
-    beadID = handles.TrackingTable.ID;
-    t = handles.TrackingTable.Time - handles.mintime;
-    x = handles.TrackingTable.X;
-    y = handles.TrackingTable.Y;
-    
-    
-    [xm, ym] = ginput(2);
-    
-%     if get(handles.radio_microns, 'Value')
-%         calibum = str2double(get(handles.edit_calibum, 'String'));
-%         
-%         if(get(handles.radio_XYfig, 'Value'))
-%             xm = xm / calibum;
-%             ym = ym / calibum;
-%         elseif(get(handles.radio_XTfig, 'Value'))
-%             ym = ym / calibum;
-%         end
-%         
-%     end
-    
-    xlo = min(xm);
-    xhi = max(xm);
-    ylo = min(ym);
-    yhi = max(ym);
-    
-    if get(handles.radio_XYfig, 'Value')
-        k = find(~(x > xlo & x < xhi & y > ylo & y < yhi & beadID == currentbead));
-    elseif get(handles.radio_XTfig, 'Value')
-        k = find(~( ( (x > ylo & x < yhi) | (y > ylo & y < yhi) ) & ...
-                      (t > xlo & t < xhi) & (beadID == currentbead)));
-    elseif get(handles.radio_AUXfig, 'Value')
-        logentry('Deleting data from AUX plot is not allowed.');
-    end
-    
-    NewTrash = handles.TrackingTable(k,:);
+    NewTrash = handles.TrackingTable(sel,:);
     handles.Trash = [handles.Trash; NewTrash];
     
-    handles.TrackingTable(k,:) = [];
+    handles.TrackingTable(sel,:) = [];
     
-%     handles.tstamp_times = handles.tstamp_times(k);
-
 
 function handles = delete_outside_boundingbox(handles)
 
+    sel = select_by_boundingbox(handles);
+
+    T = handles.TrackingTable;
+    Trash = handles.Trash;
+
     
-    % xyzk1 = the neutralization offsets for the XT plot
-    if ~isfield(handles, 'xyzk1')
-        xyzk1 = [ 0 0 0 ];
+    % The data to keep is what's inside the bounding box. 
+    %
+    % For XY, this means that ANYTHING outside that box is deleted.
+    if handles.radio_XYfig.Value
+        NewTrash = T(~sel,:);
+        Trash = [Trash; NewTrash];   
+        T(~sel,:) = [];
     end
 
-    if(get(handles.radio_XYfig, 'Value'))
-        active_fig = handles.XYfig;
-        xyzk1 = [ 0 0 0 ];
-    elseif(get(handles.radio_XTfig, 'Value'))
-        active_fig = handles.XTfig;
-    else
-        logentry('Deleting data from the AUXplot is not allowed.');
-        return;
-    end
-    
-    figure(active_fig);
-    TrackingTable = handles.TrackingTable;
-    
-    beadID = TrackingTable.ID;
-    t = TrackingTable.Time - handles.mintime;
-    x = TrackingTable.X;
-    y = TrackingTable.Y;
-    z = TrackingTable.Z;
-    currentbead = handles.CurrentBead;
-    
-    [xm, ym] = ginput(2);
-    
-    if get(handles.checkbox_neutoffsets, 'Value')
-        xm = xm + xyzk1(1);
-        ym = ym + xyzk1(2);
-%         zm = zm + xyzk1(3);
-    end
-    
-    if get(handles.radio_microns, 'Value')
-        calibum = str2double(get(handles.edit_calibum, 'String'));
+    % For XT, the currentbead matters. Delete anything outside the box for
+    % THAT BEAD ONLY
+    if handles.radio_XTfig.Value
+
+        % The selection is a subset of points in the original table.
+        BeadPointsToKeep = T(sel,:);
+
+        % The points should always be constrained to a single beadID since
+        % that's all we ever plot in the XTfig.
+        ThisBeadID = unique(BeadPointsToKeep.ID);
+
+        % Pull out the entire bead of interest from the original table
+        Tbead = T( T.ID == ThisBeadID, :);
+
+        % Remove the entire bead from the original table. We'll add back a
+        % segment of it later.
+        T = T(T.ID ~= ThisBeadID,:);
+
+        % List all the frames that this original bead path owned
+        AllFrames = unique(Tbead.Frame);
+
+        % List the frames we want to keep
+        FramesToKeep = unique(BeadPointsToKeep.Frame);
+
+        % To partition all the points in Tbead, look for the intersection.
+        % ia contains the locations for the points that do intersect 
+        % ib contains locations where they do NOT intersect 
+        [~, ia, ib] = intersect(Tbead.Frame, FramesToKeep);
+        Tkeep = Tbead(ia,:);
+        Ttoss = Tbead(ib,:);
         
-        if(get(handles.radio_XYfig, 'Value'))
-            xm = xm / calibum;
-            ym = ym / calibum;
-        elseif(get(handles.radio_XTfig, 'Value'))
-            xm = xm / calibum;
-            ym = ym / calibum;            
-            %%% XXX add separate z-step calibration value.
-        end
-        
-    end
-    
-    xlo = min(xm);
-    xhi = max(xm);
-    ylo = min(ym);
-    yhi = max(ym);
-    
-    if get(handles.radio_XYfig, 'Value')
-        k = find( (x > xlo & x < xhi & y > ylo & y < yhi ) & beadID == currentbead);
+        % concatenate everything back together properly and resort
+        Trash = [Trash; Ttoss];   
+        T = [T; Tkeep];
+        T = sortrows(T, {'Fid', 'Frame', 'ID'});
 
-        handles.TrackingTable = TrackingTable(k,:);
-        handles.tstamp_times = handles.tstamp_times(k);
-
-    elseif get(handles.radio_XTfig, 'Value')
-        k = find( ~(t > xlo & t < xhi ) & beadID == currentbead );
-
-        TrackingTable(k,:) = [];
-        handles.tstamp_times(k) = [];
-        handles.TrackingTable = TrackingTable;
-
-    elseif get(handles.radio_AUXfig, 'Value')
-        logentry('Deleting data from AUX plot is not allowed.');
-    end
-    
-    guidata(hObject, handles);
-
-    
-function handles = delete_data_before_time(handles) 
-    
-    if(get(handles.radio_XYfig, 'Value'))
-        active_fig = handles.XTfig;
-    elseif(get(handles.radio_XTfig, 'Value'))
-        active_fig = handles.XTfig;
-    elseif(get(handles.radio_AUXfig, 'Value'))
-        active_fig = handles.XTfig;
     end
 
-    figure(active_fig);
+    handles.TrackingTable = T;
+    handles.Trash = Trash;
 
-    TrackingTable = handles.TrackingTable;    
+function closest_time = select_time_from_XTfig(handles) 
+    handles.Activefig = handles.XTfig;
+    handles.radio_XTfig.Value = 1;
 
-    t = TrackingTable.Time - handles.mintime;
-    
+    figure(handles.XTfig);
     [tm, xm] = ginput(1);
     
+    if handles.radio_frames.Value
+        tm = frame2sec(tm);
+    end
+
+    time = handles.BeadTrackingTable.Frame / handles.fps; % [sec]
+
     % find the closest time point to mouse click
-    dists = abs(t - tm);    
+    dists = abs(time - tm);    
     
     % identify time
-    idx = find(dists == min(dists));
-    closest_time = mean(t(idx));
-    
-    % remove any points in the TrackingTable that have times eariler than our
+    [~,idx] = min(dists);
+    closest_time = time(idx(1));
+
+
+function handles = delete_data_before_time(handles)
+ 
+    closest_time = select_time_from_XTfig(handles);
+
+    T = handles.TrackingTable;    
+    time = T.Frame / handles.fps;
+
+    % remove any points in the TrackingTable that have times earlier than our
     % prescribed beginning time point
-    idx = find(TrackingTable.Time > (closest_time + handles.mintime));
-    TrackingTable = TrackingTable(idx,:);
+    idx = (time <= closest_time);
+    T(idx,:) = [];
     
-    handles.TrackingTable = TrackingTable;
-    handles.mintime = min(TrackingTable.Time);
-    guidata(hObject, handles);
+    handles.TrackingTable = T;
 
     
-function delete_data_after_time(hObject, eventdata, handles)
+function handles = delete_data_after_time(handles)
 
-    if(get(handles.radio_XYfig, 'Value'))
-        active_fig = handles.XTfig;
-    elseif(get(handles.radio_XTfig, 'Value'))
-        active_fig = handles.XTfig;
-    elseif(get(handles.radio_AUXfig, 'Value'))
-        active_fig = handles.XTfig;
-    end
+    closest_time = select_time_from_XTfig(handles);
 
-    figure(active_fig);
+    T = handles.TrackingTable;    
+    time = T.Frame / handles.fps;
+    % remove any points in the TrackingTable that have times earlier than our
+    % prescribed beginning time point
+    idx = (time >= closest_time);
 
-    TrackingTable = handles.TrackingTable;
-
-    t = TrackingTable.Time - handles.mintime;
+    T(idx,:) = [];
     
-    [tm, xm] = ginput(1);
-    
-    % find the closest time point to mouse click
-    dists = abs(t - tm);    
-    
-    % identify index value that corresponds to this time
-    idx = find(dists == min(dists));
-    closest_time = t(idx);
-
-    % remove any points in the TrackingTable that are greater than the time value
-    % selected by the mouse-click.
-    idx = find(t <= closest_time(1));
-    TrackingTable = TrackingTable(idx,:);
-    
-    handles.TrackingTable = TrackingTable;
-    guidata(hObject, handles);
+    handles.TrackingTable = T;
 
 
 function rheo = calc_viscosity_stds(hObject, eventdata, handles) 
-    video_tracking_constants;
     kB = 1.3806e-23; % [m^2 kg s^-2 K^-1];
     temp_K = 296; % [K]
     
@@ -1539,28 +1480,61 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
 return
 
 
-function NewTrackingTable = ScaleTrackingTable(hObject, eventdata, handles)
-
-%     TrackingTable = handles.TrackingTable;
-%     Scales = handles.Scales;
-% 
-%     Xunits = TrackingTable.Properties.VariableUnits{'X'};
-%     
-%     
-%     if strcmp(Xunits, 'pixels') && strcmp(toXunits, 'um')
-%         TrackingTable.X = TrackingTable.X / calibum;
-%         TrackingTable.Y = TrackingTable.Y / calibum;
-%         TrackingTable.Z = TrackingTable.Z / calibum;
-%     end
-%     
-%     if strcmp(Xunits, 'um') && strcmp(toXunits, 'pixels')
-%         TrackingTable.X = TrackingTable.X * calibum;
-%         TrackingTable.Y = TrackingTable.Y * calibum;
-%         TrackingTable.Z = TrackingTable.Z * calibum;
-%     end
-%     
-%    NewTrackingTable = 0;
+function NativeXYZ = RemoveXYScaleAndOffset(xyz, handles)
+    % XYZoffsets = the neutralization offsets for the XT plot
+    XYZoffsets = handles.XYZoffsets;
+    calibum = handles.calibum;
    
+    if size(xyz,2) < 3
+        C = size(xyz,2);
+        xyz(:, C:3) = 0;
+    end
+
+    xyz = xyz + XYZoffsets;
+%     zm = zm + XYZoffsets(3);
+    xyz = xyz / calibum;
+        
+    NativeXYZ = xyz;
+
+    return
+
+
+function varargout = pixel2um(varargin)
+    handles = guihandles(gcbo);
+    calibum = str2num(get(handles.edit_calibum, 'String'));
+    varargout = cell(1, nargin);
+    for k = 1:nargin
+        varargout{k} = varargin{k} * calibum;
+    end
+return
+
+
+function varargout = um2pixel(varargin)
+    handles = guihandles(gcbo);
+    calibum = str2num(get(handles.edit_calibum, 'String'));
+    for k = 1:nargin
+        varargout{k} = varargin{k} / calibum;
+    end
+return
+
+
+function varargout = frame2sec(varargin)
+    handles = guihandles(gcbo);
+    fps = str2double(get(handles.edit_frame_rate, 'String'));
+    varargout = cell(1, nargin);
+    for k = 1:nargin
+        varargout{k} = varargin{k} / fps;
+    end
+return
+
+
+function varargout = sec2frame(varargin)
+    handles = guihandles(gcbo);
+    fps = str2double(handles.edit_frame_rate.String);
+    varargout = cell(1, nargin);
+    for k = 1:nargin
+        varargout{k} = varargin{k} * fps;
+    end
 return
 
 
@@ -1575,56 +1549,68 @@ function outs = sa_CalcVel(id, frame, xyz, sfactor)
 return
 
 
-function radial = calculate_radial_vector(hObject, eventdata, handles)
+function radial = calculate_radial_vector(handles)
     
-    idx = handles.CurrentBeadRows;
+    Tbead = handles.BeadTrackingTable; % [pixels]
+
+    if isempty(Tbead)
+        radial.t = [];
+        radial.r = [];
+        return
+    end
+
+    t = Tbead.Frame / handles.fps;
+    x = Tbead.X;
+    y = Tbead.Y;
+    z = Tbead.Z;
+
+    %
+    % Handle origins, scalings, and offsets
+    %     
+    if get(handles.radio_relative, 'Value')
+        x0 = x(1); 
+        y0 = y(1); 
+        z0 = z(1); 
+    elseif get(handles.radio_arb_origin, 'Value')            
+        arb_origin = str2num(handles.edit_arb_origin.String);   
+
+        if numel(arb_origin) >= 1
+            x0 = arb_origin(1); 
+        else 
+            x0 = 0;
+        end
+
+        if numel(arb_origin) >= 2
+            y0 = arb_origin(2); 
+        else 
+            y0 = 0;
+        end
+
+        if numel(arb_origin) == 3
+            z0 = arb_origin(3);        
+        else 
+            z0 = 0;
+        end
+
+    end    
+
+    % handle the case where 'microns' are selected
+    if handles.radio_microns.Value
+        x0 = um2pixel(x0);
+        y0 = um2pixel(y0);
+        z0 = um2pixel(z0);
+    end    
     
-    t = handles.TrackingTable.Time(idx);
-    x = handles.TrackingTable.X(idx);
-    y = handles.TrackingTable.Y(idx);
-    z = handles.TrackingTable.Z(idx);
-    r = sqrt(x.^2 + y.^2 + z.^2);
+    r = sqrt((x-x0).^2 + (y-y0).^2 + (z-z0).^2);
 
     mintime = handles.mintime;
     
     radial.t = t - mintime;
     radial.r = r;
     
-%     %
-%     % Handle origins, scalings, and offsets
-%     %
-%     arb_origin = str2double(get(handles.edit_arb_origin, 'String'));      
-%     if get(handles.radio_relative, 'Value')
-%         xinit = x(k); 
-%         if ~isempty(xinit)
-%             xinit = xinit(1); 
-%         end
-%         
-%         yinit = y(k); 
-%         if ~isempty(yinit)
-%             yinit = yinit(1); 
-%         end
-%         
-%         zinit = z(k); 
-%         if ~isempty(zinit)
-%             zinit = zinit(1); 
-%         end
-%     elseif get(handles.radio_arb_origin, 'Value')            
-%         xinit = arb_origin(1);
-%         yinit = arb_origin(2);
-%         zinit = arb_origin(3);
-% 
-%         % handle the case where 'microns' are selected
-%         if get(handles.radio_microns, 'Value')
-%             xinit = xinit * calibum;
-%             yinit = yinit * calibum;                
-%             zinit = zinit * calibum;
-%         end                        
-%     end    
-    
-
     return
     
+
 function plot_radial_vector(radial, LengthUnits, h)    
     
     figure(h);
@@ -1635,9 +1621,9 @@ function plot_radial_vector(radial, LengthUnits, h)
  return
 
  
-function outs = calculate_sensitivity(hObject, eventdata, handles)
+function outs = calculate_sensitivity(handles)
     mintime = handles.mintime;
-    t = handles.TrackingTable.Time;
+    t = handles.TrackingTable.Frame / handles.fps;
     s = handles.TrackingTable.Sensitivity;
     idx = handles.CurrentBeadRows;
     
@@ -1657,7 +1643,7 @@ function plot_sensitivity(sens, h)
 return
  
 
-function outs = calculate_tracker_availability(hObject, eventdata, handles)
+function outs = calculate_tracker_availability(handles)
     outs.Frame = handles.TrackingTable.Frame;
     outs.ID = handles.TrackingTable.ID;
 return
@@ -1678,9 +1664,9 @@ function plot_tracker_availability(TrackerAvail, CurrentBeadRows, h)
 return
 
 
-function outs = calculate_center_intensity(hObject, eventdata, handles)
+function outs = calculate_center_intensity(handles)
 
-    t = handles.TrackingTable.Time;
+    t = handles.TrackingTable.Frame / handles.fps;
     c = handles.TrackingTable.CenterIntensity;
     
     idx = handles.CurrentBeadRows;
@@ -1703,13 +1689,13 @@ function plot_center_intensity(CenterIntensity, h)
 return
 
 
-function outs = prep_velocity_plot(hObject, eventdata, handles)
+function outs = prep_velocity_plot(handles)
     
     dt = 1/handles.fps;
     
     idx = handles.CurrentBeadRows;
     
-    outs.Time = handles.TrackingTable.Time(idx);
+    outs.Time = handles.TrackingTable.Frame(idx) / handles.fps;
     outs.VelX = handles.TrackingTable.Vx(idx) / dt;
     outs.VelY = handles.TrackingTable.Vy(idx) / dt;
     outs.VelZ = handles.TrackingTable.Vz(idx) / dt;
@@ -1727,9 +1713,9 @@ function plot_velocity(Velocity, LengthUnits, h)
 return
 
 
-function outs = prep_velmag_plot(hObject, eventdata, handles)
+function outs = prep_velmag_plot(handles)
 
-    vel = prep_velocity_plot(hObject, eventdata, handles);
+    vel = prep_velocity_plot(handles);
    
     outs.Time = vel.Time;
     outs.VelMag = sqrt(vel.VelX .^2 + vel.VelY .^2 + vel.VelZ .^2);
@@ -1748,7 +1734,7 @@ function plot_velocity_magnitude(Velocity, LengthUnits, h)
 return
 
 
-function outs = prep_VelScatter_plot(hObject, eventdata, handles)
+function outs = prep_VelScatter_plot(handles)
 
     
     CurrentBead = handles.CurrentBead;
@@ -1824,7 +1810,7 @@ function plot_velocity_scatter(VelScatter, h, ActiveOnlyTF)
 
 return
 
-function outs = prep_VelField_plot(hObject, eventdata, handles)
+function outs = prep_VelField_plot(handles)
         
     NGridX = 50;
     NGridY = 50;
@@ -1839,7 +1825,7 @@ function outs = prep_VelField_plot(hObject, eventdata, handles)
     VideoStruct.fps = handles.fps;
     
     TrackingTable = handles.TrackingTable;
-    trajdata = convert_Table_to_old_matrix(TrackingTable);
+    trajdata = convert_Table_to_old_matrix(TrackingTable, handles.fps);
 
     VelField = vel_field(trajdata, NGridX, NGridY, VideoStruct);
     
@@ -1866,8 +1852,8 @@ function plot_VelField(VelFieldPlot, h)
     pretty_plot;
 return
 
-function VelMag = prep_VelMagScalarField_plot(hObject, eventdata, handles)
-    VelMag = prep_VelField_plot(hObject, eventdata, handles);
+function VelMag = prep_VelMagScalarField_plot(handles)
+    VelMag = prep_VelField_plot(handles);
     VelMag = VelMag.VelField;
     
 
@@ -1891,7 +1877,7 @@ function plot_VelMagScalarField(VelMag, h)
     pretty_plot;   
 return
 
-function outs = prep_MSD_plot(hObject, eventdata, handles)
+function outs = prep_MSD_plot(handles)
     TrackingTable = handles.TrackingTable;
     framemax = max(TrackingTable.Frame);
     numtaus = handles.numtaus;
@@ -1932,9 +1918,25 @@ function outs = prep_MSD_plot(hObject, eventdata, handles)
 return
 
 function plot_MSD_evt(MSDdata, h)
-    T = MSDdata.MsdTable;
+    beads = MSDdata.MsdTable;
+    ensemble = MSDdata.MsdEnsemble;
+    tau = MSDdata.taulist;
+
+    gb = findgroups(beads.ID);    
+    ge = findgroups(ensemble.Tau);
+    
     figure(h);
-    pause(0.1);
+    hold on;
+        gscatter(beads.Tau_s, beads.MsdX, gb, [0.7 0.7 0.7]);
+        gscatter(ensemble.Tau_s, 10.^(ensemble.logmsdX), ge, 'k');
+        ax = gca;
+        ax.XScale = 'log';
+        ax.YScale = 'log';
+        xlabel('time scale, \tau [s]');
+        ylabel('MSD.x, <x^2> []');
+        grid on;
+        legend off;
+    hold off;    
 return
 
 function plot_GSER(hObject, eventdata, handles)
@@ -2004,44 +2006,46 @@ function plot_data(handles)
             set(AUXfig, 'Visible', 'off');
 
         case 'radial vector'
-            handles.plots.radial = calculate_radial_vector(hObject, eventdata, handles);            
+            handles.plots.radial = calculate_radial_vector(handles);            
             plot_radial_vector(handles.plots.radial, handles.LengthUnits, AUXfig);
             
         case 'sensitivity (SNR)'
-            handles.plots.sens = calculate_sensitivity(hObject, eventdata, handles);
+            handles.plots.sens = calculate_sensitivity(handles);
             plot_sensitivity(handles.plots.sens, AUXfig);
         
         case 'center intensity'            
-            handles.plots.CenterIntensity = calculate_center_intensity(hObject, eventdata, handles);
+            handles.plots.CenterIntensity = calculate_center_intensity(handles);
             plot_center_intensity(handles.plots.CenterIntensity, handles.AUXfig);
 
         case 'velocity'
-            handles.plots.Velocity = prep_velocity_plot(hObject, eventdata, handles);
+            handles.plots.Velocity = prep_velocity_plot(handles);
             plot_velocity(handles.plots.Velocity, handles.LengthUnits, AUXfig);
             
         case 'velocity magnitude'
-            handles.plots.VelMag = prep_velmag_plot(hObject, eventdata, handles);
+            handles.plots.VelMag = prep_velmag_plot(handles);
             plot_velocity_magnitude(handles.plots.VelMag, handles.LengthUnits, AUXfig);
             
         case 'velocity scatter (all)'
-            handles.plots.VelScatter = prep_VelScatter_plot(hObject, eventdata, handles);
+            handles.plots.VelScatter = prep_VelScatter_plot(handles);
             plot_velocity_scatter(handles.plots.VelScatter, AUXfig);
             
         case 'velocity scatter (active)'            
-            handles.plots.VelScatter = prep_VelScatter_plot(hObject, eventdata, handles);
+            handles.plots.VelScatter = prep_VelScatter_plot(handles);
             plot_velocity_scatter(handles.plots.VelScatter, AUXfig, true);
 
         case 'velocity vectorfield'            
-            handles.plots.VelField = prep_VelField_plot(hObject, eventdata, handles);
+            handles.plots.VelField = prep_VelField_plot(handles);
             plot_VelField(handles.plots.VelField, AUXfig);
    
         case 'vel. mag. scalarfield'            
-            handles.plots.VelMag = prep_VelMagScalarField_plot(hObject, eventdata, handles);
+            handles.plots.VelMag = prep_VelMagScalarField_plot(handles);
             plot_VelMagScalarField(handles.plots.VelMag, AUXfig);
                         
 %         case 'displacement hist'        
         case 'MSD'
-            handles.plots.MSD = prep_MSD_plot(hObject, eventdata, handles);
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_MSD_plot(handles);
+            end
             plot_MSD_evt(handles.plots.MSD, AUXfig);
             
         case 'GSER'
@@ -2070,7 +2074,7 @@ function plot_data(handles)
 function bayes = run_bayes_model_selection(hObject, eventdata, handles)
     video_tracking_constants;
 
-    vidtable = convert_Table_to_old_matrix(handles.TrackingTable);
+    vidtable = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
 
     calibum = str2double(get(handles.edit_calibum, 'String'));
 
@@ -2189,7 +2193,7 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
     
     % % USER INPUTS FOR FUNCTION
     
-    vidtable = convert_Table_to_old_matrix(handles.TrackingTable);
+    vidtable = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
 
     % max_tau_s is the maximum time scale the user wants the bayesian
     % modeling code to consider when binning MSD curves.
@@ -2319,99 +2323,110 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
 return
 
 
-function TrackingTable = convert_old_matrix_to_Table(data)
-    video_tracking_constants;
-    
-    v.t = data(:,TIME);
-    v.id= data(:,ID);    
-    v.frame = data(:,FRAME);
-    v.x = data(:,X);
-    v.y = data(:,Y);
-    v.z = data(:,Z);		
-    v.roll = data(:,ROLL);    
-    v.pitch= data(:,PITCH);   
-    v.yaw  = data(:,YAW);     
-    v.area = data(:,AREA);    
-    v.sens = data(:,SENS);    
-    v.centints = data(:,CENTINTS);  
-    v.well = data(:,WELL);    
-    v.pass = data(:,PASS);    
-
-    TrackingTable = struct2table(v);
-    TrackingTable.Properties.VariableNames = { 'Time', 'ID', 'Frame', ...
-                                               'X', 'Y', 'Z', ...
-                                               'Roll', 'Pitch', 'Yaw', ...
-                                               'Area', 'Sensitivity', 'CenterIntensity', ...
-                                               'Well', 'Pass' };
-    TrackingTable.Properties.VariableUnits = { 's', '', 'frame', ...
-                                               'pixels', 'pixels', 'pixels', ...
-                                               'unknown', 'unknown', 'unknown', ...
-                                               'pixels^2', '', '', ...
-                                               '', '' };
-
+% function TrackingTable = convert_old_matrix_to_Table(data, fid)
+%     video_tracking_constants;
+%     
+%     v.fid  = data(:,FID);
+%     v.t = data(:,TIME);
+%     v.id= data(:,ID);    
+%     v.frame = data(:,FRAME);
+%     v.x = data(:,X);
+%     v.y = data(:,Y);
+%     v.z = data(:,Z);		
+%     v.roll = data(:,ROLL);    
+%     v.pitch= data(:,PITCH);   
+%     v.yaw  = data(:,YAW);     
+%     v.area = data(:,AREA);    
+%     v.sens = data(:,SENS);    
+%     v.centints = data(:,CENTINTS);  
+%     v.well = data(:,WELL);    
+%     v.pass = data(:,PASS);    
+%     
+% 
+%     TrackingTable = struct2table(v);
+%     TrackingTable.Properties.VariableNames = { 'Fid', 'Time', 'ID', 'Frame', ...
+%                                                'X', 'Y', 'Z', ...
+%                                                'Roll', 'Pitch', 'Yaw', ...
+%                                                'Area', 'Sensitivity', 'CenterIntensity', ...
+%                                                'Well', 'Pass' };
+%     TrackingTable.Properties.VariableUnits = { '', 's', '', 'frame', ...
+%                                                'pixels', 'pixels', 'pixels', ...
+%                                                'unknown', 'unknown', 'unknown', ...
+%                                                'pixels^2', '', '', ...
+%                                                '', '' };
+% 
                                            
-function d = convert_Table_to_old_matrix(TrackingTable)
+function d = convert_Table_to_old_matrix(TrackingTable, fps)
+
+    iscolumn = @(TableName, ColumnName)(sum(ismember(ColumnName, TableName.Properties.VariableNames)));
+
     video_tracking_constants;
     
-    d(:,TIME) = TrackingTable.Time;
+    d(:,TIME) = (TrackingTable.Frame - 1) / fps;
     d(:,ID) = TrackingTable.ID;
     d(:,FRAME) = TrackingTable.Frame;
     d(:,X) = TrackingTable.X;
     d(:,Y) = TrackingTable.Y;
     d(:,Z) = TrackingTable.Z;
     
-    if isfield(TrackingTable, 'Roll')        
+    if iscolumn(TrackingTable, 'Roll')        
         d(:,ROLL) = TrackingTable.Roll;
     else
         d(:,ROLL) = 0;
     end
     
-    if isfield(TrackingTable, 'Pitch')        
+    if iscolumn(TrackingTable, 'Pitch')        
         d(:,PITCH) = TrackingTable.Pitch;
     else
         d(:,PITCH) = 0;
     end
     
-    if isfield(TrackingTable, 'Yaw')        
+    if iscolumn(TrackingTable, 'Yaw')        
         d(:,YAW) = TrackingTable.Yaw;
     else
         d(:,YAW) = 0;
     end
-    
-    
-    if isfield(TrackingTable, 'Area')        
+        
+    if iscolumn(TrackingTable, 'Area')        
         d(:,AREA) = TrackingTable.Area;
     else
         d(:,AREA) = 0;
     end
     
-    if isfield(TrackingTable, 'Sensitivity')        
+    if iscolumn(TrackingTable, 'Sensitivity')        
         d(:,SENS) = TrackingTable.Sensitivity;
     else
         d(:,SENS) = 0;
     end
     
-    if isfield(TrackingTable, 'CenterIntensity')        
+    if iscolumn(TrackingTable, 'CenterIntensity')        
         d(:,CENTINTS) = TrackingTable.CenterIntensity;
     else
         d(:,CENTINTS) = 0;
     end
     
-    if isfield(TrackingTable, 'Well')        
+    if iscolumn(TrackingTable, 'Well')        
         d(:,WELL) = TrackingTable.Well;
     else
         d(:,WELL) = 0;
     end
     
-    if isfield(TrackingTable, 'Pass')        
+    if iscolumn(TrackingTable, 'Pass')        
         d(:,PASS) = TrackingTable.Pass;
     else
         d(:,PASS) = 0;
+    end
+
+    if iscolumn(TrackingTable, 'Fid')
+        d(:,FID) = TrackingTable.Fid;
+    else
+        d(:,FID) = 0;
     end
     
 return
     
 function logentry(txt)
+
     logtime = clock;
     
     % dbstack pulls the stack of function calls that got us here
@@ -2420,17 +2435,36 @@ function logentry(txt)
     % This function is stk(1).name and its calling function is stk(2).name
     calling_func = stk(2).name;
     
-    logtimetext = [ '(' num2str(logtime(1),  '%04i') '.' ...
-                   num2str(logtime(2),        '%02i') '.' ...
-                   num2str(logtime(3),        '%02i') ', ' ...
-                   num2str(logtime(4),        '%02i') ':' ...
-                   num2str(logtime(5),        '%02i') ':' ...
-                   num2str(round(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext calling_func ': '];
+    logtimetext = [ '(' num2str(logtime(1),        '%04i') '.' ...
+                        num2str(logtime(2),        '%02i') '.' ...
+                        num2str(logtime(3),        '%02i') ', ' ...
+                        num2str(logtime(4),        '%02i') ':' ...
+                        num2str(logtime(5),        '%02i') ':' ...
+                        num2str(round(logtime(6)), '%02i') ') '];
+    headertext = [logtimetext calling_func ': '];
      
-     fprintf('%s%s\n', headertext, txt);
- 
+    fprintf('%s%s\n', headertext, txt);
 
+    % Putting status onto the gui
+    handles = guihandles(gcbo);
+    set(handles.text_status, 'String', [headertext, txt]);
+
+%     mystatus = get(handles.text_status, 'String');
+% 
+%     if ischar(mystatus) 
+%         mystatus{1,1} = mystatus;
+%     end
+% 
+%     N = numel(mystatus);
+% 
+%     mystatus{N + 1, 1} = [headertext, txt];
+% 
+%     if N > 50
+%         mystatus(:,1) = mystatus(end-50:end,1);
+%     end
+% 
+%     set(handles.text_status, 'String', mystatus);
+%     set(handles.text_status, 'Value', N);
      
 % function old_popup_AUXplot_Callback(hObject, eventdata, handles)
 %     contents = get(hObject, 'String');
