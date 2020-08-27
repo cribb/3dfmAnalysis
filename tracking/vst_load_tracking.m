@@ -51,10 +51,10 @@ for f = 1:length(fid)
     Fid.Properties.VariableNames{'Var1'} = 'Fid';
 
     % rename the headers to something more easily coded/read
-%     dd.Properties.VariableNames{'FrameNumber'} = 'Frame';
-%     dd.Properties.VariableNames{'SpotID'}      = 'ID';
+    dd.Properties.VariableNames{'FrameNumber'} = 'Frame';
+    dd.Properties.VariableNames{'SpotID'}      = 'ID';
     
-%     logentry(['Loaded *' filelist{f} '* which contains ' num2str(length(unique((dd.ID)))) ' initial trackers.']);
+    logentry(['Loaded *' filelist{f} '* which contains ' num2str(length(unique((dd.ID)))) ' initial trackers.']);
 
     % Z data and remaining values are nonexistant (These can be added back if needed in a
     % later version
