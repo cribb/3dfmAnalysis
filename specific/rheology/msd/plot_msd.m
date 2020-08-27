@@ -23,9 +23,6 @@ end
 
 if nargin < 2 || isempty(h)
     h = figure;
-    brought_own_figure_handle = 0;
-else
-    brought_own_figure_handle = 1;
 end
 
 if nargin < 1 || isempty(d_in.tau)
@@ -39,27 +36,31 @@ end
 d = msdstat(d_in);
 
 % creating the plot
-if ~exist('brought_own_figure_handle')
-    figure(h);
-end
+figure(h);
     
 if strcmpi(optstring, 'u')
     d.mean_logmsd = d.mean_logmsd + 12;
     d.msd = d.msd * 1e12;
 end
 
+gray = [0.65, 0.65, 0.65];
+black = [0 0 0];
+
 if strcmpi(optstring, 'a')
-    plot(d.logtau, d.logmsd, 'b');
+    plot(d.logtau, d.logmsd, 'Color', gray);
 elseif strcmpi(optstring, 'm')
-    plot(d.mean_logtau, d.mean_logmsd, 'k.-');
+    plot(d.mean_logtau, d.mean_logmsd, black);
 elseif strcmpi(optstring, 'am')
-    plot(d.logtau, d.logmsd, 'b', d.mean_logtau, d.mean_logmsd, 'k.-');
-elseif strcmpi(optstring, 'me') || strcmpi(optstring, 'e')
-    errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, '.-', 'Color', 'cyan', 'LineWidth', 2);
-elseif strcmpi(optstring, 'ame')
-    plot(log10(d.tau), log10(d.msd), 'b-');
     hold on;
-        errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, '.-', 'Color', 'cyan', 'LineWidth', 2);
+    plot(d.logtau, d.logmsd, 'Color', gray);
+    plot(d.mean_logtau, d.mean_logmsd, 'Color', black, 'LineWidth', 2);
+    hold off;
+elseif strcmpi(optstring, 'me') || strcmpi(optstring, 'e')
+    errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, '.-', 'Color', black, 'LineWidth', 2);
+elseif strcmpi(optstring, 'ame')
+    plot(log10(d.tau), log10(d.msd), 'Color', gray);
+    hold on;
+        errorbar(d.mean_logtau, d.mean_logmsd, d.msderr, '.-', 'Color', black, 'LineWidth', 2);
     hold off;
 end
 
