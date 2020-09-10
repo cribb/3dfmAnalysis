@@ -51,8 +51,8 @@ for f = 1:length(fid)
     Fid.Properties.VariableNames{'Var1'} = 'Fid';
 
     % rename the headers to something more easily coded/read
-%     dd.Properties.VariableNames{'FrameNumber'} = 'Frame';
-%     dd.Properties.VariableNames{'SpotID'}      = 'ID';
+    dd.Properties.VariableNames{'FrameNumber'} = 'Frame';
+    dd.Properties.VariableNames{'SpotID'}      = 'ID';
     
 %     logentry(['Loaded *' filelist{f} '* which contains ' num2str(length(unique((dd.ID)))) ' initial trackers.']);
 
