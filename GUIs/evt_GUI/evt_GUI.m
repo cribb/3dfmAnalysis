@@ -453,6 +453,7 @@ function edit_calibum_CreateFcn(hObject, eventdata, handles)
 
 function edit_calibum_Callback(hObject, eventdata, handles)
     handles.calibum = str2double(handles.edit_calibum.String);
+    handles.VidTable.Calibum = str2double(handles.edit_calibum.String);
     handles.recomputeMSD = 1;
 	guidata(hObject, handles);
     
@@ -502,6 +503,7 @@ function edit_frame_rate_Callback(hObject, eventdata, handles)
     
     % Rescale time in the tracking table
     handles.fps = str2double(get(hObject, 'String'));
+    handles.VidTable.fps = str2double(get(hObject, 'String'));
 
 %     handles.TrackingTable.Time = handles.TrackingTable.Frame / handles.fps;
     handles.recomputeMSD = 1;
@@ -717,7 +719,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
 
     [File, Path, fidx] = uigetfile({'*.mat;*.csv';'*.mat';'*.csv';'*.*'}, ...
                                       'Select File(s) to Open', ...
-                                      'MultiSelect', 'on');
+                                      'MultiSelect', 'off');
+%                                       'MultiSelect', 'on');
 
     if sum(length(File), length(Path)) <= 1
         logentry('No tracking file selected. No tracking file loaded.');
@@ -731,6 +734,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
 %     Path = 'C:\Dropbox\prof\Lab\Hill Lab\Water';
 %     File = 'saltwater_0005.vrpn.mat';
 %     File = 'sim_beads.vrpn.mat';
+%     Path = 'E:\microrheo\2020.08.12__HBE_1um_SurfaceStudy1';
+%     File = 'well29_pass01_1024x768x1200_uint8.csv';
 
     filename = fullfile(Path, File);
     S.Fid = evt_makeFid;
@@ -739,8 +744,10 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     S.TrackingFiles = File;
     S.Fps = handles.fps;
     S.Calibum = handles.calibum;
-    S.Width = 648;
-    S.Height = 484;
+    S.Width = 1024;
+    S.Height = 768;
+%     S.Width = 648;
+%     S.Height = 484;
     S.Firstframefile = '';
     S.Mipfile = '';
     

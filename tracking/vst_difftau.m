@@ -30,7 +30,8 @@ function DiffTauTable = vst_difftau(DataIn, taulist)
     
     tmpT = innerjoin(DiffTauTable, DataIn.VidTable(:,{'Fid', 'Fps'}));
     DiffTauTable.Tau_s = DiffTauTable.Tau ./ tmpT.Fps;
-
+%     DiffTauTable.Tau_s = DiffTauTable.Tau ./ 60;
+    
     DiffTauTable = movevars(DiffTauTable, 'Tau_s', 'after', 'Tau');
     
     DiffTauTable.Properties.Description = 'Displacements in microns over Tau';
