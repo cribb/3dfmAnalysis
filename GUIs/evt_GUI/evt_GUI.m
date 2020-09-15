@@ -1884,34 +1884,35 @@ function plot_VelMagScalarField(VelMag, h)
     pretty_plot;   
 return
 
-function outs = prep_MSD_plot(handles)
+function outs = prep_old_MSD_plot(handles)
     TrackingTable = handles.TrackingTable;
     framemax = max(TrackingTable.Frame);
     numtaus = handles.numtaus;
-    duration_fraction = 0.5;
+    fps = handles.fps;
+    calibum = handles.calibum;
+    bead_diameter_um = handles.edit_bead_diameter_um.Value;
     
+    duration_fraction = 0.5;
     taulist = msd_gen_taus(framemax, numtaus, duration_fraction);
+    window_at_1_sec = floor(fps);    
+    taulist = [taulist; window_at_1_sec - 1; window_at_1_sec; window_at_1_sec+1];
+    taulist = unique(taulist); % to eliminate the possibility of repeats after adding a special set to default
+    taulist = sort(taulist);
     
     DataIn.VidTable = handles.VidTable;
     DataIn.TrackingTable = TrackingTable;
     
-%     if handles.recomputeMSD
+    video_tracking_constants;
+    trajectories = convert_Table_to_old_matrix(handles.TrackingTable, fps);    
+    trajectories(:,X:Y) = trajectories(:,X:Y) .* calibum .* 1e-6;
+    
+    mymsd = video_msd(trajectories, taulist, fps, calibum, 'n', 'n');
+    myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n');
+    myD = mymsd.msd ./ (4 .* mymsd.tau);
+    outs.mymsd = mymsd;
+    outs.myve  = myve;
+    outs.myD   = myD;
 
-        diffTable = vst_difftau(DataIn, taulist);
-        msdTable = vst_msd(DataIn, taulist);
-        outs.MsdTable = join(diffTable, msdTable);
-        outs.MsdEnsemble = vst_msdEnsemble(outs);
-        outs.taulist = taulist;
-%     end
-        
-%         myve = ve(mymsd, bead_diameter_um*1e-6/2, 'f', 'n');
-%         myD = mymsd.msd ./ (4 .* mymsd.tau);
-%         handles.mymsd = mymsd;
-%         handles.myve  = myve;
-%         handles.myD   = myD;
-%         handles.recomputeMSD = 0;
-%      end
-% 
 %         msdID   = unique(TrackingTable.ID)';    
 %         mymsd   = handles.mymsd;
 %         myve    = handles.myve;
@@ -1924,7 +1925,36 @@ function outs = prep_MSD_plot(handles)
         
 return
 
-function plot_MSD_evt(MSDdata, h)
+function outs = prep_new_MSD_plot(handles)
+    TrackingTable = handles.TrackingTable;
+    framemax = max(TrackingTable.Frame);
+    numtaus = handles.numtaus;
+    duration_fraction = 0.5;
+    
+    taulist = msd_gen_taus(framemax, numtaus, duration_fraction);
+    
+    DataIn.VidTable = handles.VidTable;
+    DataIn.TrackingTable = TrackingTable;
+    
+    diffTable = vst_difftau(DataIn, taulist);
+    msdTable = vst_msd(DataIn, taulist);
+    outs.MsdTable = join(diffTable, msdTable);
+    outs.MsdEnsemble = vst_msdEnsemble(outs);
+    outs.taulist = taulist;
+
+% 
+%         msdID   = unique(TrackingTable.ID)';    
+%         mymsd   = handles.mymsd;
+%         myve    = handles.myve;
+%         myD     = handles.myD;
+%         tau = mymsd.tau;
+%         msd = mymsd.msd;
+%         
+%         q  = find(msdID  == CurrentBead);        
+        
+return
+
+function plot_new_MSD(MSDdata, h)
     beads = MSDdata.MsdTable;
     ensemble = MSDdata.MsdEnsemble;
     tau = MSDdata.taulist;
@@ -1946,34 +1976,40 @@ function plot_MSD_evt(MSDdata, h)
     hold off;    
 return
 
-function plot_GSER(hObject, eventdata, handles)
-    AUXfig = handles.AUXfig;
-    myve = handles.myve;
-    
-    plotG       = get(handles.checkbox_G, 'Value');
-    ploteta     = get(handles.checkbox_eta, 'Value');
-    plotGstar   = get(handles.checkbox_Gstar, 'Value');
-    plotetastar = get(handles.checkbox_etastar, 'Value');
 
-    plotstring = [];
+function plot_old_MSD(MSDdata, h)
+    plot_msd(MSDdata.mymsd, h, 'ame')
+return
 
-    if plotG
-        plotstring = [plotstring 'Gg'];
-    end
 
-    if ploteta
-        plotstring = [plotstring 'Nn'];
-    end
-
-    if plotGstar
-        plotstring = [plotstring 'S'];
-    end
-
-    if plotetastar
-        plotstring = [plotstring 's'];                
-    end
-
-    plot_ve(myve, 'f', AUXfig, plotstring);                
+function plot_GSER(MSDdata, h)
+%     AUXfig = handles.AUXfig;
+%     myve = handles.myve;
+%     
+%     plotG       = get(handles.checkbox_G, 'Value');
+%     ploteta     = get(handles.checkbox_eta, 'Value');
+%     plotGstar   = get(handles.checkbox_Gstar, 'Value');
+%     plotetastar = get(handles.checkbox_etastar, 'Value');
+% 
+%     plotstring = [];
+% 
+%     if plotG
+%         plotstring = [plotstring 'Gg'];
+%     end
+% 
+%     if ploteta
+%         plotstring = [plotstring 'Nn'];
+%     end
+% 
+%     if plotGstar
+%         plotstring = [plotstring 'S'];
+%     end
+% 
+%     if plotetastar
+%         plotstring = [plotstring 's'];                
+%     end
+    plotstring = 'Nn';
+    plot_ve(MSDdata.myve, 'f', h, plotstring);                
 return
 
     
@@ -2049,13 +2085,28 @@ function plot_data(handles)
             plot_VelMagScalarField(handles.plots.VelMag, AUXfig);
                         
 %         case 'displacement hist'        
-        case 'MSD'
+
+
+        case 'old MSD (fast)'
             if handles.recomputeMSD
-                handles.plots.MSD = prep_MSD_plot(handles);
+                handles.plots.MSD = prep_old_MSD_plot(handles);
             end
-            plot_MSD_evt(handles.plots.MSD, AUXfig);
+            plot_old_MSD(handles.plots.MSD, AUXfig);
+            handles.recomputeMSD = 0;
+
+        case 'new MSD (slow)'
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_new_MSD_plot(handles);
+            end
+            plot_new_MSD(handles.plots.MSD, AUXfig);
+            handles.recomputeMSD = 0;
             
         case 'GSER'
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_old_MSD_plot(handles);
+            end
+            plot_GSER(handles.plots.MSD);
+            
         case 'RMS displacement'
         case 'alpha vs tau'            
         case 'alpha histogram'
