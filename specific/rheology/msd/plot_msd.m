@@ -49,7 +49,7 @@ black = [0 0 0];
 if strcmpi(optstring, 'a')
     plot(d.logtau, d.logmsd, 'Color', gray);
 elseif strcmpi(optstring, 'm')
-    plot(d.mean_logtau, d.mean_logmsd, black);
+    plot(d.mean_logtau, d.mean_logmsd, 'Color', black);
 elseif strcmpi(optstring, 'am')
     hold on;
     plot(d.logtau, d.logmsd, 'Color', gray);
