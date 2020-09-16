@@ -32,7 +32,7 @@ function vmsd = video_msd(files, window, frame_rate, calib_um, make_plot, xtra_o
 %
 
 % initializing arguments
-if nargin < 6 || isempty(xtra_output) || ~contains(xtra_output, 'n')
+if nargin < 6 || isempty(xtra_output) || contains(xtra_output, 'n')
     calc_r2 = 0;
     calc_r = 0;
 elseif contains(xtra_output, 'r2')
@@ -133,8 +133,8 @@ for k = 1 : length(beadIDs)
     
     b = get_bead(v, beadIDs(k));    
     
-    first_positions_X(1,k) = b(1,X) / (calib_um * 1e-6);
-    first_positions_Y(1,k) = b(1,Y) / (calib_um * 1e-6);
+%     first_positions_X(1,k) = b(1,X) / (calib_um * 1e-6);
+%     first_positions_Y(1,k) = b(1,Y) / (calib_um * 1e-6);
     
     % call up the MSD kernel-function to compute the MSD for each bead    
     if calc_r2 || calc_r
