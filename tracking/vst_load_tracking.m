@@ -51,8 +51,15 @@ for f = 1:length(fid)
     Fid.Properties.VariableNames{'Var1'} = 'Fid';
 
     % rename the headers to something more easily coded/read
-    dd.Properties.VariableNames{'FrameNumber'} = 'Frame';
-    dd.Properties.VariableNames{'SpotID'}      = 'ID';
+    % This one filters out any variant of Frame, i.e. "FrameID",
+    % "FrameNumber", etc.. to just a simple "Frame"
+    if sum(contains(dd.Properties.VariableNames, 'Frame'))
+        dd.Properties.VariableNames{contains(dd.Properties.VariableNames, 'Frame')} = 'Frame';
+    end
+    
+    if sum(contains(dd.Properties.VariableNames, 'Spot'))
+        dd.Properties.VariableNames{contains(dd.Properties.VariableNames, 'Spot')}      = 'ID';
+    end
     
     logentry(['Loaded *' filelist{f} '* which contains ' num2str(length(unique((dd.ID)))) ' initial trackers.']);
 
