@@ -116,7 +116,7 @@ if (nargin < 4) || isempty(plot_results) || strncmp(plot_results,'y',1)
     fig1 = figure; fig2 = figure;
     plot_ve(v, freq_type, fig1, 'Gg');
     plot_ve(v, freq_type, fig2, 'Nn');
-end;
+end
 
 return;
 
