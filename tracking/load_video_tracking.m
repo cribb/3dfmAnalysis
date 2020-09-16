@@ -186,7 +186,7 @@ for fid = 1:length(filelist)
 
     end
     
-    if fid == 1
+    if fid == 1 || ~exist('glommed_d', 'var')
         glommed_d = zeros(0,size(data,2));
     end
 
