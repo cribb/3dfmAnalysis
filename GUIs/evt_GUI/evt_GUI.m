@@ -843,7 +843,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     set(handles.text_calibum                        , 'Enable', 'on');
     set(handles.checkbox_lockum                     , 'Enable', 'on');    
     set(handles.checkbox_msdmean                    , 'Value',   1);
-
+    set(handles.edit_bead_diameter_um               , 'Enable', 'on');
+    
     % The slider calls the plot_data function
     slider_BeadID_Callback(hObject, eventdata, handles);
     guidata(hObject, handles);           
@@ -864,7 +865,7 @@ function FileMenuSaveAs_Callback(hObject, eventdata, handles)
     
 function FileMenuSave_Callback(hObject, eventdata, handles)
         
-    outfile = handles.Filename;
+    [pname, outfile] = fileparts(handles.Filename);
 
     logentry(['Setting Path to: ' pname]);
     cd(pname);
@@ -898,7 +899,7 @@ function EditMenu_AddMip_Callback(hObject, eventdata, handles)
                                       'MultiSelect', 'on');
     File = fullfile(Path, File);
     handles.im = imread(File);
-    [handles.Width, handles.Height] = size(handles.im);    
+    [handles.Height, handles.Width] = size(handles.im);    
     guidata(hObject, handles);                                    
                                   
     plot_data(handles);
@@ -1784,13 +1785,13 @@ function plot_velocity_scatter(VelScatter, h, ActiveOnlyTF)
     end
     
     
-    [imx, imy] = size(im);    
+    [r, c] = size(im);    
     
     [g, gT] = findgroups(VelScatter.id);
 
     figure(h);
     clf;
-    imagesc([0 imx], [0 imy], im);
+    imagesc([0 c], [0 r], im);
     colormap(gray(256));
     hold on;
         
@@ -1890,7 +1891,7 @@ function outs = prep_old_MSD_plot(handles)
     numtaus = handles.numtaus;
     fps = handles.fps;
     calibum = handles.calibum;
-    bead_diameter_um = handles.edit_bead_diameter_um.Value;
+    bead_diameter_um = str2double(handles.edit_bead_diameter_um.String);
     
     duration_fraction = 0.5;
     taulist = msd_gen_taus(framemax, numtaus, duration_fraction);
@@ -2105,7 +2106,7 @@ function plot_data(handles)
             if handles.recomputeMSD
                 handles.plots.MSD = prep_old_MSD_plot(handles);
             end
-            plot_GSER(handles.plots.MSD);
+            plot_GSER(handles.plots.MSD, AUXfig);
             
         case 'RMS displacement'
         case 'alpha vs tau'            
