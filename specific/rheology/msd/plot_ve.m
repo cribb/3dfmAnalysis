@@ -24,7 +24,7 @@ function h = plot_ve(v, freq_type, h, optstring)
 %  
 
 if nargin < 4 || isempty(optstring)
-    optstring = '';
+    optstring = 'Nn';
 end
 
 if nargin < 3 || isempty(h)
