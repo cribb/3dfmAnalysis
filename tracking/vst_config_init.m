@@ -3,7 +3,8 @@ function vc = vst_config_init
 arch = computer('arch');
 % [~,host] = system('hostname');
 
-vc.VSTdir = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.13.0';
+% vc.VSTdir = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.13.0';
+vc.VSTdir = 'C:\Program Files (x86)\CISMM\Video_Spot_Tracker_v8.12.1';
 vc.VSTcuda = 'video_spot_tracker_local.bat';
 vc.VSTexe = 'video_spot_tracker.exe';
 % vc.VSTexe = 'video_spot_tracker_nogui.exe';
