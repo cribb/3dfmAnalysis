@@ -30,14 +30,14 @@ function h = plot_alphadist(alpha, h)
 % % % % calculate statistical measures for msd and plant into data structure
 % % % d = msdstat(d);
 
-if nargin < 2 || isempty(h);
+if nargin < 2 || isempty(h)
     h = figure;
 end
 
 
 % creating the plot
 figure(h);
-hist(alpha(:),25);
+histogram(alpha(:));
 
 ch = get(gca, 'Children');
 for k = 1:length(ch)

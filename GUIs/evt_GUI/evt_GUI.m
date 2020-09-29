@@ -2013,7 +2013,19 @@ function plot_GSER(MSDdata, h)
     plot_ve(MSDdata.myve, 'f', h, plotstring);                
 return
 
+function evt_plot_rmsdisp(MSDdata, h)
+    plotstring = 'ame';
+    plot_rmsdisp(MSDdata.mymsd, h, plotstring);
+return
     
+function evt_plot_alphatau(MSDdata,h)
+    plotstring = 'ame';
+    plot_alphavstau(MSDdata.myve, h, plotstring);
+return
+
+function evt_plot_alphadist(MSDdata, h)
+    plot_alphadist(MSDdata.myve.alpha, h);
+
 function plot_data(handles)
 
     stk = dbstack;
@@ -2107,10 +2119,30 @@ function plot_data(handles)
                 handles.plots.MSD = prep_old_MSD_plot(handles);
             end
             plot_GSER(handles.plots.MSD, AUXfig);
+            handles.recomputeMSD = 0;
             
         case 'RMS displacement'
-        case 'alpha vs tau'            
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_old_MSD_plot(handles);
+            end
+            %plot_GSER(handles.plots.MSD, AUXfig);
+            evt_plot_rmsdisp(handles.plots.MSD, AUXfig);
+            handles.recomputeMSD = 0;
+            
+        case 'alpha vs tau'   
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_old_MSD_plot(handles);
+            end
+            evt_plot_alphatau(handles.plots.MSD, AUXfig);
+            handles.recomputeMSD = 0;
+            
         case 'alpha histogram'
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_old_MSD_plot(handles);
+            end
+            evt_plot_alphadist(handles.plots.MSD, AUXfig)
+            handles.recomputeMSD = 0;
+            
         case 'MSD histogram'
         case 'Diffusivity @ a tau'
         case 'Diffusivity vs. tau'

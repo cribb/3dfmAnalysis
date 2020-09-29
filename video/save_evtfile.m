@@ -58,7 +58,7 @@ function save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, outtype)
 		data(:,X:Z) = data(:,X:Z) ./ calib_um;  % convert video coords from pixels to meters
     elseif strcmp(xyzunits,'nm')
 		data(:,X:Z) = data(:,X:Z) ./ calib_um * 1e-3;  % convert video coords from pixels to nm
-    elseif strcmp(xyzunits, 'pixels')
+    elseif strcmp(xyzunits, 'pixel')
         % do nothing
     else
         units{X} = 'pixels';  units{Y} = 'pixels';  units{Z} = 'pixels';
