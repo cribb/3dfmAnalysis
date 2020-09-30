@@ -339,7 +339,7 @@ function pushbutton_Select_Closest_xydataset_Callback(hObject, eventdata, handle
         
         switch myAUXplottype
             case 'MSD'
-                logentry('MSD selection needs reimplementation.');
+                logentry('Displaying active bead in MSD selection needs reimplementation.');
 %                 figure(handles.AUXfig);
 %                 
 %                 mymsd = handles.mymsd;
@@ -964,10 +964,11 @@ function checkbox_min_sens_Callback(hObject, eventdata, handles)
 
     
 function pushbutton_FilterConfig_Callback(hObject, eventdata, handles)
+
     h = evt_FilterConfig;
-    uiwait(gcf);
-    h
+    uiwait(gcf);   
     guidata(hObject, handles);
+    
     return
 
     
@@ -996,9 +997,6 @@ function handles = filter_bead_selection(handles)
     else
         handles.XYZoffsets = zeros(1,3);
     end
-
-
-
     
 
 function Plot_XYfig(handles)
@@ -1486,40 +1484,29 @@ function NativeXYZ = RemoveXYScaleAndOffset(xyz, handles)
 
 function varargout = pixel2um(varargin)
     handles = guihandles(gcbo);
-    calibum = str2num(get(handles.edit_calibum, 'String'));
-    varargout = cell(1, nargin);
-    for k = 1:nargin
-        varargout{k} = varargin{k} * calibum;
-    end
+    calibum = str2double(get(handles.edit_calibum, 'String'));
+    varargout = cellfun(@(x)(x .* calibum), varargin);
 return
 
 
 function varargout = um2pixel(varargin)
     handles = guihandles(gcbo);
-    calibum = str2num(get(handles.edit_calibum, 'String'));
-    for k = 1:nargin
-        varargout{k} = varargin{k} / calibum;
-    end
+    calibum = str2double(get(handles.edit_calibum, 'String'));
+    varargout = cellfun(@(x)(x ./ calibum), varargin);
 return
 
 
 function varargout = frame2sec(varargin)
     handles = guihandles(gcbo);
     fps = str2double(get(handles.edit_frame_rate, 'String'));
-    varargout = cell(1, nargin);
-    for k = 1:nargin
-        varargout{k} = varargin{k} / fps;
-    end
+    varargout = cellfun(@(x) (x ./ fps), varargin);
 return
 
 
 function varargout = sec2frame(varargin)
     handles = guihandles(gcbo);
     fps = str2double(handles.edit_frame_rate.String);
-    varargout = cell(1, nargin);
-    for k = 1:nargin
-        varargout{k} = varargin{k} * fps;
-    end
+    varargout = cellfun(@(x) (x .* fps), varargin);
 return
 
 
@@ -1557,7 +1544,7 @@ function radial = calculate_radial_vector(handles)
         y0 = y(1); 
         z0 = z(1); 
     elseif get(handles.radio_arb_origin, 'Value')            
-        arb_origin = str2num(handles.edit_arb_origin.String);   
+        arb_origin = str2double(handles.edit_arb_origin.String);   
 
         if numel(arb_origin) >= 1
             x0 = arb_origin(1); 
@@ -1841,8 +1828,6 @@ function VelMag = prep_VelMagScalarField_plot(handles)
     VelMag = prep_VelField_plot(handles);
     VelMag = VelMag.VelField;
     
-
-    
     Vmag = sqrt(VelMag.Xvel.^2 + VelMag.Yvel.^2);        
     Vmag(Vmag<0.001) = NaN;
     Vmag(isnan(Vmag)) = min(Vmag(~isnan(Vmag)));
@@ -1850,8 +1835,7 @@ function VelMag = prep_VelMagScalarField_plot(handles)
     VelMag.Vmag = Vmag;
 return
 
-function plot_VelMagScalarField(VelMag, h)
-    
+function plot_VelMagScalarField(VelMag, h)    
     figure(h);
     imagesc(VelMag.Xgrid, VelMag.Ygrid, log10(VelMag.Vmag')); 
     colormap(hot);
@@ -1877,8 +1861,8 @@ function outs = prep_old_MSD_plot(handles)
     taulist = unique(taulist); % to eliminate the possibility of repeats after adding a special set to default
     taulist = sort(taulist);
     
-    DataIn.VidTable = handles.VidTable;
-    DataIn.TrackingTable = TrackingTable;
+%     DataIn.VidTable = handles.VidTable;
+%     DataIn.TrackingTable = TrackingTable;
     
     video_tracking_constants;
     trajectories = convert_Table_to_old_matrix(handles.TrackingTable, fps);    
@@ -1891,14 +1875,7 @@ function outs = prep_old_MSD_plot(handles)
     outs.myve  = myve;
     outs.myD   = myD;
 
-%         msdID   = unique(TrackingTable.ID)';    
-%         mymsd   = handles.mymsd;
-%         myve    = handles.myve;
-%         myD     = handles.myD;
-%         tau = mymsd.tau;
-%         msd = mymsd.msd;
-%         
-%         q  = find(msdID  == CurrentBead);
+
         
         
 return
@@ -1935,8 +1912,7 @@ return
 function plot_new_MSD(MSDdata, h)
     beads = MSDdata.MsdTable;
     ensemble = MSDdata.MsdEnsemble;
-    tau = MSDdata.taulist;
-
+    
     gb = findgroups(beads.ID);    
     ge = findgroups(ensemble.Tau);
     
@@ -2164,7 +2140,7 @@ function bayes = run_bayes_model_selection(hObject, eventdata, handles)
     metadata.fps         = str2double(get(handles.edit_frame_rate, 'String'));
     metadata.calibum     = calibum;
     metadata.bead_radius = str2double(get(handles.edit_bead_diameter_um, 'String'))*1e-6/2;
-    metadata.numtaus     = str2num(get(handles.edit_numtaus, 'String'));
+    metadata.numtaus     = str2double(get(handles.edit_numtaus, 'String'));
     metadata.sample_names= {' '};
     metadata.models      = {'N', 'D', 'DA', 'DR', 'V'}; % avail. models are {'N', 'D', 'DA', 'DR', 'V', 'DV', 'DAV', 'DRV'};
     metadata.refdata     = 1;
@@ -2392,8 +2368,7 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
      handles.bayes.name = myfile;     
      guidata(hObject, handles);
      
-%      bayes = handles.bayes;
-%      
+     bayes = handles.bayes;
          
 return
 
