@@ -1141,11 +1141,11 @@ function Plot_AUXfig(handles)
         
         case 'center intensity'            
             handles.plots.CenterIntensity = calculate_center_intensity(handles);
-            plot_center_intensity(handles.plots.CenterIntensity, handles.AUXfig);
+            plot_center_intensity(handles.plots.CenterIntensity, AUXfig);
 
         case 'velocity'
             handles.plots.Velocity = prep_velocity_plot(handles);
-            plot_velocity(handles.plots.Velocity, handles.LengthUnits, AUXfig);
+            plot_velocity(handles.plots.Velocity, AUXfig);
             
         case 'velocity magnitude'
             handles.plots.VelMag = prep_velmag_plot(handles);
@@ -1790,23 +1790,48 @@ function outs = prep_velocity_plot(handles)
 %     handles.TimeUnits = 'frames';
 %     handles.TimeUnits = 'seconds';
 
-    dt = 1/handles.fps;
-    
     idx = handles.CurrentBeadRows;
+
+    Frame = handles.TrackingTable.Frame(idx);
+    VelX = handles.TrackingTable.Vx(idx);
+    VelY = handles.TrackingTable.Vy(idx);
+    VelZ = handles.TrackingTable.Vz(idx);
+
+    if handles.radio_microns.Value
+        [VelX, VelY, VelZ] = pixel2um(VelX, VelY, VelZ);
+        LengthUnits = '\mum';
+    else
+        LengthUnits = 'pixels';
+    end
     
-    outs.Time = handles.TrackingTable.Frame(idx) / handles.fps;
-    outs.VelX = handles.TrackingTable.Vx(idx) / dt;
-    outs.VelY = handles.TrackingTable.Vy(idx) / dt;
-    outs.VelZ = handles.TrackingTable.Vz(idx) / dt;
+    if handles.radio_seconds.Value
+        dt = 1/handles.fps;
+        Time = Frame .* dt;
+        TimeUnits = '[s]';
+        VelTimeUnits = 's';        
+        [VelX, VelY, VelZ] = frame2sec(VelX, VelY, VelZ);
+    else
+        dt = 1;
+        Time = Frame;
+        TimeUnits = '[frames]';
+        VelTimeUnits = 'frame';
+    end
+    
+    outs.Time = Time;
+    outs.VelX = VelX;
+    outs.VelY = VelY;
+    outs.VelZ = VelZ;
+    outs.TimeUnits = TimeUnits;
+    outs.VelUnits = ['[', LengthUnits, '/', VelTimeUnits, ']'];
 return
 
 
-function plot_velocity(Velocity, LengthUnits, h)
+function plot_velocity(Velocity, h)
     figure(h);
     clf;
     plot(Velocity.Time, [Velocity.VelX Velocity.VelY], '.-');
-    xlabel('time (s)');
-    ylabel(['velocity [' LengthUnits '/s]']);
+    xlabel(['time, ' Velocity.TimeUnits]);
+    ylabel(['velocity, ' Velocity.VelUnits]);
     legend('x', 'y');
     drawnow;
 return
