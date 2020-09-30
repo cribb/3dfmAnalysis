@@ -1032,11 +1032,6 @@ function Plot_XYfig(handles)
     ylabel(['displacement [' LengthUnits ']']);    
     xlim(imx);
     ylim(imy);
-    set(handles.XYfig, 'Units', 'Normalized');
-%     set(handles.XYfig, 'Position', [0.1 0.05 0.4 0.4]);
-    set(handles.XYfig, 'DoubleBuffer', 'on');
-    set(handles.XYfig, 'BackingStore', 'off');
-    drawnow;
     
 %     if isfield(handles, 'poleloc')
 %         polex = handles.poleloc(1);
@@ -1117,7 +1112,122 @@ function Plot_XTfig(handles)
 
     drawnow;
 
+function Plot_AUXfig(handles)
+    AUXfig = handles.AUXfig;         
+    AUXtype = handles.AUXtype;
     
+    if ~strcmp(AUXtype,'OFF')
+        try
+            set(AUXfig, 'Visible', 'on');            
+        catch
+            handles = init_AUXfig(handles);
+            set(handles.AUXfig, 'Visible', 'on');            
+        end
+        
+        clf(handles.AUXfig);
+    end        
+    
+    switch handles.AUXtype
+        case 'OFF'
+            set(AUXfig, 'Visible', 'off');
+
+        case 'radial vector'
+            handles.plots.radial = calculate_radial_vector(handles);            
+            plot_radial_vector(handles.plots.radial, handles.LengthUnits, AUXfig);
+            
+        case 'sensitivity (SNR)'
+            handles.plots.sens = calculate_sensitivity(handles);
+            plot_sensitivity(handles.plots.sens, AUXfig);
+        
+        case 'center intensity'            
+            handles.plots.CenterIntensity = calculate_center_intensity(handles);
+            plot_center_intensity(handles.plots.CenterIntensity, handles.AUXfig);
+
+        case 'velocity'
+            handles.plots.Velocity = prep_velocity_plot(handles);
+            plot_velocity(handles.plots.Velocity, handles.LengthUnits, AUXfig);
+            
+        case 'velocity magnitude'
+            handles.plots.VelMag = prep_velmag_plot(handles);
+            plot_velocity_magnitude(handles.plots.VelMag, handles.LengthUnits, AUXfig);
+            
+        case 'velocity scatter (all)'
+            handles.plots.VelScatter = prep_VelScatter_plot(handles);
+            plot_velocity_scatter(handles.plots.VelScatter, AUXfig);
+            
+        case 'velocity scatter (active)'            
+            handles.plots.VelScatter = prep_VelScatter_plot(handles);
+            plot_velocity_scatter(handles.plots.VelScatter, AUXfig, true);
+
+        case 'velocity vectorfield'            
+            handles.plots.VelField = prep_VelField_plot(handles);
+            plot_VelField(handles.plots.VelField, AUXfig);
+   
+        case 'vel. mag. scalarfield'            
+            handles.plots.VelMag = prep_VelMagScalarField_plot(handles);
+            plot_VelMagScalarField(handles.plots.VelMag, AUXfig);
+                        
+%         case 'displacement hist'        
+
+        case 'old MSD (fast)'
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_old_MSD_plot(handles);
+            end
+            plot_old_MSD(handles.plots.MSD, AUXfig);
+            handles.recomputeMSD = 0;
+
+        case 'new MSD (slow)'
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_new_MSD_plot(handles);
+            end
+            plot_new_MSD(handles.plots.MSD, AUXfig);
+            handles.recomputeMSD = 0;
+            
+        case 'GSER'
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_old_MSD_plot(handles);
+            end
+            plot_GSER(handles.plots.MSD, AUXfig);
+            handles.recomputeMSD = 0;
+            
+        case 'RMS displacement'
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_old_MSD_plot(handles);
+            end
+            %plot_GSER(handles.plots.MSD, AUXfig);
+            evt_plot_rmsdisp(handles.plots.MSD, AUXfig);
+            handles.recomputeMSD = 0;
+            
+        case 'alpha vs tau'   
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_old_MSD_plot(handles);
+            end
+            evt_plot_alphatau(handles.plots.MSD, AUXfig);
+            handles.recomputeMSD = 0;
+            
+        case 'alpha histogram'
+            if handles.recomputeMSD
+                handles.plots.MSD = prep_old_MSD_plot(handles);
+            end
+            evt_plot_alphadist(handles.plots.MSD, AUXfig)
+            handles.recomputeMSD = 0;
+            
+        case 'MSD histogram'
+        case 'Diffusivity @ a tau'
+        case 'Diffusivity vs. tau'
+        case 'temporal MSD'
+        case 'PSD'        
+        case 'Integrated Disp'                 
+        case 'pole locator'
+        case 'tracker avail'
+            handles.plots.TrackerAvail = calculate_tracker_availability(handles);
+            plot_tracker_availability(handles.plots.TrackerAvail, AUXfig)
+
+        case '2pt MSD ~~not implemented yet~~'
+
+    end
+    
+    return    
     
 function handles = delete_selected_dataset(handles)
     
@@ -1485,28 +1595,28 @@ function NativeXYZ = RemoveXYScaleAndOffset(xyz, handles)
 function varargout = pixel2um(varargin)
     handles = guihandles(gcbo);
     calibum = str2double(get(handles.edit_calibum, 'String'));
-    varargout = cellfun(@(x)(x .* calibum), varargin);
+    varargout = cellfun(@(x)(x .* calibum), varargin, 'UniformOutput', false);
 return
 
 
 function varargout = um2pixel(varargin)
     handles = guihandles(gcbo);
     calibum = str2double(get(handles.edit_calibum, 'String'));
-    varargout = cellfun(@(x)(x ./ calibum), varargin);
+    varargout = cellfun(@(x)(x ./ calibum), varargin, 'UniformOutput', false);
 return
 
 
 function varargout = frame2sec(varargin)
     handles = guihandles(gcbo);
     fps = str2double(get(handles.edit_frame_rate, 'String'));
-    varargout = cellfun(@(x) (x ./ fps), varargin);
+    varargout = cellfun(@(x) (x ./ fps), varargin, 'UniformOutput', false);
 return
 
 
 function varargout = sec2frame(varargin)
     handles = guihandles(gcbo);
     fps = str2double(handles.edit_frame_rate.String);
-    varargout = cellfun(@(x) (x .* fps), varargin);
+    varargout = cellfun(@(x) (x .* fps), varargin, 'UniformOutput', false);
 return
 
 
@@ -1563,21 +1673,27 @@ function radial = calculate_radial_vector(handles)
         else 
             z0 = 0;
         end
+        
+        % Covnert 'wrt' coordinates to 'pixels' when 'microns' are selected
+        % on the UI.
+        if handles.radio_microns.Value
+            x0 = um2pixel(x0);
+            y0 = um2pixel(y0);
+            z0 = um2pixel(z0);
+        end    
 
-    end    
-
-    % handle the case where 'microns' are selected
-    if handles.radio_microns.Value
-        x0 = um2pixel(x0);
-        y0 = um2pixel(y0);
-        z0 = um2pixel(z0);
     end    
     
     r = sqrt((x-x0).^2 + (y-y0).^2 + (z-z0).^2);
 
     mintime = handles.mintime;
+    t = t - mintime;
     
-    radial.t = t - mintime;
+    if handles.radio_microns.Value
+        r = pixel2um(r);        
+    end
+    
+    radial.t = t;
     radial.r = r;
     
     return
@@ -1588,7 +1704,7 @@ function plot_radial_vector(radial, LengthUnits, h)
     figure(h);
     plot(radial.t, radial.r, '.-');
     xlabel('time (s)');
-    ylabel(['radial dispacement [' LengthUnits ']']);
+    ylabel(['radial displacement [' LengthUnits ']']);
     drawnow;
  return
 
@@ -1616,21 +1732,27 @@ return
  
 
 function outs = calculate_tracker_availability(handles)
-    outs.Frame = handles.TrackingTable.Frame;
-    outs.ID = handles.TrackingTable.ID;
+    
+    CurrentBeadRows = handles.CurrentBeadRows;
+    
+    outs.CurrentBead.Frame = handles.TrackingTable.Frame(CurrentBeadRows);
+    outs.CurrentBead.ID = handles.TrackingTable.ID(CurrentBeadRows);
+    outs.OtherBeads.Frame = handles.TrackingTable.Frame(~CurrentBeadRows);
+    outs.OtherBeads.ID = handles.TrackingTable.ID(~CurrentBeadRows);
 return
 
 
-function plot_tracker_availability(TrackerAvail, CurrentBeadRows, h)
+function plot_tracker_availability(TrackerAvail, h)
     figure(h);
     clf;
     hold on;
-        plot(TrackerAvail.Frame(~CurrentBeadRows), ...
-             TrackerAvail.ID(~CurrentBeadRows), 'b.');
-        plot(TrackerAvail.Frame(CurrentBeadRows), ...
-             TrackerAvail.ID(CurrentBeadRows), 'r.');
+        plot(TrackerAvail.CurrentBead.Frame, ...
+             TrackerAvail.CurrentBead.ID, 'r.');
+         
+        plot(TrackerAvail.OtherBeads.Frame, ...
+             TrackerAvail.OtherBeads.ID, 'b.');
     hold off;    
-    xlabel('frame number');
+    xlabel('Frame#');
     ylabel('Tracker ID');
     drawnow;
 return
@@ -1663,6 +1785,11 @@ return
 
 function outs = prep_velocity_plot(handles)
     
+%     handles.LengthUnits = 'pixels';
+%     handles.LengthUnits = 'microns';
+%     handles.TimeUnits = 'frames';
+%     handles.TimeUnits = 'seconds';
+
     dt = 1/handles.fps;
     
     idx = handles.CurrentBeadRows;
@@ -2001,123 +2128,9 @@ function plot_data(handles)
     
     Plot_XYfig(handles);
     Plot_XTfig(handles);
+    Plot_AUXfig(handles);
     
-    
-    AUXfig = handles.AUXfig;         
-    AUXtype = handles.AUXtype;
-    
-    if ~strcmp(AUXtype,'OFF')
-        try
-            set(AUXfig, 'Visible', 'on');            
-        catch
-            handles = init_AUXfig(handles);
-            set(handles.AUXfig, 'Visible', 'on');            
-        end
-        
-        clf(handles.AUXfig);
-    end        
-    
-    switch handles.AUXtype
-        case 'OFF'
-            set(AUXfig, 'Visible', 'off');
-
-        case 'radial vector'
-            handles.plots.radial = calculate_radial_vector(handles);            
-            plot_radial_vector(handles.plots.radial, handles.LengthUnits, AUXfig);
-            
-        case 'sensitivity (SNR)'
-            handles.plots.sens = calculate_sensitivity(handles);
-            plot_sensitivity(handles.plots.sens, AUXfig);
-        
-        case 'center intensity'            
-            handles.plots.CenterIntensity = calculate_center_intensity(handles);
-            plot_center_intensity(handles.plots.CenterIntensity, handles.AUXfig);
-
-        case 'velocity'
-            handles.plots.Velocity = prep_velocity_plot(handles);
-            plot_velocity(handles.plots.Velocity, handles.LengthUnits, AUXfig);
-            
-        case 'velocity magnitude'
-            handles.plots.VelMag = prep_velmag_plot(handles);
-            plot_velocity_magnitude(handles.plots.VelMag, handles.LengthUnits, AUXfig);
-            
-        case 'velocity scatter (all)'
-            handles.plots.VelScatter = prep_VelScatter_plot(handles);
-            plot_velocity_scatter(handles.plots.VelScatter, AUXfig);
-            
-        case 'velocity scatter (active)'            
-            handles.plots.VelScatter = prep_VelScatter_plot(handles);
-            plot_velocity_scatter(handles.plots.VelScatter, AUXfig, true);
-
-        case 'velocity vectorfield'            
-            handles.plots.VelField = prep_VelField_plot(handles);
-            plot_VelField(handles.plots.VelField, AUXfig);
-   
-        case 'vel. mag. scalarfield'            
-            handles.plots.VelMag = prep_VelMagScalarField_plot(handles);
-            plot_VelMagScalarField(handles.plots.VelMag, AUXfig);
-                        
-%         case 'displacement hist'        
-
-
-        case 'old MSD (fast)'
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_old_MSD_plot(handles);
-            end
-            plot_old_MSD(handles.plots.MSD, AUXfig);
-            handles.recomputeMSD = 0;
-
-        case 'new MSD (slow)'
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_new_MSD_plot(handles);
-            end
-            plot_new_MSD(handles.plots.MSD, AUXfig);
-            handles.recomputeMSD = 0;
-            
-        case 'GSER'
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_old_MSD_plot(handles);
-            end
-            plot_GSER(handles.plots.MSD, AUXfig);
-            handles.recomputeMSD = 0;
-            
-        case 'RMS displacement'
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_old_MSD_plot(handles);
-            end
-            %plot_GSER(handles.plots.MSD, AUXfig);
-            evt_plot_rmsdisp(handles.plots.MSD, AUXfig);
-            handles.recomputeMSD = 0;
-            
-        case 'alpha vs tau'   
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_old_MSD_plot(handles);
-            end
-            evt_plot_alphatau(handles.plots.MSD, AUXfig);
-            handles.recomputeMSD = 0;
-            
-        case 'alpha histogram'
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_old_MSD_plot(handles);
-            end
-            evt_plot_alphadist(handles.plots.MSD, AUXfig)
-            handles.recomputeMSD = 0;
-            
-        case 'MSD histogram'
-        case 'Diffusivity @ a tau'
-        case 'Diffusivity vs. tau'
-        case 'temporal MSD'
-        case 'PSD'        
-        case 'Integrated Disp'                 
-        case 'pole locator'
-        case 'tracker avail'
-            handles.plots.TrackerAvail = calculate_tracker_availability(hObject, eventdata, handles);
-            plot_tracker_availability(handles.plots.TrackerAvail, handles.CurrentBeadRows, AUXfig)
-
-        case '2pt MSD ~~not implemented yet~~'
-
-    end
-
+    return
 
     
      
@@ -2493,6 +2506,8 @@ function handles = init_XYfig(handles)
                        'BackingStore', 'off', ...
                        'Visible', 'on');
     handles.XYfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
+    drawnow;
+
 return
 
 function handles = init_XTfig(handles)
