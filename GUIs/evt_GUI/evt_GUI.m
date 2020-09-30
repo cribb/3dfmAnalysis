@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 08-Jul-2020 14:21:09
+% Last Modified by GUIDE v2.5 30-Sep-2020 14:10:49
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -870,13 +870,13 @@ function FileMenuQuit_Callback(hObject, eventdata, handles)
 function EditMenu_Callback(hObject, eventdata, handles)
 
 
-function EditMenu_AddMip_Callback(hObject, eventdata, handles)
+function EditMenu_AddBkgd_Callback(hObject, eventdata, handles)
     [File, Path, fidx] = uigetfile({'*.pgm';'*.png';'*.tif;*.tiff';'*.*'}, ...
                                       'Select Background Image (e.g. MIP)', ...
                                       'MultiSelect', 'on');
     File = fullfile(Path, File);
     handles.im = imread(File);
-    [handles.Height, handles.Width] = size(handles.im);    
+    [handles.ImageHeight, handles.ImageWidth] = size(handles.im);    
     guidata(hObject, handles);                                    
                                   
     plot_data(handles);
@@ -1149,7 +1149,7 @@ function Plot_AUXfig(handles)
             
         case 'velocity magnitude'
             handles.plots.VelMag = prep_velmag_plot(handles);
-            plot_velocity_magnitude(handles.plots.VelMag, handles.LengthUnits, AUXfig);
+            plot_velocity_magnitude(handles.plots.VelMag, AUXfig);
             
         case 'velocity scatter (all)'
             handles.plots.VelScatter = prep_VelScatter_plot(handles);
@@ -1497,6 +1497,9 @@ function rheo = calc_viscosity_stds(hObject, eventdata, handles)
 
 
 function NewTrackingTable = AddVelocity2Table(TrackingTable)
+% Outputs the velocities in the default format, which is [pixels/frame] and
+% leaves the scaling to the invidual functions as needed.
+
 % XXX TODO: Add a smoothing scale to UI and CreateGaussScaleSpace call.
 
 %     if isempty(TrackingTable)
@@ -1519,19 +1522,22 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
     else
         Vel = NaN(0,5);
     end
-
-    
-    
+        
     VelTable.ID    = Vel(:,1);
     VelTable.Frame = Vel(:,2);
     VelTable.Vx    = Vel(:,3);
     VelTable.Vy    = Vel(:,4);
     VelTable.Vz    = Vel(:,5);
     VelTable.Vr    = sqrt( sum( Vel(:,3:5).^2, 2 ) );
-
-    VelTable = struct2table(VelTable);
-            
+    VelTable.Vclr = Calculate_Velocity_ColorMap(VelTable.Vr);
     
+    VelTable = struct2table(VelTable);    
+    
+    NewTrackingTable = innerjoin(TrackingTable, VelTable);    
+    
+return
+
+function Vclr = Calculate_Velocity_ColorMap(vr)
     %
     % Mapping the logged-velocities to colors for scatter-point color-mapping
     %   
@@ -1540,8 +1546,26 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
     % 2. Set any NaN to zero.
     % 3. Take the log. We need to keep the original non-shifted logvr
     %    separate from the shifted/color-mapped ones    
-    vr = VelTable.Vr;
-    vr(vr < 0.001) = NaN;
+    
+    % Minimum velocity threshold in pixels per frame. It's a magic number.
+    MinVelThresh = 0.001;
+    
+    % Because it's used for no other reason, we're just going to yank the
+    % current scale selections off the gui without having the handles
+    % structure passed in explicitly.
+    handles = guihandles(gcbo);
+    
+    if handles.radio_seconds.Value
+        MinVelThresh = frame2sec(MinVelThresh);
+    end
+    
+    if handles.radio_microns.Value
+        MinVelThresh = pixel2um(MinVelThresh);
+    end
+    
+    clear('handles');
+    
+    vr(vr < MinVelThresh) = NaN;
     logvr = log10(vr);
 
 
@@ -1564,14 +1588,10 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
    
     vals = floor(normvr * 255);
     heatmap = hot(256);
-    velclr = heatmap(vals+1,:);
-
-    VelTable.Vclr = velclr;
     
-    NewTrackingTable = innerjoin(TrackingTable, VelTable);    
-    
-return
+    Vclr = heatmap(vals+1,:);
 
+    return
 
 function NativeXYZ = RemoveXYScaleAndOffset(xyz, handles)
     % XYZoffsets = the neutralization offsets for the XT plot
@@ -1796,7 +1816,10 @@ function outs = prep_velocity_plot(handles)
     VelX = handles.TrackingTable.Vx(idx);
     VelY = handles.TrackingTable.Vy(idx);
     VelZ = handles.TrackingTable.Vz(idx);
-
+    VelR = handles.TrackingTable.Vr(idx); 
+    Velclr = Calculate_Velocity_ColorMap(VelR);
+    
+    % Get the velocities into the desired units
     if handles.radio_microns.Value
         [VelX, VelY, VelZ] = pixel2um(VelX, VelY, VelZ);
         LengthUnits = '\mum';
@@ -1805,13 +1828,10 @@ function outs = prep_velocity_plot(handles)
     end
     
     if handles.radio_seconds.Value
-        dt = 1/handles.fps;
-        Time = Frame .* dt;
+        [Time, VelX, VelY, VelZ] = frame2sec(Frame, VelX, VelY, VelZ);
         TimeUnits = '[s]';
         VelTimeUnits = 's';        
-        [VelX, VelY, VelZ] = frame2sec(VelX, VelY, VelZ);
     else
-        dt = 1;
         Time = Frame;
         TimeUnits = '[frames]';
         VelTimeUnits = 'frame';
@@ -1821,6 +1841,9 @@ function outs = prep_velocity_plot(handles)
     outs.VelX = VelX;
     outs.VelY = VelY;
     outs.VelZ = VelZ;
+    outs.VelR = VelR;
+    outs.Velclr = Velclr;
+    
     outs.TimeUnits = TimeUnits;
     outs.VelUnits = ['[', LengthUnits, '/', VelTimeUnits, ']'];
 return
@@ -1843,29 +1866,30 @@ function outs = prep_velmag_plot(handles)
    
     outs.Time = vel.Time;
     outs.VelMag = sqrt(vel.VelX .^2 + vel.VelY .^2 + vel.VelZ .^2);
-    
+    outs.TimeUnits = vel.TimeUnits;
+    outs.VelUnits = vel.VelUnits;
 return
 
 
-function plot_velocity_magnitude(Velocity, LengthUnits, h)
+function plot_velocity_magnitude(Velocity, h)
     figure(h);
     clf;
     plot(Velocity.Time, Velocity.VelMag, '.-');
-    xlabel('time (s)');
-    ylabel(['|v| [' LengthUnits '/s]']);    
+    xlabel(['time, ' Velocity.TimeUnits]);
+    ylabel(['|v|, ' Velocity.VelUnits]);    
     grid on;
     drawnow;
 return
 
 
 function outs = prep_VelScatter_plot(handles)
-
     
     CurrentBead = handles.CurrentBead;
-
+    im = handles.im;
+    xr = [0 size(im,2)];
+    yr = [0 size(im,1)];
     
     % separate the currently selected bead vs not the selected bead
-
     
     T = handles.TrackingTable;
 
@@ -1875,18 +1899,51 @@ function outs = prep_VelScatter_plot(handles)
     
     T = vst_filter_tracking(T, filt);
 
+    % Pull out relevant info. Defaults units are pixels/frame
+    Frame = T.Frame;
+    X = T.X;
+    Y = T.Y;
+    Z = T.Z;
+    Vx = T.Vx;
+    Vy = T.Vy;
+    Vz = T.Vz;
+    Vr = T.Vr;
+    
+    % Get the velocities into the desired units
+    if handles.radio_microns.Value
+        [X, Y, Z, xr, yr, Vx, Vy, Vz, Vr] = pixel2um(X, Y, Z, xr, yr, Vx, Vy, Vz, Vr);
+        LengthUnits = '\mum';
+    else
+        LengthUnits = 'pixels';
+    end
+    
+    if handles.radio_seconds.Value
+        [Time, Vx, Vy, Vz, Vr] = frame2sec(Frame, Vx, Vy, Vz, Vr);
+        TimeUnits = '[s]';
+        VelTimeUnits = 's';        
+    else
+        Time = Frame;
+        TimeUnits = '[frames]';
+        VelTimeUnits = 'frame';
+    end
+    
+    Vclr = Calculate_Velocity_ColorMap(Vr);
+    
     outs.im   = handles.im;   
+    outs.xrange = xr;
+    outs.yrange = yr;
     outs.id   = T.ID;
     outs.idx  = (T.ID == CurrentBead);
-    outs.x    = T.X;
-    outs.y    = T.Y;
-    outs.z    = T.Z;
-    outs.vx   = T.Vx;
-    outs.vy   = T.Vy;
-    outs.vz   = T.Vz;
-    outs.vr   = T.Vr;
-    outs.vclr = T.Vclr;
-    outs.Units = 'pixels/frame';
+    outs.x    = X;
+    outs.y    = Y;
+    outs.z    = Z;
+    outs.vx   = Vx;
+    outs.vy   = Vy;
+    outs.vz   = Vz;
+    outs.vr   = Vr;
+    outs.vclr = Vclr;
+    outs.LengthUnits = LengthUnits;
+    outs.VelUnits = ['[', LengthUnits, '/', VelTimeUnits, ']'];
     
 return
 
@@ -1900,36 +1957,39 @@ function plot_velocity_scatter(VelScatter, h, ActiveOnlyTF)
         ActiveOnlyTF = false;
     end
     
-    
-    [r, c] = size(im);    
-    
-    [g, gT] = findgroups(VelScatter.id);
-
     figure(h);
     clf;
-    imagesc([0 c], [0 r], im);
+    imagesc(VelScatter.xrange, VelScatter.yrange, im);
     colormap(gray(256));
     hold on;
-        
-        if ActiveOnlyTF
+
+   [g, gT] = findgroups(VelScatter.id);
+
+
+    if ActiveOnlyTF
 %             plot(VelScatter.x(~idx), VelScatter.y(~idx), 'b.');
-            scatter(VelScatter.x(idx), VelScatter.y(idx), 10, VelScatter.vclr(idx,:), 'filled');
-        else
-            splitapply(@(x1,x2)plot(x1, x2, 'w-'), VelScatter.x, VelScatter.y, g);
-            scatter(VelScatter.x, VelScatter.y, 10, VelScatter.vclr, 'filled');
-        end
+        scatter(VelScatter.x(idx), VelScatter.y(idx), 10, VelScatter.vclr(idx,:), 'filled');
+    else
+        splitapply(@(x1,x2)plot(x1, x2, 'w-'), VelScatter.x, VelScatter.y, g);
+        scatter(VelScatter.x, VelScatter.y, 10, VelScatter.vclr, 'filled');
+    end
         
     hold off;
+    xlabel(['X, ' VelScatter.LengthUnits]);
+    ylabel(['Y, ' VelScatter.LengthUnits]);
+    
     
     minVr = min(VelScatter.vr);
     maxVr = max(VelScatter.vr);
     set(gca, 'YDir', 'reverse');            
-    manual_colorbar(log10([minVr maxVr]));
     
+    manual_colorbar(log10([minVr maxVr]));
+    title(['log_{10}(velocity), ' VelScatter.VelUnits]);
 
-    disp(['Minimum Velocity = ' num2str(minVr) ' ' VelScatter.Units '.']);
-    disp(['Maximum Velocity = ' num2str(maxVr) ' ' VelScatter.Units '.']);
+    disp(['Minimum Velocity = ' num2str(minVr) ' ' VelScatter.VelUnits '.']);
+    disp(['Maximum Velocity = ' num2str(maxVr) ' ' VelScatter.VelUnits '.']);
 
+    
     drawnow;
 
 return
@@ -2026,11 +2086,9 @@ function outs = prep_old_MSD_plot(handles)
     outs.mymsd = mymsd;
     outs.myve  = myve;
     outs.myD   = myD;
-
-
-        
         
 return
+
 
 function outs = prep_new_MSD_plot(handles)
     TrackingTable = handles.TrackingTable;

@@ -26,6 +26,7 @@ h.Units = 'normalized';
 imagesc([], mycdata, mypatch);
 colormap(mycolormap);
 ax = gca;
+
 if contains(lower(orientation), 'vertical')
     h.Position(3) = 0.1;
     ax.YDir = 'normal';
@@ -36,6 +37,6 @@ if contains(lower(orientation), 'vertical')
     ax.XTick= [];
 end
 
-% axis tight
+return
 
-pause(1);
+% axis tight
