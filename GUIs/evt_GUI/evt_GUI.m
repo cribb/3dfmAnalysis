@@ -74,7 +74,6 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.LengthUnits = 'pixels';
     handles.TimeUnits = 'sec';
 
-
     % Assign initial "filter by" values 
     handles.filt.min_frames = 0;
     handles.filt.min_pixels = 0;
@@ -88,24 +87,12 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.filt.calibum = 1;
 
     % set default figure parameters
-    handles.XYfig = figure('Units', 'Normalized', ...
-                           'Position', [0.1 0.05 0.4 0.4], ...
-                           'DoubleBuffer', 'on', ...
-                           'BackingStore', 'off', ...
-                           'Visible', 'on');
-    handles.XTfig = figure('Units', 'Normalized', ...
-                           'Position', [0.51 0.05 0.4 0.4], ...
-                           'DoubleBuffer', 'on', ...
-                           'BackingStore', 'off', ...
-                           'Visible', 'on');
-    handles.AUXfig = figure('Units', 'Normalized', ...
-                           'Position', [0.51 0.525 0.4 0.4], ...
-                           'DoubleBuffer', 'on', ...
-                           'BackingStore', 'off', ...
-                           'Visible', 'off');
+    handles = init_XTfig(handles);
+    handles = init_XYfig(handles);
+    handles = init_AUXfig(handles);
+    
+    handles.AUXtype = 'OFF';    
     handles.Activefig = handles.XYfig;
-
-    handles.AUXtype = 'OFF';
     
     set(handles.slider_BeadID, 'Min', 1);                
     set(handles.slider_BeadID, 'Max', 2);
@@ -122,24 +109,14 @@ function varargout = evt_GUI_OutputFcn(hObject, eventdata, handles)
 
     
 function evt_GUI_CloseRequestFcn(hObject, eventdata, handles)
-    try
-        close(handles.XYfig);
-    catch
-        logentry('XY figure was already closed.');
-    end
+    handles.XYfig.CloseRequestFcn = 'closereq';
+    delete(handles.XYfig);
+    
+    handles.XTfig.CloseRequestFcn = 'closereq';
+    delete(handles.XTfig);
 
-
-    try
-        close(handles.XTfig);
-    catch
-        logentry('XT figure was already closed.');
-    end
-
-    try
-        close(handles.AUXfig);
-    catch
-        logentry('AUX figure was already closed.');
-    end
+    handles.AUXfig.CloseRequestFcn = 'closereq';
+    delete(handles.AUXfig);    
 
 	delete(hObject);
 
@@ -2025,6 +2002,7 @@ return
 
 function evt_plot_alphadist(MSDdata, h)
     plot_alphadist(MSDdata.myve.alpha, h);
+return
 
 function plot_data(handles)
 
@@ -2053,8 +2031,14 @@ function plot_data(handles)
     AUXtype = handles.AUXtype;
     
     if ~strcmp(AUXtype,'OFF')
-        set(AUXfig, 'Visible', 'on');            
-        clf(AUXfig);
+        try
+            set(AUXfig, 'Visible', 'on');            
+        catch
+            handles = init_AUXfig(handles);
+            set(handles.AUXfig, 'Visible', 'on');            
+        end
+        
+        clf(handles.AUXfig);
     end        
     
     switch handles.AUXtype
@@ -2515,7 +2499,36 @@ function d = convert_Table_to_old_matrix(TrackingTable, fps)
     end
     
 return
-    
+
+function handles = init_AUXfig(handles)
+    handles.AUXfig = figure('Units', 'Normalized', ...
+       'Position', [0.51 0.525 0.4 0.4], ...
+       'DoubleBuffer', 'on', ...
+       'BackingStore', 'off', ...
+       'Visible', 'off');
+   
+    handles.AUXfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
+   
+return
+
+function handles = init_XYfig(handles)
+    handles.XYfig = figure('Units', 'Normalized', ...
+                       'Position', [0.1 0.05 0.4 0.4], ...
+                       'DoubleBuffer', 'on', ...
+                       'BackingStore', 'off', ...
+                       'Visible', 'on');
+    handles.XYfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
+return
+
+function handles = init_XTfig(handles)
+    handles.XTfig = figure('Units', 'Normalized', ...
+                           'Position', [0.51 0.05 0.4 0.4], ...
+                           'DoubleBuffer', 'on', ...
+                           'BackingStore', 'off', ...
+                           'Visible', 'on');
+    handles.XTfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
+return
+
 function logentry(txt)
 
     logtime = clock;
@@ -2539,7 +2552,8 @@ function logentry(txt)
     % Putting status onto the gui
     handles = guihandles(gcbo);
     set(handles.text_status, 'String', [headertext, txt]);
-
+return
+    
 %     mystatus = get(handles.text_status, 'String');
 % 
 %     if ischar(mystatus) 
