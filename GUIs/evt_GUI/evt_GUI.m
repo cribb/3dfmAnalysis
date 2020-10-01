@@ -257,7 +257,7 @@ function slider_BeadID_Callback(hObject, eventdata, handles)
     end
     
     if ~isempty(beadList)
-        CurrentBead = beadList(Slider.Value);
+        CurrentBead = beadList(round(Slider.Value));
     else
         CurrentBead = NaN;
     end
@@ -965,7 +965,7 @@ function checkbox_min_sens_Callback(hObject, eventdata, handles)
     
 function pushbutton_FilterConfig_Callback(hObject, eventdata, handles)
 
-    h = evt_FilterConfig;
+    h = evt_FilterConfig('evt_GUI', handles);
     uiwait(gcf);   
     guidata(hObject, handles);
     
