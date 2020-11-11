@@ -42,7 +42,7 @@ end
     numpoints = size(data,1);
 
     if numpoints == 1
-        logentry('Insufficient points to compute any MSD value');
+%         logentry('Insufficient points to compute any MSD value');
         varargout{1} = tau;
         varargout{2} = msd;
         varargout{3} = Nestimates;
