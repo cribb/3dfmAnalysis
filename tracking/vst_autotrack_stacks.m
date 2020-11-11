@@ -1,4 +1,8 @@
-function v = vst_autotrack_stacks(exptpath, filename, cfgfiles)
+function v = vst_autotrack_stacks(exptpath, filename, cfgfiles, matThreshTF)
+
+if nargin < 4 || isempty(matThreshTF)
+    matThreshTF = false;
+end
 
 if nargin < 3 || isempty(cfgfiles)
     cfgfiles.find = 'D:\Dropbox\prof\Lab\Superfine Lab\expts\bead_adhesion_assay\optimize_z_find.cfg';
@@ -49,8 +53,16 @@ filelist = dir(['**/' filename]);
         firstframe = fullfile(filelist(k).folder, filelist(k).name);
         findframefilename =  fullfile(filelist(k).folder, 'findframe.pgm');
         
-        % copy first frame into a new filename so initialize bead positions
-        [success,msg,msgid] = copyfile(filelist(k).name, findframefilename);
+        if matThreshTF
+            % Use matlab adaptive threshold to create a binary find frame
+            I = imread(firstframe);
+            T = adaptthresh(I, 0.4);
+            bw = imbinarize(I, T);
+            imwrite(findframefilename);            
+        else
+            % copy first frame into a new filename so initialize bead positions
+            [success,msg,msgid] = copyfile(filelist(k).name, findframefilename);
+        end
         
         if ~success
             error('File not copied.');
