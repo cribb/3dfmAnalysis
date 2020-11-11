@@ -17,6 +17,7 @@ for k = 1:length(beadlist)
     idx = find(beadID == k);
 
     beadstruct(k).t      = vidtable(idx,TIME) - min(vidtable(:,TIME));
+    beadstruck(k).frame  = vidtable(idx,FRAME);
     beadstruct(k).x      = vidtable(idx,X);
     beadstruct(k).y      = vidtable(idx,Y);
     beadstruct(k).yaw    = vidtable(idx,YAW);
