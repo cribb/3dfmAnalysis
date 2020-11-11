@@ -4,7 +4,7 @@ function MsdTable = vst_msd(DataIn, taulist)
     [g,~] = findgroups(TrackingTable.Fid, TrackingTable.ID);
 
 
-    % HERE, LENGTH SCALES ARE CONVERTED INTO [PIXELS] INTO [UM]
+    % HERE, LENGTH SCALES ARE CONVERTED FROM [PIXELS] INTO [UM]
     XYXoYo_pix =  [TrackingTable.X, TrackingTable.Y, ...
                   TrackingTable.Xo, TrackingTable.Yo];
     XYXoYo_um =  XYXoYo_pix .* repmat(TrackingTable.Calibum,1,4);
@@ -78,7 +78,7 @@ function logentry(txt)
                    num2str(logtime(4),        '%02i') ':' ...
                    num2str(logtime(5),        '%02i') ':' ...
                    num2str(floor(logtime(6)), '%02i') ') '];
-     headertext = [logtimetext 'video_msd: '];
+     headertext = [logtimetext 'vst_msd: '];
      
      fprintf('%s%s\n', headertext, txt);
      
