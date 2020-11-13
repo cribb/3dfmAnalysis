@@ -75,16 +75,14 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.TimeUnits = 'sec';
 
     % Assign initial "filter by" values 
-    handles.filt.min_frames = 0;
-    handles.filt.min_pixels = 0;
-    handles.filt.max_pixels = Inf;
-    handles.filt.tcrop = 0;
-    handles.filt.xycrop = 0;
-    handles.filt.min_sens = 0;
-    handles.filt.deadzone = 0;
-    handles.filt.overlapthresh = 0.1;        
-    handles.filt.xyzunits = 'pixels';
-    handles.filt.calibum = 1;
+    handles.TrackingFilter.min_frames = 0;
+    handles.TrackingFilter.min_pixels = 0;
+    handles.TrackingFilter.max_pixels = Inf;
+    handles.TrackingFilter.tcrop = 0;
+    handles.TrackingFilter.xycrop = 0;
+    handles.TrackingFilter.min_sens = 0;
+    handles.TrackingFilter.xyzunits = 'pixels';
+    handles.TrackingFilter.calibum = 1;
 
     % set default figure parameters
     handles = init_XTfig(handles);
@@ -98,7 +96,7 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     set(handles.slider_BeadID, 'Max', 2);
     set(handles.slider_BeadID, 'SliderStep', [1 1]);                
     set(handles.slider_BeadID, 'Value', 1);                
-
+   
 	% Update handles structure
 	guidata(hObject, handles);
 	
@@ -236,7 +234,7 @@ function edit_BeadID_Callback(hObject, eventdata, handles)
     
     % separate the currently selected bead vs not the selected bead
     handles.CurrentBead = CurrentBead;
-    handles = filter_bead_selection(handles);
+    handles = SelectBead(handles);
     
     guidata(hObject, handles);
     plot_data(handles);
@@ -277,7 +275,7 @@ function slider_BeadID_Callback(hObject, eventdata, handles)
 
     % separate the currently selected bead vs not the selected bead
     handles.CurrentBead = CurrentBead;
-    handles = filter_bead_selection(handles);
+    handles = SelectBead(handles);
 
 
     % Set the Slider changes into the handles structure
@@ -485,7 +483,7 @@ function edit_frame_rate_Callback(hObject, eventdata, handles)
 %     handles.TrackingTable.Time = handles.TrackingTable.Frame / handles.fps;
     handles.recomputeMSD = 1;
 
-    handles = filter_bead_selection(handles);
+    handles = SelectBead(handles);
     guidata(hObject, handles);
 	
     % Update the plots
@@ -598,7 +596,7 @@ end
 
 function checkbox_neutoffsets_Callback(hObject, eventdata, handles)
 
-    handles = filter_bead_selection(handles);    
+    handles = SelectBead(handles);    
 
     guidata(hObject, handles);
     
@@ -742,7 +740,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     logentry('Loading dataset... ');
 
     TrackingTable = vst_load_tracking(VidTable);
-    [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.filt);
+    [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
     
     TrackingTable = AddVelocity2Table(TrackingTable);
     Trash = AddVelocity2Table(Trash);
@@ -782,7 +780,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     handles.calibum = VidTable.Calibum;
     handles.rheo = calc_viscosity_stds(hObject, eventdata, handles);
     handles.CurrentBead = min(TrackingTable.ID);           
-    handles = filter_bead_selection(handles);    
+    handles = SelectBead(handles);    
     
     
     % Enable some controls now that data is loaded
@@ -931,6 +929,7 @@ function ExportMenu_CurrentBead_Callback(hObject, eventdata, handles)
 
         bead.t      = handles.TrackingTable.Frame(idx) / handles.fps;
         bead.t      = bead.t - min(bead.t);
+        bead.frame  = handles.TrackingTable.Frame(idx);
         bead.x      = handles.TrackingTable.X(idx);
         bead.y      = handles.TrackingTable.Y(idx);
         if isfield(bead, 'yaw')
@@ -964,9 +963,10 @@ function checkbox_min_sens_Callback(hObject, eventdata, handles)
 
     
 function pushbutton_FilterConfig_Callback(hObject, eventdata, handles)
-
-    h = evt_FilterConfig('evt_GUI', handles);
-    uiwait(gcf);   
+    % Set waiting flag in appdata
+%     setappdata(handles.evt_GUI,'waiting',1);
+    
+    handles.TESTfilter = evt_FilterConfig('evt_GUI', handles);    
     guidata(hObject, handles);
     
     return
@@ -978,7 +978,7 @@ function pushbutton_FilterConfig_Callback(hObject, eventdata, handles)
 % Everything below this point are functions related to computation and data
 % handling/display, and not the gui (though the handles structure is used).
 % =========================================================================
-function handles = filter_bead_selection(handles)
+function handles = SelectBead(handles)
     
     CurrentBead = handles.CurrentBead;
     beadID = handles.TrackingTable.ID;
@@ -998,6 +998,39 @@ function handles = filter_bead_selection(handles)
         handles.XYZoffsets = zeros(1,3);
     end
     
+function handles = init_AUXfig(handles)
+    handles.AUXfig = figure('Units', 'Normalized', ...
+       'Position', [0.51 0.525 0.4 0.4], ...
+       'DoubleBuffer', 'on', ...
+       'BackingStore', 'off', ...
+       'Visible', 'off');
+   
+    handles.AUXfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
+   
+return
+
+
+function handles = init_XYfig(handles)
+    handles.XYfig = figure('Units', 'Normalized', ...
+                       'Position', [0.1 0.05 0.4 0.4], ...
+                       'DoubleBuffer', 'on', ...
+                       'BackingStore', 'off', ...
+                       'Visible', 'on');
+    handles.XYfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
+    drawnow;
+
+return
+
+
+function handles = init_XTfig(handles)
+    handles.XTfig = figure('Units', 'Normalized', ...
+                           'Position', [0.51 0.05 0.4 0.4], ...
+                           'DoubleBuffer', 'on', ...
+                           'BackingStore', 'off', ...
+                           'Visible', 'on');
+    handles.XTfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
+return
+
 
 function Plot_XYfig(handles)
 
@@ -1229,6 +1262,7 @@ function Plot_AUXfig(handles)
     
     return    
     
+
 function handles = delete_selected_dataset(handles)
     
     OldTrackingHeight = height(handles.TrackingTable);
@@ -1255,6 +1289,7 @@ function handles = delete_selected_dataset(handles)
          '. ']);
 
     return
+
 
 function selection = select_by_boundingbox(handles)
 
@@ -1346,6 +1381,7 @@ function selection = select_by_boundingbox(handles)
 
     selection = k;
     
+
 function handles = delete_inside_boundingbox(handles)    
 
     sel = select_by_boundingbox(handles);
@@ -1413,6 +1449,7 @@ function handles = delete_outside_boundingbox(handles)
 
     handles.TrackingTable = T;
     handles.Trash = Trash;
+
 
 function closest_time = select_time_from_XTfig(handles) 
     handles.Activefig = handles.XTfig;
@@ -1537,6 +1574,7 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
     
 return
 
+
 function Vclr = Calculate_Velocity_ColorMap(vr)
     %
     % Mapping the logged-velocities to colors for scatter-point color-mapping
@@ -1553,7 +1591,8 @@ function Vclr = Calculate_Velocity_ColorMap(vr)
     % Because it's used for no other reason, we're just going to yank the
     % current scale selections off the gui without having the handles
     % structure passed in explicitly.
-    handles = guihandles(gcbo);
+    myUI = findall(0, 'Tag', 'evt_GUI');
+    handles = guihandles(myUI);
     
     if handles.radio_seconds.Value
         MinVelThresh = frame2sec(MinVelThresh);
@@ -1593,6 +1632,7 @@ function Vclr = Calculate_Velocity_ColorMap(vr)
 
     return
 
+
 function NativeXYZ = RemoveXYScaleAndOffset(xyz, handles)
     % XYZoffsets = the neutralization offsets for the XT plot
     XYZoffsets = handles.XYZoffsets;
@@ -1613,28 +1653,32 @@ function NativeXYZ = RemoveXYScaleAndOffset(xyz, handles)
 
 
 function varargout = pixel2um(varargin)
-    handles = guihandles(gcbo);
+    myUI = findall(0, 'Tag', 'evt_GUI');
+    handles = guihandles(myUI);
     calibum = str2double(get(handles.edit_calibum, 'String'));
     varargout = cellfun(@(x)(x .* calibum), varargin, 'UniformOutput', false);
 return
 
 
 function varargout = um2pixel(varargin)
-    handles = guihandles(gcbo);
+    myUI = findall(0, 'Tag', 'evt_GUI');
+    handles = guihandles(myUI);
     calibum = str2double(get(handles.edit_calibum, 'String'));
     varargout = cellfun(@(x)(x ./ calibum), varargin, 'UniformOutput', false);
 return
 
 
 function varargout = frame2sec(varargin)
-    handles = guihandles(gcbo);
+    myUI = findall(0, 'Tag', 'evt_GUI');
+    handles = guihandles(myUI);
     fps = str2double(get(handles.edit_frame_rate, 'String'));
     varargout = cellfun(@(x) (x ./ fps), varargin, 'UniformOutput', false);
 return
 
 
 function varargout = sec2frame(varargin)
-    handles = guihandles(gcbo);
+    myUI = findall(0, 'Tag', 'evt_GUI');
+    handles = guihandles(myUI);
     fps = str2double(handles.edit_frame_rate.String);
     varargout = cellfun(@(x) (x .* fps), varargin, 'UniformOutput', false);
 return
@@ -2192,20 +2236,20 @@ return
 
 function plot_data(handles)
 
-    stk = dbstack;
-    disp(['In ' stk(1).name ', and ' stk(2).name ' called me.']);
-    
-
-    T = handles.TrackingTable;    
-    H = height(T);
-    N = numel(unique(T.ID));
-
-    disp(['nTableRows=', num2str(H), ...
-          ', nBeads=' num2str(N), ...
-          ', CurrentBead=' num2str(handles.CurrentBead) ...
-          ', nPoints=' num2str(sum(handles.CurrentBeadRows)), ...
-          ', LengthUnits=' handles.LengthUnits ...
-          ', Calibum=', num2str(handles.calibum)]);
+%     stk = dbstack;
+%     disp(['In ' stk(1).name ', and ' stk(2).name ' called me.']);
+%     
+% 
+%     T = handles.TrackingTable;    
+%     H = height(T);
+%     N = numel(unique(T.ID));
+% 
+%     disp(['nTableRows=', num2str(H), ...
+%           ', nBeads=' num2str(N), ...
+%           ', CurrentBead=' num2str(handles.CurrentBead) ...
+%           ', nPoints=' num2str(sum(handles.CurrentBeadRows)), ...
+%           ', LengthUnits=' handles.LengthUnits ...
+%           ', Calibum=', num2str(handles.calibum)]);
     
 %     handles.TrackingTable  = ScaleTrackingTable(handles.TrackingTable);
     
@@ -2571,35 +2615,46 @@ function d = convert_Table_to_old_matrix(TrackingTable, fps)
     
 return
 
-function handles = init_AUXfig(handles)
-    handles.AUXfig = figure('Units', 'Normalized', ...
-       'Position', [0.51 0.525 0.4 0.4], ...
-       'DoubleBuffer', 'on', ...
-       'BackingStore', 'off', ...
-       'Visible', 'off');
-   
-    handles.AUXfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
-   
-return
 
-function handles = init_XYfig(handles)
-    handles.XYfig = figure('Units', 'Normalized', ...
-                       'Position', [0.1 0.05 0.4 0.4], ...
-                       'DoubleBuffer', 'on', ...
-                       'BackingStore', 'off', ...
-                       'Visible', 'on');
-    handles.XYfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
-    drawnow;
 
-return
+% For filtering low frequency info out of velocities for variance measurement
+function y = doFilter(x)
+%DOFILTER Filters input x and returns output y.
 
-function handles = init_XTfig(handles)
-    handles.XTfig = figure('Units', 'Normalized', ...
-                           'Position', [0.51 0.05 0.4 0.4], ...
-                           'DoubleBuffer', 'on', ...
-                           'BackingStore', 'off', ...
-                           'Visible', 'on');
-    handles.XTfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
+% MATLAB Code
+% Generated by MATLAB(R) 9.5 and DSP System Toolbox 9.7.
+% Generated on: 01-Oct-2020 15:31:01
+
+persistent Hd;
+
+if isempty(Hd)
+    
+    Fstop = 0.45;  % Stopband Frequency
+    Fpass = 0.55;  % Passband Frequency
+    Astop = 60;    % Stopband Attenuation (dB)
+    Apass = 1;     % Passband Ripple (dB)
+    
+    h = fdesign.highpass('fst,fp,ast,ap', Fstop, Fpass, Astop, Apass);
+    
+    Hd = design(h, 'equiripple', ...
+        'MinOrder', 'any', ...
+        'StopbandShape', 'flat');
+    
+    
+    
+    set(Hd,'PersistentMemory',true);
+    
+end
+
+y = filter(Hd,x);
+
+function handles = filter_tracking(handles)    
+    % To avoid cumulative changes to the TrackingTable start by combining
+    % the FilteredTable and the Trash back into the TrackingTable;
+    TrackingTable = [handles.TrackingTable; handles.Trash];
+    [handles.TrackingTable, handles.Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
+    handles = SelectBead(handles);
+    plot_data(handles);
 return
 
 function logentry(txt)
@@ -2623,383 +2678,8 @@ function logentry(txt)
     fprintf('%s%s\n', headertext, txt);
 
     % Putting status onto the gui
-    handles = guihandles(gcbo);
+    myUI = findall(0, 'Tag', 'evt_GUI');
+    handles = guihandles(myUI);
     set(handles.text_status, 'String', [headertext, txt]);
 return
     
-%     mystatus = get(handles.text_status, 'String');
-% 
-%     if ischar(mystatus) 
-%         mystatus{1,1} = mystatus;
-%     end
-% 
-%     N = numel(mystatus);
-% 
-%     mystatus{N + 1, 1} = [headertext, txt];
-% 
-%     if N > 50
-%         mystatus(:,1) = mystatus(end-50:end,1);
-%     end
-% 
-%     set(handles.text_status, 'String', mystatus);
-%     set(handles.text_status, 'Value', N);
-     
-% function old_popup_AUXplot_Callback(hObject, eventdata, handles)
-%     contents = get(hObject, 'String');
-%     AUXtype = contents(get(hObject, 'Value'));
-%     
-%     handles.AUXtype = AUXtype{1};
-%     guidata(hObject, handles);
-% 
-%     switch handles.AUXtype
-%         case 'OFF'
-%             set(handles.radio_relative       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin      ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall      ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             
-%         case 'radial vector'
-%             set(handles.radio_relative    ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.radio_arb_origin  ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.edit_arb_origin   ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-%             plot_radial_vector(hObject, eventdata, handles)
-%             
-%         case 'PSD'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%         
-%         case 'Integrated Disp'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');                        
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-% %         case 'displacement hist'
-% %             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-% %             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-% %             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-% %             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-% %             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-% %             set(handles.checkbox_G       ,  'Visible', 'off', 'Enable', 'off');
-% %             set(handles.checkbox_eta      ,  'Visible', 'off', 'Enable', 'off');
-% %             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-% %             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
-%         
-%         case 'MSD'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.checkbox_msdall   ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_numtaus         ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.edit_numtaus         ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'on', 'Enable', 'on');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'on', 'Enable', 'on');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'on', 'Enable', 'on');
-%         
-%         case 'alpha vs tau'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             
-%         case 'alpha histogram'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_chosentau       , 'Visible', 'on', 'Enable', 'on');
-%             set(handles.text_chosentau       , 'Visible', 'on', 'Enable', 'on');
-%             set(handles.text_chosentau_value , 'Visible', 'on', 'Enable', 'on');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-%         case 'MSD histogram'
-%             set(handles.radio_relative       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin      ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall      ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_chosentau       , 'Visible', 'on', 'Enable', 'on');
-%             set(handles.text_chosentau       , 'Visible', 'on', 'Enable', 'on');
-%             set(handles.text_chosentau_value , 'Visible', 'on', 'Enable', 'on');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-%         case 'Diffusivity @ a tau'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-%         case 'Diffusivity vs. tau'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-%         case 'temporal MSD'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-%         case 'GSER'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G       ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.checkbox_Gstar   ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.checkbox_eta      ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.checkbox_etastar  ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.text_bead_diameter,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.text_numtaus         ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.edit_numtaus         ,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-%         case 'pole locator'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');            
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-%         case 'tracker avail'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_bead_diameter,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_temp           , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-%         case '2pt MSD ~~not implemented yet~~'
-%             set(handles.radio_relative    ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.radio_arb_origin  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_arb_origin   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdmean  ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_msdall   ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_G           ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_Gstar       ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_eta         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_etastar     ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_bead_diameter_um,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.text_bead_diameter,  'Visible', 'on', 'Enable', 'on');
-%             set(handles.text_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_numtaus         ,  'Visible', 'off', 'Enable', 'off');
-%             set(handles.edit_temp           , 'Visible', 'on', 'Enable', 'on');
-%             set(handles.text_temp           , 'Visible', 'on', 'Enable', 'on');
-%             set(handles.edit_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau       , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.text_chosentau_value , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_watermsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2Mmsd   , 'Visible', 'off', 'Enable', 'off');
-%             set(handles.checkbox_2p5Mmsd   , 'Visible', 'off', 'Enable', 'off');
-% 
-%     end
-%     
-%     plot_data(handles);
-%     
-     

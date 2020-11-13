@@ -58,23 +58,16 @@ function evt_FilterConfig_OpeningFcn(hObject, eventdata, handles, varargin) %#ok
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to evt_FilterConfig (see VARARGIN)
 
-    e.min_frames = 1;
-    e.min_pixels = 0;
-    e.max_pixels = inf;
-    e.min_sens = 0;
-    e.tcrop = 0;
-    e.xycrop = 0;
-
-    handles.evtFiltConfig = e;
-
+    handles.evtHandles = varargin{2};
+    handles.evtFiltConfig = handles.evtHandles.TrackingFilter;
+    
     % Choose default command line output for evt_FilterConfig
     handles.output = hObject;
 
     % Update handles structure
     guidata(hObject, handles);
 
-    % UIWAIT makes evt_FilterConfig wait for user response (see UIRESUME)
-%     uiwait(handles.figure1);
+
 
 
 % --- Outputs from this function are returned to the command line.
@@ -87,6 +80,8 @@ function varargout = evt_FilterConfig_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 % varargout{1} = handles.output;
 varargout{1} = handles.evtFiltConfig;
+% delete(hObject);
+
 
 %     setappdata(0,'evtFiltConfig',handles.evtFiltConfig);
 %     close(evt_FilterConfig);
@@ -136,13 +131,19 @@ function edit_MinSens_CreateFcn(hObject, eventdata, handles)
     
     
 function pushbutton_close_Callback(hObject, eventdata, handles) 
-    setappdata(0,'evtFiltConfig',handles.evtFiltConfig);
+    handles.evtHandles.TrackingFilter = handles.evtFiltConfig;
+    guidata(hObject, handles);
+    evt_GUI('filter_tracking', handles.evtHandles);
+%     setappdata(0,'evtFiltConfig',handles.evtFiltConfig);
     closereq;
 
 
 
 function pushbutton_apply_Callback(hObject, eventdata, handles)
-    evt_GUI(filterdata)
+    handles.evtHandles.TrackingFilter = handles.evtFiltConfig;
+    guidata(hObject, handles);
+    evt_GUI('filter_tracking', handles.evtHandles);
+    
 
 function checkbox_MinFrames_Callback(hObject, eventdata, handles)
     if get(hObject, 'Value')
