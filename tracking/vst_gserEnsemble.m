@@ -19,7 +19,6 @@ bd.diameter = str2double(bd.diameter);
 
 msdE = innerjoin(DataIn.summary.msdEnsembleTable, bd);
 
-
 logmsdXYXoYo_um = [msdE.logmsdX, msdE.logmsdY, msdE.logmsdXo, msdE.logmsdYo];
 logerrXYXoYo_um = [msdE.errmsdX, msdE.errmsdY, msdE.errmsdXo, msdE.errmsdYo];
 

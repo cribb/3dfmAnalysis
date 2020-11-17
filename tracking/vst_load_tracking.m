@@ -37,6 +37,11 @@ for f = 1:length(fid)
     myfile = fullfile(VidTable.Path{f}, VidTable.TrackingFiles{f});
     fps = VidTable.Fps(f);
 
+    if ~numel(dir(myfile))
+        warning('File in VidTable not found. Corrupted VidTable?');
+        continue
+    end
+        
     if contains(myfile, '.evt.mat')
         dd = load_evtfile(myfile, fps, 1);
     elseif contains(myfile, '.vrpn.mat')
