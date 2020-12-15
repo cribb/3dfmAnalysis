@@ -1195,6 +1195,10 @@ function Plot_AUXfig(handles)
         case 'velocity vectorfield'            
             handles.plots.VelField = prep_VelField_plot(handles);
             plot_VelField(handles.plots.VelField, AUXfig);
+            
+        case 'velocity curl'
+            handles.plots.VelCurl = calculate_curl(handles);
+            plot_curl(handles.plots.VelCurl, AUXfig);
    
         case 'vel. mag. scalarfield'            
             handles.plots.VelMag = prep_VelMagScalarField_plot(handles);
@@ -2080,6 +2084,39 @@ function plot_VelField(VelFieldPlot, h)
     pretty_plot;
 return
 
+function outs = calculate_curl(handles)
+    tmp = prep_VelField_plot(handles);
+    VelField = tmp.VelField;
+    VideoStruct = tmp.VideoStruct;
+    
+    X = repmat(VelField.Xgrid(:)', size(VelField.Ygrid(:)));
+    Y = repmat(VelField.Ygrid(:),  size(VelField.Xgrid(:)')); 
+
+    Vx = VelField.Xvel;
+    Vy = VelField.Yvel;
+    
+%      P = [VelField.X,    VelField.Y];
+%      V = [VelField.Velx, VelField.Vely];
+
+     outs.X = X;
+     outs.Y = Y;
+     outs.Vx = Vx;
+     outs.Vy = Vy;
+     outs.Curl = curl(X, Y, Vx, Vy);
+     
+     return
+
+     
+function plot_curl(CurlStruct, h)
+	
+    figure(h);
+    pcolor(CurlStruct.X, CurlStruct.Y, CurlStruct.Curl);
+	shading interp
+    colormap(hot);
+    colorbar;
+    return
+
+    
 function VelMag = prep_VelMagScalarField_plot(handles)
     VelMag = prep_VelField_plot(handles);
     VelMag = VelMag.VelField;
