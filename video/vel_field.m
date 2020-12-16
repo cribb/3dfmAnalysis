@@ -1,4 +1,4 @@
-function map = vel_field(filename, xCol, yRow, video)
+function map = vel_field(filename, NCols, NRows, video)
 
 % function vel_field
 %
@@ -51,19 +51,19 @@ if (nargin < 4 || isempty(video))
    video.fps = 90;
    video.pixelsPerMicron = .542;
 end
-if (nargin < 3 || isempty(yRow));       yRow=5;              end
-if (nargin < 2 || isempty(xCol));       xCol=5;              end
+if (nargin < 3 || isempty(NRows));       NRows=5;              end
+if (nargin < 2 || isempty(NCols));       NCols=5;              end
 
-xBinSize = video.xDim/xCol;
-yBinSize = video.yDim/yRow;
+xBinSize = video.xDim/NCols;
+yBinSize = video.yDim/NRows;
 micronsPerPixel = 1/video.pixelsPerMicron;
 %Declare variables
 table_data = [];
 
 sectorList = [];
-sectorX = zeros(1,xCol*yRow);
-sectorY = zeros(1,xCol*yRow);
-sectorCount = zeros(1,xCol*yRow);
+sectorX = zeros(1,NCols*NRows);
+sectorY = zeros(1,NCols*NRows);
+sectorCount = zeros(1,NCols*NRows);
 
 %% Load Data
 if ~isnumeric(filename)
@@ -92,7 +92,7 @@ for i = 1:length(beads)
     
     xBinVal = ceil(beads(i).x/xBinSize);
     yBinVal = floor(beads(i).y/yBinSize);
-    beads(i).sector = yBinVal*xCol + xBinVal; 
+    beads(i).sector = yBinVal*NCols + xBinVal; 
         
     %Convert pixel values to microns
     beads(i).xmicron = beads(i).x/video.pixelsPerMicron;
@@ -163,26 +163,26 @@ end
 xValMed = xBinSize/2;
 yValMed = yBinSize/2;
 
-xPosValOrig = [1:xCol];
+xPosValOrig = [1:NCols];
 xPosValOrig = xPosValOrig*xBinSize - xValMed;
 xPosVal = [];
-for i = 1:yRow
+for i = 1:NRows
    xPosVal = [xPosVal xPosValOrig];
 end
 
-yPosValOrig = [1:yRow];
+yPosValOrig = [1:NRows];
 yPosValOrig = yPosValOrig*yBinSize - yValMed;
 
 
 yPosVal = [];
-for j = 1:xCol
+for j = 1:NCols
       yPosVal = [yPosVal; yPosValOrig];
 end
 
-yPosVal = reshape(yPosVal,xCol*yRow,1);
+yPosVal = reshape(yPosVal,NCols*NRows,1);
 yPosVal = yPosVal';
 
-map.yPosVal = yPosVal;
-map.xPosVal = xPosVal;
-map.sectorX = sectorX;
-map.sectorY = sectorY;
+map.X = yPosVal;
+map.Y = xPosVal;
+map.Vx = sectorX;
+map.Vy = sectorY;
