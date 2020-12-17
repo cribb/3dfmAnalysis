@@ -1,4 +1,4 @@
-function map = vel_field(filename, NCols, NRows, video)
+function map = vel_field(filename, NCols, NRows, VideoStruct)
 
 % function vel_field
 %
@@ -45,18 +45,24 @@ function map = vel_field(filename, NCols, NRows, video)
 
 %% Manage Input Parameters, declarations,set constants 
 video_tracking_constants;
-if (nargin < 4 || isempty(video))
-   video.xDim = 656;
-   video.yDim = 494;
-   video.fps = 90;
-   video.pixelsPerMicron = .542;
+if (nargin < 4 || isempty(VideoStruct))
+   VideoStruct.xDim = 656;
+   VideoStruct.yDim = 494;
+   VideoStruct.fps = 90;
+   VideoStruct.pixelsPerMicron = .542;
 end
-if (nargin < 3 || isempty(NRows));       NRows=5;              end
-if (nargin < 2 || isempty(NCols));       NCols=5;              end
 
-xBinSize = video.xDim/NCols;
-yBinSize = video.yDim/NRows;
-micronsPerPixel = 1/video.pixelsPerMicron;
+if (nargin < 3 || isempty(NRows))
+    NRows=5;
+end
+
+if (nargin < 2 || isempty(NCols))
+    NCols=5;
+end
+
+xBinSize = VideoStruct.xDim/NCols;
+yBinSize = VideoStruct.yDim/NRows;
+micronsPerPixel = 1/VideoStruct.pixelsPerMicron;
 %Declare variables
 table_data = [];
 
@@ -68,7 +74,7 @@ sectorCount = zeros(1,NCols*NRows);
 %% Load Data
 if ~isnumeric(filename)
     % load video data
-    table_data = load_video_tracking(filename, video.fps, 'pixels', micronsPerPixel, 'absolute', 'no', 'matrix');
+    table_data = load_video_tracking(filename, VideoStruct.fps, 'pixels', micronsPerPixel, 'absolute', 'no', 'matrix');
 
 else
     % in this case, we assume that the incoming units are in their intended
@@ -95,15 +101,15 @@ for i = 1:length(beads)
     beads(i).sector = yBinVal*NCols + xBinVal; 
         
     %Convert pixel values to microns
-    beads(i).xmicron = beads(i).x/video.pixelsPerMicron;
-    beads(i).ymicron = beads(i).y/video.pixelsPerMicron;
+    beads(i).xmicron = beads(i).x/VideoStruct.pixelsPerMicron;
+    beads(i).ymicron = beads(i).y/VideoStruct.pixelsPerMicron;
     
 %     beads(i).xmicron = smooth(beads(i).xmicron,50);
 %     beads(i).ymicron = smooth(beads(i).ymicron,50);
 
     if ~isempty(beads(i).xmicron)
-        beads(i).xvel = CreateGaussScaleSpace(beads(i).xmicron,1,4).*video.fps;
-        beads(i).yvel = CreateGaussScaleSpace(beads(i).ymicron,1,4).*video.fps;
+        beads(i).xvel = CreateGaussScaleSpace(beads(i).xmicron,1,4).*VideoStruct.fps;
+        beads(i).yvel = CreateGaussScaleSpace(beads(i).ymicron,1,4).*VideoStruct.fps;
     else
         beads(i).xvel = [];
         beads(i).yvel = [];
@@ -182,7 +188,14 @@ end
 yPosVal = reshape(yPosVal,NCols*NRows,1);
 yPosVal = yPosVal';
 
-map.X = yPosVal;
-map.Y = xPosVal;
-map.Vx = sectorX;
-map.Vy = sectorY;
+Xgrid(1,:) = (1:NCols).*(VideoStruct.xDim/NCols/VideoStruct.pixelsPerMicron);
+Ygrid(:,1) = (1:NRows).*(VideoStruct.yDim/NRows/VideoStruct.pixelsPerMicron);
+
+[X,Y] = meshgrid(Xgrid,Ygrid);
+
+map.X = X;
+map.Y = Y;
+map.Vx = reshape(sectorX, NCols, NRows)';
+map.Vy = reshape(sectorY, NCols, NRows)';
+
+return

@@ -26,7 +26,7 @@ if nargin < 1 || isempty(map)
 end
 
 figure(h);
-quiver(map.xPosVal,map.yPosVal,map.sectorX,map.sectorY,1);
+quiver(map.X,map.Y,map.Vx,map.Vy,1);
 set(gca,'YDir','reverse'); 
 xlim([0 video.xDim]);
 ylim([0 video.yDim]);
