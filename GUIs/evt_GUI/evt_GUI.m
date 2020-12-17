@@ -1552,7 +1552,7 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
     [g, gT] = findgroups(TrackingTable.ID);    
     
     if ~isempty(g)
-        Vel = splitapply(@(x1,x2,x3){sa_CalcVel(x1,x2,x3,1)}, ...
+        Vel = splitapply(@(x1,x2,x3){vst_CalcVel(x1,x2,x3,1)}, ...
                                                               TrackingTable.ID, ...
                                                               TrackingTable.Frame, ...
                                                              [TrackingTable.X, ...
@@ -1688,15 +1688,15 @@ function varargout = sec2frame(varargin)
 return
 
 
-function outs = sa_CalcVel(id, frame, xyz, sfactor)    
-    if isempty(frame)
-        outs = zeros(0,3);
-        return
-    end
-    
-    dxyz = CreateGaussScaleSpace(xyz,1,1);
-    outs = [id, frame, dxyz];
-return
+% function outs = sa_CalcVel(id, frame, xyz, sfactor)    
+%     if isempty(frame)
+%         outs = zeros(0,3);
+%         return
+%     end
+%     
+%     dxyz = CreateGaussScaleSpace(xyz,1,1);
+%     outs = [id, frame, dxyz];
+% return
 
 
 function radial = calculate_radial_vector(handles)
@@ -2061,11 +2061,11 @@ function outs = prep_VelField_plot(handles)
 
     VelField = vel_field(trajdata, NGridX, NGridY, VideoStruct);
     
-    VelField.Xgrid = (1:NGridX)*(VideoStruct.xDim/NGridX/VideoStruct.pixelsPerMicron);
-    VelField.Ygrid = (1:NGridY)*(VideoStruct.yDim/NGridY/VideoStruct.pixelsPerMicron);
-
-    VelField.Xvel = reshape(VelField.sectorX, NGridX, NGridY);
-    VelField.Yvel = reshape(VelField.sectorY, NGridX, NGridY);
+%     VelField.Xgrid = (1:NGridX)*(VideoStruct.xDim/NGridX/VideoStruct.pixelsPerMicron);
+%     VelField.Ygrid = (1:NGridY)*(VideoStruct.yDim/NGridY/VideoStruct.pixelsPerMicron);
+% 
+%     VelField.Xvel = reshape(VelField.sectorX, NGridX, NGridY);
+%     VelField.Yvel = reshape(VelField.sectorY, NGridX, NGridY);
     
     outs.VelField = VelField;
     outs.VideoStruct = VideoStruct;
@@ -2089,39 +2089,55 @@ function outs = calculate_curl(handles)
     VelField = tmp.VelField;
     VideoStruct = tmp.VideoStruct;
     
-    X = repmat(VelField.Xgrid(:)', size(VelField.Ygrid(:)));
-    Y = repmat(VelField.Ygrid(:),  size(VelField.Xgrid(:)')); 
-
-    Vx = VelField.Xvel;
-    Vy = VelField.Yvel;
+%     X = repmat(VelField.Xgrid(:)', size(VelField.Ygrid(:)));
+%     Y = repmat(VelField.Ygrid(:),  size(VelField.Xgrid(:)')); 
+% 
+%     Vx = VelField.Xvel;
+%     Vy = VelField.Yvel;
     
 %      P = [VelField.X,    VelField.Y];
 %      V = [VelField.Velx, VelField.Vely];
 
-     outs.X = X;
-     outs.Y = Y;
-     outs.Vx = Vx;
-     outs.Vy = Vy;
-     outs.Curl = curl(X, Y, Vx, Vy);
+     outs.VelField = VelField;
+     outs.VideoStruct = VideoStruct;
+     outs.Curl = curl(VelField.X, VelField.Y, VelField.Vx, VelField.Vy);
      
      return
 
      
-function plot_curl(CurlStruct, h)
+function plot_curl(CurlPlot, h)
 	
-    figure(h);
-    pcolor(CurlStruct.X, CurlStruct.Y, CurlStruct.Curl);
-	shading interp
+    figure(h);    
+%     pcolor(CurlPlot.VelField.X, CurlPlot.VelField.Y, CurlPlot.Curl);	
+%     shading interp
+    imagesc(CurlPlot.VelField.X(1,:), CurlPlot.VelField.Y(:,1), CurlPlot.Curl);	
     colormap(hot);
     colorbar;
+
+    hold on;
+    quiver(CurlPlot.VelField.X, CurlPlot.VelField.Y, CurlPlot.VelField.Vx, CurlPlot.VelField.Vy, 1, 'k');
+    set(gca,'YDir','reverse');    
+    hold off;
+    
+    myhot = [ones(128,1), linspace(0,1,128)', linspace(0,1,128)'];
+    mycold = flipud(fliplr(myhot));
+    hotcold = [myhot ; mycold(2:end,:)];
+    hotcold = flipud(hotcold);
+    colormap(hotcold);
+    cmax = max(abs(CurlPlot.Curl(:)));    
+    caxis([-cmax cmax]);
+    xlim([CurlPlot.VelField.X(1,1) CurlPlot.VideoStruct.xDim]);
+    ylim([CurlPlot.VelField.Y(1,1) CurlPlot.VideoStruct.yDim]);
+    
     return
 
+    
     
 function VelMag = prep_VelMagScalarField_plot(handles)
     VelMag = prep_VelField_plot(handles);
     VelMag = VelMag.VelField;
     
-    Vmag = sqrt(VelMag.Xvel.^2 + VelMag.Yvel.^2);        
+    Vmag = sqrt(VelMag.Vx.^2 + VelMag.Vy.^2);        
     Vmag(Vmag<0.001) = NaN;
     Vmag(isnan(Vmag)) = min(Vmag(~isnan(Vmag)));
     
@@ -2130,7 +2146,7 @@ return
 
 function plot_VelMagScalarField(VelMag, h)    
     figure(h);
-    imagesc(VelMag.Xgrid, VelMag.Ygrid, log10(VelMag.Vmag')); 
+    imagesc(VelMag.X(1,:), VelMag.Y(:,1), log10(VelMag.Vmag')); 
     colormap(hot);
     xlabel('\mum')
     ylabel('\mum')
