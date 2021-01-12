@@ -146,7 +146,7 @@ TrackingTable = sortrows(TrackingTable,vars);
     
     % maxarea given the first XY datapoint of the trajectory
     if isfield(filtin, 'min_intensity')
-        if filtin.max_region_size < Inf
+        if filtin.min_intensity < Inf
             logentry(['min_intensity- Removing trackers with average intensities less than ' num2str(filtin.min_intensity) ' pixels^2.']);
 
             temp = splitapply(@(x,y){filter_min_intensity(x,y,filtin.min_intensity)}, [TrackingTable.X, TrackingTable.Y], TrackingTable.CenterIntensity, gid);
