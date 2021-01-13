@@ -22,7 +22,7 @@ function varargout = evt_FilterConfig(varargin)
 
 % Edit the above text to modify the response to help evt_FilterConfig
 
-% Last Modified by GUIDE v2.5 20-Nov-2019 15:56:13
+% Last Modified by GUIDE v2.5 13-Jan-2021 10:51:44
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -128,7 +128,13 @@ function edit_MinSens_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
+
     
+function edit_MinPixIntens_CreateFcn(hObject, eventdata, handles)
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+
     
 function pushbutton_close_Callback(hObject, eventdata, handles) 
     handles.evtHandles.TrackingFilter = handles.evtFiltConfig;
@@ -136,7 +142,6 @@ function pushbutton_close_Callback(hObject, eventdata, handles)
     evt_GUI('filter_tracking', handles.evtHandles);
 %     setappdata(0,'evtFiltConfig',handles.evtFiltConfig);
     closereq;
-
 
 
 function pushbutton_apply_Callback(hObject, eventdata, handles)
@@ -201,6 +206,14 @@ function checkbox_MinSens_Callback(hObject, eventdata, handles)
     end
 
 
+function checkbox_MinPixIntens_Callback(hObject, eventdata, handles)
+    if get(hObject, 'Value')
+        set(handles.edit_MinPixIntens, 'enable', 'on');
+    else
+        set(handles.edit_MinPixIntetns, 'enable', 'off');
+    end
+    
+
 function edit_MinFrames_Callback(hObject, eventdata, handles)
     handles.evtFiltConfig.min_frames = str2double(hObject.String);
     guidata(hObject, handles);
@@ -233,6 +246,11 @@ function edit_CameraDeadZone_Callback(hObject, eventdata, handles)
     
 function edit_MinSens_Callback(hObject, eventdata, handles)
     handles.evtFiltConfig.min_sens = str2double(hObject.String);
+    guidata(hObject, handles);
+
+
+function edit_MinPixIntens_Callback(hObject, eventdata, handles)
+    handles.evtFiltConfig.min_intensity = str2double(hObject.String);
     guidata(hObject, handles);
 
     

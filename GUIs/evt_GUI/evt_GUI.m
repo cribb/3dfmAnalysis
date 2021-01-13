@@ -81,6 +81,7 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.TrackingFilter.tcrop = 0;
     handles.TrackingFilter.xycrop = 0;
     handles.TrackingFilter.min_sens = 0;
+    handles.TrackingFilter.min_intensity = 0;
     handles.TrackingFilter.xyzunits = 'pixels';
     handles.TrackingFilter.calibum = 1;
 
