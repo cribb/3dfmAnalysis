@@ -75,6 +75,9 @@ vars = {'Fid'};
 TrackingTable = sortrows(TrackingTable,vars);
 [gid, GroupsTable] = findgroups(TrackingTable(:,vars));
 
+% Original number of trajectories
+logentry(['Starting with ' num2str(numel(unique(TrackingTable.ID))) ' trackers in the original dataset.']);
+
     if isfield(filtin, 'min_trackers')
         if filtin.min_trackers > 0
             logentry(['min_trackers- Not enough trackers (N < ' num2str(filtin.min_trackers) '). Zeroing this file.']);
@@ -166,6 +169,7 @@ TrackingTable = sortrows(TrackingTable,vars);
     TrackingTableOut = TrackingTable(~BadData,:);
     Trash = TrackingTable(BadData,:);
     
+    logentry(['Left with ' num2str(numel(unique(TrackingTableOut.ID))) ' trackers in the filtered dataset.']);    
     return
  
 % %%%%%%
