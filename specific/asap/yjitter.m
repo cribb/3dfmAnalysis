@@ -1,7 +1,11 @@
-function JitterTable = yjitter(csvfile, intens_thresh,  min_traj_length, plotTF)
+function JitterTable = yjitter(csvfile, intens_thresh,  min_traj_length, min_pixels, plotTF)
 
-if nargin < 3 || isempty(plotTF)
+if nargin < 5 || isempty(plotTF)
     plotTF = false;
+end
+
+if nargin < 4 || isempty(min_pixels)
+    min_pixels = 0;
 end
 
 if nargin < 3 || isempty(min_traj_length)
@@ -50,7 +54,7 @@ logentry(['Median Intensity: ', num2str(median(TrackingTable.CenterIntensity)), 
 % define the filter parameters for the filtering step
 filtin.min_trackers    = 0;
 filtin.min_frames      = min_traj_length;
-filtin.min_pixels      = 0;
+filtin.min_pixels      = min_pixels;
 filtin.max_pixels      = Inf;
 filtin.max_region_size = Inf;
 filtin.min_sens        = 0;
