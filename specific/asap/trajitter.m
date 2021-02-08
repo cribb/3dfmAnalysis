@@ -105,11 +105,9 @@ end
 cd(rootdir);
 
 
-
-
 function outs = sa_calc_xyjitter(xy)
     meanxy = mean(xy,1);
-    deltax = -( xy(end,1) - xy(1,1) );
+    deltax =  ( xy(end,1) - xy(1,1) );
     deltay = -( xy(end,2) - xy(1,2) );
     % mean(xy(end-5:end,:) - mean(xy(1:5,:));
     % max(y) - min(y)
@@ -119,18 +117,11 @@ end
 
 
 function plot_jitter(JitterTable, mytitle, plotXY)
+% Plot some data, enable data cursor mode, and set the UpdateFcn
+% property to the callback function. Then, create a data tip by 
+% clicking on a data point.
 
-%     minx = -maxx;
-
-    
-
-
-    % Plot some data, enable data cursor mode, and set the UpdateFcn
-    % property to the callback function. Then, create a data tip by 
-    % clicking on a data point.
     if contains(plotXY, 'X')
-        
-
         maxx = max(abs(JitterTable.Xdelta));
         minx = -maxx;
         
@@ -139,13 +130,14 @@ function plot_jitter(JitterTable, mytitle, plotXY)
         xlabel('mean(x) [\mum]');
         ylabel('\Deltax [\mum]');
         title(mytitle, 'Interpreter', 'none');
-        xlim([minx maxx]);
+        ylim([minx maxx]);
 %         set(gca, 'YDir', 'reverse');
 
         dcm = datacursormode;
         dcm.Enable = 'on';
         dcm.UpdateFcn = @displayCoordinatesX;
     end
+    
     
     if contains(plotXY, 'Y')
         
