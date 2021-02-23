@@ -78,16 +78,16 @@ TrackingTable = sortrows(TrackingTable,vars);
 % Original number of trajectories
 logentry(['Starting with ' num2str(numel(unique(TrackingTable.ID))) ' trackers in the original dataset.']);
 
-    if isfield(filtin, 'min_trackers')
-        if filtin.min_trackers > 0
-            logentry(['min_trackers- Not enough trackers (N < ' num2str(filtin.min_trackers) '). Zeroing this file.']);
-            
-            temp = splitapply(@(x,y){filter_min_trackers(x,y,filtin.min_trackers)}, TrackingTable.ID, [TrackingTable.X, TrackingTable.Y], gid);
-            temp = cell2mat(temp);
-            TrackingTable.X = temp(:,1);
-            TrackingTable.Y = temp(:,2);         
-        end
-    end    
+if isfield(filtin, 'min_trackers')
+    if filtin.min_trackers > 0
+        logentry(['min_trackers- Not enough trackers (N < ' num2str(filtin.min_trackers) '). Zeroing this file.']);
+
+        temp = splitapply(@(x,y){filter_min_trackers(x,y,filtin.min_trackers)}, TrackingTable.ID, [TrackingTable.X, TrackingTable.Y], gid);
+        temp = cell2mat(temp);
+        TrackingTable.X = temp(:,1);
+        TrackingTable.Y = temp(:,2);         
+    end
+end    
     
 % Tracker level filters    
 vars = {'Fid', 'ID'};
@@ -117,6 +117,30 @@ TrackingTable = sortrows(TrackingTable,vars);
             % of the dataset.
             my_min = filtin.min_frames + 2 * filtin.tcrop + 1;
             temp = splitapply(@(x){filter_min_frames(x,my_min)}, [TrackingTable.X, TrackingTable.Y], gid);
+            temp = cell2mat(temp);
+            TrackingTable.X = temp(:,1);
+            TrackingTable.Y = temp(:,2);
+        end
+    end
+
+    % Minimum distance the trajectory must have
+    if isfield(filtin, 'min_pixels')
+        if filtin.min_pixels > 0
+            logentry(['min_pixels- Removing trackers with shorter lengths than ' num2str(filtin.min_pixels) ' [pixels].']);
+
+            temp = splitapply(@(xy){filter_min_pixels(xy,filtin.min_pixels)}, [TrackingTable.X, TrackingTable.Y], gid);
+            temp = cell2mat(temp);
+            TrackingTable.X = temp(:,1);
+            TrackingTable.Y = temp(:,2);
+        end
+    end
+
+    % Maximum distance the trajectory can have
+    if isfield(filtin, 'max_pixels')
+        if filtin.max_pixels < Inf
+            logentry(['max_pixels- Removing trackers with longer lengths than ' num2str(filtin.max_pixels) ' [pixels].']);
+
+            temp = splitapply(@(xy){filter_max_pixels(xy,filtin.max_pixels)}, [TrackingTable.X, TrackingTable.Y], gid);
             temp = cell2mat(temp);
             TrackingTable.X = temp(:,1);
             TrackingTable.Y = temp(:,2);
@@ -195,9 +219,34 @@ function XYcoords = filter_min_frames(XYcoords, minFrames)
         XYcoords = NaN(size(XYcoords));
     end
     
-    return;
+    return
 
+function XYcoords = filter_min_pixels(XYcoords, min_pixels)
+%     largest_distance = pdist2(XYcoords(:,1), XYcoords(:,2), 'euclidean', 'Largest', 1);
+    x = XYcoords(:,1);
+    y = XYcoords(:,2);
     
+    largest_distance = sqrt( (max(x) - min(x))^2 + (max(y) - min(y))^2 );
+    
+    if largest_distance < min_pixels
+        XYcoords = NaN(size(XYcoords));
+    end
+return
+
+function XYcoords = filter_max_pixels(XYcoords, max_pixels)
+%     largest_distance = pdist2(XYcoords(:,1), XYcoords(:,2), 'euclidean', 'Largest', 1);
+
+    x = XYcoords(:,1);
+    y = XYcoords(:,2);
+    
+    largest_distance = sqrt( (max(x) - min(x))^2 + (max(y) - min(y))^2 );
+    
+    if largest_distance > max_pixels
+        XYcoords = NaN(size(XYcoords));
+    end
+return
+
+
 function XYcoords = filter_tcrop(XYcoords, tCrop)
     
 
