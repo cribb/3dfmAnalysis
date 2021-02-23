@@ -222,26 +222,21 @@ function XYcoords = filter_min_frames(XYcoords, minFrames)
     return
 
 function XYcoords = filter_min_pixels(XYcoords, min_pixels)
-%     largest_distance = pdist2(XYcoords(:,1), XYcoords(:,2), 'euclidean', 'Largest', 1);
-    x = XYcoords(:,1);
-    y = XYcoords(:,2);
+
+    rangex = range(XYcoords(:,1));
+    rangey = range(XYcoords(:,2));
     
-    largest_distance = sqrt( (max(x) - min(x))^2 + (max(y) - min(y))^2 );
-    
-    if largest_distance < min_pixels
+    if (rangex < min_pixels) && (rangey < min_pixels)
         XYcoords = NaN(size(XYcoords));
     end
 return
 
 function XYcoords = filter_max_pixels(XYcoords, max_pixels)
-%     largest_distance = pdist2(XYcoords(:,1), XYcoords(:,2), 'euclidean', 'Largest', 1);
 
-    x = XYcoords(:,1);
-    y = XYcoords(:,2);
+    rangex = range(XYcoords(:,1));
+    rangey = range(XYcoords(:,2));
     
-    largest_distance = sqrt( (max(x) - min(x))^2 + (max(y) - min(y))^2 );
-    
-    if largest_distance > max_pixels
+    if (rangex > max_pixels) && (rangey > max_pixels)
         XYcoords = NaN(size(XYcoords));
     end
 return
