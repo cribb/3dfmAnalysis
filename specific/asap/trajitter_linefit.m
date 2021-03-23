@@ -22,6 +22,12 @@ end
 rootdir = pwd;
 
 plotXY = upper(plotXY);
+switch plotXY
+    case 'X'
+    case 'Y'
+    otherwise
+        error('plotXY must be either ''X'' or ''Y''.');
+end
 
 % Pull metadata info for csvfile. 
 fname = dir(csvfile);
@@ -91,14 +97,14 @@ end
 xy = [TrackingTable.X, TrackingTable.Y] * calibum;
 
 xytmp = splitapply(@(id, frame, xy){sa_calc_xyfits(id, frame, xy)}, TrackingTable.ID, TrackingTable.Frame, [TrackingTable.X, TrackingTable.Y], g);
-
-
 xytmp = cell2mat(xytmp);
 
 FitTable.ID = xytmp(:,1);
 FitTable.Frame = xytmp(:,2);
 FitTable.Xmodel = xytmp(:,3);
 FitTable.Ymodel = xytmp(:,4);
+FitTable.Xresiduals = xytmp(:,5);
+FitTable.Yresiduals = xytmp(:,6);
 
 FitTable = struct2table(FitTable);
 
@@ -113,10 +119,16 @@ JitterTable.Xmean = xytmp(:,1);
 JitterTable.Xdelta = xytmp(:,2);
 JitterTable.Ymean = xytmp(:,3);
 JitterTable.Ydelta = xytmp(:,4);
-
+JitterTable.RMSE = xytmp(:,5);
 JitterTable = struct2table(JitterTable);
+
+
+
+
+
 if contains(plotXY, 'X') || contains(plotXY, 'Y')
     plot_jitter(JitterTable, csvfile(1:end-4), plotXY);
+    plot_rmse(JitterTable, csvfile(1:end-4), plotXY);
 %     ylim([]);
 end
 
@@ -125,21 +137,10 @@ end
 cd(rootdir);
 
 
-function outs = sa_calc_xyjitter(xy, xymodel)
-    meanxy = mean(xy,1);
-    foo = xy-xymodel;
-    deltax =  ( xy(end,1) - xymodel(end,1) );
-    deltay = -( xy(end,2) - xymodel(end,2) );
-    % mean(xy(end-5:end,:) - mean(xy(1:5,:));
-    % max(y) - min(y)
-    outs = [meanxy(:,1), deltax, meanxy(:,2), deltay];
-end
-
 function outs = sa_calc_xyfits(id, frame, xy)
     TrajFitFraction = 0.15;
     order = 1;
-    
-    
+        
     N = ceil(numel(frame)*TrajFitFraction);
         
     xfit = polyfit(frame(1:N), xy(1:N,1), order);
@@ -148,55 +149,104 @@ function outs = sa_calc_xyfits(id, frame, xy)
     xmodel = polyval(xfit, frame);
     ymodel = polyval(yfit, frame);
     
-    outs = [id(:), frame(:), xmodel(:), ymodel(:)];
+    % Calculate residuals
+    xres = xy(:,1) - xmodel;
+    yres = xy(:,2) - ymodel;
+    
+    outs = [id(:), frame(:), xmodel(:), ymodel(:), xres(:), yres(:)];
 end
 
 
+function outs = sa_calc_xyjitter(xy, xymodel)
+    meanxy = mean(xy,1);
+    
+    deltax =  ( xy(end,1) - xymodel(end,1) );
+    deltay = -( xy(end,2) - xymodel(end,2) );
+    % mean(xy(end-5:end,:) - mean(xy(1:5,:));
+    % max(y) - min(y)
+    
+    rmse = sqrt(mean((xy-xymodel).^2));
+
+    outs = [meanxy(:,1), deltax, meanxy(:,2), deltay, rmse];
+end
+
+function plot_rmse(JitterTable, mytitle, plotXY)
+    
+        maxx = max(abs(JitterTable.Xdelta*calibum));
+        minx = -maxx;
+
+    figure;
+    switch plotXY 
+        case 'X'           
+            plot(JitterTable.Xmean * calibum, JitterTable.RMSE * calibum, 'o');
+            xlabel('mean(x) [\mum]');
+            ylabel('RMSE(x) [\mum]');
+%             ylim([minx maxx]);
+            dcm = datacursormode;
+            dcm.Enable = 'on';
+            dcm.UpdateFcn = @displayRmseX;
+        case 'Y'
+            plot(JitterTable.RMSE * calibum, JitterTable.Ymean * calibum, 'o');
+            xlabel('RMSE(y) [\mum]');
+            ylabel('mean(y) [\mum]');
+%             xlim([miny maxy]);
+            set(gca, 'YDir', 'reverse');
+            dcm = datacursormode;
+            dcm.Enable = 'on';            
+            dcm.UpdateFcn = @displayRmseY;
+    end
+    title(mytitle, 'Interpreter', 'none');
+
+    
+end
 
 function plot_jitter(JitterTable, mytitle, plotXY)
+
 % Plot some data, enable data cursor mode, and set the UpdateFcn
 % property to the callback function. Then, create a data tip by 
 % clicking on a data point.
 
-    if contains(plotXY, 'X')
-        maxx = max(abs(JitterTable.Xdelta*calibum));
-        minx = -maxx;
-        
-        figure;
-        plot(JitterTable.Xmean * calibum, JitterTable.Xdelta * calibum, 'o');
-        xlabel('mean(x) [\mum]');
-        ylabel('\Deltax [\mum]');
-        title(mytitle, 'Interpreter', 'none');
-        ylim([minx maxx]);
-%         set(gca, 'YDir', 'reverse');
+    figure;
+    switch plotXY
+        case 'X'
+            maxx = max(abs(JitterTable.Xdelta*calibum));
+            minx = -maxx;
 
-        dcm = datacursormode;
-        dcm.Enable = 'on';
-        dcm.UpdateFcn = @displayCoordinatesX;
+            plot(JitterTable.Xmean * calibum, JitterTable.Xdelta * calibum, 'o');
+            xlabel('mean(x) [\mum]');
+            ylabel('\Deltax [\mum]');
+            ylim([minx maxx]);
+            dcm = datacursormode;
+            dcm.Enable = 'on';            
+            dcm.UpdateFcn = @displayCoordinatesX;
+        case 'Y'
+            maxy = max(abs(JitterTable.Ydelta)*calibum);
+            miny = -maxy;
+
+            plot(JitterTable.Ydelta * calibum, JitterTable.Ymean * calibum, 'o');
+            xlabel('\Deltay [\mum]');
+            ylabel('mean(y) [\mum]');
+            xlim([miny maxy]);
+            set(gca, 'YDir', 'reverse');
+            dcm = datacursormode;
+            dcm.Enable = 'on';            
+            dcm.UpdateFcn = @displayCoordinatesY;
     end
+    title(mytitle, 'Interpreter', 'none');
     
-    
-    if contains(plotXY, 'Y')
-        
-        maxy = max(abs(JitterTable.Ydelta)*calibum);
-        miny = -maxy;
-    
-        figure;
-        plot(JitterTable.Ydelta * calibum, JitterTable.Ymean * calibum, 'o');
-        xlabel('\Deltay [\mum]');
-        ylabel('mean(y) [\mum]');
-        title(mytitle, 'Interpreter', 'none');
-        xlim([miny maxy]);
-        set(gca, 'YDir', 'reverse');
-
-        dcm = datacursormode;
-        dcm.Enable = 'on';
-        dcm.UpdateFcn = @displayCoordinatesY;
-    end
-
-
 end
     
+function attachDataTips(XorY)
+    dcm = datacursormode;
+    dcm.Enable = 'on';
+    switch upper(XorY)
+        case 'X'
+            dcm.UpdateFcn = @displayCoordinatesX;
+        case 'Y'
+            dcm.UpdateFcn = @displayCoordinatesY;
+    end           
+end
+
 
 function outs = displayCoordinatesX(~, plotXY)
     
@@ -204,7 +254,8 @@ function outs = displayCoordinatesX(~, plotXY)
     xdelta_um = plotXY.Position(2);
     
     % fid = JitterTable.Fid;    
-    row = JitterTable(JitterTable.Xdelta == xdelta_um/calibum & JitterTable.Xmean == xmean_um/calibum,:);        
+    row = JitterTable(abs(JitterTable.Xdelta - xdelta_um/calibum) < 0.001 & ...
+                      abs(JitterTable.Xmean  - xmean_um/calibum) < 0.001,:);        
     
     % may need to add FID later in case more than one file is loaded
     % outs = ['Fid = ', num2str(row.Fid), ', ID = ' num2str(row.ID)];       
@@ -218,12 +269,41 @@ function outs = displayCoordinatesY(~, plotXY)
     ymean_um  = plotXY.Position(2);
        
     % fid = JitterTable.Fid;    
-    row = JitterTable(JitterTable.Ydelta == ydelta_um/calibum & JitterTable.Ymean == ymean_um/calibum,:);        
+    row = JitterTable(abs(JitterTable.Ydelta - ydelta_um/calibum) < 0.001 & ...
+                      abs(JitterTable.Ymean  - ymean_um/calibum) < 0.001,:);        
     
     % may need to add FID later in case more than one file is loaded
     % outs = ['Fid = ', num2str(row.Fid), ', ID = ' num2str(row.ID)];       
     outs = ['ID = ' num2str(row.ID)];    
 end
 
+function outs = displayRmseX(~, plotXY)
+    
+    xmean_um  = plotXY.Position(1);
+    rmse_um = plotXY.Position(2);
+    
+    % fid = JitterTable.Fid;    
+    row = JitterTable(abs(JitterTable.RMSE - rmse_um/calibum) < 0.001 & ...
+                      abs(JitterTable.Xmean - xmean_um/calibum) < 0.001,:);        
+    
+    % may need to add FID later in case more than one file is loaded
+    % outs = ['Fid = ', num2str(row.Fid), ', ID = ' num2str(row.ID)];       
+    outs = ['ID = ' num2str(row.ID)];    
+end
+
+
+function outs = displayRmseY(~, plotXY)
+    
+    rmse_um = plotXY.Position(1);
+    ymean_um  = plotXY.Position(2);
+       
+    % fid = JitterTable.Fid;    
+    row = JitterTable(abs(JitterTable.RMSE - rmse_um/calibum) < 0.001 & ...
+                      abs(JitterTable.Ymean - ymean_um/calibum) < 0.001,:);        
+    
+    % may need to add FID later in case more than one file is loaded
+    % outs = ['Fid = ', num2str(row.Fid), ', ID = ' num2str(row.ID)];       
+    outs = ['ID = ' num2str(row.ID)];    
+end
 
 end
