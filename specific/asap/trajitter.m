@@ -1,4 +1,4 @@
-function JitterTable = trajitter(csvfile, intens_thresh,  min_frames, min_pixels, plotXY)
+function JitterTable = trajitter(csvfile, intens_thresh,  min_frames, min_pixels, plotXY, binnum)
 
 if nargin < 5 || isempty(plotXY)
     plotXY = '';
@@ -22,6 +22,12 @@ end
 rootdir = pwd;
 
 plotXY = upper(plotXY);
+switch plotXY
+    case 'X'
+    case 'Y'
+    otherwise
+        error('plotXY must be either ''X'' or ''Y''.');
+end
 
 % Pull metadata info for csvfile. 
 fname = dir(csvfile);
@@ -35,10 +41,11 @@ end
 cd(fname.folder);
 
 % Provide info about video the trajectories came from
-fps = 90;
+fps = 29;
 calibum = 0.1782; % [um/pixel]
 width = 1024;
 height = 768;
+% Ybinnum = 16;
 firstframefname = [];
 mipfname = [];
 
@@ -62,6 +69,8 @@ filtin.max_region_size = Inf;
 filtin.min_sens        = 0;
 filtin.tcrop           = 0;
 filtin.xycrop          = 0;
+filtin.width           = width;
+filtin.height          = height;
 filtin.xyzunits        = 'pixels';
 filtin.calib_um        = 1;
 filtin.drift_method    = 'none';
@@ -74,6 +83,7 @@ filtin.overlapthresh   = 0;
 
 % Filter the trajectories. The filtered points go into TrackingTable and
 % what gets cut goes into Trash
+% TrackingTable0 = TrackingTable;
 [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, filtin);
 
 % If everything gets filtered out, throw an error with an explanation
@@ -81,23 +91,69 @@ if isempty(TrackingTable)
     error('Intensity threshold is too strict. Choose a lower value.');
 end
 
+
+% Calculate fits for the X and Y trajectories for each path 
+[g, FitTable.ID] = findgroups(TrackingTable.ID);
+
+xytmp = splitapply(@(id, frame, xy){sa_calc_xyfits(id, frame, xy)}, TrackingTable.ID, TrackingTable.Frame, [TrackingTable.X, TrackingTable.Y], g);
+xytmp = cell2mat(xytmp);
+
+FitTable.ID = xytmp(:,1);
+FitTable.Frame = xytmp(:,2);
+FitTable.Xmodel = xytmp(:,3);
+FitTable.Ymodel = xytmp(:,4);
+FitTable.Xresiduals = xytmp(:,5);
+FitTable.Yresiduals = xytmp(:,6);
+
+FitTable = struct2table(FitTable);
+
+TrackingTable = innerjoin(TrackingTable, FitTable);
+
+
 % Calculate the "jitter" based on the average y-position and Yf-Yo. The
 % table is split-up into individual trajectories and passed to a function
-% that calculates on eatch group separately
-[g, JitterTable.ID] = findgroups(TrackingTable.ID);
+% that calculates on each group separately
+[gj, JitterTable.ID] = findgroups(TrackingTable.ID);
 
-xytmp = splitapply(@(xy)sa_calc_xyjitter(xy), [TrackingTable.X, TrackingTable.Y] * calibum, g);
-
-JitterTable.Xmean = xytmp(:,1);
-JitterTable.Xdelta = xytmp(:,2);
-JitterTable.Ymean = xytmp(:,3);
-JitterTable.Ydelta = xytmp(:,4);
-
+xytmp = splitapply(@(xy1,xy2)sa_calc_xyjitter(xy1, xy2), [TrackingTable.X,      TrackingTable.Y     ], ...
+                                                         [TrackingTable.Xmodel, TrackingTable.Ymodel], gj);
+JitterTable.Xi = xytmp(:,1);
+JitterTable.Xmean = xytmp(:,2);
+JitterTable.Xdelta = xytmp(:,3);
+JitterTable.Yi = xytmp(:,4);
+JitterTable.Ymean = xytmp(:,5);
+JitterTable.Ydelta = xytmp(:,6);
+JitterTable.RMSE = xytmp(:,7);
 JitterTable = struct2table(JitterTable);
 
+%define bins and average ydelta for each bin
+
+% % % %using initial y position of individual track to define which bin a tracker
+% % % %ends up in
+% % % [n, edge, bins] = histcounts(JitterTable.Yi, binnum);
+
+% Using mean y position of individual track to define which bin a tracker
+% ends up in
+
+[n, edges, bins] = histcounts(JitterTable.Ymean, binnum);
+
+[binsg, BG] = findgroups(bins);
+Nb = splitapply(@numel, binsg, binsg);
+
+
+
+
+%    Calculate the new tables here JAKE CODE
+
+
 if contains(plotXY, 'X') || contains(plotXY, 'Y')
+    plot_boxes;
     plot_jitter(JitterTable, csvfile(1:end-4), plotXY);
-%     ylim([]);
+    
+    overlayfig = figure;   
+    plot_jitter(JitterTable, csvfile(1:end-4), plotXY, overlayfig);
+    plot_boxes(overlayfig);
+    %     plot_jakermse(JitterTable, csvfile(1:end-4), plotXY);
 end
 
 
@@ -105,69 +161,166 @@ end
 cd(rootdir);
 
 
-function outs = sa_calc_xyjitter(xy)
-    meanxy = mean(xy,1);
-    deltax =  ( xy(end,1) - xy(1,1) );
-    deltay = -( xy(end,2) - xy(1,2) );
-    % mean(xy(end-5:end,:) - mean(xy(1:5,:));
-    % max(y) - min(y)
-    outs = [meanxy(:,1), deltax, meanxy(:,2), deltay];
+% Ancillary functions within the context of main/title function 
+function bin_out = um2bin(um)
+    bin_out = (um/calibum).*(binnum/height);    
+end
+
+function um_out = bin2um(bin)
+    um_out = bin * height/binnum * calibum;
+end
+    
+function bin_out = pix2bin(pix)
+    bin_out = pix * (binnum/height);
+end
+
+function pix_out = bin2pix(bin)
+    pix_out = bin * (height/binnum);
+end
+
+function um_out = pix2um(pix)
+    um_out = pix * calibum;
+end
+
+function pix_out = um2pix(um)
+    pix_out = um / calibum;
 end
 
 
+function outs = sa_calc_xyfits(id, frame, xy)
+    TrajFitFraction = 0.1;
+    order = 1;
+        
+    N = ceil(numel(frame)*TrajFitFraction);
+        
+    xfit = polyfit(frame(1:N), xy(1:N,1), order);
+    yfit = polyfit(frame(1:N), xy(1:N,2), order);
+    
+    xmodel = polyval(xfit, frame);
+    ymodel = polyval(yfit, frame);
+    
+    % Calculate residuals
+    xres = xy(:,1) - xmodel;
+    yres = xy(:,2) - ymodel;
+    
+    % (:) means linearize the matrix (creates column vectors)
+    
+    outs = [id(:), frame(:), xmodel(:), ymodel(:), xres(:), yres(:)];
+end
 
-function plot_jitter(JitterTable, mytitle, plotXY)
+
+function outs = sa_calc_xyjitter(xy, xymodel)
+    meanxy = mean(xy,1);
+    
+    deltax =  ( xy(end,1) - xymodel(end,1) );
+    deltay = -( xy(end,2) - xymodel(end,2) );
+    % mean(xy(end-5:end,:) - mean(xy(1:5,:));
+    % max(y) - min(y)
+    
+    xi = xy(1,1);
+    yi = xy(1,2);
+    
+    rmse = sqrt(mean((xy-xymodel).^2));
+    
+    if isempty(rmse)
+        outs = zeros(1,5);
+    end
+
+    outs = [xi, meanxy(:,1), deltax, yi, meanxy(:,2), deltay, rmse];
+end
+
+
+function plot_boxes(fig)
+    if nargin < 1 || isempty(fig)
+        fig = figure;
+    end
+    
+    figure(fig);
+    hold on;
+    boxplot(pix2um(JitterTable.Ydelta), binsg, 'Notch', 'off', ...
+                                       'Whisker', 2, ...
+                                        'Plotstyle', 'compact', ...
+                                       'Labels', BG, ...
+                                       'Orientation', 'horizontal', ...
+                                       'Positions', (1:binnum)-0.5);
+
+    ymin = 0;
+    ymax = binnum;
+    ylim([ymin, ymax]);
+    ytick_um(:,1) = [0:10:130];
+    ytick_grp = um2bin(ytick_um);
+    ax = gca;
+    ax.YDir = 'reverse';
+    ax.YTick = ytick_grp;
+    ax.YTickLabel = num2str(ytick_um);
+    ylabel('Mean (y) [\mum]');
+    xlabel('\Deltay [\mum]');
+
+    title('\Deltay');
+    hold off;
+    grid on;
+end
+
+function plot_jitter(JitterTable, mytitle, plotXY, fig)
 % Plot some data, enable data cursor mode, and set the UpdateFcn
 % property to the callback function. Then, create a data tip by 
 % clicking on a data point.
-
-    if contains(plotXY, 'X')
-        maxx = max(abs(JitterTable.Xdelta));
-        minx = -maxx;
-        
-        figure;
-        plot(JitterTable.Xmean, JitterTable.Xdelta, 'o');
-        xlabel('mean(x) [\mum]');
-        ylabel('\Deltax [\mum]');
-        title(mytitle, 'Interpreter', 'none');
-        ylim([minx maxx]);
-%         set(gca, 'YDir', 'reverse');
-
-        dcm = datacursormode;
-        dcm.Enable = 'on';
-        dcm.UpdateFcn = @displayCoordinatesX;
-    end
-    
-    
-    if contains(plotXY, 'Y')
-        
-        maxy = max(abs(JitterTable.Ydelta));
-        miny = -maxy;
-    
-        figure;
-        plot(JitterTable.Ydelta, JitterTable.Ymean, 'o');
-        xlabel('\Deltay [\mum]');
-        ylabel('mean(y) [\mum]');
-        title(mytitle, 'Interpreter', 'none');
-        xlim([miny maxy]);
-        set(gca, 'YDir', 'reverse');
-
-        dcm = datacursormode;
-        dcm.Enable = 'on';
-        dcm.UpdateFcn = @displayCoordinatesY;
+    if nargin < 4 || isempty(fig)
+        fig = figure;
     end
 
+    figure(fig);
+    hold on;
+    switch plotXY
+        case 'X'
+            maxx = max(abs(pix2bin(JitterTable.Xdelta)));
+            minx = -maxx;
 
+            plot(pix2bin(JitterTable.Xmean), pix2um(JitterTable.Xdelta), 'o', 'Color', [0.6 0.6 0.6]);
+            xlabel('mean(x) [\mum]');
+            ylabel('\Deltax [\mum]');
+%             ylim([minx maxx]);
+            dcm = datacursormode;
+            dcm.Enable = 'on';            
+            dcm.UpdateFcn = @displayCoordinatesX;
+        case 'Y'
+            maxy = max(abs(pix2bin(JitterTable.Ydelta)));
+            miny = -maxy;
+
+            plot(pix2um(JitterTable.Ydelta), pix2bin(JitterTable.Ymean), 'o', 'Color', [0.6 0.6 0.6]);
+            xlabel('\Deltay [\mum]');
+            ylabel('mean(y) [\mum]');
+%             xlim([miny maxy]);
+            set(gca, 'YDir', 'reverse');
+            dcm = datacursormode;
+            dcm.Enable = 'on';            
+            dcm.UpdateFcn = @displayCoordinatesY;
+    end
+    title(mytitle, 'Interpreter', 'none');
+    grid on;
 end
-    
+
+
+% function attachDataTips(XorY)
+%     dcm = datacursormode;
+%     dcm.Enable = 'on';
+%     switch upper(XorY)
+%         case 'X'
+%             dcm.UpdateFcn = @displayCoordinatesX;
+%         case 'Y'
+%             dcm.UpdateFcn = @displayCoordinatesY;
+%     end           
+% end
+
 
 function outs = displayCoordinatesX(~, plotXY)
     
-    xmean  = plotXY.Position(1);
-    xdelta = plotXY.Position(2);
+    xmean_bin  = plotXY.Position(1);
+    xdelta_bin = plotXY.Position(2);
     
     % fid = JitterTable.Fid;    
-    row = JitterTable(JitterTable.Xdelta == xdelta & JitterTable.Xmean == xmean,:);        
+    row = JitterTable(abs(JitterTable.Xdelta - bin2pix(xdelta_bin)) < 0.001 & ...
+                      abs(JitterTable.Xmean  - bin2pix(xmean_bin)) < 0.001,:);        
     
     % may need to add FID later in case more than one file is loaded
     % outs = ['Fid = ', num2str(row.Fid), ', ID = ' num2str(row.ID)];       
@@ -177,16 +330,77 @@ end
 
 function outs = displayCoordinatesY(~, plotXY)
     
-    ydelta = plotXY.Position(1);
-    ymean  = plotXY.Position(2);
+    ydelta_bin = plotXY.Position(1);
+    ymean_bin  = plotXY.Position(2);
        
     % fid = JitterTable.Fid;    
-    row = JitterTable(JitterTable.Ydelta == ydelta & JitterTable.Ymean == ymean,:);        
+    row = JitterTable(abs(JitterTable.Ydelta - um2pix(ydelta_bin)) < 0.001 & ...
+                      abs(JitterTable.Ymean  - bin2pix(ymean_bin)) < 0.001,:);        
     
     % may need to add FID later in case more than one file is loaded
     % outs = ['Fid = ', num2str(row.Fid), ', ID = ' num2str(row.ID)];       
     outs = ['ID = ' num2str(row.ID)];    
 end
+
+
+% % % 
+% % % function outs = displayRmseX(~, plotXY)
+% % %     
+% % %     xmean_um  = plotXY.Position(1);
+% % %     rmse_um = plotXY.Position(2);
+% % %     
+% % %     % fid = JitterTable.Fid;    
+% % %     row = JitterTable(abs(JitterTable.RMSE - um2pix(rmse_um)) < 0.001 & ...
+% % %                       abs(JitterTable.Xmean - um2pix(xmean_um)) < 0.001,:);        
+% % %     
+% % %     % may need to add FID later in case more than one file is loaded
+% % %     % outs = ['Fid = ', num2str(row.Fid), ', ID = ' num2str(row.ID)];       
+% % %     outs = ['ID = ' num2str(row.ID)];    
+% % % end
+% % % 
+% % % 
+% % % function outs = displayRmseY(~, plotXY)
+% % %     
+% % %     rmse_um = plotXY.Position(1);
+% % %     ymean_um  = plotXY.Position(2);
+% % %        
+% % %     % fid = JitterTable.Fid;    
+% % %     row = JitterTable(abs(JitterTable.RMSE - um2pix(rmse_um)) < 0.001 & ...
+% % %                       abs(JitterTable.Ymean - um2pix(ymean_um)) < 0.001,:);        
+% % %     
+% % %     % may need to add FID later in case more than one file is loaded
+% % %     % outs = ['Fid = ', num2str(row.Fid), ', ID = ' num2str(row.ID)];       
+% % %     outs = ['ID = ' num2str(row.ID)];    
+% % % end
+% % % 
+% % % 
+% % % function plot_rmse(JitterTable, mytitle, plotXY)
+% % %     
+% % %         maxx = max(abs(JitterTable.Xdelta*calibum));
+% % %         minx = -maxx;
+% % % 
+% % %     figure;
+% % %     switch plotXY 
+% % %         case 'X'           
+% % %             plot(pix2um(JitterTable.Xmean), pix2um(JitterTable.RMSE), 'o');
+% % %             xlabel('mean(x) [\mum]');
+% % %             ylabel('RMSE(x) [\mum]');
+% % % %             ylim([minx maxx]);
+% % %             dcm = datacursormode;
+% % %             dcm.Enable = 'on';
+% % %             dcm.UpdateFcn = @displayRmseX;
+% % %         case 'Y'
+% % %             plot(pix2um(JitterTable.RMSE), pix2um(JitterTable.Ymean), 'o');
+% % %             xlabel('RMSE(y) [\mum]');
+% % %             ylabel('mean(y) [\mum]');
+% % % %             xlim([miny maxy]);
+% % %             set(gca, 'YDir', 'reverse');
+% % %             dcm = datacursormode;
+% % %             dcm.Enable = 'on';            
+% % %             dcm.UpdateFcn = @displayRmseY;
+% % %     end
+% % %     title(mytitle, 'Interpreter', 'none');    
+% % % end
 
 
 end
