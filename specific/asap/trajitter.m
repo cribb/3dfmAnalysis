@@ -29,16 +29,6 @@ switch plotXY
         error('plotXY must be either ''X'' or ''Y''.');
 end
 
-% Pull metadata info for csvfile. 
-fname = dir(csvfile);
-
-% Check for the presence of the file
-if isempty(fname)
-    error('CSV file not found.');
-end
-
-% Move to directory that contains data file
-cd(fname.folder);
 
 % Provide info about video the trajectories came from
 fps = 29;
@@ -51,7 +41,7 @@ mipfname = [];
 
 % Create the VideoTable that will tell vst_load_tracking how to load and
 % scale the trajectories.
-VidTable = mk_video_table(fname.name, fps, calibum, ...
+VidTable = mk_video_table(csvfile, fps, calibum, ...
                           width, height, firstframefname, mipfname);
                       
 % Load the trajectories into TrackingTable
@@ -93,17 +83,22 @@ end
 
 
 % Calculate fits for the X and Y trajectories for each path 
-[g, FitTable.ID] = findgroups(TrackingTable.ID);
+[g, ~] = findgroups(TrackingTable(:,{'Fid', 'ID'}));
 
-xytmp = splitapply(@(id, frame, xy){sa_calc_xyfits(id, frame, xy)}, TrackingTable.ID, TrackingTable.Frame, [TrackingTable.X, TrackingTable.Y], g);
+xytmp = splitapply(@(q1, q2, q3, q4){sa_calc_xyfits(q1, q2, q3, q4)}, TrackingTable.Fid, ...
+                                                                      TrackingTable.ID, ...
+                                                                      TrackingTable.Frame, ...
+                                                                      [TrackingTable.X, TrackingTable.Y], ...
+                                                                      g );
 xytmp = cell2mat(xytmp);
 
-FitTable.ID = xytmp(:,1);
-FitTable.Frame = xytmp(:,2);
-FitTable.Xmodel = xytmp(:,3);
-FitTable.Ymodel = xytmp(:,4);
-FitTable.Xresiduals = xytmp(:,5);
-FitTable.Yresiduals = xytmp(:,6);
+FitTable.Fid = xytmp(:,1);
+FitTable.ID = xytmp(:,2);
+FitTable.Frame = xytmp(:,3);
+FitTable.Xmodel = xytmp(:,4);
+FitTable.Ymodel = xytmp(:,5);
+FitTable.Xresiduals = xytmp(:,6);
+FitTable.Yresiduals = xytmp(:,7);
 
 FitTable = struct2table(FitTable);
 
@@ -113,10 +108,10 @@ TrackingTable = innerjoin(TrackingTable, FitTable);
 % Calculate the "jitter" based on the average y-position and Yf-Yo. The
 % table is split-up into individual trajectories and passed to a function
 % that calculates on each group separately
-[gj, JitterTable.ID] = findgroups(TrackingTable.ID);
+[gj, JitterTable] = findgroups(TrackingTable(:,{'Fid', 'ID'}));
 
-xytmp = splitapply(@(xy1,xy2)sa_calc_xyjitter(xy1, xy2), [TrackingTable.X,      TrackingTable.Y     ], ...
-                                                         [TrackingTable.Xmodel, TrackingTable.Ymodel], gj);
+xytmp = splitapply(@(q1,q2)sa_calc_xyjitter(q1, q2), [TrackingTable.X,      TrackingTable.Y     ], ...
+                                                     [TrackingTable.Xmodel, TrackingTable.Ymodel], gj);
 JitterTable.Xi = xytmp(:,1);
 JitterTable.Xmean = xytmp(:,2);
 JitterTable.Xdelta = xytmp(:,3);
@@ -124,7 +119,9 @@ JitterTable.Yi = xytmp(:,4);
 JitterTable.Ymean = xytmp(:,5);
 JitterTable.Ydelta = xytmp(:,6);
 JitterTable.RMSE = xytmp(:,7);
-JitterTable = struct2table(JitterTable);
+if isstruct(JitterTable)
+    JitterTable = struct2table(JitterTable);
+end
 
 %define bins and average ydelta for each bin
 
@@ -139,8 +136,6 @@ JitterTable = struct2table(JitterTable);
 
 [binsg, BG] = findgroups(bins);
 Nb = splitapply(@numel, binsg, binsg);
-
-
 
 
 %    Calculate the new tables here JAKE CODE
@@ -187,7 +182,7 @@ function pix_out = um2pix(um)
 end
 
 
-function outs = sa_calc_xyfits(id, frame, xy)
+function outs = sa_calc_xyfits(fid, id, frame, xy)
     TrajFitFraction = 0.1;
     order = 1;
         
@@ -205,7 +200,7 @@ function outs = sa_calc_xyfits(id, frame, xy)
     
     % (:) means linearize the matrix (creates column vectors)
     
-    outs = [id(:), frame(:), xmodel(:), ymodel(:), xres(:), yres(:)];
+    outs = [fid(:), id(:), frame(:), xmodel(:), ymodel(:), xres(:), yres(:)];
 end
 
 
