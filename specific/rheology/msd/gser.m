@@ -4,7 +4,7 @@ function v = gser(tau, msd, bead_radius)
 
     kb = 1.3806e-23;
     T = 298;
-    timeblur_decade_fraction = .3;
+    timeblur_decade_fraction = 0.1;
 
     % trim out NaNs   
     tau = tau( ~isnan(tau));
