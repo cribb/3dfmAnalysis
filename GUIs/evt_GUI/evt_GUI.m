@@ -80,6 +80,8 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.TrackingFilter.max_pixels = Inf;
     handles.TrackingFilter.tcrop = 0;
     handles.TrackingFilter.xycrop = 0;
+    handles.TrackingFilter.height = 768;
+    handles.TrackingFilter.width  = 1024;
     handles.TrackingFilter.min_sens = 0;
     handles.TrackingFilter.min_intensity = 0;
     handles.TrackingFilter.xyzunits = 'pixels';
@@ -726,7 +728,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
 %     S.Height = 484;
     S.Firstframefile = '';
     S.Mipfile = '';
-    
+
     VidTable = struct2table(S, 'AsArray', true);
 
     logentry(['Setting Path to: ' Path]);
@@ -741,6 +743,11 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     logentry('Loading dataset... ');
 
     TrackingTable = vst_load_tracking(VidTable);
+    
+    % Update the filter with height and width information
+    handles.TrackingFilter.height = VidTable.Height;
+    handles.TrackingFilter.width  = VidTable.Width;
+
     [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
     
     TrackingTable = AddVelocity2Table(TrackingTable);
@@ -927,19 +934,24 @@ function ExportMenu_CurrentBead_Callback(hObject, eventdata, handles)
     else
         CurrentBead = handles.CurrentBead;
         idx = handles.CurrentBeadRows;
+        
+        TrackingTable = handles.TrackingTable;
+        BeadTable = TrackingTable(idx,:);
 
-        bead.t      = handles.TrackingTable.Frame(idx) / handles.fps;
+        bead.t      = TrackingTable.Frame(idx) / handles.fps;
         bead.t      = bead.t - min(bead.t);
-        bead.frame  = handles.TrackingTable.Frame(idx);
-        bead.x      = handles.TrackingTable.X(idx);
-        bead.y      = handles.TrackingTable.Y(idx);
+        bead.frame  = TrackingTable.Frame(idx);
+        bead.x      = TrackingTable.X(idx);
+        bead.y      = TrackingTable.Y(idx);
         if isfield(bead, 'yaw')
-            bead.yaw    = handles.TrackingTable.Yaw(idx);
+            bead.yaw    = TrackingTable.Yaw(idx);
         end
     end    
 
     beadname = ['bead' num2str(CurrentBead)];
+    beadTname = ['BeadT' num2str(CurrentBead)];
     assignin('base', beadname, bead);
+    assignin('base', beadTname, BeadTable);
     logentry(['Bead ', num2str(CurrentBead), ' exported to base workspace as ''' beadname '''.']);
     return
     
@@ -952,6 +964,7 @@ function ExportMenu_AllBeads_Callback(hObject, eventdata, handles)
         vidtable = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
         bead = convert_vidtable_to_beadstruct(vidtable);    
         assignin('base', 'beads', bead);
+        assignin('base', 'TrackingTable', handles.TrackingTable);
         logentry(['All beads exported to base workspace as ''beads''.']);
         return
     end
@@ -2102,7 +2115,7 @@ function outs = calculate_curl(handles)
      outs.VelField = VelField;
      outs.VideoStruct = VideoStruct;
      outs.Curl = curl(VelField.X, VelField.Y, VelField.Vx, VelField.Vy);
-     
+     assignin('base', 'VelocityField', outs);
      return
 
      
