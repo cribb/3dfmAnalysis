@@ -301,18 +301,6 @@ function plot_jitter(JitterTable, mytitle, plotXY, fig)
 end
 
 
-% function attachDataTips(XorY)
-%     dcm = datacursormode;
-%     dcm.Enable = 'on';
-%     switch upper(XorY)
-%         case 'X'
-%             dcm.UpdateFcn = @displayCoordinatesX;
-%         case 'Y'
-%             dcm.UpdateFcn = @displayCoordinatesY;
-%     end           
-% end
-
-
 function outs = displayCoordinatesX(~, plotXY)
     
     xmean_bin  = plotXY.Position(1);

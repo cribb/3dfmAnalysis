@@ -138,8 +138,8 @@ cd(rootdir);
 
 
 function outs = sa_calc_xyfits(id, frame, xy)
-    TrajFitFraction = 0.15;
-    order = 1;
+    TrajFitFraction = 1;
+    order = 2;
         
     N = ceil(numel(frame)*TrajFitFraction);
         
