@@ -9,13 +9,14 @@ if nargin < 4 || isempty(debugPlotTF)
 end
 
 
-%Find ranges of tau, prepare for interpolation
+% Find ranges of tau, prepare for interpolation
+nBufferPoints = 2;
 min_tau         = min(logtau);
 tau_interp_step = min(diff(logtau))/2;
 max_tau         = max(logtau);
-tau_evenspace   = (min_tau : tau_interp_step : max_tau)';
+tau_evenspace(:,1)   = (min_tau - tau_interp_step*nBufferPoints : tau_interp_step : max_tau + tau_interp_step*nBufferPoints);
 
-% handle case where empty dataset is sent
+% Handle case where empty dataset is sent
 if isempty(logtau) || (isnan(min_tau) && isnan(max_tau))
     alpha = NaN;
     tau_evenspace = NaN;
@@ -25,10 +26,7 @@ end
 
 %Interpolate MSD to get evenly spaced MSD data
 warning('OFF', 'MATLAB:interp1:NaNinY');
-msd_evenspace = interp1(logtau,...
-                        logmsd,...
-                        tau_evenspace ...
-                        );
+msd_evenspace = interp1(logtau, logmsd, tau_evenspace, 'linear', 'extrap');
 
 %Create some important constants
 derivative_blur = timeblur_decade_fraction / tau_interp_step;
@@ -38,8 +36,12 @@ derivative_blur = timeblur_decade_fraction / tau_interp_step;
 %Take derivative of each bead's MSD (loop over beads)
 alpha_evenspace = nan(m_interp,n_interp); %initialize alpha matrix
 for i = 1:n_interp
-    curve = msd_evenspace(:, i) / tau_interp_step;
-    alpha_evenspace(:, i) = CreateGaussScaleSpace(curve, 1, derivative_blur);
+    dMSDdTau = CreateGaussScaleSpace(msd_evenspace(:, i), 1, 0.5)/tau_interp_step;
+%     alpha_evenspace(:, i) = dMSDdTau(nBufferPoints+1:end-nBufferPoints);
+    alpha_evenspace(:, i) = dMSDdTau;
+%     alpha_evenspace(:, i) = CreateGaussScaleSpace(msd_evenspace(:, i), 1, derivative_blur)/tau_interp_step;
+%     mb  = polyfit(tau_interp_step, msd_evenspace, 1);
+%     alpha_evenspace(:,i) = mb(1);
 end
 
 % Map indicies back to the original (uninterpolated) taus

@@ -30,12 +30,14 @@ function [TrackingTableOut, Trash] = vst_filter_tracking(TrackingTable, filtin)
         filtin.min_frames      = 0;
         filtin.min_pixels      = 0;
         filtin.max_pixels      = Inf;
-        filtin.max_region_size = Inf;
         filtin.min_sens        = 0;
+        filtin.max_region_size = Inf;
         filtin.tcrop           = 0;
         filtin.xycrop          = 0;
         filtin.xyzunits        = 'pixels';
         filtin.calib_um        = 1;
+        filtin.height          = 768;
+        filtin.width           = 1024;
         filtin.drift_method    = 'none';
         filtin.dead_spots      = [];
         filtin.jerk_limit      = [];
@@ -183,6 +185,35 @@ TrackingTable = sortrows(TrackingTable,vars);
         end
     end
         
+    % xycrop
+    if isfield(filtin, 'xycrop')
+        
+        xycrop = filtin.xycrop(:);
+        height = filtin.height;
+        width = filtin.width;
+        
+        if sum(xycrop) > 0
+            logentry(['xycrop- Removing trackers outside these bounds: ' num2str(filtin.xycrop) ' pixels']);                        
+            
+            switch length(xycrop)
+                case 1
+                    xycrop = xycrop .* ones(4,1); 
+                case 4
+                    xycrop(:,1) = xycrop(:);
+                otherwise
+                    error('XYcrop filter value must be length 1 (same crop all sides) or length 4 ([Left Right Top Bottom])/')
+            end
+            
+            xycropOUT = [xycrop(1), width-xycrop(2), xycrop(3), height-xycrop(4)];                        
+            
+            temp = splitapply(@(xy){filter_xycrop(xy,xycropOUT)}, [TrackingTable.X, TrackingTable.Y], gid);
+            temp = cell2mat(temp);
+            TrackingTable.X = temp(:,1);
+            TrackingTable.Y = temp(:,2);
+        end
+    end
+    
+    
     % NOW that all of the trajectory specific DATA REMOVAL type filters are
     % out of the way, remove the NaN position data from the TrackingTable and 
     % put it into another table for later reference. The two tables can
@@ -262,7 +293,21 @@ function XYcoords = filter_min_sens(XYcoords, sensitivity, min_sens)
     end
     
 return
+
+function XYcoords = filter_xycrop(XYcoords, xycrop)    
+% xycrop is a four-element vector containing pixel locations in the form
+% [Left, Right, Top, Bottom]
+%
+    if min(XYcoords(:,1)) < xycrop(1) || ... % Pixel location from left
+       max(XYcoords(:,1)) > xycrop(2) || ... % Pixel location on the right
+       min(XYcoords(:,2)) < xycrop(3) || ... % Pixel location on the top
+       min(XYcoords(:,2)) > xycrop(4)        % Pixel location on the top
+           XYcoords = NaN(size(XYcoords));
+    end 
     
+return
+
+
 
 function XYcoords = filter_max_region_size(XYcoords, RegionSize, max_region_size)
 

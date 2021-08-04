@@ -36,6 +36,11 @@ function save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, outtype)
     if nargin < 4 || isempty(calib_um)
         calib_um = NaN;
     end
+ 
+   if istable(tracking_in)
+        data = convert_TrackingTable_to_old_matrix(tracking_in, fps);
+        myinfo = NaN;
+   end
     
     if isstruct(tracking_in)
         data = tracking_in.spot3DSecUsecIndexFramenumXYZRPY;
@@ -49,6 +54,8 @@ function save_evtfile(filename, tracking_in, xyzunits, calib_um, fps, outtype)
         myinfo = NaN;
     end
           
+
+    
     if isempty(data)
         logentry('Saving empty dataset.');
         data = NULLTRACK;    
