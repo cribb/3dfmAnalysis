@@ -33,7 +33,7 @@ function [v,rho] = sucrose_viscosity(sucrose_molar_conc, temperature, temp_units
     end
     
     % Check the temperature input value for sanity.
-    if temperature < 0 || temperature > 100
+    if temperature < 0 | temperature > 100
         error('This model is valid for temperature values between 0 and 100 degrees Celsius.');
     end
 
