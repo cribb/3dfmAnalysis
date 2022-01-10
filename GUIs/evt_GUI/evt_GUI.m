@@ -1270,6 +1270,11 @@ function Plot_AUXfig(handles)
         case 'PSD'        
         case 'Integrated Disp'                 
         case 'pole locator'
+            if handles.recomputeMSD
+%                 handles.plots.MSD = prep_old_MSD_plot(handles);
+            end
+%             evt_plot_alphadist(handles.plots.MSD, AUXfig)
+            handles.recomputeMSD = 0;
         case 'tracker avail'
             handles.plots.TrackerAvail = calculate_tracker_availability(handles);
             plot_tracker_availability(handles.plots.TrackerAvail, AUXfig)
@@ -1883,14 +1888,21 @@ function outs = prep_velocity_plot(handles)
     
     % Get the velocities into the desired units
     if handles.radio_microns.Value
-        [VelX, VelY, VelZ] = pixel2um(VelX, VelY, VelZ);
+        [vX, vY, vZ] = pixel2um(VelX, VelY, VelZ);
+        VelX = vX; VelY = vY; VelZ = vZ;
         LengthUnits = '\mum';
     else
         LengthUnits = 'pixels';
     end
     
     if handles.radio_seconds.Value
-        [Time, VelX, VelY, VelZ] = frame2sec(Frame, VelX, VelY, VelZ);
+        % This is a velocity, where "frames" is in the denominator. For a
+        % clean conversion (and not screw up numerator conversions later,
+        % we need to invert before we convert and then reinvert after the
+        % conversion is made. Really screwy way to do this, so maybe the
+        % best thing to do is create separate scaling functions?
+        [Time, vX, vY, vZ] = frame2sec(Frame, 1./VelX, 1./VelY, 1./VelZ);
+        VelX = 1./vX; VelY = 1./vY; VelZ = 1./vZ;
         TimeUnits = '[s]';
         VelTimeUnits = 's';        
     else
@@ -1914,10 +1926,18 @@ return
 function plot_velocity(Velocity, h)
     figure(h);
     clf;
-    plot(Velocity.Time, [Velocity.VelX Velocity.VelY], '.-');
+%     plot(Velocity.Time, [Velocity.VelX Velocity.VelY], '.-');
+%     xlabel(['time, ' Velocity.TimeUnits]);
+%     ylabel(['velocity, ' Velocity.VelUnits]);
+%     legend('x', 'y');
+    
+    
+    plot(Velocity.Time, 6*pi*0.1*14e-6*[Velocity.VelX Velocity.VelY]*1e3, '.-');
     xlabel(['time, ' Velocity.TimeUnits]);
-    ylabel(['velocity, ' Velocity.VelUnits]);
+    ylabel(['force, [nN]']);
     legend('x', 'y');
+    
+    
     drawnow;
 return
 
