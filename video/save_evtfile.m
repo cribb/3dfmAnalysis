@@ -96,7 +96,7 @@ function outs = save_matfile(filename, data, fps, calib_um, myinfo)
     filename = strrep(filename, '.evt', '');
     filename = strrep(filename, '.mat', '');
     filename = strrep(filename, '.csv', '');    
-    outfile = [filename '.vrpn.evt.mat'];
+    outfile = [filename '.evt.mat'];
 
     save(outfile, 'tracking');  
 
