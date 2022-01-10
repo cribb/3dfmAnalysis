@@ -50,7 +50,8 @@ function [TrackingTableOut, Trash] = vst_filter_tracking(TrackingTable, filtin)
     
     if (nargin < 1) || isempty(TrackingTable) 
         logentry('No data inputs set. Exiting filter_vst_tracking now.');
-        TrackingTableOut = [];
+        TrackingTableOut = table;
+        Trash = table;
         filtout.drift_vector = [NaN NaN];
         return;
     end
