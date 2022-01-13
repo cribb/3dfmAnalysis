@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 30-Sep-2020 14:10:49
+% Last Modified by GUIDE v2.5 12-Jan-2022 08:14:03
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -73,7 +73,9 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.XYZoffsets = [ 0 0 0 ];
     handles.LengthUnits = 'pixels';
     handles.TimeUnits = 'sec';
-
+    handles.XYorigin = [0,0];
+    handles.Viscosity = 0.001;
+    
     % Assign initial "filter by" values 
     handles.TrackingFilter.min_frames = 0;
     handles.TrackingFilter.min_pixels = 0;
@@ -99,7 +101,8 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     set(handles.slider_BeadID, 'Max', 2);
     set(handles.slider_BeadID, 'SliderStep', [1 1]);                
     set(handles.slider_BeadID, 'Value', 1);                
-   
+    set(handles.edit_arb_origin, 'String', '0,0');
+    
 	% Update handles structure
 	guidata(hObject, handles);
 	
@@ -507,9 +510,9 @@ function radio_arb_origin_Callback(hObject, eventdata, handles)
     set(handles.radio_relative, 'Value', 0);
     set(handles.radio_arb_origin, 'Value', 1);
 
-    arb_origin = str2num(get(handles.edit_arb_origin, 'String'));  %#ok<ST2NM>
-
-    if length(arb_origin) ~= 2
+    edit_arb_origin_Callback(hObject, eventdata, handles);  %#ok<ST2NM>
+    
+    if length(handles.XYorigin) ~= 2
         logentry('Origin value is not valid.  Not plotting.')
         set(handles.radio_arb_origin, 'Value', 0);
         set(handles.radio_relative, 'Value', 1);
@@ -519,14 +522,20 @@ function radio_arb_origin_Callback(hObject, eventdata, handles)
 
 
 function edit_arb_origin_Callback(hObject, eventdata, handles)
-    arb_origin = str2double(get(hObject, 'String'));
 
+    arb_origin = get(handles.edit_arb_origin, 'String');
+    arb_origin = strsplit(arb_origin,',');
+    arb_origin = cellfun(@str2double, arb_origin, 'UniformOutput', false);
+    arb_origin = cell2mat(arb_origin);
+    
     if length(arb_origin) ~= 2
         logentry('Origin value is not valid.  Not plotting.')
         set(handles.radio_arb_origin, 'Value', 0);
     else
+        handles.XYorigin = arb_origin;
         plot_data(handles);
     end
+    guidata(hObject, handles);
     
 
 function edit_arb_origin_CreateFcn(hObject, eventdata, handles)
@@ -543,9 +552,10 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
     AUXtype = contents(get(hObject, 'Value'));
     
     handles.AUXtype = AUXtype{1};
-    guidata(hObject, handles);
+    
     
     plot_data(handles);
+    guidata(hObject, handles);
     
 
 function popup_AUXplot_CreateFcn(hObject, eventdata, handles)
@@ -586,23 +596,40 @@ function edit_bead_diameter_um_Callback(hObject, eventdata, handles)
 
 
 function edit_bead_diameter_um_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_bead_diameter_um (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
+% --- Executes on button press in checkbox_visc.
+function checkbox_visc_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_visc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_visc
+
+
+
+function edit_customviscPas_Callback(hObject, eventdata, handles)
+    handles.Viscosity = str2double(get(hObject,'String'));
+    guidata(hObject, handles);    
+    plot_data(handles);
+    
+
+% --- Executes during object creation, after setting all properties.
+function edit_customviscPas_CreateFcn(hObject, eventdata, handles)
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+
+
 
 function checkbox_neutoffsets_Callback(hObject, eventdata, handles)
 
     handles = SelectBead(handles);    
-
-    guidata(hObject, handles);
-    
+    guidata(hObject, handles);   
     plot_data(handles);
 
 
@@ -695,7 +722,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     set(handles.slider_BeadID, 'Value', 1);   
     set(handles.text_status, 'String', {''});
 
-    [File, Path, fidx] = uigetfile({'*.mat;*.csv';'*.mat';'*.csv';'*.*'}, ...
+    [File, Path, fidx] = uigetfile({'*.evt.mat;*.csv';'*.evt.mat';'*.csv';'*.*'}, ...
                                       'Select File(s) to Open', ...
                                       'MultiSelect', 'off');
 %                                       'MultiSelect', 'on');
@@ -750,8 +777,14 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
 
     [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
     
-    TrackingTable = AddVelocity2Table(TrackingTable);
-    Trash = AddVelocity2Table(Trash);
+    TrackingTable = AddRadialLocations2Table(TrackingTable);
+%     Trash = AddRadialLocations2Table(Trash);    
+    
+    TrackingTable = AddVelocity2Table(TrackingTable);     
+%     Trash = AddVelocity2Table(Trash);
+
+%     TrackingTable = AddForce2Table(TrackingTable);     
+%     Trash = AddForce2Table(Trash);
 
     if isempty(TrackingTable)
         msgbox('No data exists in this fileset!');
@@ -824,6 +857,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     set(handles.radio_microns                       , 'Enable', 'on');
     set(handles.edit_calibum                        , 'Enable', 'on');
     set(handles.text_calibum                        , 'Enable', 'on');
+    set(handles.edit_customviscPas                  , 'Enable', 'on');
+    set(handles.checkbox_visc                       , 'Enable', 'on');    
     set(handles.checkbox_lockum                     , 'Enable', 'on');    
     set(handles.checkbox_msdmean                    , 'Value',   1);
     set(handles.edit_bead_diameter_um               , 'Enable', 'on');
@@ -1080,22 +1115,20 @@ function Plot_XYfig(handles)
     xlim(imx);
     ylim(imy);
     
-%     if isfield(handles, 'poleloc')
-%         polex = handles.poleloc(1);
-%         poley = handles.poleloc(2);
-%         circradius = 50;
-%         
-%         if get(handles.radio_microns, 'Value')
-%             polex = polex * calibum;
-%             poley = poley * calibum;
-%             circradius = circradius * calibum;
-%         end
-%         
-%         hold on;
-%             plot(polex, poley, 'r+', 'MarkerSize', 36);
-%             circle(polex, poley, circradius, 'r');
-%         hold off;
-%     end
+    if isfield(handles, 'plots') && isfield(handles.plots, 'PoleLocation')
+        polex = handles.plots.PoleLocation(1);
+        poley = handles.plots.PoleLocation(2);        
+        
+        if get(handles.radio_microns, 'Value')
+            [polex, poley] = pixel2um(polex,poley);
+%             poley = poley * calibum;            
+        end
+        
+        hold on;
+            plot(polex, poley, 'r+', 'MarkerSize', 24);
+            plot(polex, poley, 'ro', 'MarkerSize', 24);
+        hold off;
+    end
 
 return
 
@@ -1199,12 +1232,12 @@ function Plot_AUXfig(handles)
             plot_velocity_magnitude(handles.plots.VelMag, AUXfig);
             
         case 'velocity scatter (all)'
-            handles.plots.VelScatter = prep_VelScatter_plot(handles);
-            plot_velocity_scatter(handles.plots.VelScatter, AUXfig);
+            handles.plots.VelScatterAll = prep_VelScatter_plot(handles);
+            plot_velocity_scatter(handles.plots.VelScatterAll, AUXfig);
             
         case 'velocity scatter (active)'            
-            handles.plots.VelScatter = prep_VelScatter_plot(handles);
-            plot_velocity_scatter(handles.plots.VelScatter, AUXfig, true);
+            handles.plots.VelScatterActive = prep_VelScatter_plot(handles);
+            plot_velocity_scatter(handles.plots.VelScatterActive, AUXfig, true);
 
         case 'velocity vectorfield'            
             handles.plots.VelField = prep_VelField_plot(handles);
@@ -1217,9 +1250,33 @@ function Plot_AUXfig(handles)
         case 'vel. mag. scalarfield'            
             handles.plots.VelMag = prep_VelMagScalarField_plot(handles);
             plot_VelMagScalarField(handles.plots.VelMag, AUXfig);
-                        
-%         case 'displacement hist'        
+            
+        case 'forceXY'
+            handles.plots.ForceXY = prep_forceXY_plot(handles);
+            plot_forceXY(handles.plots.ForceXY, AUXfig);
+            
+        case 'force magnitude'
+            handles.plots.ForceMag = prep_forceMag_plot(handles);
+            plot_force_magnitude(handles.plots.ForceMag, AUXfig);
 
+        case 'force vs distance'
+            handles.plots.ForceVsDistance = prep_ForceVsDistance_plot(handles);
+            plot_forcevsdistance(handles.plots.ForceVsDistance, AUXfig);            
+        
+        case 'force scatter (all)'
+            handles.plots.ForceScatterAll = prep_ForceScatterAll_plot(handles);
+            plot_forcescatter_all(handles.plot.ForceScatterAll, AUXfig);            
+        
+        case 'force scatter (active)'
+            handles.plots.ForceScatterActive = prep_ForceScatterActive_plot(handles);
+            plot_forcescatter_active(handles.plot.ForceScatterActive, AUXfig);            
+        
+        case 'force vectorfield'
+            handles.plots.ForceVectorField = prep_ForceVectorField_plot(handles);
+            plot_force_vectorfield(handles.plot.ForceVectorField, AUXfig);            
+
+            
+%         case 'displacement hist'        
         case 'old MSD (fast)'
             if handles.recomputeMSD
                 handles.plots.MSD = prep_old_MSD_plot(handles);
@@ -1264,17 +1321,24 @@ function Plot_AUXfig(handles)
             handles.recomputeMSD = 0;
             
         case 'MSD histogram'
+            logentry('Not yet implemented, or implementation is deprecated.');
         case 'Diffusivity @ a tau'
+            logentry('Not yet implemented, or implementation is deprecated.');
         case 'Diffusivity vs. tau'
+            logentry('Not yet implemented, or implementation is deprecated.');
         case 'temporal MSD'
+            logentry('Not yet implemented, or implementation is deprecated.');
         case 'PSD'        
+            logentry('Not yet implemented, or implementation is deprecated.');
         case 'Integrated Disp'                 
+            logentry('Not yet implemented, or implementation is deprecated.');
+            
         case 'pole locator'
-            if handles.recomputeMSD
-%                 handles.plots.MSD = prep_old_MSD_plot(handles);
-            end
-%             evt_plot_alphadist(handles.plots.MSD, AUXfig)
-            handles.recomputeMSD = 0;
+%             logentry('Not yet implemented, or implementation is deprecated.');
+            handles.plots.PoleLocation = calculate_pole_location(handles);
+            Plot_XYfig(handles);
+            
+            
         case 'tracker avail'
             handles.plots.TrackerAvail = calculate_tracker_availability(handles);
             plot_tracker_availability(handles.plots.TrackerAvail, AUXfig)
@@ -1282,6 +1346,8 @@ function Plot_AUXfig(handles)
         case '2pt MSD ~~not implemented yet~~'
 
     end
+    
+    assignin('caller', 'handles', handles);
     
     return    
     
@@ -1556,6 +1622,47 @@ function rheo = calc_viscosity_stds(hObject, eventdata, handles)
     return
 
 
+function NewTrackingTable = AddRadialLocations2Table(TrackingTable, XYZo)
+
+    if nargin < 2 
+        XYZo = zeros(0,3);
+    elseif numel(XYZo) ~= 3
+        error('Something is incorrect about the origin of the coordinates.');
+    end
+
+    T = TrackingTable; % [pixels]
+
+    XYZ = [T.X, T.Y, T.Z];
+    [g, gT] = findgroups(T(:, {'Fid', 'ID'}));
+    Rxyz = splitapply(@(x1,x2,x3){sa_calc_rad_vecs(x1,x2,x3,XYZo)}, ...
+                                                          TrackingTable.ID, ...
+                                                          TrackingTable.Frame, ...
+                                                         [TrackingTable.X, ...
+                                                          TrackingTable.Y, ...
+                                                          TrackingTable.Z], ...
+                                                          g);           
+     Rxyz = cell2mat(Rxyz);
+     
+     RxyzT = table(Rxyz(:,1), Rxyz(:,2), Rxyz(:,3), 'VariableNames', {'ID', 'Frame', 'Rxyz'});
+
+     Tmp = innerjoin(TrackingTable, RxyzT, 'Keys', {'ID', 'Frame'});
+     Tmp = movevars(Tmp, 'Rxyz', 'after', 'Z');
+     
+     NewTrackingTable = Tmp;
+return
+    
+function outs = sa_calc_rad_vecs(id, frame, XYZ, XYZorigin)
+
+    if nargin<2 || isempty(XYZorigin)
+        XYZorigin = XYZ(1,:);
+    end
+
+    rout = sqrt( sum( (XYZ - XYZorigin).^2, 2 ) );    
+    
+    outs = [id, frame, rout];
+return
+
+
 function NewTrackingTable = AddVelocity2Table(TrackingTable)
 % Outputs the velocities in the default format, which is [pixels/frame] and
 % leaves the scaling to the invidual functions as needed.
@@ -1570,8 +1677,9 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
     
     [g, gT] = findgroups(TrackingTable.ID);    
     
+    smooth_factor = 1;
     if ~isempty(g)
-        Vel = splitapply(@(x1,x2,x3){vst_CalcVel(x1,x2,x3,1)}, ...
+        Vel = splitapply(@(x1,x2,x3){vst_CalcVel(x1,x2,x3,smooth_factor)}, ...
                                                               TrackingTable.ID, ...
                                                               TrackingTable.Frame, ...
                                                              [TrackingTable.X, ...
@@ -1594,6 +1702,28 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
     VelTable = struct2table(VelTable);    
     
     NewTrackingTable = innerjoin(TrackingTable, VelTable);    
+    
+return
+
+
+function NewTrackingTable = AddForce2Table(TrackingTable)
+% Outputs the velocities in the default format, which is [pixels/frame] and
+% leaves the scaling to the invidual functions as needed.
+
+% XXX TODO: Add a smoothing scale to UI and CreateGaussScaleSpace call.
+
+%     if isempty(TrackingTable)
+%         NewTrackingTable = TrackingTable;
+%         
+%         return
+%     end
+    
+
+ForceScale = 6*pi*BeadRadius*Viscosity;
+TrackingTable(:, {'Fx', 'Fy', 'Fz', 'Fr'}) = ForceScale * TrackingTable(:, {'Vx', 'Vy', 'Vz', 'Vr'});
+    
+NewTrackingTable = TrackingTable;
+%     NewTrackingTable = innerjoin(TrackingTable, VelTable);    
     
 return
 
@@ -1707,17 +1837,6 @@ function varargout = sec2frame(varargin)
 return
 
 
-% function outs = sa_CalcVel(id, frame, xyz, sfactor)    
-%     if isempty(frame)
-%         outs = zeros(0,3);
-%         return
-%     end
-%     
-%     dxyz = CreateGaussScaleSpace(xyz,1,1);
-%     outs = [id, frame, dxyz];
-% return
-
-
 function radial = calculate_radial_vector(handles)
     
     Tbead = handles.BeadTrackingTable; % [pixels]
@@ -1741,7 +1860,7 @@ function radial = calculate_radial_vector(handles)
         y0 = y(1); 
         z0 = z(1); 
     elseif get(handles.radio_arb_origin, 'Value')            
-        arb_origin = str2double(handles.edit_arb_origin.String);   
+        arb_origin = handles.XYorigin;   
 
         if numel(arb_origin) >= 1
             x0 = arb_origin(1); 
@@ -1761,16 +1880,23 @@ function radial = calculate_radial_vector(handles)
             z0 = 0;
         end
         
-        % Covnert 'wrt' coordinates to 'pixels' when 'microns' are selected
+        % Convert 'wrt' coordinates to 'pixels' when 'microns' are selected
         % on the UI.
         if handles.radio_microns.Value
             x0 = um2pixel(x0);
             y0 = um2pixel(y0);
             z0 = um2pixel(z0);
+        else
+
         end    
 
     end    
-    
+        if handles.radio_microns.Value
+            units = 'microns';
+        else
+            units = 'pixels';
+        end
+        
     r = sqrt((x-x0).^2 + (y-y0).^2 + (z-z0).^2);
 
     mintime = handles.mintime;
@@ -1782,9 +1908,38 @@ function radial = calculate_radial_vector(handles)
     
     radial.t = t;
     radial.r = r;
+    radial.TimeUnits = 'fix the code here';
+    radial.LengthUnits = units;
     
     return
     
+
+    
+    radial.t = t;
+    radial.r = r;
+    radial.TimeUnits = 'fix the code here';
+    radial.LengthUnits = units;
+    
+
+% function radial = calculate_radial_vector(handles)
+% 
+%      Tbead = handles.BeadTrackingTable; % [pixels]
+%      
+%      if isempty(Tbead)
+%         radial.t = [];
+%         radial.r = [];
+%         return
+%      end
+%      
+%      t = Tbead.Frame / handles.fps;
+%     
+%     radial.t = t;
+%     radial.r = Tbead.Rxyz;
+%     radial.TimeUnits = 'fix the code here';
+%     radial.LengthUnits = units;
+%     
+% 
+% return
 
 function plot_radial_vector(radial, LengthUnits, h)    
     
@@ -1870,12 +2025,12 @@ function plot_center_intensity(CenterIntensity, h)
 return
 
 
-function outs = prep_velocity_plot(handles)
-    
-%     handles.LengthUnits = 'pixels';
-%     handles.LengthUnits = 'microns';
-%     handles.TimeUnits = 'frames';
-%     handles.TimeUnits = 'seconds';
+function outs = prep_velocity_plot(handles, reqTimeUnits, reqLengthUnits)
+% "requested Time Units" and "requested Length Units"    
+%     LengthUnits = 'pixels';
+%     LengthUnits = 'microns';
+%     TimeUnits = 'frames';
+%     TimeUnits = 'seconds';
 
     idx = handles.CurrentBeadRows;
 
@@ -1887,29 +2042,52 @@ function outs = prep_velocity_plot(handles)
     Velclr = Calculate_Velocity_ColorMap(VelR);
     
     % Get the velocities into the desired units
-    if handles.radio_microns.Value
-        [vX, vY, vZ] = pixel2um(VelX, VelY, VelZ);
-        VelX = vX; VelY = vY; VelZ = vZ;
-        LengthUnits = '\mum';
-    else
-        LengthUnits = 'pixels';
+    
+    % First, length scales
+    if (nargin < 3 || isempty(reqLengthUnits)) && handles.radio_microns.Value
+        reqLengthUnits = 'microns';
+    elseif (nargin < 3 || isempty(reqLengthUnits))        
+        reqLengthUnits = 'pixels';
+    end
+        
+    switch reqLengthUnits
+        case 'microns'
+            [vX, vY, vZ] = pixel2um(VelX, VelY, VelZ);
+            VelX = vX; VelY = vY; VelZ = vZ;
+            LengthUnits = '\mum';            
+        case 'pixels'
+            LengthUnits = 'pixels';
+        otherwise
+            error('Undefined Length Unit.');
+    end
+
+    
+    % Next, time scales
+    if (nargin < 2 || isempty(reqTimeUnits)) && handles.radio_seconds.Value
+        reqTimeUnits = 'seconds';
+    elseif (nargin < 2 || isempty(reqTimeUnits))
+        reqTimeUnits = 'frames';
+    end
+
+    switch reqTimeUnits
+        case 'seconds'
+            % This is a velocity, where "frames" is in the denominator. For a
+            % clean conversion (and not screw up numerator conversions later,
+            % we need to invert before we convert and then reinvert after the
+            % conversion is made. Really screwy way to do this, so maybe the
+            % best thing to do is create separate scaling functions?
+            [Time, iX, iY, iZ] = frame2sec(Frame, 1./VelX, 1./VelY, 1./VelZ);
+            VelX = 1./iX; VelY = 1./iY; VelZ = 1./iZ;
+            TimeUnits = '[s]';
+            VelTimeUnits = 's';        
+        case 'frames'
+            Time = Frame;
+            TimeUnits = '[frames]';
+            VelTimeUnits = 'frame';
+        otherwise
+            error('Undefined time scale unit.');
     end
     
-    if handles.radio_seconds.Value
-        % This is a velocity, where "frames" is in the denominator. For a
-        % clean conversion (and not screw up numerator conversions later,
-        % we need to invert before we convert and then reinvert after the
-        % conversion is made. Really screwy way to do this, so maybe the
-        % best thing to do is create separate scaling functions?
-        [Time, vX, vY, vZ] = frame2sec(Frame, 1./VelX, 1./VelY, 1./VelZ);
-        VelX = 1./vX; VelY = 1./vY; VelZ = 1./vZ;
-        TimeUnits = '[s]';
-        VelTimeUnits = 's';        
-    else
-        Time = Frame;
-        TimeUnits = '[frames]';
-        VelTimeUnits = 'frame';
-    end
     
     outs.Time = Time;
     outs.VelX = VelX;
@@ -1926,18 +2104,11 @@ return
 function plot_velocity(Velocity, h)
     figure(h);
     clf;
-%     plot(Velocity.Time, [Velocity.VelX Velocity.VelY], '.-');
-%     xlabel(['time, ' Velocity.TimeUnits]);
-%     ylabel(['velocity, ' Velocity.VelUnits]);
-%     legend('x', 'y');
-    
-    
-    plot(Velocity.Time, 6*pi*0.1*14e-6*[Velocity.VelX Velocity.VelY]*1e3, '.-');
+    plot(Velocity.Time, [Velocity.VelX Velocity.VelY], '.-');
     xlabel(['time, ' Velocity.TimeUnits]);
-    ylabel(['force, [nN]']);
+    ylabel(['velocity, ' Velocity.VelUnits]);
     legend('x', 'y');
-    
-    
+       
     drawnow;
 return
 
@@ -1964,7 +2135,7 @@ function plot_velocity_magnitude(Velocity, h)
 return
 
 
-function outs = prep_VelScatter_plot(handles)
+function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     
     CurrentBead = handles.CurrentBead;
     im = handles.im;
@@ -1981,6 +2152,11 @@ function outs = prep_VelScatter_plot(handles)
     
     T = vst_filter_tracking(T, filt);
 
+    % XXX TODO Change all of these weird structures into tables derived
+    % from the TrackingTable, or subtables tied to the TrackingTable. This
+    % should help to minimize cross-function recalculation.
+    %
+    
     % Pull out relevant info. Defaults units are pixels/frame
     Frame = T.Frame;
     X = T.X;
@@ -1991,23 +2167,58 @@ function outs = prep_VelScatter_plot(handles)
     Vz = T.Vz;
     Vr = T.Vr;
     
-    % Get the velocities into the desired units
-    if handles.radio_microns.Value
-        [X, Y, Z, xr, yr, Vx, Vy, Vz, Vr] = pixel2um(X, Y, Z, xr, yr, Vx, Vy, Vz, Vr);
-        LengthUnits = '\mum';
-    else
-        LengthUnits = 'pixels';
+    % Get the velocities into the desired units ...
+    
+    % First, length scales
+    if (nargin < 3 || isempty(reqLengthUnits)) && handles.radio_microns.Value
+        reqLengthUnits = 'microns';
+    elseif (nargin < 3 || isempty(reqLengthUnits))        
+        reqLengthUnits = 'pixels';
     end
     
-    if handles.radio_seconds.Value
-        [Time, Vx, Vy, Vz, Vr] = frame2sec(Frame, Vx, Vy, Vz, Vr);
-        TimeUnits = '[s]';
-        VelTimeUnits = 's';        
-    else
-        Time = Frame;
-        TimeUnits = '[frames]';
-        VelTimeUnits = 'frame';
+    switch reqLengthUnits
+        case 'microns'
+            [X, Y, Z, xr, yr, Vx, Vy, Vz, Vr] = pixel2um(X, Y, Z, xr, yr, Vx, Vy, Vz, Vr);
+            LengthUnits = '\mum';
+        case 'pixels'
+            LengthUnits = 'pixels';    
+        otherwise
+            error('Undefined Length Scale');
     end
+    
+%     if handles.radio_microns.Value
+%     else
+%     end
+    
+    % Next, time scales
+    if (nargin < 2 || isempty(reqTimeUnits)) && handles.radio_seconds.Value
+        reqTimeUnits = 'seconds';
+    elseif (nargin < 2 || isempty(reqTimeUnits))
+        reqTimeUnits = 'frames';
+    end
+    
+    switch reqTimeUnits
+        case 'seconds'
+            % This is a velocity, where "frames" is in the denominator. For a
+            % clean conversion (and not screw up numerator conversions later,
+            % we need to invert before we convert and then reinvert after the
+            % conversion is made. Really screwy way to do this, so maybe the
+            % best thing to do is create separate scaling functions?
+            [Time, ix, iy, iz, ir] = frame2sec(Frame, 1./Vx, 1./Vy, 1./Vz, 1./Vr);
+            Vx = 1./ix; Vy = 1./iy; Vz = 1./iz; Vr = 1./ir;
+            TimeUnits = '[s]';
+            VelTimeUnits = 's';                   
+        case 'frames'
+            Time = Frame;
+            TimeUnits = '[frames]';
+            VelTimeUnits = 'frame';
+        otherwise
+            error('Undefined time scale unit.');
+    end
+    
+%     if handles.radio_seconds.Value
+%     else
+%     end
     
     Vclr = Calculate_Velocity_ColorMap(Vr);
     
@@ -2165,8 +2376,7 @@ function plot_curl(CurlPlot, h)
     
     return
 
-    
-    
+        
 function VelMag = prep_VelMagScalarField_plot(handles)
     VelMag = prep_VelField_plot(handles);
     VelMag = VelMag.VelField;
@@ -2178,6 +2388,7 @@ function VelMag = prep_VelMagScalarField_plot(handles)
     VelMag.Vmag = Vmag;
 return
 
+
 function plot_VelMagScalarField(VelMag, h)    
     figure(h);
     imagesc(VelMag.X(1,:), VelMag.Y(:,1), log10(VelMag.Vmag')); 
@@ -2188,6 +2399,116 @@ function plot_VelMagScalarField(VelMag, h)
     colorbar;
     pretty_plot;   
 return
+
+
+function PoleLoc = calculate_pole_location(handles)
+    PoleLoc = pole_locator(handles.TrackingTable, [], 'y', handles.AUXfig);
+return
+
+
+function outs = prep_forceXY_plot(handles)
+
+%     handles.LengthUnits = 'microns';
+%     handles.TimeUnits = 'seconds';
+    
+    Velocity = prep_velocity_plot(handles, 'seconds', 'microns');
+    
+    BeadRadius = str2double(get(handles.edit_bead_diameter_um, 'String'))/2*1e-6;
+    Viscosity = str2double(get(handles.edit_customviscPas, 'String'));
+    
+    outs.Time = Velocity.Time;
+    outs.TimeUnits = Velocity.TimeUnits;    
+    outs.Viscosity = Viscosity;
+    outs.BeadRadius = BeadRadius;
+    outs.Force = 6*pi*BeadRadius*Viscosity*[Velocity.VelX Velocity.VelY]*1e-6;
+    outs.ForceUnits = 'N';
+return
+
+function plot_forceXY(ForceXY, h)
+    figure(h);
+    clf;
+    plot(ForceXY.Time, ForceXY.Force*1e9, '.-');
+    xlabel(['time, ' ForceXY.TimeUnits]);
+    ylabel(['force, [nN]']);
+    legend('x', 'y');
+return
+
+
+function outs = prep_forceMag_plot(handles)
+    force = prep_forceXY_plot(handles);
+    
+    outs.Time = force.Time;
+    outs.ForceMag = sqrt(sum(force.Force.^2,2));
+    outs.TimeUnits = force.TimeUnits;
+    outs.ForceUnits = force.ForceUnits;   
+return
+
+
+function plot_force_magnitude(Force, h)
+    figure(h);
+    clf;
+    plot(Force.Time, Force.ForceMag*1e9, '.-');
+    xlabel(['time, ' Force.TimeUnits]);
+    ylabel(['|F|, [nN]']);    
+    grid on;
+    drawnow;
+return
+
+        
+function ForceVsDistance = prep_ForceVsDistance_plot(handles)
+
+    R = calculate_radial_vector(handles);
+    ForceVsDistance.Distance = R.r;
+    ForceVsDistance.DistanceUnits = R.LengthUnits;
+    
+    F = prep_forceMag_plot(handles);
+    ForceVsDistance.ForceMag = F.ForceMag;
+    ForceVsDistance.ForceUnits = F.ForceUnits;
+    
+    return
+    
+    
+
+function plot_forcevsdistance(ForceVsDistance, h)
+    figure(h);
+    clf;
+    plot(ForceVsDistance.Distance, ForceVsDistance.ForceMag*1e9, '.-');
+    xlabel(['distance from poletop, ' ForceVsDistance.DistanceUnits]);
+    ylabel(['|F|, [nN]']);    
+    grid on;
+    drawnow;
+
+
+
+function outs = prep_ForceScatterAll_plot(handles)
+    TrackingTable = handles.TrackingTable;
+    
+    VelScatter = prep_VelScatter_plot(handles, 'seconds', 'microns');
+    
+    BeadRadius = str2double(get(handles.edit_bead_diameter_um, 'String'))/2*1e-6;
+    Viscosity = str2double(get(handles.edit_customviscPas, 'String'));
+    
+    Forces = 6*pi*BeadRadius*Viscosity*VelScatter.vr*1e-6;
+    
+    foo = splitapply(@(x1,x2)sa_gridifyForces(x1,x2), Tr, Forces, T.ID);
+    
+    outs.Viscosity = Viscosity;
+    outs.BeadRadius = BeadRadius;
+    outs.Forces = Forces;
+%     outs.MeanForce = CleanUpForceData(outs.Forces);
+    outs.ForceUnits = 'N';
+
+return
+    
+function plot_forcescatter(ForceScatter, h, ActiveOnlyTF) 
+
+function ForceScatterActive = prep_ForceScatterActive_plot(handles)
+
+function plot_forcescatter_active(ForceScatterActive, h)
+
+function ForceVectorField = prep_ForceVectorField_plot(handles)
+
+function plot_force_vectorfield(ForceVectorField, h)
 
 function outs = prep_old_MSD_plot(handles)
     TrackingTable = handles.TrackingTable;
@@ -2343,6 +2664,8 @@ function plot_data(handles)
     Plot_XYfig(handles);
     Plot_XTfig(handles);
     Plot_AUXfig(handles);
+    
+    assignin('caller', 'handles', handles);
     
     return
 
@@ -2770,3 +3093,5 @@ function logentry(txt)
     set(handles.text_status, 'String', [headertext, txt]);
 return
     
+
+
