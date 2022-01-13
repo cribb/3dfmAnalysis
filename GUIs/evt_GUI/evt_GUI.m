@@ -73,7 +73,7 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.XYZoffsets = [ 0 0 0 ];
     handles.LengthUnits = 'pixels';
     handles.TimeUnits = 'sec';
-    handles.XYorigin = [0,0];
+    handles.XYorigin = [0,0,0];
     handles.Viscosity = 0.001;
     
     % Assign initial "filter by" values 
@@ -512,7 +512,7 @@ function radio_arb_origin_Callback(hObject, eventdata, handles)
 
     edit_arb_origin_Callback(hObject, eventdata, handles);  %#ok<ST2NM>
     
-    if length(handles.XYorigin) ~= 2
+    if length(handles.XYorigin) ~= 3
         logentry('Origin value is not valid.  Not plotting.')
         set(handles.radio_arb_origin, 'Value', 0);
         set(handles.radio_relative, 'Value', 1);
@@ -528,15 +528,22 @@ function edit_arb_origin_Callback(hObject, eventdata, handles)
     arb_origin = cellfun(@str2double, arb_origin, 'UniformOutput', false);
     arb_origin = cell2mat(arb_origin);
     
-    if length(arb_origin) ~= 2
+    if numel(arb_origin) == 2
+        arb_origin = [arb_origin(:);0]';
+    end
+    
+    if length(arb_origin) ~= 3
         logentry('Origin value is not valid.  Not plotting.')
         set(handles.radio_arb_origin, 'Value', 0);
+        AddRadialLocations2Table(handles.TrackingTable);
     else
         handles.XYorigin = arb_origin;
-        plot_data(handles);
+        AddRadialLocations2Table(handles.TrackingTable, arb_origin);        
     end
+    plot_data(handles);
     guidata(hObject, handles);
     
+return
 
 function edit_arb_origin_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -1212,7 +1219,7 @@ function Plot_AUXfig(handles)
             set(AUXfig, 'Visible', 'off');
 
         case 'radial vector'
-            handles.plots.radial = calculate_radial_vector(handles);            
+            handles.plots.radial = prep_radial_vector_plot(handles);            
             plot_radial_vector(handles.plots.radial, handles.LengthUnits, AUXfig);
             
         case 'sensitivity (SNR)'
@@ -1624,16 +1631,31 @@ function rheo = calc_viscosity_stds(hObject, eventdata, handles)
 
 function NewTrackingTable = AddRadialLocations2Table(TrackingTable, XYZo)
 
+    isTableCol = @(t, thisCol) ismember(thisCol, t.Properties.VariableNames);
+
     if nargin < 2 
         XYZo = zeros(0,3);
-    elseif numel(XYZo) ~= 3
+    elseif numel(XYZo) == 2
+        XYZo = [XYZo(:);0]';
+    end
+    
+    if ~isempty(XYZo) && numel(XYZo) ~= 3
         error('Something is incorrect about the origin of the coordinates.');
     end
 
+    if isempty(TrackingTable)
+        NewTrackingTable = [];
+        return
+    end
+    
     T = TrackingTable; % [pixels]
 
-    XYZ = [T.X, T.Y, T.Z];
-    [g, gT] = findgroups(T(:, {'Fid', 'ID'}));
+    if isTableCol(T, 'Rxyz')
+        T.Rxyz = [];
+    end
+    
+    
+    g = findgroups(T(:, {'Fid', 'ID'}));
     Rxyz = splitapply(@(x1,x2,x3){sa_calc_rad_vecs(x1,x2,x3,XYZo)}, ...
                                                           TrackingTable.ID, ...
                                                           TrackingTable.Frame, ...
@@ -1645,7 +1667,7 @@ function NewTrackingTable = AddRadialLocations2Table(TrackingTable, XYZo)
      
      RxyzT = table(Rxyz(:,1), Rxyz(:,2), Rxyz(:,3), 'VariableNames', {'ID', 'Frame', 'Rxyz'});
 
-     Tmp = innerjoin(TrackingTable, RxyzT, 'Keys', {'ID', 'Frame'});
+     Tmp = innerjoin(T, RxyzT, 'Keys', {'ID', 'Frame'});
      Tmp = movevars(Tmp, 'Rxyz', 'after', 'Z');
      
      NewTrackingTable = Tmp;
@@ -1837,109 +1859,110 @@ function varargout = sec2frame(varargin)
 return
 
 
-function radial = calculate_radial_vector(handles)
-    
-    Tbead = handles.BeadTrackingTable; % [pixels]
+% function radial = calculate_radial_vector(handles)
+%     
+%     Tbead = handles.BeadTrackingTable; % [pixels]
+% 
+%     if isempty(Tbead)
+%         radial.t = [];
+%         radial.r = [];
+%         return
+%     end
+% 
+%     t = Tbead.Frame / handles.fps;
+%     x = Tbead.X;
+%     y = Tbead.Y;
+%     z = Tbead.Z;
+% 
+%     %
+%     % Handle origins, scalings, and offsets
+%     %     
+% % % %     if get(handles.radio_relative, 'Value')
+% % % %         x0 = x(1); 
+% % % %         y0 = y(1); 
+% % % %         z0 = z(1); 
+% % % %     elseif get(handles.radio_arb_origin, 'Value')            
+% % % %         arb_origin = handles.XYorigin;   
+% % % % 
+% % % %         if numel(arb_origin) >= 1
+% % % %             x0 = arb_origin(1); 
+% % % %         else 
+% % % %             x0 = 0;
+% % % %         end
+% % % % 
+% % % %         if numel(arb_origin) >= 2
+% % % %             y0 = arb_origin(2); 
+% % % %         else 
+% % % %             y0 = 0;
+% % % %         end
+% % % % 
+% % % %         if numel(arb_origin) == 3
+% % % %             z0 = arb_origin(3);        
+% % % %         else 
+% % % %             z0 = 0;
+% % % %         end
+%         
+%         % Convert 'wrt' coordinates to 'pixels' when 'microns' are selected
+%         % on the UI.
+%         if handles.radio_microns.Value
+%             x0 = um2pixel(x0);
+%             y0 = um2pixel(y0);
+%             z0 = um2pixel(z0);
+%         else
+% 
+%         end    
+% 
+%     end    
+%         if handles.radio_microns.Value
+%             units = 'microns';
+%         else
+%             units = 'pixels';
+%         end
+%         
+%     r = sqrt((x-x0).^2 + (y-y0).^2 + (z-z0).^2);
+% 
+%     mintime = handles.mintime;
+%     t = t - mintime;
+%     
+%     if handles.radio_microns.Value
+%         r = pixel2um(r);        
+%     end
+%     
+%     radial.t = t;
+%     radial.r = r;
+%     radial.TimeUnits = 'fix the code here';
+%     radial.LengthUnits = units;
+%     
+%     return
+     
 
+function radial = prep_radial_vector_plot(handles)
+
+    Tbead = handles.BeadTrackingTable; % [pixels]
+    mintime = handles.mintime;
+    r = Tbead.Rxyz;
+    units = 'pixels';
+    
     if isempty(Tbead)
         radial.t = [];
         radial.r = [];
         return
     end
-
-    t = Tbead.Frame / handles.fps;
-    x = Tbead.X;
-    y = Tbead.Y;
-    z = Tbead.Z;
-
-    %
-    % Handle origins, scalings, and offsets
-    %     
-    if get(handles.radio_relative, 'Value')
-        x0 = x(1); 
-        y0 = y(1); 
-        z0 = z(1); 
-    elseif get(handles.radio_arb_origin, 'Value')            
-        arb_origin = handles.XYorigin;   
-
-        if numel(arb_origin) >= 1
-            x0 = arb_origin(1); 
-        else 
-            x0 = 0;
-        end
-
-        if numel(arb_origin) >= 2
-            y0 = arb_origin(2); 
-        else 
-            y0 = 0;
-        end
-
-        if numel(arb_origin) == 3
-            z0 = arb_origin(3);        
-        else 
-            z0 = 0;
-        end
-        
-        % Convert 'wrt' coordinates to 'pixels' when 'microns' are selected
-        % on the UI.
-        if handles.radio_microns.Value
-            x0 = um2pixel(x0);
-            y0 = um2pixel(y0);
-            z0 = um2pixel(z0);
-        else
-
-        end    
-
-    end    
-        if handles.radio_microns.Value
-            units = 'microns';
-        else
-            units = 'pixels';
-        end
-        
-    r = sqrt((x-x0).^2 + (y-y0).^2 + (z-z0).^2);
-
-    mintime = handles.mintime;
+    
+    t = Tbead.Frame / handles.fps; 
     t = t - mintime;
-    
-    if handles.radio_microns.Value
-        r = pixel2um(r);        
+
+    if handles.radio_microns.Value         
+        r = pixel2um(r);            
+        units = 'microns';
     end
-    
+
     radial.t = t;
-    radial.r = r;
+    radial.r = Tbead.Rxyz;
     radial.TimeUnits = 'fix the code here';
     radial.LengthUnits = units;
-    
-    return
-    
 
-    
-    radial.t = t;
-    radial.r = r;
-    radial.TimeUnits = 'fix the code here';
-    radial.LengthUnits = units;
-    
-
-% function radial = calculate_radial_vector(handles)
-% 
-%      Tbead = handles.BeadTrackingTable; % [pixels]
-%      
-%      if isempty(Tbead)
-%         radial.t = [];
-%         radial.r = [];
-%         return
-%      end
-%      
-%      t = Tbead.Frame / handles.fps;
-%     
-%     radial.t = t;
-%     radial.r = Tbead.Rxyz;
-%     radial.TimeUnits = 'fix the code here';
-%     radial.LengthUnits = units;
-%     
-% 
-% return
+return
 
 function plot_radial_vector(radial, LengthUnits, h)    
     
