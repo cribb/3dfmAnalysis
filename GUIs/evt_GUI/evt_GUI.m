@@ -526,8 +526,8 @@ function edit_arb_origin_Callback(hObject, eventdata, handles)
     arb_origin = get(handles.edit_arb_origin, 'String');
     arb_origin = strsplit(arb_origin,',');
     arb_origin = cellfun(@str2double, arb_origin, 'UniformOutput', false);
-    arb_origin = cell2mat(arb_origin);
-    
+    arb_origin = cell2mat(arb_origin);      
+        
     if numel(arb_origin) == 2
         arb_origin = [arb_origin(:);0]';
     end
@@ -535,10 +535,10 @@ function edit_arb_origin_Callback(hObject, eventdata, handles)
     if length(arb_origin) ~= 3
         logentry('Origin value is not valid.  Not plotting.')
         set(handles.radio_arb_origin, 'Value', 0);
-        AddRadialLocations2Table(handles.TrackingTable);
+        handles.TrackingTable = AddRadialLocations2Table(handles.TrackingTable);
     else
         handles.XYorigin = arb_origin;
-        AddRadialLocations2Table(handles.TrackingTable, arb_origin);        
+        handles.TrackingTable = AddRadialLocations2Table(handles.TrackingTable, arb_origin);        
     end
     plot_data(handles);
     guidata(hObject, handles);
@@ -1635,8 +1635,8 @@ function NewTrackingTable = AddRadialLocations2Table(TrackingTable, XYZo)
 
     if nargin < 2 
         XYZo = zeros(0,3);
-    elseif numel(XYZo) == 2
-        XYZo = [XYZo(:);0]';
+%     elseif numel(XYZo) == 2
+%         XYZo = [XYZo(:);0]';
     end
     
     if ~isempty(XYZo) && numel(XYZo) ~= 3
@@ -2683,6 +2683,8 @@ function plot_data(handles)
 %           ', Calibum=', num2str(handles.calibum)]);
     
 %     handles.TrackingTable  = ScaleTrackingTable(handles.TrackingTable);
+    
+    handles = SelectBead(handles);
     
     Plot_XYfig(handles);
     Plot_XTfig(handles);
