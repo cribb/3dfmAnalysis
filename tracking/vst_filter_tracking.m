@@ -52,6 +52,8 @@ function [TrackingTableOut, Trash] = vst_filter_tracking(TrackingTable, filtin)
         logentry('No data inputs set. Exiting filter_vst_tracking now.');
         TrackingTableOut = table;
         Trash = table;
+%         TrackingTableOut = vst_initTrackingTable;
+%         Trash = vst_initTrackingTable;
         filtout.drift_vector = [NaN NaN];
         return;
     end
