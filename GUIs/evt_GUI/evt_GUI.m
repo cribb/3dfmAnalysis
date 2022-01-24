@@ -73,8 +73,9 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.XYZoffsets = [ 0 0 0 ];
     handles.LengthUnits = 'pixels';
     handles.TimeUnits = 'sec';
-    handles.XYorigin = [0,0,0];
+    handles.XYZorigin = [0,0,0];
     handles.Viscosity = 0.001;
+    handles.BeadRadius = 0.5e-6;
     
     % Assign initial "filter by" values 
     handles.TrackingFilter.min_frames = 0;
@@ -434,9 +435,10 @@ function edit_calibum_CreateFcn(hObject, eventdata, handles)
 
 function edit_calibum_Callback(hObject, eventdata, handles)
     handles.calibum = str2double(handles.edit_calibum.String);
-    handles.VidTable.Calibum = str2double(handles.edit_calibum.String);
+    handles.VidTable.Calibum = str2double(handles.edit_calibum.String);    
     handles.recomputeMSD = 1;
-	guidata(hObject, handles);
+	
+    guidata(hObject, handles);
     
     plot_data(handles);    
 
@@ -512,7 +514,7 @@ function radio_arb_origin_Callback(hObject, eventdata, handles)
 
     edit_arb_origin_Callback(hObject, eventdata, handles);  %#ok<ST2NM>
     
-    if length(handles.XYorigin) ~= 3
+    if length(handles.XYZorigin) ~= 3
         logentry('Origin value is not valid.  Not plotting.')
         set(handles.radio_arb_origin, 'Value', 0);
         set(handles.radio_relative, 'Value', 1);
@@ -537,7 +539,7 @@ function edit_arb_origin_Callback(hObject, eventdata, handles)
         set(handles.radio_arb_origin, 'Value', 0);
         handles.TrackingTable = AddRadialLocations2Table(handles.TrackingTable);
     else
-        handles.XYorigin = arb_origin;
+        handles.XYZorigin = arb_origin;
         handles.TrackingTable = AddRadialLocations2Table(handles.TrackingTable, arb_origin);        
     end
     plot_data(handles);
@@ -597,6 +599,9 @@ function checkbox_etastar_Callback(hObject, eventdata, handles)
     
 function edit_bead_diameter_um_Callback(hObject, eventdata, handles)
     handles.recomputeMSD = 1;     
+    handles.BeadRadius = str2double(get(hObject, 'String'))/2 * 1e-6;
+    handles.ForceScale = calculate_ForceScale(handles);
+    
     guidata(hObject, handles);
 
     plot_data(handles);
@@ -621,6 +626,8 @@ function checkbox_visc_Callback(hObject, eventdata, handles)
 
 function edit_customviscPas_Callback(hObject, eventdata, handles)
     handles.Viscosity = str2double(get(hObject,'String'));
+    handles.ForceScale = calculate_ForceScale(handles);
+    
     guidata(hObject, handles);    
     plot_data(handles);
     
@@ -785,13 +792,11 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
     
     TrackingTable = AddRadialLocations2Table(TrackingTable);
-%     Trash = AddRadialLocations2Table(Trash);    
+%     Trash = AddRadialLocations2Table(Trash);
     
     TrackingTable = AddVelocity2Table(TrackingTable);     
 %     Trash = AddVelocity2Table(Trash);
 
-%     TrackingTable = AddForce2Table(TrackingTable);     
-%     Trash = AddForce2Table(Trash);
 
     if isempty(TrackingTable)
         msgbox('No data exists in this fileset!');
@@ -799,8 +804,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     end
 
     logentry('Dataset(s) successfully loaded...');
-    
-    
+        
     MIPfile = strrep(filenameroot, '_TRACKED', '');
     MIPfile = strrep(MIPfile, 'video', 'FLburst');
     MIPfile = [MIPfile, '*mip*'];
@@ -817,8 +821,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
         handles.ImageWidth = max(TrackingTable.X) * 1.05;
         handles.ImageHeight = max(TrackingTable.Y) * 1.05;
     end
-    
-    
+        
     % export important data to handles structure
     handles.Filename = filename;
     handles.VidTable = VidTable;
@@ -826,10 +829,14 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     handles.Trash = Trash;    
     handles.recomputeMSD = 1;   
     handles.calibum = VidTable.Calibum;
+
     handles.rheo = calc_viscosity_stds(hObject, eventdata, handles);
-    handles.CurrentBead = min(TrackingTable.ID);           
-    handles = SelectBead(handles);    
+
+    handles.CurrentBead = min(TrackingTable.ID);       
     
+    handles.ForceScale = calculate_ForceScale(handles);
+    
+    handles = SelectBead(handles);    
     
     % Enable some controls now that data is loaded
     set(handles.edit_frame_rate                     , 'Enable', 'on');
@@ -1271,16 +1278,16 @@ function Plot_AUXfig(handles)
             plot_forcevsdistance(handles.plots.ForceVsDistance, AUXfig);            
         
         case 'force scatter (all)'
-            handles.plots.ForceScatterAll = prep_ForceScatterAll_plot(handles);
-            plot_forcescatter_all(handles.plot.ForceScatterAll, AUXfig);            
+            handles.plots.ForceScatterAll = prep_ForceScatter_plot(handles);
+            plot_force_scatter(handles.plots.ForceScatterAll, AUXfig);            
         
         case 'force scatter (active)'
-            handles.plots.ForceScatterActive = prep_ForceScatterActive_plot(handles);
-            plot_forcescatter_active(handles.plot.ForceScatterActive, AUXfig);            
+            handles.plots.ForceScatterActive = prep_ForceScatter_plot(handles);
+            plot_force_scatter(handles.plots.ForceScatterActive, AUXfig, true);            
         
         case 'force vectorfield'
             handles.plots.ForceVectorField = prep_ForceVectorField_plot(handles);
-            plot_force_vectorfield(handles.plot.ForceVectorField, AUXfig);            
+            plot_force_vectorfield(handles.plots.ForceVectorField, AUXfig);            
 
             
 %         case 'displacement hist'        
@@ -1483,7 +1490,12 @@ function handles = delete_inside_boundingbox(handles)
     sel = select_by_boundingbox(handles);
     
     NewTrash = handles.TrackingTable(sel,:);
-    handles.Trash = [handles.Trash; NewTrash];
+    
+    if isempty(handles.Trash)
+        handles.Trash = NewTrash;
+    else
+        handles.Trash = [handles.Trash; NewTrash];
+    end
     
     handles.TrackingTable(sel,:) = [];
     
@@ -1601,13 +1613,12 @@ function handles = delete_data_after_time(handles)
 function rheo = calc_viscosity_stds(hObject, eventdata, handles) 
     kB = 1.3806e-23; % [m^2 kg s^-2 K^-1];
     temp_K = 296; % [K]
-    
-    TrackingTable = handles.TrackingTable;
+        
     numtaus = str2double(get(handles.edit_chosentau, 'String'));
-    framemax = max(TrackingTable.Frame);
+    framemax = max(handles.TrackingTable.Frame);
     tau = msd_gen_taus(framemax, numtaus, 1);
-    bead_diameter_um = get(handles.edit_bead_diameter_um, 'String');
-    bead_radius_m = str2double(bead_diameter_um)/2 * 1e-6;
+    
+    bead_radius_m = handles.BeadRadius;
     
     % visc.water = 0.001; % [Pa s]
     visc.water = sucrose_viscosity(0, temp_K, 'K');
@@ -1629,11 +1640,11 @@ function rheo = calc_viscosity_stds(hObject, eventdata, handles)
     return
 
 
-function NewTrackingTable = AddRadialLocations2Table(TrackingTable, XYZo)
+function NewTrackingTable = AddRadialLocations2Table(TrackingTable, Trash, XYZo)
 
     isTableCol = @(t, thisCol) ismember(thisCol, t.Properties.VariableNames);
 
-    if nargin < 2 
+    if nargin < 3 
         XYZo = zeros(0,3);
 %     elseif numel(XYZo) == 2
 %         XYZo = [XYZo(:);0]';
@@ -1644,7 +1655,8 @@ function NewTrackingTable = AddRadialLocations2Table(TrackingTable, XYZo)
     end
 
     if isempty(TrackingTable)
-        NewTrackingTable = [];
+        NewTrackingTable = vst_initTrackingTable;
+%         error('You need to add the appropriate variables to the TrackingTable before this will work.');
         return
     end
     
@@ -1728,26 +1740,26 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
 return
 
 
-function NewTrackingTable = AddForce2Table(TrackingTable)
-% Outputs the velocities in the default format, which is [pixels/frame] and
-% leaves the scaling to the invidual functions as needed.
-
-% XXX TODO: Add a smoothing scale to UI and CreateGaussScaleSpace call.
-
-%     if isempty(TrackingTable)
-%         NewTrackingTable = TrackingTable;
-%         
-%         return
-%     end
-    
-
-ForceScale = 6*pi*BeadRadius*Viscosity;
-TrackingTable(:, {'Fx', 'Fy', 'Fz', 'Fr'}) = ForceScale * TrackingTable(:, {'Vx', 'Vy', 'Vz', 'Vr'});
-    
-NewTrackingTable = TrackingTable;
-%     NewTrackingTable = innerjoin(TrackingTable, VelTable);    
-    
-return
+% function NewTrackingTable = AddForce2Table(TrackingTable)
+% % Outputs the velocities in the default format, which is [pixels/frame] and
+% % leaves the scaling to the invidual functions as needed.
+% 
+% % XXX TODO: Add a smoothing scale to UI and CreateGaussScaleSpace call.
+% 
+% %     if isempty(TrackingTable)
+% %         NewTrackingTable = TrackingTable;
+% %         
+% %         return
+% %     end
+%     
+% 
+% 
+% TrackingTable(:, {'Fx', 'Fy', 'Fz', 'Fr'}) = ForceScale * TrackingTable(:, {'Vx', 'Vy', 'Vz', 'Vr'});
+%     
+% NewTrackingTable = TrackingTable;
+% %     NewTrackingTable = innerjoin(TrackingTable, VelTable);    
+%     
+% return
 
 
 function Vclr = Calculate_Velocity_ColorMap(vr)
@@ -1808,6 +1820,8 @@ function Vclr = Calculate_Velocity_ColorMap(vr)
     return
 
 
+    
+    
 function NativeXYZ = RemoveXYScaleAndOffset(xyz, handles)
     % XYZoffsets = the neutralization offsets for the XT plot
     XYZoffsets = handles.XYZoffsets;
@@ -1882,7 +1896,7 @@ return
 % % % %         y0 = y(1); 
 % % % %         z0 = z(1); 
 % % % %     elseif get(handles.radio_arb_origin, 'Value')            
-% % % %         arb_origin = handles.XYorigin;   
+% % % %         arb_origin = handles.XYZorigin;   
 % % % % 
 % % % %         if numel(arb_origin) >= 1
 % % % %             x0 = arb_origin(1); 
@@ -2431,26 +2445,22 @@ return
 
 function outs = prep_forceXY_plot(handles)
 
-%     handles.LengthUnits = 'microns';
-%     handles.TimeUnits = 'seconds';
-    
     Velocity = prep_velocity_plot(handles, 'seconds', 'microns');
-    
-    BeadRadius = str2double(get(handles.edit_bead_diameter_um, 'String'))/2*1e-6;
-    Viscosity = str2double(get(handles.edit_customviscPas, 'String'));
-    
+        
     outs.Time = Velocity.Time;
     outs.TimeUnits = Velocity.TimeUnits;    
-    outs.Viscosity = Viscosity;
-    outs.BeadRadius = BeadRadius;
-    outs.Force = 6*pi*BeadRadius*Viscosity*[Velocity.VelX Velocity.VelY]*1e-6;
+    outs.Viscosity = handles.Viscosity;
+    outs.BeadRadius = handles.BeadRadius;
+    outs.ForceScale = handles.ForceScale;
+    [outs.ForceX, outs.ForceY] = calculate_forces(handles.ForceScale, Velocity.VelX, Velocity.VelY);
     outs.ForceUnits = 'N';
+
 return
 
 function plot_forceXY(ForceXY, h)
     figure(h);
     clf;
-    plot(ForceXY.Time, ForceXY.Force*1e9, '.-');
+    plot(ForceXY.Time, [ForceXY.ForceX, ForceXY.ForceY]*1e9, '.-');
     xlabel(['time, ' ForceXY.TimeUnits]);
     ylabel(['force, [nN]']);
     legend('x', 'y');
@@ -2461,7 +2471,7 @@ function outs = prep_forceMag_plot(handles)
     force = prep_forceXY_plot(handles);
     
     outs.Time = force.Time;
-    outs.ForceMag = sqrt(sum(force.Force.^2,2));
+    outs.ForceMag = calculate_mag([force.ForceX,force.ForceY]);
     outs.TimeUnits = force.TimeUnits;
     outs.ForceUnits = force.ForceUnits;   
 return
@@ -2479,6 +2489,8 @@ return
 
         
 function ForceVsDistance = prep_ForceVsDistance_plot(handles)
+
+    error('Not implemented yet, yo.');
 
     R = calculate_radial_vector(handles);
     ForceVsDistance.Distance = R.r;
@@ -2503,31 +2515,92 @@ function plot_forcevsdistance(ForceVsDistance, h)
 
 
 
-function outs = prep_ForceScatterAll_plot(handles)
-    TrackingTable = handles.TrackingTable;
+function outs = prep_ForceScatter_plot(handles)    
     
-    VelScatter = prep_VelScatter_plot(handles, 'seconds', 'microns');
+    V = prep_VelScatter_plot(handles, 'seconds', 'microns');                   
     
-    BeadRadius = str2double(get(handles.edit_bead_diameter_um, 'String'))/2*1e-6;
-    Viscosity = str2double(get(handles.edit_customviscPas, 'String'));
     
-    Forces = 6*pi*BeadRadius*Viscosity*VelScatter.vr*1e-6;
+    Fs = handles.ForceScale;
+    [Fx, Fy, Fz, Fr] = calculate_forces(Fs, V.vx, V.vy, V.vz, V.vr);
+
+    F = V;
+%     F.im = V.im;
+%     F.xrange = V.xr;
+%     F.yrange = V.yr;
+%     F.id = V.id;
+%     F.idx = V.idx;
+%     F.x = V.x;
+%     F.y = V.y;
+%     F.z = V.z;
+%     F.vx = V.vx;
+%     F.vy = V.vy;
+%     F.vz = V.vz;
+%     F.vr = V.vr;
+%     F.vclr = V.vclr;    
+    F.BeadRadius = handles.BeadRadius;
+    F.Viscosity = handles.Viscosity;
+    F.ForceScale = handles.ForceScale;
+    F.Fx = Fx;
+    F.Fy = Fy;
+    F.Fz = Fz;
+    F.Fr = Fr;
+    F.Fclr = F.vclr;
     
-    foo = splitapply(@(x1,x2)sa_gridifyForces(x1,x2), Tr, Forces, T.ID);
+    F.ForceUnits = 'N';
     
-    outs.Viscosity = Viscosity;
-    outs.BeadRadius = BeadRadius;
-    outs.Forces = Forces;
-%     outs.MeanForce = CleanUpForceData(outs.Forces);
-    outs.ForceUnits = 'N';
+    outs = F;
+    
+
+    
 
 return
     
-function plot_forcescatter(ForceScatter, h, ActiveOnlyTF) 
+function plot_force_scatter(ForceScatter, h, ActiveOnlyTF) 
 
-function ForceScatterActive = prep_ForceScatterActive_plot(handles)
+    im = ForceScatter.im;
+    idx = ForceScatter.idx;
+    
+    if nargin < 3 || isempty(ActiveOnlyTF)
+        ActiveOnlyTF = false;
+    end
+    
+    figure(h);
+    clf;
+    imagesc(ForceScatter.xrange, ForceScatter.yrange, im);
+    colormap(gray(256));
+    hold on;
 
-function plot_forcescatter_active(ForceScatterActive, h)
+   [g, gT] = findgroups(ForceScatter.id);
+
+
+    if ActiveOnlyTF
+        scatter(ForceScatter.x(idx), ForceScatter.y(idx), 10, ForceScatter.fclr(idx,:), 'filled');
+    else
+        splitapply(@(x1,x2)plot(x1, x2, 'w-'), ForceScatter.x, ForceScatter.y, g);
+        scatter(ForceScatter.x, ForceScatter.y, 10, ForceScatter.Fclr, 'filled');
+    end
+        
+    hold off;
+    xlabel(['X, ' ForceScatter.LengthUnits]);
+    ylabel(['Y, ' ForceScatter.LengthUnits]);
+    
+        
+    minFr = min(ForceScatter.Fr)*1e9;
+    maxFr = max(ForceScatter.Fr)*1e9;
+    set(gca, 'YDir', 'reverse');            
+    
+    manual_colorbar(log10([minFr maxFr]));
+    title('log_{10}(force), [nN]');
+%     title(['log_{10}(force), ' ForceScatter.ForceUnits]);
+
+    disp(['Minimum Force = ' num2str(minFr) ' n' ForceScatter.ForceUnits '.']);
+    disp(['Maximum Force = ' num2str(maxFr) ' n' ForceScatter.ForceUnits '.']);
+
+    
+    drawnow;
+
+return
+
 
 function ForceVectorField = prep_ForceVectorField_plot(handles)
 
@@ -2714,7 +2787,7 @@ function bayes = run_bayes_model_selection(hObject, eventdata, handles)
     metadata.num_subtraj = 30;
     metadata.fps         = str2double(get(handles.edit_frame_rate, 'String'));
     metadata.calibum     = calibum;
-    metadata.bead_radius = str2double(get(handles.edit_bead_diameter_um, 'String'))*1e-6/2;
+    metadata.bead_radius = handles.BeadRadius;
     metadata.numtaus     = str2double(get(handles.edit_numtaus, 'String'));
     metadata.sample_names= {' '};
     metadata.models      = {'N', 'D', 'DA', 'DR', 'V'}; % avail. models are {'N', 'D', 'DA', 'DR', 'V', 'DV', 'DAV', 'DRV'};
@@ -2831,7 +2904,7 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
     fraction_for_subtraj = 0.75;
 
     fps = str2double(get(handles.edit_frame_rate, 'String'));
-    bead_radius = str2double(get(handles.edit_bead_diameter_um, 'String'))*1e-6/2;
+    bead_radius = handles.BeadRadius;
     calibum = str2double(get(handles.edit_calibum, 'String'));
     num_taus = str2double(get(handles.edit_numtaus, 'String'));
     opened_file = get(handles.edit_outfile, 'String');
@@ -3092,6 +3165,27 @@ function handles = filter_tracking(handles)
     plot_data(handles);
 return
 
+
+function ForceScale = calculate_ForceScale(handles)
+    ForceScale = 6*pi*handles.BeadRadius*handles.Viscosity;
+return
+
+
+function varargout = calculate_forces(ForceScale_meterPas, varargin)
+    % varargin in here is a list of arguments that are velocities in [um/s]
+    
+    % The velocity unit input is um/s but the ForceScale is in meters. Need to
+    % scale the velocity by 1e-6 to get it into meters/s.
+    Force_N  = cellfun(@(v)(ForceScale_meterPas .* v .* 1e-6), varargin, 'UniformOutput', false);    
+    varargout = Force_N;
+return
+
+    
+function mag = calculate_mag(matrix)
+    mag = sqrt(sum(matrix.^2,2));
+return
+
+    
 function logentry(txt)
 
     logtime = clock;
