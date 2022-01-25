@@ -74,8 +74,8 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.LengthUnits = 'pixels';
     handles.TimeUnits = 'sec';
     handles.XYZorigin = [0,0,0];
-    handles.Viscosity = 0.001;
-    handles.BeadRadius = 0.5e-6;
+    handles.Viscosity_Pas = 0.001;
+    handles.BeadRadius_m = 0.5e-6;
     
     % Assign initial "filter by" values 
     handles.TrackingFilter.min_frames = 0;
@@ -599,7 +599,7 @@ function checkbox_etastar_Callback(hObject, eventdata, handles)
     
 function edit_bead_diameter_um_Callback(hObject, eventdata, handles)
     handles.recomputeMSD = 1;     
-    handles.BeadRadius = str2double(get(hObject, 'String'))/2 * 1e-6;
+    handles.BeadRadius_m = str2double(get(hObject, 'String'))/2 * 1e-6;
     handles.ForceScale = calculate_ForceScale(handles);
     
     guidata(hObject, handles);
@@ -625,7 +625,7 @@ function checkbox_visc_Callback(hObject, eventdata, handles)
 
 
 function edit_customviscPas_Callback(hObject, eventdata, handles)
-    handles.Viscosity = str2double(get(hObject,'String'));
+    handles.Viscosity_Pas = str2double(get(hObject,'String'));
     handles.ForceScale = calculate_ForceScale(handles);
     
     guidata(hObject, handles);    
@@ -792,7 +792,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
     
     TrackingTable = AddRadialLocations2Table(TrackingTable);
-%     Trash = AddRadialLocations2Table(Trash);
+    Trash = AddRadialLocations2Table(Trash);
     
     TrackingTable = AddVelocity2Table(TrackingTable);     
 %     Trash = AddVelocity2Table(Trash);
@@ -1618,7 +1618,7 @@ function rheo = calc_viscosity_stds(hObject, eventdata, handles)
     framemax = max(handles.TrackingTable.Frame);
     tau = msd_gen_taus(framemax, numtaus, 1);
     
-    bead_radius_m = handles.BeadRadius;
+    bead_radius_m = handles.BeadRadius_m;
     
     % visc.water = 0.001; % [Pa s]
     visc.water = sucrose_viscosity(0, temp_K, 'K');
@@ -1640,7 +1640,7 @@ function rheo = calc_viscosity_stds(hObject, eventdata, handles)
     return
 
 
-function NewTrackingTable = AddRadialLocations2Table(TrackingTable, Trash, XYZo)
+function NewTrackingTable = AddRadialLocations2Table(TrackingTable, XYZo)
 
     isTableCol = @(t, thisCol) ismember(thisCol, t.Properties.VariableNames);
 
@@ -1655,8 +1655,12 @@ function NewTrackingTable = AddRadialLocations2Table(TrackingTable, Trash, XYZo)
     end
 
     if isempty(TrackingTable)
-        NewTrackingTable = vst_initTrackingTable;
-%         error('You need to add the appropriate variables to the TrackingTable before this will work.');
+        T = vst_initTrackingTable;
+        
+        Rxyz = [];
+        T = addvars(T, Rxyz, 'After', 'Z');
+        
+        NewTrackingTable = T;
         return
     end
     
@@ -1703,11 +1707,15 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
 
 % XXX TODO: Add a smoothing scale to UI and CreateGaussScaleSpace call.
 
-%     if isempty(TrackingTable)
-%         NewTrackingTable = TrackingTable;
-%         
-%         return
-%     end
+    if isempty(TrackingTable)
+        T = vst_initTrackingTable;
+        
+        Vx = []; Vy = []; Vz = []; Vr = []; Vclr = zeros(0,3);
+        T = addvars(T, Vx, Vy, Vz, Vr, Vclr, 'After', 'Radius');
+        
+        NewTrackingTable = T;
+        return
+    end
     
     [g, gT] = findgroups(TrackingTable.ID);    
     
@@ -2091,7 +2099,7 @@ function outs = prep_velocity_plot(handles, reqTimeUnits, reqLengthUnits)
         case 'microns'
             [vX, vY, vZ] = pixel2um(VelX, VelY, VelZ);
             VelX = vX; VelY = vY; VelZ = vZ;
-            LengthUnits = '\mum';            
+            LengthUnits = 'microns';            
         case 'pixels'
             LengthUnits = 'pixels';
         otherwise
@@ -2216,7 +2224,7 @@ function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     switch reqLengthUnits
         case 'microns'
             [X, Y, Z, xr, yr, Vx, Vy, Vz, Vr] = pixel2um(X, Y, Z, xr, yr, Vx, Vy, Vz, Vr);
-            LengthUnits = '\mum';
+            LengthUnits = 'microns';
         case 'pixels'
             LengthUnits = 'pixels';    
         otherwise
@@ -2324,10 +2332,10 @@ function plot_velocity_scatter(VelScatter, h, ActiveOnlyTF)
 
 return
 
-function outs = prep_VelField_plot(handles)
+function outs = prep_VelField_plot(handles, reqTimeUnits, reqLengthUnits)
         
     NGridX = 50;
-    NGridY = 50;
+    NGridY = 40;
     
     im = handles.im;
     
@@ -2335,8 +2343,44 @@ function outs = prep_VelField_plot(handles)
     
     VideoStruct.xDim = imx;
     VideoStruct.yDim = imy;
-    VideoStruct.pixelsPerMicron = 1 / handles.calibum;
-    VideoStruct.fps = handles.fps;
+    
+    % First, length scales
+    if (nargin < 3 || isempty(reqLengthUnits)) && handles.radio_microns.Value
+        reqLengthUnits = 'microns';
+    elseif (nargin < 3 || isempty(reqLengthUnits))        
+        reqLengthUnits = 'pixels';
+    end
+    
+    switch reqLengthUnits
+        case 'microns'
+            VideoStruct.pixelsPerMicron = 1 / handles.calibum;            
+            LengthUnits = 'microns';
+        case 'pixels'
+            VideoStruct.pixelsPerMicron = 1;
+            LengthUnits = 'pixels';    
+        otherwise
+            error('Undefined Length Scale');
+    end
+    
+    
+    % Next, time scales
+    if (nargin < 2 || isempty(reqTimeUnits)) && handles.radio_seconds.Value
+        reqTimeUnits = 'seconds';
+    elseif (nargin < 2 || isempty(reqTimeUnits))
+        reqTimeUnits = 'frames';
+    end
+    
+    switch reqTimeUnits
+        case 'seconds'
+            VideoStruct.fps = handles.fps;
+            TimeUnits = 'seconds';
+        case 'frames'
+            VideoStruct.fps = 1;
+            TimeUnits = 'frames';
+        otherwise
+            error('Undefined time scale unit.');
+    end
+    
     
     TrackingTable = handles.TrackingTable;
     trajdata = convert_Table_to_old_matrix(TrackingTable, handles.fps);
@@ -2350,6 +2394,8 @@ function outs = prep_VelField_plot(handles)
 %     VelField.Yvel = reshape(VelField.sectorY, NGridX, NGridY);
     
     outs.VelField = VelField;
+    outs.LengthUnits = LengthUnits;
+    outs.TimeUnits = TimeUnits;
     outs.VideoStruct = VideoStruct;
     
 return
@@ -2432,7 +2478,7 @@ function plot_VelMagScalarField(VelMag, h)
     colormap(hot);
     xlabel('\mum')
     ylabel('\mum')
-    title('Vel. [\mum/s]');
+    title('Vel. [microns/s]');
     colorbar;
     pretty_plot;   
 return
@@ -2449,8 +2495,8 @@ function outs = prep_forceXY_plot(handles)
         
     outs.Time = Velocity.Time;
     outs.TimeUnits = Velocity.TimeUnits;    
-    outs.Viscosity = handles.Viscosity;
-    outs.BeadRadius = handles.BeadRadius;
+    outs.Viscosity_Pas = handles.Viscosity_Pas;
+    outs.BeadRadius_m = handles.BeadRadius_m;
     outs.ForceScale = handles.ForceScale;
     [outs.ForceX, outs.ForceY] = calculate_forces(handles.ForceScale, Velocity.VelX, Velocity.VelY);
     outs.ForceUnits = 'N';
@@ -2524,21 +2570,8 @@ function outs = prep_ForceScatter_plot(handles)
     [Fx, Fy, Fz, Fr] = calculate_forces(Fs, V.vx, V.vy, V.vz, V.vr);
 
     F = V;
-%     F.im = V.im;
-%     F.xrange = V.xr;
-%     F.yrange = V.yr;
-%     F.id = V.id;
-%     F.idx = V.idx;
-%     F.x = V.x;
-%     F.y = V.y;
-%     F.z = V.z;
-%     F.vx = V.vx;
-%     F.vy = V.vy;
-%     F.vz = V.vz;
-%     F.vr = V.vr;
-%     F.vclr = V.vclr;    
-    F.BeadRadius = handles.BeadRadius;
-    F.Viscosity = handles.Viscosity;
+    F.BeadRadius_m = handles.BeadRadius_m;
+    F.Viscosity_Pas = handles.Viscosity_Pas;
     F.ForceScale = handles.ForceScale;
     F.Fx = Fx;
     F.Fy = Fy;
@@ -2550,11 +2583,9 @@ function outs = prep_ForceScatter_plot(handles)
     
     outs = F;
     
-
-    
-
 return
-    
+
+
 function plot_force_scatter(ForceScatter, h, ActiveOnlyTF) 
 
     im = ForceScatter.im;
@@ -2603,8 +2634,35 @@ return
 
 
 function ForceVectorField = prep_ForceVectorField_plot(handles)
+    V = prep_VelField_plot(handles, 'seconds', 'microns');
+    F.X = V.VelField.X;
+    F.Y = V.VelField.Y;
+    F.Vx = V.VelField.Vx;
+    F.Vy = V.VelField.Vy;
+    [F.Fx, F.Fy] = calculate_forces(handles.ForceScale, F.Vx, F.Vy);  
+    F.LengthUnits = V.LengthUnits;
+    F.TimeUnits = V.TimeUnits;
+    F.ForceUnits = '[N]';
+    ForceVectorField = F;
+   
+return
+
 
 function plot_force_vectorfield(ForceVectorField, h)
+
+    S = ForceVectorField;
+        
+    figure(h);
+    quiver(S.X, S.Y, S.Fx*1e9, S.Fy*1e9, 1);
+    set(gca,'YDir','reverse'); 
+    xlim([0 max(S.X(1,:))]);
+    ylim([0 max(S.Y(:,1))]);
+    
+    xlabel('X [\mum]');
+    ylabel('Y [\mum]')
+    title('Force Vectors [nN]');
+    pretty_plot;
+return
 
 function outs = prep_old_MSD_plot(handles)
     TrackingTable = handles.TrackingTable;
@@ -2787,7 +2845,7 @@ function bayes = run_bayes_model_selection(hObject, eventdata, handles)
     metadata.num_subtraj = 30;
     metadata.fps         = str2double(get(handles.edit_frame_rate, 'String'));
     metadata.calibum     = calibum;
-    metadata.bead_radius = handles.BeadRadius;
+    metadata.bead_radius = handles.BeadRadius_m;
     metadata.numtaus     = str2double(get(handles.edit_numtaus, 'String'));
     metadata.sample_names= {' '};
     metadata.models      = {'N', 'D', 'DA', 'DR', 'V'}; % avail. models are {'N', 'D', 'DA', 'DR', 'V', 'DV', 'DAV', 'DRV'};
@@ -2904,7 +2962,7 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
     fraction_for_subtraj = 0.75;
 
     fps = str2double(get(handles.edit_frame_rate, 'String'));
-    bead_radius = handles.BeadRadius;
+    bead_radius = handles.BeadRadius_m;
     calibum = str2double(get(handles.edit_calibum, 'String'));
     num_taus = str2double(get(handles.edit_numtaus, 'String'));
     opened_file = get(handles.edit_outfile, 'String');
@@ -3167,16 +3225,16 @@ return
 
 
 function ForceScale = calculate_ForceScale(handles)
-    ForceScale = 6*pi*handles.BeadRadius*handles.Viscosity;
+    ForceScale = 6*pi*handles.BeadRadius_m*handles.Viscosity_Pas;
 return
 
 
-function varargout = calculate_forces(ForceScale_meterPas, varargin)
+function varargout = calculate_forces(ForceScale_umPas, varargin)
     % varargin in here is a list of arguments that are velocities in [um/s]
     
     % The velocity unit input is um/s but the ForceScale is in meters. Need to
     % scale the velocity by 1e-6 to get it into meters/s.
-    Force_N  = cellfun(@(v)(ForceScale_meterPas .* v .* 1e-6), varargin, 'UniformOutput', false);    
+    Force_N  = cellfun(@(v)(ForceScale_umPas .* v .* 1e-6), varargin, 'UniformOutput', false);    
     varargout = Force_N;
 return
 
