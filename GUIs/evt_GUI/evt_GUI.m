@@ -488,7 +488,6 @@ function edit_frame_rate_Callback(hObject, eventdata, handles)
     handles.fps = str2double(get(hObject, 'String'));
     handles.VidTable.fps = str2double(get(hObject, 'String'));
 
-%     handles.TrackingTable.Time = handles.TrackingTable.Frame / handles.fps;
     handles.recomputeMSD = 1;
 
     handles = SelectBead(handles);
@@ -537,10 +536,12 @@ function edit_arb_origin_Callback(hObject, eventdata, handles)
     if length(arb_origin) ~= 3
         logentry('Origin value is not valid.  Not plotting.')
         set(handles.radio_arb_origin, 'Value', 0);
-        handles.TrackingTable = AddRadialLocations2Table(handles.TrackingTable);
+        set(handles.radio_relative, 'Value', 1);
+%         handles.RadialTable = CalculateRadialLocations(handles.TrackingTable);
     else
         handles.XYZorigin = arb_origin;
-        handles.TrackingTable = AddRadialLocations2Table(handles.TrackingTable, arb_origin);        
+        handles.RadialTable = CalculateRadialLocations(handles.TrackingTable, arb_origin);        
+%         handles.VelocityTable = CalculateVelocity(handles.TrackingTable);
     end
     plot_data(handles);
     guidata(hObject, handles);
@@ -791,11 +792,10 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
 
     [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
     
-    TrackingTable = AddRadialLocations2Table(TrackingTable);
-    Trash = AddRadialLocations2Table(Trash);
-    
-    TrackingTable = AddVelocity2Table(TrackingTable);     
-%     Trash = AddVelocity2Table(Trash);
+    RadialTable = CalculateRadialLocations(TrackingTable);
+        
+    VelocityTable = CalculateVelocity(TrackingTable);     
+
 
 
     if isempty(TrackingTable)
@@ -826,6 +826,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     handles.Filename = filename;
     handles.VidTable = VidTable;
     handles.TrackingTable = TrackingTable;
+    handles.RadialTable = RadialTable;
+    handles.VelocityTable = VelocityTable;
     handles.Trash = Trash;    
     handles.recomputeMSD = 1;   
     handles.calibum = VidTable.Calibum;
@@ -1043,18 +1045,21 @@ function pushbutton_FilterConfig_Callback(hObject, eventdata, handles)
 % =========================================================================
 function handles = SelectBead(handles)
     
-    CurrentBead = handles.CurrentBead;
-    beadID = handles.TrackingTable.ID;
+    CurrentBead = handles.CurrentBead;    
     
     % separate the currently selected bead vs not the selected bead
-    idx = (beadID == CurrentBead);
+    idx = (handles.TrackingTable.ID == CurrentBead);
 
     Tbead = handles.TrackingTable(idx,:);
+    
+    handles.Bead.TrackingTable = Tbead;
+    handles.Bead.RadialTable = handles.RadialTable(idx,:);
+    handles.Bead.VelocityTable = handles.VelocityTable(idx,:);
 
     handles.CurrentBeadRows = idx;
     handles.mintime = min(Tbead.Frame) / handles.fps;
-    handles.BeadTrackingTable = Tbead;
-
+    
+    
     if handles.checkbox_neutoffsets.Value && ~isempty(Tbead)
         handles.XYZoffsets = [Tbead.X(1), Tbead.Y(1) Tbead.Z(1)];
     else
@@ -1375,22 +1380,8 @@ function handles = delete_selected_dataset(handles)
     
     k = (handles.TrackingTable.ID == bead_to_remove);
     
-    NewTrash = handles.TrackingTable(k,:);
+    handles = delete_data(handles,k);
     
-    handles.Trash = [handles.Trash; NewTrash];
-    handles.TrackingTable(k,:) = [];        
-    
-    NewTrackingHeight = height(handles.TrackingTable);
-    NewTrashHeight = height(handles.Trash);
-    
-    disp([' height(TrackingTable)=', num2str(OldTrackingHeight), ...
-         ', height(Trash)= ', num2str(OldTrashHeight), ...
-         ', Deleting beadID= ', num2str(bead_to_remove), ...
-         ', NumRowsRemoved= ', num2str(sum(k)), ...
-         ', height(NewTrash)= ', num2str(NewTrashHeight), ...
-         ', height(NewTrackingTable)= ', num2str(NewTrackingHeight), ...
-         '. ']);
-
     return
 
 
@@ -1473,10 +1464,6 @@ function selection = select_by_boundingbox(handles)
     elseif get(handles.radio_XTfig, 'Value')
         k = ( t > Xedge_lo & t < Xedge_hi )   & ...
               handles.TrackingTable.ID == currentbead;
-% % % % % % %         k = (( (x-x0 > clickY_lo & x-x0 < clickY_hi)   | ...
-% % % % % % %                (y-y0 > clickY_lo & y-y0 < clickY_hi) ) & ...
-% % % % % % %                (t > clickX_lo & t < clickX_hi)   & ...
-% % % % % % %                handles.TrackingTable.ID == currentbead);
     elseif get(handles.radio_AUXfig, 'Value')
         logentry('Deleting data from AUX plot is not allowed.');
         return
@@ -1497,7 +1484,35 @@ function handles = delete_inside_boundingbox(handles)
         handles.Trash = [handles.Trash; NewTrash];
     end
     
+    handles = delete_data(handles, sel);
+return
+
+
+function handles = delete_data(handles, sel)
+    
+    NewTrash = handles.TrackingTable(sel,:);        
+    handles.Trash = [handles.Trash; NewTrash];
+    
     handles.TrackingTable(sel,:) = [];
+    handles.RadialTable(sel,:) = [];
+    handles.VelocityTable(sel,:) = [];
+    
+        
+%     NewTrackingHeight = height(handles.TrackingTable);
+%     NewTrashHeight = height(handles.Trash);
+%     
+%         disp([' height(TrackingTable)=', num2str(OldTrackingHeight), ...
+%          ', height(Trash)= ', num2str(OldTrashHeight), ...
+%          ', Deleting beadID= ', num2str(bead_to_remove), ...
+%          ', NumRowsRemoved= ', num2str(sum(k)), ...
+%          ', height(NewTrash)= ', num2str(NewTrashHeight), ...
+%          ', height(NewTrackingTable)= ', num2str(NewTrackingHeight), ...
+%          '. ']);
+     
+    handles = SelectBead(handles);
+return
+        
+    
     
 
 function handles = delete_outside_boundingbox(handles)
@@ -1555,6 +1570,7 @@ function handles = delete_outside_boundingbox(handles)
 
     end
 
+%     handles = delete_data(handles
     handles.TrackingTable = T;
     handles.Trash = Trash;
 
@@ -1570,7 +1586,7 @@ function closest_time = select_time_from_XTfig(handles)
         tm = frame2sec(tm);
     end
 
-    time = handles.BeadTrackingTable.Frame / handles.fps; % [sec]
+    time = handles.Bead.TrackingTable.Frame / handles.fps; % [sec]
 
     % find the closest time point to mouse click
     dists = abs(time - tm);    
@@ -1582,33 +1598,31 @@ function closest_time = select_time_from_XTfig(handles)
 
 function handles = delete_data_before_time(handles)
  
-    closest_time = select_time_from_XTfig(handles);
-
-    T = handles.TrackingTable;    
-    time = T.Frame / handles.fps;
-
+    closest_time = select_time_from_XTfig(handles);    
+        
+    time = handles.TrackingTable.Frame / handles.fps;
+    
     % remove any points in the TrackingTable that have times earlier than our
     % prescribed beginning time point
-    idx = (time <= closest_time);
-    T(idx,:) = [];
+    idx = (time <= closest_time);    
     
-    handles.TrackingTable = T;
+    handles = delete_data(handles, idx);
+    
 
     
 function handles = delete_data_after_time(handles)
 
-    closest_time = select_time_from_XTfig(handles);
-
-    T = handles.TrackingTable;    
-    time = T.Frame / handles.fps;
+    closest_time = select_time_from_XTfig(handles);    
+        
+    time = handles.TrackingTable.Frame / handles.fps;
+    
     % remove any points in the TrackingTable that have times earlier than our
     % prescribed beginning time point
-    idx = (time >= closest_time);
-
-    T(idx,:) = [];
+    idx = (time >= closest_time);    
     
-    handles.TrackingTable = T;
-
+    handles = delete_data(handles, idx);
+    
+    
 
 function rheo = calc_viscosity_stds(hObject, eventdata, handles) 
     kB = 1.3806e-23; % [m^2 kg s^-2 K^-1];
@@ -1640,88 +1654,116 @@ function rheo = calc_viscosity_stds(hObject, eventdata, handles)
     return
 
 
-function NewTrackingTable = AddRadialLocations2Table(TrackingTable, XYZo)
+% function NewTrackingTable = AddRadialLocations2Table(TrackingTable, XYZo)
+% 
+%     isTableCol = @(t, thisCol) ismember(thisCol, t.Properties.VariableNames);
+% 
+%     if nargin < 3 
+%         XYZo = zeros(0,3);
+% %     elseif numel(XYZo) == 2
+% %         XYZo = [XYZo(:);0]';
+%     end
+%     
+%     if ~isempty(XYZo) && numel(XYZo) ~= 3
+%         error('Something is incorrect about the origin of the coordinates.');
+%     end
+% 
+%     if isempty(TrackingTable)
+%         T = vst_initTrackingTable;
+%         
+%         Rxyz = [];
+%         T = addvars(T, Rxyz, 'After', 'Z');
+%         
+%         NewTrackingTable = T;
+%         return
+%     end
+%     
+%     T = TrackingTable; % [pixels]
+% 
+%     if isTableCol(T, 'Rxyz')
+%         T.Rxyz = [];
+%     end
+%     
+%     
+%     g = findgroups(T(:, {'Fid', 'ID'}));
+%     Rxyz = splitapply(@(x1,x2,x3,x4){sa_calc_rad_vecs(x1,x2,x3,x4,XYZo)}, ...
+%                                                           TrackingTable.Fid, ...        
+%                                                           TrackingTable.ID, ...
+%                                                           TrackingTable.Frame, ...
+%                                                          [TrackingTable.X, ...
+%                                                           TrackingTable.Y, ...
+%                                                           TrackingTable.Z], ...
+%                                                           g);           
+%      Rxyz = cell2mat(Rxyz);
+%      
+%      RxyzT = table(Rxyz(:,1), Rxyz(:,2), Rxyz(:,3), 'VariableNames', {'ID', 'Frame', 'Rxyz'});
+% 
+%      Tmp = innerjoin(T, RxyzT, 'Keys', {'ID', 'Frame'});
+%      Tmp = movevars(Tmp, 'Rxyz', 'after', 'Z');
+%      
+%      NewTrackingTable = Tmp;
+% return
+%     
+% 
+function RadialTable = CalculateRadialLocations(TrackingTable, XYZo)
 
-    isTableCol = @(t, thisCol) ismember(thisCol, t.Properties.VariableNames);
 
-    if nargin < 3 
+    if nargin < 2
         XYZo = zeros(0,3);
-%     elseif numel(XYZo) == 2
-%         XYZo = [XYZo(:);0]';
     end
     
     if ~isempty(XYZo) && numel(XYZo) ~= 3
         error('Something is incorrect about the origin of the coordinates.');
     end
 
-    if isempty(TrackingTable)
-        T = vst_initTrackingTable;
-        
-        Rxyz = [];
-        T = addvars(T, Rxyz, 'After', 'Z');
-        
-        NewTrackingTable = T;
-        return
-    end
-    
-    T = TrackingTable; % [pixels]
-
-    if isTableCol(T, 'Rxyz')
-        T.Rxyz = [];
-    end
     
     
-    g = findgroups(T(:, {'Fid', 'ID'}));
-    Rxyz = splitapply(@(x1,x2,x3){sa_calc_rad_vecs(x1,x2,x3,XYZo)}, ...
+    g = findgroups(TrackingTable(:, {'Fid', 'ID'}));
+    rout = splitapply(@(x1,x2,x3,x4){sa_calc_rad_vecs(x1,x2,x3,x4,XYZo)}, ...
+                                                          TrackingTable.Fid, ...
                                                           TrackingTable.ID, ...
                                                           TrackingTable.Frame, ...
                                                          [TrackingTable.X, ...
                                                           TrackingTable.Y, ...
                                                           TrackingTable.Z], ...
                                                           g);           
-     Rxyz = cell2mat(Rxyz);
+     rout = cell2mat(rout);
      
-     RxyzT = table(Rxyz(:,1), Rxyz(:,2), Rxyz(:,3), 'VariableNames', {'ID', 'Frame', 'Rxyz'});
+     RadialTable = table(rout(:,1), rout(:,2), rout(:,3), rout(:,4));
+     RadialTable.Properties.VariableNames = {'Fid', 'ID', 'Frame', 'Rxyz'};
 
-     Tmp = innerjoin(T, RxyzT, 'Keys', {'ID', 'Frame'});
-     Tmp = movevars(Tmp, 'Rxyz', 'after', 'Z');
-     
-     NewTrackingTable = Tmp;
 return
-    
-function outs = sa_calc_rad_vecs(id, frame, XYZ, XYZorigin)
 
-    if nargin<2 || isempty(XYZorigin)
+
+function outs = sa_calc_rad_vecs(fid, id, frame, XYZ, XYZorigin)
+
+    if nargin<5 || isempty(XYZorigin)
         XYZorigin = XYZ(1,:);
     end
 
     rout = sqrt( sum( (XYZ - XYZorigin).^2, 2 ) );    
     
-    outs = [id, frame, rout];
+    outs = [fid, id, frame, rout];
 return
 
 
-function NewTrackingTable = AddVelocity2Table(TrackingTable)
+function VelocityTable = CalculateVelocity(TrackingTable)
 % Outputs the velocities in the default format, which is [pixels/frame] and
 % leaves the scaling to the invidual functions as needed.
 
 % XXX TODO: Add a smoothing scale to UI and CreateGaussScaleSpace call.
 
     if isempty(TrackingTable)
-        T = vst_initTrackingTable;
-        
-        Vx = []; Vy = []; Vz = []; Vr = []; Vclr = zeros(0,3);
-        T = addvars(T, Vx, Vy, Vz, Vr, Vclr, 'After', 'Radius');
-        
-        NewTrackingTable = T;
+        VelocityTable = init_velocity_table;
         return
     end
     
-    [g, gT] = findgroups(TrackingTable.ID);    
+    [g, gT] = findgroups(TrackingTable.Fid, TrackingTable.ID);    
     
     smooth_factor = 1;
     if ~isempty(g)
-        Vel = splitapply(@(x1,x2,x3){vst_CalcVel(x1,x2,x3,smooth_factor)}, ...
+        Vel = splitapply(@(x1,x2,x3,x4){vst_CalcVel(x1,x2,x3,x4,smooth_factor)}, ...
+                                                              TrackingTable.Fid, ...            
                                                               TrackingTable.ID, ...
                                                               TrackingTable.Frame, ...
                                                              [TrackingTable.X, ...
@@ -1733,17 +1775,18 @@ function NewTrackingTable = AddVelocity2Table(TrackingTable)
         Vel = NaN(0,5);
     end
         
-    VelTable.ID    = Vel(:,1);
-    VelTable.Frame = Vel(:,2);
-    VelTable.Vx    = Vel(:,3);
-    VelTable.Vy    = Vel(:,4);
-    VelTable.Vz    = Vel(:,5);
-    VelTable.Vr    = sqrt( sum( Vel(:,3:5).^2, 2 ) );
+    VelTable.Fid   = Vel(:,1);
+    VelTable.ID    = Vel(:,2);
+    VelTable.Frame = Vel(:,3);
+    VelTable.Vx    = Vel(:,4);
+    VelTable.Vy    = Vel(:,5);
+    VelTable.Vz    = Vel(:,6);
+    VelTable.Vr    = calculate_mag(Vel(:,3:5));
     VelTable.Vclr = Calculate_Velocity_ColorMap(VelTable.Vr);
     
-    VelTable = struct2table(VelTable);    
+    VelocityTable = struct2table(VelTable);    
     
-    NewTrackingTable = innerjoin(TrackingTable, VelTable);    
+     
     
 return
 
@@ -1821,10 +1864,15 @@ function Vclr = Calculate_Velocity_ColorMap(vr)
     normvr = lvr ./ max(lvr);
    
     vals = floor(normvr * 255);
-    heatmap = hot(256);
     
-    Vclr = heatmap(vals+1,:);
-
+    
+    if ~isnan(vals)
+        heatmap = hot(256);
+        Vclr = heatmap(vals+1,:);
+    else
+        Vclr = [0 0 0];
+    end
+    
     return
 
 
@@ -1883,7 +1931,7 @@ return
 
 % function radial = calculate_radial_vector(handles)
 %     
-%     Tbead = handles.BeadTrackingTable; % [pixels]
+%     Tbead = handles.Bead.TrackingTable; % [pixels]
 % 
 %     if isempty(Tbead)
 %         radial.t = [];
@@ -1960,9 +2008,11 @@ return
 
 function radial = prep_radial_vector_plot(handles)
 
-    Tbead = handles.BeadTrackingTable; % [pixels]
+    Tbead = handles.Bead.TrackingTable; % [pixels]
+    Rbead = handles.Bead.RadialTable.Rxyz;
+
     mintime = handles.mintime;
-    r = Tbead.Rxyz;
+    
     units = 'pixels';
     
     if isempty(Tbead)
@@ -1975,12 +2025,12 @@ function radial = prep_radial_vector_plot(handles)
     t = t - mintime;
 
     if handles.radio_microns.Value         
-        r = pixel2um(r);            
+        Rbead = pixel2um(Rbead);            
         units = 'microns';
     end
 
     radial.t = t;
-    radial.r = Tbead.Rxyz;
+    radial.r = Rbead;
     radial.TimeUnits = 'fix the code here';
     radial.LengthUnits = units;
 
@@ -2077,13 +2127,16 @@ function outs = prep_velocity_plot(handles, reqTimeUnits, reqLengthUnits)
 %     TimeUnits = 'frames';
 %     TimeUnits = 'seconds';
 
-    idx = handles.CurrentBeadRows;
+%     idx = handles.CurrentBeadRows;    
 
-    Frame = handles.TrackingTable.Frame(idx);
-    VelX = handles.TrackingTable.Vx(idx);
-    VelY = handles.TrackingTable.Vy(idx);
-    VelZ = handles.TrackingTable.Vz(idx);
-    VelR = handles.TrackingTable.Vr(idx); 
+    tmpTable = innerjoin(handles.Bead.RadialTable, handles.Bead.VelocityTable, 'Keys', {'Fid', 'ID', 'Frame'});
+        
+    Frame = tmpTable.Frame;
+    Rxyz = tmpTable.Rxyz;
+    VelX = tmpTable.Vx;
+    VelY = tmpTable.Vy;
+    VelZ = tmpTable.Vz;
+    VelR = tmpTable.Vr;
     Velclr = Calculate_Velocity_ColorMap(VelR);
     
     % Get the velocities into the desired units
@@ -2097,8 +2150,8 @@ function outs = prep_velocity_plot(handles, reqTimeUnits, reqLengthUnits)
         
     switch reqLengthUnits
         case 'microns'
-            [vX, vY, vZ] = pixel2um(VelX, VelY, VelZ);
-            VelX = vX; VelY = vY; VelZ = vZ;
+            [rxyz, vX, vY, vZ] = pixel2um(Rxyz, VelX, VelY, VelZ);
+            Rxyz = rxyz; VelX = vX; VelY = vY; VelZ = vZ;
             LengthUnits = 'microns';            
         case 'pixels'
             LengthUnits = 'pixels';
@@ -2135,12 +2188,14 @@ function outs = prep_velocity_plot(handles, reqTimeUnits, reqLengthUnits)
     
     
     outs.Time = Time;
+    outs.Rxyz = Rxyz;
     outs.VelX = VelX;
     outs.VelY = VelY;
     outs.VelZ = VelZ;
     outs.VelR = VelR;
     outs.Velclr = Velclr;
     
+    outs.LengthUnits = LengthUnits;
     outs.TimeUnits = TimeUnits;
     outs.VelUnits = ['[', LengthUnits, '/', VelTimeUnits, ']'];
 return
@@ -2161,11 +2216,9 @@ return
 function outs = prep_velmag_plot(handles)
 
     vel = prep_velocity_plot(handles);
-   
-    outs.Time = vel.Time;
-    outs.VelMag = sqrt(vel.VelX .^2 + vel.VelY .^2 + vel.VelZ .^2);
-    outs.TimeUnits = vel.TimeUnits;
-    outs.VelUnits = vel.VelUnits;
+    outs = vel;
+        
+    outs.VelMag = calculate_mag([vel.VelX, vel.VelY, vel.VelZ]);
 return
 
 
@@ -2183,19 +2236,20 @@ return
 function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     
     CurrentBead = handles.CurrentBead;
+    
     im = handles.im;
     xr = [0 size(im,2)];
     yr = [0 size(im,1)];
     
     % separate the currently selected bead vs not the selected bead
     
-    T = handles.TrackingTable;
+    T = innerjoin(handles.TrackingTable, handles.VelocityTable);
 
     % Filter out the first and last velocity value (avoids edge effects in
     % the visualization.
     filt.tcrop = 1;
     
-    T = vst_filter_tracking(T, filt);
+%     T = vst_filter_tracking(T, filt);
 
     % XXX TODO Change all of these weird structures into tables derived
     % from the TrackingTable, or subtables tied to the TrackingTable. This
@@ -2492,9 +2546,8 @@ return
 function outs = prep_forceXY_plot(handles)
 
     Velocity = prep_velocity_plot(handles, 'seconds', 'microns');
-        
-    outs.Time = Velocity.Time;
-    outs.TimeUnits = Velocity.TimeUnits;    
+       
+    outs = Velocity;
     outs.Viscosity_Pas = handles.Viscosity_Pas;
     outs.BeadRadius_m = handles.BeadRadius_m;
     outs.ForceScale = handles.ForceScale;
@@ -2514,12 +2567,9 @@ return
 
 
 function outs = prep_forceMag_plot(handles)
-    force = prep_forceXY_plot(handles);
+    outs = prep_forceXY_plot(handles);      
     
-    outs.Time = force.Time;
-    outs.ForceMag = calculate_mag([force.ForceX,force.ForceY]);
-    outs.TimeUnits = force.TimeUnits;
-    outs.ForceUnits = force.ForceUnits;   
+    outs.ForceMag = calculate_mag([outs.ForceX, outs.ForceY]);
 return
 
 
@@ -2536,17 +2586,14 @@ return
         
 function ForceVsDistance = prep_ForceVsDistance_plot(handles)
 
-    error('Not implemented yet, yo.');
-
-    R = calculate_radial_vector(handles);
-    ForceVsDistance.Distance = R.r;
-    ForceVsDistance.DistanceUnits = R.LengthUnits;
-    
     F = prep_forceMag_plot(handles);
+    
+    ForceVsDistance.Distance = F.Rxyz;
+    ForceVsDistance.LengthUnits = F.LengthUnits;
     ForceVsDistance.ForceMag = F.ForceMag;
     ForceVsDistance.ForceUnits = F.ForceUnits;
     
-    return
+return
     
     
 
@@ -2554,11 +2601,11 @@ function plot_forcevsdistance(ForceVsDistance, h)
     figure(h);
     clf;
     plot(ForceVsDistance.Distance, ForceVsDistance.ForceMag*1e9, '.-');
-    xlabel(['distance from poletop, ' ForceVsDistance.DistanceUnits]);
+    xlabel(['distance from poletop, ' ForceVsDistance.LengthUnits]);
     ylabel(['|F|, [nN]']);    
     grid on;
     drawnow;
-
+return
 
 
 function outs = prep_ForceScatter_plot(handles)    
@@ -2798,23 +2845,6 @@ return
 
 function plot_data(handles)
 
-%     stk = dbstack;
-%     disp(['In ' stk(1).name ', and ' stk(2).name ' called me.']);
-%     
-% 
-%     T = handles.TrackingTable;    
-%     H = height(T);
-%     N = numel(unique(T.ID));
-% 
-%     disp(['nTableRows=', num2str(H), ...
-%           ', nBeads=' num2str(N), ...
-%           ', CurrentBead=' num2str(handles.CurrentBead) ...
-%           ', nPoints=' num2str(sum(handles.CurrentBeadRows)), ...
-%           ', LengthUnits=' handles.LengthUnits ...
-%           ', Calibum=', num2str(handles.calibum)]);
-    
-%     handles.TrackingTable  = ScaleTrackingTable(handles.TrackingTable);
-    
     handles = SelectBead(handles);
     
     Plot_XYfig(handles);
@@ -2823,10 +2853,46 @@ function plot_data(handles)
     
     assignin('caller', 'handles', handles);
     
-    return
+return
 
+
+function handles = filter_tracking(handles)    
+    % To avoid cumulative changes to the TrackingTable start by combining
+    % the FilteredTable and the Trash back into the TrackingTable;
+    TrackingTable = [handles.TrackingTable; handles.Trash];
     
-     
+    [handles.TrackingTable, handles.Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
+    
+    handles = SelectBead(handles);
+    
+    handles.RadialTable = CalculateRadialLocations(handles.TrackingTable);
+    handles.VelocityTable = CalculateVelocity(handles.TrackingTable);     
+    
+    plot_data(handles);
+return
+
+
+function mag = calculate_mag(matrix)
+    mag = sqrt( sum( matrix.^2, 2 ) );
+return
+
+
+function ForceScale = calculate_ForceScale(handles)
+    ForceScale = 6*pi*handles.BeadRadius_m*handles.Viscosity_Pas;
+return
+
+
+function varargout = calculate_forces(ForceScale_umPas, varargin)
+    % varargin in here is a list of arguments that are velocities in [um/s]
+    
+    % The velocity unit input is um/s but the ForceScale is in meters. Need to
+    % scale the velocity by 1e-6 to get it into meters/s.
+    Force_N  = cellfun(@(v)(ForceScale_umPas .* v .* 1e-6), varargin, 'UniformOutput', false);    
+    varargout = Force_N;
+return
+
+
+
 
 function bayes = run_bayes_model_selection(hObject, eventdata, handles)
     video_tracking_constants;
@@ -2990,12 +3056,6 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
     
     logentry(['Minimum frames in Bayesian model selection set to ' num2str(shortest_traj_frames) ' frames.']);
 
-%     min_frames = floor( fraction_for_subtraj * frame_max);    
-%     num_subtraj = floor( (frame_max - min_frames - 1 ) * 0.5);
-    
-%     if num_subtraj > 60 %i.e. max_N_subtraj
-%         num_subtraj = 60;
-%     end
     
     % Set up filter settings for trajectory data
     filt.min_frames = floor(max_tau_frames * num_subtraj);
@@ -3182,68 +3242,6 @@ function d = convert_Table_to_old_matrix(TrackingTable, fps)
 return
 
 
-
-% For filtering low frequency info out of velocities for variance measurement
-function y = doFilter(x)
-%DOFILTER Filters input x and returns output y.
-
-% MATLAB Code
-% Generated by MATLAB(R) 9.5 and DSP System Toolbox 9.7.
-% Generated on: 01-Oct-2020 15:31:01
-
-persistent Hd;
-
-if isempty(Hd)
-    
-    Fstop = 0.45;  % Stopband Frequency
-    Fpass = 0.55;  % Passband Frequency
-    Astop = 60;    % Stopband Attenuation (dB)
-    Apass = 1;     % Passband Ripple (dB)
-    
-    h = fdesign.highpass('fst,fp,ast,ap', Fstop, Fpass, Astop, Apass);
-    
-    Hd = design(h, 'equiripple', ...
-        'MinOrder', 'any', ...
-        'StopbandShape', 'flat');
-    
-    
-    
-    set(Hd,'PersistentMemory',true);
-    
-end
-
-y = filter(Hd,x);
-
-function handles = filter_tracking(handles)    
-    % To avoid cumulative changes to the TrackingTable start by combining
-    % the FilteredTable and the Trash back into the TrackingTable;
-    TrackingTable = [handles.TrackingTable; handles.Trash];
-    [handles.TrackingTable, handles.Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
-    handles = SelectBead(handles);
-    plot_data(handles);
-return
-
-
-function ForceScale = calculate_ForceScale(handles)
-    ForceScale = 6*pi*handles.BeadRadius_m*handles.Viscosity_Pas;
-return
-
-
-function varargout = calculate_forces(ForceScale_umPas, varargin)
-    % varargin in here is a list of arguments that are velocities in [um/s]
-    
-    % The velocity unit input is um/s but the ForceScale is in meters. Need to
-    % scale the velocity by 1e-6 to get it into meters/s.
-    Force_N  = cellfun(@(v)(ForceScale_umPas .* v .* 1e-6), varargin, 'UniformOutput', false);    
-    varargout = Force_N;
-return
-
-    
-function mag = calculate_mag(matrix)
-    mag = sqrt(sum(matrix.^2,2));
-return
-
-    
 function logentry(txt)
 
     logtime = clock;
