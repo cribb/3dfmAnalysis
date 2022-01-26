@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 12-Jan-2022 08:14:03
+% Last Modified by GUIDE v2.5 26-Jan-2022 08:10:17
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -789,7 +789,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     % Update the filter with height and width information
     handles.TrackingFilter.height = VidTable.Height;
     handles.TrackingFilter.width  = VidTable.Width;
-
+    handles.TrackingFilter.min_frames = 5;
+    
     [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
     
     RadialTable = CalculateRadialLocations(TrackingTable);
@@ -1277,10 +1278,14 @@ function Plot_AUXfig(handles)
         case 'force magnitude'
             handles.plots.ForceMag = prep_forceMag_plot(handles);
             plot_force_magnitude(handles.plots.ForceMag, AUXfig);
+            
+        case 'force vs distance (all)'
+            handles.plots.ForceVsDistanceAll = prep_ForceVsDistance_plot(handles);
+            plot_forcevsdistance(handles.plots.ForceVsDistanceAll, AUXfig);                                   
 
-        case 'force vs distance'
-            handles.plots.ForceVsDistance = prep_ForceVsDistance_plot(handles);
-            plot_forcevsdistance(handles.plots.ForceVsDistance, AUXfig);            
+        case 'force vs distance (active)'
+            handles.plots.ForceVsDistanceActive = prep_ForceVsDistance_plot(handles);
+            plot_forcevsdistance(handles.plots.ForceVsDistanceActive, AUXfig, true);            
         
         case 'force scatter (all)'
             handles.plots.ForceScatterAll = prep_ForceScatter_plot(handles);
@@ -1355,6 +1360,9 @@ function Plot_AUXfig(handles)
         case 'pole locator'
 %             logentry('Not yet implemented, or implementation is deprecated.');
             handles.plots.PoleLocation = calculate_pole_location(handles);
+            str_poleloc = [num2str(handles.plots.PoleLocation(1)), ',', ...
+                           num2str(handles.plots.PoleLocation(2))];
+            set(handles.edit_arb_origin, 'String', str_poleloc);
             Plot_XYfig(handles);
             
             
@@ -1781,7 +1789,7 @@ function VelocityTable = CalculateVelocity(TrackingTable)
     VelTable.Vx    = Vel(:,4);
     VelTable.Vy    = Vel(:,5);
     VelTable.Vz    = Vel(:,6);
-    VelTable.Vr    = calculate_mag(Vel(:,3:5));
+    VelTable.Vr    = calculate_mag(Vel(:,4:6));
     VelTable.Vclr = Calculate_Velocity_ColorMap(VelTable.Vr);
     
     VelocityTable = struct2table(VelTable);    
@@ -2243,13 +2251,14 @@ function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     
     % separate the currently selected bead vs not the selected bead
     
-    T = innerjoin(handles.TrackingTable, handles.VelocityTable);
-
+    T = innerjoin(handles.TrackingTable, handles.RadialTable);
+    T = innerjoin(T, handles.VelocityTable);
+    
     % Filter out the first and last velocity value (avoids edge effects in
     % the visualization.
-    filt.tcrop = 1;
+    filt.tcrop = 2;
     
-%     T = vst_filter_tracking(T, filt);
+    T = vst_filter_tracking(T, filt);
 
     % XXX TODO Change all of these weird structures into tables derived
     % from the TrackingTable, or subtables tied to the TrackingTable. This
@@ -2261,6 +2270,7 @@ function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     X = T.X;
     Y = T.Y;
     Z = T.Z;
+    R = T.Rxyz;
     Vx = T.Vx;
     Vy = T.Vy;
     Vz = T.Vz;
@@ -2324,11 +2334,12 @@ function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     outs.im   = handles.im;   
     outs.xrange = xr;
     outs.yrange = yr;
-    outs.id   = T.ID;
+    outs.id   = categorical(T.ID);
     outs.idx  = (T.ID == CurrentBead);
     outs.x    = X;
     outs.y    = Y;
     outs.z    = Z;
+    outs.r    = R;
     outs.vx   = Vx;
     outs.vy   = Vy;
     outs.vz   = Vz;
@@ -2584,23 +2595,65 @@ function plot_force_magnitude(Force, h)
 return
 
         
-function ForceVsDistance = prep_ForceVsDistance_plot(handles)
+function outs = prep_ForceVsDistance_plot(handles)
+    
+    F = prep_ForceScatter_plot(handles);     
+    
+    mindist = min(F.r);
+    maxdist = max(F.r);
+    
+    [g,gT] = findgroups(F.id);
+    interp_grid(:,1) = linspace(mindist, maxdist, 100);
 
-    F = prep_forceMag_plot(handles);
+    interp_Force = splitapply(@(x,y){sa_interp_forces(x,y,interp_grid)}, F.r, F.Fr, g);
     
-    ForceVsDistance.Distance = F.Rxyz;
-    ForceVsDistance.LengthUnits = F.LengthUnits;
-    ForceVsDistance.ForceMag = F.ForceMag;
-    ForceVsDistance.ForceUnits = F.ForceUnits;
+    Fmat = cell2mat(interp_Force');
     
+    outs.idx = F.idx;
+    outs.Distance = F.r;
+    outs.LengthUnits = F.LengthUnits;
+    outs.ForceMag = F.Fr;
+    outs.ForceUnits = F.ForceUnits;
+    outs.DistanceGrid = interp_grid;
+    outs.meanForce = mean(Fmat,2,'omitnan');
+    outs.medianForce = median(Fmat, 2, 'omitnan');
+    outs.stdForce = std(Fmat, [], 2, 'omitnan');
+    outs.errForce = stderr(Fmat,[],2,'omitnan');
 return
     
     
+function plot_forcevsdistance(ForceVsDistance, h, ActiveOnlyTF)
 
-function plot_forcevsdistance(ForceVsDistance, h)
+    F = ForceVsDistance;
+    
+    if nargin < 3 || isempty(ActiveOnlyTF)
+        ActiveOnlyTF = false;
+    end
+    
     figure(h);
     clf;
-    plot(ForceVsDistance.Distance, ForceVsDistance.ForceMag*1e9, '.-');
+    hold on;
+    
+    % Find the current bead data
+        
+    if ActiveOnlyTF
+        scatter(F.x(idx), F.y(idx), 10, F.fclr(idx,:), 'filled');
+    else
+%         splitapply(@(x1,x2)plot(x1, x2, 'w-'), ForceScatter.x, ForceScatter.y, g);
+%         scatter(ForceScatter.x, ForceScatter.y, 10, ForceScatter.Fclr, 'filled');
+        bkgdgray = [0.8 0.8 0.8];
+        plot(F.Distance, F.ForceMag*1e9, 'Marker', '.', 'MarkerEdgeColor', bkgdgray, ...
+                                                    'MarkerFaceColor', bkgdgray, ...                                                    
+                                                    'LineStyle', 'none');
+        errorbar(F.DistanceGrid(1:5:end), F.meanForce(1:5:end)*1e9, F.stdForce(1:5:end)*1e9, ...
+                'Marker', 'none', 'LineStyle', 'none', 'LineWidth', 2, 'Color', [0.75 0.75 1]);
+        errorbar(F.DistanceGrid(1:5:end), F.meanForce(1:5:end)*1e9, F.errForce(1:5:end)*1e9, ...
+                'Marker', 'none', 'LineStyle', 'none', 'LineWidth', 2, 'Color', 'b');
+        plot(F.DistanceGrid, F.meanForce*1e9, 'Marker', 'none', 'LineStyle', '-', 'LineWidth', 2, 'Color', 'b');
+%         plot(F.DistanceGrid, F.medianForce*1e9, 'Marker', 'none', 'LineStyle', '-', 'Color', 'g');
+        legend({'', 'stdev', 'stderr', 'mean'});
+    end
+                
     xlabel(['distance from poletop, ' ForceVsDistance.LengthUnits]);
     ylabel(['|F|, [nN]']);    
     grid on;
@@ -3268,5 +3321,11 @@ function logentry(txt)
     set(handles.text_status, 'String', [headertext, txt]);
 return
     
+function interp_Forces = sa_interp_forces(radial_loc, radial_force, interp_grid)
 
-
+    data = [radial_loc(:) radial_force(:)];
+    data = sortrows(data,1);
+    % interp_Force = interp1(data(:,1), data(:,2), interp_grid, 'pchip', 'extrap');
+    interp_Forces = interp1(data(:,1), data(:,2), interp_grid);
+    
+    
