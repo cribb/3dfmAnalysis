@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 26-Jan-2022 08:10:17
+% Last Modified by GUIDE v2.5 26-Jan-2022 16:21:46
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -2635,29 +2635,34 @@ function plot_forcevsdistance(ForceVsDistance, h, ActiveOnlyTF)
     hold on;
     
     % Find the current bead data
-        
+    bkgdgray = [0.8 0.8 0.8];
+    limegreen = [0.3 0.8 0.3];       
+    darkred = [0.8 0.3 0.3];
+    
+    plot(F.Distance, F.ForceMag*1e9, 'Marker', '.', 'MarkerEdgeColor', bkgdgray, ...
+                                                'MarkerFaceColor', bkgdgray, ...                                                    
+                                                'LineStyle', 'none');
+    errorbar(F.DistanceGrid(1:5:end), F.meanForce(1:5:end)*1e9, F.stdForce(1:5:end)*1e9, ...
+            'Marker', 'none', 'LineStyle', 'none', 'LineWidth', 2, 'Color', [0.75 0.75 1]);
+    errorbar(F.DistanceGrid(1:5:end), F.meanForce(1:5:end)*1e9, F.errForce(1:5:end)*1e9, ...
+            'Marker', 'none', 'LineStyle', 'none', 'LineWidth', 2, 'Color', 'b');
+    plot(F.DistanceGrid, F.meanForce*1e9, 'Marker', 'none', 'LineStyle', '-', 'LineWidth', 2, 'Color', 'b');
+    plot(F.DistanceGrid, F.medianForce*1e9, 'Marker', 'none', 'LineStyle', '-', 'LineWidth', 2, 'Color', limegreen);
+    leg = legend({'force on bead', 'stdev', 'stderr', 'mean', 'median'});
+    
     if ActiveOnlyTF
-        scatter(F.x(idx), F.y(idx), 10, F.fclr(idx,:), 'filled');
-    else
-%         splitapply(@(x1,x2)plot(x1, x2, 'w-'), ForceScatter.x, ForceScatter.y, g);
-%         scatter(ForceScatter.x, ForceScatter.y, 10, ForceScatter.Fclr, 'filled');
-        bkgdgray = [0.8 0.8 0.8];
-        plot(F.Distance, F.ForceMag*1e9, 'Marker', '.', 'MarkerEdgeColor', bkgdgray, ...
-                                                    'MarkerFaceColor', bkgdgray, ...                                                    
-                                                    'LineStyle', 'none');
-        errorbar(F.DistanceGrid(1:5:end), F.meanForce(1:5:end)*1e9, F.stdForce(1:5:end)*1e9, ...
-                'Marker', 'none', 'LineStyle', 'none', 'LineWidth', 2, 'Color', [0.75 0.75 1]);
-        errorbar(F.DistanceGrid(1:5:end), F.meanForce(1:5:end)*1e9, F.errForce(1:5:end)*1e9, ...
-                'Marker', 'none', 'LineStyle', 'none', 'LineWidth', 2, 'Color', 'b');
-        plot(F.DistanceGrid, F.meanForce*1e9, 'Marker', 'none', 'LineStyle', '-', 'LineWidth', 2, 'Color', 'b');
-%         plot(F.DistanceGrid, F.medianForce*1e9, 'Marker', 'none', 'LineStyle', '-', 'Color', 'g');
-        legend({'', 'stdev', 'stderr', 'mean'});
+        plot(F.Distance(F.idx), F.ForceMag(F.idx)*1e9, 'Marker', '.', 'MarkerEdgeColor', darkred, ...
+                                                       'MarkerFaceColor', darkred, ...                                                    
+                                                       'LineStyle', 'none');           
+        leg.String{numel(leg.String)} = 'active bead';
     end
                 
+    
     xlabel(['distance from poletop, ' ForceVsDistance.LengthUnits]);
     ylabel(['|F|, [nN]']);    
     grid on;
     drawnow;
+    hold off;
 return
 
 
@@ -3324,7 +3329,8 @@ return
 function interp_Forces = sa_interp_forces(radial_loc, radial_force, interp_grid)
 
     data = [radial_loc(:) radial_force(:)];
-    data = sortrows(data,1);
+    [~,ia,ic] = unique(data(:,1));
+    data = data(ia,:);
     % interp_Force = interp1(data(:,1), data(:,2), interp_grid, 'pchip', 'extrap');
     interp_Forces = interp1(data(:,1), data(:,2), interp_grid);
     
