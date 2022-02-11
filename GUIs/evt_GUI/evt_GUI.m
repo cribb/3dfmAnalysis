@@ -78,7 +78,7 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.BeadRadius_m = 0.5e-6;
     
     % Assign initial "filter by" values 
-    handles.TrackingFilter.min_frames = 0;
+    handles.TrackingFilter.min_frames = 10;
     handles.TrackingFilter.min_pixels = 0;
     handles.TrackingFilter.max_pixels = Inf;
     handles.TrackingFilter.tcrop = 0;
@@ -790,8 +790,11 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     handles.TrackingFilter.height = VidTable.Height;
     handles.TrackingFilter.width  = VidTable.Width;
     handles.TrackingFilter.min_frames = 5;
+    handles.TrackingFilter.tcrop = 5;
     
     [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
+    
+    
     
     RadialTable = CalculateRadialLocations(TrackingTable);
         
@@ -929,7 +932,7 @@ function EditMenu_Callback(hObject, eventdata, handles)
 
 
 function EditMenu_AddBkgd_Callback(hObject, eventdata, handles)
-    [File, Path, fidx] = uigetfile({'*.pgm';'*.png';'*.tif;*.tiff';'*.*'}, ...
+    [File, Path, fidx] = uigetfile({'*.pgm;*.png;*.tif;*.tiff';'*.*'}, ...
                                       'Select Background Image (e.g. MIP)', ...
                                       'MultiSelect', 'on');
     File = fullfile(Path, File);
@@ -1150,6 +1153,7 @@ function Plot_XYfig(handles)
         hold off;
     end
 
+    pretty_plot;
 return
 
 
@@ -1205,13 +1209,17 @@ function Plot_XTfig(handles)
         ylabel([yaxislabel ' bead position [', yunits, ']']);
         legend(mylegend, 'Location', 'northwest');    
         set(handles.XTfig, 'Units', 'Normalized');
+%         set(handles.XTfig, 
+        grid on
     %     set(handles.XTfig, 'Position', [0.51 0.05 0.4 0.4]);
     else
         clf;
     end
 
     drawnow;
-
+    pretty_plot;
+    
+    
 function Plot_AUXfig(handles)
     AUXfig = handles.AUXfig;         
     AUXtype = handles.AUXtype;
@@ -1374,8 +1382,10 @@ function Plot_AUXfig(handles)
 
     end
     
-    assignin('caller', 'handles', handles);
+    pretty_plot;
     
+    assignin('caller', 'handles', handles);
+        
     return    
     
 
@@ -1860,8 +1870,12 @@ function Vclr = Calculate_Velocity_ColorMap(vr)
     % original (non-infinite) non-shifted logvr separate from the 
     % shifted/color-mapped one.
     tst = isfinite(logvr);
-    logvr(~tst) = min(logvr(tst));
-
+    if sum(tst)>0
+        logvr(~tst) = min(logvr(tst));
+    else
+        logvr(:,1) = zeros(size(tst));
+    end
+    
     % We want to normalize the velocities to the colormap, where 1 is the
     % highest colormap value and 0 the lowest. To do that we add the minimum
     % value. If that minimum value is negative, we'll subtract is out
@@ -2254,11 +2268,11 @@ function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     T = innerjoin(handles.TrackingTable, handles.RadialTable);
     T = innerjoin(T, handles.VelocityTable);
     
-    % Filter out the first and last velocity value (avoids edge effects in
-    % the visualization.
-    filt.tcrop = 2;
-    
-    T = vst_filter_tracking(T, filt);
+% %     % Filter out the first and last velocity value (avoids edge effects in
+% %     % the visualization.
+% %     filt.tcrop = 2;
+% %     
+% %     T = vst_filter_tracking(T, filt);
 
     % XXX TODO Change all of these weird structures into tables derived
     % from the TrackingTable, or subtables tied to the TrackingTable. This
@@ -2287,7 +2301,7 @@ function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     
     switch reqLengthUnits
         case 'microns'
-            [X, Y, Z, xr, yr, Vx, Vy, Vz, Vr] = pixel2um(X, Y, Z, xr, yr, Vx, Vy, Vz, Vr);
+            [X, Y, Z, R, xr, yr, Vx, Vy, Vz, Vr] = pixel2um(X, Y, Z, R, xr, yr, Vx, Vy, Vz, Vr);
             LengthUnits = 'microns';
         case 'pixels'
             LengthUnits = 'pixels';    
@@ -2638,28 +2652,35 @@ function plot_forcevsdistance(ForceVsDistance, h, ActiveOnlyTF)
     bkgdgray = [0.8 0.8 0.8];
     limegreen = [0.3 0.8 0.3];       
     darkred = [0.8 0.3 0.3];
+    cornflower = [0.45 0.74 1];
+    cerulean = [0.302 0.7451 0.9333];    
+    tangerine = [1 0.412 0.161];
+    melon = [0.9294 0.6941 0.1255];
+    
     
     plot(F.Distance, F.ForceMag*1e9, 'Marker', '.', 'MarkerEdgeColor', bkgdgray, ...
                                                 'MarkerFaceColor', bkgdgray, ...                                                    
                                                 'LineStyle', 'none');
     errorbar(F.DistanceGrid(1:5:end), F.meanForce(1:5:end)*1e9, F.stdForce(1:5:end)*1e9, ...
-            'Marker', 'none', 'LineStyle', 'none', 'LineWidth', 2, 'Color', [0.75 0.75 1]);
+            'Marker', 'none', 'LineStyle', 'none', 'LineWidth', 2, 'Color', cerulean);
     errorbar(F.DistanceGrid(1:5:end), F.meanForce(1:5:end)*1e9, F.errForce(1:5:end)*1e9, ...
             'Marker', 'none', 'LineStyle', 'none', 'LineWidth', 2, 'Color', 'b');
+    plot(F.DistanceGrid, F.medianForce*1e9, 'Marker', 'none', 'LineStyle', '--', 'LineWidth', 2, 'Color', melon);
     plot(F.DistanceGrid, F.meanForce*1e9, 'Marker', 'none', 'LineStyle', '-', 'LineWidth', 2, 'Color', 'b');
-    plot(F.DistanceGrid, F.medianForce*1e9, 'Marker', 'none', 'LineStyle', '-', 'LineWidth', 2, 'Color', limegreen);
-    leg = legend({'force on bead', 'stdev', 'stderr', 'mean', 'median'});
+    leg = legend({'force on bead', 'stdev', 'stderr', 'median', 'mean'});
     
     if ActiveOnlyTF
-        plot(F.Distance(F.idx), F.ForceMag(F.idx)*1e9, 'Marker', '.', 'MarkerEdgeColor', darkred, ...
-                                                       'MarkerFaceColor', darkred, ...                                                    
+        plot(F.Distance(F.idx), F.ForceMag(F.idx)*1e9, 'Marker', '*', 'MarkerEdgeColor', darkred, ...
+                                                       'MarkerFaceColor', darkred, ...    
+                                                       'MarkerSize', 6, ...
                                                        'LineStyle', 'none');           
         leg.String{numel(leg.String)} = 'active bead';
     end
                 
     
-    xlabel(['distance from poletop, ' ForceVsDistance.LengthUnits]);
-    ylabel(['|F|, [nN]']);    
+%     xlabel(['distance from poletip, ' ForceVsDistance.LengthUnits]);
+    xlabel(['distance from poletip [\mum]']);
+    ylabel(['|F| [nN]']);    
     grid on;
     drawnow;
     hold off;
@@ -3331,7 +3352,8 @@ function interp_Forces = sa_interp_forces(radial_loc, radial_force, interp_grid)
     data = [radial_loc(:) radial_force(:)];
     [~,ia,ic] = unique(data(:,1));
     data = data(ia,:);
-    % interp_Force = interp1(data(:,1), data(:,2), interp_grid, 'pchip', 'extrap');
+%     interp_Forces = interp1(data(:,1), data(:,2), interp_grid, 'pchip', 'extrap');
     interp_Forces = interp1(data(:,1), data(:,2), interp_grid);
+    
     
     
