@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 26-Jan-2022 16:21:46
+% Last Modified by GUIDE v2.5 12-Feb-2022 14:14:46
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -1025,6 +1025,11 @@ function ExportMenu_AllBeads_Callback(hObject, eventdata, handles)
     end
    
     
+function ExportMenu_PlotData_Callback(hObject, eventdata, handles)
+    assignin('base', 'evtPlotData', handles.plots);
+    logentry('Plot data exported to base workspace.');
+
+    
 function ConfigureMenu_Callback(hObject, eventdata, handles)
 
 
@@ -1152,7 +1157,7 @@ function Plot_XYfig(handles)
             plot(polex, poley, 'ro', 'MarkerSize', 24);
         hold off;
     end
-
+    axis image
     pretty_plot;
 return
 
@@ -1370,8 +1375,12 @@ function Plot_AUXfig(handles)
             handles.plots.PoleLocation = calculate_pole_location(handles);
             str_poleloc = [num2str(handles.plots.PoleLocation(1)), ',', ...
                            num2str(handles.plots.PoleLocation(2))];
+            logentry(['Pole located at: (', num2str(pixel2um(handles.plots.PoleLocation)), ') [microns]']);
+            set(handles.radio_arb_origin, 'Value', 1);
+            set(handles.radio_relative, 'Value', 0);
             set(handles.edit_arb_origin, 'String', str_poleloc);
             Plot_XYfig(handles);
+            
             
             
         case 'tracker avail'
@@ -2679,7 +2688,7 @@ function plot_forcevsdistance(ForceVsDistance, h, ActiveOnlyTF)
                 
     
 %     xlabel(['distance from poletip, ' ForceVsDistance.LengthUnits]);
-    xlabel(['distance from poletip [\mum]']);
+    xlabel(['distance from "monopole" [\mum]']);
     ylabel(['|F| [nN]']);    
     grid on;
     drawnow;
@@ -3357,3 +3366,6 @@ function interp_Forces = sa_interp_forces(radial_loc, radial_force, interp_grid)
     
     
     
+
+
+
