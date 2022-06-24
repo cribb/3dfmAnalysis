@@ -1,6 +1,6 @@
 function MsdTable = vst_msd(DataIn, taulist)
 
-    TrackingTable = innerjoin(DataIn.TrackingTable, DataIn.VidTable(:,{'Fid', 'Calibum', 'Fps'}));
+    TrackingTable = innerjoin(DataIn.TrackingTable, DataIn.VidTable(:,{'Fid', 'Calibum', 'Fps'}), "Keys", {'Fid'});
     [g,~] = findgroups(TrackingTable.Fid, TrackingTable.ID);
 
 
