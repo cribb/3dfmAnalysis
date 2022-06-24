@@ -24,6 +24,9 @@ function [TrackingTableOut, Trash] = vst_filter_tracking(TrackingTable, filtin)
 % - This function is designed to work under default conditions with
 %   only the filename as an input argument.
 
+isColumn = @(t, thisCol) ismember(thisCol, t.Properties.VariableNames);
+
+
     %  Handle inputs
     if (nargin < 2) || isempty(filtin)
         filtin.min_trackers    = 0;
@@ -177,7 +180,7 @@ TrackingTable = sortrows(TrackingTable,vars);
     end
     
     % maxarea given the first XY datapoint of the trajectory
-    if isfield(filtin, 'min_intensity')
+    if isfield(filtin, 'min_intensity') && isColumn(TrackingTable, 'CenterIntensity')
         if filtin.min_intensity < Inf
             logentry(['min_intensity- Removing trackers with average intensities less than ' num2str(filtin.min_intensity) ' pixels^2.']);
 
