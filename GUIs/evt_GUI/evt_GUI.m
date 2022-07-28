@@ -819,13 +819,19 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     % If it doesn't exist, replace with half-tone grayscale.
     if ~isempty(MIPfile)
         handles.im = imread(MIPfile(1).name);
+    else
+        try
+%             tmp(:,:,1) = imread([filenameroot, '.00001.pgm']);
+            tmp(:,:,2) = imread([filenameroot, '.07625.pgm']);
+            handles.im = squeeze(max(tmp,[],3));
+        catch
+            handles.im = 0.5 * ones(ceil(max(TrackingTable.Y)),ceil(max(TrackingTable.X)));
+%             handles.ImageWidth = max(TrackingTable.X) * 1.05;
+%             handles.ImageHeight = max(TrackingTable.Y) * 1.05;
+        end
+    end
         handles.ImageWidth  = size(handles.im,2);
         handles.ImageHeight = size(handles.im,1);
-    else
-        handles.im = 0.5 * ones(ceil(max(TrackingTable.Y)),ceil(max(TrackingTable.X)));
-        handles.ImageWidth = max(TrackingTable.X) * 1.05;
-        handles.ImageHeight = max(TrackingTable.Y) * 1.05;
-    end
         
     % export important data to handles structure
     handles.Filename = filename;
