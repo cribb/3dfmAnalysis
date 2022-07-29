@@ -803,13 +803,19 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     % If it doesn't exist, replace with half-tone grayscale.
     if ~isempty(MIPfile)
         handles.im = imread(MIPfile(1).name);
+    else
+        try
+%             tmp(:,:,1) = imread([filenameroot, '.00001.pgm']);
+            tmp(:,:,2) = imread([filenameroot, '.07625.pgm']);
+            handles.im = squeeze(max(tmp,[],3));
+        catch
+            handles.im = 0.5 * ones(ceil(max(TrackingTable.Y)),ceil(max(TrackingTable.X)));
+%             handles.ImageWidth = max(TrackingTable.X) * 1.05;
+%             handles.ImageHeight = max(TrackingTable.Y) * 1.05;
+        end
+    end
         handles.ImageWidth  = size(handles.im,2);
         handles.ImageHeight = size(handles.im,1);
-    else
-        handles.im = 0.5 * ones(ceil(max(TrackingTable.Y)),ceil(max(TrackingTable.X)));
-        handles.ImageWidth = max(TrackingTable.X) * 1.05;
-        handles.ImageHeight = max(TrackingTable.Y) * 1.05;
-    end
     
     
     % export important data to handles structure
@@ -876,10 +882,31 @@ function FileMenuAdd_Callback(hObject, eventdata, handles)
 
 function FileMenuSaveAs_Callback(hObject, eventdata, handles)
 
-    suggested_outfile = '';
-    [outfile, outpath, outindx] = uiputfile();
+    [pname, outfile] = fileparts(handles.Filename);
 
+    rootdir = pwd;
 
+    outfile = strrep(outfile, '.raw', '');
+    outfile = strrep(outfile, '.csv', '');
+    outfile = strrep(outfile, '.vrpn', '');
+    outfile = strrep(outfile, '.mat', '');
+    outfile = strrep(outfile, '.evt', '');
+
+    suggested_outfile = [outfile, '.evt.mat'];
+
+    [outfile, outpath, outindx] = uiputfile({'*.evt.mat;*.csv';'*.evt.mat';'*.csv';'*.*'}, ...
+                                      'Generate Save File Name...', suggested_outfile);
+    if outfile == 0
+     return
+    end
+
+    calibum = str2double(get(handles.edit_calibum, 'String'));
+    fps = str2double(get(handles.edit_frame_rate, 'String'));
+    trajdata = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
+    cd(outpath);
+    save_evtfile(outfile, trajdata, 'pixels', calibum, fps, 'mat');
+    cd(rootdir);
+    logentry(['New tracking file, ' outfile ', saved...']);
     
 function FileMenuSave_Callback(hObject, eventdata, handles)
         
@@ -1361,9 +1388,9 @@ function handles = delete_selected_dataset(handles)
     
     k = (handles.TrackingTable.ID == bead_to_remove);
     
-    NewTrash = handles.TrackingTable(k,:);
-    
-    handles.Trash = [handles.Trash; NewTrash];
+%     NewTrash = handles.TrackingTable(k,:);
+%     
+%     handles.Trash = [handles.Trash; NewTrash];
     handles.TrackingTable(k,:) = [];        
     
     NewTrackingHeight = height(handles.TrackingTable);
@@ -1475,8 +1502,8 @@ function handles = delete_inside_boundingbox(handles)
 
     sel = select_by_boundingbox(handles);
     
-    NewTrash = handles.TrackingTable(sel,:);
-    handles.Trash = [handles.Trash; NewTrash];
+%     NewTrash = handles.TrackingTable(sel,:);
+%     handles.Trash = [handles.Trash; NewTrash];
     
     handles.TrackingTable(sel,:) = [];
     
@@ -1486,7 +1513,7 @@ function handles = delete_outside_boundingbox(handles)
     sel = select_by_boundingbox(handles);
 
     T = handles.TrackingTable;
-    Trash = handles.Trash;
+%     Trash = handles.Trash;
 
     
     % The data to keep is what's inside the bounding box. 
@@ -1494,7 +1521,7 @@ function handles = delete_outside_boundingbox(handles)
     % For XY, this means that ANYTHING outside that box is deleted.
     if handles.radio_XYfig.Value
         NewTrash = T(~sel,:);
-        Trash = [Trash; NewTrash];   
+%         Trash = vertcat(Trash, NewTrash);   
         T(~sel,:) = [];
     end
 
@@ -1530,14 +1557,14 @@ function handles = delete_outside_boundingbox(handles)
         Ttoss = Tbead(ib,:);
         
         % concatenate everything back together properly and resort
-        Trash = [Trash; Ttoss];   
+%         Trash = vertcat(Trash, Ttoss);
         T = [T; Tkeep];
         T = sortrows(T, {'Fid', 'Frame', 'ID'});
 
     end
 
     handles.TrackingTable = T;
-    handles.Trash = Trash;
+%     handles.Trash = Trash;
 
 
 function closest_time = select_time_from_XTfig(handles) 
