@@ -29,7 +29,7 @@ function varargout = evt_GUI(varargin)
 
 % Edit the above text to modify the response to help evt_GUI
 
-% Last Modified by GUIDE v2.5 08-May-2022 20:07:39
+% Last Modified by GUIDE v2.5 31-Jan-2023 14:17:29
 
 	% Begin initialization code - DO NOT EDIT
 	gui_Singleton = 1;
@@ -78,7 +78,8 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.BeadRadius_m = 0.5e-6;
     
     % Assign initial "filter by" values 
-    handles.TrackingFilter.min_frames = 10;
+%     handles.TrackingFilter.min_frames = 10;
+    handles.TrackingFilter.min_frames = 0;
     handles.TrackingFilter.min_pixels = 0;
     handles.TrackingFilter.max_pixels = Inf;
     handles.TrackingFilter.tcrop = 0;
@@ -155,6 +156,88 @@ function radio_AUXfig_Callback(hObject, eventdata, handles)
     handles.Activefig = handles.AUXfig;
     guidata(hObject, handles);
 
+% --- Executes on button press in pushbutton_cliptwin.
+function pushbutton_cliptwin_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_cliptwin (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    if get(handles.radio_AUXfig, 'Value')
+        logentry('AUXfigs are not allowed to delete data');
+        return
+    end
+    
+    set(handles.radio_selected_dataset,   'Enable', 'Off');
+	set(handles.radio_insideboundingbox,  'Enable', 'Off');
+	set(handles.radio_outsideboundingbox, 'Enable', 'Off');
+    set(handles.radio_deletetimebefore,   'Enable', 'Off');
+    set(handles.radio_deletetimeafter,    'Enable', 'Off');
+    
+    set(handles.radio_XTfig, 'Enable', 'off');
+    set(handles.radio_XYfig, 'Enable', 'off');
+    set(handles.radio_AUXfig,'Enable', 'off');	
+
+    window_sec = 0.4;
+    window_frames = window_sec .* handles.fps;
+    handles = delete_outside_time_window(handles, window_frames)    
+    
+    set(handles.radio_XTfig, 'Enable', 'on');
+    set(handles.radio_XYfig, 'Enable', 'on');
+    set(handles.radio_AUXfig,'Enable', 'on');        
+
+	set(handles.radio_selected_dataset,   'Enable', 'On');
+	set(handles.radio_insideboundingbox,  'Enable', 'On');
+	set(handles.radio_outsideboundingbox, 'Enable', 'On');
+    set(handles.radio_deletetimebefore,   'Enable', 'On');
+    set(handles.radio_deletetimeafter,    'Enable', 'On');
+    
+    handles.recomputeMSD = 1;
+    guidata(hObject, handles);
+    
+    slider_BeadID_Callback(hObject, eventdata, handles);
+    
+    stk = dbstack;        
+    disp([stk(1).name ', Height(TrackingTable)= ' num2str(height(handles.TrackingTable))]);    
+
+return
+    
+function handles = delete_outside_time_window(handles, window_frames)
+    handles.Activefig = handles.XTfig;
+    handles.radio_XTfig.Value = 1;
+
+    current_bead = handles.CurrentBead;
+    
+    figure(handles.XTfig);
+    [fr, xm] = ginput(1);
+    
+    if handles.radio_seconds.Value
+%         tm = frame2sec(tm);
+        fr = sec2frame(fr);
+    end
+
+    frames = handles.Bead.TrackingTable.Frame;
+
+    % find the closest time point to mouse click
+    dists = abs(frames - fr);    
+    
+    % identify time
+    [~,minidx] = min(dists);
+
+    
+    T = handles.TrackingTable;
+   
+    
+    min_keepframe = minidx - window_frames;
+    max_keepframe = minidx + window_frames;
+
+    
+    foo = T.Frame <= min_keepframe | T.Frame >= max_keepframe;
+
+    idx = find( T.ID == current_bead & foo);
+    
+    handles = delete_data(handles, idx);
+    
+return
+    
 
 function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
 
@@ -539,6 +622,9 @@ function edit_arb_origin_Callback(hObject, eventdata, handles)
         handles.XYZorigin = arb_origin;
         handles.RadialTable = CalculateRadialLocations(handles.TrackingTable, arb_origin);        
 %         handles.VelocityTable = CalculateVelocity(handles.TrackingTable);
+        smooth_factor = handles.edit_smoothness.Value;
+        handles.VelocityTable = vst_CalculateVelocity(TrackingTable, smooth_factor);
+%         handles.VelocityTable = CalculateVelocity(handles.TrackingTable);
     end
     plot_data(handles);
     guidata(hObject, handles);
@@ -767,7 +853,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
 %     S.Height = 484;
     S.Firstframefile = '';
     S.Mipfile = '';
-
+    
+    
     VidTable = struct2table(S, 'AsArray', true);
 
     logentry(['Setting Path to: ' Path]);
@@ -790,8 +877,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     % Update the filter with height and width information
     handles.TrackingFilter.height = VidTable.Height;
     handles.TrackingFilter.width  = VidTable.Width;
-    handles.TrackingFilter.min_frames = 5;
-    handles.TrackingFilter.tcrop = 5;
+%     handles.TrackingFilter.min_frames = 5;
+%     handles.TrackingFilter.tcrop = 5;
     
     [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
     
@@ -799,8 +886,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     
     RadialTable = CalculateRadialLocations(TrackingTable);
         
-    VelocityTable = CalculateVelocity(TrackingTable);     
-
+%     VelocityTable = CalculateVelocity(TrackingTable); 
+    VelocityTable = vst_CalculateVelocity(TrackingTable);
 
 
     if isempty(TrackingTable)
@@ -821,9 +908,11 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
         handles.im = imread(MIPfile(1).name);
     else
         try
-%             tmp(:,:,1) = imread([filenameroot, '.00001.pgm']);
+            tmp(:,:,1) = imread([filenameroot, '.00001.pgm']);
             tmp(:,:,2) = imread([filenameroot, '.07625.pgm']);
-            handles.im = squeeze(max(tmp,[],3));
+            tmp(:,:,3) = 0;
+%             handles.im = squeeze(max(tmp,[],3));
+            handles.im = tmp;
         catch
             handles.im = 0.5 * ones(ceil(max(TrackingTable.Y)),ceil(max(TrackingTable.X)));
 %             handles.ImageWidth = max(TrackingTable.X) * 1.05;
@@ -885,6 +974,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     set(handles.edit_calibum                        , 'Enable', 'on');
     set(handles.text_calibum                        , 'Enable', 'on');
     set(handles.edit_customviscPas                  , 'Enable', 'on');
+    set(handles.edit_smoothness                     , 'Enable', 'on');
     set(handles.checkbox_visc                       , 'Enable', 'on');    
     set(handles.checkbox_lockum                     , 'Enable', 'on');    
     set(handles.checkbox_msdmean                    , 'Value',   1);
@@ -1109,7 +1199,7 @@ function handles = init_AUXfig(handles)
        'DoubleBuffer', 'on', ...
        'BackingStore', 'off', ...
        'Visible', 'off');
-   
+    handles.AUXfig.KeyPressFcn = @keys;
     handles.AUXfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
    
 return
@@ -1121,6 +1211,7 @@ function handles = init_XYfig(handles)
                        'DoubleBuffer', 'on', ...
                        'BackingStore', 'off', ...
                        'Visible', 'on');
+    handles.XYfig.KeyPressFcn = @keys;
     handles.XYfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
     drawnow;
 
@@ -1133,9 +1224,24 @@ function handles = init_XTfig(handles)
                            'DoubleBuffer', 'on', ...
                            'BackingStore', 'off', ...
                            'Visible', 'on');
+    handles.XTfig.KeyPressFcn = @keys;
     handles.XTfig.CloseRequestFcn = 'set(gcf,"Visible","off");';
 return
 
+function keys(src,event)
+    myUI = findall(0, 'Tag', 'evt_GUI');
+    handles = guihandles(myUI);
+    
+   disp(event.Key);
+%    switch(event.Key)
+%        case 'rightarrow'
+%            disp('poot');
+% %            handles.;
+% %            slider_BeadID_Callback
+%        case 'leftarrow'
+%            disp('fooz');
+%    end
+return
 
 function Plot_XYfig(handles)
 
@@ -1162,7 +1268,7 @@ function Plot_XYfig(handles)
     if get(handles.checkbox_overlayxy, 'Value')
         hold on;
             plot(x(~idx), y(~idx), '.', ...
-                 x(idx),  y(idx),  'r.');
+                 x(idx),  y(idx),  'm.');
         hold off;
     end
     
@@ -1291,6 +1397,14 @@ function Plot_AUXfig(handles)
         case 'velocity magnitude'
             handles.plots.VelMag = prep_velmag_plot(handles);
             plot_velocity_magnitude(handles.plots.VelMag, AUXfig);
+
+        case 'velocity rosehist (active)'
+            handles.plots.VelRoseHist = prep_velocity_rosehistogram_plot(handles);
+            plot_velocity_rosehistograms(handles.plots.VelRoseHist, AUXfig, true);
+            
+        case 'velocity rosehist (all)'
+            handles.plots.VelRoseHistAll = prep_velocity_rosehistogram_plot(handles);
+            plot_velocity_rosehistograms(handles.plots.VelRoseHistAll, AUXfig);
 
         case 'velocity histograms (xy)'
             handles.plots.VelHist = prep_velocity_histogram_plot(handles);
@@ -1457,7 +1571,7 @@ function handles = delete_selected_dataset(handles)
 %          '. ']);
 
 
-    handles = delete_data(handles,k);
+%     handles = delete_data(handles,k);
     
 
     return
@@ -1576,7 +1690,6 @@ function handles = delete_data(handles, sel)
     handles = SelectBead(handles);
 return
         
-    
     
 
 function handles = delete_outside_boundingbox(handles)
@@ -1761,115 +1874,49 @@ function outs = sa_calc_rad_vecs(fid, id, frame, XYZ, XYZorigin)
 return
 
 
-function VelocityTable = CalculateVelocity(TrackingTable)
-% Outputs the velocities in the default format, which is [pixels/frame] and
-% leaves the scaling to the invidual functions as needed.
-
-% XXX TODO: Add a smoothing scale to UI and CreateGaussScaleSpace call.
-
-    if isempty(TrackingTable)
-        VelocityTable = init_velocity_table;
-        return
-    end
-    
-    [g, gT] = findgroups(TrackingTable.Fid, TrackingTable.ID);    
-    
-    smooth_factor = 1;
-    if ~isempty(g)
-        Vel = splitapply(@(x1,x2,x3,x4){vst_CalcVel(x1,x2,x3,x4,smooth_factor)}, ...
-                                                              TrackingTable.Fid, ...            
-                                                              TrackingTable.ID, ...
-                                                              TrackingTable.Frame, ...
-                                                             [TrackingTable.X, ...
-                                                              TrackingTable.Y, ...
-                                                              TrackingTable.Z], ...
-                                                              g);
-        Vel = cell2mat(Vel);
-    else
-        Vel = NaN(0,5);
-    end
-        
-    VelTable.Fid   = Vel(:,1);
-    VelTable.ID    = Vel(:,2);
-    VelTable.Frame = Vel(:,3);
-    VelTable.Vx    = Vel(:,4);
-    VelTable.Vy    = Vel(:,5);
-    VelTable.Vz    = Vel(:,6);
-    VelTable.Vr    = calculate_mag(Vel(:,4:6));
-    VelTable.Vclr = Calculate_Velocity_ColorMap(VelTable.Vr);
-    
-    VelocityTable = struct2table(VelTable);    
-    
-     
-    
-return
-
-
-function Vclr = Calculate_Velocity_ColorMap(vr)
-    %
-    % Mapping the logged-velocities to colors for scatter-point color-mapping
-    %   
-    % Obvious first steps:
-    % 1. Get the magnitude of the velocity vectors 
-    % 2. Set any NaN to zero.
-    % 3. Take the log. We need to keep the original non-shifted logvr
-    %    separate from the shifted/color-mapped ones    
-    
-    % Minimum velocity threshold in pixels per frame. It's a magic number.
-    MinVelThresh = 0.001;
-    
-    % Because it's used for no other reason, we're just going to yank the
-    % current scale selections off the gui without having the handles
-    % structure passed in explicitly.
-    myUI = findall(0, 'Tag', 'evt_GUI');
-    handles = guihandles(myUI);
-    
-    if handles.radio_seconds.Value
-        MinVelThresh = frame2sec(MinVelThresh);
-    end
-    
-    if handles.radio_microns.Value
-        MinVelThresh = pixel2um(MinVelThresh);
-    end
-    
-    clear('handles');
-    
-    vr(vr < MinVelThresh) = NaN;
-    logvr = log10(vr);
-
-
-    % Set any number that is set to -inf or NaN to the *non-infinite* minimum value.
-    % We are just setting colors in the colormap. Anything with zero 
-    % (or "less") velocity will just be black anyway. We need to keep the
-    % original (non-infinite) non-shifted logvr separate from the 
-    % shifted/color-mapped one.
-    tst = isfinite(logvr);
-    if sum(tst)>0
-        logvr(~tst) = min(logvr(tst));
-    else
-        logvr(:,1) = zeros(size(tst));
-    end
-    
-    % We want to normalize the velocities to the colormap, where 1 is the
-    % highest colormap value and 0 the lowest. To do that we add the minimum
-    % value. If that minimum value is negative, we'll subtract is out
-    % anyway. Once this operation is over the minimum value should be zero
-    % and the maximum value should be one.      
-    lvr = logvr;
-    lvr = lvr - min(lvr);   
-    normvr = lvr ./ max(lvr);
-   
-    vals = floor(normvr * 255);
-    
-    
-    if ~isnan(vals)
-        heatmap = hot(256);
-        Vclr = heatmap(vals+1,:);
-    else
-        Vclr = [0 0 0];
-    end
-    
-    return
+% function VelocityTable = CalculateVelocity(TrackingTable)
+% % Outputs the velocities in the default format, which is [pixels/frame] and
+% % leaves the scaling to the invidual functions as needed.
+% 
+% % XXX TODO: Add a smoothing scale to UI and CreateGaussScaleSpace call.
+% 
+%     if isempty(TrackingTable)
+%         VelocityTable = init_velocity_table;
+%         return
+%     end
+%     
+%     [g, gT] = findgroups(TrackingTable.Fid, TrackingTable.ID);    
+%     
+%     smooth_factor = 1;
+%     if ~isempty(g)
+%         Vel = splitapply(@(x1,x2,x3,x4){vst_CalcVel(x1,x2,x3,x4,smooth_factor)}, ...
+%                                                               TrackingTable.Fid, ...            
+%                                                               TrackingTable.Frame, ...
+%                                                               TrackingTable.ID, ...
+%                                                              [TrackingTable.X, ...
+%                                                               TrackingTable.Y, ...
+%                                                               TrackingTable.Z], ...
+%                                                               g);
+%         Vel = cell2mat(Vel);
+%     else
+%         Vel = NaN(0,5);
+%     end
+%         
+%     VelTable.Fid   = Vel(:,1);
+%     VelTable.Frame = Vel(:,2);
+%     VelTable.ID    = Vel(:,3);
+%     VelTable.Vx    = Vel(:,4);
+%     VelTable.Vy    = Vel(:,5);
+%     VelTable.Vz    = Vel(:,6);
+%     VelTable.Vr    = calculate_mag(Vel(:,4:6));
+%     VelTable.Vtheta = calculate_angle(Vel(:,4:6));
+%     VelTable.Vclr = Calculate_Velocity_ColorMap(VelTable.Vr);
+%     
+%     VelocityTable = struct2table(VelTable);    
+%     
+%      
+%     
+% return
 
 
     
@@ -2056,6 +2103,7 @@ function outs = prep_velocity_plot(handles, reqTimeUnits, reqLengthUnits)
     VelY = tmpTable.Vy;
     VelZ = tmpTable.Vz;
     VelR = tmpTable.Vr;
+%     VelTheta = tmpTable.Vtheta;
     Velclr = Calculate_Velocity_ColorMap(VelR);
     
     % Get the velocities into the desired units
@@ -2111,12 +2159,15 @@ function outs = prep_velocity_plot(handles, reqTimeUnits, reqLengthUnits)
     outs.VelX = VelX;
     outs.VelY = VelY;
     outs.VelZ = VelZ;
-    outs.VelR = VelR;
+%     outs.VelR = VelR;
+%     outs.VelTheta = VelTheta;
     outs.Velclr = Velclr;
     
     outs.LengthUnits = LengthUnits;
     outs.TimeUnits = TimeUnits;
     outs.VelUnits = ['[', LengthUnits, '/', VelTimeUnits, ']'];
+    
+    logentry(['Velocity, mean +/- SD, ', outs.VelUnits, ': ', num2str(mean([outs.VelX(:), outs.VelY(:)])), std([outs.VelX(:), outs.VelY(:)])]);
 return
 
 
@@ -2138,6 +2189,54 @@ function outs = prep_velmag_plot(handles)
     outs = vel;
         
     outs.VelMag = calculate_mag([vel.VelX, vel.VelY, vel.VelZ]);
+    outs.VelTheta = calculate_angle([vel.VelX, vel.VelY]);
+return
+
+function outs = prep_velocity_rosehistogram_plot(handles)
+
+    vel = prep_VelScatter_plot(handles);
+    outs = vel;
+    
+return
+
+function plot_velocity_rosehistograms(VelScatter, h, ActiveOnlyTF)
+    if nargin < 3 || isempty(ActiveOnlyTF)
+        ActiveOnlyTF = false;
+    end
+
+    
+    idx = VelScatter.idx;
+    
+    if ActiveOnlyTF
+        vr = VelScatter.vr(idx);
+        vtheta = VelScatter.vtheta(idx);       
+    else
+        vr = VelScatter.vr;
+        vtheta = VelScatter.vtheta;
+    end
+    
+    figure(h);
+    clf;    
+    h = polarhistogram(vtheta);
+    h.DisplayStyle = 'stairs';
+    h.Normalization = 'pdf';
+    hold on;
+    
+    clrmap = lines(6);
+    
+    vtheta_mean = mean(vtheta);
+    vmag_mean = mean(vr);
+    
+    
+%     vals = mag/2 .* h.Values ./ max(h.Values);
+%     h.Values = vals;
+    
+    hold on
+    
+    polarscatter(vtheta, vr, '.', 'MarkerEdgeColor', clrmap(3,:));
+    q = polarplot([0 vtheta_mean], [0 vmag_mean], 'r', 'LineWidth', 2);
+    grid on;
+    drawnow;   
 return
 
 
@@ -2282,10 +2381,13 @@ function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     outs.vy   = Vy;
     outs.vz   = Vz;
     outs.vr   = Vr;
+    outs.vtheta = calculate_angle([Vx Vy]);
     outs.vclr = Vclr;
     outs.LengthUnits = LengthUnits;
     outs.VelUnits = ['[', LengthUnits, '/', VelTimeUnits, ']'];
     
+    assignin('base', 'TrackerVelocitiesFromEVT', outs);
+    logentry(['Velocity, mean +/- SD, ', outs.VelUnits, ': [', num2str(mean([Vx(:), Vy(:)])), '], ', '[', num2str(std([Vx(:), Vy(:)])), '].']);
 return
 
 
@@ -2869,7 +2971,11 @@ function handles = filter_tracking(handles)
     handles = SelectBead(handles);
     
     handles.RadialTable = CalculateRadialLocations(handles.TrackingTable);
-    handles.VelocityTable = CalculateVelocity(handles.TrackingTable);     
+   
+
+    smooth_factor = 1;
+%     handles.VelocityTable = CalculateVelocity(handles.TrackingTable);  
+    handles.VelocityTable = vst_CalculateVelocity(TrackingTable, smooth_factor);
     
     plot_data(handles);
 return
@@ -2879,6 +2985,9 @@ function mag = calculate_mag(matrix)
     mag = sqrt( sum( matrix.^2, 2 ) );
 return
 
+function angle = calculate_angle(matrix)
+    angle = atan2(-matrix(:,2), matrix(:,1));    
+return
 
 function ForceScale = calculate_ForceScale(handles)
     ForceScale = 6*pi*handles.BeadRadius_m*handles.Viscosity_Pas;
@@ -3281,3 +3390,39 @@ function interp_Forces = sa_interp_forces(radial_loc, radial_force, interp_grid)
     
     
     
+
+
+% --- Executes on button press in checkbox_smoothness.
+function checkbox_smoothness_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_smoothness (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_smoothness
+
+
+
+function edit_smoothness_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_smoothness (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_smoothness as text
+%        str2double(get(hObject,'String')) returns contents of edit_smoothness as a double
+    handles.smooth_factor = str2double(get(hObject,'String'));
+    handles.VelocityTable = vst_CalculateVelocity(handles.TrackingTable, handles.smooth_factor);
+    
+    guidata(hObject, handles);    
+    plot_data(handles);
+
+% --- Executes during object creation, after setting all properties.
+function edit_smoothness_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_smoothness (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
