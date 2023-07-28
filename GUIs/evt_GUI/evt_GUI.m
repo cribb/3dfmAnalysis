@@ -63,33 +63,33 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
 	handles.output = hObject;
     
     % Set initial/default values for tracking-related data   
-	handles.CurrentBead = 0;   
-    handles.CurrentBeadRows = [];
-    handles.TrackerList = [];
-    handles.calibum = 1;
-    handles.fps = 120;
-    handles.numtaus = 30;
-    handles.mintime = 0;
-    handles.XYZoffsets = [ 0 0 0 ];
-    handles.LengthUnits = 'pixels';
-    handles.TimeUnits = 'sec';
-    handles.XYZorigin = [0,0,0];
-    handles.Viscosity_Pas = 0.001;
-    handles.BeadRadius_m = 0.5e-6;
+	handles.appData.CurrentBead = 0;   
+    handles.appData.CurrentBeadRows = [];
+    handles.appData.TrackerList = [];
+    handles.appData.calibum = 1;
+    handles.appData.fps = 120;
+    handles.appData.numtaus = 30;
+    handles.appData.mintime = 0;
+    handles.appData.XYZoffsets = [ 0 0 0 ];
+    handles.appData.LengthUnits = 'pixels';
+    handles.appData.TimeUnits = 'sec';
+    handles.appData.XYZorigin = [0,0,0];
+    handles.appData.Viscosity_Pas = 0.001;
+    handles.appData.BeadRadius_m = 0.5e-6;
     
     % Assign initial "filter by" values 
-%     handles.TrackingFilter.min_frames = 10;
-    handles.TrackingFilter.min_frames = 0;
-    handles.TrackingFilter.min_pixels = 0;
-    handles.TrackingFilter.max_pixels = Inf;
-    handles.TrackingFilter.tcrop = 0;
-    handles.TrackingFilter.xycrop = 0;
-    handles.TrackingFilter.height = 768;
-    handles.TrackingFilter.width  = 1024;
-    handles.TrackingFilter.min_sens = 0;
-    handles.TrackingFilter.min_intensity = 0;
-    handles.TrackingFilter.xyzunits = 'pixels';
-    handles.TrackingFilter.calibum = 1;
+%     handles.appData.TrackingFilter.min_frames = 10;
+    handles.appData.TrackingFilter.min_frames = 0;
+    handles.appData.TrackingFilter.min_pixels = 0;
+    handles.appData.TrackingFilter.max_pixels = Inf;
+    handles.appData.TrackingFilter.tcrop = 0;
+    handles.appData.TrackingFilter.xycrop = 0;
+    handles.appData.TrackingFilter.height = 768;
+    handles.appData.TrackingFilter.width  = 1024;
+    handles.appData.TrackingFilter.min_sens = 0;
+    handles.appData.TrackingFilter.min_intensity = 0;
+    handles.appData.TrackingFilter.xyzunits = 'pixels';
+    handles.appData.TrackingFilter.calibum = 1;
 
     % set default figure parameters
     handles = init_XTfig(handles);
@@ -107,7 +107,7 @@ function evt_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     
 	% Update handles structure
 	guidata(hObject, handles);
-	
+	setappdata(handles.output, 'appData', handles.appData);
 
 function varargout = evt_GUI_OutputFcn(hObject, eventdata, handles)
 	% Get default command line output from handles structure
@@ -145,7 +145,7 @@ function radio_deletetimeafter_Callback(hObject, eventdata, handles)
 function radio_XYfig_Callback(hObject, eventdata, handles)
     handles.Activefig = handles.XYfig;
     guidata(hObject, handles);
-
+    
     
 function radio_XTfig_Callback(hObject, eventdata, handles)
     handles.Activefig = handles.XTfig;
@@ -177,8 +177,8 @@ function pushbutton_cliptwin_Callback(hObject, eventdata, handles)
     set(handles.radio_AUXfig,'Enable', 'off');	
 
     window_sec = 0.4;
-    window_frames = window_sec .* handles.fps;
-    handles = delete_outside_time_window(handles, window_frames)    
+    window_frames = window_sec .* handles.appData.fps;
+    handles = delete_outside_time_window(handles, window_frames);
     
     set(handles.radio_XTfig, 'Enable', 'on');
     set(handles.radio_XYfig, 'Enable', 'on');
@@ -192,19 +192,21 @@ function pushbutton_cliptwin_Callback(hObject, eventdata, handles)
     
     handles.recomputeMSD = 1;
     guidata(hObject, handles);
-    
+    setappdata(handles.output, 'appData', handles.appData);
+
     slider_BeadID_Callback(hObject, eventdata, handles);
     
     stk = dbstack;        
-    disp([stk(1).name ', Height(TrackingTable)= ' num2str(height(handles.TrackingTable))]);    
+    disp([stk(1).name ', Height(TrackingTable)= ' num2str(height(handles.appData.TrackingTable))]);    
 
 return
-    
+  
+
 function handles = delete_outside_time_window(handles, window_frames)
     handles.Activefig = handles.XTfig;
     handles.radio_XTfig.Value = 1;
 
-    current_bead = handles.CurrentBead;
+    current_bead = handles.appData.CurrentBead;
     
     figure(handles.XTfig);
     [fr, xm] = ginput(1);
@@ -214,7 +216,7 @@ function handles = delete_outside_time_window(handles, window_frames)
         fr = sec2frame(fr);
     end
 
-    frames = handles.Bead.TrackingTable.Frame;
+    frames = handles.appData.Bead.TrackingTable.Frame;
 
     % find the closest time point to mouse click
     dists = abs(frames - fr);    
@@ -223,7 +225,7 @@ function handles = delete_outside_time_window(handles, window_frames)
     [~,minidx] = min(dists);
 
     
-    T = handles.TrackingTable;
+    T = handles.appData.TrackingTable;
    
     
     min_keepframe = minidx - window_frames;
@@ -281,11 +283,12 @@ function pushbutton_Edit_Data_Callback(hObject, eventdata, handles)
     
     handles.recomputeMSD = 1;
     guidata(hObject, handles);
-    
+    setappdata(handles.output, 'appData', handles.appData);
+
     slider_BeadID_Callback(hObject, eventdata, handles);
     
     stk = dbstack;        
-    disp([stk(1).name ', Height(TrackingTable)= ' num2str(height(handles.TrackingTable))]);    
+    disp([stk(1).name ', Height(TrackingTable)= ' num2str(height(handles.appData.TrackingTable))]);    
 
     return
     
@@ -313,7 +316,7 @@ function edit_BeadID_Callback(hObject, eventdata, handles)
 % trajectory table. Update the plots afterwards.
    
     desired_bead = round(str2double(get(handles.edit_BeadID, 'String')));
-    beadList(:,1) = sort(unique(handles.TrackingTable.ID), 'ascend');
+    beadList(:,1) = sort(unique(handles.appData.TrackingTable.ID), 'ascend');
     
     [~,closest_beadIDX] = min( abs( desired_bead - beadList ));
 
@@ -323,17 +326,19 @@ function edit_BeadID_Callback(hObject, eventdata, handles)
     set(handles.edit_BeadID, 'String', num2str(CurrentBead));
     
     % separate the currently selected bead vs not the selected bead
-    handles.CurrentBead = CurrentBead;
+    handles.appData.CurrentBead = CurrentBead;
     handles = SelectBead(handles);
     
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
+
     plot_data(handles);
     
 
 function slider_BeadID_Callback(hObject, eventdata, handles)
     
     Slider = handles.slider_BeadID;    
-    T = handles.TrackingTable;
+    T = handles.appData.TrackingTable;
 
     beadList(:,1) = unique(sort(T.ID));
     N = numel(beadList);
@@ -364,13 +369,14 @@ function slider_BeadID_Callback(hObject, eventdata, handles)
     handles.edit_BeadID.String = num2str(CurrentBead, '%i');
 
     % separate the currently selected bead vs not the selected bead
-    handles.CurrentBead = CurrentBead;
+    handles.appData.CurrentBead = CurrentBead;
     handles = SelectBead(handles);
 
 
     % Set the Slider changes into the handles structure
     handles.slider_BeadID = Slider;    
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
     
     plot_data(handles);    
 
@@ -386,9 +392,9 @@ function pushbutton_Select_Closest_xydataset_Callback(hObject, eventdata, handle
             
     if handles.radio_XYfig.Value
         
-        beadID = handles.TrackingTable.ID;    
-        x = handles.TrackingTable.X;
-        y = handles.TrackingTable.Y;
+        beadID = handles.appData.TrackingTable.ID;    
+        x = handles.appData.TrackingTable.X;
+        y = handles.appData.TrackingTable.Y;
 
         figure(handles.XYfig);
         [xm, ym] = ginput(1);
@@ -410,7 +416,7 @@ function pushbutton_Select_Closest_xydataset_Callback(hObject, eventdata, handle
         
         handles.slider_BeadID.Value = J;
         guidata(hObject, handles);
-        
+        setappdata(handles.output, 'appData', handles.appData);
         
         
     end
@@ -427,7 +433,7 @@ function pushbutton_Select_Closest_xydataset_Callback(hObject, eventdata, handle
                 logentry('Displaying active bead in MSD selection needs reimplementation.');
 %                 figure(handles.AUXfig);
 %                 
-%                 mymsd = handles.mymsd;
+%                 mymsd = handles.appData.mymsd;
 % 
 %                 [xm, ym] = ginput(1);
 % 
@@ -435,7 +441,7 @@ function pushbutton_Select_Closest_xydataset_Callback(hObject, eventdata, handle
 %                 xm = repmat(xm, size(mymsd.tau));
 %                 ym = repmat(ym, size(mymsd.msd));
 %         
-%                 beadID = handles.TrackingTable.ID;    
+%                 beadID = handles.appData.TrackingTable.ID;    
 %                 x = log10(mymsd.tau);
 %                 y = log10(mymsd.msd);
 % 
@@ -466,13 +472,13 @@ function pushbutton_select_drift_region_Callback(hObject, eventdata, handles)
 
     [xm, ym] = ginput(2);
    
-    xlo = min(xm); % + handles.mintime;
-    xhi = max(xm); % + handles.mintime;
+    xlo = min(xm); % + handles.appData.mintime;
+    xhi = max(xm); % + handles.appData.mintime;
 
-    handles.drift_tzero = xlo;
-	handles.drift_tend = xhi;
+    handles.appData.drift_tzero = xlo;
+	handles.appData.drift_tend = xhi;
 	guidata(hObject, handles);
-    
+    setappdata(handles.output, 'appData', handles.appData);
 
 function radio_com_Callback(hObject, eventdata, handles)
 
@@ -484,24 +490,32 @@ function radio_commonmode_Callback(hObject, eventdata, handles)
 function radio_pixels_Callback(hObject, eventdata, handles)
     handles.LengthUnits = 'pixels';
 	guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
+    
     plot_data(handles);
 
 
 function radio_microns_Callback(hObject, eventdata, handles)
     handles.LengthUnits = 'microns';
 	guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
+    
     plot_data(handles);
 
 
 function radio_frames_Callback(hObject, eventdata, handles)
     handles.TimeUnits = 'frames';
 	guidata(hObject, handles);    
+    setappdata(handles.output, 'appData', handles.appData);
+    
     plot_data(handles);
 
 
 function radio_seconds_Callback(hObject, eventdata, handles)
     handles.TimeUnits = 'seconds';
 	guidata(hObject, handles);    
+    setappdata(handles.output, 'appData', handles.appData);
+    
     plot_data(handles);
 
 
@@ -514,11 +528,12 @@ function edit_calibum_CreateFcn(hObject, eventdata, handles)
 
 
 function edit_calibum_Callback(hObject, eventdata, handles)
-    handles.calibum = str2double(handles.edit_calibum.String);
-    handles.VidTable.Calibum = str2double(handles.edit_calibum.String);    
+    handles.appData.calibum = str2double(handles.edit_calibum.String);
+    handles.appData.VidTable.Calibum = str2double(handles.edit_calibum.String);    
     handles.recomputeMSD = 1;
 	
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
     
     plot_data(handles);    
 
@@ -527,29 +542,30 @@ function pushbutton_remove_drift_Callback(hObject, eventdata, handles)
     if ~isfield(handles, 'drift_t0')
         start_time = [];
     else
-        start_time = handles.drift_t0;
+        start_time = handles.appData.drift_t0;
     end
     
     if ~isfield(handles, 'drift_tend')
         end_time = [];
     else
-        end_time = handles.drift_tend;
+        end_time = handles.appData.drift_tend;
     end    
     
     if get(handles.radio_linear, 'Value')
         logentry('Removing Drift via linear method.');
-        [v,q] = vst_remove_drift(handles.TrackingTable, start_time, end_time, 'linear');
+        [v,q] = vst_remove_drift(handles.appData.TrackingTable, start_time, end_time, 'linear');
     elseif get(handles.radio_com, 'Value')
         logentry('Removing Drift via center-of-mass method.');
-        [v,q] = vst_remove_drift(handles.TrackingTable, start_time, end_time, 'center-of-mass'); 
+        [v,q] = vst_remove_drift(handles.appData.TrackingTable, start_time, end_time, 'center-of-mass'); 
     elseif get(handles.radio_commonmode, 'Value')
         logentry('Removing Drift via common-mode method.');
-        [v,q] = vst_remove_drift(handles.TrackingTable, start_time, end_time, 'common-mode');
+        [v,q] = vst_remove_drift(handles.appData.TrackingTable, start_time, end_time, 'common-mode');
     end
     
-    handles.TrackingTable = v;
+    handles.appData.TrackingTable = v;
     handles.recomputeMSD = 1;
 	guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
 
     plot_data(handles);
         
@@ -565,13 +581,14 @@ function edit_frame_rate_CreateFcn(hObject, eventdata, handles)
 function edit_frame_rate_Callback(hObject, eventdata, handles)
     
     % Rescale time in the tracking table
-    handles.fps = str2double(get(hObject, 'String'));
-    handles.VidTable.fps = str2double(get(hObject, 'String'));
+    handles.appData.fps = str2double(get(hObject, 'String'));
+    handles.appData.VidTable.fps = str2double(get(hObject, 'String'));
 
     handles.recomputeMSD = 1;
 
     handles = SelectBead(handles);
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
 	
     % Update the plots
     plot_data(handles);
@@ -593,7 +610,7 @@ function radio_arb_origin_Callback(hObject, eventdata, handles)
 
     edit_arb_origin_Callback(hObject, eventdata, handles);  %#ok<ST2NM>
     
-    if length(handles.XYZorigin) ~= 3
+    if length(handles.appData.XYZorigin) ~= 3
         logentry('Origin value is not valid.  Not plotting.')
         set(handles.radio_arb_origin, 'Value', 0);
         set(handles.radio_relative, 'Value', 1);
@@ -617,17 +634,18 @@ function edit_arb_origin_Callback(hObject, eventdata, handles)
         logentry('Origin value is not valid.  Not plotting.')
         set(handles.radio_arb_origin, 'Value', 0);
         set(handles.radio_relative, 'Value', 1);
-%         handles.RadialTable = CalculateRadialLocations(handles.TrackingTable);
+%         handles.appData.RadialTable = CalculateRadialLocations(handles.appData.TrackingTable);
     else
-        handles.XYZorigin = arb_origin;
-        handles.RadialTable = CalculateRadialLocations(handles.TrackingTable, arb_origin);        
-%         handles.VelocityTable = CalculateVelocity(handles.TrackingTable);
+        handles.appData.XYZorigin = arb_origin;
+        handles.appData.RadialTable = CalculateRadialLocations(handles.appData.TrackingTable, arb_origin);        
+%         handles.appData.VelocityTable = CalculateVelocity(handles.appData.TrackingTable);
         smooth_factor = handles.edit_smoothness.Value;
-        handles.VelocityTable = vst_CalculateVelocity(TrackingTable, smooth_factor);
-%         handles.VelocityTable = CalculateVelocity(handles.TrackingTable);
+        handles.appData.VelocityTable = vst_CalculateVelocity(TrackingTable, smooth_factor);
+%         handles.appData.VelocityTable = CalculateVelocity(handles.appData.TrackingTable);
     end
     plot_data(handles);
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
     
 return
 
@@ -649,6 +667,7 @@ function popup_AUXplot_Callback(hObject, eventdata, handles)
     
     plot_data(handles);
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
     
 
 function popup_AUXplot_CreateFcn(hObject, eventdata, handles)
@@ -683,10 +702,11 @@ function checkbox_etastar_Callback(hObject, eventdata, handles)
     
 function edit_bead_diameter_um_Callback(hObject, eventdata, handles)
     handles.recomputeMSD = 1;     
-    handles.BeadRadius_m = str2double(get(hObject, 'String'))/2 * 1e-6;
-    handles.ForceScale = calculate_ForceScale(handles);
+    handles.appData.BeadRadius_m = str2double(get(hObject, 'String'))/2 * 1e-6;
+    handles.appData.ForceScale = calculate_ForceScale(handles);
     
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
 
     plot_data(handles);
 
@@ -709,10 +729,11 @@ function checkbox_visc_Callback(hObject, eventdata, handles)
 
 
 function edit_customviscPas_Callback(hObject, eventdata, handles)
-    handles.Viscosity_Pas = str2double(get(hObject,'String'));
-    handles.ForceScale = calculate_ForceScale(handles);
+    handles.appData.Viscosity_Pas = str2double(get(hObject,'String'));
+    handles.appData.ForceScale = calculate_ForceScale(handles);
     
     guidata(hObject, handles);    
+    setappdata(handles.output, 'appData', handles.appData);
     plot_data(handles);
     
 
@@ -728,6 +749,7 @@ function checkbox_neutoffsets_Callback(hObject, eventdata, handles)
 
     handles = SelectBead(handles);    
     guidata(hObject, handles);   
+    setappdata(handles.output, 'appData', handles.appData);
     plot_data(handles);
 
 
@@ -750,10 +772,11 @@ function edit_numtaus_Callback(hObject, eventdata, handles)
     numtaus = str2double(get(handles.edit_numtaus, 'String'));
     taulist = msd_gen_taus(a,numtaus,percent_duration);
     
-    handles.numtaus = numtaus;
-    handles.taulist = taulist;
+    handles.appData.numtaus = numtaus;
+    handles.appData.taulist = taulist;
     handles.recomputeMSD = 1;     
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
     
     plot_data(handles);   
         
@@ -789,18 +812,24 @@ function edit_chosentau_Callback(hObject, eventdata, handles)
 function checkbox_watermsd_Callback(hObject, eventdata, handles)
     handles.recomputeMSD = 1;
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
+
     plot_data(handles);
 
     
 function checkbox_2p5Mmsd_Callback(hObject, eventdata, handles)
     handles.recomputeMSD = 1;
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
+
     plot_data(handles);
 
     
 function checkbox_2Mmsd_Callback(hObject, eventdata, handles)
     handles.recomputeMSD = 1;
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
+
     plot_data(handles);
 
 
@@ -845,8 +874,8 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     S.Path = Path;
     S.Vidfile = 0;
     S.TrackingFiles = File;
-    S.Fps = handles.fps;
-    S.Calibum = handles.calibum;
+    S.Fps = handles.appData.fps;
+    S.Calibum = handles.appData.calibum;
     S.Width = 1024;
     S.Height = 768;
 %     S.Width = 648;
@@ -875,12 +904,12 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     end
     
     % Update the filter with height and width information
-    handles.TrackingFilter.height = VidTable.Height;
-    handles.TrackingFilter.width  = VidTable.Width;
-%     handles.TrackingFilter.min_frames = 5;
-%     handles.TrackingFilter.tcrop = 5;
+    handles.appData.TrackingFilter.height = VidTable.Height;
+    handles.appData.TrackingFilter.width  = VidTable.Width;
+%     handles.appData.TrackingFilter.min_frames = 5;
+%     handles.appData.TrackingFilter.tcrop = 5;
     
-    [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
+    [TrackingTable, Trash] = vst_filter_tracking(TrackingTable, handles.appData.TrackingFilter);
     
     
     
@@ -905,38 +934,41 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     % If the background MIP image exists, attach it to handles structure.
     % If it doesn't exist, replace with half-tone grayscale.
     if ~isempty(MIPfile)
-        handles.im = imread(MIPfile(1).name);
+        handles.appData.im = imread(MIPfile(1).name);
     else
         try
             tmp(:,:,1) = imread([filenameroot, '.00001.pgm']);
             tmp(:,:,2) = imread([filenameroot, '.07625.pgm']);
             tmp(:,:,3) = 0;
-%             handles.im = squeeze(max(tmp,[],3));
-            handles.im = tmp;
+%             handles.appData.im = squeeze(max(tmp,[],3));
+            handles.appData.im = tmp;
         catch
-            handles.im = 0.5 * ones(ceil(max(TrackingTable.Y)),ceil(max(TrackingTable.X)));
-%             handles.ImageWidth = max(TrackingTable.X) * 1.05;
-%             handles.ImageHeight = max(TrackingTable.Y) * 1.05;
+            handles.appData.im = 0.5 * ones(ceil(max(TrackingTable.Y)),ceil(max(TrackingTable.X)));
+%             handles.appData.ImageWidth = max(TrackingTable.X) * 1.05;
+%             handles.appData.ImageHeight = max(TrackingTable.Y) * 1.05;
         end
     end
-        handles.ImageWidth  = size(handles.im,2);
-        handles.ImageHeight = size(handles.im,1);
+        handles.appData.ImageWidth  = size(handles.appData.im,2);
+        handles.appData.ImageHeight = size(handles.appData.im,1);
 
     % export important data to handles structure
-    handles.Filename = filename;
-    handles.VidTable = VidTable;
-    handles.TrackingTable = TrackingTable;
-    handles.RadialTable = RadialTable;
-    handles.VelocityTable = VelocityTable;
-    handles.Trash = Trash;    
-    handles.recomputeMSD = 1;   
-    handles.calibum = VidTable.Calibum;
+    handles.appData.Filename = filename;
+%     myUI = findall(0, 'Tag', 'evt_GUI');
+%     handles = guihandles(myUI);
+%     setappdata(handles.appData, 'Filename', filename);
+    handles.appData.VidTable = VidTable;
+    handles.appData.TrackingTable = TrackingTable;
+    handles.appData.RadialTable = RadialTable;
+    handles.appData.VelocityTable = VelocityTable;
+    handles.appData.Trash = Trash;    
+    handles.appData.recomputeMSD = 1;   
+    handles.appData.calibum = VidTable.Calibum;
 
-    handles.rheo = calc_viscosity_stds(hObject, eventdata, handles);
+    handles.appData.rheo = calc_viscosity_stds(hObject, eventdata, handles);
 
-    handles.CurrentBead = min(TrackingTable.ID);       
+    handles.appData.CurrentBead = min(TrackingTable.ID);       
     
-    handles.ForceScale = calculate_ForceScale(handles);
+    handles.appData.ForceScale = calculate_ForceScale(handles);
     
     handles = SelectBead(handles);    
     
@@ -983,6 +1015,7 @@ function FileMenuOpen_Callback(hObject, eventdata, handles)
     % The slider calls the plot_data function
     slider_BeadID_Callback(hObject, eventdata, handles);
     guidata(hObject, handles);           
+    setappdata(handles.output, 'appData', handles.appData);
         
     return
 
@@ -993,7 +1026,7 @@ function FileMenuAdd_Callback(hObject, eventdata, handles)
 
 function FileMenuSaveAs_Callback(hObject, eventdata, handles)
 
-    [pname, outfile] = fileparts(handles.Filename);
+    [pname, outfile] = fileparts(handles.appData.Filename);
 
     rootdir = pwd;
 
@@ -1013,7 +1046,7 @@ function FileMenuSaveAs_Callback(hObject, eventdata, handles)
 
     calibum = str2double(get(handles.edit_calibum, 'String'));
     fps = str2double(get(handles.edit_frame_rate, 'String'));
-    trajdata = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
+    trajdata = convert_Table_to_old_matrix(handles.appData.TrackingTable, handles.appData.fps);
     cd(outpath);
     save_evtfile(outfile, trajdata, 'pixels', calibum, fps, 'mat');
     cd(rootdir);
@@ -1021,22 +1054,23 @@ function FileMenuSaveAs_Callback(hObject, eventdata, handles)
     
 function FileMenuSave_Callback(hObject, eventdata, handles)
         
-    [pname, outfile] = fileparts(handles.Filename);
-
-    logentry(['Setting Path to: ' pname]);
-    cd(pname);
-
-    outfile = strrep(outfile, '.raw', '');
-    outfile = strrep(outfile, '.csv', '');
-    outfile = strrep(outfile, '.vrpn', '');
-    outfile = strrep(outfile, '.mat', '');
-    outfile = strrep(outfile, '.evt', '');
-    
-    calibum = str2double(get(handles.edit_calibum, 'String'));
-    fps = str2double(get(handles.edit_frame_rate, 'String'));
-    trajdata = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
-    save_evtfile(outfile, trajdata, 'pixels', calibum, fps, 'mat');
-    logentry(['New tracking file, ' outfile ', saved...']);
+    save_datafile(handles.appData);
+%     [pname, outfile] = fileparts(handles.appData.Filename);
+% 
+%     logentry(['Setting Path to: ' pname]);
+%     cd(pname);
+% 
+%     outfile = strrep(outfile, '.raw', '');
+%     outfile = strrep(outfile, '.csv', '');
+%     outfile = strrep(outfile, '.vrpn', '');
+%     outfile = strrep(outfile, '.mat', '');
+%     outfile = strrep(outfile, '.evt', '');
+%     
+%     calibum = str2double(get(handles.edit_calibum, 'String'));
+%     fps = str2double(get(handles.edit_frame_rate, 'String'));
+%     trajdata = convert_Table_to_old_matrix(handles.appData.TrackingTable, handles.appData.fps);
+%     save_evtfile(outfile, trajdata, 'pixels', calibum, fps, 'mat');
+%     logentry(['New tracking file, ' outfile ', saved...']);
     
 
 function FileMenuClose_Callback(hObject, eventdata, handles)
@@ -1054,9 +1088,10 @@ function EditMenu_AddBkgd_Callback(hObject, eventdata, handles)
                                       'Select Background Image (e.g. MIP)', ...
                                       'MultiSelect', 'on');
     File = fullfile(Path, File);
-    handles.im = imread(File);
-    [handles.ImageHeight, handles.ImageWidth] = size(handles.im);    
+    handles.appData.im = imread(File);
+    [handles.appData.ImageHeight, handles.appData.ImageWidth] = size(handles.appData.im);    
     guidata(hObject, handles);                                    
+    setappdata(handles.output, 'appData', handles.appData);
                                   
     plot_data(handles);
 
@@ -1081,7 +1116,7 @@ function MeasureMenu_XYdistance_Callback(hObject, eventdata, handles)
     set(li, 'MarkerSize', 8);
     
     if get(handles.radio_microns, 'Value')
-        calibum = handles.calibum;
+        calibum = handles.appData.calibum;
         
 %         xm = xm / calibum;
 %         ym = ym / calibum;
@@ -1093,7 +1128,7 @@ function MeasureMenu_XYdistance_Callback(hObject, eventdata, handles)
     dist = sqrt((xm(2) - xm(1)).^2 + (ym(2) - ym(1)).^2);
     
     diststr = [num2str(round(dist)) ' ' units];
-    set(handles.text_distance, 'String', diststr);
+    set(handles.appData.text_distance, 'String', diststr);
 
     
 function ExportMenu_Callback(hObject, eventdata, handles)
@@ -1105,13 +1140,13 @@ function ExportMenu_CurrentBead_Callback(hObject, eventdata, handles)
         logentry('Error: No tracking data loaded yet to export.')
         return
     else
-        CurrentBead = handles.CurrentBead;
-        idx = handles.CurrentBeadRows;
+        CurrentBead = handles.appData.CurrentBead;
+        idx = handles.appData.CurrentBeadRows;
         
-        TrackingTable = handles.TrackingTable;
+        TrackingTable = handles.appData.TrackingTable;
         BeadTable = TrackingTable(idx,:);
 
-        bead.t      = TrackingTable.Frame(idx) / handles.fps;
+        bead.t      = TrackingTable.Frame(idx) / handles.appData.fps;
         bead.t      = bead.t - min(bead.t);
         bead.frame  = TrackingTable.Frame(idx);
         bead.x      = TrackingTable.X(idx);
@@ -1134,17 +1169,17 @@ function ExportMenu_AllBeads_Callback(hObject, eventdata, handles)
         logentry('Error: No tracking data loaded yet to export.')
         return
     else
-        vidtable = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
+        vidtable = convert_Table_to_old_matrix(handles.appData.TrackingTable, handles.appData.fps);
         bead = convert_vidtable_to_beadstruct(vidtable);    
         assignin('base', 'beads', bead);
-        assignin('base', 'TrackingTable', handles.TrackingTable);
+        assignin('base', 'TrackingTable', handles.appData.TrackingTable);
         logentry(['All beads exported to base workspace as ''beads''.']);
         return
     end
    
     
 function ExportMenu_PlotData_Callback(hObject, eventdata, handles)
-    assignin('base', 'evtPlotData', handles.plots);
+    assignin('base', 'evtPlotData', handles.appData.plots);
     logentry('Plot data exported to base workspace.');
 
     
@@ -1158,11 +1193,37 @@ function pushbutton_FilterConfig_Callback(hObject, eventdata, handles)
     % Set waiting flag in appdata
 %     setappdata(handles.evt_GUI,'waiting',1);
     
-    handles.TESTfilter = evt_FilterConfig('evt_GUI', handles);    
+    handles.appData.TESTfilter = evt_FilterConfig('evt_GUI', handles);    
     guidata(hObject, handles);
+    setappdata(handles.output, 'appData', handles.appData);
     
     return
 
+
+% --- Executes on button press in checkbox_smoothness.
+function checkbox_smoothness_Callback(hObject, eventdata, handles)
+
+
+function edit_smoothness_Callback(hObject, eventdata, handles)
+    handles.appData.smooth_factor = str2double(get(hObject,'String'));
+    handles.appData.VelocityTable = vst_CalculateVelocity(handles.appData.TrackingTable, handles.appData.smooth_factor);
+    
+    guidata(hObject, handles);    
+    setappdata(handles.output, 'appData', handles.appData);
+
+    plot_data(handles);
+
+% --- Executes during object creation, after setting all properties.
+function edit_smoothness_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_smoothness (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
     
 
     
@@ -1170,27 +1231,46 @@ function pushbutton_FilterConfig_Callback(hObject, eventdata, handles)
 % Everything below this point are functions related to computation and data
 % handling/display, and not the gui (though the handles structure is used).
 % =========================================================================
+
+function save_datafile(appData)
+    [pname, outfile] = fileparts(appData.Filename);
+
+    logentry(['Setting Path to: ' pname]);
+    cd(pname);
+
+    outfile = strrep(outfile, '.raw', '');
+    outfile = strrep(outfile, '.csv', '');
+    outfile = strrep(outfile, '.vrpn', '');
+    outfile = strrep(outfile, '.mat', '');
+    outfile = strrep(outfile, '.evt', '');
+          
+    trajdata = convert_Table_to_old_matrix(appData.TrackingTable, appData.fps);
+    save_evtfile(outfile, trajdata, 'pixels', appData.calibum, appData.fps, 'mat');
+    logentry(['New tracking file, ' outfile ', saved...']);
+return  
+
+
 function handles = SelectBead(handles)
     
-    CurrentBead = handles.CurrentBead;    
+    CurrentBead = handles.appData.CurrentBead;    
     
     % separate the currently selected bead vs not the selected bead
-    idx = (handles.TrackingTable.ID == CurrentBead);
+    idx = (handles.appData.TrackingTable.ID == CurrentBead);
 
-    Tbead = handles.TrackingTable(idx,:);
+    Tbead = handles.appData.TrackingTable(idx,:);
     
-    handles.Bead.TrackingTable = Tbead;
-    handles.Bead.RadialTable = handles.RadialTable(idx,:);
-    handles.Bead.VelocityTable = handles.VelocityTable(idx,:);
+    handles.appData.Bead.TrackingTable = Tbead;
+    handles.appData.Bead.RadialTable = handles.appData.RadialTable(idx,:);
+    handles.appData.Bead.VelocityTable = handles.appData.VelocityTable(idx,:);
 
-    handles.CurrentBeadRows = idx;
-    handles.mintime = min(Tbead.Frame) / handles.fps;
+    handles.appData.CurrentBeadRows = idx;
+    handles.appData.mintime = min(Tbead.Frame) / handles.appData.fps;
     
     
     if handles.checkbox_neutoffsets.Value && ~isempty(Tbead)
-        handles.XYZoffsets = [Tbead.X(1), Tbead.Y(1) Tbead.Z(1)];
+        handles.appData.XYZoffsets = [Tbead.X(1), Tbead.Y(1) Tbead.Z(1)];
     else
-        handles.XYZoffsets = zeros(1,3);
+        handles.appData.XYZoffsets = zeros(1,3);
     end
     
 function handles = init_AUXfig(handles)
@@ -1230,28 +1310,38 @@ return
 
 function keys(src,event)
     myUI = findall(0, 'Tag', 'evt_GUI');
+    appData = getappdata(myUI, 'appData');  
     handles = guihandles(myUI);
-    
-   disp(event.Key);
+%     eventdata = [];
+%     hObject = gcbo;
+
+%    disp(event.Key);
+%    disp(event.Modifier);
+
+   if size(event.Modifier) == 1 & isequal(event.Modifier{1},'alt')
+       switch(event.Key)
+           case 's'
+               disp('Saving the multiverse one day at a time.')
+               save_datafile(appData);
+       end
+   end
+
 %    switch(event.Key)
-%        case 'rightarrow'
-%            disp('poot');
-% %            handles.;
-% %            slider_BeadID_Callback
-%        case 'leftarrow'
-%            disp('fooz');
+%        case 'c'
+% 
+%        case 'v'
 %    end
 return
 
 function Plot_XYfig(handles)
 
-    ImageWidth = handles.ImageWidth;
-    ImageHeight = handles.ImageHeight;
-    LengthUnits = handles.LengthUnits;
-    im = handles.im;    
+    ImageWidth = handles.appData.ImageWidth;
+    ImageHeight = handles.appData.ImageHeight;
+    LengthUnits = handles.appData.LengthUnits;
+    im = handles.appData.im;    
 
-    x = handles.TrackingTable.X;
-    y = handles.TrackingTable.Y;
+    x = handles.appData.TrackingTable.X;
+    y = handles.appData.TrackingTable.Y;
     imx = [0 ImageWidth ];
     imy = [0 ImageHeight];
 
@@ -1259,7 +1349,7 @@ function Plot_XYfig(handles)
         [x, y, imx, imy] = pixel2um(x, y, imx, imy);
     end        
     
-    idx = handles.CurrentBeadRows;
+    idx = handles.appData.CurrentBeadRows;
            
     figure(handles.XYfig);
     imagesc(imx, imy, im);
@@ -1277,9 +1367,9 @@ function Plot_XYfig(handles)
     xlim(imx);
     ylim(imy);
     
-    if isfield(handles, 'plots') && isfield(handles.plots, 'PoleLocation')
-        polex = handles.plots.PoleLocation(1);
-        poley = handles.plots.PoleLocation(2);        
+    if isfield(handles, 'plots') && isfield(handles.appData.plots, 'PoleLocation')
+        polex = handles.appData.plots.PoleLocation(1);
+        poley = handles.appData.plots.PoleLocation(2);        
         
         if get(handles.radio_microns, 'Value')
             [polex, poley] = pixel2um(polex,poley);
@@ -1301,10 +1391,10 @@ function Plot_XTfig(handles)
 % PLOTTING XY&Z vs T
 %
 
-    XYZoffsets = handles.XYZoffsets;
-    idx = handles.CurrentBeadRows;
+    XYZoffsets = handles.appData.XYZoffsets;
+    idx = handles.appData.CurrentBeadRows;
 
-    Tbead = handles.TrackingTable(idx,:);
+    Tbead = handles.appData.TrackingTable(idx,:);
 
     frames = Tbead.Frame;
     xyz = [Tbead.X, Tbead.Y, Tbead.Z];
@@ -1328,15 +1418,15 @@ function Plot_XTfig(handles)
         yaxislabel = 'XY';
     end
     
-    yunits = handles.LengthUnits;
+    yunits = handles.appData.LengthUnits;
 
     if get(handles.radio_frames, 'Value')
         t = frames;
-        mintime = sec2frame(handles.mintime);
+        mintime = sec2frame(handles.appData.mintime);
         Xaxis_Label = 'Frame #';
     elseif get(handles.radio_seconds, 'Value')
         t = frame2sec(frames);
-        mintime = handles.mintime;
+        mintime = handles.appData.mintime;
         Xaxis_Label = 'time [s]';
     end
 
@@ -1379,129 +1469,129 @@ function Plot_AUXfig(handles)
             set(AUXfig, 'Visible', 'off');
 
         case 'radial vector'
-            handles.plots.radial = prep_radial_vector_plot(handles);            
-            plot_radial_vector(handles.plots.radial, handles.LengthUnits, AUXfig);
+            handles.appData.plots.radial = prep_radial_vector_plot(handles);            
+            plot_radial_vector(handles.appData.plots.radial, handles.appData.LengthUnits, AUXfig);
             
         case 'sensitivity (SNR)'
-            handles.plots.sens = calculate_sensitivity(handles);
-            plot_sensitivity(handles.plots.sens, AUXfig);
+            handles.appData.plots.sens = calculate_sensitivity(handles);
+            plot_sensitivity(handles.appData.plots.sens, AUXfig);
         
         case 'center intensity'            
-            handles.plots.CenterIntensity = calculate_center_intensity(handles);
-            plot_center_intensity(handles.plots.CenterIntensity, AUXfig);
+            handles.appData.plots.CenterIntensity = calculate_center_intensity(handles);
+            plot_center_intensity(handles.appData.plots.CenterIntensity, AUXfig);
 
         case 'velocity'
-            handles.plots.Velocity = prep_velocity_plot(handles);
-            plot_velocity(handles.plots.Velocity, AUXfig);
+            handles.appData.plots.Velocity = prep_velocity_plot(handles);
+            plot_velocity(handles.appData.plots.Velocity, AUXfig);
             
         case 'velocity magnitude'
-            handles.plots.VelMag = prep_velmag_plot(handles);
-            plot_velocity_magnitude(handles.plots.VelMag, AUXfig);
+            handles.appData.plots.VelMag = prep_velmag_plot(handles);
+            plot_velocity_magnitude(handles.appData.plots.VelMag, AUXfig);
 
         case 'velocity rosehist (active)'
-            handles.plots.VelRoseHist = prep_velocity_rosehistogram_plot(handles);
-            plot_velocity_rosehistograms(handles.plots.VelRoseHist, AUXfig, true);
+            handles.appData.plots.VelRoseHist = prep_velocity_rosehistogram_plot(handles);
+            plot_velocity_rosehistograms(handles.appData.plots.VelRoseHist, AUXfig, true);
             
         case 'velocity rosehist (all)'
-            handles.plots.VelRoseHistAll = prep_velocity_rosehistogram_plot(handles);
-            plot_velocity_rosehistograms(handles.plots.VelRoseHistAll, AUXfig);
+            handles.appData.plots.VelRoseHistAll = prep_velocity_rosehistogram_plot(handles);
+            plot_velocity_rosehistograms(handles.appData.plots.VelRoseHistAll, AUXfig);
 
         case 'velocity histograms (xy)'
-            handles.plots.VelHist = prep_velocity_histogram_plot(handles);
-            plot_velocity_histograms(handles.plots.VelHist, AUXfig);
+            handles.appData.plots.VelHist = prep_velocity_histogram_plot(handles);
+            plot_velocity_histograms(handles.appData.plots.VelHist, AUXfig);
             
         case 'velocity scatter (all)'
-            handles.plots.VelScatterAll = prep_VelScatter_plot(handles);
-            plot_velocity_scatter(handles.plots.VelScatterAll, AUXfig);
+            handles.appData.plots.VelScatterAll = prep_VelScatter_plot(handles);
+            plot_velocity_scatter(handles.appData.plots.VelScatterAll, AUXfig);
             
         case 'velocity scatter (active)'            
-            handles.plots.VelScatterActive = prep_VelScatter_plot(handles);
-            plot_velocity_scatter(handles.plots.VelScatterActive, AUXfig, true);
+            handles.appData.plots.VelScatterActive = prep_VelScatter_plot(handles);
+            plot_velocity_scatter(handles.appData.plots.VelScatterActive, AUXfig, true);
 
         case 'velocity vectorfield'            
-            handles.plots.VelField = prep_VelField_plot(handles);
-            plot_VelField(handles.plots.VelField, AUXfig);
+            handles.appData.plots.VelField = prep_VelField_plot(handles);
+            plot_VelField(handles.appData.plots.VelField, AUXfig);
             
         case 'velocity curl'
-            handles.plots.VelCurl = calculate_curl(handles);
-            plot_curl(handles.plots.VelCurl, AUXfig);
+            handles.appData.plots.VelCurl = calculate_curl(handles);
+            plot_curl(handles.appData.plots.VelCurl, AUXfig);
    
         case 'vel. mag. scalarfield'            
-            handles.plots.VelMag = prep_VelMagScalarField_plot(handles);
-            plot_VelMagScalarField(handles.plots.VelMag, AUXfig);
+            handles.appData.plots.VelMag = prep_VelMagScalarField_plot(handles);
+            plot_VelMagScalarField(handles.appData.plots.VelMag, AUXfig);
             
         case 'forceXY'
-            handles.plots.ForceXY = prep_forceXY_plot(handles);
-            plot_forceXY(handles.plots.ForceXY, AUXfig);
+            handles.appData.plots.ForceXY = prep_forceXY_plot(handles);
+            plot_forceXY(handles.appData.plots.ForceXY, AUXfig);
             
         case 'force magnitude'
-            handles.plots.ForceMag = prep_forceMag_plot(handles);
-            plot_force_magnitude(handles.plots.ForceMag, AUXfig);
+            handles.appData.plots.ForceMag = prep_forceMag_plot(handles);
+            plot_force_magnitude(handles.appData.plots.ForceMag, AUXfig);
             
         case 'force vs distance (all)'
-            handles.plots.ForceVsDistanceAll = prep_ForceVsDistance_plot(handles);
-            plot_forcevsdistance(handles.plots.ForceVsDistanceAll, AUXfig);                                   
+            handles.appData.plots.ForceVsDistanceAll = prep_ForceVsDistance_plot(handles);
+            plot_forcevsdistance(handles.appData.plots.ForceVsDistanceAll, AUXfig);                                   
 
         case 'force vs distance (active)'
-            handles.plots.ForceVsDistanceActive = prep_ForceVsDistance_plot(handles);
-            plot_forcevsdistance(handles.plots.ForceVsDistanceActive, AUXfig, true);            
+            handles.appData.plots.ForceVsDistanceActive = prep_ForceVsDistance_plot(handles);
+            plot_forcevsdistance(handles.appData.plots.ForceVsDistanceActive, AUXfig, true);            
         
         case 'force scatter (all)'
-            handles.plots.ForceScatterAll = prep_ForceScatter_plot(handles);
-            plot_force_scatter(handles.plots.ForceScatterAll, AUXfig);            
+            handles.appData.plots.ForceScatterAll = prep_ForceScatter_plot(handles);
+            plot_force_scatter(handles.appData.plots.ForceScatterAll, AUXfig);            
         
         case 'force scatter (active)'
-            handles.plots.ForceScatterActive = prep_ForceScatter_plot(handles);
-            plot_force_scatter(handles.plots.ForceScatterActive, AUXfig, true);            
+            handles.appData.plots.ForceScatterActive = prep_ForceScatter_plot(handles);
+            plot_force_scatter(handles.appData.plots.ForceScatterActive, AUXfig, true);            
         
         case 'force vectorfield'
-            handles.plots.ForceVectorField = prep_ForceVectorField_plot(handles);
-            plot_force_vectorfield(handles.plots.ForceVectorField, AUXfig);            
+            handles.appData.plots.ForceVectorField = prep_ForceVectorField_plot(handles);
+            plot_force_vectorfield(handles.appData.plots.ForceVectorField, AUXfig);            
 
             
 %         case 'displacement hist'        
         case 'old MSD (fast)'
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_old_MSD_plot(handles);
+            if handles.appData.recomputeMSD
+                handles.appData.plots.MSD = prep_old_MSD_plot(handles);
             end
-            plot_old_MSD(handles.plots.MSD, AUXfig);
-            handles.recomputeMSD = 0;
+            plot_old_MSD(handles.appData.plots.MSD, AUXfig);
+            handles.appData.recomputeMSD = 0;
 
         case 'new MSD (slow)'
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_new_MSD_plot(handles);
+            if handles.appData.recomputeMSD
+                handles.appData.plots.MSD = prep_new_MSD_plot(handles);
             end
-            plot_new_MSD(handles.plots.MSD, AUXfig);
-            handles.recomputeMSD = 0;
+            plot_new_MSD(handles.appData.plots.MSD, AUXfig);
+            handles.appData.recomputeMSD = 0;
             
         case 'GSER'
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_old_MSD_plot(handles);
+            if handles.appData.recomputeMSD
+                handles.appData.plots.MSD = prep_old_MSD_plot(handles);
             end
-            plot_GSER(handles.plots.MSD, AUXfig);
-            handles.recomputeMSD = 0;
+            plot_GSER(handles.appData.plots.MSD, AUXfig);
+            handles.appData.recomputeMSD = 0;
             
         case 'RMS displacement'
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_old_MSD_plot(handles);
+            if handles.appData.recomputeMSD
+                handles.appData.plots.MSD = prep_old_MSD_plot(handles);
             end
-            %plot_GSER(handles.plots.MSD, AUXfig);
-            evt_plot_rmsdisp(handles.plots.MSD, AUXfig);
-            handles.recomputeMSD = 0;
+            %plot_GSER(handles.appData.plots.MSD, AUXfig);
+            evt_plot_rmsdisp(handles.appData.plots.MSD, AUXfig);
+            handles.appData.recomputeMSD = 0;
             
         case 'alpha vs tau'   
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_old_MSD_plot(handles);
+            if handles.appData.recomputeMSD
+                handles.appData.plots.MSD = prep_old_MSD_plot(handles);
             end
-            evt_plot_alphatau(handles.plots.MSD, AUXfig);
-            handles.recomputeMSD = 0;
+            evt_plot_alphatau(handles.appData.plots.MSD, AUXfig);
+            handles.appData.recomputeMSD = 0;
             
         case 'alpha histogram'
-            if handles.recomputeMSD
-                handles.plots.MSD = prep_old_MSD_plot(handles);
+            if handles.appData.recomputeMSD
+                handles.appData.plots.MSD = prep_old_MSD_plot(handles);
             end
-            evt_plot_alphadist(handles.plots.MSD, AUXfig)
-            handles.recomputeMSD = 0;
+            evt_plot_alphadist(handles.appData.plots.MSD, AUXfig)
+            handles.appData.recomputeMSD = 0;
             
         case 'MSD histogram'
             logentry('Not yet implemented, or implementation is deprecated.');
@@ -1518,10 +1608,10 @@ function Plot_AUXfig(handles)
             
         case 'pole locator'
 %             logentry('Not yet implemented, or implementation is deprecated.');
-            handles.plots.PoleLocation = calculate_pole_location(handles);
-            str_poleloc = [num2str(handles.plots.PoleLocation(1)), ',', ...
-                           num2str(handles.plots.PoleLocation(2))];
-            logentry(['Pole located at: (', num2str(pixel2um(handles.plots.PoleLocation)), ') [microns]']);
+            handles.appData.plots.PoleLocation = calculate_pole_location(handles);
+            str_poleloc = [num2str(handles.appData.plots.PoleLocation(1)), ',', ...
+                           num2str(handles.appData.plots.PoleLocation(2))];
+            logentry(['Pole located at: (', num2str(pixel2um(handles.appData.plots.PoleLocation)), ') [microns]']);
             set(handles.radio_arb_origin, 'Value', 1);
             set(handles.radio_relative, 'Value', 0);
             set(handles.edit_arb_origin, 'String', str_poleloc);
@@ -1530,8 +1620,8 @@ function Plot_AUXfig(handles)
             
             
         case 'tracker avail'
-            handles.plots.TrackerAvail = calculate_tracker_availability(handles);
-            plot_tracker_availability(handles.plots.TrackerAvail, AUXfig)
+            handles.appData.plots.TrackerAvail = calculate_tracker_availability(handles);
+            plot_tracker_availability(handles.appData.plots.TrackerAvail, AUXfig)
 
         case '2pt MSD ~~not implemented yet~~'
 
@@ -1546,21 +1636,21 @@ function Plot_AUXfig(handles)
 
 function handles = delete_selected_dataset(handles)
     
-    OldTrackingHeight = height(handles.TrackingTable);
-    OldTrashHeight = height(handles.Trash);
+    OldTrackingHeight = height(handles.appData.TrackingTable);
+    OldTrashHeight = height(handles.appData.Trash);
     
-    bead_to_remove = handles.CurrentBead;    
+    bead_to_remove = handles.appData.CurrentBead;    
     
-    k = (handles.TrackingTable.ID == bead_to_remove);
+    k = (handles.appData.TrackingTable.ID == bead_to_remove);
     
 
-%     NewTrash = handles.TrackingTable(k,:);
+%     NewTrash = handles.appData.TrackingTable(k,:);
 %     
-%     handles.Trash = [handles.Trash; NewTrash];
-    handles.TrackingTable(k,:) = [];        
+%     handles.appData.Trash = [handles.appData.Trash; NewTrash];
+    handles.appData.TrackingTable(k,:) = [];        
     
-%     NewTrackingHeight = height(handles.TrackingTable);
-%     NewTrashHeight = height(handles.Trash);
+%     NewTrackingHeight = height(handles.appData.TrackingTable);
+%     NewTrashHeight = height(handles.appData.Trash);
 %     
 %     disp([' height(TrackingTable)=', num2str(OldTrackingHeight), ...
 %          ', height(Trash)= ', num2str(OldTrashHeight), ...
@@ -1627,20 +1717,20 @@ function selection = select_by_boundingbox(handles)
     fprintf('clickX = [%4.1f, %4.1f], Xedges = [%4.1f, %4.1f]\n', clickY(1), clickY(2), Yedge_lo, Yedge_hi);
 
     % At least for now, the selection should only apply to the current bead
-    currentbead = handles.CurrentBead;
+    currentbead = handles.appData.CurrentBead;
     
     % The XT plot, uses neutralized time, so add back the offset
-    t = handles.TrackingTable.Frame / handles.fps; % [sec]
-    x = handles.TrackingTable.X; % [pixels]
-    y = handles.TrackingTable.Y; % [pixels]
+    t = handles.appData.TrackingTable.Frame / handles.appData.fps; % [sec]
+    x = handles.appData.TrackingTable.X; % [pixels]
+    y = handles.appData.TrackingTable.Y; % [pixels]
 
     if get(handles.radio_XYfig, 'Value')
         k = ( x > Xedge_lo & x < Xedge_hi & ...
               y > Yedge_lo & y < Yedge_hi & ...
-              handles.TrackingTable.ID == currentbead);
+              handles.appData.TrackingTable.ID == currentbead);
     elseif get(handles.radio_XTfig, 'Value')
         k = ( t > Xedge_lo & t < Xedge_hi )   & ...
-              handles.TrackingTable.ID == currentbead;
+              handles.appData.TrackingTable.ID == currentbead;
     elseif get(handles.radio_AUXfig, 'Value')
         logentry('Deleting data from AUX plot is not allowed.');
         return
@@ -1653,13 +1743,13 @@ function handles = delete_inside_boundingbox(handles)
 
     sel = select_by_boundingbox(handles);
     
-%     NewTrash = handles.TrackingTable(sel,:);
-%     handles.Trash = [handles.Trash; NewTrash];
+%     NewTrash = handles.appData.TrackingTable(sel,:);
+%     handles.appData.Trash = [handles.appData.Trash; NewTrash];
 %     
-%     if isempty(handles.Trash)
-%         handles.Trash = NewTrash;
+%     if isempty(handles.appData.Trash)
+%         handles.appData.Trash = NewTrash;
 %     else
-%         handles.Trash = [handles.Trash; NewTrash];
+%         handles.appData.Trash = [handles.appData.Trash; NewTrash];
 %     end
     
     handles = delete_data(handles, sel);
@@ -1668,16 +1758,16 @@ return
 
 function handles = delete_data(handles, sel)
     
-%     NewTrash = handles.TrackingTable(sel,:);        
-%     handles.Trash = [handles.Trash; NewTrash];
+%     NewTrash = handles.appData.TrackingTable(sel,:);        
+%     handles.appData.Trash = [handles.appData.Trash; NewTrash];
     
-    handles.TrackingTable(sel,:) = [];
-    handles.RadialTable(sel,:) = [];
-    handles.VelocityTable(sel,:) = [];
+    handles.appData.TrackingTable(sel,:) = [];
+    handles.appData.RadialTable(sel,:) = [];
+    handles.appData.VelocityTable(sel,:) = [];
     
         
-%     NewTrackingHeight = height(handles.TrackingTable);
-%     NewTrashHeight = height(handles.Trash);
+%     NewTrackingHeight = height(handles.appData.TrackingTable);
+%     NewTrashHeight = height(handles.appData.Trash);
 %     
 %         disp([' height(TrackingTable)=', num2str(OldTrackingHeight), ...
 %          ', height(Trash)= ', num2str(OldTrashHeight), ...
@@ -1696,8 +1786,8 @@ function handles = delete_outside_boundingbox(handles)
 
     sel = select_by_boundingbox(handles);
 
-    T = handles.TrackingTable;
-%     Trash = handles.Trash;
+    T = handles.appData.TrackingTable;
+%     Trash = handles.appData.Trash;
 
     
     % The data to keep is what's inside the bounding box. 
@@ -1748,12 +1838,12 @@ function handles = delete_outside_boundingbox(handles)
     end
 
 %     handles = delete_data(handles
-    handles.TrackingTable = T;
-%     handles.Trash = Trash;
+    handles.appData.TrackingTable = T;
+%     handles.appData.Trash = Trash;
 
 
 function closest_time = select_time_from_XTfig(handles) 
-    handles.Activefig = handles.XTfig;
+    handles.appData.Activefig = handles.XTfig;
     handles.radio_XTfig.Value = 1;
 
     figure(handles.XTfig);
@@ -1763,7 +1853,7 @@ function closest_time = select_time_from_XTfig(handles)
         tm = frame2sec(tm);
     end
 
-    time = handles.Bead.TrackingTable.Frame / handles.fps; % [sec]
+    time = handles.appData.Bead.TrackingTable.Frame / handles.appData.fps; % [sec]
 
     % find the closest time point to mouse click
     dists = abs(time - tm);    
@@ -1777,7 +1867,7 @@ function handles = delete_data_before_time(handles)
  
     closest_time = select_time_from_XTfig(handles);    
         
-    time = handles.TrackingTable.Frame / handles.fps;
+    time = handles.appData.TrackingTable.Frame / handles.appData.fps;
     
     % remove any points in the TrackingTable that have times earlier than our
     % prescribed beginning time point
@@ -1791,7 +1881,7 @@ function handles = delete_data_after_time(handles)
 
     closest_time = select_time_from_XTfig(handles);    
         
-    time = handles.TrackingTable.Frame / handles.fps;
+    time = handles.appData.TrackingTable.Frame / handles.appData.fps;
     
     % remove any points in the TrackingTable that have times earlier than our
     % prescribed beginning time point
@@ -1806,10 +1896,10 @@ function rheo = calc_viscosity_stds(hObject, eventdata, handles)
     temp_K = 296; % [K]
         
     numtaus = str2double(get(handles.edit_chosentau, 'String'));
-    framemax = max(handles.TrackingTable.Frame);
+    framemax = max(handles.appData.TrackingTable.Frame);
     tau = msd_gen_taus(framemax, numtaus, 1);
     
-    bead_radius_m = handles.BeadRadius_m;
+    bead_radius_m = handles.appData.BeadRadius_m;
     
     % visc.water = 0.001; % [Pa s]
     visc.water = sucrose_viscosity(0, temp_K, 'K');
@@ -1923,8 +2013,8 @@ return
     
 function NativeXYZ = RemoveXYScaleAndOffset(xyz, handles)
     % XYZoffsets = the neutralization offsets for the XT plot
-    XYZoffsets = handles.XYZoffsets;
-    calibum = handles.calibum;
+    XYZoffsets = handles.appData.XYZoffsets;
+    calibum = handles.appData.calibum;
    
     if size(xyz,2) < 3
         C = size(xyz,2);
@@ -1974,10 +2064,10 @@ return
 
 function radial = prep_radial_vector_plot(handles)
 
-    Tbead = handles.Bead.TrackingTable; % [pixels]
-    Rbead = handles.Bead.RadialTable.Rxyz;
+    Tbead = handles.appData.Bead.TrackingTable; % [pixels]
+    Rbead = handles.appData.Bead.RadialTable.Rxyz;
 
-    mintime = handles.mintime;
+    mintime = handles.appData.mintime;
     
     units = 'pixels';
     
@@ -1987,7 +2077,7 @@ function radial = prep_radial_vector_plot(handles)
         return
     end
     
-    t = Tbead.Frame / handles.fps; 
+    t = Tbead.Frame / handles.appData.fps; 
     t = t - mintime;
 
     if handles.radio_microns.Value         
@@ -2013,10 +2103,10 @@ function plot_radial_vector(radial, LengthUnits, h)
 
  
 function outs = calculate_sensitivity(handles)
-    mintime = handles.mintime;
-    t = handles.TrackingTable.Frame / handles.fps;
-    s = handles.TrackingTable.Sensitivity;
-    idx = handles.CurrentBeadRows;
+    mintime = handles.appData.mintime;
+    t = handles.appData.TrackingTable.Frame / handles.appData.fps;
+    s = handles.appData.TrackingTable.Sensitivity;
+    idx = handles.appData.CurrentBeadRows;
     
     outs.t = t(idx) - mintime;
     outs.s = s(idx);   
@@ -2036,12 +2126,12 @@ return
 
 function outs = calculate_tracker_availability(handles)
     
-    CurrentBeadRows = handles.CurrentBeadRows;
+    CurrentBeadRows = handles.appData.CurrentBeadRows;
     
-    outs.CurrentBead.Frame = handles.TrackingTable.Frame(CurrentBeadRows);
-    outs.CurrentBead.ID = handles.TrackingTable.ID(CurrentBeadRows);
-    outs.OtherBeads.Frame = handles.TrackingTable.Frame(~CurrentBeadRows);
-    outs.OtherBeads.ID = handles.TrackingTable.ID(~CurrentBeadRows);
+    outs.CurrentBead.Frame = handles.appData.TrackingTable.Frame(CurrentBeadRows);
+    outs.CurrentBead.ID = handles.appData.TrackingTable.ID(CurrentBeadRows);
+    outs.OtherBeads.Frame = handles.appData.TrackingTable.Frame(~CurrentBeadRows);
+    outs.OtherBeads.ID = handles.appData.TrackingTable.ID(~CurrentBeadRows);
 return
 
 
@@ -2063,12 +2153,12 @@ return
 
 function outs = calculate_center_intensity(handles)
 
-    t = handles.TrackingTable.Frame / handles.fps;
-    c = handles.TrackingTable.CenterIntensity;
+    t = handles.appData.TrackingTable.Frame / handles.appData.fps;
+    c = handles.appData.TrackingTable.CenterIntensity;
     
-    idx = handles.CurrentBeadRows;
+    idx = handles.appData.CurrentBeadRows;
     
-    mintime = handles.mintime;
+    mintime = handles.appData.mintime;
         
     outs.t  = t(idx) - mintime; 
     outs.ci = c(idx) ./ max(c(idx));
@@ -2093,9 +2183,9 @@ function outs = prep_velocity_plot(handles, reqTimeUnits, reqLengthUnits)
 %     TimeUnits = 'frames';
 %     TimeUnits = 'seconds';
 
-%     idx = handles.CurrentBeadRows;    
+%     idx = handles.appData.CurrentBeadRows;    
 
-    tmpTable = innerjoin(handles.Bead.RadialTable, handles.Bead.VelocityTable, 'Keys', {'Fid', 'ID', 'Frame'});
+    tmpTable = innerjoin(handles.appData.Bead.RadialTable, handles.appData.Bead.VelocityTable, 'Keys', {'Fid', 'ID', 'Frame'});
         
     Frame = tmpTable.Frame;
     Rxyz = tmpTable.Rxyz;
@@ -2252,7 +2342,7 @@ return
 
 function outs = prep_velocity_histogram_plot(handles)
     
-    T = handles.VelocityTable;
+    T = handles.appData.VelocityTable;
 
     outs.Vx = T.Vx * 0.692 * 50; % [pixels/frame -> um/sec]
     outs.Vy = T.Vy * 0.692 * 50; % [pixels/frame -> um/sec]
@@ -2280,16 +2370,16 @@ return
 
 function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     
-    CurrentBead = handles.CurrentBead;
+    CurrentBead = handles.appData.CurrentBead;
     
-    im = handles.im;
+    im = handles.appData.im;
     xr = [0 size(im,2)];
     yr = [0 size(im,1)];
     
     % separate the currently selected bead vs not the selected bead
     
-    T = innerjoin(handles.TrackingTable, handles.RadialTable);
-    T = innerjoin(T, handles.VelocityTable);
+    T = innerjoin(handles.appData.TrackingTable, handles.appData.RadialTable);
+    T = innerjoin(T, handles.appData.VelocityTable);
     
 % %     % Filter out the first and last velocity value (avoids edge effects in
 % %     % the visualization.
@@ -2368,7 +2458,7 @@ function outs = prep_VelScatter_plot(handles, reqTimeUnits, reqLengthUnits)
     
     Vclr = Calculate_Velocity_ColorMap(Vr);
     
-    outs.im   = handles.im;   
+    outs.im   = handles.appData.im;   
     outs.xrange = xr;
     outs.yrange = yr;
     outs.id   = categorical(T.ID);
@@ -2442,7 +2532,7 @@ function outs = prep_VelField_plot(handles, reqTimeUnits, reqLengthUnits)
     NGridX = floor(25*1.33);
     NGridY = 25;
     
-    im = handles.im;
+    im = handles.appData.im;
     
     [imy, imx] = size(im);
     
@@ -2458,7 +2548,7 @@ function outs = prep_VelField_plot(handles, reqTimeUnits, reqLengthUnits)
     
     switch reqLengthUnits
         case 'microns'
-            VideoStruct.pixelsPerMicron = 1 / handles.calibum;            
+            VideoStruct.pixelsPerMicron = 1 / handles.appData.calibum;            
             LengthUnits = 'microns';
         case 'pixels'
             VideoStruct.pixelsPerMicron = 1;
@@ -2477,7 +2567,7 @@ function outs = prep_VelField_plot(handles, reqTimeUnits, reqLengthUnits)
     
     switch reqTimeUnits
         case 'seconds'
-            VideoStruct.fps = handles.fps;
+            VideoStruct.fps = handles.appData.fps;
             TimeUnits = 'seconds';
         case 'frames'
             VideoStruct.fps = 1;
@@ -2487,8 +2577,8 @@ function outs = prep_VelField_plot(handles, reqTimeUnits, reqLengthUnits)
     end
     
     
-    TrackingTable = handles.TrackingTable;
-    trajdata = convert_Table_to_old_matrix(TrackingTable, handles.fps);
+    TrackingTable = handles.appData.TrackingTable;
+    trajdata = convert_Table_to_old_matrix(TrackingTable, handles.appData.fps);
 
     VelField = vel_field(trajdata, NGridX, NGridY, VideoStruct);
     
@@ -2590,7 +2680,7 @@ return
 
 
 function PoleLoc = calculate_pole_location(handles)
-    PoleLoc = pole_locator(handles.TrackingTable, [], 'y', handles.AUXfig);
+    PoleLoc = pole_locator(handles.appData.TrackingTable, [], 'y', handles.AUXfig);
 return
 
 
@@ -2599,10 +2689,10 @@ function outs = prep_forceXY_plot(handles)
     Velocity = prep_velocity_plot(handles, 'seconds', 'microns');
        
     outs = Velocity;
-    outs.Viscosity_Pas = handles.Viscosity_Pas;
-    outs.BeadRadius_m = handles.BeadRadius_m;
-    outs.ForceScale = handles.ForceScale;
-    [outs.ForceX, outs.ForceY] = calculate_forces(handles.ForceScale, Velocity.VelX, Velocity.VelY);
+    outs.Viscosity_Pas = handles.appData.Viscosity_Pas;
+    outs.BeadRadius_m = handles.appData.BeadRadius_m;
+    outs.ForceScale = handles.appData.ForceScale;
+    [outs.ForceX, outs.ForceY] = calculate_forces(handles.appData.ForceScale, Velocity.VelX, Velocity.VelY);
     outs.ForceUnits = 'N';
 
 return
@@ -2718,13 +2808,13 @@ function outs = prep_ForceScatter_plot(handles)
     V = prep_VelScatter_plot(handles, 'seconds', 'microns');                   
     
     
-    Fs = handles.ForceScale;
+    Fs = handles.appData.ForceScale;
     [Fx, Fy, Fz, Fr] = calculate_forces(Fs, V.vx, V.vy, V.vz, V.vr);
 
     F = V;
-    F.BeadRadius_m = handles.BeadRadius_m;
-    F.Viscosity_Pas = handles.Viscosity_Pas;
-    F.ForceScale = handles.ForceScale;
+    F.BeadRadius_m = handles.appData.BeadRadius_m;
+    F.Viscosity_Pas = handles.appData.Viscosity_Pas;
+    F.ForceScale = handles.appData.ForceScale;
     F.Fx = Fx;
     F.Fy = Fy;
     F.Fz = Fz;
@@ -2791,7 +2881,7 @@ function ForceVectorField = prep_ForceVectorField_plot(handles)
     F.Y = V.VelField.Y;
     F.Vx = V.VelField.Vx;
     F.Vy = V.VelField.Vy;
-    [F.Fx, F.Fy] = calculate_forces(handles.ForceScale, F.Vx, F.Vy);  
+    [F.Fx, F.Fy] = calculate_forces(handles.appData.ForceScale, F.Vx, F.Vy);  
     F.LengthUnits = V.LengthUnits;
     F.TimeUnits = V.TimeUnits;
     F.ForceUnits = '[N]';
@@ -2817,11 +2907,11 @@ function plot_force_vectorfield(ForceVectorField, h)
 return
 
 function outs = prep_old_MSD_plot(handles)
-    TrackingTable = handles.TrackingTable;
+    TrackingTable = handles.appData.TrackingTable;
     framemax = max(TrackingTable.Frame);
-    numtaus = handles.numtaus;
-    fps = handles.fps;
-    calibum = handles.calibum;
+    numtaus = handles.appData.numtaus;
+    fps = handles.appData.fps;
+    calibum = handles.appData.calibum;
     bead_diameter_um = str2double(handles.edit_bead_diameter_um.String);
     
     duration_fraction = 0.5;
@@ -2831,11 +2921,11 @@ function outs = prep_old_MSD_plot(handles)
     taulist = unique(taulist); % to eliminate the possibility of repeats after adding a special set to default
     taulist = sort(taulist);
     
-%     DataIn.VidTable = handles.VidTable;
+%     DataIn.VidTable = handles.appData.VidTable;
 %     DataIn.TrackingTable = TrackingTable;
     
     video_tracking_constants;
-    trajectories = convert_Table_to_old_matrix(handles.TrackingTable, fps);    
+    trajectories = convert_Table_to_old_matrix(handles.appData.TrackingTable, fps);    
     trajectories(:,X:Y) = trajectories(:,X:Y) .* calibum .* 1e-6;
     
     mymsd = video_msd(trajectories, taulist, fps, calibum, 'n', 'n');
@@ -2849,14 +2939,14 @@ return
 
 
 function outs = prep_new_MSD_plot(handles)
-    TrackingTable = handles.TrackingTable;
+    TrackingTable = handles.appData.TrackingTable;
     framemax = max(TrackingTable.Frame);
-    numtaus = handles.numtaus;
+    numtaus = handles.appData.numtaus;
     duration_fraction = 0.5;
     
     taulist = msd_gen_taus(framemax, numtaus, duration_fraction);
     
-    DataIn.VidTable = handles.VidTable;
+    DataIn.VidTable = handles.appData.VidTable;
     DataIn.TrackingTable = TrackingTable;
     
     diffTable = vst_difftau(DataIn, taulist);
@@ -2867,9 +2957,9 @@ function outs = prep_new_MSD_plot(handles)
 
 % 
 %         msdID   = unique(TrackingTable.ID)';    
-%         mymsd   = handles.mymsd;
-%         myve    = handles.myve;
-%         myD     = handles.myD;
+%         mymsd   = handles.appData.mymsd;
+%         myve    = handles.appData.myve;
+%         myD     = handles.appData.myD;
 %         tau = mymsd.tau;
 %         msd = mymsd.msd;
 %         
@@ -2906,7 +2996,7 @@ return
 
 function plot_GSER(MSDdata, h)
 %     AUXfig = handles.AUXfig;
-%     myve = handles.myve;
+%     myve = handles.appData.myve;
 %     
 %     plotG       = get(handles.checkbox_G, 'Value');
 %     ploteta     = get(handles.checkbox_eta, 'Value');
@@ -2964,18 +3054,18 @@ return
 function handles = filter_tracking(handles)    
     % To avoid cumulative changes to the TrackingTable start by combining
     % the FilteredTable and the Trash back into the TrackingTable;
-    TrackingTable = [handles.TrackingTable; handles.Trash];
+    TrackingTable = [handles.appData.TrackingTable; handles.appData.Trash];
     
-    [handles.TrackingTable, handles.Trash] = vst_filter_tracking(TrackingTable, handles.TrackingFilter);
+    [handles.appData.TrackingTable, handles.appData.Trash] = vst_filter_tracking(TrackingTable, handles.appData.TrackingFilter);
     
     handles = SelectBead(handles);
     
-    handles.RadialTable = CalculateRadialLocations(handles.TrackingTable);
+    handles.appData.RadialTable = CalculateRadialLocations(handles.appData.TrackingTable);
    
 
     smooth_factor = 1;
-%     handles.VelocityTable = CalculateVelocity(handles.TrackingTable);  
-    handles.VelocityTable = vst_CalculateVelocity(TrackingTable, smooth_factor);
+%     handles.appData.VelocityTable = CalculateVelocity(handles.appData.TrackingTable);  
+    handles.appData.VelocityTable = vst_CalculateVelocity(TrackingTable, smooth_factor);
     
     plot_data(handles);
 return
@@ -2990,7 +3080,7 @@ function angle = calculate_angle(matrix)
 return
 
 function ForceScale = calculate_ForceScale(handles)
-    ForceScale = 6*pi*handles.BeadRadius_m*handles.Viscosity_Pas;
+    ForceScale = 6*pi*handles.appData.BeadRadius_m*handles.appData.Viscosity_Pas;
 return
 
 
@@ -3009,7 +3099,7 @@ return
 function bayes = run_bayes_model_selection(hObject, eventdata, handles)
     video_tracking_constants;
 
-    vidtable = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
+    vidtable = convert_Table_to_old_matrix(handles.appData.TrackingTable, handles.appData.fps);
 
     calibum = str2double(get(handles.edit_calibum, 'String'));
 
@@ -3023,7 +3113,7 @@ function bayes = run_bayes_model_selection(hObject, eventdata, handles)
     metadata.num_subtraj = 30;
     metadata.fps         = str2double(get(handles.edit_frame_rate, 'String'));
     metadata.calibum     = calibum;
-    metadata.bead_radius = handles.BeadRadius_m;
+    metadata.bead_radius = handles.appData.BeadRadius_m;
     metadata.numtaus     = str2double(get(handles.edit_numtaus, 'String'));
     metadata.sample_names= {' '};
     metadata.models      = {'N', 'D', 'DA', 'DR', 'V'}; % avail. models are {'N', 'D', 'DA', 'DR', 'V', 'DV', 'DAV', 'DRV'};
@@ -3040,7 +3130,7 @@ function bayes = run_bayes_model_selection(hObject, eventdata, handles)
 
     [vidtable, filtout] = filter_video_tracking(vidtable, filt); 
 
-    agg_msdcalc = handles.mymsd;
+    agg_msdcalc = handles.appData.mymsd;
     
     tracker_IDlist = unique(vidtable(:,ID));
 
@@ -3100,17 +3190,19 @@ function bayes = run_bayes_model_selection(hObject, eventdata, handles)
      
 %      [bayes_model_output] = bayes_model_analysis(bayes_output);    
 
-     handles.bayes = struct;
+     handles.appData.bayes = struct;
+
+     handles.appData.bayes.metadata = metadata;
+     handles.appData.bayes.filt = filt;
+     handles.appData.bayes.results = bayes_output;
+     handles.appData.bayes.name = myfile;     
      guidata(hObject, handles);
      
-     handles.bayes.metadata = metadata;
-     handles.bayes.filt = filt;
-     handles.bayes.results = bayes_output;
-     handles.bayes.name = myfile;     
+     bayes = handles.appData.bayes;
+
      guidata(hObject, handles);
-     
-     bayes = handles.bayes;
-              
+     setappdata(handles.output, 'appData', handles.appData);
+
 return
 
 
@@ -3128,7 +3220,7 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
     
     % % USER INPUTS FOR FUNCTION
     
-    vidtable = convert_Table_to_old_matrix(handles.TrackingTable, handles.fps);
+    vidtable = convert_Table_to_old_matrix(handles.appData.TrackingTable, handles.appData.fps);
 
     % max_tau_s is the maximum time scale the user wants the bayesian
     % modeling code to consider when binning MSD curves.
@@ -3140,7 +3232,7 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
     fraction_for_subtraj = 0.75;
 
     fps = str2double(get(handles.edit_frame_rate, 'String'));
-    bead_radius = handles.BeadRadius_m;
+    bead_radius = handles.appData.BeadRadius_m;
     calibum = str2double(get(handles.edit_calibum, 'String'));
     num_taus = str2double(get(handles.edit_numtaus, 'String'));
     opened_file = get(handles.edit_outfile, 'String');
@@ -3154,7 +3246,7 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
     prd    = strfind(myfile,'.');
     myname = myfile(1:prd-1);
      
-    agg_msdcalc = handles.mymsd;
+    agg_msdcalc = handles.appData.mymsd;
 
     % The shortest trajectory we will want to consider depends on the
     % longest time scale (max_tau_s) we want to see in the MSD and the 
@@ -3237,17 +3329,17 @@ function bayes = run_bayes_model_selection_general(hObject, eventdata, handles)
      
 %      [bayes_model_output] = bayes_model_analysis(bayes_output);    
 
-     handles.bayes = struct;
+     handles.appData.bayes = struct;
+     handles.appData.bayes.metadata = metadata;
+     handles.appData.bayes.filt = filt;
+     handles.appData.bayes.results = bayes_output;
+     handles.appData.bayes.name = myfile;     
+
+     bayes = handles.appData.bayes;
+
      guidata(hObject, handles);
-     
-     handles.bayes.metadata = metadata;
-     handles.bayes.filt = filt;
-     handles.bayes.results = bayes_output;
-     handles.bayes.name = myfile;     
-     guidata(hObject, handles);
-     
-     bayes = handles.bayes;
-         
+     setappdata(handles.output, 'appData', handles.appData);
+
 return
 
 
@@ -3379,7 +3471,8 @@ function logentry(txt)
     handles = guihandles(myUI);
     set(handles.text_status, 'String', [headertext, txt]);
 return
-    
+   
+
 function interp_Forces = sa_interp_forces(radial_loc, radial_force, interp_grid)
 
     data = [radial_loc(:) radial_force(:)];
@@ -3387,42 +3480,9 @@ function interp_Forces = sa_interp_forces(radial_loc, radial_force, interp_grid)
     data = data(ia,:);
 %     interp_Forces = interp1(data(:,1), data(:,2), interp_grid, 'pchip', 'extrap');
     interp_Forces = interp1(data(:,1), data(:,2), interp_grid);
+return
+
+  
     
-    
-    
 
 
-% --- Executes on button press in checkbox_smoothness.
-function checkbox_smoothness_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_smoothness (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox_smoothness
-
-
-
-function edit_smoothness_Callback(hObject, eventdata, handles)
-% hObject    handle to edit_smoothness (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit_smoothness as text
-%        str2double(get(hObject,'String')) returns contents of edit_smoothness as a double
-    handles.smooth_factor = str2double(get(hObject,'String'));
-    handles.VelocityTable = vst_CalculateVelocity(handles.TrackingTable, handles.smooth_factor);
-    
-    guidata(hObject, handles);    
-    plot_data(handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit_smoothness_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_smoothness (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
