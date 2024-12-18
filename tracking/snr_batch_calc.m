@@ -1,127 +1,69 @@
-function [SNR, signal, background, noise]=calc_video_SNR(filepath,filenum,beadsize,filetype,thresh)
+function [meanSNR, stdSNR, DataOut] = snr_batch_calc(filepath, filemask, circle_radius, sensitivity, overfill)
+% SNR_BEADIMAGE calculates signal-to-noise ratio for a microscopy image 
+%
+% The function snr_beadimage finds circular objects and segments them out
+% in an attempt to calculate signal-to-noise (SNR). The maximum pixel
+% intensity of each circular object is used as signal. The average value
+% of the remaining pixels serves as the background measurement, while its
+% standard deviation estimates the noise.
+% 
+% [snrmean, snrstd, T] = snr_beadimage(image, circle_radius, sensitivity, overfill, report)
+% 
+% Output parameters:
+%   snrmean  mean SNR computed from each circular (signal) object
+%   snrstd   standard deviation for signal distribution
+%   T        output data table for individual objects.
+%
+% Input parameters:
+%   filepath        path to files in filemas. Use '.'  for current directory
+%   filemask        string that defines the file search mask. Ex.: '*.tif'
+%   circle_radius   estimated average pixel radius for objects of interest
+%   sensitivity     "dial" for optimizing object detection, usually between
+%                   0.8 - 0.97. More than 0.97 risks false positive signals
+%   overfill        size "factor" for object segmentation. A value of 1
+%                   means the object mask will be the same as measured by
+%                   the object finding algorithm, where a value of 2 would
+%                   double the effective radii of objects in the image
+%
 
-double errorthresh;
 cd(filepath);
 
-switch filetype 
-    case '.tif'
-     files=dir('*.tif');
-    case '.pgm'
-      files=dir('*.pgm');
-end 
-
-if nargin <5 || isempty(thresh)
-    thresh=.3;
-end
-threshold=thresh;
-if isempty(files)
-    error('No files in list. Wrong filename?');
+if nargin < 1 || isempty(filepath)
+    error('File path needed.');
 end
 
-if (beadsize==1000 || beadsize==2000)
-    errorthresh=.001;
-else
-     errorthresh=.01;
-end    
-filename = files(filenum).name;
-    
-info=imfinfo(filename);
-num_images=numel(info);
-    
-    if (num_images==1)
-        for fid=1:length(files)
-            filename=files(fid).name;
-            im=imread(filename);
-            picinfo = imfinfo(filename);
-            bit = picinfo.BitDepth;
-                
-                if bit ~=8 && bit~=16
-                       error('image neither 16-bit or 8-bit depth');
-                end
-            frame(:,:,fid) = im;
-        end
-   
-         im=mean(frame,3);
-         im = im/fid;
-         
-         background = imopen(im,strel('disk',100));
-         
-        for i=1:fid
-            
-              frame(:,:,i)=double(frame(:,:,i))-background;
-             [avgSNR(i), mean_max_sig(i), image_background(i), image_noise(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh,'n',threshold,bit);
-             
-    
-        end
-   tracking_single_image_SNR(frame(:,:,1),errorthresh,'y',threshold,bit);     
-   SNR=mean(avgSNR)
-   signal=mean(mean_max_sig)
-   background=mean(image_background)
-   noise=mean(image_noise)
-  err=std(avgSNR)/sqrt(length(avgSNR))
-  snfig = figure; 
- plot(1:length(avgSNR), avgSNR);
-% h= errorbar(1:length(avgSNR),avgSNR);
-  %// a color spec here would affect both data and error bars
-%hc = get(h, 'Children');
-%set(hc(1),'color','b') %// data
-%set(hc(2),'color','g') %// error bars
-  xlabel('Frame #');
-   ylabel('Signal-to-Noise Ratio');
-   title([filename]);
-   pretty_plot;
-  
-        
-        
-    else
-        for k=1:num_images
-            im=imread(filename,k);
-            picinfo = imfinfo(filename);
-            bit = picinfo.BitDepth;
+if nargin < 2 || isempty(filemask)
+    error('File mask needed. A specific filename is also fine.');
+end
 
-             switch bit
-                case 16
-                    q = double(im);
-                    q = q/2^16*2^8;
-                    im = uint8(q);
-                case 8
-            % No change required
-                otherwise
-                     error('image neither 16-bit or 8-bit depth');
-         end
-   
-            frame(:,:,k)=im;
-   
-   
-   
-        end
+if nargin < 3 || isempty(circle_radius)
+    error('Expected bead radius in pixels required.');
+end
 
-          im=mean(frame,3);
-          im = im/num_images;
-          background = imopen(im,strel('disk',100));
-        for i=1:num_images
-             frame(:,:,i)=double(frame(:,:,i))-background;
-             [avgSNR(i), mean_max_sig(i), image_background(i), image_noise(i)] = tracking_single_image_SNR(frame(:,:,i), errorthresh,'n',threshold,bit);
-                 
-        end
-tracking_single_image(frame(:,:,1),errorthresh,'y',threshold, bit);
-  SNR=mean(avgSNR)
-   signal=mean(mean_max_sig)
-   background=mean(image_background)
-   noise=mean(image_noise)
-   err=stddev(avgSNR)/sqrt(length(avgSNR))
-   snfig = figure; 
-   plot(1:length(snr), snr);
-   %errorbar(1:length(snr),snr,total_error);
-   xlabel('Frame #');
-   ylabel('Signal-to-Noise Ratio');
-   title([filename]);
-   pretty_plot; 
-       
-    end
-    return;
-    
-    
-    
-  
-  
+if nargin < 4 || isempty(sensitivity)
+    sensitivity = 0.95;
+end
+
+if nargin < 5 || isemtpy(overfill)
+    overfill = 5;
+end
+
+filelist = dir(filemask);
+
+if isempty(filelist)
+    error('No files found. Wrong file name/mask?');
+end
+
+N = numel(filelist);
+
+meanSNR = NaN(N,1);
+stdSNR = NaN(N,1);
+DataOut = cell(N,1);
+for fid = 1:N
+    filename = filelist(fid).name;
+
+    im = imread(filename);
+
+    [meanSNR(fid), stdSNR(fid), DataOut{fid}] = snr_beadimage(im, circle_radius, sensitivity, overfill, 'n');
+end
+
